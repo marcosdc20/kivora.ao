@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Phone, Menu, X, ArrowRight, GraduationCap } from 'lucide-react';
+import { Menu, X, Download, User, ChevronRight } from 'lucide-react';
 import { KivoraLogo } from './KivoraLogo';
-import { SCHOOL_INFO } from '../data/school';
 
 export type PageId =
   | 'home'
-  | 'sobre'
-  | 'equipe'
-  | 'alunos'
+  | 'funcionalidades'
+  | 'solucoes'
+  | 'planos'
+  | 'parceiros'
+  | 'recursos'
+  | 'suporte'
+  | 'download'
+  | 'login'
+  | 'area-cliente'
+  | 'area-parceiro'
   | 'modulos'
   | 'modulo-detalhe'
-  | 'turmas'
+  | 'faturacao'
+  | 'pos'
+  | 'sobre'
   | 'noticias'
   | 'noticia-post'
-  | 'financeiro'
-  | 'suporte'
-  | 'login'
   | 'privacidade'
   | 'termos';
 
@@ -23,7 +28,6 @@ interface HeaderProps {
   activePage?: PageId;
   onNavigatePage?: (page: PageId, sectionId?: string) => void;
   onOpenLogin?: () => void;
-  onOpenSupportModal?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -33,26 +37,29 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalHeight > 0) {
+        setScrollProgress((window.scrollY / totalHeight) * 100);
+      }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const navLinks: { name: string; page: PageId; sectionId?: string }[] = [
-    { name: 'Início', page: 'home', sectionId: 'inicio' },
-    { name: 'Sobre', page: 'sobre', sectionId: 'sobre-nos' },
-    { name: 'Alunos', page: 'alunos', sectionId: 'alunos' },
-    { name: 'Módulos', page: 'modulos', sectionId: 'modulos' },
-    { name: 'Turmas', page: 'turmas', sectionId: 'turmas' },
-    { name: 'Equipa', page: 'equipe' },
-    { name: 'Notícias', page: 'noticias' },
-    { name: 'Financeiro', page: 'financeiro' },
-    { name: 'Suporte', page: 'suporte', sectionId: 'suporte' },
+    { name: 'Início', page: 'home' },
+    { name: 'Funcionalidades', page: 'funcionalidades' },
+    { name: 'Soluções', page: 'solucoes' },
+    { name: 'Licenças', page: 'planos' },
+    { name: 'Parceiros', page: 'parceiros' },
+    { name: 'Recursos', page: 'recursos' },
+    { name: 'Suporte', page: 'suporte' },
   ];
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, page: PageId, sectionId?: string) => {
@@ -74,23 +81,32 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 transition-all duration-300 ${
-        isScrolled ? 'shadow-md py-2.5' : 'shadow-header py-3.5'
+      className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md transition-all duration-200 border-b ${
+        isScrolled ? 'border-slate-200 shadow-sm py-2.5' : 'border-slate-100 py-3.5'
       }`}
     >
+      {/* Scroll Progress Bar at top of navbar */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-transparent">
+        <div
+          className="h-full bg-blue-600 transition-all duration-75 ease-out"
+          style={{ width: `${scrollProgress}%` }}
+        />
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-11">
 
           {/* Brand Logo Kivora */}
           <a
             href="#home"
             onClick={(e) => handleNavClick(e, 'home')}
-            className="flex items-center group cursor-pointer"
+            className="flex items-center group cursor-pointer focus:outline-none"
+            aria-label="Kivora Início"
           >
-            <KivoraLogo size="md" />
+            <KivoraLogo size="md" useOfficialImage={true} />
           </a>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex items-center space-x-6">
             {navLinks.map((link) => {
               const isActive = activePage === link.page;
@@ -99,60 +115,63 @@ export const Header: React.FC<HeaderProps> = ({
                   key={link.name}
                   href={`#${link.page}`}
                   onClick={(e) => handleNavClick(e, link.page, link.sectionId)}
-                  className={`text-sm font-bold transition-all duration-200 relative py-1 ${
+                  className={`text-[13px] font-medium transition-all duration-150 relative py-1 px-1 ${
                     isActive
-                      ? 'text-brand-blue font-extrabold'
-                      : 'text-gray-700 hover:text-brand-blue'
+                      ? 'text-blue-600 font-bold'
+                      : 'text-slate-700 hover:text-slate-950'
                   }`}
                 >
                   {link.name}
                   {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-brand-blue rounded-full animate-fadeIn" />
+                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-600 rounded-full animate-fadeIn" />
                   )}
                 </a>
               );
             })}
           </nav>
 
-          {/* Right Area: Phone & CTA Button */}
-          <div className="hidden lg:flex items-center space-x-5">
-            <a
-              href={`tel:${SCHOOL_INFO.phoneRaw}`}
-              className="flex items-center gap-2 text-sm font-bold text-gray-800 hover:text-brand-blue transition-colors"
-            >
-              <Phone className="w-4 h-4 text-brand-blue" />
-              <span>{SCHOOL_INFO.phoneDisplay}</span>
-            </a>
-
+          {/* Right Action Buttons */}
+          <div className="hidden lg:flex items-center space-x-2.5">
             <button
               onClick={() => {
                 if (onOpenLogin) onOpenLogin();
                 else if (onNavigatePage) onNavigatePage('login');
               }}
-              className="bg-brand-blue hover:bg-brand-blue-dark text-white text-sm font-extrabold px-5 py-2.5 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
+              className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200/80 active:scale-98"
             >
-              <GraduationCap className="w-4 h-4 text-brand-amber" />
-              <span>Acessar Plataforma</span>
-              <ArrowRight className="w-4 h-4" />
+              <User className="w-3.5 h-3.5 text-slate-600" strokeWidth={1.75} />
+              <span>Iniciar sessão</span>
+            </button>
+
+            <button
+              onClick={() => {
+                if (onNavigatePage) onNavigatePage('download');
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition-all flex items-center gap-1.5 hover:shadow active:scale-98"
+            >
+              <Download className="w-3.5 h-3.5" strokeWidth={1.75} />
+              <span>Baixar KIVORA</span>
             </button>
           </div>
 
           {/* Mobile Hamburger */}
-          <div className="flex lg:hidden items-center gap-3">
-            <a
-              href={`tel:${SCHOOL_INFO.phoneRaw}`}
-              className="p-2 text-brand-green hover:bg-gray-100 rounded-full transition-colors"
-              aria-label="Ligar"
+          <div className="flex lg:hidden items-center gap-2">
+            <button
+              onClick={() => {
+                if (onNavigatePage) onNavigatePage('download');
+              }}
+              className="px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg flex items-center gap-1 shadow-sm"
             >
-              <Phone className="w-5 h-5" />
-            </a>
+              <Download className="w-3.5 h-3.5" strokeWidth={1.75} />
+              <span>Baixar</span>
+            </button>
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-gray-700 hover:text-brand-green focus:outline-none"
-              aria-label="Abrir menu"
+              className="p-1.5 text-slate-800 hover:text-blue-600 focus:outline-none rounded-lg"
+              aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
             >
-              {mobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+              {mobileMenuOpen ? <X className="w-6 h-6" strokeWidth={1.75} /> : <Menu className="w-6 h-6" strokeWidth={1.75} />}
             </button>
           </div>
         </div>
@@ -160,8 +179,8 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-gray-200 shadow-xl px-6 pt-4 pb-8 space-y-4 animate-fadeIn z-50 text-brand-dark">
-          <div className="flex flex-col space-y-2">
+        <div className="lg:hidden bg-white border-b border-slate-200 shadow-xl px-4 py-5 space-y-4 text-slate-800 animate-fadeIn">
+          <div className="flex flex-col space-y-1">
             {navLinks.map((link) => {
               const isActive = activePage === link.page;
               return (
@@ -169,40 +188,47 @@ export const Header: React.FC<HeaderProps> = ({
                   key={link.name}
                   href={`#${link.page}`}
                   onClick={(e) => handleNavClick(e, link.page, link.sectionId)}
-                  className={`text-base font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-between ${
+                  className={`text-sm font-semibold py-2.5 px-3 rounded-xl transition-colors flex items-center justify-between ${
                     isActive
-                      ? 'bg-brand-green-light text-brand-green font-extrabold'
-                      : 'text-gray-700 hover:bg-gray-50 hover:text-brand-green'
+                      ? 'bg-blue-50 text-blue-600 font-bold'
+                      : 'text-slate-700 hover:bg-slate-50'
                   }`}
                 >
                   <span>{link.name}</span>
-                  {isActive && <span className="w-2 h-2 rounded-full bg-brand-green" />}
+                  {isActive ? (
+                    <span className="w-2 h-2 rounded-full bg-blue-600" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 text-slate-400" strokeWidth={1.75} />
+                  )}
                 </a>
               );
             })}
           </div>
 
-          <div className="pt-4 border-t border-gray-100 space-y-3">
-            <a
-              href={`tel:${SCHOOL_INFO.phoneRaw}`}
-              className="flex items-center gap-3 text-base font-bold text-gray-800 py-2 px-4 rounded-lg bg-gray-50"
-            >
-              <Phone className="w-5 h-5 text-brand-green" />
-              <span>{SCHOOL_INFO.phoneDisplay}</span>
-            </a>
+          <div className="pt-3 border-t border-slate-100 space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (onOpenLogin) onOpenLogin();
+                  else if (onNavigatePage) onNavigatePage('login');
+                }}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-center py-2.5 rounded-xl text-xs border border-slate-200"
+              >
+                <span>Iniciar sessão</span>
+              </button>
 
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                if (onOpenLogin) onOpenLogin();
-                else if (onNavigatePage) onNavigatePage('login');
-              }}
-              className="w-full bg-brand-green hover:bg-brand-green-dark text-white font-extrabold text-center py-3.5 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2"
-            >
-              <GraduationCap className="w-5 h-5" />
-              <span>Acessar Sistema</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (onNavigatePage) onNavigatePage('download');
+                }}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-center py-2.5 rounded-xl text-xs flex items-center justify-center gap-1 shadow-sm"
+              >
+                <Download className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <span>Baixar KIVORA</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

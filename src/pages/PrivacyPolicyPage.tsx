@@ -1,6 +1,6 @@
 import React from 'react';
-import { ShieldCheck, ArrowLeft } from 'lucide-react';
-import { SCHOOL_INFO } from '../data/school';
+import { ArrowLeft, ShieldCheck } from 'lucide-react';
+import { KIVORA_INFO } from '../data/kivoraData';
 
 interface PrivacyPolicyPageProps {
   onBack: () => void;
@@ -8,76 +8,52 @@ interface PrivacyPolicyPageProps {
 
 export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onBack }) => {
   return (
-    <div className="pt-20 animate-fadeIn bg-white min-h-screen">
-      
-      {/* Top Header Breadcrumb */}
-      <div className="bg-gray-100 border-b border-gray-200 py-3">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <button
-            onClick={onBack}
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-extrabold text-brand-dark hover:text-brand-green transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 text-brand-green" />
-            <span>Voltar ao Início</span>
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-slate-50 text-slate-900 pt-28 pb-20 selection:bg-blue-600 selection:text-white">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 mb-6"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Voltar à Página Principal</span>
+        </button>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 bg-brand-green-light text-brand-green text-xs font-extrabold uppercase px-3 py-1 rounded-md">
-            <ShieldCheck className="w-4 h-4" />
-            <span>PROTEÇÃO DE DADOS & PRIVACIDADE</span>
+        <div className="bg-white p-8 md:p-12 rounded-3xl border border-slate-200 shadow-sm space-y-8">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-blue-100 text-blue-600 rounded-xl">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-slate-900">Política de Privacidade</h1>
+              <p className="text-xs text-slate-500">Última atualização: Fevereiro de 2026 • Kivora ERP</p>
+            </div>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-brand-dark">
-            Política de Privacidade
-          </h1>
-
-          <p className="text-xs text-gray-400 font-bold uppercase">
-            Última atualização: Agosto de 2026
-          </p>
-
-          <div className="prose max-w-none text-brand-body text-sm sm:text-base leading-relaxed space-y-6 pt-4 border-t border-gray-100">
+          <div className="space-y-6 text-xs md:text-sm text-slate-700 leading-relaxed">
+            <h3 className="text-base font-extrabold text-slate-900">1. Proteção de Dados Fiscais e Comerciais</h3>
             <p>
-              O <strong>{SCHOOL_INFO.fullName}</strong> está profundamente comprometido em respeitar a privacidade e proteger os dados pessoais de todos os utilizadores do nosso sistema, escolas parceiras, encarregados de educação e alunos em Angola.
+              A <strong>Visual Software</strong>, detentora da plataforma <strong>Kivora</strong>, compromete-se a proteger a privacidade e a confidencialidade dos dados das empresas clientes. Todas as informações comerciais, cadastros de clientes, faturação e dados de vencimentos são armazenados com encriptação de nível bancário.
             </p>
 
-            <h3 className="text-xl font-extrabold text-brand-dark">1. Recolha de Informações Pessoais</h3>
+            <h3 className="text-base font-extrabold text-slate-900">2. Encriptação de Chaves Privadas do Contribuinte</h3>
             <p>
-              Recolhemos apenas as informações estritamente necessárias para o funcionamento e gestão do sistema escolar enviado voluntariamente pelos utilizadores:
-            </p>
-            <ul className="list-disc pl-6 space-y-1">
-              <li>Dados cadastrais de alunos e encarregados de educação;</li>
-              <li>Contacto telefónico e e-mail para envio de comunicados e notificações;</li>
-              <li>Histórico de presenças, avaliações e notas escolares;</li>
-              <li>Informações de propinas e pagamentos de mensalidades.</li>
-            </ul>
-
-            <h3 className="text-xl font-extrabold text-brand-dark">2. Finalidade do Tratamento dos Dados</h3>
-            <p>
-              Os dados recolhidos destinam-se exclusivamente a:
-            </p>
-            <ul className="list-disc pl-6 space-y-1">
-              <li>Permitir o funcionamento dos módulos de gestão escolar e relatórios pedagógicos;</li>
-              <li>Facilitar a comunicação entre a instituição de ensino e os encarregados de educação;</li>
-              <li>Garantir o controlo de acessos e segurança da informação dos alunos.</li>
-            </ul>
-
-            <h3 className="text-xl font-extrabold text-brand-dark">3. Não Partilha de Dados com Terceiros</h3>
-            <p>
-              A Kivora não vende, aluga nem cede quaisquer dados pessoais ou organizacionais a entidades terceiras para fins comerciais ou publicitários.
+              Em estrita conformidade com as diretrizes da AGT para a faturação eletrónica, as chaves privadas do contribuinte fornecidas para a assinatura digital de documentos (algoritmo RS256) são armazenadas encriptadas em repouso e nunca são expostas em texto simples após a gravação no sistema.
             </p>
 
-            <h3 className="text-xl font-extrabold text-brand-dark">4. Contacto Oficial de Privacidade</h3>
+            <h3 className="text-base font-extrabold text-slate-900">3. Comunicação com a AGT</h3>
             <p>
-              Para quaisquer questões relacionadas com a proteção dos seus dados pessoais, pode entrar em contacto através do e-mail: <strong>{SCHOOL_INFO.email}</strong>.
+              O envio de dados de facturação aos webservices da AGT ocorre exclusivamente através de canais seguros HTTPS/TLS com autenticação autorizada, visando o cumprimento das obrigações fiscais legais decorrentes da legislação angolana.
+            </p>
+
+            <h3 className="text-base font-extrabold text-slate-900">4. Contacto de Proteção de Dados</h3>
+            <p>
+              Para esclarecimentos sobre o tratamento dos seus dados no Kivora ERP, contacte o nosso encarregado de proteção através do email <strong>{KIVORA_INFO.supportEmail}</strong>.
             </p>
           </div>
-
         </div>
-      </div>
 
+      </div>
     </div>
   );
 };

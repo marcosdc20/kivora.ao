@@ -5,11 +5,21 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #0f172a;
+    background-color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   body {
-    @apply text-brand-dark bg-white overflow-x-hidden;
+    @apply text-slate-900 bg-white overflow-x-hidden;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: #1d4ed8;
+    color: #ffffff;
   }
 }
 
@@ -17,58 +27,78 @@
   .text-balance {
     text-wrap: balance;
   }
-  
-  .glass-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(12px);
+
+  /* Smooth Page Transitions */
+  .page-transition-enter {
+    animation: pageFadeSlide 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
-  
-  .bg-blueprint-pattern {
-    background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px);
-    background-size: 24px 24px;
+
+  /* Scroll Reveal Animation */
+  .reveal-init {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal-active {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Hero & Carousel Animations */
-@keyframes floatSlow {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
+/* Animations */
+@keyframes pageFadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.animate-float {
-  animation: floatSlow 4s ease-in-out infinite;
+@keyframes floatSubtle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.animate-float-subtle {
+  animation: floatSubtle 4s ease-in-out infinite;
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.4s ease-out forwards;
+@keyframes pulseSubtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
-@keyframes zoomSlow {
-  from { transform: scale(1); }
-  to { transform: scale(1.08); }
+.animate-pulse-subtle {
+  animation: pulseSubtle 2.5s ease-in-out infinite;
 }
 
-.animate-zoom-slow {
-  animation: zoomSlow 8s ease-out infinite alternate;
-}
-
-/* Custom scrollbar */
+/* Elegant minimalist scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-::-webkit-scrollbar-thumb {
-  background: #2563EB;
-  border-radius: 5px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #1E40AF;
+  width: 8px;
+  height: 8px;
 }
 
+::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

@@ -1,305 +1,471 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Hero } from '../components/Hero';
-import { ScrollReveal, ScrollRevealItem } from '../components/ScrollReveal';
-import { CountUp } from '../components/CountUp';
-import { MODULES_DATA, DIFFERENTIALS_DATA } from '../data/school';
-import {
-  ArrowRight, CheckCircle, Star, Users, BookOpen, GraduationCap,
-  Shield, Zap, Smartphone, BarChart3, MessageCircle, DollarSign,
-  ClipboardList, PieChart
-} from 'lucide-react';
-
-const ICON_MAP: Record<string, React.ReactNode> = {
-  Users: <Users className="w-7 h-7" />,
-  BookOpen: <BookOpen className="w-7 h-7" />,
-  GraduationCap: <GraduationCap className="w-7 h-7" />,
-  ClipboardList: <ClipboardList className="w-7 h-7" />,
-  BarChart3: <BarChart3 className="w-7 h-7" />,
-  DollarSign: <DollarSign className="w-7 h-7" />,
-  MessageCircle: <MessageCircle className="w-7 h-7" />,
-  PieChart: <PieChart className="w-7 h-7" />,
-  Shield: <Shield className="w-7 h-7" />,
-  Zap: <Zap className="w-7 h-7" />,
-  Smartphone: <Smartphone className="w-7 h-7" />,
-};
-
-const TESTIMONIALS = [
-  {
-    name: 'Directora Ana Luisa',
-    role: 'Directora – Escola Secundária do Kilamba',
-    text: 'A Kivora transformou completamente a gestão da nossa escola. Antes passávamos horas a processar documentos. Agora fazemos tudo em minutos.',
-    rating: 5,
-    photo: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?q=80&w=100&auto=format&fit=crop',
-  },
-  {
-    name: 'Prof. Carlos Mendes',
-    role: 'Coordenador Pedagógico – Colégio Internacional de Luanda',
-    text: 'A gestão de processos e o controlo de presenças ficaram muito mais simples. A equipa da Kivora presta um suporte excelente.',
-    rating: 5,
-    photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=100&auto=format&fit=crop',
-  },
-  {
-    name: 'Encarregada Maria José',
-    role: 'Encarregada de Educação – 3 filhos matriculados',
-    text: 'Finalmente consigo acompanhar os boletins e presenças dos meus filhos sem precisar deslocar-me. A plataforma Kivora é incrível!',
-    rating: 5,
-    photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=100&auto=format&fit=crop',
-  },
-];
+import { KIVORA_MODULES, KIVORA_FAQS, LOCAL_DB_ARGUMENTS, INSTALLATION_STEPS, CURRENT_RELEASE } from '../data/kivoraData';
+import { KivoraModule } from '../types/kivora';
+import { ShieldCheck, ArrowRight, CheckCircle2, ChevronDown, ChevronUp, Download, Monitor, Network, HardDrive, FileCheck, ArrowUpRight, Layers } from 'lucide-react';
 
 interface HomePageProps {
-  onNavigateSection?: (secId: string) => void;
-  onOpenMatricula?: () => void;
-  onSelectModule?: (moduleId: string) => void;
+  onSelectModule: (module: KivoraModule) => void;
+  onOpenDemoModal: (moduleTitle?: string) => void;
+  onNavigatePage: (page: any) => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
-  onNavigateSection,
-  onOpenMatricula,
   onSelectModule,
+  onOpenDemoModal,
+  onNavigatePage,
 }) => {
-  const handleNav = (id: string) => {
-    if (onNavigateSection) onNavigateSection(id);
+  const [openFaqId, setOpenFaqId] = useState<string | null>('faq-1');
+
+  // Scroll reveal observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('reveal-active');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    const elements = document.querySelectorAll('.reveal-init');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
+  const toggleFaq = (id: string) => {
+    setOpenFaqId(openFaqId === id ? null : id);
+  };
+
+  const getStepIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'Download':
+        return <Download className="w-5 h-5" strokeWidth={1.75} />;
+      case 'HardDrive':
+        return <HardDrive className="w-5 h-5" strokeWidth={1.75} />;
+      case 'Settings':
+        return <Layers className="w-5 h-5" strokeWidth={1.75} />;
+      case 'Key':
+        return <ShieldCheck className="w-5 h-5" strokeWidth={1.75} />;
+      case 'FileCheck':
+        return <FileCheck className="w-5 h-5" strokeWidth={1.75} />;
+      default:
+        return <Download className="w-5 h-5" strokeWidth={1.75} />;
+    }
   };
 
   return (
-    <>
-      {/* ===== HERO ===== */}
+    <div className="min-h-screen bg-white text-slate-900 selection:bg-blue-600 selection:text-white page-transition-enter">
+      
+      {/* 1. HERO SECTION WITH CINEMA CAROUSEL */}
       <Hero
-        onNavigateSection={onNavigateSection}
-        onOpenMatricula={onOpenMatricula}
+        onOpenDemoModal={() => onOpenDemoModal()}
+        onNavigatePage={onNavigatePage}
       />
 
-      {/* ===== STATS SECTION ===== */}
-      <section className="bg-white py-16 border-b border-gray-100">
+      {/* 2. BARRA DE CONFORMIDADE AGT & REGULAÇÃO FISCAL */}
+      <section id="conformidade-agt" className="bg-slate-50 border-y border-slate-200/80 py-12 reveal-init">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal variant="stagger">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              {[
-                { value: 5000, suffix: '+', label: 'Alunos Geridos', color: 'text-brand-green' },
-                { value: 120, suffix: '+', label: 'Turmas Ativas', color: 'text-brand-gold' },
-                { value: 30, suffix: '+', label: 'Escolas Parceiras', color: 'text-blue-600' },
-                { value: 98, suffix: '%', label: 'Satisfação', color: 'text-purple-600' },
-              ].map((stat, i) => (
-                <ScrollRevealItem key={i}>
-                  <div className="flex flex-col items-center gap-1">
-                    <CountUp
-                      end={stat.value}
-                      suffix={stat.suffix}
-                      className={`text-4xl font-extrabold ${stat.color}`}
-                    />
-                    <span className="text-sm text-brand-body font-medium">{stat.label}</span>
-                  </div>
-                </ScrollRevealItem>
-              ))}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            <div className="lg:col-span-8 flex items-start gap-4">
+              <div className="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm text-blue-600 shrink-0">
+                <ShieldCheck className="w-8 h-8" strokeWidth={1.75} />
+              </div>
+              <div className="space-y-1">
+                <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded border border-blue-200/60">
+                  Software Certificado AGT nº XXX/AGT/2026
+                </span>
+                <h2 className="text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight">
+                  Totalmente Conforme o Decreto Presidencial n.º 71/25 e Especificação DS.120
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  Garante a assinatura criptográfica RS256, numeração sequencial inviolável de séries, código QR oficial e geração do ficheiro mensal auditável SAF-T (AO).
+                </p>
+              </div>
             </div>
-          </ScrollReveal>
-        </div>
-      </section>
 
-      {/* ===== MÓDULOS DESTAQUE ===== */}
-      <section id="modulos-home" className="bg-brand-bg py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal variant="fade-up">
-            <div className="text-center mb-12">
-              <span className="inline-flex items-center gap-2 bg-brand-green-light text-brand-green text-xs font-extrabold uppercase px-4 py-1.5 rounded-full mb-4">
-                <BookOpen className="w-3.5 h-3.5" />
-                Módulos do Sistema
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-brand-dark leading-tight">
-                Tudo que a sua escola precisa,<br />
-                <span className="text-brand-green">num só sistema</span>
-              </h2>
-              <p className="mt-4 text-brand-body max-w-2xl mx-auto">
-                8 módulos integrados para cobrir todas as necessidades da sua gestão escolar — desde a matrícula ao relatório final.
-              </p>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal variant="stagger">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {MODULES_DATA.slice(0, 8).map((mod) => (
-                <ScrollRevealItem key={mod.id}>
-                  <div
-                    className="bg-white rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 group cursor-pointer border border-brand-border hover:border-brand-green/30 transform hover:-translate-y-1"
-                    onClick={() => onSelectModule && onSelectModule(mod.id)}
-                  >
-                    {mod.badge && (
-                      <span className="inline-block text-[10px] font-extrabold uppercase bg-brand-green text-white px-2 py-0.5 rounded-full mb-3">
-                        {mod.badge}
-                      </span>
-                    )}
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${mod.color}`}>
-                      {ICON_MAP[mod.icon]}
-                    </div>
-                    <h3 className="text-base font-extrabold text-brand-dark mb-2 group-hover:text-brand-green transition-colors">
-                      {mod.title}
-                    </h3>
-                    <p className="text-xs text-brand-body leading-relaxed">{mod.shortDesc}</p>
-                    <div className="mt-4 flex items-center gap-1 text-brand-green text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span>Ver detalhes</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </div>
-                  </div>
-                </ScrollRevealItem>
-              ))}
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal variant="fade-up" delay={0.3}>
-            <div className="mt-10 text-center">
+            <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-end">
               <button
-                onClick={() => handleNav('modulos')}
-                className="bg-brand-green hover:bg-brand-green-dark text-white font-extrabold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 inline-flex items-center gap-2 transform hover:-translate-y-0.5"
+                onClick={() => onNavigatePage('download')}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
               >
-                <span>Ver Todos os Módulos</span>
-                <ArrowRight className="w-4 h-4" />
+                <Download className="w-4 h-4" strokeWidth={1.75} />
+                <span>Baixar KIVORA Setup</span>
+              </button>
+
+              <button
+                onClick={() => onNavigatePage('recursos')}
+                className="w-full bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all"
+              >
+                <span>Ver Guia SAF-T AGT</span>
+                <ArrowRight className="w-3.5 h-3.5 text-slate-500" strokeWidth={1.75} />
               </button>
             </div>
-          </ScrollReveal>
-        </div>
-      </section>
 
-      {/* ===== DIFERENCIAIS ===== */}
-      <section className="bg-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <ScrollReveal variant="fade-right">
-              <div>
-                <span className="inline-flex items-center gap-2 bg-blue-100 text-brand-blue text-xs font-extrabold uppercase px-4 py-1.5 rounded-full mb-4">
-                  <Shield className="w-3.5 h-3.5 text-brand-amber" />
-                  Por que escolher a Kivora?
-                </span>
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-brand-navy leading-tight mb-6">
-                  Simples, seguro e feito <br />
-                  <span className="text-brand-blue">para Angola</span>
-                </h2>
-                <p className="text-slate-600 mb-8 leading-relaxed">
-                  A Kivora foi desenvolvida especificamente para a realidade das organizações angolanas, com suporte local dedicado, alta segurança e recursos que realmente fazem a diferença.
-                </p>
-                <div className="space-y-4">
-                  {DIFFERENTIALS_DATA.map((diff, i) => (
-                    <div key={i} className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 hover:bg-blue-50 transition-colors group">
-                      <div className="w-10 h-10 rounded-lg bg-blue-100 text-brand-blue flex items-center justify-center shrink-0 group-hover:bg-brand-blue group-hover:text-white transition-colors">
-                        {ICON_MAP[diff.icon] || <CheckCircle className="w-5 h-5" />}
-                      </div>
-                      <div>
-                        <h4 className="font-extrabold text-brand-navy text-sm mb-1">{diff.title}</h4>
-                        <p className="text-xs text-slate-600">{diff.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </ScrollReveal>
-
-            <ScrollReveal variant="fade-left">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                <img
-                  src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop"
-                  alt="Sistema Kivora em uso"
-                  className="w-full h-[450px] object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/70 to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6">
-                  <div className="bg-white/95 backdrop-blur rounded-xl p-4 shadow-xl">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-brand-blue flex items-center justify-center">
-                        <GraduationCap className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-extrabold text-brand-navy">Kivora Tech – Angola</p>
-                        <p className="text-[10px] text-slate-500">50+ instituições confiam em nós</p>
-                      </div>
-                      <div className="ml-auto flex gap-0.5">
-                        {[1,2,3,4,5].map(s => <Star key={s} className="w-3 h-3 fill-brand-amber text-brand-amber" />)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ScrollReveal>
           </div>
         </div>
       </section>
 
-      {/* ===== TESTEMUNHOS ===== */}
-      <section className="bg-slate-50 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal variant="fade-up">
-            <div className="text-center mb-12">
-              <span className="inline-flex items-center gap-2 bg-amber-100 text-brand-amber text-xs font-extrabold uppercase px-4 py-1.5 rounded-full mb-4">
-                <Star className="w-3.5 h-3.5 fill-brand-amber" />
-                O que dizem sobre nós
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-brand-navy">
-                Organizações que confiam na Kivora
-              </h2>
-            </div>
-          </ScrollReveal>
+      {/* 3. FLUXO DE 5 PASSOS (01 - 05) */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 reveal-init">
+        <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+          <span className="text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/70">
+            Fluxo de Instalação e Utilização
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight">
+            Como Funciona o KIVORA na Sua Empresa
+          </h2>
+          <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+            Sem complexidades ou dependência de terceiros: instale o programa, configure os dados do seu negócio e comece a faturar.
+          </p>
+        </div>
 
-          <ScrollReveal variant="stagger">
-            <div className="grid md:grid-cols-3 gap-6">
-              {TESTIMONIALS.map((t, i) => (
-                <ScrollRevealItem key={i}>
-                  <div className="bg-white rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 border border-slate-200">
-                    <div className="flex gap-0.5 mb-4">
-                      {Array.from({ length: t.rating }).map((_, s) => (
-                        <Star key={s} className="w-4 h-4 fill-brand-amber text-brand-amber" />
-                      ))}
-                    </div>
-                    <p className="text-sm text-slate-600 leading-relaxed mb-6 italic">"{t.text}"</p>
-                    <div className="flex items-center gap-3">
-                      <img src={t.photo} alt={t.name} className="w-10 h-10 rounded-full object-cover" />
-                      <div>
-                        <p className="text-sm font-extrabold text-brand-navy">{t.name}</p>
-                        <p className="text-xs text-slate-500">{t.role}</p>
-                      </div>
-                    </div>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+          {INSTALLATION_STEPS.map((step) => (
+            <div
+              key={step.stepNumber}
+              className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4 hover:border-blue-500/50 hover:shadow-md transition-all group"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-black text-blue-600 font-mono">
+                    {step.stepNumber}
+                  </span>
+                  <div className="p-2 bg-slate-100 text-slate-700 rounded-xl group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                    {getStepIcon(step.icon)}
                   </div>
-                </ScrollRevealItem>
-              ))}
+                </div>
+
+                <h3 className="text-base font-extrabold text-slate-900">
+                  {step.title}
+                </h3>
+
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  {step.description}
+                </p>
+              </div>
             </div>
-          </ScrollReveal>
+          ))}
         </div>
       </section>
 
-      {/* ===== CTA FINAL ===== */}
-      <section className="bg-brand-navy py-20 relative overflow-hidden">
-        <div className="bg-blueprint-pattern absolute inset-0 opacity-30" />
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <ScrollReveal variant="zoom-in">
-            <span className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 text-xs font-extrabold uppercase px-4 py-1.5 rounded-full mb-6 border border-blue-400/30">
-              <Zap className="w-3.5 h-3.5 text-brand-amber" />
-              Comece Hoje Mesmo
+      {/* 4. ARQUITETURA: BASE DE DADOS LOCAL & MODO REDE LAN */}
+      <section className="bg-slate-50 border-y border-slate-200/80 py-20 reveal-init">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+          
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <span className="text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/70">
+              Arquitetura Robusta & Segura
             </span>
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-white mb-6 leading-tight">
-              Transforme a gestão <br />
-              <span className="text-brand-amber">da sua organização agora</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight">
+              Os Seus Dados Ficam na Sua Empresa
             </h2>
-            <p className="text-slate-300 text-lg mb-10 max-w-2xl mx-auto">
-              Junte-se às mais de 50 organizações angolanas que já digitalizam e otimizam a sua gestão com a Kivora.
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+              O KIVORA foi desenvolvido para funcionar localmente, permitindo realizar as principais operações comerciais com alta velocidade e sem depender de conetividade externa.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={onOpenMatricula || (() => handleNav('suporte'))}
-                className="bg-brand-green hover:bg-brand-green-dark text-white font-extrabold px-10 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
-              >
-                <GraduationCap className="w-5 h-5" />
-                <span>Experimentar Grátis</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => handleNav('suporte')}
-                className="bg-white/10 hover:bg-white/20 text-white border border-white/30 font-bold px-10 py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 backdrop-blur-md"
-              >
-                <MessageCircle className="w-5 h-5 text-brand-gold" />
-                <span>Falar com Consultor</span>
-              </button>
+          </div>
+
+          {/* Side by side comparison: PC Único vs Rede LAN with Package Images */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            {/* Box 1: Modo PC Único (Standalone) */}
+            <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex items-center gap-2 text-xs font-bold text-slate-900 uppercase tracking-wider bg-slate-100 px-3 py-1 rounded-lg">
+                    <Monitor className="w-4 h-4 text-blue-600" strokeWidth={1.75} />
+                    <span>Modo PC Único (Standalone)</span>
+                  </div>
+                  <span className="text-[11px] font-semibold text-slate-500">Pequenas Lojas</span>
+                </div>
+
+                <h3 className="text-2xl font-extrabold text-slate-950">
+                  Instalação Direta no Computador de Venda
+                </h3>
+
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  Para estabelecimentos que necessitam de 1 posto de atendimento ou faturação. O KIVORA e a sua base de dados operam de forma autónoma no disco do computador.
+                </p>
+
+                {/* Package Disk Image Display */}
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-center">
+                  <img
+                    src="/imagens/pacote-de-instalação-com-disco.png"
+                    alt="Kivora Instalação com Disco"
+                    className="max-h-44 object-contain"
+                  />
+                </div>
+
+                <ul className="space-y-2 text-xs text-slate-700 font-medium">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.75} />
+                    <span>Setup ultra-rápido em menos de 2 minutos</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.75} />
+                    <span>Sem necessidade de cabos de rede ou servidores dedicados</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.75} />
+                    <span>Cópias de segurança instantâneas para Pen Drive USB</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100">
+                <button
+                  onClick={() => onNavigatePage('download')}
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-colors"
+                >
+                  <Download className="w-4 h-4" strokeWidth={1.75} />
+                  <span>Baixar KIVORA para 1 Computador</span>
+                </button>
+              </div>
             </div>
-          </ScrollReveal>
+
+            {/* Box 2: Modo Rede Local (LAN Multi-Postos) */}
+            <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex items-center gap-2 text-xs font-bold text-blue-700 uppercase tracking-wider bg-blue-50 px-3 py-1 rounded-lg border border-blue-200/70">
+                    <Network className="w-4 h-4 text-blue-600" strokeWidth={1.75} />
+                    <span>Modo Rede Local / LAN Multi-Postos</span>
+                  </div>
+                  <span className="text-[11px] font-semibold text-blue-600 font-bold">Empresas & Supermercados</span>
+                </div>
+
+                <h3 className="text-2xl font-extrabold text-slate-950">
+                  Vários Computadores Interligados à Mesma Base de Dados
+                </h3>
+
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  Interligue o PC Servidor aos postos de Caixa de atendimento, Gabinete de Gerência, Escritório de Administração e Armazém na rede interna.
+                </p>
+
+                {/* Server Package Image Display */}
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-center">
+                  <img
+                    src="/imagens/servidor.png"
+                    alt="Kivora Servidor em Rede Local"
+                    className="max-h-44 object-contain"
+                  />
+                </div>
+
+                <ul className="space-y-2 text-xs text-slate-700 font-medium">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.75} />
+                    <span>Atualização de stock e vendas em tempo real em todos os caixas</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.75} />
+                    <span>Permissões diferenciadas por operador, caixa e gerente</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.75} />
+                    <span>Operação contínua na rede local mesmo sem internet externa</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100">
+                <button
+                  onClick={() => onNavigatePage('solucoes')}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm"
+                >
+                  <Network className="w-4 h-4" strokeWidth={1.75} />
+                  <span>Ver Como Funciona a Rede Local</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          {/* 4 Pillars Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
+            {LOCAL_DB_ARGUMENTS.map((arg, idx) => (
+              <div
+                key={idx}
+                className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3"
+              >
+                <h4 className="text-sm font-extrabold text-slate-900">
+                  {arg.title}
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  {arg.description}
+                </p>
+              </div>
+            ))}
+          </div>
+
         </div>
       </section>
-    </>
+
+      {/* 5. MÓDULOS DE GESTÃO DO ERP KIVORA */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 reveal-init">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-4">
+          <div className="space-y-2">
+            <span className="text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/70">
+              Catálogo de Módulos
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight">
+              Funcionalidades Especialistas do KIVORA
+            </h2>
+          </div>
+          <button
+            onClick={() => onNavigatePage('funcionalidades')}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 transition-colors"
+          >
+            <span>Ver especificações técnicas completas</span>
+            <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.75} />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {KIVORA_MODULES.map((moduleItem) => (
+            <div
+              key={moduleItem.id}
+              className="bg-white p-7 rounded-2xl border border-slate-200 shadow-sm hover:border-blue-500/50 hover:shadow-md transition-all flex flex-col justify-between space-y-6 group"
+            >
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold px-2.5 py-1 bg-slate-100 text-slate-800 rounded-lg">
+                    {moduleItem.badge || 'Módulo Kivora'}
+                  </span>
+                </div>
+
+                <h3 className="text-lg font-extrabold text-slate-950 group-hover:text-blue-600 transition-colors">
+                  {moduleItem.title}
+                </h3>
+
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  {moduleItem.shortDesc}
+                </p>
+
+                <ul className="space-y-2 pt-2 text-xs text-slate-700">
+                  {moduleItem.features.slice(0, 3).map((feat, fIdx) => (
+                    <li key={fIdx} className="flex items-start gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" strokeWidth={1.75} />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <button
+                  onClick={() => onSelectModule(moduleItem)}
+                  className="text-xs font-bold text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                >
+                  <span>Ver módulo em detalhe</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={1.75} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 6. PERGUNTAS FREQUENTES (FAQ) */}
+      <section className="bg-slate-50 border-t border-slate-200/80 py-20 reveal-init">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          
+          <div className="text-center space-y-2">
+            <span className="text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/70">
+              Esclarecimentos
+            </span>
+            <h2 className="text-3xl font-extrabold text-slate-950 tracking-tight">
+              Perguntas Frequentes sobre o Software KIVORA
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600">
+              Tire as suas dúvidas sobre instalação local, rede, licenças e conformidade fiscal.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {KIVORA_FAQS.map((faq) => {
+              const isOpen = openFaqId === faq.id;
+              return (
+                <div
+                  key={faq.id}
+                  className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all"
+                >
+                  <button
+                    onClick={() => toggleFaq(faq.id)}
+                    className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm text-slate-950 hover:text-blue-600 transition-colors"
+                  >
+                    <span>{faq.question}</span>
+                    {isOpen ? (
+                      <ChevronUp className="w-4 h-4 text-blue-600 shrink-0" strokeWidth={1.75} />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" strokeWidth={1.75} />
+                    )}
+                  </button>
+
+                  {isOpen && (
+                    <div className="px-5 pb-5 pt-1 text-xs text-slate-700 leading-relaxed border-t border-slate-100">
+                      {faq.answer}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+        </div>
+      </section>
+
+      {/* 7. BANNER FINAL CTA COM IMAGEM DO PACOTE */}
+      <section className="bg-slate-900 text-white py-16 reveal-init">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            <div className="lg:col-span-8 space-y-4 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-semibold">
+                <Download className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <span>KIVORA Setup v{CURRENT_RELEASE.version} para Windows</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                Pronto para Instalar o KIVORA no Computador da Sua Empresa?
+              </h2>
+
+              <p className="text-slate-300 text-xs sm:text-sm max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                Descarregue o instalador ou solicite auxílio da nossa equipa técnica em Luanda para a instalação e ativação da licença do seu estabelecimento.
+              </p>
+
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
+                <button
+                  onClick={() => onNavigatePage('download')}
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm px-8 py-3.5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
+                >
+                  <Download className="w-4 h-4" strokeWidth={1.75} />
+                  <span>Baixar KIVORA Setup</span>
+                </button>
+                <button
+                  onClick={() => onOpenDemoModal('Solicitação Geral')}
+                  className="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm px-7 py-3.5 rounded-xl border border-slate-700 transition-all"
+                >
+                  <span>Pedir Demonstração Presencial</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="lg:col-span-4 flex items-center justify-center">
+              <img
+                src="/imagens/pacote.png"
+                alt="Kivora Software Package"
+                className="max-h-56 object-contain drop-shadow-2xl"
+              />
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </div>
   );
 };

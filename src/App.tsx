@@ -2,30 +2,32 @@ import { useEffect, useState } from 'react';
 import { Header, PageId } from './components/Header';
 import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
-import { AboutPage } from './pages/AboutPage';
-import { TeamPage } from './pages/TeamPage';
-import { AlunosPage } from './pages/AlunosPage';
 import { ModulosPage } from './pages/ModulosPage';
 import { ModuloDetailPage } from './pages/ModuloDetailPage';
-import { TurmasPage } from './pages/TurmasPage';
-import { NoticiasPage } from './pages/NoticiasPage';
-import { NoticiaDetailPage } from './pages/NoticiaDetailPage';
+import { SolucoesPage } from './pages/SolucoesPage';
+import { DownloadPage } from './pages/DownloadPage';
+import { ParceirosPage } from './pages/ParceirosPage';
+import { RecursosPage } from './pages/RecursosPage';
+import { AreaClientePage } from './pages/AreaClientePage';
+import { AreaParceiroPage } from './pages/AreaParceiroPage';
 import { FinanceiroPage } from './pages/FinanceiroPage';
 import { SuportePage } from './pages/SuportePage';
+import { NoticiasPage } from './pages/NoticiasPage';
+import { NoticiaDetailPage } from './pages/NoticiaDetailPage';
+import { LoginPage } from './pages/LoginPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
-import { AlunoModal } from './components/AlunoModal';
-import { MatriculaModal } from './components/MatriculaModal';
-import { MODULES_DATA } from './data/school';
-import { Student, SchoolModule, NewsPost } from './types/school';
+import { DemoModal } from './components/DemoModal';
+import { KIVORA_MODULES } from './data/kivoraData';
+import { KivoraModule, NewsPost } from './types/kivora';
 
 export function App() {
   const [activePage, setActivePage] = useState<PageId>('home');
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [selectedModule, setSelectedModule] = useState<SchoolModule | null>(null);
+  const [selectedModule, setSelectedModule] = useState<KivoraModule | null>(null);
   const [selectedNewsPost, setSelectedNewsPost] = useState<NewsPost | null>(null);
-  const [selectedForSupport, setSelectedForSupport] = useState<string>('');
-  const [isMatriculaOpen, setIsMatriculaOpen] = useState<boolean>(false);
+  const [selectedForSupport] = useState<string>('');
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState<boolean>(false);
+  const [demoInitialModule, setDemoInitialModule] = useState<string>('');
 
   useEffect(() => {
     const loader = document.getElementById('initial-loader');
@@ -56,17 +58,7 @@ export function App() {
     }
   };
 
-  const handleSelectModuleById = (moduleId: string) => {
-    const found = MODULES_DATA.find((m) => m.id === moduleId);
-    if (found) {
-      setSelectedModule(found);
-      setActivePage('modulo-detalhe');
-    } else {
-      handleNavigatePage('modulos');
-    }
-  };
-
-  const handleSelectModule = (moduleItem: SchoolModule) => {
+  const handleSelectModule = (moduleItem: KivoraModule) => {
     setSelectedModule(moduleItem);
     setActivePage('modulo-detalhe');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -78,74 +70,114 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleOpenSupportModal = (subject?: string) => {
-    if (subject) {
-      setSelectedForSupport(subject);
-    }
-    handleNavigatePage('suporte');
+  const handleOpenDemoModal = (moduleTitle?: string) => {
+    setDemoInitialModule(moduleTitle || '');
+    setIsDemoModalOpen(true);
   };
 
+  if (activePage === 'login') {
+    return (
+      <LoginPage
+        onBackToHome={() => handleNavigatePage('home')}
+        onNavigatePage={handleNavigatePage}
+      />
+    );
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-white selection:bg-brand-green selection:text-white relative">
+    <div className="min-h-screen flex flex-col bg-white selection:bg-[#2563EB] selection:text-white relative font-sans">
       
-      {/* Header / Navbar Fixo com Suporte Multi-Página */}
+      {/* Header Fixo com Suporte Multi-Página */}
       <Header
         activePage={activePage}
         onNavigatePage={handleNavigatePage}
-        onOpenSupportModal={() => handleOpenSupportModal('Acesso ao Sistema')}
+        onOpenLogin={() => handleNavigatePage('login')}
       />
 
-      {/* Roteamento de Conteúdo de Páginas Institucionais */}
+      {/* Roteamento de Conteúdo de Páginas Kivora Desktop ERP */}
       <main className="flex-grow">
         {activePage === 'home' && (
           <HomePage
-            onSelectModule={handleSelectModuleById}
-            onOpenMatricula={() => setIsMatriculaOpen(true)}
-            onNavigateSection={(secId) => {
-              if (secId === 'alunos') handleNavigatePage('alunos');
-              else if (secId === 'modulos') handleNavigatePage('modulos');
-              else if (secId === 'turmas') handleNavigatePage('turmas');
-              else if (secId === 'suporte') handleNavigatePage('suporte');
-              else if (secId === 'sobre-nos' || secId === 'sobre') handleNavigatePage('sobre');
-            }}
+            onSelectModule={handleSelectModule}
+            onOpenDemoModal={handleOpenDemoModal}
+            onNavigatePage={handleNavigatePage}
           />
         )}
 
-        {activePage === 'sobre' && (
-          <AboutPage
-            onOpenContact={() => handleOpenSupportModal('Informações sobre a Kivora')}
-            onNavigateTeam={() => handleNavigatePage('equipe')}
+        {activePage === 'funcionalidades' && (
+          <ModulosPage
+            onSelectModule={handleSelectModule}
+            onOpenDemoModal={handleOpenDemoModal}
           />
         )}
 
-        {activePage === 'equipe' && (
-          <TeamPage
-            onBack={() => handleNavigatePage('sobre')}
-            onOpenContact={() => handleOpenSupportModal('Candidatura Equipa Pedagógica')}
+        {activePage === 'solucoes' && (
+          <SolucoesPage
+            onOpenDemoModal={handleOpenDemoModal}
+            onNavigatePage={handleNavigatePage}
           />
         )}
 
-        {activePage === 'alunos' && (
-          <AlunosPage onSelectStudent={(student) => setSelectedStudent(student)} />
+        {activePage === 'download' && (
+          <DownloadPage
+            onOpenDemoModal={handleOpenDemoModal}
+            onNavigatePage={handleNavigatePage}
+          />
+        )}
+
+        {activePage === 'planos' && (
+          <FinanceiroPage onOpenDemoModal={handleOpenDemoModal} />
+        )}
+
+        {activePage === 'parceiros' && (
+          <ParceirosPage />
+        )}
+
+        {activePage === 'recursos' && (
+          <RecursosPage onNavigatePage={handleNavigatePage} />
+        )}
+
+        {activePage === 'suporte' && (
+          <SuportePage initialSubject={selectedForSupport} />
+        )}
+
+        {activePage === 'area-cliente' && (
+          <AreaClientePage onNavigatePage={handleNavigatePage} />
+        )}
+
+        {activePage === 'area-parceiro' && (
+          <AreaParceiroPage onNavigatePage={handleNavigatePage} />
         )}
 
         {activePage === 'modulos' && (
           <ModulosPage
             onSelectModule={handleSelectModule}
-            onOpenContact={() => handleOpenSupportModal('Demonstração Módulos')}
+            onOpenDemoModal={handleOpenDemoModal}
           />
         )}
 
         {activePage === 'modulo-detalhe' && selectedModule && (
           <ModuloDetailPage
             module={selectedModule}
-            onBack={() => handleNavigatePage('modulos')}
-            onOpenContact={() => handleOpenSupportModal(`Interesse no módulo: ${selectedModule.title}`)}
+            onBack={() => handleNavigatePage('funcionalidades')}
+            onOpenDemoModal={handleOpenDemoModal}
           />
         )}
 
-        {activePage === 'turmas' && (
-          <TurmasPage onOpenContact={() => handleOpenSupportModal('Criação de Turmas')} />
+        {activePage === 'faturacao' && (
+          <ModuloDetailPage
+            module={KIVORA_MODULES.find((m) => m.id === 'faturacao-agt') || KIVORA_MODULES[0]}
+            onBack={() => handleNavigatePage('home')}
+            onOpenDemoModal={handleOpenDemoModal}
+          />
+        )}
+
+        {activePage === 'pos' && (
+          <ModuloDetailPage
+            module={KIVORA_MODULES.find((m) => m.id === 'pos-multicaixa') || KIVORA_MODULES[1]}
+            onBack={() => handleNavigatePage('home')}
+            onOpenDemoModal={handleOpenDemoModal}
+          />
         )}
 
         {activePage === 'noticias' && (
@@ -157,14 +189,6 @@ export function App() {
             post={selectedNewsPost}
             onBack={() => handleNavigatePage('noticias')}
           />
-        )}
-
-        {activePage === 'financeiro' && (
-          <FinanceiroPage onOpenContact={() => handleOpenSupportModal('Contratação de Plano')} />
-        )}
-
-        {activePage === 'suporte' && (
-          <SuportePage initialSubject={selectedForSupport} />
         )}
 
         {activePage === 'privacidade' && (
@@ -179,17 +203,11 @@ export function App() {
       {/* Footer Global */}
       <Footer onNavigatePage={(page) => handleNavigatePage(page as PageId)} />
 
-      {/* Modal de Detalhes do Aluno (z-[100]) */}
-      <AlunoModal
-        student={selectedStudent}
-        onClose={() => setSelectedStudent(null)}
-        onOpenContactForm={(studentName) => handleOpenSupportModal(`Ficha do Aluno: ${studentName}`)}
-      />
-
-      {/* Modal de Simulação de Matrícula (z-[110]) */}
-      <MatriculaModal
-        isOpen={isMatriculaOpen}
-        onClose={() => setIsMatriculaOpen(false)}
+      {/* Modal de Pedido de Demonstração (z-[120]) */}
+      <DemoModal
+        isOpen={isDemoModalOpen}
+        onClose={() => setIsDemoModalOpen(false)}
+        initialModule={demoInitialModule}
       />
 
     </div>

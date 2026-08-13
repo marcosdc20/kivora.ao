@@ -1,170 +1,128 @@
 import React from 'react';
-import { ScrollReveal, ScrollRevealItem } from '../components/ScrollReveal';
-import { CountUp } from '../components/CountUp';
-import { ArrowRight, CheckCircle, GraduationCap, Target, Eye, Heart, Users, BookOpen } from 'lucide-react';
-
-const VALUES = [
-  { icon: <Target className="w-6 h-6" />, title: 'Inovação', desc: 'Desenvolvemos soluções modernas adaptadas à realidade angolana.' },
-  { icon: <Eye className="w-6 h-6" />, title: 'Transparência', desc: 'Dados claros e acessíveis para diretores, professores e famílias.' },
-  { icon: <Heart className="w-6 h-6" />, title: 'Comprometimento', desc: 'Suporte local dedicado para garantir o sucesso de cada escola parceira.' },
-  { icon: <CheckCircle className="w-6 h-6" />, title: 'Qualidade', desc: 'Excelência no desenvolvimento de software e na experiência do utilizador.' },
-];
+import { ShieldCheck, Award, Users, CheckCircle, Sparkles } from 'lucide-react';
+import { KIVORA_INFO } from '../data/kivoraData';
 
 interface AboutPageProps {
-  onOpenContact?: () => void;
-  onNavigateTeam?: () => void;
+  onOpenDemoModal: () => void;
 }
 
-export const AboutPage: React.FC<AboutPageProps> = ({ onOpenContact, onNavigateTeam }) => {
+export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
   return (
-    <div className="pt-24 bg-white min-h-screen">
-
-      {/* HERO SOBRE */}
-      <section className="bg-brand-navy py-20 relative overflow-hidden">
-        <div className="bg-blueprint-pattern absolute inset-0 opacity-20" />
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/20 to-transparent" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal variant="fade-up">
-            <span className="inline-flex items-center gap-2 bg-brand-blue/20 text-blue-400 text-xs font-extrabold uppercase px-4 py-1.5 rounded-full mb-6 border border-blue-400/30">
-              <GraduationCap className="w-3.5 h-3.5 text-brand-amber" />
-              Sobre a Kivora
-            </span>
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight mb-6">
-              A plataforma desenvolvida <br />
-              <span className="text-blue-400">para impulsionar a tecnologia</span> e gestão em Angola
-            </h1>
-            <p className="text-slate-300 text-lg max-w-2xl leading-relaxed">
-              A Kivora é um ecossistema de soluções tecnológicas desenvolvido com foco total na eficiência, segurança e automação das organizações angolanas.
-            </p>
-          </ScrollReveal>
+    <div className="min-h-screen bg-white text-slate-900 pt-28 pb-20 selection:bg-blue-600 selection:text-white">
+      
+      {/* Header Banner - Clean Light Neutral */}
+      <section className="bg-slate-50 border-b border-slate-200/80 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
+          <span className="text-blue-600 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100">
+            Sobre a Visual Software & Kivora
+          </span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+            Tecnologia de Gestão de Alto Desempenho para Angola
+          </h1>
+          <p className="text-slate-600 text-sm max-w-2xl mx-auto leading-relaxed">
+            Desenvolvemos o Kivora ERP para capacitar empresários e gestores angolanos com software robusto, alinhado com a legislação tributária da AGT e com suporte técnico local.
+          </p>
         </div>
       </section>
 
-      {/* MISSÃO E VISÃO */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <ScrollReveal variant="fade-right">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                <img
-                  src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800&auto=format&fit=crop"
-                  alt="Sobre a Kivora"
-                  className="w-full h-[420px] object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/70 to-transparent" />
-                <div className="absolute bottom-6 left-6 bg-white/95 rounded-xl px-5 py-4 shadow-xl">
-                  <p className="text-xs font-extrabold text-brand-navy uppercase tracking-wide">Líder em Inovação</p>
-                  <p className="text-2xl font-extrabold text-brand-blue">Kivora Tech</p>
-                  <p className="text-xs text-slate-500">Luanda, Angola</p>
-                </div>
+      {/* Main Content Showcase */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <div className="lg:col-span-6 space-y-6">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
+              A Nossa Missão: Simplificar e Garantir a Conformidade Fiscal das Empresas
+            </h2>
+            
+            <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
+              Fundada em Luanda, a <strong>Visual Software</strong> nasceu com a missão de transformar a forma como as empresas em Angola gerem os seus processos comerciais, financeiros e contabilísticos.
+            </p>
+
+            <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
+              O <strong>Kivora ERP</strong> representa a evolução tecnológica necessária para responder aos desafios da Faturação Eletrónica (Decreto Presidencial n.º 71/25), garantindo interoperabilidade com os webservices da AGT, segurança criptográfica e operação ininterrupta.
+            </p>
+
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+                <span className="text-xs font-bold text-slate-800">Programa Validado e Certificado pela AGT nº XXX/AGT/2026</span>
               </div>
-            </ScrollReveal>
-
-            <ScrollReveal variant="fade-left">
-              <div>
-                <h2 className="text-3xl font-extrabold text-brand-navy mb-6 leading-tight">
-                  Desenvolvemos tecnologias para tornar a gestão <span className="text-brand-blue">inteligente e integrada</span>
-                </h2>
-                <p className="text-slate-600 mb-6 leading-relaxed">
-                  A equipa da Kivora nasceu com o propósito de solucionar desafios críticos de gestão: transformar processos manuais em ecossistemas digitais de alta performance e disponibilidade.
-                </p>
-                <p className="text-slate-600 mb-8 leading-relaxed">
-                  Desenvolvemos soluções intuitivas, escaláveis e perfeitamente adaptadas ao contexto nacional — com suporte técnico local, integração com pagamentos e emissão documental.
-                </p>
-
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  {[
-                    { label: 'Missão', text: 'Digitalizar e potencializar os processos das organizações em Angola com tecnologia de ponta.' },
-                    { label: 'Visão', text: 'Ser a marca de referência em software de gestão e inovação tecnológica em Angola.' },
-                  ].map((item, i) => (
-                    <div key={i} className="bg-slate-50 rounded-xl p-5 border border-slate-200">
-                      <h4 className="font-extrabold text-brand-navy text-sm mb-2 uppercase tracking-wide">{item.label}</h4>
-                      <p className="text-xs text-slate-600 leading-relaxed">{item.text}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    onClick={onNavigateTeam}
-                    className="bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 transform hover:-translate-y-0.5"
-                  >
-                    <Users className="w-4 h-4 text-brand-amber" />
-                    <span>Conheça a Equipa</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={onOpenContact}
-                    className="border border-slate-300 text-brand-navy hover:border-brand-blue hover:text-brand-blue font-bold px-6 py-3 rounded-xl transition-all duration-300"
-                  >
-                    Entrar em Contacto
-                  </button>
-                </div>
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                <CheckCircle className="w-5 h-5 text-blue-600 shrink-0" />
+                <span className="text-xs font-bold text-slate-800">Equipa Técnica de Desenvolvimento e Suporte Sediada em Luanda</span>
               </div>
-            </ScrollReveal>
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                <Award className="w-5 h-5 text-amber-500 shrink-0" />
+                <span className="text-xs font-bold text-slate-800">Arquitetura Resiliente: Nuvem, Desktop Local e Operação Offline</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="lg:col-span-6">
+            <div className="relative rounded-2xl overflow-hidden shadow-md border border-slate-200 bg-slate-100 p-2">
+              <img
+                src={KIVORA_INFO.appOverviewImage}
+                alt="Kivora Software Platform"
+                className="w-full h-auto rounded-xl object-cover"
+              />
+            </div>
+          </div>
+
+        </div>
+
+        {/* Pillars / Values Grid */}
+        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-white p-8 rounded-2xl border border-slate-200/90 shadow-sm space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg font-extrabold text-slate-900">Rigor Fiscal & Segurança</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Cada linha de código do Kivora é auditada para garantir o cumprimento estrito do Código do IVA, PGC-AO, IRT 2026 e transmissão segura de dados.
+            </p>
+          </div>
+
+          <div className="bg-white p-8 rounded-2xl border border-slate-200/90 shadow-sm space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg font-extrabold text-slate-900">Inovação Orientada ao Cliente</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Atualizações contínuas e automáticas para incorporar novas regras legais e funcionalidades solicitadas pelos nossos clientes em Angola.
+            </p>
+          </div>
+
+          <div className="bg-white p-8 rounded-2xl border border-slate-200/90 shadow-sm space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+              <Users className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg font-extrabold text-slate-900">Suporte & Formação Local</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Não é apenas um software: oferecemos acompanhamento personalizado, formação presencial para a sua equipa e canal direto de WhatsApp.
+            </p>
           </div>
         </div>
-      </section>
 
-      {/* VALORES */}
-      <section className="bg-slate-50 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal variant="fade-up">
-            <div className="text-center mb-12">
-              <span className="inline-flex items-center gap-2 bg-blue-100 text-brand-blue text-xs font-extrabold uppercase px-4 py-1.5 rounded-full mb-4">
-                <Heart className="w-3.5 h-3.5 text-brand-amber" />
-                Os Nossos Valores
-              </span>
-              <h2 className="text-3xl font-extrabold text-brand-navy">O que nos guia a cada dia</h2>
-            </div>
-          </ScrollReveal>
-          <ScrollReveal variant="stagger">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {VALUES.map((val, i) => (
-                <ScrollRevealItem key={i}>
-                  <div className="bg-white rounded-2xl p-6 shadow-card hover:shadow-card-hover border border-slate-200 transition-all duration-300 group hover:border-brand-blue/40">
-                    <div className="w-12 h-12 rounded-xl bg-blue-50 text-brand-blue flex items-center justify-center mb-4 group-hover:bg-brand-blue group-hover:text-white transition-colors">
-                      {val.icon}
-                    </div>
-                    <h3 className="font-extrabold text-brand-navy mb-2">{val.title}</h3>
-                    <p className="text-sm text-slate-600">{val.desc}</p>
-                  </div>
-                </ScrollRevealItem>
-              ))}
-            </div>
-          </ScrollReveal>
+        {/* CTA Banner - Clean Neutral */}
+        <div className="mt-16 bg-slate-900 rounded-3xl p-8 md:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-md">
+          <div className="space-y-2 text-center md:text-left">
+            <h3 className="text-2xl font-extrabold">
+              Quer conhecer o Kivora de perto?
+            </h3>
+            <p className="text-slate-300 text-xs max-w-xl">
+              Agende uma sessão de apresentação presencial no seu escritório em Luanda ou via reunião online.
+            </p>
+          </div>
+          <button
+            onClick={onOpenDemoModal}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-7 py-3.5 rounded-xl shadow-sm transition-all flex items-center gap-2 shrink-0"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>Agendar Apresentação</span>
+          </button>
         </div>
-      </section>
 
-      {/* NÚMEROS */}
-      <section className="bg-brand-navy py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal variant="fade-up">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-extrabold text-white">A Kivora em Números</h2>
-            </div>
-          </ScrollReveal>
-          <ScrollReveal variant="stagger">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-              {[
-                { value: 50, suffix: '+', label: 'Organizações Parceiras', icon: <BookOpen className="w-6 h-6" /> },
-                { value: 12000, suffix: '+', label: 'Utilizadores Ativos', icon: <Users className="w-6 h-6" /> },
-                { value: 100, suffix: '%', label: 'Conformidade & Segurança', icon: <GraduationCap className="w-6 h-6" /> },
-                { value: 99, suffix: '%', label: 'Taxa de Satisfação', icon: <Heart className="w-6 h-6" /> },
-              ].map((stat, i) => (
-                <ScrollRevealItem key={i}>
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-12 h-12 rounded-full bg-blue-500/20 text-brand-amber flex items-center justify-center mb-2">
-                      {stat.icon}
-                    </div>
-                    <CountUp end={stat.value} suffix={stat.suffix} className="text-4xl font-extrabold text-white" />
-                    <span className="text-sm text-slate-400">{stat.label}</span>
-                  </div>
-                </ScrollRevealItem>
-              ))}
-            </div>
-          </ScrollReveal>
-        </div>
       </section>
 
     </div>

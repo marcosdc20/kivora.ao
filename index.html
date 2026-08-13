@@ -2,19 +2,19 @@
 <html lang="pt-AO" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/jpeg" href="/logo.jpg" />
+    <link rel="icon" type="image/png" href="/imagens/logo_kivora.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     <meta name="referrer" content="no-referrer" />
     
-    <!-- SEO Title & Description -->
-    <title>Kivora | Soluções Tecnológicas & Sistemas de Gestão Inteligente</title>
-    <meta name="description" content="Kivora - Plataforma e ecossistema de soluções tecnológicas integradas em Angola. Gestão de processos, autocarros, alunos, presenças, relatórios e finanças com máxima eficiência." />
-    <meta name="keywords" content="Kivora, Kivora Angola, Sistemas de Gestão Luanda, Software para Empresas e Escolas, Gestão Inteligente Angola, Tecnologias Kivora" />
-    <meta name="author" content="Kivora – Soluções Tecnológicas" />
+    <!-- Primary SEO Title & Meta Description -->
+    <title>KIVORA | Software de Faturação Eletrónica AGT & Gestão Empresarial para Windows</title>
+    <meta name="description" content="KIVORA - Software desktop de gestão e faturação eletrónica certificado pela AGT em Angola (Decreto Presidencial n.º 71/25). Base de dados local, funcionamento em rede LAN e modo offline-first para o seu negócio." />
+    <meta name="keywords" content="Kivora, Kivora ERP, Software de Faturação Angola, Faturação Eletrónica AGT, Decreto Presidencial 71/25, POS Luanda, SAF-T AO, Base de Dados Local, Visual Software Angola" />
+    <meta name="author" content="Visual Software – KIVORA" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href="https://kivora.ao" />
 
-    <!-- Geo Tags for Angola / Luanda -->
+    <!-- Geo Metadata for Angola / Luanda -->
     <meta name="geo.region" content="AO-LUA" />
     <meta name="geo.placename" content="Luanda, Angola" />
     <meta name="geo.position" content="-8.8383;13.2344" />
@@ -23,22 +23,22 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://kivora.ao" />
-    <meta property="og:title" content="Kivora | Soluções Tecnológicas & Gestão Inteligente" />
-    <meta property="og:description" content="A plataforma que impulsiona a eficiência e inovação tecnológica das organizações em Angola." />
-    <meta property="og:image" content="https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=1200&auto=format&fit=crop" />
+    <meta property="og:title" content="KIVORA | Software de Faturação Eletrónica Certificado pela AGT" />
+    <meta property="og:description" content="Faturação e gestão empresarial diretamente no seu computador com base de dados local. Baixe o instalador KIVORA para Windows." />
+    <meta property="og:image" content="/imagens/imagem.png" />
     <meta property="og:locale" content="pt_AO" />
-    <meta property="og:site_name" content="Kivora" />
+    <meta property="og:site_name" content="KIVORA" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Kivora | Soluções Tecnológicas em Angola" />
-    <meta name="twitter:description" content="Plataforma de soluções tecnológicas integradas em Luanda, Angola." />
-    <meta name="twitter:image" content="https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=1200&auto=format&fit=crop" />
+    <meta name="twitter:title" content="KIVORA | Software de Faturação Eletrónica AGT Angola" />
+    <meta name="twitter:description" content="Faturação e gestão empresarial instalada no seu computador com base de dados local." />
+    <meta name="twitter:image" content="/imagens/imagem.png" />
 
-    <!-- Google Fonts -->
+    <!-- Preload Primary Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Preloader Styles -->
     <style>
@@ -47,14 +47,10 @@
         50% { left: 25%; width: 60%; }
         100% { left: 100%; width: 30%; }
       }
-      @keyframes pulse-logo {
-        0%, 100% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.05); opacity: 0.9; }
-      }
       #initial-loader {
         position: fixed;
         inset: 0;
-        background-color: #0A192F;
+        background-color: #0f172a;
         z-index: 99999;
         display: flex;
         flex-direction: column;
@@ -64,40 +60,67 @@
       }
     </style>
 
-    <!-- Structured Data (Schema.org JSON-LD) -->
+    <!-- Schema.org JSON-LD Structured Data for SEO -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Kivora – Soluções Tecnológicas",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web",
-      "url": "https://kivora.ao",
-      "telephone": "+244923456789",
-      "email": "suporte@kivora.ao",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Luanda",
-        "addressCountry": "AO"
-      }
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://kivora.ao/#software",
+          "name": "KIVORA",
+          "operatingSystem": "Windows 10, Windows 11, Windows Server",
+          "applicationCategory": "BusinessApplication",
+          "offers": {
+            "@type": "Offer",
+            "priceCurrency": "AOA",
+            "price": "Sob Consulta",
+            "availability": "https://schema.org/InStock"
+          },
+          "description": "Software de Faturação e Gestão Empresarial certificado pela AGT em Angola. Suporte a base de dados local, funcionamento em rede LAN e exportação SAF-T AO.",
+          "softwareVersion": "2026.08.13",
+          "publisher": {
+            "@type": "Organization",
+            "name": "Visual Software",
+            "url": "https://kivora.ao"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://kivora.ao/#organization",
+          "name": "KIVORA – Visual Software",
+          "url": "https://kivora.ao",
+          "logo": "https://kivora.ao/imagens/logo_kivora.png",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+244923456789",
+            "contactType": "customer service",
+            "areaServed": "AO",
+            "availableLanguage": "Portuguese"
+          },
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Luanda",
+            "addressCountry": "AO"
+          }
+        }
+      ]
     }
     </script>
   </head>
-  <body class="bg-white text-brand-dark antialiased font-sans selection:bg-brand-blue selection:text-white overflow-x-hidden">
+  <body class="bg-white text-slate-900 antialiased font-sans selection:bg-[#1d4ed8] selection:text-white overflow-x-hidden">
     
-    <!-- Splash Screen Loader while App loads -->
+    <!-- Splash Screen Loader -->
     <div id="initial-loader">
       <div style="text-align: center; max-width: 260px;">
         <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-          <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 800; color: #FFFFFF; letter-spacing: 1px;">
-            KIVOR<span style="color: #F59E0B;">A</span>
-          </span>
+          <img src="/imagens/logo_sem_fundo.png" alt="Kivora Logo" style="height: 48px; width: auto; object-fit: contain;" />
         </div>
-        <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.12); border-radius: 4px; overflow: hidden; position: relative;">
-          <div style="position: absolute; top: 0; left: 0; bottom: 0; width: 50%; background: linear-gradient(90deg, #2563EB, #F59E0B); border-radius: 4px; animation: loader-slide 1.2s infinite ease-in-out;"></div>
+        <div style="width: 100%; height: 3px; background: rgba(255,255,255,0.15); border-radius: 4px; overflow: hidden; position: relative;">
+          <div style="position: absolute; top: 0; left: 0; bottom: 0; width: 50%; background: #2563EB; border-radius: 4px; animation: loader-slide 1.2s infinite ease-in-out;"></div>
         </div>
-        <p style="color: #94A3B8; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px; margin-top: 16px;">
-          Kivora...
+        <p style="color: #94a3b8; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px; margin-top: 16px;">
+          A Carregar KIVORA...
         </p>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React from 'react';
-import { ShieldCheck, ArrowLeft } from 'lucide-react';
-import { SCHOOL_INFO } from '../data/school';
+import { ArrowLeft, FileText } from 'lucide-react';
+import { KIVORA_INFO } from '../data/kivoraData';
 
 interface TermsPageProps {
   onBack: () => void;
@@ -8,60 +8,52 @@ interface TermsPageProps {
 
 export const TermsPage: React.FC<TermsPageProps> = ({ onBack }) => {
   return (
-    <div className="pt-20 animate-fadeIn bg-white min-h-screen">
-      
-      {/* Top Header Breadcrumb */}
-      <div className="bg-gray-100 border-b border-gray-200 py-3">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <button
-            onClick={onBack}
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-extrabold text-brand-dark hover:text-brand-green transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 text-brand-green" />
-            <span>Voltar ao Início</span>
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-slate-50 text-slate-900 pt-28 pb-20 selection:bg-blue-600 selection:text-white">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 mb-6"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Voltar à Página Principal</span>
+        </button>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 bg-brand-green-light text-brand-green text-xs font-extrabold uppercase px-3 py-1 rounded-md">
-            <ShieldCheck className="w-4 h-4" />
-            <span>TERMOS E CONDIÇÕES LEGAIS</span>
+        <div className="bg-white p-8 md:p-12 rounded-3xl border border-slate-200 shadow-sm space-y-8">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-amber-100 text-amber-700 rounded-xl">
+              <FileText className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-slate-900">Termos e Condições de Licenciamento</h1>
+              <p className="text-xs text-slate-500">Kivora ERP • Visual Software Angola</p>
+            </div>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-brand-dark">
-            Termos de Uso
-          </h1>
-
-          <p className="text-xs text-gray-400 font-bold uppercase">
-            Última atualização: Agosto de 2026
-          </p>
-
-          <div className="prose max-w-none text-brand-body text-sm sm:text-base leading-relaxed space-y-6 pt-4 border-t border-gray-100">
+          <div className="space-y-6 text-xs md:text-sm text-slate-700 leading-relaxed">
+            <h3 className="text-base font-extrabold text-slate-900">1. Licenciamento e Uso do Software</h3>
             <p>
-              Ao aceder e utilizar o sistema <strong>{SCHOOL_INFO.fullName}</strong>, o utilizador aceita cumprir os seguintes Termos de Uso e Condições Gerais.
+              O Kivora ERP é um software de gestão empresarial e faturação certificado pela AGT sob o número de validação XXX/AGT/2026. A utilização da plataforma é concedida mediante subscrição (Cloud) ou aquisição de licença de uso (Desktop Local).
             </p>
 
-            <h3 className="text-xl font-extrabold text-brand-dark">1. Utilização da Plataforma</h3>
+            <h3 className="text-base font-extrabold text-slate-900">2. Responsabilidade sobre Dados Fiscais</h3>
             <p>
-              O sistema destina-se à gestão administrativa, financeira e pedagógica de instituições de ensino em Angola, sendo o acesso restrito a utilizadores autorizados pelas escolas contratantes.
+              O utilizador é responsável pela exatidão dos dados inseridos no sistema (NIFs, preços, alíquotas de impostos e artigos). O Kivora garante a integridade da numeração sequencial das séries, o cálculo automático das retenções e a geração da assinatura digital RS256.
             </p>
 
-            <h3 className="text-xl font-extrabold text-brand-dark">2. Propriedade Intelectual</h3>
+            <h3 className="text-base font-extrabold text-slate-900">3. Modo de Contingência</h3>
             <p>
-              Todos os conteúdos, módulos, código-fonte, marcas e logótipos apresentados na plataforma são propriedade exclusiva da Kivora e estão protegidos pelas leis de propriedade intelectual.
+              Em caso de indisponibilidade técnica da internet ou dos serviços da AGT, o Kivora disponibiliza o mecanismo legal de contingência por até 45 dias corridos, efetuando o reenvio automático assim que o sinal for restabelecido.
             </p>
 
-            <h3 className="text-xl font-extrabold text-brand-dark">3. Responsabilidade das Informações</h3>
+            <h3 className="text-base font-extrabold text-slate-900">4. Suporte Técnico e Atualizações</h3>
             <p>
-              A instituição de ensino é responsável pela exatidão e atualização dos dados introduzidos no sistema relativos a alunos, professores, turmas e pagamentos.
+              Todas as subscrições ativas incluem suporte técnico através da equipa em Luanda ({KIVORA_INFO.phoneDisplay}) e atualizações fiscais automáticas sem custos adicionais em caso de alteração da legislação pela AGT.
             </p>
           </div>
-
         </div>
-      </div>
 
+      </div>
     </div>
   );
 };

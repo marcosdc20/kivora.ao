@@ -1,142 +1,154 @@
-import React from 'react';
-import { ScrollReveal } from '../components/ScrollReveal';
-import { MODULES_DATA } from '../data/school';
-import { SchoolModule } from '../types/school';
-import {
-  Users, BookOpen, GraduationCap, ClipboardList,
-  BarChart3, DollarSign, MessageCircle, PieChart, ArrowRight
-} from 'lucide-react';
-
-const ICON_MAP: Record<string, React.ReactNode> = {
-  Users: <Users className="w-8 h-8" />,
-  BookOpen: <BookOpen className="w-8 h-8" />,
-  GraduationCap: <GraduationCap className="w-8 h-8" />,
-  ClipboardList: <ClipboardList className="w-8 h-8" />,
-  BarChart3: <BarChart3 className="w-8 h-8" />,
-  DollarSign: <DollarSign className="w-8 h-8" />,
-  MessageCircle: <MessageCircle className="w-8 h-8" />,
-  PieChart: <PieChart className="w-8 h-8" />,
-};
+import React, { useState } from 'react';
+import { KIVORA_MODULES } from '../data/kivoraData';
+import { KivoraModule } from '../types/kivora';
+import { CheckCircle2, ArrowRight, Search } from 'lucide-react';
 
 interface ModulosPageProps {
-  onSelectModule?: (module: SchoolModule) => void;
-  onOpenContact?: () => void;
+  onSelectModule: (module: KivoraModule) => void;
+  onOpenDemoModal: (moduleTitle?: string) => void;
 }
 
-export const ModulosPage: React.FC<ModulosPageProps> = ({ onSelectModule, onOpenContact }) => {
-  return (
-    <div className="pt-24 bg-white min-h-screen">
+export const ModulosPage: React.FC<ModulosPageProps> = ({ onSelectModule, onOpenDemoModal }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCat, setSelectedCat] = useState<string>('todos');
 
-      {/* HEADER */}
-      <section className="bg-brand-dark py-16 relative overflow-hidden">
-        <div className="bg-blueprint-pattern absolute inset-0 opacity-20" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal variant="fade-up">
-            <span className="inline-flex items-center gap-2 bg-brand-green/20 text-brand-green text-xs font-extrabold uppercase px-4 py-1.5 rounded-full mb-4 border border-brand-green/30">
-              <BookOpen className="w-3.5 h-3.5" />
-              Módulos do Sistema
-            </span>
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight mb-4">
-              8 módulos integrados para<br />
-              <span className="text-brand-green">gestão escolar completa</span>
-            </h1>
-            <p className="text-gray-300 text-lg max-w-2xl">
-              Cada módulo foi desenhado para resolver um problema específico da gestão escolar — e todos funcionam perfeitamente em conjunto.
-            </p>
-          </ScrollReveal>
+  const categories = [
+    { id: 'todos', label: 'Todos os Módulos' },
+    { id: 'faturacao', label: 'Faturação AGT' },
+    { id: 'pos', label: 'POS de Balcão' },
+    { id: 'financas', label: 'Finanças' },
+    { id: 'stock', label: 'Stock & Armazém' },
+    { id: 'rh', label: 'RH & Salários 2026' },
+    { id: 'contabilidade', label: 'Contabilidade & SAF-T' },
+  ];
+
+  const filteredModules = KIVORA_MODULES.filter((m) => {
+    const matchesSearch =
+      m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      m.shortDesc.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCat = selectedCat === 'todos' || m.category === selectedCat;
+    return matchesSearch && matchesCat;
+  });
+
+  return (
+    <div className="min-h-screen bg-white text-slate-900 pt-28 pb-20 selection:bg-blue-600 selection:text-white page-transition-enter">
+      
+      {/* Header Banner */}
+      <section className="bg-slate-50 border-b border-slate-200/80 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
+          <span className="text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/70">
+            Catálogo Funcional do KIVORA ERP
+          </span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-950 tracking-tight">
+            Módulos Especialistas de Gestão e Faturação
+          </h1>
+          <p className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            Conheça as capacidades técnicas de cada módulo do sistema KIVORA, desenhado especificamente para a legislação e operação comercial em Angola.
+          </p>
         </div>
       </section>
 
-      {/* LISTA DE MÓDULOS */}
-      <section className="py-16 bg-brand-bg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-8">
-            {MODULES_DATA.map((mod, i) => (
-              <ScrollReveal key={mod.id} variant={i % 2 === 0 ? 'fade-right' : 'fade-left'}>
-                <div className="bg-white rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover border border-brand-border hover:border-brand-green/30 transition-all duration-300 group">
-                  <div className={`grid lg:grid-cols-5 gap-0 ${i % 2 !== 0 ? 'lg:grid-flow-dense' : ''}`}>
-
-                    {/* Image */}
-                    <div className={`lg:col-span-2 relative overflow-hidden h-60 lg:h-auto ${i % 2 !== 0 ? 'lg:col-start-4' : ''}`}>
-                      <img
-                        src={mod.image}
-                        alt={mod.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/40 to-transparent" />
-                    </div>
-
-                    {/* Content */}
-                    <div className={`lg:col-span-3 p-8 flex flex-col justify-center ${i % 2 !== 0 ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${mod.color}`}>
-                          {ICON_MAP[mod.icon]}
-                        </div>
-                        <div>
-                          {mod.badge && (
-                            <span className="inline-block text-[10px] font-extrabold uppercase bg-brand-green text-white px-2 py-0.5 rounded-full mb-1">
-                              {mod.badge}
-                            </span>
-                          )}
-                          <h2 className="text-xl font-extrabold text-brand-dark group-hover:text-brand-green transition-colors">
-                            {mod.title}
-                          </h2>
-                        </div>
-                      </div>
-
-                      <p className="text-brand-body mb-6 leading-relaxed">{mod.description}</p>
-
-                      <div className="grid sm:grid-cols-2 gap-2 mb-6">
-                        {mod.features.slice(0, 4).map((feat, j) => (
-                          <div key={j} className="flex items-start gap-2 text-sm text-brand-body">
-                            <span className="w-1.5 h-1.5 rounded-full bg-brand-green mt-2 shrink-0" />
-                            <span>{feat}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => onSelectModule && onSelectModule(mod)}
-                          className="bg-brand-green hover:bg-brand-green-dark text-white font-extrabold px-6 py-2.5 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 transform hover:-translate-y-0.5"
-                        >
-                          <span>Ver Detalhes</span>
-                          <ArrowRight className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={onOpenContact}
-                          className="border border-brand-border text-brand-dark hover:border-brand-green hover:text-brand-green font-bold px-6 py-2.5 rounded-lg transition-all duration-300"
-                        >
-                          Solicitar Demo
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </ScrollReveal>
+      {/* Filter & Search Bar */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-4">
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          
+          {/* Categories Buttons */}
+          <div className="flex flex-wrap gap-1.5 w-full md:w-auto">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCat(cat.id)}
+                className={`text-xs font-semibold px-3.5 py-2 rounded-xl transition-all ${
+                  selectedCat === cat.id
+                    ? 'bg-blue-600 text-white shadow-sm font-bold'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                {cat.label}
+              </button>
             ))}
           </div>
+
+          {/* Search Box */}
+          <div className="relative w-full md:w-72">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" strokeWidth={1.75} />
+            <input
+              type="text"
+              placeholder="Pesquisar funcionalidades..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-600 outline-none"
+            />
+          </div>
+
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-brand-green py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <ScrollReveal variant="zoom-in">
-            <h2 className="text-3xl font-extrabold text-white mb-4">
-              Pronto para digitalizar a sua escola?
-            </h2>
-            <p className="text-green-100 mb-8">
-              Experimente todos os módulos gratuitamente por 30 dias. Sem compromisso, sem cartão de crédito.
-            </p>
-            <button
-              onClick={onOpenContact}
-              className="bg-white text-brand-green hover:bg-brand-green-light font-extrabold px-10 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 inline-flex items-center gap-2 transform hover:-translate-y-0.5"
+      {/* Modules Catalog Grid */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredModules.map((moduleItem) => (
+            <div
+              key={moduleItem.id}
+              className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:border-blue-500/50 hover:shadow-lg transition-all flex flex-col justify-between space-y-6 group"
             >
-              <span>Começar Gratuitamente</span>
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </ScrollReveal>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold px-2.5 py-1 bg-slate-100 text-slate-800 rounded-lg">
+                    {moduleItem.badge || 'Módulo Kivora'}
+                  </span>
+                </div>
+
+                <h3 className="text-xl font-extrabold text-slate-950 group-hover:text-blue-600 transition-colors">
+                  {moduleItem.title}
+                </h3>
+
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  {moduleItem.shortDesc}
+                </p>
+
+                <div className="pt-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Principais Recursos:</span>
+                  <ul className="space-y-2 text-xs text-slate-700 font-medium">
+                    {moduleItem.features.slice(0, 4).map((feat, fIdx) => (
+                      <li key={fIdx} className="flex items-start gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" strokeWidth={1.75} />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <button
+                  onClick={() => onSelectModule(moduleItem)}
+                  className="text-xs font-bold text-blue-600 hover:text-blue-800 inline-flex items-center gap-1.5"
+                >
+                  <span>Ver ficha técnica completa</span>
+                  <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.75} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Box */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+        <div className="bg-slate-900 text-white p-8 md:p-12 rounded-3xl text-center space-y-6">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            Precisa de uma Solução Personalizada para a Sua Atividade?
+          </h2>
+          <p className="text-slate-300 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
+            O KIVORA possui configurações especializadas para Retalho, Restauração, Supermercados, Farmácias e Empresas de Prestação de Serviços.
+          </p>
+          <button
+            onClick={() => onOpenDemoModal('Consulta de Módulos')}
+            className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-md transition-all"
+          >
+            Falar com Consultor Comercial
+          </button>
         </div>
       </section>
 
