@@ -135,11 +135,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
 
           </form>
 
-          <div className="pt-2 text-center text-[11px] text-slate-500 space-y-1">
+          <div className="pt-2 text-center text-[11px] text-slate-500 space-y-2">
             <p>Esqueceu a palavra-passe ou necessita de acesso?</p>
-            <a href={`mailto:${KIVORA_INFO.supportEmail}`} className="text-blue-600 font-semibold hover:underline">
+            <a href={`mailto:${KIVORA_INFO.supportEmail}`} className="text-blue-600 font-semibold hover:underline block">
               Contactar Assistência Técnica Kivora
             </a>
+
+            {onNavigatePage && (
+              <div className="pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => onNavigatePage('admin')}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 px-4 py-2 rounded-xl transition-all border border-slate-200"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Entrar no Painel Executivo Admin</span>
+                </button>
+              </div>
+            )}
           </div>
 
         </div>
