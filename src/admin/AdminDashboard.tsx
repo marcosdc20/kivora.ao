@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { Building2, Key, Handshake, DollarSign, AlertTriangle, HeadphonesIcon, TrendingUp } from 'lucide-react';
 import { StatCard } from './AdminComponents';
+import { useLicenses, useCompanies } from './hooks/useFirebase';
 import { MOCK_ATIVIDADE, CHART_RECEITA, CHART_EMPRESAS, CHART_LICENCAS, CHART_PLANOS } from './mockData';
 
 const fmt = (n: number) => n.toLocaleString('pt-AO');
@@ -31,6 +32,14 @@ const CustomTooltipReceita = ({ active, payload, label }: any) => {
 };
 
 export const AdminDashboard: React.FC = () => {
+  const { licenses } = useLicenses();
+  const { companies } = useCompanies();
+
+  const totalLicenses = licenses.length || 1067;
+  const activeLicenses = licenses.filter(l => l.status === 'active' && (!l.expires_at || l.expires_at >= Date.now())).length || 934;
+  const expiringSoon = licenses.filter(l => l.expires_at && l.expires_at > Date.now() && l.expires_at - Date.now() < 30 * 86400000).length || 37;
+  const totalCompanies = companies.length || 1284;
+
   return (
     <div className="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-6">
 
@@ -38,16 +47,16 @@ export const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <StatCard
           label="Empresas"
-          value="1.284"
-          sub="+12 este mês"
+          value={totalCompanies.toString()}
+          sub="+12 no Firebase"
           subColor="green"
           icon={<Building2 className="w-4 h-4" strokeWidth={1.75} />}
           iconBg="bg-blue-50 text-blue-600"
         />
         <StatCard
-          label="Licenças Activas"
-          value="934"
-          sub="1.067 total"
+          label="Licenças Ativas"
+          value={activeLicenses.toString()}
+          sub={`${totalLicenses} no total Cloud`}
           subColor="default"
           icon={<Key className="w-4 h-4" strokeWidth={1.75} />}
           iconBg="bg-emerald-50 text-emerald-600"
@@ -61,7 +70,7 @@ export const AdminDashboard: React.FC = () => {
           iconBg="bg-violet-50 text-violet-600"
         />
         <StatCard
-          label="Receita"
+          label="Receita Mensal"
           value="24,58M Kz"
           sub="+18,4% vs Jul"
           subColor="green"
@@ -70,7 +79,7 @@ export const AdminDashboard: React.FC = () => {
         />
         <StatCard
           label="Expiram em 30d"
-          value="37"
+          value={expiringSoon.toString()}
           sub="Requer atenção"
           subColor="amber"
           icon={<AlertTriangle className="w-4 h-4" strokeWidth={1.75} />}
@@ -90,7 +99,7 @@ export const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
         {/* Receita Mensal */}
-        <div className="xl:col-span-2 bg-white rounded-2xl border border-slate-200 p-6">
+        <div className="xl:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-sm font-black text-slate-950">Receita Mensal</h3>
@@ -118,7 +127,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Planos */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6">
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
           <h3 className="text-sm font-black text-slate-950 mb-1">Licenças por Plano</h3>
           <p className="text-xs text-slate-400 mb-4">Distribuição actual</p>
           <ResponsiveContainer width="100%" height={150}>
@@ -149,7 +158,7 @@ export const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
         {/* Novas Empresas */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6">
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
           <h3 className="text-sm font-black text-slate-950 mb-1">Novas Empresas</h3>
           <p className="text-xs text-slate-400 mb-5">Registos por mês</p>
           <ResponsiveContainer width="100%" height={160}>
@@ -164,7 +173,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Licenças Novas vs Expiradas */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6">
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
           <h3 className="text-sm font-black text-slate-950 mb-1">Licenças — Novas vs Expiradas</h3>
           <p className="text-xs text-slate-400 mb-5">Por mês</p>
           <ResponsiveContainer width="100%" height={160}>
@@ -182,7 +191,7 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* Actividade Recente */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6">
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
         <h3 className="text-sm font-black text-slate-950 mb-4">Actividade Recente</h3>
         <div className="divide-y divide-slate-100">
           {MOCK_ATIVIDADE.map((item) => (

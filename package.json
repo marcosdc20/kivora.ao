@@ -13,6 +13,7 @@
     "@types/aos": "^3.0.8",
     "aos": "^2.3.4",
     "clsx": "^2.1.1",
+    "firebase": "^12.17.1",
     "framer-motion": "^13.0.0",
     "lucide-react": "^0.460.0",
     "react": "^18.3.1",

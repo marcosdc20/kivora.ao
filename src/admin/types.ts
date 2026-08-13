@@ -9,6 +9,55 @@ export type ParceiroStatus = 'ativo' | 'suspenso' | 'pendente';
 export type TicketStatus = 'pendente' | 'em_atendimento' | 'resolvido' | 'fechado';
 export type TicketPrioridade = 'baixa' | 'media' | 'alta' | 'urgente';
 
+// ─── Tipos do Firebase Firestore ──────────────────────────────────────────
+export type PlanType = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'semiannual' | 'annual' | 'quadrennial' | 'lifetime';
+export type LicenseStatus = 'active' | 'expired' | 'revoked';
+
+export interface KivoraLicense {
+  id: string;                    // Chave KVRA-XXXX-XXXX-XXXX
+  client_email: string;
+  company_name: string;
+  nif: string;
+  plan_type: PlanType;
+  status: LicenseStatus;
+  hardware_id: string | null;    // Fingerprint gravado no 1º uso online
+  created_at: number;
+  expires_at: number | null;     // null = vitalício
+  price_aoa?: number;
+  notes?: string;
+  activated_at?: number | null;
+  extra_seats?: number;
+  max_users?: number;
+}
+
+export interface Company {
+  id: string;
+  name: string;
+  nif: string;
+  email: string;
+  phone: string;
+  address?: string;
+  status: 'active' | 'suspended' | 'blocked';
+  createdAt: number;
+}
+
+export interface CreateLicenseParams {
+  client_email: string;
+  company_name: string;
+  nif: string;
+  plan_type: PlanType;
+  expires_at: number | null;
+  price_aoa?: number;
+  notes?: string;
+  extra_seats?: number;
+}
+
+export interface LicenseFilters {
+  search?: string;
+  status?: LicenseStatus | 'all';
+  plan_type?: PlanType | 'all';
+}
+
 export interface Empresa {
   id: string;
   nome: string;
