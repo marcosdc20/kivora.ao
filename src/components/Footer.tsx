@@ -174,6 +174,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
             >
               Termos de Licenciamento
             </a>
+            <a
+              href="#admin"
+              onClick={(e) => handleLinkClick(e, 'admin')}
+              className="hover:text-slate-600 transition-colors text-slate-800 text-[10px]"
+              title="Acesso Admin"
+            >
+              Admin
+            </a>
           </div>
         </div>
 

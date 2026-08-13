@@ -22,7 +22,8 @@ export type PageId =
   | 'noticias'
   | 'noticia-post'
   | 'privacidade'
-  | 'termos';
+  | 'termos'
+  | 'admin';
 
 interface HeaderProps {
   activePage?: PageId;

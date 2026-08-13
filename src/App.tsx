@@ -18,6 +18,7 @@ import { LoginPage } from './pages/LoginPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
 import { DemoModal } from './components/DemoModal';
+import { AdminApp } from './admin/AdminApp';
 import { KIVORA_MODULES } from './data/kivoraData';
 import { KivoraModule, NewsPost } from './types/kivora';
 
@@ -74,6 +75,12 @@ export function App() {
     setDemoInitialModule(moduleTitle || '');
     setIsDemoModalOpen(true);
   };
+
+  if (activePage === 'admin') {
+    return (
+      <AdminApp onExitAdmin={() => handleNavigatePage('home')} />
+    );
+  }
 
   if (activePage === 'login') {
     return (
