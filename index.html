@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-AO" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/jpeg" href="/logo.jpg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <meta name="referrer" content="no-referrer" />
+    
+    <!-- SEO Title & Description -->
+    <title>Kivora | Soluções Tecnológicas & Sistemas de Gestão Inteligente</title>
+    <meta name="description" content="Kivora - Plataforma e ecossistema de soluções tecnológicas integradas em Angola. Gestão de processos, autocarros, alunos, presenças, relatórios e finanças com máxima eficiência." />
+    <meta name="keywords" content="Kivora, Kivora Angola, Sistemas de Gestão Luanda, Software para Empresas e Escolas, Gestão Inteligente Angola, Tecnologias Kivora" />
+    <meta name="author" content="Kivora – Soluções Tecnológicas" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://kivora.ao" />
+
+    <!-- Geo Tags for Angola / Luanda -->
+    <meta name="geo.region" content="AO-LUA" />
+    <meta name="geo.placename" content="Luanda, Angola" />
+    <meta name="geo.position" content="-8.8383;13.2344" />
+    <meta name="ICBM" content="-8.8383, 13.2344" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://kivora.ao" />
+    <meta property="og:title" content="Kivora | Soluções Tecnológicas & Gestão Inteligente" />
+    <meta property="og:description" content="A plataforma que impulsiona a eficiência e inovação tecnológica das organizações em Angola." />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=1200&auto=format&fit=crop" />
+    <meta property="og:locale" content="pt_AO" />
+    <meta property="og:site_name" content="Kivora" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Kivora | Soluções Tecnológicas em Angola" />
+    <meta name="twitter:description" content="Plataforma de soluções tecnológicas integradas em Luanda, Angola." />
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=1200&auto=format&fit=crop" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Preloader Styles -->
+    <style>
+      @keyframes loader-slide {
+        0% { left: -50%; width: 30%; }
+        50% { left: 25%; width: 60%; }
+        100% { left: 100%; width: 30%; }
+      }
+      @keyframes pulse-logo {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.9; }
+      }
+      #initial-loader {
+        position: fixed;
+        inset: 0;
+        background-color: #0A192F;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.4s ease, visibility 0.4s ease;
+      }
+    </style>
+
+    <!-- Structured Data (Schema.org JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Kivora – Soluções Tecnológicas",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://kivora.ao",
+      "telephone": "+244923456789",
+      "email": "suporte@kivora.ao",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Luanda",
+        "addressCountry": "AO"
+      }
+    }
+    </script>
+  </head>
+  <body class="bg-white text-brand-dark antialiased font-sans selection:bg-brand-blue selection:text-white overflow-x-hidden">
+    
+    <!-- Splash Screen Loader while App loads -->
+    <div id="initial-loader">
+      <div style="text-align: center; max-width: 260px;">
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+          <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 800; color: #FFFFFF; letter-spacing: 1px;">
+            KIVOR<span style="color: #F59E0B;">A</span>
+          </span>
+        </div>
+        <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.12); border-radius: 4px; overflow: hidden; position: relative;">
+          <div style="position: absolute; top: 0; left: 0; bottom: 0; width: 50%; background: linear-gradient(90deg, #2563EB, #F59E0B); border-radius: 4px; animation: loader-slide 1.2s infinite ease-in-out;"></div>
+        </div>
+        <p style="color: #94A3B8; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px; margin-top: 16px;">
+          Kivora...
+        </p>
+      </div>
+    </div>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
