@@ -1,115 +1,126 @@
-import React, { useState } from 'react';
-import { RESOURCE_GUIDES } from '../data/kivoraData';
-import { ChevronRight, Download } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { PageHero } from '../components/PageHero';
+import { ArrowRight, FileText, Video, BookOpen, Download } from 'lucide-react';
+import { PageId } from '../components/Header';
 
 interface RecursosPageProps {
-  onNavigatePage: (page: any) => void;
+  onNavigatePage: (page: PageId) => void;
+}
+
+function useScrollReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll('[data-reveal]');
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('sr-visible'); obs.unobserve(e.target); } }),
+      { threshold: 0.1 }
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
 }
 
 export const RecursosPage: React.FC<RecursosPageProps> = ({ onNavigatePage }) => {
-  const [selectedGuideId, setSelectedGuideId] = useState<string>('guia-instalacao');
+  useScrollReveal();
 
-  const selectedGuide = RESOURCE_GUIDES.find((g) => g.id === selectedGuideId) || RESOURCE_GUIDES[0];
+  const resources = [
+    {
+      icon: <FileText className="w-5 h-5" strokeWidth={1.75} />,
+      category: 'Documentação',
+      title: 'Guia de Instalação Passo a Passo',
+      desc: 'Manual completo para instalar o KIVORA em modo standalone ou em rede local com múltiplos postos.',
+      action: 'Ler Guia',
+    },
+    {
+      icon: <FileText className="w-5 h-5" strokeWidth={1.75} />,
+      category: 'Documentação',
+      title: 'Manual de Faturação AGT DS.120',
+      desc: 'Como configurar QR Code, assinatura digital RS256 e comunicação com o portal da AGT para conformidade fiscal.',
+      action: 'Ler Manual',
+    },
+    {
+      icon: <Video className="w-5 h-5" strokeWidth={1.75} />,
+      category: 'Tutoriais em Vídeo',
+      title: 'Primeiros Passos com o KIVORA',
+      desc: 'Vídeo passo-a-passo desde a instalação até à emissão da primeira fatura eletrónica.',
+      action: 'Ver Vídeo',
+    },
+    {
+      icon: <BookOpen className="w-5 h-5" strokeWidth={1.75} />,
+      category: 'Conformidade Fiscal',
+      title: 'SAF-T Angola — Exportação e Submissão',
+      desc: 'Como gerar o ficheiro SAF-T no KIVORA e como submetê-lo ao portal da AGT dentro do prazo legal.',
+      action: 'Ver Guia',
+    },
+    {
+      icon: <FileText className="w-5 h-5" strokeWidth={1.75} />,
+      category: 'RH & Salários',
+      title: 'Configuração IRT 2026',
+      desc: 'Tabela de IRT 2026 já incluída no KIVORA. Este guia explica como processar o mapa de salários mensal.',
+      action: 'Ler Guia',
+    },
+    {
+      icon: <Download className="w-5 h-5" strokeWidth={1.75} />,
+      category: 'Downloads',
+      title: 'Notas de Versão v2026.08',
+      desc: 'Resumo de todas as novas funcionalidades, correções e melhorias na versão atual do KIVORA.',
+      action: 'Ver Notas',
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 pt-28 pb-20 selection:bg-blue-600 selection:text-white">
-      
-      {/* Header Banner */}
-      <section className="bg-slate-50 border-b border-slate-200/80 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
-          <span className="text-blue-600 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100">
-            Base de Conhecimento & Recursos
-          </span>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
-            Guias Técnicos e Manuais de Utilização
-          </h1>
-          <p className="text-slate-600 text-sm max-w-2xl mx-auto leading-relaxed">
-            Consulte documentação prática sobre instalação, configuração em rede local, backups e emissão do SAF-T (AO).
-          </p>
+    <div className="min-h-screen bg-white text-slate-900 page-enter">
+
+      <div className="pt-16">
+        <PageHero
+          image="/imagens/pacote.png"
+          tag="Centro de Recursos"
+          title="Documentação, tutoriais e guias de conformidade"
+          sub="Tudo o que precisa para instalar, configurar e tirar o máximo partido do KIVORA."
+        />
+      </div>
+
+      <section className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16 py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {resources.map((res, i) => (
+            <div
+              key={i}
+              data-reveal
+              className="sr-init bg-white border border-slate-200 rounded-3xl p-7 flex flex-col gap-4 hover:border-blue-400/40 hover:shadow-lg transition-all group"
+              style={{ transitionDelay: `${Math.min(i, 4) * 70}ms` }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  {res.icon}
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{res.category}</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-black text-slate-950 mb-2 leading-snug">{res.title}</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">{res.desc}</p>
+              </div>
+              <button className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 group/btn transition-colors self-start">
+                <span>{res.action}</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" strokeWidth={2} />
+              </button>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Main Guides Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          
-          {/* Left Column: Guides Navigation Menu */}
-          <div className="lg:col-span-4 space-y-3">
-            <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider mb-2">
-              Selecione o Guia Técnico
-            </h3>
-
-            {RESOURCE_GUIDES.map((guide) => (
-              <button
-                key={guide.id}
-                onClick={() => setSelectedGuideId(guide.id)}
-                className={`w-full p-4 rounded-xl border text-left transition-all flex items-center justify-between ${
-                  selectedGuideId === guide.id
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-bold'
-                    : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'
-                }`}
-              >
-                <div>
-                  <h4 className="text-xs font-bold">{guide.title}</h4>
-                  <span className={`text-[10px] block mt-0.5 ${selectedGuideId === guide.id ? 'text-blue-100' : 'text-slate-400'}`}>
-                    Tempo de leitura: {guide.readTime}
-                  </span>
-                </div>
-                <ChevronRight className={`w-4 h-4 shrink-0 ${selectedGuideId === guide.id ? 'text-white' : 'text-slate-400'}`} />
-              </button>
-            ))}
-
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 mt-6 space-y-2">
-              <span className="text-xs font-bold text-slate-900 block">Precisa do Ficheiro Setup?</span>
-              <p className="text-[11px] text-slate-600">Descarregue a versão instalável oficial para Windows.</p>
-              <button
-                onClick={() => onNavigatePage('download')}
-                className="w-full bg-slate-900 text-white font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-1.5"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Ir para Downloads</span>
-              </button>
-            </div>
+      {/* Baixar Instalador */}
+      <section className="bg-slate-950 py-16 px-6 sm:px-10 lg:px-16">
+        <div data-reveal className="sr-init max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="text-white">
+            <h3 className="text-xl font-black mb-1">Pronto para instalar?</h3>
+            <p className="text-slate-400 text-sm">Baixe o instalador KIVORA v2026.08 e comece hoje.</p>
           </div>
-
-          {/* Right Column: Guide Details Content */}
-          <div className="lg:col-span-8">
-            <div className="bg-white p-8 rounded-2xl border border-slate-200/90 shadow-sm space-y-6">
-              
-              <div className="space-y-2 border-b border-slate-100 pb-6">
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded border border-blue-100">
-                  {selectedGuide.category}
-                </span>
-                <h2 className="text-2xl font-extrabold text-slate-900">
-                  {selectedGuide.title}
-                </h2>
-                <p className="text-xs text-slate-600">
-                  {selectedGuide.summary}
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">
-                  Passos de Execução
-                </h3>
-
-                <div className="space-y-3">
-                  {selectedGuide.steps.map((stepText, idx) => (
-                    <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-3">
-                      <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
-                        {idx + 1}
-                      </span>
-                      <p className="text-xs text-slate-700 font-medium leading-relaxed">
-                        {stepText}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-          </div>
-
+          <button
+            onClick={() => onNavigatePage('download')}
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm px-7 py-3.5 rounded-2xl shadow-lg shadow-blue-600/30 transition-all hover:-translate-y-0.5 shrink-0"
+          >
+            <Download className="w-4 h-4" strokeWidth={2} />
+            <span>Ir para Downloads</span>
+          </button>
         </div>
       </section>
 

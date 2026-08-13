@@ -8,7 +8,7 @@ interface HeroProps {
   onNavigatePage: (page: any) => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onNavigatePage }) => {
+export const Hero: React.FC<HeroProps> = ({ onNavigatePage, onOpenDemoModal }) => {
   const scrollToExplore = () => {
     const el = document.getElementById('conformidade-agt');
     if (el) {
@@ -83,7 +83,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigatePage }) => {
 
         {/* Full-Width Cinema Product Carousel (The Visual Hero) */}
         <div className="pt-4">
-          <HeroCarousel onNavigatePage={onNavigatePage} />
+          <HeroCarousel onNavigatePage={onNavigatePage} onOpenDemoModal={onOpenDemoModal} />
         </div>
 
         {/* Scroll Indicator */}

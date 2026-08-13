@@ -1,160 +1,169 @@
-import React from 'react';
-import { KIVORA_PLANS } from '../data/kivoraData';
-import { CheckCircle2, ArrowRight, Monitor, Network, Building, Key } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { PageHero } from '../components/PageHero';
+import { CheckCircle2, ArrowRight } from 'lucide-react';
 
 interface FinanceiroPageProps {
-  onOpenDemoModal: (planName?: string) => void;
+  onOpenDemoModal: (subject?: string) => void;
 }
 
+function useScrollReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll('[data-reveal]');
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('sr-visible'); obs.unobserve(e.target); } }),
+      { threshold: 0.1 }
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+}
+
+interface Plan {
+  id: string;
+  name: string;
+  price: string;
+  period: string;
+  desc: string;
+  features: string[];
+  highlight?: boolean;
+}
+
+const PLANS: Plan[] = [
+  {
+    id: 'mensal',
+    name: 'Mensal',
+    price: '15.000',
+    period: '/ mês',
+    desc: 'Ideal para experimentar ou negócios sazonais.',
+    features: [
+      '1 posto de trabalho',
+      'Faturação eletrónica AGT',
+      'POS de balcão',
+      'Gestão de stock básica',
+      'Suporte por email',
+    ],
+  },
+  {
+    id: 'anual',
+    name: 'Anual',
+    price: '120.000',
+    period: '/ ano',
+    desc: 'A escolha mais popular. Poupe 33% em relação ao mensal.',
+    features: [
+      'Tudo do plano Mensal',
+      'Até 3 postos de trabalho',
+      'Módulo de Recursos Humanos',
+      'IRT 2026 incluído',
+      'Exportação SAF-T Angola',
+      'Suporte prioritário',
+    ],
+    highlight: true,
+  },
+  {
+    id: 'ilimitado',
+    name: 'Ilimitado',
+    price: 'Sob Consulta',
+    period: '',
+    desc: 'Para empresas com múltiplos postos e necessidades específicas.',
+    features: [
+      'Postos ilimitados em rede LAN',
+      'Configuração e instalação no local',
+      'Módulos customizados por atividade',
+      'Formação de equipa incluída',
+      'Gestor de conta dedicado',
+      'SLA de suporte técnico 8h',
+    ],
+  },
+];
+
 export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal }) => {
-  const getPlanIcon = (iconName: string) => {
-    switch (iconName) {
-      case 'Monitor':
-        return <Monitor className="w-5 h-5 text-blue-600" strokeWidth={1.75} />;
-      case 'Network':
-        return <Network className="w-5 h-5 text-blue-600" strokeWidth={1.75} />;
-      case 'Building':
-        return <Building className="w-5 h-5 text-blue-600" strokeWidth={1.75} />;
-      default:
-        return <Key className="w-5 h-5 text-blue-600" strokeWidth={1.75} />;
-    }
-  };
+  useScrollReveal();
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 pt-28 pb-20 selection:bg-blue-600 selection:text-white page-transition-enter">
-      
-      {/* Header Banner */}
-      <section className="bg-slate-50 border-b border-slate-200/80 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
-          <span className="text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/70">
-            Licenciamento & Planos
-          </span>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-950 tracking-tight">
-            Licenças Transparentes para a Sua Empresa
-          </h1>
-          <p className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-            Escolha o modelo de licenciamento adequado à quantidade de computadores da sua empresa. Sem custos ocultos.
-          </p>
-        </div>
-      </section>
+    <div className="min-h-screen bg-white text-slate-900 page-enter">
 
-      {/* Pricing Cards Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-          {KIVORA_PLANS.map((plan) => {
-            const isPopular = plan.popular;
-            return (
-              <div
-                key={plan.id}
-                className={`bg-white rounded-3xl p-8 border flex flex-col justify-between space-y-8 transition-all relative ${
-                  isPopular
-                    ? 'border-blue-600 ring-2 ring-blue-600/20 shadow-xl'
-                    : 'border-slate-200 shadow-sm hover:border-slate-300'
+      {/* Hero */}
+      <div className="pt-16">
+        <PageHero
+          image="/imagens/pacote.png"
+          tag="Licenças e Preços"
+          title="Escolha a licença certa para a sua empresa"
+          sub="Pagamento único ou anual, sem contratos longos. Inclui instalação, suporte e todas as atualizações."
+        />
+      </div>
+
+      {/* Planos */}
+      <section className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16 py-24">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+          {PLANS.map((plan, i) => (
+            <div
+              key={plan.id}
+              data-reveal
+              className={`sr-init rounded-3xl p-8 border flex flex-col gap-6 transition-all ${
+                plan.highlight
+                  ? 'bg-slate-950 border-slate-800 shadow-2xl shadow-slate-950/30 ring-1 ring-blue-500/30'
+                  : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-lg'
+              }`}
+              style={{ transitionDelay: `${i * 100}ms` }}
+            >
+              {plan.highlight && (
+                <span className="text-[11px] font-black uppercase tracking-widest text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-full self-start">
+                  Mais Popular
+                </span>
+              )}
+              <div>
+                <h3 className={`text-lg font-black mb-1 ${plan.highlight ? 'text-white' : 'text-slate-950'}`}>{plan.name}</h3>
+                <div className={`flex items-baseline gap-1 ${plan.highlight ? 'text-white' : 'text-slate-950'}`}>
+                  {plan.price !== 'Sob Consulta' && (
+                    <span className="text-xs font-semibold text-slate-400">Kz</span>
+                  )}
+                  <span className="text-3xl font-black">{plan.price}</span>
+                  <span className={`text-sm ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>{plan.period}</span>
+                </div>
+                <p className={`text-xs mt-2 leading-relaxed ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>{plan.desc}</p>
+              </div>
+
+              <ul className="space-y-2.5 flex-1">
+                {plan.features.map((feat, fi) => (
+                  <li key={fi} className="flex items-center gap-2.5 text-sm">
+                    <CheckCircle2 className={`w-4 h-4 shrink-0 ${plan.highlight ? 'text-emerald-400' : 'text-emerald-500'}`} strokeWidth={2} />
+                    <span className={plan.highlight ? 'text-slate-300' : 'text-slate-700'}>{feat}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                onClick={() => onOpenDemoModal(`Licença ${plan.name}`)}
+                className={`w-full inline-flex items-center justify-center gap-2 font-bold text-sm py-3 rounded-xl transition-all hover:-translate-y-0.5 ${
+                  plan.highlight
+                    ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-900'
                 }`}
               >
-                {isPopular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                    Recomendado para Empresas
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="p-2.5 bg-slate-100 rounded-xl">
-                      {getPlanIcon(plan.icon)}
-                    </div>
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                      {plan.billingPeriod}
-                    </span>
-                  </div>
-
-                  <h3 className="text-xl font-extrabold text-slate-950">
-                    {plan.name}
-                  </h3>
-
-                  <p className="text-xs text-slate-600 min-h-[36px] leading-relaxed">
-                    {plan.target}
-                  </p>
-
-                  <div className="pt-2 border-t border-slate-100">
-                    <span className="text-2xl sm:text-3xl font-extrabold text-slate-950">
-                      {plan.priceAOA}
-                    </span>
-                  </div>
-
-                  <ul className="space-y-2.5 pt-4 text-xs text-slate-700 font-medium">
-                    {plan.features.map((feat, fIdx) => (
-                      <li key={fIdx} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" strokeWidth={1.75} />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="pt-4 border-t border-slate-100">
-                  <button
-                    onClick={() => onOpenDemoModal(`Licença: ${plan.name}`)}
-                    className={`w-full font-bold text-xs py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 ${
-                      isPopular
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md'
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-200'
-                    }`}
-                  >
-                    <span>Adquirir Esta Licença</span>
-                    <ArrowRight className="w-4 h-4" strokeWidth={1.75} />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+                <span>{plan.price === 'Sob Consulta' ? 'Solicitar Proposta' : 'Adquirir Licença'}</span>
+                <ArrowRight className="w-4 h-4" strokeWidth={2} />
+              </button>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* License Manager Overview Box */}
-      <section className="bg-slate-50 border-t border-slate-200/80 py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="text-center space-y-2">
-            <span className="text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/70">
-              License Manager Integrado
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
-              Como Funciona a Ativação da Licença no Software
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600">
-              O KIVORA possui um gestor de licenças local para ativação e controlo dos postos autorizados.
-            </p>
-          </div>
-
-          {/* License Preview Widget */}
-          <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4 max-w-lg mx-auto font-sans">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Gestor de Licença KIVORA</span>
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>ATIVA</span>
-              </span>
+      {/* FAQ rápido */}
+      <section className="border-t border-slate-100 max-w-4xl mx-auto px-6 sm:px-10 lg:px-16 py-20">
+        <div data-reveal className="sr-init mb-10">
+          <h3 className="text-2xl font-black text-slate-950">Perguntas frequentes sobre licenças</h3>
+        </div>
+        <div className="space-y-5">
+          {[
+            { q: 'A licença inclui atualizações?', a: 'Sim. Todas as atualizações de conformidade fiscal (IRT, SAF-T, DS.120) são incluídas durante o período de validade da licença.' },
+            { q: 'Posso instalar em mais de um computador?', a: 'Depende do plano. O Mensal permite 1 posto, o Anual até 3, e o Ilimitado não tem restrição.' },
+            { q: 'O que acontece quando a licença expira?', a: 'O sistema continua a funcionar para consulta, mas não permite emitir novas faturas até renovar a licença.' },
+          ].map((faq, i) => (
+            <div key={i} data-reveal className="sr-init border-b border-slate-100 pb-5" style={{ transitionDelay: `${i * 80}ms` }}>
+              <h4 className="font-bold text-slate-900 mb-1">{faq.q}</h4>
+              <p className="text-sm text-slate-600 leading-relaxed">{faq.a}</p>
             </div>
-
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div>
-                <span className="text-slate-400 block text-[11px]">Empresa Registada:</span>
-                <strong className="text-slate-900 block font-bold">SUA EMPRESA, LDA</strong>
-              </div>
-              <div>
-                <span className="text-slate-400 block text-[11px]">Modalidade:</span>
-                <strong className="text-slate-900 block font-bold">Licença Anual PME</strong>
-              </div>
-              <div>
-                <span className="text-slate-400 block text-[11px]">Postos em Rede LAN:</span>
-                <strong className="text-slate-900 block font-bold">3 / 5 Computadores</strong>
-              </div>
-              <div>
-                <span className="text-slate-400 block text-[11px]">Validade:</span>
-                <strong className="text-slate-900 block font-bold">12 Meses com Suporte</strong>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 

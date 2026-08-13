@@ -1,288 +1,172 @@
-import React from 'react';
-import { CURRENT_RELEASE, RELEASE_HISTORY, INSTALLATION_STEPS, LOCAL_DB_ARGUMENTS } from '../data/kivoraData';
-import { Download, Monitor, HardDrive, Cpu, CheckCircle2, Database, WifiOff, Save, Key, FileCheck, Layers, HelpCircle } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { PageHero } from '../components/PageHero';
+import { CheckCircle2, Download, Monitor, HardDrive, Cpu, ArrowRight } from 'lucide-react';
+import { PageId } from '../components/Header';
 
 interface DownloadPageProps {
   onOpenDemoModal: (subject?: string) => void;
-  onNavigatePage?: (page: any) => void;
+  onNavigatePage: (page: PageId) => void;
 }
 
-export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal }) => {
-  const handleDownload = () => {
-    alert(`O download do instalador KIVORA Setup (Versão ${CURRENT_RELEASE.version}) irá iniciar em instantes no seu navegador.`);
-  };
+function useScrollReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll('[data-reveal]');
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add('sr-visible') && obs.unobserve(e.target)),
+      { threshold: 0.1 }
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+}
 
-  const renderIcon = (iconName: string) => {
-    switch (iconName) {
-      case 'Download':
-        return <Download className="w-5 h-5" strokeWidth={1.75} />;
-      case 'HardDrive':
-        return <HardDrive className="w-5 h-5" strokeWidth={1.75} />;
-      case 'Settings':
-        return <Layers className="w-5 h-5" strokeWidth={1.75} />;
-      case 'Key':
-        return <Key className="w-5 h-5" strokeWidth={1.75} />;
-      case 'FileCheck':
-        return <FileCheck className="w-5 h-5" strokeWidth={1.75} />;
-      case 'Database':
-        return <Database className="w-5 h-5 text-blue-600" strokeWidth={1.75} />;
-      case 'Zap':
-        return <CheckCircle2 className="w-5 h-5 text-emerald-600" strokeWidth={1.75} />;
-      case 'WifiOff':
-        return <WifiOff className="w-5 h-5 text-blue-600" strokeWidth={1.75} />;
-      case 'Save':
-        return <Save className="w-5 h-5 text-slate-700" strokeWidth={1.75} />;
-      default:
-        return <Download className="w-5 h-5" strokeWidth={1.75} />;
-    }
-  };
+export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onNavigatePage }) => {
+  useScrollReveal();
+
+  const requirements = [
+    { icon: <Monitor className="w-5 h-5" />, label: 'Sistema Operativo', val: 'Windows 10 / 11 (64-bit)' },
+    { icon: <Cpu className="w-5 h-5" />, label: 'Processador', val: 'Intel Core i3 / AMD Ryzen 3 (ou superior)' },
+    { icon: <HardDrive className="w-5 h-5" />, label: 'RAM', val: 'Mínimo 4 GB (recomendado 8 GB)' },
+    { icon: <HardDrive className="w-5 h-5" />, label: 'Espaço em Disco', val: '2 GB livres (+ espaço para base de dados)' },
+  ];
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 pt-28 pb-20 selection:bg-blue-600 selection:text-white page-transition-enter">
+    <div className="min-h-screen bg-white text-slate-900 page-enter">
       
-      {/* 1. Hero Download Section */}
-      <section className="bg-slate-50 border-b border-slate-200/80 py-16 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
-            {/* Left Column: Download Card & Title */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-blue-50 border border-blue-200/70 rounded-full text-xs font-semibold text-blue-800">
-                <Monitor className="w-4 h-4 text-blue-600 shrink-0" strokeWidth={1.75} />
-                <span>KIVORA para Windows • Versão {CURRENT_RELEASE.version}</span>
-              </div>
+      {/* Hero com imagem */}
+      <div className="pt-16">
+        <PageHero
+          image="/imagens/pacote-de-instalação-com-disco.png"
+          tag="Download Gratuito"
+          title="KIVORA Desktop para Windows"
+          sub="Instale o sistema de gestão e faturação da sua empresa. Base de dados 100% local, sem mensalidades escondidas."
+        />
+      </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight leading-tight">
-                Descarregue o KIVORA Setup para o Seu Computador
-              </h1>
-
-              <p className="text-slate-700 text-sm sm:text-base leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Instale o KIVORA no computador da sua empresa e tenha a sua gestão disponível localmente, com velocidade instantânea e sem depender de conetividade constante.
-              </p>
-
-              {/* Download Action Box */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 max-w-lg mx-auto lg:mx-0">
-                <button
-                  onClick={handleDownload}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-base hover:shadow-lg active:scale-98"
-                >
-                  <Download className="w-5 h-5" strokeWidth={1.75} />
-                  <span>Baixar KIVORA Setup Agora</span>
-                </button>
-
-                {/* Metadata Pills */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-semibold text-slate-600 pt-3 border-t border-slate-100">
-                  <div>
-                    <span className="block text-slate-400 font-normal text-[10px]">Versão:</span>
-                    <strong className="text-slate-900">{CURRENT_RELEASE.version}</strong>
-                  </div>
-                  <div>
-                    <span className="block text-slate-400 font-normal text-[10px]">Sistema:</span>
-                    <strong className="text-slate-900">Win 10/11</strong>
-                  </div>
-                  <div>
-                    <span className="block text-slate-400 font-normal text-[10px]">Arquitetura:</span>
-                    <strong className="text-slate-900">{CURRENT_RELEASE.architecture}</strong>
-                  </div>
-                  <div>
-                    <span className="block text-slate-400 font-normal text-[10px]">Tamanho:</span>
-                    <strong className="text-slate-900">{CURRENT_RELEASE.fileSize}</strong>
-                  </div>
-                </div>
-              </div>
+      {/* Download Box Principal */}
+      <section className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16 py-20">
+        <div
+          data-reveal
+          className="sr-init bg-slate-950 text-white rounded-3xl p-10 sm:p-14 flex flex-col md:flex-row items-center gap-10"
+        >
+          <div className="flex-1 space-y-4">
+            <span className="text-blue-400 text-xs font-bold uppercase tracking-widest">Versão Atual</span>
+            <h2 className="text-3xl font-black leading-tight">
+              KIVORA ERP <br />
+              <span className="text-blue-400">v2026.08</span>
+            </h2>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Inclui faturação eletrónica AGT DS.120, IRT 2026, POS de balcão, gestão de stock e módulo RH.
+            </p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              {['AGT DS.120', 'IRT 2026', 'SAF-T Angola', 'Offline-First'].map((tag) => (
+                <span key={tag} className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/20">
+                  {tag}
+                </span>
+              ))}
             </div>
+          </div>
 
-            {/* Right Column: Official Package Disk Art */}
-            <div className="lg:col-span-5 flex items-center justify-center">
-              <div className="p-6 bg-white rounded-3xl border border-slate-200 shadow-xl max-w-sm">
-                <img
-                  src="/imagens/pacote-de-instalação-com-disco.png"
-                  alt="Kivora Software Package Installer"
-                  className="w-full h-auto object-contain"
-                />
-                <div className="text-center pt-3 space-y-1">
-                  <strong className="block text-xs font-bold text-slate-900">Instalador Desktop Oficial</strong>
-                  <span className="block text-[11px] text-slate-500">Base de dados SQLite / PostgreSQL Local</span>
-                </div>
-              </div>
-            </div>
-
+          <div className="flex flex-col items-center gap-4">
+            <a
+              href="#"
+              className="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-500 text-white font-black text-base px-8 py-4 rounded-2xl shadow-2xl shadow-blue-600/40 transition-all hover:-translate-y-0.5 hover:shadow-blue-500/50 w-full sm:w-auto justify-center"
+            >
+              <Download className="w-5 h-5" strokeWidth={2} />
+              <span>Baixar Setup (.exe)</span>
+            </a>
+            <span className="text-slate-500 text-xs">≈ 48,5 MB — Windows 10/11 64-bit</span>
+            <button
+              onClick={() => onOpenDemoModal('Pedido de Licença')}
+              className="text-slate-400 hover:text-white text-xs font-medium transition-colors flex items-center gap-1.5 group"
+            >
+              <span>Preciso de licença corporativa</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </button>
           </div>
         </div>
       </section>
 
-      {/* 2. Como Funciona (01-05 Steps) */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
-          <span className="text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/70">
-            Passo a Passo
-          </span>
-          <h2 className="text-3xl font-extrabold text-slate-950 tracking-tight">
-            Como Funciona a Instalação e Ativação
-          </h2>
-          <p className="text-slate-600 text-sm">
-            Do download ao primeiro recibo emitido em menos de 5 minutos.
-          </p>
+      {/* Requisitos do Sistema */}
+      <section className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16 pb-20">
+        <div data-reveal className="sr-init mb-10">
+          <h3 className="text-2xl font-black text-slate-950">Requisitos do Sistema</h3>
+          <p className="text-slate-500 text-sm mt-1">Compatível com a maioria dos computadores com Windows 10 ou superior.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-          {INSTALLATION_STEPS.map((step) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {requirements.map((req, i) => (
             <div
-              key={step.stepNumber}
-              className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4 hover:border-blue-500/50 hover:shadow-md transition-all group"
+              key={i}
+              data-reveal
+              className="sr-init bg-slate-50 border border-slate-200 rounded-2xl p-5 flex items-center gap-4"
+              style={{ transitionDelay: `${i * 80}ms` }}
             >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-black text-blue-600 font-mono">
-                    {step.stepNumber}
-                  </span>
-                  <div className="p-2 bg-slate-100 text-slate-700 rounded-xl group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                    {renderIcon(step.icon)}
-                  </div>
-                </div>
-
-                <h3 className="text-base font-extrabold text-slate-900">
-                  {step.title}
-                </h3>
-
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  {step.description}
-                </p>
+              <div className="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-blue-600 shadow-sm shrink-0">
+                {req.icon}
+              </div>
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">{req.label}</span>
+                <span className="text-sm font-semibold text-slate-900">{req.val}</span>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 3. Base de Dados Local (Commercial Highlights) */}
-      <section className="bg-slate-50 border-y border-slate-200/80 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-14">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-            <span className="text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/70">
-              Privacidade & Velocidade
-            </span>
-            <h2 className="text-3xl font-extrabold text-slate-950 tracking-tight">
-              Os Seus Dados Permanecem no Seu Computador
-            </h2>
-            <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-              O KIVORA foi concebido para funcionar localmente, permitindo realizar as principais operações comerciais mesmo quando não existe ligação à Internet.
-            </p>
+      {/* Passos de instalação */}
+      <section className="bg-slate-950 text-white py-20 px-6 sm:px-10 lg:px-16">
+        <div className="max-w-5xl mx-auto">
+          <div data-reveal className="sr-init text-center mb-12">
+            <h3 className="text-3xl font-black">Instalação em 3 passos</h3>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {LOCAL_DB_ARGUMENTS.map((arg, idx) => (
-              <div
-                key={idx}
-                className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3"
-              >
-                <div className="p-3 bg-slate-100 rounded-xl w-fit">
-                  {renderIcon(arg.icon)}
-                </div>
-                <h3 className="text-base font-extrabold text-slate-900">
-                  {arg.title}
-                </h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  {arg.description}
-                </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { n: '01', title: 'Execute o Setup.exe', desc: 'Dê dois cliques no ficheiro descarregado e siga o assistente de instalação.' },
+              { n: '02', title: 'Configure a Empresa', desc: 'Introduza o NIF, nome da empresa e dados fiscais no primeiro arranque.' },
+              { n: '03', title: 'Ative a Licença', desc: 'Insira a chave de ativação recebida por email após a compra.' },
+            ].map((step, i) => (
+              <div key={i} data-reveal className="sr-init space-y-3" style={{ transitionDelay: `${i * 120}ms` }}>
+                <span className="text-5xl font-black text-slate-800">{step.n}</span>
+                <h4 className="text-base font-bold text-white">{step.title}</h4>
+                <p className="text-slate-400 text-sm leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
+
+          <div data-reveal className="sr-init mt-12 flex flex-wrap gap-4">
+            <button
+              onClick={() => onNavigatePage('recursos')}
+              className="inline-flex items-center gap-2 text-slate-300 hover:text-white text-sm font-semibold transition-colors group"
+            >
+              <span>Ver guia completo de instalação</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* 4. Requisitos do Sistema & Histórico de Versões */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          
-          {/* System Requirements */}
-          <div className="lg:col-span-6 space-y-6">
-            <div className="space-y-2">
-              <span className="text-blue-700 font-bold text-xs uppercase tracking-wider">Requisitos do Computador</span>
-              <h3 className="text-2xl font-extrabold text-slate-950">Especificações Técnicas</h3>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs">
-              <div className="flex items-start gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-100">
-                <Monitor className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" strokeWidth={1.75} />
-                <div>
-                  <strong className="text-slate-950 block text-sm font-bold">Sistema Operativo:</strong>
-                  <span className="text-slate-700">Windows 10, Windows 11 ou Windows Server 2019/2022 (64-bits)</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-100">
-                <Cpu className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" strokeWidth={1.75} />
-                <div>
-                  <strong className="text-slate-950 block text-sm font-bold">Processador & Memória RAM:</strong>
-                  <span className="text-slate-700">Intel Core i3 / AMD Ryzen 3 ou superior com 4 GB de Memória RAM (8 GB recomendado para servidor de rede LAN)</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-100">
-                <HardDrive className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" strokeWidth={1.75} />
-                <div>
-                  <strong className="text-slate-950 block text-sm font-bold">Espaço em Disco:</strong>
-                  <span className="text-slate-700">Pelo menos 500 MB de espaço livre para o programa e a base de dados local</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Release History */}
-          <div className="lg:col-span-6 space-y-6">
-            <div className="space-y-2">
-              <span className="text-blue-700 font-bold text-xs uppercase tracking-wider">Notas de Versão</span>
-              <h3 className="text-2xl font-extrabold text-slate-950">Histórico de Atualizações</h3>
-            </div>
-
-            <div className="space-y-4">
-              {RELEASE_HISTORY.map((rel, rIdx) => (
-                <div key={rIdx} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-extrabold text-slate-950 text-sm">Versão {rel.version}</span>
-                    <span className="text-xs text-slate-500 font-semibold">{rel.date}</span>
-                  </div>
-                  <ul className="space-y-1.5 text-xs text-slate-700">
-                    {rel.changelog.map((change, cIdx) => (
-                      <li key={cIdx} className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
-                        <span>{change}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-
+      {/* O que está incluído */}
+      <section className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16 py-20">
+        <div data-reveal className="sr-init mb-10">
+          <h3 className="text-2xl font-black text-slate-950">O que está incluído</h3>
         </div>
-      </section>
-
-      {/* 5. CTA Footer */}
-      <section className="bg-slate-900 text-white py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <h2 className="text-3xl font-extrabold tracking-tight">
-            Precisa de Auxílio na Instalação do KIVORA?
-          </h2>
-          <p className="text-slate-300 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
-            A equipa técnica da Visual Software em Luanda presta suporte presencial e remoto para a instalação do Setup e configuração das suas impressoras térmicas.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              onClick={handleDownload}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm px-8 py-3.5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
-            >
-              <Download className="w-4 h-4" strokeWidth={1.75} />
-              <span>Baixar KIVORA Setup</span>
-            </button>
-            <button
-              onClick={() => onOpenDemoModal('Auxílio de Instalação')}
-              className="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm px-7 py-3.5 rounded-xl border border-slate-700 transition-all flex items-center justify-center gap-2"
-            >
-              <HelpCircle className="w-4 h-4 text-slate-400" strokeWidth={1.75} />
-              <span>Solicitar Apoio na Instalação</span>
-            </button>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {[
+            'Faturação Eletrónica com QR Code AGT DS.120',
+            'POS de Balcão com impressão térmica',
+            'Gestão de Stock e Armazém Multidepósito',
+            'Módulo de Recursos Humanos e IRT 2026',
+            'Contabilidade e exportação SAF-T Angola',
+            'Relatórios e dashboards de gestão',
+            'Rede Local multi-postos incluída',
+            'Suporte técnico por 12 meses',
+          ].map((feat, i) => (
+            <div key={i} data-reveal className="sr-init flex items-center gap-3 py-3 border-b border-slate-100 last:border-0" style={{ transitionDelay: `${i * 50}ms` }}>
+              <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" strokeWidth={2} />
+              <span className="text-sm text-slate-700 font-medium">{feat}</span>
+            </div>
+          ))}
         </div>
       </section>
 
