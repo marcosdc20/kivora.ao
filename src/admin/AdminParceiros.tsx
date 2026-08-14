@@ -1,127 +1,315 @@
 import React, { useState } from 'react';
 import {
-  Handshake, Plus, Eye, Check, X, MessageCircle,
-  TrendingUp, DollarSign, Users, CheckCircle2, Loader2
+  Handshake, Plus, Eye, Check, X,
+  DollarSign, Users, CheckCircle2, Loader2, Copy,
+  Award
 } from 'lucide-react';
-import { AdminTopbar, StatusBadge, StatCard } from './AdminComponents';
-import { MOCK_PARCEIROS } from './mockData';
-import { Parceiro } from './types';
+import { AdminTopbar, StatCard } from './AdminComponents';
 import { createOrApprovePartnerAccount } from './services/authService';
 
-const fmt = (n: number) => n.toLocaleString('pt-AO');
+export interface Partner {
+  id: string;
+  code: string;
+  name: string;
+  email: string;
+  phone: string;
+  region: string;
+  commission_rate: number;
+  total_sales: number;
+  balance_aoa: number;
+  status: 'active' | 'pending' | 'suspended';
+  createdAt: number;
+}
 
-// ============================
-// PARCEIROS — Lista
-// ============================
-export const AdminParceiros: React.FC<{ onCandidaturas: () => void }> = ({ onCandidaturas }) => {
-  const [filterStatus, setFilterStatus] = useState('todos');
-  const [selected, setSelected] = useState<Parceiro | null>(null);
+interface AdminParceirosProps {
+  onCandidaturas?: () => void;
+  onBack?: () => void;
+  initialTab?: 'todos' | 'candidaturas';
+}
 
-  const filtered = MOCK_PARCEIROS.filter(p =>
-    filterStatus === 'todos' || p.status === filterStatus
-  );
+const INITIAL_PARTNERS: Partner[] = [
+  {
+    id: '1',
+    code: 'REV-LUANDA-01',
+    name: 'AngoSolutions TI & Consultoria',
+    email: 'comercial@angosolutions.ao',
+    phone: '+244 923 456 789',
+    region: 'Luanda',
+    commission_rate: 20,
+    total_sales: 3450000,
+    balance_aoa: 690000,
+    status: 'active',
+    createdAt: Date.now() - 45 * 86400000
+  },
+  {
+    id: '2',
+    code: 'REV-BENGUELA-02',
+    name: 'Lobito Tech & Automação Comercial',
+    email: 'lobito.tech@gmail.com',
+    phone: '+244 912 345 678',
+    region: 'Benguela',
+    commission_rate: 25,
+    total_sales: 2100000,
+    balance_aoa: 525000,
+    status: 'active',
+    createdAt: Date.now() - 30 * 86400000
+  },
+  {
+    id: '3',
+    code: 'REV-HUILA-03',
+    name: 'Sul Digital Lubango, Lda.',
+    email: 'geral@suldigital.co.ao',
+    phone: '+244 933 111 222',
+    region: 'Huíla (Lubango)',
+    commission_rate: 15,
+    total_sales: 850000,
+    balance_aoa: 127500,
+    status: 'pending',
+    createdAt: Date.now() - 5 * 86400000
+  },
+  {
+    id: '4',
+    code: 'REV-CABINDA-04',
+    name: 'Cabinda Sistemas & Redes',
+    email: 'info@cabindasistemas.ao',
+    phone: '+244 944 555 666',
+    region: 'Cabinda',
+    commission_rate: 20,
+    total_sales: 1200000,
+    balance_aoa: 240000,
+    status: 'active',
+    createdAt: Date.now() - 15 * 86400000
+  }
+];
+
+export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'todos' }) => {
+  const [partners, setPartners] = useState<Partner[]>(INITIAL_PARTNERS);
+  const [tab, setTab] = useState<'todos' | 'candidaturas'>(initialTab);
+  const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [approving, setApproving] = useState<string | null>(null);
+
+  // Form State
+  const [name, setName] = useState('');
+  const [code, setCode] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [region, setRegion] = useState('Luanda');
+  const [rate, setRate] = useState<number>(20);
+
+  const activePartners = partners.filter(p => p.status === 'active');
+  const pendingPartners = partners.filter(p => p.status === 'pending');
+  const totalSalesAoa = partners.reduce((acc, p) => acc + p.total_sales, 0);
+  const totalCommissionsAoa = partners.reduce((acc, p) => acc + p.balance_aoa, 0);
+
+  const handleAddPartner = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !code) return;
+
+    const newP: Partner = {
+      id: Date.now().toString(),
+      code: code.toUpperCase().trim(),
+      name,
+      email,
+      phone,
+      region,
+      commission_rate: rate,
+      total_sales: 0,
+      balance_aoa: 0,
+      status: 'active',
+      createdAt: Date.now()
+    };
+
+    setPartners([newP, ...partners]);
+    setShowModal(false);
+    setName('');
+    setCode('');
+    setEmail('');
+    setPhone('');
+    alert(`Parceiro ${newP.name} registado com sucesso! Link: https://kivora.ao/ref/${newP.code}`);
+  };
+
+  const copyRefLink = (p: Partner) => {
+    const link = `https://kivora.ao/ref/${p.code}`;
+    navigator.clipboard.writeText(link);
+    setCopiedCode(p.code);
+    setTimeout(() => setCopiedCode(null), 2500);
+  };
+
+  const handleApprovePartner = async (partner: Partner) => {
+    setApproving(partner.id);
+    try {
+      await createOrApprovePartnerAccount({
+        nome: partner.name,
+        email: partner.email,
+        phone: partner.phone,
+        region: partner.region,
+        partnerCode: partner.code,
+      });
+
+      setPartners(prev => prev.map(p =>
+        p.id === partner.id ? { ...p, status: 'active' } : p
+      ));
+
+      alert(`Candidatura aprovada! Conta ativada no Firebase com o código de parceiro ${partner.code}.`);
+    } catch (err: any) {
+      alert('Erro ao aprovar parceiro: ' + err.message);
+    } finally {
+      setApproving(null);
+    }
+  };
 
   return (
     <div className="flex-1 overflow-y-auto bg-slate-50">
       <AdminTopbar
-        title="Parceiros"
-        subtitle="Programa de revendedores e consultores KIVORA"
+        title="Rede de Parceiros & Revenda"
+        subtitle="Gestão de canais de distribuição, comissões em Kwanzas e candidaturas"
         actions={
-          <div className="flex gap-2">
-            <button
-              onClick={onCandidaturas}
-              className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition-all"
-            >
-              <span>Candidaturas</span>
-              <span className="bg-white/20 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">3</span>
-            </button>
-            <button className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition-all">
-              <Plus className="w-3.5 h-3.5" strokeWidth={2} />
-              <span>Novo Parceiro</span>
-            </button>
-          </div>
+          <button
+            onClick={() => setShowModal(true)}
+            className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md shadow-blue-600/20 transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Registar Novo Parceiro</span>
+          </button>
         }
       />
 
       <div className="p-6 space-y-5">
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard label="Parceiros Activos" value="84" sub="+7 este mês" subColor="green"
-            icon={<Handshake className="w-4 h-4" strokeWidth={1.75} />} iconBg="bg-violet-50 text-violet-600" />
-          <StatCard label="Pendentes" value="3" sub="Aguardam aprovação" subColor="amber"
-            icon={<Users className="w-4 h-4" strokeWidth={1.75} />} iconBg="bg-amber-50 text-amber-600" />
-          <StatCard label="Vendas este Mês" value="126" sub="Total de licenças" subColor="green"
-            icon={<TrendingUp className="w-4 h-4" strokeWidth={1.75} />} iconBg="bg-emerald-50 text-emerald-600" />
-          <StatCard label="Comissões Pendentes" value="2.450.000 Kz" sub="A pagar" subColor="amber"
-            icon={<DollarSign className="w-4 h-4" strokeWidth={1.75} />} iconBg="bg-blue-50 text-blue-600" />
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <StatCard
+            label="Parceiros Ativos"
+            value={activePartners.length}
+            sub={`${pendingPartners.length} aguardam aprovação`}
+            subColor="green"
+            icon={<Users className="w-4 h-4" />}
+            iconBg="bg-blue-50 text-blue-600"
+          />
+          <StatCard
+            label="Vendas por Parceiros"
+            value={`${fmt(totalSalesAoa)} Kz`}
+            sub="Volume acumulado"
+            subColor="green"
+            icon={<Award className="w-4 h-4" />}
+            iconBg="bg-emerald-50 text-emerald-600"
+          />
+          <StatCard
+            label="Comissões Acumuladas"
+            value={`${fmt(totalCommissionsAoa)} Kz`}
+            sub="Saldo de revenda"
+            subColor="amber"
+            icon={<DollarSign className="w-4 h-4" />}
+            iconBg="bg-amber-50 text-amber-600"
+          />
+          <StatCard
+            label="Taxa Média de Comissão"
+            value="20.0%"
+            sub="Margem padrão KIVORA"
+            subColor="default"
+            icon={<Handshake className="w-4 h-4" />}
+            iconBg="bg-purple-50 text-purple-600"
+          />
         </div>
 
-        {/* Filtros */}
-        <div className="flex gap-2">
-          {[
-            { key: 'todos', label: 'Todos' },
-            { key: 'ativo', label: 'Activos' },
-            { key: 'pendente', label: 'Pendentes' },
-            { key: 'suspenso', label: 'Suspensos' },
-          ].map(f => (
-            <button
-              key={f.key}
-              onClick={() => setFilterStatus(f.key)}
-              className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all ${
-                filterStatus === f.key
-                  ? 'bg-slate-950 text-white border-slate-950'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+        {/* Abas */}
+        <div className="flex gap-2 border-b border-slate-200 pb-3">
+          <button
+            onClick={() => setTab('todos')}
+            className={`text-xs font-bold px-4 py-2 rounded-xl transition-all ${
+              tab === 'todos'
+                ? 'bg-slate-950 text-white shadow-sm'
+                : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'
+            }`}
+          >
+            Todos os Parceiros ({partners.length})
+          </button>
+          <button
+            onClick={() => setTab('candidaturas')}
+            className={`text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-all ${
+              tab === 'candidaturas'
+                ? 'bg-slate-950 text-white shadow-sm'
+                : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'
+            }`}
+          >
+            <span>Candidaturas Pendentes</span>
+            {pendingPartners.length > 0 && (
+              <span className="bg-amber-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-black">
+                {pendingPartners.length}
+              </span>
+            )}
+          </button>
         </div>
 
-        {/* Tabela */}
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-          <table className="w-full text-xs">
+        {/* Tabela de Parceiros */}
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <table className="w-full text-xs text-left">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="text-left px-5 py-3.5 text-[11px] font-black uppercase tracking-wider text-slate-400">Parceiro</th>
-                <th className="text-left px-4 py-3.5 text-[11px] font-black uppercase tracking-wider text-slate-400 hidden md:table-cell">Tipo</th>
-                <th className="text-left px-4 py-3.5 text-[11px] font-black uppercase tracking-wider text-slate-400">Estado</th>
-                <th className="text-left px-4 py-3.5 text-[11px] font-black uppercase tracking-wider text-slate-400 hidden lg:table-cell">Clientes</th>
-                <th className="text-left px-4 py-3.5 text-[11px] font-black uppercase tracking-wider text-slate-400 hidden xl:table-cell">Vendas/Mês</th>
-                <th className="text-left px-4 py-3.5 text-[11px] font-black uppercase tracking-wider text-slate-400 hidden xl:table-cell">Comissão Pend.</th>
-                <th className="text-right px-5 py-3.5 text-[11px] font-black uppercase tracking-wider text-slate-400">Ações</th>
+              <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 uppercase font-black text-[10px] tracking-wider">
+                <th className="p-4">Código / Parceiro</th>
+                <th className="p-4">Região / Província</th>
+                <th className="p-4">Taxa Comissão</th>
+                <th className="p-4">Vendas Geradas</th>
+                <th className="p-4">Saldo Comissão</th>
+                <th className="p-4">Estado</th>
+                <th className="p-4 text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filtered.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50 transition-colors group">
-                  <td className="px-5 py-3.5">
-                    <div>
-                      <p className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{p.nome}</p>
-                      <p className="text-slate-400 text-[10px]">{p.empresa || 'Individual'} · {p.provincia}</p>
+              {(tab === 'todos' ? partners : pendingPartners).map((p) => (
+                <tr key={p.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                        {p.code}
+                      </span>
                     </div>
+                    <p className="font-bold text-slate-900 mt-1">{p.name}</p>
+                    <p className="text-slate-400 text-[10px]">{p.email} • {p.phone}</p>
                   </td>
-                  <td className="px-4 py-3.5 hidden md:table-cell">
-                    <span className="capitalize text-slate-600 font-medium">{p.tipo}</span>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <StatusBadge status={p.status} type="parceiro" />
-                  </td>
-                  <td className="px-4 py-3.5 font-bold text-slate-900 hidden lg:table-cell">{p.clientes}</td>
-                  <td className="px-4 py-3.5 text-slate-600 hidden xl:table-cell">{fmt(p.vendasMes)} Kz</td>
-                  <td className="px-4 py-3.5 hidden xl:table-cell">
-                    <span className={`font-bold ${p.comissaoPendente > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
-                      {fmt(p.comissaoPendente)} Kz
+                  <td className="p-4 font-semibold text-slate-700">{p.region}</td>
+                  <td className="p-4 font-bold text-purple-700 bg-purple-50/50">{p.commission_rate}%</td>
+                  <td className="p-4 font-mono font-bold text-slate-900">{fmt(p.total_sales)} Kz</td>
+                  <td className="p-4 font-mono font-bold text-emerald-700">{fmt(p.balance_aoa)} Kz</td>
+                  <td className="p-4">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      p.status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                      p.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                      'bg-red-50 text-red-700 border border-red-200'
+                    }`}>
+                      {p.status === 'active' ? 'Ativo' : p.status === 'pending' ? 'Pendente' : 'Suspenso'}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5 text-right">
-                    <button
-                      onClick={() => setSelected(p)}
-                      className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold text-[11px] transition-colors"
-                    >
-                      <Eye className="w-3.5 h-3.5" strokeWidth={2} />
-                      <span>Ver</span>
-                    </button>
+                  <td className="p-4 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => copyRefLink(p)}
+                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Copiar Link de Referência"
+                      >
+                        {copiedCode === p.code ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+
+                      {p.status === 'pending' && (
+                        <button
+                          onClick={() => handleApprovePartner(p)}
+                          disabled={approving === p.id}
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg font-bold text-[11px] flex items-center gap-1 shadow-sm transition-all"
+                        >
+                          {approving === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                          <span>Aprovar</span>
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => setSelectedPartner(p)}
+                        className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                        title="Ver Detalhes"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -130,220 +318,183 @@ export const AdminParceiros: React.FC<{ onCandidaturas: () => void }> = ({ onCan
         </div>
       </div>
 
-      {/* Modal Detalhe Parceiro */}
-      {selected && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setSelected(null)}>
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl p-8 space-y-5" onClick={e => e.stopPropagation()}>
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-xl font-black text-slate-950">{selected.nome}</h2>
-                <p className="text-sm text-slate-500">{selected.empresa || 'Individual'} · {selected.tipo}</p>
-              </div>
-              <button onClick={() => setSelected(null)} className="text-slate-400 hover:text-slate-900 transition-colors">
-                <X className="w-5 h-5" strokeWidth={1.75} />
+      {/* Modal Registar Novo Parceiro */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-black text-slate-900">Registar Novo Parceiro Kivora</h3>
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: 'Estado', value: <StatusBadge status={selected.status} type="parceiro" /> },
-                { label: 'Província', value: selected.provincia },
-                { label: 'Email', value: selected.email },
-                { label: 'Telefone', value: selected.telefone },
-                { label: 'Data de Entrada', value: selected.dataEntrada },
-                { label: 'Taxa de Comissão', value: `${selected.taxaComissao}%` },
-              ].map((item) => (
-                <div key={item.label} className="bg-slate-50 rounded-xl p-3">
-                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-1">{item.label}</p>
-                  <div className="text-sm font-bold text-slate-900">{item.value}</div>
+            <form onSubmit={handleAddPartner} className="space-y-4 text-xs">
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase">Nome / Empresa do Parceiro</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: Luanda Tech Solutions"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 uppercase">Código Único (Ref)</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="REV-LUANDA-05"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-mono font-bold"
+                  />
                 </div>
-              ))}
-            </div>
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 uppercase">Comissão (%)</label>
+                  <input
+                    type="number"
+                    min={5}
+                    max={50}
+                    value={rate}
+                    onChange={(e) => setRate(Number(e.target.value))}
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-bold"
+                  />
+                </div>
+              </div>
 
-            <div className="grid grid-cols-3 gap-3 pt-2">
-              <div className="bg-slate-950 rounded-2xl p-4 text-center">
-                <p className="text-2xl font-black text-white">{selected.clientes}</p>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Clientes</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 uppercase">Email Comercial</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="parceiro@empresa.ao"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 uppercase">Telefone</label>
+                  <input
+                    type="tel"
+                    placeholder="+244 923 000 000"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium"
+                  />
+                </div>
               </div>
-              <div className="bg-emerald-50 rounded-2xl p-4 text-center">
-                <p className="text-xl font-black text-emerald-700">{fmt(selected.comissaoPaga)}</p>
-                <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Pago (Kz)</p>
-              </div>
-              <div className="bg-amber-50 rounded-2xl p-4 text-center">
-                <p className="text-xl font-black text-amber-700">{fmt(selected.comissaoPendente)}</p>
-                <p className="text-[10px] text-amber-600 font-bold uppercase tracking-wider">Pendente (Kz)</p>
-              </div>
-            </div>
 
-            <div className="flex gap-3 pt-2">
-              <button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-3 rounded-2xl transition-all">
-                Marcar Comissão Paga
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase">Província Principal</label>
+                <select
+                  value={region}
+                  onChange={(e) => setRegion(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-white font-bold"
+                >
+                  <option value="Luanda">Luanda</option>
+                  <option value="Benguela">Benguela</option>
+                  <option value="Huíla">Huíla (Lubango)</option>
+                  <option value="Cabinda">Cabinda</option>
+                  <option value="Huambo">Huambo</option>
+                  <option value="Cuanza Sul">Cuanza Sul (Sumbe/Porto Amboim)</option>
+                  <option value="Uíge">Uíge</option>
+                  <option value="Namibe">Namibe</option>
+                  <option value="Outra Província">Outra Província</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20"
+                >
+                  Criar Parceiro
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Detalhe do Parceiro */}
+      {selectedPartner && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                  {selectedPartner.code}
+                </span>
+                <h3 className="text-base font-black text-slate-900">{selectedPartner.name}</h3>
+              </div>
+              <button onClick={() => setSelectedPartner(null)} className="text-slate-400 hover:text-slate-900">
+                <X className="w-4 h-4" />
               </button>
-              <button className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm px-5 py-3 rounded-2xl transition-all">
-                <MessageCircle className="w-4 h-4" strokeWidth={1.75} />
-                Contactar
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-2xl space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Província:</span>
+                <strong className="text-slate-900">{selectedPartner.region}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Email:</span>
+                <strong className="text-slate-900">{selectedPartner.email}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Telefone:</span>
+                <strong className="text-slate-900">{selectedPartner.phone}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Comissão Acordada:</span>
+                <strong className="text-purple-700 font-bold">{selectedPartner.commission_rate}%</strong>
+              </div>
+              <div className="flex justify-between border-t border-slate-200 pt-2">
+                <span className="text-slate-500">Saldo a Liquidar:</span>
+                <strong className="text-emerald-700 font-mono text-sm">{fmt(selectedPartner.balance_aoa)} Kz</strong>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center pt-2">
+              <button
+                onClick={() => {
+                  alert(`Comissão de ${fmt(selectedPartner.balance_aoa)} Kz liquidada para o parceiro ${selectedPartner.name}!`);
+                  setPartners(partners.map(p => p.id === selectedPartner.id ? { ...p, balance_aoa: 0 } : p));
+                  setSelectedPartner(null);
+                }}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-emerald-600/20"
+              >
+                Liquidar Comissão (Pagamento Efetuado)
+              </button>
+              <button
+                onClick={() => setSelectedPartner(null)}
+                className="text-xs font-bold text-slate-500 hover:text-slate-900 px-3 py-2"
+              >
+                Fechar
               </button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };
 
-// ============================
-// CANDIDATURAS & APROVAÇÃO
-// ============================
-interface CandidaturaItem {
-  id: string;
-  nome: string;
-  email: string;
-  phone: string;
-  provincia: string;
-  tipo: string;
-  clientes: number;
-  empresa?: string;
-  data: string;
-}
+const fmt = (n: number) => n.toLocaleString('pt-AO');
 
-const INITIAL_CANDIDATURAS: CandidaturaItem[] = [
-  { id: 'c1', nome: 'Ana Rodrigues', email: 'ana.rodrigues@ardigital.ao', phone: '+244 923 111 222', provincia: 'Huambo', tipo: 'Revendedor', clientes: 5, empresa: 'AR Digital', data: '2026-08-10' },
-  { id: 'c2', nome: 'Mário Santos', email: 'mario.santos@consultoria.ao', phone: '+244 934 333 444', provincia: 'Benguela', tipo: 'Consultor', clientes: 12, empresa: 'Santos Consult', data: '2026-08-09' },
-  { id: 'c3', nome: 'Helena Furtado', email: 'helena@hfsistemas.ao', phone: '+244 945 555 666', provincia: 'Luanda', tipo: 'Integrador', clientes: 8, empresa: 'HF Sistemas', data: '2026-08-07' },
-];
-
-export const AdminCandidaturas: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  const [candidaturas, setCandidaturas] = useState<CandidaturaItem[]>(INITIAL_CANDIDATURAS);
-  const [approvingId, setApprovingId] = useState<string | null>(null);
-  const [approvedResult, setApprovedResult] = useState<{ nome: string; email: string; code: string } | null>(null);
-
-  const handleAprovar = async (c: CandidaturaItem) => {
-    setApprovingId(c.id);
-    const code = `PARCEIRO-AO-${Math.floor(100 + Math.random() * 900)}`;
-
-    try {
-      await createOrApprovePartnerAccount({
-        email: c.email,
-        nome: c.nome,
-        partnerCode: code,
-        phone: c.phone,
-        region: c.provincia,
-      });
-
-      setCandidaturas(prev => prev.filter(item => item.id !== c.id));
-      setApprovedResult({
-        nome: c.nome,
-        email: c.email,
-        code,
-      });
-    } catch (err: any) {
-      alert('Erro ao aprovar parceiro no Firebase: ' + err.message);
-    } finally {
-      setApprovingId(null);
-    }
-  };
-
-  const handleRejeitar = (id: string) => {
-    if (!confirm('Rejeitar esta candidatura de parceiro?')) return;
-    setCandidaturas(prev => prev.filter(c => c.id !== id));
-  };
-
-  return (
-    <div className="flex-1 overflow-y-auto bg-slate-50">
-      <AdminTopbar
-        title="Candidaturas de Parceiros"
-        subtitle={`${candidaturas.length} candidaturas pendentes de análise e aprovação`}
-        actions={
-          <button onClick={onBack} className="text-xs text-slate-500 hover:text-slate-900 font-semibold transition-colors">
-            ← Voltar aos Parceiros
-          </button>
-        }
-      />
-      <div className="p-6 space-y-4 max-w-4xl">
-
-        {/* Modal de Sucesso na Aprovação */}
-        {approvedResult && (
-          <div className="p-6 bg-slate-950 text-white rounded-3xl space-y-4 shadow-xl border border-slate-800 animate-fadeIn">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-base font-black">Parceiro Aprovado no Firebase!</h3>
-                <p className="text-xs text-slate-400">As credenciais de acesso foram geradas para o Portal do Parceiro.</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white/5 p-4 rounded-2xl text-xs font-mono">
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase block font-sans font-bold">Nome</span>
-                <strong className="text-white font-sans">{approvedResult.nome}</strong>
-              </div>
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase block font-sans font-bold">Email de Acesso</span>
-                <strong className="text-blue-300">{approvedResult.email}</strong>
-              </div>
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase block font-sans font-bold">Código do Parceiro</span>
-                <strong className="text-emerald-400 text-sm">{approvedResult.code}</strong>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setApprovedResult(null)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl"
-            >
-              Fechar Notificação
-            </button>
-          </div>
-        )}
-
-        {candidaturas.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
-            <Users className="w-10 h-10 mx-auto text-slate-300 mb-2" />
-            <p className="text-sm font-bold text-slate-700">Todas as candidaturas foram processadas!</p>
-            <p className="text-xs text-slate-400">Novos pedidos submetidos no site aparecerão aqui automaticamente.</p>
-          </div>
-        ) : (
-          candidaturas.map((c) => (
-            <div key={c.id} className="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-blue-400/40 hover:shadow-md transition-all">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    Candidatura Pendente
-                  </span>
-                  <span className="text-xs text-slate-400 font-mono">Submetido em {c.data}</span>
-                </div>
-                <h3 className="font-black text-slate-950 text-base">{c.nome}</h3>
-                <p className="text-xs text-slate-500 font-medium">
-                  {c.empresa || 'Individual'} • {c.tipo} • {c.provincia} • {c.email} • {c.phone}
-                </p>
-                <p className="text-xs text-blue-600 font-bold">
-                  Previsão de vendas: ~{c.clientes} clientes no 1º trimestre
-                </p>
-              </div>
-
-              <div className="flex gap-2 shrink-0 w-full sm:w-auto">
-                <button
-                  onClick={() => handleAprovar(c)}
-                  disabled={approvingId === c.id}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-md shadow-emerald-600/20 transition-all disabled:bg-slate-300"
-                >
-                  {approvingId === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-                  <span>Aprovar & Criar Acesso</span>
-                </button>
-                <button
-                  onClick={() => handleRejeitar(c.id)}
-                  className="flex items-center justify-center gap-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 px-3.5 py-2.5 rounded-xl transition-colors"
-                >
-                  <X className="w-3.5 h-3.5" />
-                  <span>Rejeitar</span>
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-};
+export const AdminCandidaturas: React.FC<AdminParceirosProps> = (props) => <AdminParceiros {...props} initialTab="candidaturas" />;
