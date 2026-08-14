@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Settings, ShieldCheck, Mail, Smartphone, Save,
-  Database, Download, Loader2, SaveAll, Rocket,
-  RotateCcw, X
+  ShieldCheck, Smartphone, Save,
+  Database, Download, Loader2, Rocket, RotateCcw,
+  X, GitBranch, CreditCard, Building2, ExternalLink, Plus
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { AdminTopbar } from './AdminComponents';
+import {
+  SystemCompanySettings, DEFAULT_SETTINGS,
+  subscribeSystemSettings, saveSystemSettings
+} from '../services/systemSettingsService';
 
 export interface UpdateRelease {
   id: string;
@@ -67,19 +71,17 @@ const INITIAL_RELEASES: UpdateRelease[] = [
   }
 ];
 
+type ConfigTab = 'geral' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups';
+
 export const AdminConfiguracoes: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'geral' | 'backups' | 'updates' | 'agt' | 'whatsapp' | 'email'>('backups');
+  const [activeTab, setActiveTab] = useState<ConfigTab>('geral');
+  const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  // Form states gerais
-  const [empresaNome, setEmpresaNome] = useState('Kivora Angola — Soluções Tecnológicas');
-  const [nifKivora, setNifKivora] = useState('5417089123');
-  const [emailSuporte, setEmailSuporte] = useState('suporte@kivora.ao');
-  const [whatsappApiToken, setWhatsappApiToken] = useState('kvr_live_wa_991823712893');
-  const [agtCertNumber, setAgtCertNumber] = useState('321/AGT/2026');
-  const [smtpServer, setSmtpServer] = useState('mail.kivora.ao');
+  // System Settings State
+  const [settings, setSettings] = useState<SystemCompanySettings>(DEFAULT_SETTINGS);
 
-  // Backups reais
+  // Backups
   const [isExporting, setIsExporting] = useState(false);
   const [lastBackup, setLastBackup] = useState<string | null>(localStorage.getItem('kivora_last_backup_date'));
 
@@ -91,6 +93,29 @@ export const AdminConfiguracoes: React.FC = () => {
   const [newChangelog, setNewChangelog] = useState('');
   const [newMandatory, setNewMandatory] = useState(false);
   const [newRollout, setNewRollout] = useState(100);
+
+  useEffect(() => {
+    const unsub = subscribeSystemSettings(setSettings);
+    return () => unsub();
+  }, []);
+
+  const handleChange = (field: keyof SystemCompanySettings, value: string) => {
+    setSettings(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await saveSystemSettings(settings);
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 4000);
+    } catch (err: any) {
+      alert('Erro ao guardar configurações: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const exportCollection = async (collectionName: string) => {
     try {
@@ -104,11 +129,12 @@ export const AdminConfiguracoes: React.FC = () => {
   const handleExportBackup = async () => {
     setIsExporting(true);
     try {
-      const [licenses, companies, trials, users] = await Promise.all([
+      const [licenses, companies, partners, partner_debts, tickets] = await Promise.all([
         exportCollection('licenses'),
         exportCollection('companies'),
-        exportCollection('trials'),
-        exportCollection('users'),
+        exportCollection('partners'),
+        exportCollection('partner_debts'),
+        exportCollection('support_tickets'),
       ]);
 
       const backupData = {
@@ -118,8 +144,9 @@ export const AdminConfiguracoes: React.FC = () => {
         collections: {
           licenses,
           companies,
-          trials,
-          users,
+          partners,
+          partner_debts,
+          tickets,
         }
       };
 
@@ -180,34 +207,40 @@ export const AdminConfiguracoes: React.FC = () => {
     }
   };
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
-  };
-
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50">
+    <div className="flex-1 overflow-y-auto bg-slate-50 font-sans pb-12">
       <AdminTopbar
-        title="Configurações, Backups & Atualizações OTA"
-        subtitle="Definições globais do sistema, cópias de segurança do Firestore e deployment de executáveis"
+        title="Configurações do Sistema & Empresa"
+        subtitle="Gerencie manualmente números de contacto, links de download, GitHub, IBANs e dados da AGT"
       />
 
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+        
+        {/* Toast de Sucesso */}
+        {savedSuccess && (
+          <div className="bg-emerald-600 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-lg shadow-emerald-600/20 flex items-center justify-between animate-fadeIn">
+            <span>✓ Configurações guardadas e sincronizadas no Firebase com sucesso!</span>
+            <button onClick={() => setSavedSuccess(false)} className="text-white/80 hover:text-white">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Navigation Tabs */}
         <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
           {[
-            { id: 'backups', label: 'Cópias de Segurança (Backups)', icon: <Database className="w-4 h-4" /> },
-            { id: 'updates', label: 'Atualizações OTA (Windows)', icon: <Rocket className="w-4 h-4" /> },
-            { id: 'geral', label: 'Geral & Empresa', icon: <Settings className="w-4 h-4" /> },
+            { id: 'geral', label: 'Geral & Empresa', icon: <Building2 className="w-4 h-4" /> },
+            { id: 'contactos', label: 'Telefones & WhatsApp', icon: <Smartphone className="w-4 h-4" /> },
+            { id: 'links', label: 'Links, GitHub & Download', icon: <GitBranch className="w-4 h-4" /> },
+            { id: 'bancos', label: 'Contas Bancárias (IBANs)', icon: <CreditCard className="w-4 h-4" /> },
             { id: 'agt', label: 'Certificação AGT', icon: <ShieldCheck className="w-4 h-4" /> },
-            { id: 'whatsapp', label: 'WhatsApp API', icon: <Smartphone className="w-4 h-4" /> },
-            { id: 'email', label: 'Servidor SMTP', icon: <Mail className="w-4 h-4" /> },
+            { id: 'updates', label: 'Atualizações OTA', icon: <Rocket className="w-4 h-4" /> },
+            { id: 'backups', label: 'Backups Nuvem', icon: <Database className="w-4 h-4" /> },
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+              onClick={() => setActiveTab(tab.id as ConfigTab)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 activeTab === tab.id
                   ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
@@ -219,371 +252,494 @@ export const AdminConfiguracoes: React.FC = () => {
           ))}
         </div>
 
-        {/* TAB 1: BACKUPS (Port de Backups.tsx de kivora_admin) */}
-        {activeTab === 'backups' && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* TAB 1: GERAL & EMPRESA */}
+        {activeTab === 'geral' && (
+          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-black text-slate-900">Backups e Segurança da Nuvem</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Exporte cópias de segurança JSON de todas as empresas, licenças e clientes na nuvem Firebase.
-                </p>
+                <h3 className="text-base font-black text-slate-900">Identificação da Empresa & Software</h3>
+                <p className="text-xs text-slate-500">Dados institucionais exibidos nos rodapés, propostas e termos</p>
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Nome Comercial do Software</label>
+                <input
+                  type="text"
+                  value={settings.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="Ex: Kivora"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Razão Social da Empresa Detentora</label>
+                <input
+                  type="text"
+                  value={settings.company}
+                  onChange={(e) => handleChange('company', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="Ex: Visual Software, Lda."
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">NIF da Empresa</label>
+                <input
+                  type="text"
+                  value={settings.nif}
+                  onChange={(e) => handleChange('nif', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="Ex: 5417089123"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Título Completo / Slogan</label>
+                <input
+                  type="text"
+                  value={settings.fullName}
+                  onChange={(e) => handleChange('fullName', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="Kivora – Sistema de Gestão Empresarial & Faturação Eletrónica AGT"
+                />
+              </div>
+
+              <div className="md:col-span-2 space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Morada da Sede / Atendimento Presencial</label>
+                <input
+                  type="text"
+                  value={settings.address}
+                  onChange={(e) => handleChange('address', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="Ex: Luanda, Angola – Atendimento Presencial & Assistência Técnica"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
               <button
-                onClick={handleExportBackup}
-                disabled={isExporting}
-                className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 flex items-center gap-2 disabled:opacity-70"
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
               >
-                {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                <span>{isExporting ? 'A Exportar Base de Dados...' : 'Descarregar Backup Completo JSON'}</span>
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Guardar Alterações</span>
               </button>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
-                    <Database className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-slate-900">Estado da Nuvem Firestore</h4>
-                    <p className="text-xs text-slate-500">Firebase Firestore Cloud (faturasimples)</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">
-                  <div className="flex justify-between py-1.5 border-b border-slate-50">
-                    <span className="text-slate-500">Coleções incluídas:</span>
-                    <strong className="text-slate-800">licenses, companies, trials, users</strong>
-                  </div>
-                  <div className="flex justify-between py-1.5 border-b border-slate-50">
-                    <span className="text-slate-500">Formato de Exportação:</span>
-                    <strong className="text-slate-800 font-mono">JSON Estruturado</strong>
-                  </div>
-                  <div className="flex justify-between py-1.5">
-                    <span className="text-slate-500">Último backup exportado:</span>
-                    <strong className="text-emerald-700">{lastBackup || 'Nenhum exportado nesta sessão'}</strong>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-slate-950 to-slate-900 rounded-3xl p-6 shadow-sm border border-slate-800 text-white space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white/10 text-white rounded-2xl flex items-center justify-center">
-                    <SaveAll className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white">Política de Proteção & Retenção</h4>
-                    <p className="text-xs text-slate-400">Recomendações Oficiais Kivora</p>
-                  </div>
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Recomenda-se exportar um backup JSON semanalmente. Guarde o arquivo descarregado num armazenamento seguro (Google Drive, disco externo ou cofre digital).
-                </p>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  As regras de segurança criptográfica no Firestore garantem que apenas a conta de administrador autenticada tem autorização para ler e exportar estes registos.
-                </p>
-              </div>
-            </div>
-          </div>
+          </form>
         )}
 
-        {/* TAB 2: UPDATES OTA (Port de Updates.tsx de kivora_admin) */}
+        {/* TAB 2: CONTACTOS & WHATSAPP */}
+        {activeTab === 'contactos' && (
+          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-base font-black text-slate-900">Contactos Oficiais & Linhas de Atendimento</h3>
+              <p className="text-xs text-slate-500">Configuração dos números de WhatsApp e emails de suporte do site</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Telefone / WhatsApp Oficial</label>
+                <input
+                  type="text"
+                  value={settings.phoneDisplay}
+                  onChange={(e) => handleChange('phoneDisplay', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="+244 923 456 789"
+                />
+                <p className="text-[10px] text-slate-400">O link do WhatsApp gerado automaticamente será: <code>https://wa.me/{settings.phoneDisplay.replace(/\D/g, '')}</code></p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Email Comercial / Vendas</label>
+                <input
+                  type="email"
+                  value={settings.email}
+                  onChange={(e) => handleChange('email', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="comercial@kivora.ao"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Email de Suporte Técnico</label>
+                <input
+                  type="email"
+                  value={settings.supportEmail}
+                  onChange={(e) => handleChange('supportEmail', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="suporte@kivora.ao"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Página do Instagram</label>
+                <input
+                  type="text"
+                  value={settings.instagramUrl}
+                  onChange={(e) => handleChange('instagramUrl', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="https://instagram.com/kivora.ao"
+                />
+              </div>
+
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="font-bold text-slate-700 uppercase">Página do Facebook</label>
+                <input
+                  type="text"
+                  value={settings.facebookUrl}
+                  onChange={(e) => handleChange('facebookUrl', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="https://facebook.com/kivora.ao"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Guardar Contactos</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* TAB 3: LINKS, GITHUB & DOWNLOAD */}
+        {activeTab === 'links' && (
+          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-base font-black text-slate-900">Links Externos, Repositório GitHub & Setup Windows</h3>
+              <p className="text-xs text-slate-500">Configure o link do GitHub e a URL direta para descarregar o instalador desktop</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="font-bold text-slate-700 uppercase flex items-center gap-2">
+                  <span>Link do Repositório no GitHub</span>
+                  <a href={settings.githubUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline inline-flex items-center gap-1">
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </label>
+                <input
+                  type="text"
+                  value={settings.githubUrl}
+                  onChange={(e) => handleChange('githubUrl', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="https://github.com/marcosdc20/kivora.ao"
+                />
+              </div>
+
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="font-bold text-slate-700 uppercase">Link de Download Direto do Instalador (.exe / .msi)</label>
+                <input
+                  type="text"
+                  value={settings.downloadUrl}
+                  onChange={(e) => handleChange('downloadUrl', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="https://cdn.kivora.ao/releases/Kivora_Setup_v2026.exe"
+                />
+                <p className="text-[10px] text-slate-400">Pode colar links do Firebase Storage, Google Drive direto ou servidor VPS.</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Versão do Executável Windows</label>
+                <input
+                  type="text"
+                  value={settings.releaseVersion}
+                  onChange={(e) => handleChange('releaseVersion', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="2026.08.13"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Data de Lançamento da Versão</label>
+                <input
+                  type="text"
+                  value={settings.releaseDate}
+                  onChange={(e) => handleChange('releaseDate', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="13 de Agosto de 2026"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Guardar Links & Versão</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* TAB 4: CONTAS BANCÁRIAS (IBANs) */}
+        {activeTab === 'bancos' && (
+          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-base font-black text-slate-900">Coordenadas Bancárias Oficiais (IBAN)</h3>
+              <p className="text-xs text-slate-500">Dados bancários para liquidação de dívidas de parceiros e pagamentos de licenças</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="font-bold text-slate-700 uppercase">Nome do Titular da Conta</label>
+                <input
+                  type="text"
+                  value={settings.ibanTitular}
+                  onChange={(e) => handleChange('ibanTitular', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="VISUAL SOFTWARE LIMITADA"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">IBAN Banco BAI</label>
+                <input
+                  type="text"
+                  value={settings.ibanBai}
+                  onChange={(e) => handleChange('ibanBai', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="AO06 0040 0000 1234 5678 9012 3"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">IBAN Banco BFA</label>
+                <input
+                  type="text"
+                  value={settings.ibanBfa}
+                  onChange={(e) => handleChange('ibanBfa', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="AO06 0006 0000 9876 5432 1098 7"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Guardar Coordenadas Bancárias</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* TAB 5: AGT */}
+        {activeTab === 'agt' && (
+          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-base font-black text-slate-900">Parâmetros de Validação Fiscal AGT</h3>
+              <p className="text-xs text-slate-500">Certificado oficial e número de registo emitido pela Administração Geral Tributária</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="font-bold text-slate-700 uppercase">Selo de Homologação / Certificado AGT</label>
+                <input
+                  type="text"
+                  value={settings.agtCertificate}
+                  onChange={(e) => handleChange('agtCertificate', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="Programa Validado nº 321/AGT/2026"
+                />
+                <p className="text-[10px] text-slate-400">Este texto é exibido no topo do portal do cliente e no rodapé do site.</p>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Guardar Parâmetros AGT</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* TAB 6: UPDATES OTA */}
         {activeTab === 'updates' && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
               <div>
-                <h3 className="text-base font-black text-slate-900">Gestor de Atualizações Over-The-Air (OTA)</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Distribuição de novas versões do executável Kivora Desktop ERP para os terminais em Angola.
-                </p>
+                <h3 className="text-base font-black text-slate-900">Atualizações de Executáveis Windows (OTA)</h3>
+                <p className="text-xs text-slate-500">Distribuição automatizada para postos de venda e servidores</p>
               </div>
               <button
                 onClick={() => setShowUpdateModal(true)}
-                className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 flex items-center gap-2"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-md shadow-blue-600/20 cursor-pointer"
               >
                 <Rocket className="w-4 h-4" />
-                <span>Publicar Nova Versão OTA</span>
+                <span>Publicar Nova Versão</span>
               </button>
             </div>
 
             <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
               <div className="overflow-x-auto w-full">
                 <table className="w-full text-xs text-left min-w-[650px]">
-                <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 uppercase font-black text-[10px] tracking-wider">
-                    <th className="p-4">Versão</th>
-                    <th className="p-4">Canal</th>
-                    <th className="p-4">Changelog / Novidades</th>
-                    <th className="p-4">Rollout</th>
-                    <th className="p-4">Estado</th>
-                    <th className="p-4 text-right">Ações</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {releases.map((rel) => (
-                    <tr key={rel.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-4">
-                        <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
-                          v{rel.version}
-                        </span>
-                        <p className="text-[10px] text-slate-400 mt-1">{rel.releaseDate}</p>
-                      </td>
-                      <td className="p-4 font-bold text-slate-700 uppercase text-[10px]">
-                        <span className={`px-2 py-0.5 rounded-full ${
-                          rel.channel === 'stable' ? 'bg-emerald-50 text-emerald-700' :
-                          rel.channel === 'beta' ? 'bg-purple-50 text-purple-700' : 'bg-red-50 text-red-700'
-                        }`}>
-                          {rel.channel}
-                        </span>
-                      </td>
-                      <td className="p-4 text-slate-600 max-w-xs font-medium whitespace-pre-line text-[11px]">
-                        {rel.changelog}
-                      </td>
-                      <td className="p-4 font-mono font-bold text-slate-800">{rel.rolloutPercentage}%</td>
-                      <td className="p-4">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          rel.status === 'published' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                          rel.status === 'testing' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                          'bg-red-50 text-red-700 border border-red-200'
-                        }`}>
-                          {rel.status === 'published' ? 'Em Produção' : rel.status === 'testing' ? 'Em Testes' : 'Rollback Efetuado'}
-                        </span>
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {rel.status !== 'rollback' && (
-                            <button
-                              onClick={() => handleRollback(rel)}
-                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Rollback de Emergência"
-                            >
-                              <RotateCcw className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                          <a
-                            href={rel.downloadUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Descarregar Executável"
-                          >
-                            <Download className="w-3.5 h-3.5" />
-                          </a>
-                        </div>
-                      </td>
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 uppercase font-black text-[10px] tracking-wider">
+                      <th className="p-4">Versão</th>
+                      <th className="p-4">Canal</th>
+                      <th className="p-4">Changelog</th>
+                      <th className="p-4">Rollout</th>
+                      <th className="p-4">Estado</th>
+                      <th className="p-4 text-right">Ações</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {releases.map((rel) => (
+                      <tr key={rel.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="p-4">
+                          <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                            v{rel.version}
+                          </span>
+                          <p className="text-[10px] text-slate-400 mt-1">{rel.releaseDate}</p>
+                        </td>
+                        <td className="p-4 font-bold text-slate-700 uppercase text-[10px]">
+                          <span className={`px-2 py-0.5 rounded-full ${
+                            rel.channel === 'stable' ? 'bg-emerald-50 text-emerald-700' :
+                            rel.channel === 'beta' ? 'bg-purple-50 text-purple-700' : 'bg-red-50 text-red-700'
+                          }`}>
+                            {rel.channel}
+                          </span>
+                        </td>
+                        <td className="p-4 text-slate-600 max-w-xs font-medium whitespace-pre-line text-[11px]">
+                          {rel.changelog}
+                        </td>
+                        <td className="p-4 font-mono font-bold text-slate-800">{rel.rolloutPercentage}%</td>
+                        <td className="p-4">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            rel.status === 'published' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                            rel.status === 'testing' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                            'bg-red-50 text-red-700 border border-red-200'
+                          }`}>
+                            {rel.status === 'published' ? 'Em Produção' : rel.status === 'testing' ? 'Em Testes' : 'Rollback Efetuado'}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {rel.status !== 'rollback' && (
+                              <button
+                                onClick={() => handleRollback(rel)}
+                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                title="Rollback"
+                              >
+                                <RotateCcw className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                            <a
+                              href={rel.downloadUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="Descarregar"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         )}
 
-        {/* TAB 3: GERAL */}
-        {activeTab === 'geral' && (
-          <form onSubmit={handleSave} className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
-            {savedSuccess && (
-              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-4 py-3 rounded-2xl animate-fadeIn">
-                ✓ Configurações guardadas com sucesso!
+        {/* TAB 7: BACKUPS NUVEM */}
+        {activeTab === 'backups' && (
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-base font-black text-slate-900">Exportação de Cópias de Segurança (Backups)</h3>
+                <p className="text-xs text-slate-500">Transfira um instantâneo JSON completo das coleções do Firebase Firestore</p>
               </div>
-            )}
-            <div className="space-y-4">
-              <h4 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-2">
-                Informações Institucionais da Kivora
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Razão Social</label>
-                  <input
-                    type="text"
-                    value={empresaNome}
-                    onChange={(e) => setEmpresaNome(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">NIF</label>
-                  <input
-                    type="text"
-                    value={nifKivora}
-                    onChange={(e) => setNifKivora(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Email Central de Atendimento</label>
-                  <input
-                    type="email"
-                    value={emailSuporte}
-                    onChange={(e) => setEmailSuporte(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium"
-                  />
-                </div>
-              </div>
+              <button
+                onClick={handleExportBackup}
+                disabled={isExporting}
+                className="bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md flex items-center gap-2 cursor-pointer"
+              >
+                {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                <span>{isExporting ? 'A Exportar...' : 'Descarregar Backup JSON'}</span>
+              </button>
             </div>
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2"
-            >
-              <Save className="w-4 h-4" />
-              <span>Guardar Alterações</span>
-            </button>
-          </form>
-        )}
 
-        {/* TAB 4: AGT */}
-        {activeTab === 'agt' && (
-          <form onSubmit={handleSave} className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
-            <div className="space-y-4 text-xs">
-              <h4 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-2">
-                Parâmetros Oficiais de Certificação AGT (DP 71/25)
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Número do Certificado AGT</label>
-                  <input
-                    type="text"
-                    value={agtCertNumber}
-                    onChange={(e) => setAgtCertNumber(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Chave RSA de Validação SAFT-AO</label>
-                  <input
-                    type="password"
-                    defaultValue="rsa_priv_agt_kivora_2026_production_key"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono"
-                  />
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
+                <p className="text-slate-400 font-bold uppercase text-[10px]">Último Backup Realizado</p>
+                <p className="font-mono font-bold text-slate-800">{lastBackup || 'Nenhum backup recente nesta máquina'}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
+                <p className="text-slate-400 font-bold uppercase text-[10px]">Proteção dos Dados</p>
+                <p className="font-bold text-emerald-600">✓ Sincronização Contínua no Firebase Firestore</p>
               </div>
             </div>
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2"
-            >
-              <Save className="w-4 h-4" />
-              <span>Guardar Parâmetros AGT</span>
-            </button>
-          </form>
-        )}
-
-        {/* TAB 5: WHATSAPP */}
-        {activeTab === 'whatsapp' && (
-          <form onSubmit={handleSave} className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
-            <div className="space-y-4 text-xs">
-              <h4 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-2">
-                Integração WhatsApp Business API
-              </h4>
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Token de API (Live)</label>
-                <input
-                  type="text"
-                  value={whatsappApiToken}
-                  onChange={(e) => setWhatsappApiToken(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold"
-                />
-              </div>
-            </div>
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2"
-            >
-              <Save className="w-4 h-4" />
-              <span>Guardar Configurações WhatsApp</span>
-            </button>
-          </form>
-        )}
-
-        {/* TAB 6: EMAIL */}
-        {activeTab === 'email' && (
-          <form onSubmit={handleSave} className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
-            <div className="space-y-4 text-xs">
-              <h4 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-2">
-                Servidor SMTP para Envio de Licenças & Alertas
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Host SMTP</label>
-                  <input
-                    type="text"
-                    value={smtpServer}
-                    onChange={(e) => setSmtpServer(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Porta SMTP</label>
-                  <input
-                    type="text"
-                    defaultValue="587 (TLS)"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold"
-                  />
-                </div>
-              </div>
-            </div>
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2"
-            >
-              <Save className="w-4 h-4" />
-              <span>Guardar SMTP</span>
-            </button>
-          </form>
+          </div>
         )}
 
       </div>
 
-      {/* Modal Publicar Nova Versão OTA */}
+      {/* OTA Publish Modal */}
       {showUpdateModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-slate-900">Publicar Atualização OTA para Kivora ERP</h3>
-              <button onClick={() => setShowUpdateModal(false)} className="text-slate-400 hover:text-slate-900">
-                <X className="w-4 h-4" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+                  <Rocket className="w-5 h-5" />
+                </div>
+                <h3 className="text-base font-black text-slate-900">Publicar Nova Versão OTA</h3>
+              </div>
+              <button onClick={() => setShowUpdateModal(false)} className="text-slate-400 hover:text-slate-700">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handlePublishRelease} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Número da Versão</label>
+                  <label className="font-bold text-slate-700 uppercase">Versão (Sem 'v')</label>
                   <input
                     type="text"
                     required
-                    placeholder="1.2.0-x64"
+                    placeholder="1.2.0"
                     value={newVersion}
                     onChange={(e) => setNewVersion(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-mono font-bold"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-mono font-bold"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Canal de Distribuição</label>
+                  <label className="font-bold text-slate-700 uppercase">Canal de Lançamento</label>
                   <select
                     value={newChannel}
                     onChange={(e) => setNewChannel(e.target.value as any)}
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-white font-bold"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-bold"
                   >
-                    <option value="stable">Stable (Produção)</option>
+                    <option value="stable">Estável (Produção)</option>
                     <option value="beta">Beta (Testes)</option>
                     <option value="hotfix">Hotfix Crítico</option>
                   </select>
                 </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Notas de Lançamento (Changelog)</label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="Melhorias na emissão de SAFT-AO e correção de arredondamento de moeda."
-                  value={newChangelog}
-                  onChange={(e) => setNewChangelog(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium"
-                />
               </div>
 
               <div className="space-y-1">
@@ -599,38 +755,52 @@ export const AdminConfiguracoes: React.FC = () => {
                 />
               </div>
 
-              <div className="flex items-center gap-2 pt-1">
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase">Changelog & Novidades</label>
+                <textarea
+                  required
+                  rows={3}
+                  placeholder="Descreva as correções fiscais ou melhorias do executável..."
+                  value={newChangelog}
+                  onChange={(e) => setNewChangelog(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 resize-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   id="mandatory"
                   checked={newMandatory}
                   onChange={(e) => setNewMandatory(e.target.checked)}
-                  className="rounded text-blue-600"
+                  className="rounded border-slate-300 text-blue-600"
                 />
-                <label htmlFor="mandatory" className="font-bold text-slate-700 cursor-pointer">
-                  Atualização Obrigatória (bloqueia versões antigas)
+                <label htmlFor="mandatory" className="font-medium text-slate-700">
+                  Atualização Obrigatória (Bloqueia versões antigas)
                 </label>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowUpdateModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100"
+                  className="px-4 py-2 rounded-xl text-slate-600 font-bold hover:bg-slate-100"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2"
                 >
-                  Publicar Versão OTA
+                  <Plus className="w-4 h-4" />
+                  <span>Publicar Release</span>
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
     </div>
   );
 };

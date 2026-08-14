@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { KivoraLogo } from './KivoraLogo';
-import { KIVORA_INFO } from '../data/kivoraData';
 import { PageId } from './Header';
-import { Phone, Mail, MapPin, ShieldCheck, Download } from 'lucide-react';
+import { Phone, Mail, MapPin, ShieldCheck, Download, GitBranch } from 'lucide-react';
+import { subscribeSystemSettings, getCachedSystemSettings, SystemCompanySettings } from '../services/systemSettingsService';
 
 interface FooterProps {
   onNavigatePage?: (page: PageId) => void;
@@ -10,6 +10,12 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
   const currentYear = new Date().getFullYear();
+  const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
+
+  useEffect(() => {
+    const unsub = subscribeSystemSettings(setSettings);
+    return () => unsub();
+  }, []);
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, page: PageId) => {
     e.preventDefault();
@@ -31,12 +37,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
             </div>
 
             <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
-              {KIVORA_INFO.fullName}. Software certificado pela AGT para emissão local de documentos comerciais e conformidade com o Decreto Presidencial n.º 71/25.
+              {settings.fullName}. Software certificado pela AGT para emissão local de documentos comerciais e conformidade com o Decreto Presidencial n.º 71/25.
             </p>
 
             <div className="flex items-center gap-2 p-3 bg-slate-900 rounded-xl border border-slate-800 text-slate-300 w-fit">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" strokeWidth={1.75} />
-              <span className="text-[11px] font-semibold">{KIVORA_INFO.agtCertificate}</span>
+              <span className="text-[11px] font-semibold">{settings.agtCertificate}</span>
             </div>
           </div>
 
@@ -128,6 +134,19 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
                   Suporte Técnico
                 </a>
               </li>
+              {settings.githubUrl && (
+                <li>
+                  <a
+                    href={settings.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors flex items-center gap-1.5 text-slate-400"
+                  >
+                    <GitBranch className="w-3.5 h-3.5" />
+                    <span>Repositório GitHub</span>
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
 
@@ -139,15 +158,19 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
             <ul className="space-y-2 text-slate-400">
               <li className="flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5 text-blue-400 shrink-0" strokeWidth={1.75} />
-                <span className="text-white font-medium">{KIVORA_INFO.phoneDisplay}</span>
+                <a href={settings.whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:text-blue-400 font-medium transition-colors">
+                  {settings.phoneDisplay}
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-blue-400 shrink-0" strokeWidth={1.75} />
-                <span>{KIVORA_INFO.email}</span>
+                <a href={`mailto:${settings.email}`} className="hover:text-white transition-colors">
+                  {settings.email}
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <MapPin className="w-3.5 h-3.5 text-blue-400 shrink-0" strokeWidth={1.75} />
-                <span>{KIVORA_INFO.address}</span>
+                <span>{settings.address}</span>
               </li>
             </ul>
           </div>
@@ -157,7 +180,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
         {/* Bottom Bar */}
         <div className="pt-10 mt-10 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500 text-[11px]">
           <p>
-            © {currentYear} {KIVORA_INFO.company}. Todos os direitos reservados.
+            © {currentYear} {settings.company}. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-6">
             <a
