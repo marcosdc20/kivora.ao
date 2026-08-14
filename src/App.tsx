@@ -8,8 +8,6 @@ import { SolucoesPage } from './pages/SolucoesPage';
 import { DownloadPage } from './pages/DownloadPage';
 import { ParceirosPage } from './pages/ParceirosPage';
 import { RecursosPage } from './pages/RecursosPage';
-import { AreaClientePage } from './pages/AreaClientePage';
-import { AreaParceiroPage } from './pages/AreaParceiroPage';
 import { FinanceiroPage } from './pages/FinanceiroPage';
 import { SuportePage } from './pages/SuportePage';
 import { NoticiasPage } from './pages/NoticiasPage';
@@ -19,6 +17,8 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
 import { DemoModal } from './components/DemoModal';
 import { AdminApp } from './admin/AdminApp';
+import { ClientPortalApp } from './client-portal/ClientPortalApp';
+import { PartnerPortalApp } from './partner-portal/PartnerPortalApp';
 import { KIVORA_MODULES } from './data/kivoraData';
 import { KivoraModule, NewsPost } from './types/kivora';
 
@@ -76,9 +76,23 @@ export function App() {
     setIsDemoModalOpen(true);
   };
 
+  // ─── Portais Executivos de Ecrã Completo ─────────────────────────────────────
+
   if (activePage === 'admin') {
     return (
       <AdminApp onExitAdmin={() => handleNavigatePage('home')} />
+    );
+  }
+
+  if (activePage === 'area-cliente') {
+    return (
+      <ClientPortalApp onLogout={() => handleNavigatePage('home')} />
+    );
+  }
+
+  if (activePage === 'area-parceiro') {
+    return (
+      <PartnerPortalApp onLogout={() => handleNavigatePage('home')} />
     );
   }
 
@@ -146,14 +160,6 @@ export function App() {
 
         {activePage === 'suporte' && (
           <SuportePage initialSubject={selectedForSupport} />
-        )}
-
-        {activePage === 'area-cliente' && (
-          <AreaClientePage onNavigatePage={handleNavigatePage} />
-        )}
-
-        {activePage === 'area-parceiro' && (
-          <AreaParceiroPage onNavigatePage={handleNavigatePage} />
         )}
 
         {activePage === 'modulos' && (

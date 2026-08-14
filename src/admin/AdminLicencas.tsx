@@ -11,6 +11,7 @@ import {
   releaseLicenseFromDevice, deleteLicense, extendLicenseExpiry,
   getPlanLabel, formatLicenseDate, calculateExpiresAt
 } from './services/licenseService';
+import { createClientAccount } from './services/authService';
 import type { KivoraLicense, PlanType } from './types';
 
 // ============================
@@ -440,6 +441,14 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
           status: 'active',
         });
       }
+
+      // Cria conta de acesso do cliente no Firebase
+      await createClientAccount({
+        email: email || `${companyNif}@kivora.ao`,
+        name: companyName,
+        nif: companyNif,
+        licenseKey: lic.id,
+      });
 
       setCreatedLicense(lic);
     } catch (err: any) {

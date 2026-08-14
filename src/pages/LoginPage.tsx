@@ -1,27 +1,60 @@
 import React, { useState } from 'react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { KIVORA_INFO } from '../data/kivoraData';
-import { Lock, Building, ShieldCheck, ArrowRight, ArrowLeft, Key, Handshake } from 'lucide-react';
+import { Lock, ShieldCheck, ArrowRight, ArrowLeft, Loader2, UserCheck, Sparkles } from 'lucide-react';
+import { loginUser, KivoraUserSession } from '../admin/services/authService';
 
 interface LoginPageProps {
   onBackToHome: () => void;
   onNavigatePage: (page: any) => void;
+  onLoginSuccess?: (session: KivoraUserSession) => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePage }) => {
-  const [portalType, setPortalType] = useState<'cliente' | 'parceiro'>('cliente');
-  const [formData, setFormData] = useState({
-    identifier: '',
-    password: '',
-  });
+export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePage, onLoginSuccess }) => {
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (portalType === 'cliente') {
-      onNavigatePage('area-cliente');
-    } else {
-      onNavigatePage('area-parceiro');
+    if (!identifier || !password) {
+      setError('Por favor preencha os dados de acesso.');
+      return;
     }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await loginUser(identifier, password);
+      if (res.success && res.session) {
+        if (onLoginSuccess) {
+          onLoginSuccess(res.session);
+        }
+
+        // Redirecionamento inteligente com base na função do utilizador
+        if (res.session.role === 'admin') {
+          onNavigatePage('admin');
+        } else if (res.session.role === 'parceiro') {
+          onNavigatePage('area-parceiro');
+        } else {
+          onNavigatePage('area-cliente');
+        }
+      } else {
+        setError(res.error || 'Credenciais inválidas. Verifique o seu email, NIF ou palavra-passe.');
+      }
+    } catch (err: any) {
+      setError('Erro de ligação ao Firebase: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQuickFill = (id: string, pass: string) => {
+    setIdentifier(id);
+    setPassword(pass);
+    setError(null);
   };
 
   return (
@@ -39,70 +72,44 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
         </button>
 
         {/* Card Form */}
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-8 space-y-6">
+        <div className="bg-white border border-slate-200 rounded-3xl shadow-sm p-8 space-y-6">
           
           <div className="text-center space-y-3">
             <div className="flex justify-center">
               <KivoraLogo variant="dark" size="lg" useOfficialImage={true} />
             </div>
-            <h2 className="text-lg font-extrabold text-slate-900">
-              {portalType === 'cliente' ? 'Área do Cliente Kivora' : 'Portal de Parceiros Revendedores'}
+            <h2 className="text-xl font-black text-slate-900">
+              Iniciar Sessão no Ecossistema Kivora
             </h2>
             <p className="text-xs text-slate-500 font-medium">
-              Aceda à sua conta online para gerir licenças, descarregar o Setup ou consultar comissões.
+              Acesso unificado para Administradores, Parceiros Revendedores e Empresas Clientes.
             </p>
           </div>
 
-          {/* Notice Box: Site Login vs Software Login */}
-          <div className="p-3 bg-blue-50/80 rounded-xl border border-blue-100 text-[11px] text-blue-900 leading-relaxed space-y-1">
-            <strong className="block text-blue-950 font-bold">Nota importante:</strong>
-            <span>O login neste site é para gestão de licenças e downloads. O login no software KIVORA é realizado localmente no seu computador.</span>
+          {/* Smart routing badge */}
+          <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 text-[11px] text-blue-900 leading-relaxed flex items-start gap-2.5">
+            <Sparkles className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+            <span>
+              <strong>Identificação Automática:</strong> O sistema reconhece o seu perfil e direciona-o instantaneamente para o seu portal correspondente.
+            </span>
           </div>
 
-          {/* Portal Selector */}
-          <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-bold">
-            <button
-              type="button"
-              onClick={() => setPortalType('cliente')}
-              className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                portalType === 'cliente'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Key className="w-3.5 h-3.5" />
-              <span>Área do Cliente</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setPortalType('parceiro')}
-              className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                portalType === 'parceiro'
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Handshake className="w-3.5 h-3.5" />
-              <span>Portal Parceiro</span>
-            </button>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-4">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
             
             <div>
               <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
-                {portalType === 'cliente' ? 'NIF da Empresa ou Email' : 'Código de Parceiro ou Email'}
+                Email, NIF da Empresa ou Código
               </label>
               <div className="relative">
-                <Building className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <UserCheck className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                 <input
                   type="text"
                   required
-                  placeholder={portalType === 'cliente' ? 'Ex: 5412398765' : 'Ex: PARCEIRO-AO-042'}
-                  value={formData.identifier}
-                  onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
-                  className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="Ex: admin@kivora.ao / 5412398765 / PARCEIRO-042"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-600 outline-none font-medium transition-all"
                 />
               </div>
             </div>
@@ -112,47 +119,83 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
                 Palavra-passe
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                 <input
                   type="password"
                   required
                   placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-600 outline-none"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-600 outline-none font-medium transition-all"
                 />
               </div>
             </div>
 
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-medium animate-fadeIn">
+                {error}
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-sm transition-all text-xs flex items-center justify-center gap-2"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-blue-600/20 transition-all text-xs flex items-center justify-center gap-2 disabled:bg-slate-300"
             >
-              <ShieldCheck className="w-4 h-4 text-blue-200" />
-              <span>Entrar na Minha Conta</span>
-              <ArrowRight className="w-4 h-4" />
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>A validar credenciais no Firebase...</span>
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="w-4 h-4 text-blue-200" />
+                  <span>Entrar no Portal</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
 
           </form>
 
-          <div className="pt-2 text-center text-[11px] text-slate-500 space-y-2">
-            <p>Esqueceu a palavra-passe ou necessita de acesso?</p>
-            <a href={`mailto:${KIVORA_INFO.supportEmail}`} className="text-blue-600 font-semibold hover:underline block">
-              Contactar Assistência Técnica Kivora
-            </a>
+          {/* Quick Demo Access Chips */}
+          <div className="pt-2 border-t border-slate-100 space-y-2">
+            <p className="text-[10px] uppercase font-bold text-slate-400 text-center tracking-wider">
+              Acesso Rápido de Demonstração
+            </p>
+            <div className="grid grid-cols-3 gap-1.5 text-[10px] font-bold">
+              <button
+                type="button"
+                onClick={() => handleQuickFill('admin@kivora.ao', 'admin123')}
+                className="py-1.5 px-2 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 transition-colors text-center truncate"
+                title="Admin: admin@kivora.ao"
+              >
+                👑 Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickFill('parceiro@kivora.ao', 'parceiro123')}
+                className="py-1.5 px-2 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 transition-colors text-center truncate"
+                title="Parceiro: parceiro@kivora.ao"
+              >
+                🤝 Parceiro
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickFill('5412398765', 'cliente123')}
+                className="py-1.5 px-2 rounded-lg bg-slate-100 hover:bg-violet-50 hover:text-violet-700 text-slate-600 transition-colors text-center truncate"
+                title="Cliente: 5412398765"
+              >
+                🏢 Cliente
+              </button>
+            </div>
+          </div>
 
-            {onNavigatePage && (
-              <div className="pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => onNavigatePage('admin')}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 px-4 py-2 rounded-xl transition-all border border-slate-200"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Entrar no Painel Executivo Admin</span>
-                </button>
-              </div>
-            )}
+          <div className="text-center text-[11px] text-slate-500 pt-1">
+            <p>Precisa de suporte ou recuperação de acesso?</p>
+            <a href={`mailto:${KIVORA_INFO.supportEmail}`} className="text-blue-600 font-semibold hover:underline block mt-0.5">
+              Contactar Equipa Kivora
+            </a>
           </div>
 
         </div>
