@@ -5,6 +5,7 @@ import {
   MessageSquare, Sparkles
 } from 'lucide-react';
 import { KivoraLogo } from '../components/KivoraLogo';
+import { KIVORA_INFO } from '../data/kivoraData';
 import { db } from '../lib/firebase';
 import { collection, addDoc, setDoc, doc } from 'firebase/firestore';
 
@@ -96,7 +97,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
 
   const getWhatsAppLink = () => {
     const msg = `Olá Equipa Kivora! Submeti a minha candidatura para me tornar Parceiro Oficial Kivora.%0A%0A*Protocolo:* ${submittedProtocol}%0A*Nome:* ${nome}%0A*Empresa:* ${empresa || nome}%0A*NIF:* ${nif}%0A*Província:* ${provincia}%0A%0AAguardo a análise e envio das credenciais de acesso ao Portal do Parceiro.`;
-    return `https://wa.me/244923000000?text=${msg}`;
+    return `https://wa.me/${KIVORA_INFO.phoneRaw}?text=${msg}`;
   };
 
   return (

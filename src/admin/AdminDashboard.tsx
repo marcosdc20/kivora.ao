@@ -325,8 +325,8 @@ export const AdminDashboard: React.FC = () => {
             <p className="text-xs text-slate-400">Registadas em tempo real na base de dados Firebase</p>
           </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-xs text-left min-w-[600px]">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 uppercase font-black text-[10px] tracking-wider">
                 <th className="p-4">Chave KVRA</th>

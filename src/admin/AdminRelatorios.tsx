@@ -296,7 +296,8 @@ export const AdminRelatorios: React.FC = () => {
             </div>
           </div>
 
-          <table className="w-full text-xs">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-xs min-w-[650px]">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 font-black uppercase text-[10px] tracking-wider text-left">
                 <th className="px-5 py-3.5">Província</th>
@@ -330,6 +331,7 @@ export const AdminRelatorios: React.FC = () => {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </div>

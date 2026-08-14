@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
 import { ArrowRight, Mail, Phone, MessageCircle } from 'lucide-react';
+import { KIVORA_INFO } from '../data/kivoraData';
 
 interface SuportePageProps {
   initialSubject?: string;
@@ -38,23 +39,26 @@ export const SuportePage: React.FC<SuportePageProps> = () => {
           {[
             {
               icon: <MessageCircle className="w-6 h-6" strokeWidth={1.75} />,
-              title: 'Chat ao Vivo',
+              title: 'Chat ao Vivo & WhatsApp',
               desc: 'Resposta imediata em dias úteis das 08h às 18h.',
-              action: 'Iniciar Chat',
+              action: 'Iniciar WhatsApp',
+              href: KIVORA_INFO.whatsapp,
               color: 'blue',
             },
             {
               icon: <Mail className="w-6 h-6" strokeWidth={1.75} />,
               title: 'Email de Suporte',
-              desc: 'suporte@kivora.ao — resposta em até 4 horas úteis.',
+              desc: `${KIVORA_INFO.supportEmail} — resposta em até 4 horas úteis.`,
               action: 'Enviar Email',
+              href: `mailto:${KIVORA_INFO.supportEmail}`,
               color: 'slate',
             },
             {
               icon: <Phone className="w-6 h-6" strokeWidth={1.75} />,
               title: 'Linha Telefónica',
-              desc: '+244 923 000 000 — Segunda a Sexta, 08h–17h30.',
+              desc: `${KIVORA_INFO.phoneDisplay} — Segunda a Sexta, 08h–17h30.`,
               action: 'Ligar Agora',
+              href: `tel:${KIVORA_INFO.phoneRaw}`,
               color: 'slate',
             },
           ].map((item, i) => (
@@ -73,12 +77,17 @@ export const SuportePage: React.FC<SuportePageProps> = () => {
                 <h3 className="text-base font-black text-slate-950 mb-1.5">{item.title}</h3>
                 <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
               </div>
-              <button className={`inline-flex items-center gap-2 font-bold text-sm group ${
-                item.color === 'blue' ? 'text-blue-600 hover:text-blue-800' : 'text-slate-700 hover:text-slate-950'
-              } transition-colors`}>
+              <a
+                href={item.href}
+                target={item.href.startsWith('http') ? '_blank' : undefined}
+                rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                className={`inline-flex items-center gap-2 font-bold text-sm group ${
+                  item.color === 'blue' ? 'text-blue-600 hover:text-blue-800' : 'text-slate-700 hover:text-slate-950'
+                } transition-colors`}
+              >
                 <span>{item.action}</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" strokeWidth={2} />
-              </button>
+              </a>
             </div>
           ))}
         </div>
