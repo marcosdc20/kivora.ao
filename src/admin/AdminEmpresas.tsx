@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { AdminTopbar, StatusBadge } from './AdminComponents';
 import { useCompanies, useLicenses } from './hooks/useFirebase';
+import { FirebaseAuthModal } from './components/FirebaseAuthModal';
 import { Empresa } from './types';
 
 // ============================
@@ -18,6 +19,7 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
   const { companies, loading, error, addCompany, deleteCompany, refresh } = useCompanies();
   const { licenses } = useLicenses();
 
+  const [modalAuth, setModalAuth] = useState(false);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('todos');
   const [modalNova, setModalNova] = useState(false);
@@ -137,17 +139,28 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
 
       <div className="p-6 space-y-5">
         {error && (
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 flex items-center justify-between">
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
             <div>
-              <p className="font-bold">Aviso de Sincronização:</p>
-              <p className="text-[11px] text-amber-700 mt-0.5">{error}</p>
+              <p className="font-bold flex items-center gap-1.5 text-amber-900">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                Aviso de Sincronização com o Firestore:
+              </p>
+              <p className="text-[11px] text-amber-800 mt-1">{error}</p>
             </div>
-            <button
-              onClick={() => refresh()}
-              className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-3 py-1.5 rounded-xl shrink-0"
-            >
-              Tentar Novamente
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setModalAuth(true)}
+                className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-sm transition-all"
+              >
+                🔐 Iniciar Sessão Firebase
+              </button>
+              <button
+                onClick={() => refresh()}
+                className="bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold text-xs px-3 py-2 rounded-xl"
+              >
+                Recarregar
+              </button>
+            </div>
           </div>
         )}
         {/* Filtros de Status */}
@@ -348,6 +361,15 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
           </div>
         </div>
       )}
+
+      {/* Modal de Autenticacao Firebase Admin */}
+      <FirebaseAuthModal
+        isOpen={modalAuth}
+        onClose={() => setModalAuth(false)}
+        onSuccess={() => {
+          refresh();
+        }}
+      />
     </div>
   );
 };
