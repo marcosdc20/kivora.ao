@@ -70,12 +70,15 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   useEffect(() => {
     try {
       const unsub = onSnapshot(collection(db, 'partners'), (snapshot) => {
-        const list: Partner[] = [];
+        const map = new Map<string, Partner>();
         snapshot.forEach((docSnap) => {
           const d = docSnap.data();
-          list.push({
+          const pCode = (d.code || docSnap.id).toUpperCase().trim();
+          const existing = map.get(pCode);
+
+          const item: Partner = {
             id: docSnap.id,
-            code: d.code || docSnap.id,
+            code: pCode,
             name: d.name || d.responsible || d.nome_responsavel || 'Parceiro Sem Nome',
             email: d.email || '',
             phone: d.phone || d.telefone || '',
@@ -85,9 +88,18 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             total_sales: Number(d.total_sales) || 0,
             status: d.status || 'pending',
             createdAt: Number(d.createdAt) || Number(d.created_at) || Date.now(),
-          });
+          };
+
+          // Prioritize 'active' or most recent if duplicated
+          if (!existing) {
+            map.set(pCode, item);
+          } else if (existing.status !== 'active' && item.status === 'active') {
+            map.set(pCode, item);
+          } else if (item.createdAt > existing.createdAt && item.status === existing.status) {
+            map.set(pCode, item);
+          }
         });
-        setPartners(list);
+        setPartners(Array.from(map.values()));
         setLoading(false);
       }, (err) => { console.warn('Erro partners:', err); setLoading(false); });
       return () => unsub();
@@ -109,7 +121,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
   useEffect(() => {
     if (selectedPartner) {
-      setPartnerDebts(allDebts.filter(d => d.partner_id === selectedPartner.id));
+      setPartnerDebts(allDebts.filter(d => d.partner_id === selectedPartner.id || d.partner_id === selectedPartner.code));
       setSelectedDebtIds([]);
     }
   }, [selectedPartner, allDebts]);
@@ -120,9 +132,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const totalReceivedAoa = allDebts.filter(d => d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
 
   const getPartnerPendingDebt = (pid: string) =>
-    allDebts.filter(d => d.partner_id === pid && !d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
+    allDebts.filter(d => (d.partner_id === pid || (partners.find(p => p.id === pid)?.code && d.partner_id === partners.find(p => p.id === pid)?.code)) && !d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
   const getPartnerLicenseCount = (pid: string) =>
-    allDebts.filter(d => d.partner_id === pid).length;
+    allDebts.filter(d => d.partner_id === pid || (partners.find(p => p.id === pid)?.code && d.partner_id === partners.find(p => p.id === pid)?.code)).length;
 
   const filteredPartners = (tab === 'candidaturas' ? pendingPartners : partners).filter(p => {
     if (!search) return true;
@@ -152,7 +164,10 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     setApproving(p.id);
     const pwd = `kivora${Math.floor(1000 + Math.random() * 9000)}`;
     try {
-      await setDoc(doc(db, 'partners', p.id), { status: 'active' }, { merge: true });
+      await setDoc(doc(db, 'partners', p.id), { status: 'active', code: p.code }, { merge: true });
+      if (p.id !== p.code) {
+        await setDoc(doc(db, 'partners', p.code), { status: 'active', code: p.code }, { merge: true });
+      }
       await createOrApprovePartnerAccount({ nome: p.name, email: p.email, phone: p.phone, region: p.region, partnerCode: p.code });
       setCredentialsModal({ open: true, partnerName: p.name, email: p.email, password: pwd, partnerCode: p.code, phone: p.phone });
     } catch (err: any) { alert('Erro ao aprovar: ' + err.message); }
@@ -162,8 +177,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const handleToggleSuspend = async (p: Partner) => {
     const ns = p.status === 'active' ? 'suspended' : 'active';
     if (!confirm(`${ns === 'suspended' ? 'Suspender' : 'Reativar'} ${p.name}?`)) return;
-    try { await setDoc(doc(db, 'partners', p.id), { status: ns }, { merge: true }); }
-    catch (err: any) { alert('Erro: ' + err.message); }
+    try {
+      await setDoc(doc(db, 'partners', p.id), { status: ns }, { merge: true });
+      if (p.id !== p.code) {
+        await setDoc(doc(db, 'partners', p.code), { status: ns }, { merge: true });
+      }
+    } catch (err: any) { alert('Erro: ' + err.message); }
   };
 
   const handleMarkPaid = async () => {

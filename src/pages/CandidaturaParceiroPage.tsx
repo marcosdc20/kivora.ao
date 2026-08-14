@@ -65,7 +65,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
       await addDoc(collection(db, 'partner_applications'), applicationData);
 
       // 2. Grava também na coleção `partners` como status 'pending'
-      const partnerDocId = (nif || tempPartnerCode).replace(/[^a-zA-Z0-9]/g, '_');
+      const partnerDocId = tempPartnerCode.toUpperCase().trim();
       await setDoc(doc(db, 'partners', partnerDocId), {
         id: partnerDocId,
         code: tempPartnerCode,
