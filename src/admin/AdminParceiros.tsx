@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Handshake, Plus, Eye, Check, X,
   DollarSign, Users, CheckCircle2, Loader2, Copy,
-  Award
+  Award, Key, MessageSquare
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
 import { createOrApprovePartnerAccount } from './services/authService';
+import { db } from '../lib/firebase';
+import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
 
 export interface Partner {
   id: string;
@@ -89,6 +91,15 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const [showModal, setShowModal] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [approving, setApproving] = useState<string | null>(null);
+  const [credentialsModal, setCredentialsModal] = useState<{
+    open: boolean;
+    partnerName: string;
+    email: string;
+    password: string;
+    partnerCode: string;
+    phone: string;
+  } | null>(null);
+  const [copiedCredentials, setCopiedCredentials] = useState(false);
 
   // Form State
   const [name, setName] = useState('');
@@ -98,18 +109,63 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const [region, setRegion] = useState('Luanda');
   const [rate, setRate] = useState<number>(20);
 
+  // Sincronização em Tempo Real com o Firestore
+  useEffect(() => {
+    try {
+      const unsub = onSnapshot(collection(db, 'partners'), (snapshot) => {
+        const firePartners: Partner[] = [];
+        snapshot.forEach((docSnap) => {
+          const d = docSnap.data();
+          firePartners.push({
+            id: docSnap.id,
+            code: d.code || docSnap.id,
+            name: d.name || d.responsible || 'Parceiro Sem Nome',
+            email: d.email || '',
+            phone: d.phone || '',
+            region: d.region || 'Luanda',
+            commission_rate: Number(d.commission_rate) || 20,
+            total_sales: Number(d.total_sales) || 0,
+            balance_aoa: Number(d.balance_aoa) || 0,
+            status: d.status || 'pending',
+            createdAt: Number(d.createdAt) || Date.now(),
+          });
+        });
+
+        if (firePartners.length > 0) {
+          // Merge com mock data para exibição rica
+          const combined = [...firePartners];
+          INITIAL_PARTNERS.forEach((ip) => {
+            if (!combined.some(c => c.code === ip.code || c.email === ip.email)) {
+              combined.push(ip);
+            }
+          });
+          setPartners(combined);
+        }
+      }, (err) => {
+        console.warn('Erro ao escutar coleção partners:', err);
+      });
+
+      return () => unsub();
+    } catch (e) {
+      console.warn(e);
+    }
+  }, []);
+
   const activePartners = partners.filter(p => p.status === 'active');
   const pendingPartners = partners.filter(p => p.status === 'pending');
   const totalSalesAoa = partners.reduce((acc, p) => acc + p.total_sales, 0);
   const totalCommissionsAoa = partners.reduce((acc, p) => acc + p.balance_aoa, 0);
 
-  const handleAddPartner = (e: React.FormEvent) => {
+  const handleAddPartner = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !code) return;
 
+    const partnerCodeUpper = code.toUpperCase().trim();
+    const defaultPassword = `kivora${Math.floor(1000 + Math.random() * 9000)}`;
+
     const newP: Partner = {
-      id: Date.now().toString(),
-      code: code.toUpperCase().trim(),
+      id: partnerCodeUpper,
+      code: partnerCodeUpper,
       name,
       email,
       phone,
@@ -121,17 +177,51 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       createdAt: Date.now()
     };
 
-    setPartners([newP, ...partners]);
-    setShowModal(false);
-    setName('');
-    setCode('');
-    setEmail('');
-    setPhone('');
-    alert(`Parceiro ${newP.name} registado com sucesso! Link: https://kivora.ao/ref/${newP.code}`);
+    try {
+      await setDoc(doc(db, 'partners', partnerCodeUpper), {
+        id: partnerCodeUpper,
+        code: partnerCodeUpper,
+        name,
+        email,
+        phone,
+        region,
+        commission_rate: rate,
+        total_sales: 0,
+        balance_aoa: 0,
+        status: 'active',
+        createdAt: Date.now(),
+      }, { merge: true });
+
+      await createOrApprovePartnerAccount({
+        nome: name,
+        email,
+        phone,
+        region,
+        partnerCode: partnerCodeUpper,
+      });
+
+      setPartners([newP, ...partners.filter(p => p.code !== partnerCodeUpper)]);
+      setShowModal(false);
+      setName('');
+      setCode('');
+      setEmail('');
+      setPhone('');
+
+      setCredentialsModal({
+        open: true,
+        partnerName: name,
+        email,
+        password: defaultPassword,
+        partnerCode: partnerCodeUpper,
+        phone,
+      });
+    } catch (err: any) {
+      alert('Erro ao registar parceiro no Firebase: ' + err.message);
+    }
   };
 
   const copyRefLink = (p: Partner) => {
-    const link = `https://kivora.ao/ref/${p.code}`;
+    const link = `https://kivora.ao/?ref=${p.code}`;
     navigator.clipboard.writeText(link);
     setCopiedCode(p.code);
     setTimeout(() => setCopiedCode(null), 2500);
@@ -139,7 +229,15 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
   const handleApprovePartner = async (partner: Partner) => {
     setApproving(partner.id);
+    const defaultPassword = `kivora${Math.floor(1000 + Math.random() * 9000)}`;
+
     try {
+      // 1. Atualiza na coleção `partners`
+      await setDoc(doc(db, 'partners', partner.id), {
+        status: 'active',
+      }, { merge: true });
+
+      // 2. Cria conta de login em `users`
       await createOrApprovePartnerAccount({
         nome: partner.name,
         email: partner.email,
@@ -152,9 +250,17 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         p.id === partner.id ? { ...p, status: 'active' } : p
       ));
 
-      alert(`Candidatura aprovada! Conta ativada no Firebase com o código de parceiro ${partner.code}.`);
+      // Abre Modal com as credenciais geradas
+      setCredentialsModal({
+        open: true,
+        partnerName: partner.name,
+        email: partner.email,
+        password: defaultPassword,
+        partnerCode: partner.code,
+        phone: partner.phone,
+      });
     } catch (err: any) {
-      alert('Erro ao aprovar parceiro: ' + err.message);
+      alert('Erro ao aprovar parceiro no Firebase: ' + err.message);
     } finally {
       setApproving(null);
     }
@@ -487,6 +593,94 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 Fechar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Credenciais de Acesso Geradas */}
+      {credentialsModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 animate-fadeIn">
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <Key className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Acesso de Parceiro Ativado!</h3>
+                  <p className="text-xs text-slate-500">Credenciais oficiais gravadas no Firebase</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setCredentialsModal(null)}
+                className="text-slate-400 hover:text-slate-900"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Caixa de Credenciais */}
+            <div className="bg-slate-950 text-white rounded-2xl p-5 space-y-3 font-mono text-xs select-all border border-slate-800">
+              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span className="text-slate-400 font-sans">Parceiro:</span>
+                <span className="font-bold text-white font-sans">{credentialsModal.partnerName}</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span className="text-slate-400 font-sans">Código Único:</span>
+                <span className="font-bold text-emerald-400">{credentialsModal.partnerCode}</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span className="text-slate-400 font-sans">Email de Login:</span>
+                <span className="font-bold text-blue-300">{credentialsModal.email}</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span className="text-slate-400 font-sans">Palavra-passe:</span>
+                <span className="font-bold text-amber-300">{credentialsModal.password}</span>
+              </div>
+              <div className="flex justify-between items-center pt-1 text-[11px]">
+                <span className="text-slate-400 font-sans">Portal de Acesso:</span>
+                <span className="text-slate-300">https://kivora.ao/#login</span>
+              </div>
+            </div>
+
+            {/* Ações de Envio */}
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    const text = `🎉 Parabéns! A sua candidatura a Parceiro Oficial KIVORA foi aprovada com sucesso.\n\n*Dados de Acesso ao Portal do Parceiro:*\n👤 Email: ${credentialsModal.email}\n🔑 Senha: ${credentialsModal.password}\n🏷️ Código: ${credentialsModal.partnerCode}\n🌐 Acesso: https://kivora.ao/#login\n\nAceda ao portal para emitir licenças e acompanhar as suas comissões.`;
+                    navigator.clipboard.writeText(text);
+                    setCopiedCredentials(true);
+                    setTimeout(() => setCopiedCredentials(false), 2500);
+                  }}
+                  className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all"
+                >
+                  {copiedCredentials ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                  <span>{copiedCredentials ? 'Credenciais Copiadas!' : 'Copiar Mensagem'}</span>
+                </button>
+
+                {credentialsModal.phone && (
+                  <a
+                    href={`https://wa.me/${credentialsModal.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`🎉 Parabéns! A sua candidatura a Parceiro Oficial KIVORA foi aprovada.\n\n*Dados de Acesso:*\n👤 Email: ${credentialsModal.email}\n🔑 Senha: ${credentialsModal.password}\n🏷️ Código: ${credentialsModal.partnerCode}\n🌐 Entrar: https://kivora.ao/#login`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-3 rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all shrink-0"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Enviar WhatsApp</span>
+                  </a>
+                )}
+              </div>
+
+              <button
+                onClick={() => setCredentialsModal(null)}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition-all"
+              >
+                Concluir & Fechar
+              </button>
+            </div>
+
           </div>
         </div>
       )}

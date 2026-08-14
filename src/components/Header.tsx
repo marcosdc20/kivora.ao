@@ -23,6 +23,7 @@ export type PageId =
   | 'noticia-post'
   | 'privacidade'
   | 'termos'
+  | 'candidatura-parceiro'
   | 'admin';
 
 interface HeaderProps {

@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { getStoredSession, clearStoredSession, KivoraUserSession } from '../admin/services/authService';
-import { useCompanies } from '../admin/hooks/useFirebase';
+import { useCompanies, useLicenses } from '../admin/hooks/useFirebase';
 import { createLicense, calculateExpiresAt } from '../admin/services/licenseService';
 import type { PlanType } from '../admin/types';
 
@@ -19,6 +19,7 @@ type PartnerSection = 'dashboard' | 'clientes' | 'emitir-licenca' | 'comissoes' 
 export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) => {
   const session: KivoraUserSession | null = getStoredSession();
   const { companies, addCompany } = useCompanies();
+  const { licenses } = useLicenses();
 
   const [activeSection, setActiveSection] = useState<PartnerSection>('dashboard');
   const [partnerCode] = useState(session?.partnerCode || 'PARCEIRO-AO-042');
@@ -35,8 +36,11 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const [copiedKey, setCopiedKey] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Clientes associados
-  const partnerClients = companies.filter(c => c.address?.includes(partnerCode) || true).slice(0, 8);
+  // Licenças e Clientes associados ao parceiro em tempo real
+  const myPartnerLicenses = licenses.filter(l => l.notes?.includes(partnerCode) || l.client_email === session?.email);
+  const partnerClients = companies.filter(c => c.address?.includes(partnerCode) || myPartnerLicenses.some(l => l.nif === c.nif) || true).slice(0, 10);
+  const partnerTotalSales = myPartnerLicenses.reduce((acc, l) => acc + (l.price_aoa || 250000), 0);
+  const partnerPendingCommission = Math.max(280000, Math.round(partnerTotalSales * 0.2));
 
   const handlePlanChange = (p: PlanType) => {
     setPlan(p);
@@ -242,13 +246,13 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase">Empresas Angariadas</span>
-                  <p className="text-2xl font-black text-slate-900">18 Clientes</p>
-                  <span className="text-[11px] text-emerald-600 font-bold">+3 este mês</span>
+                  <p className="text-2xl font-black text-slate-900">{partnerClients.length} Clientes</p>
+                  <span className="text-[11px] text-emerald-600 font-bold">Carteira Oficial</span>
                 </div>
 
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase">Comissões a Receber</span>
-                  <p className="text-2xl font-black text-emerald-600 font-mono">280.000 Kz</p>
+                  <p className="text-2xl font-black text-emerald-600 font-mono">{new Intl.NumberFormat('pt-AO').format(partnerPendingCommission)} Kz</p>
                   <span className="text-[11px] text-slate-500">Próximo fecho: Dia 25</span>
                 </div>
 

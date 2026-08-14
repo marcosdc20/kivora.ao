@@ -15,6 +15,7 @@ import { NoticiaDetailPage } from './pages/NoticiaDetailPage';
 import { LoginPage } from './pages/LoginPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
+import { CandidaturaParceiroPage } from './pages/CandidaturaParceiroPage';
 import { DemoModal } from './components/DemoModal';
 import { AdminApp } from './admin/AdminApp';
 import { ClientPortalApp } from './client-portal/ClientPortalApp';
@@ -151,7 +152,14 @@ export function App() {
         )}
 
         {activePage === 'parceiros' && (
-          <ParceirosPage />
+          <ParceirosPage onNavigatePage={handleNavigatePage} />
+        )}
+
+        {activePage === 'candidatura-parceiro' && (
+          <CandidaturaParceiroPage
+            onBack={() => handleNavigatePage('parceiros')}
+            onNavigateHome={() => handleNavigatePage('home')}
+          />
         )}
 
         {activePage === 'recursos' && (

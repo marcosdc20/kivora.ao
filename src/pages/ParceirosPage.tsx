@@ -14,8 +14,18 @@ function useScrollReveal() {
   }, []);
 }
 
-export const ParceirosPage: React.FC = () => {
+interface ParceirosPageProps {
+  onNavigatePage?: (page: any) => void;
+}
+
+export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) => {
   useScrollReveal();
+
+  const handleGoCandidatura = () => {
+    if (onNavigatePage) {
+      onNavigatePage('candidatura-parceiro');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white text-slate-900 page-enter">
@@ -57,15 +67,15 @@ export const ParceirosPage: React.FC = () => {
           <Users className="w-10 h-10 text-blue-400 mx-auto" strokeWidth={1.5} />
           <h2 className="text-3xl font-black">Candidate-se ao Programa de Parceiros</h2>
           <p className="text-slate-400 text-sm leading-relaxed max-w-lg mx-auto">
-            Preencha o formulário de candidatura e a nossa equipa comercial entrará em contacto em até 48 horas úteis.
+            Aceda à página exclusiva de candidatura com todos os requisitos oficiais e formulário de credenciamento.
           </p>
-          <a
-            href="mailto:parceiros@kivora.ao"
+          <button
+            onClick={handleGoCandidatura}
             className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm px-8 py-4 rounded-2xl shadow-lg shadow-blue-600/30 transition-all hover:-translate-y-0.5"
           >
-            <span>Enviar Candidatura</span>
+            <span>Enviar Candidatura Oficial</span>
             <ArrowRight className="w-4 h-4" strokeWidth={2} />
-          </a>
+          </button>
         </div>
       </section>
 
