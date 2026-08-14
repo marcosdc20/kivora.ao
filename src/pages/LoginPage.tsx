@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { KIVORA_INFO } from '../data/kivoraData';
 import { Lock, ShieldCheck, ArrowRight, ArrowLeft, Loader2, UserCheck, Sparkles } from 'lucide-react';
-import { loginUser, KivoraUserSession } from '../admin/services/authService';
+import { loginUser, getStoredSession, KivoraUserSession } from '../admin/services/authService';
 
 interface LoginPageProps {
   onBackToHome: () => void;
@@ -15,6 +15,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Se já tiver uma sessão válida ativa, redireciona automaticamente para o portal correspondente
+  useEffect(() => {
+    const existing = getStoredSession();
+    if (existing && existing.status === 'active') {
+      if (existing.role === 'admin') {
+        onNavigatePage('admin');
+      } else if (existing.role === 'parceiro') {
+        onNavigatePage('area-parceiro');
+      } else {
+        onNavigatePage('area-cliente');
+      }
+    }
+  }, [onNavigatePage]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
