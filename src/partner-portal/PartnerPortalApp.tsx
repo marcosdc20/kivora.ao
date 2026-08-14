@@ -218,6 +218,26 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 </div>
               </div>
 
+              {/* Link de Recomendação do Parceiro */}
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5">
+                  <span className="p-2 rounded-xl bg-emerald-600 text-white font-black text-xs">REF</span>
+                  <div>
+                    <p className="font-bold text-emerald-950">Seu Link de Recomendação Oficial:</p>
+                    <p className="text-emerald-800 font-mono text-[11px]">https://kivora.ao/?ref={partnerCode}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(`https://kivora.ao/?ref=${partnerCode}`);
+                    alert('Link de parceiro copiado com sucesso!');
+                  }}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl shrink-0 shadow-sm"
+                >
+                  Copiar Link
+                </button>
+              </div>
+
               {/* Grid de KPIs */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">

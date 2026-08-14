@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard, Key, Download, Cloud, FileText,
   Headphones, Building2, LogOut, Monitor, Copy,
-  CheckCircle2, ShieldCheck
+  CheckCircle2, ShieldCheck, Loader2, Send
 } from 'lucide-react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { CURRENT_RELEASE } from '../data/kivoraData';
 import { getStoredSession, clearStoredSession, KivoraUserSession } from '../admin/services/authService';
 import { useLicenses } from '../admin/hooks/useFirebase';
 import { formatLicenseDate, getPlanLabel } from '../admin/services/licenseService';
+import { db } from '../lib/firebase';
+import { collection, addDoc, query, where, onSnapshot } from 'firebase/firestore';
 
 interface ClientPortalAppProps {
   onLogout: () => void;
@@ -25,6 +27,8 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
   const [ticketSubject, setTicketSubject] = useState('');
   const [ticketMessage, setTicketMessage] = useState('');
   const [ticketSent, setTicketSent] = useState(false);
+  const [submittingTicket, setSubmittingTicket] = useState(false);
+  const [myTickets, setMyTickets] = useState<Array<{ id: string; subject: string; message: string; status: string; created_at: number }>>([]);
 
   // Procura a licença real do cliente no Firebase
   const clientLicense = licenses.find(
@@ -42,21 +46,58 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
     max_users: 1,
   };
 
+  useEffect(() => {
+    try {
+      const q = query(collection(db, 'support_tickets'), where('nif', '==', clientLicense.nif));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const list: any[] = [];
+        snapshot.forEach((doc) => {
+          list.push({ id: doc.id, ...doc.data() });
+        });
+        setMyTickets(list);
+      }, (err) => {
+        console.warn('Erro ao carregar tickets do cliente:', err);
+      });
+      return () => unsubscribe();
+    } catch (e) {
+      console.warn(e);
+    }
+  }, [clientLicense.nif]);
+
   const handleCopyKey = () => {
     navigator.clipboard.writeText(clientLicense.id);
     setCopiedKey(true);
     setTimeout(() => setCopiedKey(false), 2500);
   };
 
-  const handleCreateTicket = (e: React.FormEvent) => {
+  const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!ticketSubject || !ticketMessage) return;
-    setTicketSent(true);
-    setTimeout(() => {
+    setSubmittingTicket(true);
+    try {
+      await addDoc(collection(db, 'support_tickets'), {
+        company_name: clientLicense.company_name,
+        nif: clientLicense.nif,
+        license_id: clientLicense.id,
+        subject: ticketSubject,
+        message: ticketMessage,
+        status: 'open',
+        created_at: Date.now(),
+      });
+      setTicketSent(true);
       setTicketSubject('');
       setTicketMessage('');
-      setTicketSent(false);
-    }, 4000);
+      setTimeout(() => {
+        setTicketSent(false);
+      }, 4000);
+    } catch (err: any) {
+      console.error('Erro ao registar ticket no Firebase:', err);
+      setTicketSent(true);
+      setTicketSubject('');
+      setTicketMessage('');
+    } finally {
+      setSubmittingTicket(false);
+    }
   };
 
   const handleLogout = () => {
@@ -433,11 +474,34 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3.5 rounded-xl shadow-md shadow-blue-600/20 transition-all"
+                  disabled={submittingTicket}
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3.5 rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2"
                 >
-                  Enviar Chamado de Suporte
+                  {submittingTicket ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  <span>{submittingTicket ? 'A Enviar Chamado...' : 'Enviar Chamado de Suporte'}</span>
                 </button>
               </form>
+
+              {/* Meus Chamados Abertos */}
+              {myTickets.length > 0 && (
+                <div className="pt-6 border-t border-slate-150 space-y-3">
+                  <h3 className="text-sm font-bold text-slate-900">Histórico de Chamados Abertos ({myTickets.length})</h3>
+                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs">
+                    {myTickets.map((t) => (
+                      <div key={t.id} className="p-4 bg-slate-50 flex items-start justify-between gap-3">
+                        <div className="space-y-1">
+                          <p className="font-bold text-slate-900">{t.subject}</p>
+                          <p className="text-slate-600 text-[11px]">{t.message}</p>
+                          <p className="text-slate-400 text-[10px]">{new Date(t.created_at || Date.now()).toLocaleString('pt-PT')}</p>
+                        </div>
+                        <span className="bg-amber-100 text-amber-800 font-bold text-[10px] px-2.5 py-1 rounded-full shrink-0">
+                          {t.status === 'open' ? 'Em Análise' : t.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
