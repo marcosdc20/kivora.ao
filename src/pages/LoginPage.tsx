@@ -51,12 +51,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
     }
   };
 
-  const handleQuickFill = (id: string, pass: string) => {
-    setIdentifier(id);
-    setPassword(pass);
-    setError(null);
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative selection:bg-blue-600 selection:text-white">
       
@@ -106,7 +100,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
                 <input
                   type="text"
                   required
-                  placeholder="Ex: admin@kivora.ao / 5412398765 / PARCEIRO-042"
+                  placeholder="Ex: seuemail@empresa.ao ou NIF"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-600 outline-none font-medium transition-all"
@@ -158,40 +152,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
 
           </form>
 
-          {/* Quick Demo Access Chips */}
-          <div className="pt-2 border-t border-slate-100 space-y-2">
-            <p className="text-[10px] uppercase font-bold text-slate-400 text-center tracking-wider">
-              Acesso Rápido de Demonstração
-            </p>
-            <div className="grid grid-cols-3 gap-1.5 text-[10px] font-bold">
-              <button
-                type="button"
-                onClick={() => handleQuickFill('admin@kivora.ao', 'admin123')}
-                className="py-1.5 px-2 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 transition-colors text-center truncate"
-                title="Admin: admin@kivora.ao"
-              >
-                👑 Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('parceiro@kivora.ao', 'parceiro123')}
-                className="py-1.5 px-2 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 transition-colors text-center truncate"
-                title="Parceiro: parceiro@kivora.ao"
-              >
-                🤝 Parceiro
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('5002863944', 'cliente123')}
-                className="py-1.5 px-2 rounded-lg bg-slate-100 hover:bg-violet-50 hover:text-violet-700 text-slate-600 transition-colors text-center truncate"
-                title="Cliente: 5002863944 (Visual Software)"
-              >
-                🏢 Cliente (NIF)
-              </button>
-            </div>
-          </div>
-
-          <div className="text-center text-[11px] text-slate-500 pt-1">
+          <div className="text-center text-[11px] text-slate-500 pt-1 border-t border-slate-100">
             <p>Precisa de suporte ou recuperação de acesso?</p>
             <a href={`mailto:${KIVORA_INFO.supportEmail}`} className="text-blue-600 font-semibold hover:underline block mt-0.5">
               Contactar Equipa Kivora

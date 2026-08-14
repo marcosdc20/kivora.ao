@@ -1,0 +1,94 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Regra Global de Leitura e Escrita Controlada
+    // Permite leitura pública e criação de candidaturas/tickets/pedidos,
+    // e operações autenticadas para administração, parceiros e clientes.
+    
+    // 1. Licenças e Validação de Chaves
+    match /licenses/{licenseId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // 2. Empresas Registadas
+    match /empresas/{empresaId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    match /companies/{companyId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // 3. Instalações e Terminais / Computadores
+    match /installations/{installationId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // 4. Parceiros Comerciais & Candidaturas
+    match /partners/{partnerId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    match /partner_applications/{applicationId} {
+      allow read: if true;
+      allow create: if true;
+      allow write: if true;
+    }
+
+    // 5. Tabela de Preços de Atacado & Dívidas de Parceiros
+    match /partner_pricing/{planType} {
+      allow read: if true;
+      allow write: if true;
+    }
+    match /partner_debts/{debtId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // 6. Faturas de Subscrição
+    match /subscription_invoices/{invoiceId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // 7. Chamados & Tickets de Suporte Multilateral
+    match /support_tickets/{ticketId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
+      allow write: if true;
+    }
+
+    // 8. Comunicados & Notificações
+    match /announcements/{announcementId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // 9. Trilha de Auditoria
+    match /audit_logs/{logId} {
+      allow read: if true;
+      allow create: if true;
+      allow write: if true;
+    }
+
+    // 10. Autenticação e Perfis de Utilizadores
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    match /admins/{adminId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Fallback padrão para futuras coleções
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

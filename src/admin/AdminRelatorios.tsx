@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { BarChart3, Download, TrendingUp, DollarSign, MapPin, Filter } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
 import { db } from '../lib/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
-import { CHART_RECEITA, CHART_PLANOS } from './mockData';
 
 interface RegionalStat {
   provincia: string;
@@ -18,6 +17,7 @@ export const AdminRelatorios: React.FC = () => {
   const [stats, setStats] = useState<RegionalStat[]>([]);
   const [totalLicensesCount, setTotalLicensesCount] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [allLicenses, setAllLicenses] = useState<{ price_aoa: number; created_at: number; plan_type: string }[]>([]);
 
   useEffect(() => {
     try {
@@ -33,11 +33,19 @@ export const AdminRelatorios: React.FC = () => {
           'Cuanza Sul': { empresas: 0, receita: 0, parceiros: 0 },
         };
 
+        const rawLicenses: { price_aoa: number; created_at: number; plan_type: string }[] = [];
+
         snapLic.forEach((docSnap) => {
           const d = docSnap.data();
           licTotal++;
           const price = Number(d.price_aoa) || 250000;
           sumAoa += price;
+
+          rawLicenses.push({
+            price_aoa: price,
+            created_at: Number(d.created_at) || Date.now(),
+            plan_type: String(d.plan_type || 'annual'),
+          });
 
           const prov = (d.region || d.provincia || 'Luanda');
           const matchedKey = Object.keys(regionMap).find(k => prov.toLowerCase().includes(k.toLowerCase())) || 'Luanda';
@@ -45,6 +53,7 @@ export const AdminRelatorios: React.FC = () => {
           regionMap[matchedKey].receita += price;
         });
 
+        setAllLicenses(rawLicenses);
         setTotalLicensesCount(licTotal);
         setTotalRevenue(sumAoa);
 
@@ -65,6 +74,40 @@ export const AdminRelatorios: React.FC = () => {
       console.warn(e);
     }
   }, []);
+
+  // ─── Gráfico de Receita Mensal (últimos 6 meses) calculado do Firestore ─────
+  const CHART_RECEITA = useMemo(() => {
+    const MONTHS_PT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const now = new Date();
+    const result: { mes: string; valor: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const y = d.getFullYear();
+      const m = d.getMonth();
+      const valor = allLicenses
+        .filter((l) => {
+          const ld = new Date(l.created_at);
+          return ld.getFullYear() === y && ld.getMonth() === m;
+        })
+        .reduce((acc, l) => acc + l.price_aoa, 0);
+      result.push({ mes: MONTHS_PT[m], valor });
+    }
+    return result;
+  }, [allLicenses]);
+
+  // ─── Distribuição por Plano calculada do Firestore ───────────────────────
+  const CHART_PLANOS = useMemo(() => {
+    const counts: Record<string, number> = { monthly: 0, annual: 0, lifetime: 0 };
+    allLicenses.forEach((l) => {
+      const k = l.plan_type in counts ? l.plan_type : 'annual';
+      counts[k]++;
+    });
+    return [
+      { name: 'Mensal', value: counts.monthly, color: '#94a3b8' },
+      { name: 'Anual Corporativo', value: counts.annual, color: '#2563eb' },
+      { name: 'Vitalício Ilimitado', value: counts.lifetime, color: '#0ea5e9' },
+    ];
+  }, [allLicenses]);
 
   const filteredStats = selectedProvince === 'todas'
     ? stats

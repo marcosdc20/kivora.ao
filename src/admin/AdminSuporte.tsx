@@ -1,74 +1,75 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Headphones, Plus, Search, Monitor,
+  Headphones, Plus, Search,
   Clock, AlertTriangle, CheckCircle2,
-  Send, X, Loader2
+  Send, Loader2, MessageSquare, UserCheck
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
 import { db } from '../lib/firebase';
-import { collection, onSnapshot, doc, setDoc, updateDoc } from 'firebase/firestore';
-
-export interface SupportTicket {
-  id: string;
-  ticket_number: string;
-  company_name: string;
-  contact_email: string;
-  subject: string;
-  category: 'faturacao' | 'tecnico' | 'licenciamento' | 'multiloja';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  status: 'open' | 'in_progress' | 'resolved' | 'closed';
-  createdAt: number;
-  remote_code?: string;
-  messagesCount: number;
-}
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import {
+  SupportTicket, createSupportTicket, sendTicketMessage, updateTicketStatus
+} from './services/supportService';
 
 export const AdminSuporte: React.FC = () => {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'in_progress' | 'resolved'>('all');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'direct_clients' | 'partner_tickets' | 'partner_to_admin'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
 
-  // Form State
+  // Form State Novo Ticket
   const [company, setCompany] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('');
   const [category, setCategory] = useState<'faturacao' | 'tecnico' | 'licenciamento' | 'multiloja'>('tecnico');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>('medium');
   const [remoteCode, setRemoteCode] = useState('');
+  const [initialMsg, setInitialMsg] = useState('');
 
   // Chat message thread
-  const [chatMessage, setChatMessage] = useState('');
-  const [messages, setMessages] = useState<Array<{ sender: string; text: string; time: string }>>([
-    { sender: 'Suporte Kivora', text: 'Linha de apoio ao cliente ativa. Indique como podemos ajudar.', time: '09:00' }
-  ]);
+  const [chatReply, setChatReply] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
 
   // Sincronização em Tempo Real com Firestore (/support_tickets)
   useEffect(() => {
     try {
-      const unsub = onSnapshot(collection(db, 'support_tickets'), (snapshot) => {
+      const q = query(collection(db, 'support_tickets'), orderBy('createdAt', 'desc'));
+      const unsub = onSnapshot(q, (snapshot) => {
         const fireTickets: SupportTicket[] = [];
-        let count = 1;
         snapshot.forEach((docSnap) => {
           const d = docSnap.data();
-          const num = String(count++).padStart(4, '0');
           fireTickets.push({
             id: docSnap.id,
-            ticket_number: d.ticket_number || `TK-2026/${num}`,
-            company_name: d.company_name || d.company || 'Empresa Cliente',
-            contact_email: d.contact_email || d.email || '',
-            subject: d.subject || d.assunto || 'Chamado de Suporte',
+            ticket_number: d.ticket_number || `TK-${docSnap.id.slice(-4)}`,
+            company_name: d.company_name || 'Empresa Cliente',
+            nif: d.nif || '',
+            contact_email: d.contact_email || '',
+            contact_phone: d.contact_phone || '',
+            subject: d.subject || 'Chamado de Suporte',
             category: d.category || 'tecnico',
             priority: d.priority || 'medium',
             status: d.status || 'open',
-            createdAt: Number(d.createdAt) || Number(d.created_at) || Date.now(),
-            remote_code: d.remote_code || d.anydesk_id || undefined,
-            messagesCount: Number(d.messagesCount) || 1,
+            createdAt: Number(d.createdAt) || Date.now(),
+            remote_code: d.remote_code,
+            messagesCount: Array.isArray(d.messages) ? d.messages.length : (d.messagesCount || 1),
+            partner_id: d.partner_id,
+            partner_name: d.partner_name,
+            target_type: d.target_type || 'admin',
+            created_by_role: d.created_by_role || 'client',
+            messages: Array.isArray(d.messages) ? d.messages : [
+              { id: '1', sender_name: 'Suporte Kivora', sender_role: 'admin', text: d.subject || 'Ticket aberto', timestamp: d.createdAt || Date.now() }
+            ]
           });
         });
 
         setTickets(fireTickets);
+        if (selectedTicket) {
+          const updated = fireTickets.find(t => t.id === selectedTicket.id);
+          if (updated) setSelectedTicket(updated);
+        }
         setLoading(false);
       }, (err) => {
         console.warn('Erro ao escutar support_tickets:', err);
@@ -80,411 +81,412 @@ export const AdminSuporte: React.FC = () => {
       console.warn(e);
       setLoading(false);
     }
-  }, []);
+  }, [selectedTicket?.id]);
 
   const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!company || !subject) return;
 
-    const tkId = `tk_${Date.now()}`;
-    const tkNum = `TK-2026/${String(tickets.length + 1).padStart(4, '0')}`;
-
     try {
-      await setDoc(doc(db, 'support_tickets', tkId), {
-        ticket_number: tkNum,
+      const created = await createSupportTicket({
         company_name: company,
         contact_email: email || 'cliente@empresa.ao',
         subject,
         category,
         priority,
-        status: 'open',
-        createdAt: Date.now(),
-        remote_code: remoteCode || null,
-        messagesCount: 1
-      }, { merge: true });
+        initial_message: initialMsg || subject,
+        remote_code: remoteCode,
+        target_type: 'admin',
+        created_by_role: 'admin',
+        sender_name: 'Administrador Central'
+      });
 
       setShowModal(false);
       setCompany('');
       setEmail('');
       setSubject('');
       setRemoteCode('');
-      alert(`Ticket #${tkNum} registado com sucesso no Firebase!`);
+      setInitialMsg('');
+      setSelectedTicket(created);
+      alert(`Ticket #${created.ticket_number} registado com sucesso no Firebase!`);
     } catch (err: any) {
       alert('Erro ao criar ticket no Firebase: ' + err.message);
     }
   };
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendAdminMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatMessage.trim()) return;
+    if (!chatReply.trim() || !selectedTicket) return;
 
-    const newMsg = {
-      sender: 'Suporte Kivora (Você)',
-      text: chatMessage,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setMessages([...messages, newMsg]);
-    setChatMessage('');
-  };
-
-  const handleUpdateStatus = async (id: string, status: SupportTicket['status']) => {
+    setSendingMessage(true);
     try {
-      await updateDoc(doc(db, 'support_tickets', id), {
-        status
+      await sendTicketMessage(selectedTicket.id, {
+        sender_name: 'Engenharia Kivora (Admin)',
+        sender_role: 'admin',
+        sender_email: 'admin@kivora.ao',
+        text: chatReply
       });
-
-      setTickets(tickets.map(t => t.id === id ? { ...t, status } : t));
-      if (selectedTicket && selectedTicket.id === id) {
-        setSelectedTicket({ ...selectedTicket, status });
-      }
+      setChatReply('');
     } catch (err: any) {
-      alert('Erro ao atualizar status do ticket: ' + err.message);
+      alert('Erro ao enviar mensagem: ' + err.message);
+    } finally {
+      setSendingMessage(false);
     }
   };
 
+  const handleStatusChange = async (ticketId: string, newStatus: 'open' | 'in_progress' | 'resolved' | 'closed') => {
+    try {
+      await updateTicketStatus(ticketId, newStatus);
+    } catch (err: any) {
+      alert('Erro ao atualizar status: ' + err.message);
+    }
+  };
+
+  // Filtros
   const filteredTickets = tickets.filter(t => {
-    const matchesStatus = statusFilter === 'all' || t.status === statusFilter;
-    const s = searchQuery.toLowerCase();
-    const matchesSearch = t.company_name.toLowerCase().includes(s) ||
-      t.subject.toLowerCase().includes(s) ||
-      t.ticket_number.toLowerCase().includes(s);
-    return matchesStatus && matchesSearch;
+    const matchSearch = t.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.ticket_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (t.partner_id && t.partner_id.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchStatus = statusFilter === 'all' || t.status === statusFilter;
+
+    let matchRole = true;
+    if (roleFilter === 'direct_clients') {
+      matchRole = t.target_type === 'admin' && t.created_by_role === 'client';
+    } else if (roleFilter === 'partner_to_admin') {
+      matchRole = t.created_by_role === 'partner';
+    } else if (roleFilter === 'partner_tickets') {
+      matchRole = t.target_type === 'partner';
+    }
+
+    return matchSearch && matchStatus && matchRole;
   });
 
   const openCount = tickets.filter(t => t.status === 'open').length;
   const inProgressCount = tickets.filter(t => t.status === 'in_progress').length;
-  const urgentCount = tickets.filter(t => t.priority === 'urgent' && t.status !== 'closed').length;
-  const resolvedCount = tickets.filter(t => t.status === 'resolved' || t.status === 'closed').length;
+  const resolvedCount = tickets.filter(t => t.status === 'resolved').length;
+  const partnerTkCount = tickets.filter(t => t.created_by_role === 'partner').length;
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50">
+    <div className="space-y-6">
       <AdminTopbar
-        title="Helpdesk & Suporte Técnico Remoto"
-        subtitle="Atendimento a empresas, chamados urgentes e conexão AnyDesk/RustDesk"
+        title="Central de Suporte & Atendimento Multilateral"
+        subtitle="Gerenciamento unificado de tickets: Clientes Diretos, Clientes de Parceiros e Apoio aos Revendedores."
         actions={
           <button
             onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md shadow-blue-600/20 transition-all"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/20 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>Abrir Novo Ticket</span>
+            <span>Novo Ticket de Apoio</span>
           </button>
         }
       />
 
-      <div className="p-6 space-y-5">
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <StatCard
-            label="Tickets Abertos"
-            value={openCount}
-            sub="Aguardam triagem"
-            subColor="amber"
-            icon={<Headphones className="w-4 h-4" />}
-            iconBg="bg-blue-50 text-blue-600"
-          />
-          <StatCard
-            label="Urgentes"
-            value={urgentCount}
-            sub="Faturação & Retenção"
-            subColor="red"
-            icon={<AlertTriangle className="w-4 h-4" />}
-            iconBg="bg-red-50 text-red-600"
-          />
-          <StatCard
-            label="Em Atendimento"
-            value={inProgressCount}
-            sub="Sessões remotas ativas"
-            subColor="green"
-            icon={<Clock className="w-4 h-4" />}
-            iconBg="bg-purple-50 text-purple-600"
-          />
-          <StatCard
-            label="Resolvidos"
-            value={resolvedCount}
-            sub="Taxa de resolução 98%"
-            subColor="green"
-            icon={<CheckCircle2 className="w-4 h-4" />}
-            iconBg="bg-emerald-50 text-emerald-600"
+      {/* Cards de Métricas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          label="Chamados em Aberto"
+          value={openCount}
+          sub="Aguardando Triagem"
+          subColor={openCount === 0 ? 'green' : 'amber'}
+          icon={<AlertTriangle className="w-4 h-4" />}
+        />
+        <StatCard
+          label="Em Atendimento"
+          value={inProgressCount}
+          sub="Técnicos Alocados"
+          subColor="green"
+          icon={<Clock className="w-4 h-4" />}
+        />
+        <StatCard
+          label="Apoio a Parceiros"
+          value={partnerTkCount}
+          sub="Linha Revendedores"
+          subColor="green"
+          icon={<UserCheck className="w-4 h-4" />}
+        />
+        <StatCard
+          label="Casos Resolvidos"
+          value={resolvedCount}
+          sub="Sincronizado Firestore"
+          subColor="green"
+          icon={<CheckCircle2 className="w-4 h-4" />}
+        />
+      </div>
+
+      {/* Filtros e Barra de Pesquisa */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between shadow-sm">
+        <div className="relative w-full md:w-80">
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Buscar por Empresa, Ticket, Parceiro..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white font-medium transition-all"
           />
         </div>
 
-        {/* Filtros e Busca */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          <div className="flex gap-2">
-            {[
-              { id: 'all', label: 'Todos os Tickets' },
-              { id: 'open', label: 'Abertos' },
-              { id: 'in_progress', label: 'Em Atendimento' },
-              { id: 'resolved', label: 'Resolvidos' },
-            ].map((f) => (
+        {/* Filtros por Papel e Estado */}
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          {/* Origem/Canal */}
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value as any)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 font-bold focus:outline-none focus:border-blue-500 focus:bg-white cursor-pointer"
+          >
+            <option value="all">Todas as Origens</option>
+            <option value="direct_clients">Clientes Diretos (Kivora Central)</option>
+            <option value="partner_to_admin">Chamados de Parceiros</option>
+            <option value="partner_tickets">Clientes sob Parceiros</option>
+          </select>
+
+          {/* Status */}
+          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold">
+            {(['all', 'open', 'in_progress', 'resolved'] as const).map((st) => (
               <button
-                key={f.id}
-                onClick={() => setStatusFilter(f.id as any)}
-                className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all ${
-                  statusFilter === f.id
-                    ? 'bg-slate-950 text-white border-slate-950 shadow-sm'
-                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
+                key={st}
+                onClick={() => setStatusFilter(st)}
+                className={`px-3 py-1 rounded-lg transition-all capitalize cursor-pointer ${
+                  statusFilter === st
+                    ? 'bg-white text-blue-600 shadow-xs font-black'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {f.label}
+                {st === 'all' ? 'Todos' : st === 'open' ? 'Abertos' : st === 'in_progress' ? 'Em Curso' : 'Resolvidos'}
               </button>
             ))}
           </div>
-
-          <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Pesquisar por assunto, empresa, ticket..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-medium"
-            />
-          </div>
-        </div>
-
-        {/* Tabela de Tickets */}
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-          <table className="w-full text-xs text-left">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 uppercase font-black text-[10px] tracking-wider">
-                <th className="p-4">N.º Chamado</th>
-                <th className="p-4">Empresa / Email</th>
-                <th className="p-4">Assunto & Categoria</th>
-                <th className="p-4">Código Remoto</th>
-                <th className="p-4">Prioridade</th>
-                <th className="p-4">Estado</th>
-                <th className="p-4 text-right">Ação</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400">
-                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
-                    <span>A sincronizar chamados do Firebase...</span>
-                  </td>
-                </tr>
-              ) : filteredTickets.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400">
-                    <Headphones className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                    <p className="font-bold text-slate-700">Nenhum chamado de suporte encontrado</p>
-                    <p className="text-[11px] mt-1 text-slate-400">
-                      Os chamados abertos pelas empresas clientes e pelo site aparecerão aqui em tempo real.
-                    </p>
-                  </td>
-                </tr>
-              ) : (
-                filteredTickets.map((tk) => (
-                  <tr key={tk.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-4 font-mono font-bold text-blue-600">{tk.ticket_number}</td>
-                    <td className="p-4">
-                      <p className="font-bold text-slate-900">{tk.company_name}</p>
-                      <p className="text-slate-400 text-[10px]">{tk.contact_email}</p>
-                    </td>
-                    <td className="p-4">
-                      <p className="font-bold text-slate-800">{tk.subject}</p>
-                      <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase">
-                        {tk.category}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      {tk.remote_code ? (
-                        <span className="font-mono text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">
-                          {tk.remote_code}
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 text-[11px] italic">Sem código</span>
-                      )}
-                    </td>
-                    <td className="p-4">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                        tk.priority === 'urgent' ? 'bg-red-50 text-red-700 border border-red-200' :
-                        tk.priority === 'high' ? 'bg-orange-50 text-orange-700 border border-orange-200' :
-                        tk.priority === 'medium' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                        'bg-slate-100 text-slate-600'
-                      }`}>
-                        {tk.priority}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        tk.status === 'open' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                        tk.status === 'in_progress' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                        'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      }`}>
-                        {tk.status === 'open' ? 'Aberto' : tk.status === 'in_progress' ? 'Em Atendimento' : 'Resolvido'}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      <button
-                        onClick={() => setSelectedTicket(tk)}
-                        className="bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold px-3 py-1.5 rounded-lg text-[11px] transition-colors"
-                      >
-                        Atender
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
         </div>
       </div>
 
-      {/* Modal Atendimento Interativo com Chat */}
-      {selectedTicket && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-fadeIn">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-                    {selectedTicket.ticket_number}
-                  </span>
-                  <h3 className="text-base font-black text-slate-900">{selectedTicket.subject}</h3>
-                </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Empresa: <strong>{selectedTicket.company_name}</strong> • {selectedTicket.contact_email}
-                </p>
-              </div>
-              <button onClick={() => setSelectedTicket(null)} className="text-slate-400 hover:text-slate-900">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Código de Acesso Remoto */}
-            {selectedTicket.remote_code && (
-              <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <Monitor className="w-4 h-4 text-emerald-600" />
-                  <span className="font-bold text-emerald-900">Código AnyDesk / RustDesk do Cliente:</span>
-                </div>
-                <span className="font-mono text-sm font-black text-emerald-700 bg-white px-3 py-1 rounded-xl border border-emerald-200 select-all">
-                  {selectedTicket.remote_code}
-                </span>
-              </div>
-            )}
-
-            {/* Mensagens de Suporte */}
-            <div className="bg-slate-50 rounded-2xl p-4 h-56 overflow-y-auto space-y-3 text-xs">
-              {messages.map((m, idx) => (
-                <div key={idx} className={`p-3 rounded-xl max-w-[85%] ${
-                  m.sender.includes('Você') || m.sender.includes('Suporte')
-                    ? 'ml-auto bg-blue-600 text-white rounded-br-none'
-                    : 'mr-auto bg-white border border-slate-200 text-slate-900 rounded-bl-none'
-                }`}>
-                  <p className="font-bold text-[10px] opacity-75 mb-1">{m.sender} • {m.time}</p>
-                  <p className="font-medium">{m.text}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Caixa de Envio de Resposta */}
-            <form onSubmit={handleSendMessage} className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Escrever resposta para o cliente..."
-                value={chatMessage}
-                onChange={(e) => setChatMessage(e.target.value)}
-                className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 font-medium focus:outline-none focus:border-blue-500"
-              />
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow-md shadow-blue-600/20"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>Enviar</span>
-              </button>
-            </form>
-
-            {/* Ações de Estado */}
-            <div className="flex items-center justify-between border-t border-slate-100 pt-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-500">Alterar Estado:</span>
-                <button
-                  onClick={() => handleUpdateStatus(selectedTicket.id, 'in_progress')}
-                  className="px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded-lg"
-                >
-                  Em Atendimento
-                </button>
-                <button
-                  onClick={() => handleUpdateStatus(selectedTicket.id, 'resolved')}
-                  className="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-lg"
-                >
-                  Marcar Resolvido
-                </button>
-              </div>
-              <button
-                onClick={() => setSelectedTicket(null)}
-                className="text-xs font-bold text-slate-500 hover:text-slate-900 px-3 py-1"
-              >
-                Fechar Janela
-              </button>
-            </div>
+      {/* Grid Principal: Lista de Tickets (Esquerda) + Chat Interativo (Direita) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* LISTA DE TICKETS */}
+        <div className="lg:col-span-5 bg-white border border-slate-200 rounded-3xl p-5 space-y-4 shadow-sm">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <h3 className="text-xs font-black uppercase text-slate-500 tracking-wider">
+              Chamados ({filteredTickets.length})
+            </h3>
+            {loading && <Loader2 className="w-4 h-4 animate-spin text-blue-600" />}
           </div>
-        </div>
-      )}
 
-      {/* Modal Criar Novo Ticket */}
+          {filteredTickets.length === 0 ? (
+            <div className="p-8 text-center text-slate-400 space-y-2">
+              <Headphones className="w-8 h-8 mx-auto text-slate-300" />
+              <p className="font-bold text-xs text-slate-700">Nenhum ticket encontrado</p>
+              <p className="text-[11px] text-slate-400">Os chamados abertos por clientes e parceiros aparecem aqui em tempo real.</p>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
+              {filteredTickets.map((tk) => {
+                const isSel = selectedTicket?.id === tk.id;
+                return (
+                  <div
+                    key={tk.id}
+                    onClick={() => setSelectedTicket(tk)}
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                      isSel
+                        ? 'bg-blue-50/80 border-blue-300 shadow-xs'
+                        : 'bg-slate-50/60 border-slate-200/80 hover:bg-white hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <span className="font-mono text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                        {tk.ticket_number}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {tk.created_by_role === 'partner' && (
+                          <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            PARCEIRO
+                          </span>
+                        )}
+                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
+                          tk.status === 'resolved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                          tk.status === 'in_progress' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                          'bg-amber-50 text-amber-700 border-amber-200'
+                        }`}>
+                          {tk.status === 'resolved' ? 'Resolvido' : tk.status === 'in_progress' ? 'Em Atendimento' : 'Aberto'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <h4 className="font-bold text-slate-900 text-xs line-clamp-1">{tk.subject}</h4>
+                    <p className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+                      <span className="truncate max-w-[160px] font-medium">{tk.company_name}</span>
+                      <span className="font-bold text-blue-600 font-mono text-[10px]">{tk.messages.length} msg(s)</span>
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* CHAT / ATENDIMENTO DO TICKET SELECIONADO */}
+        <div className="lg:col-span-7 bg-white border border-slate-200 rounded-3xl overflow-hidden flex flex-col h-[650px] shadow-sm">
+          {selectedTicket ? (
+            <>
+              {/* Header do Chat */}
+              <div className="p-4 border-b border-slate-100 bg-slate-50/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-black text-blue-600">{selectedTicket.ticket_number}</span>
+                    <span className="text-slate-300">•</span>
+                    <h4 className="font-bold text-slate-900 text-xs">{selectedTicket.subject}</h4>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Entidade: <strong className="text-slate-800">{selectedTicket.company_name}</strong> • {selectedTicket.contact_email}
+                  </p>
+                </div>
+
+                {/* Ações de Estado */}
+                <div className="flex items-center gap-2">
+                  <select
+                    value={selectedTicket.status}
+                    onChange={(e) => handleStatusChange(selectedTicket.id, e.target.value as any)}
+                    className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 font-bold focus:outline-none focus:border-blue-500 cursor-pointer shadow-xs"
+                  >
+                    <option value="open">Aberto</option>
+                    <option value="in_progress">Em Atendimento</option>
+                    <option value="resolved">Resolvido</option>
+                    <option value="closed">Fechado</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Thread de Mensagens */}
+              <div className="flex-1 p-5 overflow-y-auto space-y-3 bg-slate-50/40">
+                {selectedTicket.messages.map((msg, i) => {
+                  const isMe = msg.sender_role === 'admin';
+                  return (
+                    <div
+                      key={msg.id || i}
+                      className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
+                    >
+                      <span className="text-[10px] font-bold text-slate-400 mb-1 px-1">
+                        {msg.sender_name} ({msg.sender_role === 'admin' ? 'Admin Kivora' : msg.sender_role === 'partner' ? 'Parceiro' : 'Cliente'})
+                      </span>
+                      <div className={`p-3.5 rounded-2xl text-xs max-w-lg ${
+                        isMe
+                          ? 'bg-blue-600 text-white rounded-br-xs shadow-sm'
+                          : 'bg-white text-slate-900 border border-slate-200 rounded-bl-xs shadow-xs'
+                      }`}>
+                        <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                        <span className={`text-[9px] font-medium mt-1.5 block text-right ${isMe ? 'text-blue-100' : 'text-slate-400'}`}>
+                          {new Date(msg.timestamp).toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Caixa de Resposta */}
+              <form onSubmit={handleSendAdminMessage} className="p-3 border-t border-slate-100 bg-white flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Escrever resposta oficial da equipa de engenharia Kivora..."
+                  value={chatReply}
+                  onChange={(e) => setChatReply(e.target.value)}
+                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white font-medium"
+                />
+                <button
+                  type="submit"
+                  disabled={!chatReply.trim() || sendingMessage}
+                  className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white p-2.5 rounded-xl shadow-sm transition-all cursor-pointer"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </form>
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400">
+              <MessageSquare className="w-12 h-12 text-slate-300 mb-2" />
+              <h4 className="font-bold text-slate-700 text-sm">Nenhum ticket selecionado</h4>
+              <p className="text-xs text-slate-400 mt-1 max-w-xs">
+                Selecione um chamado da lista ao lado para ver a conversa completa e prestar suporte técnico.
+              </p>
+            </div>
+          )}
+        </div>
+
+      </div>
+
+      {/* MODAL: NOVO TICKET ADMIN */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-slate-900">Registar Novo Chamado</h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900">
-                <X className="w-4 h-4" />
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="text-base font-black text-slate-900">Criar Ticket de Suporte Manual</h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
+              >
+                ✕
               </button>
             </div>
 
             <form onSubmit={handleCreateTicket} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Nome da Empresa</label>
+                <label className="font-bold text-slate-700 uppercase text-[11px]">Empresa / Cliente *</label>
                 <input
                   type="text"
                   required
-                  placeholder="Pastelaria Miramar, Lda"
+                  placeholder="Ex: Farmácia Central, Lda"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white font-medium"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Assunto / Descrição do Problema</label>
+                <label className="font-bold text-slate-700 uppercase text-[11px]">Email de Contato</label>
                 <input
-                  type="text"
-                  required
-                  placeholder="Configurar gaveta de dinheiro e scanner"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium"
+                  type="email"
+                  placeholder="geral@farmacia.ao"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white font-medium"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase text-[11px]">Assunto *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: Falha de Comunicação com Impressora POS"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Categoria</label>
+                  <label className="font-bold text-slate-700 uppercase text-[11px]">Categoria</label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value as any)}
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-white font-bold"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-blue-500 focus:bg-white font-bold"
                   >
-                    <option value="tecnico">Técnico / Hardware</option>
+                    <option value="tecnico">Suporte Técnico / POS</option>
                     <option value="faturacao">Faturação AGT</option>
-                    <option value="licenciamento">Licenças & Postos</option>
-                    <option value="multiloja">Multiloja / Sincronia</option>
+                    <option value="licenciamento">Licença & Terminais</option>
+                    <option value="multiloja">Rede / Multiloja</option>
                   </select>
                 </div>
+
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Prioridade</label>
+                  <label className="font-bold text-slate-700 uppercase text-[11px]">Prioridade</label>
                   <select
                     value={priority}
                     onChange={(e) => setPriority(e.target.value as any)}
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-white font-bold"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-blue-500 focus:bg-white font-bold"
                   >
                     <option value="low">Baixa</option>
                     <option value="medium">Média</option>
@@ -495,42 +497,36 @@ export const AdminSuporte: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Código RustDesk / AnyDesk</label>
-                <input
-                  type="text"
-                  placeholder="912 345 678"
-                  value={remoteCode}
-                  onChange={(e) => setRemoteCode(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-mono font-bold"
+                <label className="font-bold text-slate-700 uppercase text-[11px]">Mensagem / Descrição Inicial</label>
+                <textarea
+                  rows={3}
+                  placeholder="Detalhes adicionais sobre a solicitação..."
+                  value={initialMsg}
+                  onChange={(e) => setInitialMsg(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white font-medium resize-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100"
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20"
+                  className="px-6 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 cursor-pointer"
                 >
-                  Abrir Ticket
+                  Registar no Firebase
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
     </div>
   );
 };
-
-export { AdminRelatorios } from './AdminRelatorios';
-export { AdminComunicacao } from './AdminComunicacao';
-export { AdminUtilizadores } from './AdminUtilizadores';
-export { AdminAuditoria } from './AdminAuditoria';
-export { AdminPlanos } from './AdminPlanos';
-export { AdminConfiguracoes } from './AdminConfiguracoes';

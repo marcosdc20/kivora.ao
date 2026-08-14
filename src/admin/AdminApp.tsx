@@ -6,10 +6,13 @@ import { AdminLicencas, AdminCriarLicenca } from './AdminLicencas';
 import { AdminInstalacoes } from './AdminInstalacoes';
 import { AdminParceiros, AdminCandidaturas } from './AdminParceiros';
 import { AdminPagamentos } from './AdminPagamentos';
-import {
-  AdminSuporte, AdminRelatorios, AdminComunicacao,
-  AdminUtilizadores, AdminAuditoria, AdminPlanos, AdminConfiguracoes,
-} from './AdminSuporte';
+import { AdminSuporte } from './AdminSuporte';
+import { AdminRelatorios } from './AdminRelatorios';
+import { AdminComunicacao } from './AdminComunicacao';
+import { AdminUtilizadores } from './AdminUtilizadores';
+import { AdminAuditoria } from './AdminAuditoria';
+import { AdminPlanos } from './AdminPlanos';
+import { AdminConfiguracoes } from './AdminConfiguracoes';
 import { AdminSection } from './types';
 import { Empresa } from './types';
 import { ArrowLeft, Lock } from 'lucide-react';
@@ -73,7 +76,7 @@ const AdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@kivora.ao ou narcisomarcos826@gmail.com"
+              placeholder="admin@kivora.ao"
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
@@ -98,19 +101,6 @@ const AdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
           >
             {loading ? 'A autenticar no Firebase...' : 'Entrar no Painel Admin'}
           </button>
-          <div className="flex justify-between items-center text-[10px] text-slate-500 pt-2">
-            <span>Acesso Demo: admin@kivora.ao</span>
-            <button
-              type="button"
-              onClick={() => {
-                setEmail('admin@kivora.ao');
-                setPass('admin123');
-              }}
-              className="text-blue-400 hover:underline"
-            >
-              Preencher Demo
-            </button>
-          </div>
         </form>
       </div>
     </div>
@@ -128,7 +118,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
   const [session, setSession] = useState<KivoraUserSession | null>(() => getStoredSession());
   const [authenticated, setAuthenticated] = useState<boolean>(() => {
     const s = getStoredSession();
-    return s?.role === 'admin' || true; // Permite acesso ao admin se aberto pelo site ou com sessão
+    return s?.role === 'admin';
   });
   const [activeSection, setActiveSection] = useState<AdminSection>('licencas');
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);

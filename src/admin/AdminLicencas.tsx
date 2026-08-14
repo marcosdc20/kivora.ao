@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import {
   Plus, Search, Key, CheckSquare,
   X, Copy, Ban, RotateCcw, Unlink, Trash2, Clock, CheckCircle2,
-  Loader2, Building2
+  Loader2, Building2, Monitor, Users
 } from 'lucide-react';
 import { AdminTopbar, StatusBadge } from './AdminComponents';
 import { useLicenses, useCompanies } from './hooks/useFirebase';
 import { FirebaseAuthModal } from './components/FirebaseAuthModal';
 import {
   createLicense, revokeLicense, reactivateLicense,
-  releaseLicenseFromDevice, deleteLicense, extendLicenseExpiry,
+  releaseLicenseFromDevice, deleteLicense, extendLicenseExpiry, updateLicenseSeats,
   getPlanLabel, formatLicenseDate, calculateExpiresAt
 } from './services/licenseService';
 import { createClientAccount } from './services/authService';
@@ -31,6 +31,10 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [extendModalKey, setExtendModalKey] = useState<string | null>(null);
   const [extendDays, setExtendDays] = useState<number>(30);
+
+  // Estado para Gestão de Terminais / Postos Extras
+  const [seatsModalLic, setSeatsModalLic] = useState<KivoraLicense | null>(null);
+  const [newExtraSeats, setNewExtraSeats] = useState<number>(0);
 
   const filtered = licenses.filter((l) => {
     const s = search.toLowerCase();
@@ -126,17 +130,37 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
     }
   };
 
+  const handleOpenSeatsModal = (lic: KivoraLicense) => {
+    setSeatsModalLic(lic);
+    setNewExtraSeats(lic.extra_seats || 0);
+  };
+
+  const handleUpdateSeatsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!seatsModalLic) return;
+    setActionLoading(seatsModalLic.id);
+    try {
+      await updateLicenseSeats(seatsModalLic.id, newExtraSeats);
+      setSeatsModalLic(null);
+      alert(`Terminais atualizados com sucesso! A licença agora possui ${1 + newExtraSeats} postos de trabalho.`);
+    } catch (err: any) {
+      alert('Erro ao atualizar postos/terminais no Firebase: ' + err.message);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   return (
     <div className="flex-1 overflow-y-auto bg-slate-50">
       <AdminTopbar
         title="Gestão de Licenças (Firebase Cloud)"
-        subtitle="Emissão e controlo em tempo real de licenças do software Kivora ERP"
+        subtitle="Emissão, aumento de terminais e controlo em tempo real de licenças do software Kivora ERP"
         actions={
           <div className="flex items-center gap-2">
             <button
               onClick={() => refresh()}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-sm transition-all"
+              className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer"
               title="Recarregar dados do Firebase"
             >
               <RotateCcw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : ''}`} />
@@ -144,7 +168,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
             </button>
             <button
               onClick={onCriarLicenca}
-              className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md shadow-blue-600/20 transition-all"
+              className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md shadow-blue-600/20 transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" strokeWidth={2.5} />
               <span>Emitir Nova Licença</span>
@@ -179,6 +203,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
             </div>
           </div>
         )}
+
         {/* Stats Inline */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
@@ -190,7 +215,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
             <button
               key={item.id}
               onClick={() => setFilterStatus(item.id)}
-              className={`rounded-2xl p-4 border text-left transition-all ${
+              className={`rounded-2xl p-4 border text-left transition-all cursor-pointer ${
                 filterStatus === item.id
                   ? 'bg-slate-950 border-slate-950 text-white shadow-md'
                   : 'bg-white border-slate-200 hover:border-slate-300'
@@ -242,7 +267,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                 <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 font-black uppercase text-[10px] tracking-wider text-left">
                   <th className="px-5 py-3.5">Chave da Licença</th>
                   <th className="px-4 py-3.5">Empresa / NIF</th>
-                  <th className="px-4 py-3.5 hidden md:table-cell">Plano</th>
+                  <th className="px-4 py-3.5 hidden md:table-cell">Plano & Terminais</th>
                   <th className="px-4 py-3.5">Estado</th>
                   <th className="px-4 py-3.5 hidden lg:table-cell">Validade</th>
                   <th className="px-4 py-3.5 hidden xl:table-cell">Dispositivo Vinculado</th>
@@ -253,6 +278,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                 {filtered.map((lic) => {
                   const isExpired = lic.expires_at && lic.expires_at < Date.now();
                   const effectiveStatus = isExpired ? 'expirada' : (lic.status === 'active' ? 'ativa' : 'suspensa');
+                  const totalSeats = 1 + (lic.extra_seats || 0);
 
                   return (
                     <tr key={lic.id} className="hover:bg-slate-50 transition-colors group">
@@ -262,7 +288,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                           <span className="font-mono font-bold text-slate-900 text-xs tracking-wider select-all">{lic.id}</span>
                           <button
                             onClick={() => copyToClipboard(lic.id)}
-                            className="p-1 text-slate-400 hover:text-blue-600 transition-colors rounded"
+                            className="p-1 text-slate-400 hover:text-blue-600 transition-colors rounded cursor-pointer"
                             title="Copiar Chave"
                           >
                             {copiedKey === lic.id ? (
@@ -278,12 +304,17 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                         <p className="text-slate-400 text-[10px] font-mono">NIF: {lic.nif} • {lic.client_email}</p>
                       </td>
                       <td className="px-4 py-3.5 hidden md:table-cell">
-                        <span className="font-bold text-slate-800">{getPlanLabel(lic.plan_type)}</span>
-                        {lic.extra_seats ? (
-                          <span className="text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded font-bold ml-1">
-                            +{lic.extra_seats} PC(s)
-                          </span>
-                        ) : null}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-bold text-slate-800">{getPlanLabel(lic.plan_type)}</span>
+                          <button
+                            onClick={() => handleOpenSeatsModal(lic)}
+                            className="text-[10px] text-blue-700 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-full font-bold border border-blue-200 flex items-center gap-1 transition-all cursor-pointer"
+                            title="Clique para Aumentar ou Alterar Terminais"
+                          >
+                            <Monitor className="w-3 h-3 text-blue-600" />
+                            <span>{totalSeats} Posto(s)</span>
+                          </button>
+                        </div>
                       </td>
                       <td className="px-4 py-3.5">
                         <StatusBadge status={effectiveStatus} />
@@ -302,11 +333,20 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                       </td>
                       <td className="px-5 py-3.5 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          {/* AUMENTAR TERMINAIS / POSTOS */}
+                          <button
+                            onClick={() => handleOpenSeatsModal(lic)}
+                            className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                            title="Aumentar / Configurar Terminais (Postos Extras)"
+                          >
+                            <Monitor className="w-3.5 h-3.5" />
+                          </button>
+
                           {lic.hardware_id && (
                             <button
                               onClick={() => handleReleaseDevice(lic.id)}
                               disabled={actionLoading === lic.id}
-                              className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
                               title="Desvincular Hardware ID (Troca de PC)"
                             >
                               <Unlink className="w-3.5 h-3.5" />
@@ -314,7 +354,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                           )}
                           <button
                             onClick={() => setExtendModalKey(lic.id)}
-                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                             title="Estender Validade"
                           >
                             <Clock className="w-3.5 h-3.5" />
@@ -323,7 +363,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                             <button
                               onClick={() => handleRevoke(lic.id)}
                               disabled={actionLoading === lic.id}
-                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                               title="Revogar Licença"
                             >
                               <Ban className="w-3.5 h-3.5" />
@@ -332,7 +372,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                             <button
                               onClick={() => handleReactivate(lic.id)}
                               disabled={actionLoading === lic.id}
-                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
                               title="Reativar Licença"
                             >
                               <RotateCcw className="w-3.5 h-3.5" />
@@ -341,7 +381,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                           <button
                             onClick={() => handleDelete(lic.id)}
                             disabled={actionLoading === lic.id}
-                            className="p-1.5 text-slate-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                             title="Apagar Definitivamente"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -356,6 +396,120 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
           )}
         </div>
       </div>
+
+      {/* MODAL: AUMENTAR / CONFIGURAR TERMINAIS E POSTOS DE TRABALHO */}
+      {seatsModalLic && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+                  <Monitor className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Aumentar Terminais / Postos</h3>
+                  <p className="text-xs text-slate-500 font-mono">{seatsModalLic.company_name}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSeatsModalLic(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateSeatsSubmit} className="space-y-4 text-xs">
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Chave da Licença:</span>
+                  <span className="font-mono font-bold text-slate-900">{seatsModalLic.id}</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Posto Base (Servidor/Caixa 1):</span>
+                  <span className="font-bold text-emerald-600">1 Posto Incluído</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Postos Extras Atuais:</span>
+                  <span className="font-bold text-slate-900">{seatsModalLic.extra_seats || 0} Adicional(is)</span>
+                </div>
+              </div>
+
+              {/* Seletor de Novos Postos Extras */}
+              <div className="space-y-2">
+                <label className="font-bold text-slate-800 uppercase text-[11px] block">
+                  Definir Novo Total de Postos Extras (Rede Local) *
+                </label>
+                
+                {/* Botões Rápidos */}
+                <div className="grid grid-cols-4 gap-2">
+                  {[0, 1, 2, 3, 5, 8, 10, 15].map((st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => setNewExtraSeats(st)}
+                      className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                        newExtraSeats === st
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      +{st} Posto{st === 1 ? '' : 's'}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Input Numérico Manual */}
+                <div className="pt-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={newExtraSeats}
+                      onChange={(e) => setNewExtraSeats(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 font-bold focus:outline-none focus:border-blue-500 focus:bg-white"
+                      placeholder="Outro número de postos..."
+                    />
+                    <span className="text-slate-500 font-bold whitespace-nowrap">Postos Extras</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Resumo do Total de Terminais */}
+              <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-black uppercase text-blue-900 tracking-wider block">
+                    Capacidade Total Autorizada
+                  </span>
+                  <span className="text-base font-black text-blue-700">
+                    {1 + newExtraSeats} Computador(es) em Rede Local
+                  </span>
+                </div>
+                <Users className="w-6 h-6 text-blue-600" />
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setSeatsModalLic(null)}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoading !== null}
+                  className="px-6 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 flex items-center gap-1.5 cursor-pointer"
+                >
+                  {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckSquare className="w-3.5 h-3.5" />}
+                  <span>Salvar Terminais no Firebase</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Modal Estender Validade */}
       {extendModalKey && (
@@ -385,14 +539,14 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                 <button
                   type="button"
                   onClick={() => setExtendModalKey(null)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading !== null}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 flex items-center gap-1.5 cursor-pointer"
                 >
                   {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
                   <span>Confirmar Extensão</span>

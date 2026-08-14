@@ -36,7 +36,7 @@ const PLANS: Plan[] = [
     period: '/ mês',
     desc: 'Ideal para experimentar ou negócios sazonais.',
     features: [
-      '1 posto de trabalho',
+      '2 postos de trabalho em rede LAN',
       'Faturação eletrónica AGT',
       'POS de balcão',
       'Gestão de stock básica',
@@ -51,7 +51,7 @@ const PLANS: Plan[] = [
     desc: 'A escolha mais popular. Poupe 33% em relação ao mensal.',
     features: [
       'Tudo do plano Mensal',
-      'Até 3 postos de trabalho',
+      'Até 5 postos de trabalho em rede LAN',
       'Módulo de Recursos Humanos',
       'IRT 2026 incluído',
       'Exportação SAF-T Angola',
@@ -156,7 +156,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal 
         <div className="space-y-5">
           {[
             { q: 'A licença inclui atualizações?', a: 'Sim. Todas as atualizações de conformidade fiscal (IRT, SAF-T, DS.120) são incluídas durante o período de validade da licença.' },
-            { q: 'Posso instalar em mais de um computador?', a: 'Depende do plano. O Mensal permite 1 posto, o Anual até 3, e o Ilimitado não tem restrição.' },
+            { q: 'Posso instalar em mais de um computador?', a: 'Depende do plano. O Mensal permite até 2 postos em rede local, o Anual até 5 postos LAN, e o Ilimitado não tem restrição. Pode ainda aumentar o número de terminais individualmente através do Admin Portal.' },
             { q: 'O que acontece quando a licença expira?', a: 'O sistema continua a funcionar para consulta, mas não permite emitir novas faturas até renovar a licença.' },
           ].map((faq, i) => (
             <div key={i} data-reveal className="sr-init border-b border-slate-100 pb-5" style={{ transitionDelay: `${i * 80}ms` }}>

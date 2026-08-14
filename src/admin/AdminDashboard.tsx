@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   TrendingUp, Shield, CheckCircle2, AlertCircle,
-  Ban, RotateCcw, Key, Loader2
+  Ban, RotateCcw, Key, Loader2, Users, Wallet, TrendingDown
 } from 'lucide-react';
 import { useLicenses } from './hooks/useFirebase';
 import { FirebaseAuthModal } from './components/FirebaseAuthModal';
@@ -11,12 +11,22 @@ import {
   PieChart, Pie, Cell, Legend
 } from 'recharts';
 import { getPlanLabel, formatLicenseDate } from './services/licenseService';
+import { subscribeAllDebts, PartnerDebtEntry } from './services/partnerDebtService';
 
 const fmt = (n: number) => n.toLocaleString('pt-AO');
 
 export const AdminDashboard: React.FC = () => {
   const { licenses, loading, error, refresh } = useLicenses();
   const [modalAuth, setModalAuth] = useState(false);
+  const [partnerDebts, setPartnerDebts] = useState<PartnerDebtEntry[]>([]);
+
+  useEffect(() => {
+    const unsub = subscribeAllDebts(setPartnerDebts);
+    return () => unsub();
+  }, []);
+
+  const totalPartnerDebtPending = partnerDebts.filter(d => !d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
+  const totalPartnerDebtPaid = partnerDebts.filter(d => d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
 
   const activeLicenses = licenses.filter(l => l.status === 'active' && (!l.expires_at || l.expires_at >= Date.now()));
   const expiredLicenses = licenses.filter(l => l.status === 'expired' || (l.expires_at && l.expires_at < Date.now()));
@@ -213,6 +223,38 @@ export const AdminDashboard: React.FC = () => {
           <div>
             <div className="text-base font-black text-slate-900">{lifetimePlanCount} Licenças</div>
             <div className="text-[11px] font-bold text-slate-400">Plano Vitalício</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Partner Network & Debt Metrics */}
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 p-5 rounded-3xl text-white shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-blue-500/20 border border-blue-400/30 text-blue-400 flex items-center justify-center shrink-0">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs font-black uppercase tracking-wider text-blue-400">Rede de Parceiros & Revenda</div>
+            <div className="text-sm text-slate-300 mt-0.5">
+              <strong className="text-white font-bold">{partnerDebts.length}</strong> licenças emitidas por parceiros no portal
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4 sm:gap-8 border-t sm:border-t-0 sm:border-l border-slate-800 pt-3 sm:pt-0 sm:pl-8 w-full sm:w-auto justify-between sm:justify-end">
+          <div>
+            <span className="text-[10px] uppercase font-bold text-slate-400 block">Dívidas de Parceiros a Receber</span>
+            <span className="text-base font-black font-mono text-amber-400 flex items-center gap-1">
+              <TrendingDown className="w-4 h-4 text-amber-400" />
+              {fmt(totalPartnerDebtPending)} Kz
+            </span>
+          </div>
+          <div>
+            <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Recebido de Parceiros</span>
+            <span className="text-base font-black font-mono text-emerald-400 flex items-center gap-1">
+              <Wallet className="w-4 h-4 text-emerald-400" />
+              {fmt(totalPartnerDebtPaid)} Kz
+            </span>
           </div>
         </div>
       </div>

@@ -174,15 +174,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
             >
               Termos de Licenciamento
             </a>
-            <a
-              href="#admin"
-              onClick={(e) => handleLinkClick(e, 'admin')}
-              className="text-slate-300 hover:text-white font-bold bg-slate-900 hover:bg-blue-600 border border-slate-800 px-3 py-1 rounded-xl text-[11px] transition-all flex items-center gap-1.5 shadow-sm"
-              title="Acesso Restrito - Painel Admin Kivora"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-              <span>Painel Admin</span>
-            </a>
           </div>
         </div>
 

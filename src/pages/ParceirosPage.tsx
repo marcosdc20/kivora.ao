@@ -47,7 +47,7 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {[
-            { title: 'Comissões Atrativas', desc: 'Margem comercial competitiva em cada licença vendida, com bónus por volume trimestral.' },
+            { title: 'Preços de Atacado & Margem Livre', desc: 'Preços especiais de custo com liberdade total para definir o preço de venda ao cliente e maximizar o seu lucro.' },
             { title: 'Material de Marketing', desc: 'Acesso a brochuras, apresentações e material promocional com a sua marca.' },
             { title: 'Suporte Técnico Prioritário', desc: 'Canal de suporte exclusivo para parceiros com SLA de 2 horas de resposta.' },
             { title: 'Formação Certificada', desc: 'Formação técnica e comercial gratuita para a sua equipa de vendas e suporte.' },
