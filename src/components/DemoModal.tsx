@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { X, CheckCircle, Send, Building, Phone, Mail, User, ShieldCheck, Sparkles } from 'lucide-react';
+import { X, CheckCircle, Send, Building, Phone, Mail, User, ShieldCheck, Sparkles, MessageCircle, Loader2 } from 'lucide-react';
 import { KIVORA_INFO } from '../data/kivoraData';
+import { db } from '../lib/firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 interface DemoModalProps {
   isOpen: boolean;
@@ -14,6 +16,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
   initialModule = '',
 }) => {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     companyName: '',
     nif: '',
@@ -29,9 +32,27 @@ export const DemoModal: React.FC<DemoModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      await addDoc(collection(db, 'leads_demonstracao'), {
+        ...formData,
+        created_at: Date.now(),
+        status: 'pendente',
+        source: 'site_modal_demonstracao',
+      });
+    } catch (err) {
+      console.warn('Erro ao gravar lead no Firebase:', err);
+    } finally {
+      setSubmitting(false);
+      setSubmitted(true);
+    }
+  };
+
+  const getWhatsAppLink = () => {
+    const msg = `Olá Equipa Kivora! Gostaria de agendar uma demonstração do Kivora ERP.%0A%0A*Empresa:* ${formData.companyName}%0A*Contacto:* ${formData.contactName} (${formData.phone})%0A*Email:* ${formData.email}%0A*Ramo:* ${formData.businessSector}%0A*Módulo:* ${formData.interestedModule}%0A*Modalidade:* ${formData.installationMode}${formData.notes ? `%0A*Notas:* ${formData.notes}` : ''}`;
+    return `https://wa.me/${KIVORA_INFO.phoneRaw}?text=${msg}`;
   };
 
   const handleReset = () => {
@@ -68,27 +89,41 @@ export const DemoModal: React.FC<DemoModalProps> = ({
         {/* Content Body */}
         <div className="p-6 md:p-8 max-h-[80vh] overflow-y-auto">
           {submitted ? (
-            <div className="text-center py-8 space-y-4">
-              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto animate-bounce">
+            <div className="text-center py-6 space-y-4">
+              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
                 <CheckCircle className="w-10 h-10" />
               </div>
               <h4 className="text-2xl font-bold text-slate-800">
                 Pedido Enviado com Sucesso!
               </h4>
               <p className="text-slate-600 max-w-md mx-auto text-sm leading-relaxed">
-                Obrigado pelo seu interesse no <strong>Kivora ERP</strong>. Um dos nossos consultores fiscais e comerciais em Luanda entrará em contacto dentro de poucas horas.
+                Obrigado pelo seu interesse no <strong>Kivora ERP</strong>. A sua solicitação foi registada na nossa base de dados e um dos nossos consultores fiscais entrará em contacto dentro de poucas horas.
               </p>
-              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-xs text-blue-900 max-w-md mx-auto space-y-1">
-                <p className="font-bold">Acompanhamento Imediato:</p>
-                <p>Telefone: {KIVORA_INFO.phoneDisplay}</p>
-                <p>Email: {KIVORA_INFO.email}</p>
+              
+              <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 text-xs text-blue-900 max-w-md mx-auto space-y-1 text-left">
+                <p className="font-bold text-sm text-blue-950 mb-1">Acompanhamento e Apoio Direto:</p>
+                <p>• <strong>Telefone:</strong> {KIVORA_INFO.phoneDisplay}</p>
+                <p>• <strong>Email Comercial:</strong> {KIVORA_INFO.email}</p>
+                <p>• <strong>Sede:</strong> {KIVORA_INFO.address}</p>
               </div>
-              <button
-                onClick={handleReset}
-                className="mt-6 bg-[#2563EB] hover:bg-blue-700 text-white font-extrabold px-8 py-3 rounded-xl shadow-lg transition-all"
-              >
-                Concluir
-              </button>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <a
+                  href={getWhatsAppLink()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg shadow-emerald-600/25 transition-all text-xs"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Conversar no WhatsApp Agora</span>
+                </a>
+                <button
+                  onClick={handleReset}
+                  className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg transition-all text-xs cursor-pointer"
+                >
+                  Concluir
+                </button>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -240,10 +275,20 @@ export const DemoModal: React.FC<DemoModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#2563EB] hover:bg-blue-700 text-white font-extrabold px-6 py-2.5 rounded-xl shadow-lg shadow-blue-500/25 transition-all duration-200 flex items-center gap-2"
+                  disabled={submitting}
+                  className="bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 text-white font-extrabold px-6 py-2.5 rounded-xl shadow-lg shadow-blue-500/25 transition-all duration-200 flex items-center gap-2 cursor-pointer"
                 >
-                  <Send className="w-4 h-4" />
-                  <span>Enviar Pedido de Demonstração</span>
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>A registar pedido...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      <span>Enviar Pedido de Demonstração</span>
+                    </>
+                  )}
                 </button>
               </div>
 
