@@ -262,7 +262,8 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
               <p className="text-xs text-slate-400">Clique em "Emitir Nova Licença" para gerar uma chave real.</p>
             </div>
           ) : (
-            <table className="w-full text-xs">
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-xs min-w-[650px]">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 font-black uppercase text-[10px] tracking-wider text-left">
                   <th className="px-5 py-3.5">Chave da Licença</th>
@@ -393,6 +394,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                 })}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>

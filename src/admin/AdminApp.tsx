@@ -15,7 +15,7 @@ import { AdminPlanos } from './AdminPlanos';
 import { AdminConfiguracoes } from './AdminConfiguracoes';
 import { AdminSection } from './types';
 import { Empresa } from './types';
-import { ArrowLeft, Lock } from 'lucide-react';
+import { ArrowLeft, Lock, Menu } from 'lucide-react';
 
 import { getStoredSession, loginUser, logoutUser, KivoraUserSession } from './services/authService';
 
@@ -122,14 +122,14 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
   });
   const [activeSection, setActiveSection] = useState<AdminSection>('licencas');
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
-  const [sidebarOpen] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   if (!authenticated) {
     return (
       <div>
         <button
           onClick={onExitAdmin}
-          className="fixed top-4 left-4 z-50 flex items-center gap-1.5 text-slate-400 hover:text-white text-xs font-semibold bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-xl transition-all"
+          className="fixed top-4 left-4 z-50 flex items-center gap-1.5 text-slate-400 hover:text-white text-xs font-semibold bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-xl transition-all shadow-md"
         >
           <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2} />
           Voltar ao Site
@@ -144,6 +144,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
 
   const navigate = (section: AdminSection) => {
     setActiveSection(section);
+    setMobileSidebarOpen(false);
     if (section !== 'empresa-detalhe') setSelectedEmpresa(null);
   };
 
@@ -216,27 +217,55 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
-      {/* Sidebar */}
-      <AdminSidebar
-        activeSection={activeSection}
-        onNavigate={navigate}
-        collapsed={!sidebarOpen}
-      />
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:flex h-full flex-shrink-0">
+        <AdminSidebar
+          activeSection={activeSection}
+          onNavigate={navigate}
+        />
+      </div>
+
+      {/* Mobile Drawer Backdrop and Sidebar */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex">
+          <div
+            className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+          <div className="relative w-72 max-w-[85vw] h-full z-10 shadow-2xl">
+            <AdminSidebar
+              activeSection={activeSection}
+              onNavigate={navigate}
+              onClose={() => setMobileSidebarOpen(false)}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden w-full min-w-0">
         {/* Back to site & Session Header */}
-        <div className="flex items-center justify-between bg-slate-950 px-4 py-2 shrink-0">
-          <button
-            onClick={onExitAdmin}
-            className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-[11px] font-semibold transition-colors"
-          >
-            <ArrowLeft className="w-3 h-3" strokeWidth={2} />
-            Voltar ao Site Público
-          </button>
+        <div className="flex items-center justify-between bg-slate-950 px-3 sm:px-4 py-2 shrink-0 border-b border-slate-800">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setMobileSidebarOpen(true)}
+              className="lg:hidden flex items-center justify-center p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer"
+              title="Abrir Menu Lateral"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            <button
+              onClick={onExitAdmin}
+              className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-[11px] font-semibold transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="w-3 h-3" strokeWidth={2} />
+              <span className="hidden sm:inline">Voltar ao Site Público</span>
+              <span className="sm:hidden">Site</span>
+            </button>
+          </div>
           
-          <div className="flex items-center gap-3">
-            <span className="text-slate-400 text-[11px]">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="text-slate-400 text-[10px] sm:text-[11px] truncate max-w-[130px] sm:max-w-[220px]">
               {session?.email || 'admin@kivora.ao'}
             </span>
             <button
@@ -245,16 +274,16 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
                 setAuthenticated(false);
                 setSession(null);
               }}
-              className="text-red-400 hover:text-red-300 text-[11px] font-medium"
+              className="text-red-400 hover:text-red-300 text-[10px] sm:text-[11px] font-medium cursor-pointer"
             >
               Terminar Sessão
             </button>
-            <span className="text-slate-600 text-[10px] font-mono border-l border-slate-800 pl-3">KIVORA ADMIN v2026.08</span>
+            <span className="text-slate-600 text-[10px] font-mono border-l border-slate-800 pl-2 sm:pl-3 hidden md:inline">KIVORA ADMIN</span>
           </div>
         </div>
 
         {/* Section */}
-        <div className="flex-1 overflow-hidden flex">
+        <div className="flex-1 overflow-hidden flex min-w-0">
           {renderSection()}
         </div>
       </div>

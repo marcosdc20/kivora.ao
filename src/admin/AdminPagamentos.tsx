@@ -395,7 +395,8 @@ export const AdminPagamentos: React.FC = () => {
 
             {/* Tabela de Faturas */}
             <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-              <table className="w-full text-xs text-left">
+              <div className="overflow-x-auto w-full">
+                <table className="w-full text-xs text-left min-w-[700px]">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 uppercase font-black text-[10px] tracking-wider">
                     <th className="p-4">N.º Fatura</th>
@@ -478,6 +479,7 @@ export const AdminPagamentos: React.FC = () => {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )}
@@ -533,7 +535,8 @@ export const AdminPagamentos: React.FC = () => {
 
             {/* Tabela de Dívidas de Parceiros */}
             <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-              <table className="w-full text-xs text-left">
+              <div className="overflow-x-auto w-full">
+                <table className="w-full text-xs text-left min-w-[700px]">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 uppercase font-black text-[10px] tracking-wider">
                     <th className="p-4 w-10">
@@ -607,6 +610,7 @@ export const AdminPagamentos: React.FC = () => {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )}

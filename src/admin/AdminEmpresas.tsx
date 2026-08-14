@@ -209,7 +209,8 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
               <p className="text-xs text-slate-400">Clique em "Registar Empresa" ou emita uma nova licença.</p>
             </div>
           ) : (
-            <table className="w-full text-xs">
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-xs min-w-[650px]">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 font-black uppercase text-[10px] tracking-wider text-left">
                   <th className="px-5 py-3.5">Empresa / NIF</th>
@@ -271,6 +272,7 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>

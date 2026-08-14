@@ -151,7 +151,8 @@ export const AdminUtilizadores: React.FC = () => {
             </div>
           </div>
 
-          <table className="w-full text-xs">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-xs min-w-[600px]">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 font-black uppercase text-[10px] tracking-wider text-left">
                 <th className="px-5 py-3.5">Nome / E-mail</th>
@@ -211,6 +212,7 @@ export const AdminUtilizadores: React.FC = () => {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 

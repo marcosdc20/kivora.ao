@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard, Key, Download, Cloud, FileText,
   Headphones, Building2, LogOut, Monitor, Copy,
-  CheckCircle2, ShieldCheck, Loader2, Send
+  CheckCircle2, ShieldCheck, Loader2, Send, Menu, X
 } from 'lucide-react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { CURRENT_RELEASE } from '../data/kivoraData';
@@ -23,6 +23,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
   const { licenses } = useLicenses();
 
   const [activeSection, setActiveSection] = useState<ClientSection>('dashboard');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
   const [ticketSubject, setTicketSubject] = useState('');
   const [ticketMessage, setTicketMessage] = useState('');
@@ -118,8 +119,8 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 font-sans">
       
-      {/* Sidebar Executiva do Cliente */}
-      <aside className="w-64 bg-slate-950 text-white flex flex-col shrink-0 border-r border-slate-800">
+      {/* Desktop Sidebar Executiva do Cliente */}
+      <aside className="hidden lg:flex w-64 bg-slate-950 text-white flex-col shrink-0 border-r border-slate-800">
         <div className="p-5 border-b border-slate-800/80">
           <KivoraLogo variant="light" size="sm" />
           <div className="mt-3 flex items-center justify-between">
@@ -145,7 +146,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id as ClientSection)}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
                   active
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                     : 'text-slate-400 hover:text-white hover:bg-slate-900'
@@ -162,7 +163,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
         <div className="p-4 border-t border-slate-800/80 space-y-2">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-red-950/50 hover:text-red-400 text-slate-400 text-xs font-bold py-2.5 rounded-xl transition-all border border-slate-800"
+            className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-red-950/50 hover:text-red-400 text-slate-400 text-xs font-bold py-2.5 rounded-xl transition-all border border-slate-800 cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Terminar Sessão</span>
@@ -170,28 +171,99 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
         </div>
       </aside>
 
+      {/* Mobile Drawer Backdrop & Sidebar */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex">
+          <div
+            className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <aside className="relative w-72 max-w-[85vw] h-full bg-slate-950 text-white flex flex-col z-10 shadow-2xl border-r border-slate-800">
+            <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
+              <div>
+                <KivoraLogo variant="light" size="sm" />
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-blue-400 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800/50">
+                    Área do Cliente
+                  </span>
+                </div>
+              </div>
+              <button onClick={() => setMobileMenuOpen(false)} className="p-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 bg-slate-900/60 border-b border-slate-800/80">
+              <p className="text-xs font-black text-white truncate">{clientLicense.company_name}</p>
+              <p className="text-[10px] text-slate-400 font-mono">NIF: {clientLicense.nif}</p>
+            </div>
+
+            <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const active = activeSection === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveSection(item.id as ClientSection);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                      active
+                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 ${active ? 'text-white' : 'text-slate-400'}`} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            <div className="p-4 border-t border-slate-800/80 space-y-2">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-red-950/50 hover:text-red-400 text-slate-400 text-xs font-bold py-2.5 rounded-xl transition-all border border-slate-800 cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Terminar Sessão</span>
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+
       {/* Main Container */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0 w-full">
         
         {/* Topbar */}
-        <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 shadow-sm">
-          <div className="flex items-center gap-3">
-            <h1 className="text-base font-black text-slate-900 capitalize">
+        <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between shrink-0 shadow-sm">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden flex items-center justify-center p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+              title="Abrir Menu"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            <h1 className="text-sm sm:text-base font-black text-slate-900 capitalize truncate">
               {navItems.find(n => n.id === activeSection)?.label}
             </h1>
-            <span className="text-xs text-slate-400 font-medium hidden sm:inline">• Portal de Auto-atendimento Kivora</span>
+            <span className="text-xs text-slate-400 font-medium hidden md:inline">• Portal Kivora</span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] sm:text-[11px] font-bold px-2.5 sm:px-3 py-1 rounded-full flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Licença Certificada AGT</span>
+              <span>Certificada AGT</span>
             </div>
           </div>
         </header>
 
         {/* Dynamic Section Content */}
-        <main className="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-slate-50 space-y-6">
           
           {/* SECTION: DASHBOARD */}
           {activeSection === 'dashboard' && (

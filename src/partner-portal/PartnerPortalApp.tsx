@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, Key, DollarSign, Package,
   Headphones, LogOut, Plus, Copy, CheckCircle2,
   Download, FileText, Send, MessageSquare,
-  Building2, Search, AlertCircle
+  Building2, Search, AlertCircle, Menu, X
 } from 'lucide-react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { getStoredSession, clearStoredSession, KivoraUserSession } from '../admin/services/authService';
@@ -32,6 +32,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const { licenses } = useLicenses();
 
   const [activeSection, setActiveSection] = useState<PartnerSection>('dashboard');
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const partnerCode = session?.partnerCode || session?.email || 'PARCEIRO-KIVORA';
   const partnerName = session?.nome || 'Parceiro Homologado Kivora';
 
@@ -271,8 +272,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 font-sans">
 
-      {/* Sidebar Executiva do Parceiro */}
-      <aside className="w-64 bg-slate-950 text-white flex flex-col shrink-0 border-r border-slate-800">
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-64 bg-slate-950 text-white flex-col shrink-0 border-r border-slate-800">
         <div className="p-5 border-b border-slate-800/80">
           <KivoraLogo variant="light" size="sm" />
           <div className="mt-3 flex items-center justify-between">
@@ -334,35 +335,118 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         </div>
       </aside>
 
+      {/* Mobile Drawer Backdrop & Sidebar */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex">
+          <div
+            className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+          <aside className="relative w-72 max-w-[85vw] h-full bg-slate-950 text-white flex flex-col z-10 shadow-2xl border-r border-slate-800">
+            <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
+              <div>
+                <KivoraLogo variant="light" size="sm" />
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-800/50">
+                    Portal do Parceiro
+                  </span>
+                </div>
+              </div>
+              <button onClick={() => setMobileSidebarOpen(false)} className="p-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 bg-slate-900/60 border-b border-slate-800/80">
+              <p className="text-xs font-black text-white truncate">{partnerName}</p>
+              <p className="text-[10px] text-emerald-400 font-mono font-bold mt-0.5">{partnerCode}</p>
+            </div>
+
+            <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const active = activeSection === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveSection(item.id as PartnerSection);
+                      setMobileSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                      active
+                        ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span>{item.label}</span>
+                    </div>
+                    {item.id === 'extrato' && totalPendingDebt > 0 ? (
+                      <span className="bg-amber-500 text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded-full">
+                        Pendente
+                      </span>
+                    ) : item.badge && item.badge > 0 ? (
+                      <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">
+                        {item.badge}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </nav>
+
+            <div className="p-3 border-t border-slate-800/80">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl transition-all cursor-pointer"
+              >
+                <LogOut className="w-4 h-4 text-slate-500" />
+                <span>Terminar Sessão</span>
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden w-full">
 
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0 shadow-xs">
-          <div className="flex items-center gap-2">
-            <h1 className="text-base font-black text-slate-900">
+        <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between shrink-0 shadow-xs">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <button
+              onClick={() => setMobileSidebarOpen(true)}
+              className="lg:hidden flex items-center justify-center p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+              title="Abrir Menu"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            <h1 className="text-sm sm:text-base font-black text-slate-900 truncate">
               {activeSection === 'dashboard' && 'Visão Geral do Parceiro'}
               {activeSection === 'clientes' && 'Carteira de Clientes'}
-              {activeSection === 'emitir-licenca' && 'Emissão de Chaves de Licença'}
-              {activeSection === 'extrato' && 'Extrato de Dívida à Kivora'}
+              {activeSection === 'emitir-licenca' && 'Emissão de Licenças'}
+              {activeSection === 'extrato' && 'Extrato de Dívida'}
               {activeSection === 'materiais' && 'Kits Comerciais & Vendas'}
-              {activeSection === 'suporte' && 'Central de Suporte & Atendimento Multilateral'}
+              {activeSection === 'suporte' && 'Central de Suporte'}
             </h1>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => setActiveSection('emitir-licenca')}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 sm:px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Emitir Licença</span>
+              <span className="hidden sm:inline">Emitir Licença</span>
+              <span className="sm:hidden">Licença</span>
             </button>
           </div>
         </header>
 
         {/* Content Scrollable */}
-        <main className="flex-1 overflow-y-auto p-8 space-y-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
 
           {/* SECTION: DASHBOARD */}
           {activeSection === 'dashboard' && (
