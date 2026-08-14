@@ -1,36 +1,89 @@
-import React, { useState } from 'react';
-import { Send, Bell, Smartphone, Mail, Plus, CheckCircle, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Send, Bell, Smartphone, Mail, Plus, CheckCircle, Clock, Loader2 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
-import { MOCK_COMUNICADOS } from './mockData';
 import { ComunicadoAdmin } from './types';
+import { db } from '../lib/firebase';
+import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
 
 export const AdminComunicacao: React.FC = () => {
-  const [comunicados, setComunicados] = useState<ComunicadoAdmin[]>(MOCK_COMUNICADOS);
+  const [comunicados, setComunicados] = useState<ComunicadoAdmin[]>([]);
+  const [loading, setLoading] = useState(true);
   const [modalNovo, setModalNovo] = useState(false);
   const [titulo, setTitulo] = useState('');
   const [canal, setCanal] = useState<'sistema' | 'whatsapp' | 'email'>('sistema');
   const [destinatarios, setDestinatarios] = useState('Todas as Empresas Clientes');
   const [mensagem, setMensagem] = useState('');
 
-  const handleCriarComunicado = (e: React.FormEvent) => {
+  // Sincronização em Tempo Real com Firestore (/announcements)
+  useEffect(() => {
+    try {
+      const unsub = onSnapshot(collection(db, 'announcements'), (snapshot) => {
+        const fireComs: ComunicadoAdmin[] = [];
+        snapshot.forEach((docSnap) => {
+          const d = docSnap.data();
+          fireComs.push({
+            id: docSnap.id,
+            titulo: d.titulo || 'Comunicado Oficial',
+            canal: d.canal || 'sistema',
+            destinatarios: d.destinatarios || 'Todas as Empresas',
+            dataEnvio: d.dataEnvio || new Date().toISOString().split('T')[0],
+            autor: d.autor || 'Administração Kivora',
+            estado: d.estado || 'enviado',
+            mensagem: d.mensagem || '',
+          });
+        });
+
+        if (fireComs.length === 0) {
+          fireComs.push({
+            id: 'com-welcome',
+            titulo: 'Canal de Notificações Kivora Ativado',
+            canal: 'sistema',
+            destinatarios: 'Todas as Empresas Clientes e Parceiros',
+            dataEnvio: new Date().toISOString().split('T')[0],
+            autor: 'Suporte Central',
+            estado: 'enviado',
+            mensagem: 'O canal de avisos e notificações push está pronto e sincronizado via Firebase.',
+          });
+        }
+
+        setComunicados(fireComs);
+        setLoading(false);
+      }, (err) => {
+        console.warn('Erro ao escutar announcements:', err);
+        setLoading(false);
+      });
+
+      return () => unsub();
+    } catch (e) {
+      console.warn(e);
+      setLoading(false);
+    }
+  }, []);
+
+  const handleCriarComunicado = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!titulo || !mensagem) return;
 
-    const novo: ComunicadoAdmin = {
-      id: `com-${Date.now()}`,
-      titulo,
-      canal,
-      destinatarios,
-      dataEnvio: new Date().toISOString().split('T')[0],
-      autor: 'Adelino Costa',
-      estado: 'enviado',
-      mensagem,
-    };
+    const cId = `com_${Date.now()}`;
+    try {
+      await setDoc(doc(db, 'announcements', cId), {
+        titulo,
+        canal,
+        destinatarios,
+        dataEnvio: new Date().toISOString().split('T')[0],
+        autor: 'Administração Kivora',
+        estado: 'enviado',
+        mensagem,
+        created_at: Date.now()
+      }, { merge: true });
 
-    setComunicados([novo, ...comunicados]);
-    setModalNovo(false);
-    setTitulo('');
-    setMensagem('');
+      setModalNovo(false);
+      setTitulo('');
+      setMensagem('');
+      alert(`Comunicado "${titulo}" enviado com sucesso via Firebase!`);
+    } catch (err: any) {
+      alert('Erro ao enviar comunicado no Firebase: ' + err.message);
+    }
   };
 
   return (
@@ -86,48 +139,60 @@ export const AdminComunicacao: React.FC = () => {
           </div>
 
           <div className="divide-y divide-slate-100">
-            {comunicados.map((com) => (
-              <div key={com.id} className="p-5 hover:bg-slate-50 transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div className="space-y-1 max-w-2xl">
-                  <div className="flex items-center gap-2">
-                    {com.canal === 'whatsapp' && (
-                      <span className="text-[10px] font-extrabold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200">
-                        <Smartphone className="w-3 h-3" /> WhatsApp
-                      </span>
-                    )}
-                    {com.canal === 'email' && (
-                      <span className="text-[10px] font-extrabold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full flex items-center gap-1 border border-blue-200">
-                        <Mail className="w-3 h-3" /> E-mail
-                      </span>
-                    )}
-                    {com.canal === 'sistema' && (
-                      <span className="text-[10px] font-extrabold bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full flex items-center gap-1 border border-purple-200">
-                        <Bell className="w-3 h-3" /> Pop-up Sistema
-                      </span>
-                    )}
-                    <span className="text-xs text-slate-400 font-medium">• {com.dataEnvio}</span>
-                  </div>
-                  <h4 className="font-extrabold text-slate-900 text-sm">{com.titulo}</h4>
-                  <p className="text-xs text-slate-600 line-clamp-2">{com.mensagem}</p>
-                </div>
-
-                <div className="flex items-center gap-3 shrink-0 text-right">
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Destinatários</span>
-                    <span className="text-xs font-bold text-slate-800">{com.destinatarios}</span>
-                  </div>
-                  {com.estado === 'enviado' ? (
-                    <span className="text-xs font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg border border-emerald-200 flex items-center gap-1">
-                      <CheckCircle className="w-3.5 h-3.5" /> Enviado
-                    </span>
-                  ) : (
-                    <span className="text-xs font-bold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-lg border border-amber-200 flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" /> Agendado
-                    </span>
-                  )}
-                </div>
+            {loading ? (
+              <div className="p-8 text-center text-slate-400">
+                <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
+                <span>A carregar comunicados do Firebase...</span>
               </div>
-            ))}
+            ) : comunicados.length === 0 ? (
+              <div className="p-8 text-center text-slate-400">
+                <Bell className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                <p className="font-bold text-slate-700">Nenhum comunicado registado</p>
+              </div>
+            ) : (
+              comunicados.map((com) => (
+                <div key={com.id} className="p-5 hover:bg-slate-50 transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="space-y-1 max-w-2xl">
+                    <div className="flex items-center gap-2">
+                      {com.canal === 'whatsapp' && (
+                        <span className="text-[10px] font-extrabold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200">
+                          <Smartphone className="w-3 h-3" /> WhatsApp
+                        </span>
+                      )}
+                      {com.canal === 'email' && (
+                        <span className="text-[10px] font-extrabold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full flex items-center gap-1 border border-blue-200">
+                          <Mail className="w-3 h-3" /> E-mail
+                        </span>
+                      )}
+                      {com.canal === 'sistema' && (
+                        <span className="text-[10px] font-extrabold bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full flex items-center gap-1 border border-purple-200">
+                          <Bell className="w-3 h-3" /> Pop-up Sistema
+                        </span>
+                      )}
+                      <span className="text-xs text-slate-400 font-medium">• {com.dataEnvio}</span>
+                    </div>
+                    <h4 className="font-extrabold text-slate-900 text-sm">{com.titulo}</h4>
+                    <p className="text-xs text-slate-600 line-clamp-2">{com.mensagem}</p>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0 text-right">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Destinatários</span>
+                      <span className="text-xs font-bold text-slate-800">{com.destinatarios}</span>
+                    </div>
+                    {com.estado === 'enviado' ? (
+                      <span className="text-xs font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg border border-emerald-200 flex items-center gap-1">
+                        <CheckCircle className="w-3.5 h-3.5" /> Enviado
+                      </span>
+                    ) : (
+                      <span className="text-xs font-bold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-lg border border-amber-200 flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" /> Agendado
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Headphones, Plus, Search, MessageSquare, Monitor,
+  Headphones, Plus, Search, Monitor,
   Clock, AlertTriangle, CheckCircle2,
-  Send, X
+  Send, X, Loader2
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
+import { db } from '../lib/firebase';
+import { collection, onSnapshot, doc, setDoc, updateDoc } from 'firebase/firestore';
 
 export interface SupportTicket {
   id: string;
@@ -20,61 +22,9 @@ export interface SupportTicket {
   messagesCount: number;
 }
 
-const INITIAL_TICKETS: SupportTicket[] = [
-  {
-    id: '1',
-    ticket_number: 'TK-2026/0412',
-    company_name: 'Supermercado Central do Lobito',
-    contact_email: 'gerencia@centrallobito.ao',
-    subject: 'Erro ao emitir nota de crédito com retenção na fonte',
-    category: 'faturacao',
-    priority: 'urgent',
-    status: 'open',
-    createdAt: Date.now() - 3600000 * 2,
-    remote_code: '482 910 234',
-    messagesCount: 3
-  },
-  {
-    id: '2',
-    ticket_number: 'TK-2026/0411',
-    company_name: 'Farmácia Aliança Luanda S.A.',
-    contact_email: 'ti@farmaciaalianca.co.ao',
-    subject: 'Configuração da impressora térmica EPSON TM-T20 na filial 2',
-    category: 'tecnico',
-    priority: 'high',
-    status: 'in_progress',
-    createdAt: Date.now() - 3600000 * 5,
-    remote_code: '891 304 552',
-    messagesCount: 7
-  },
-  {
-    id: '3',
-    ticket_number: 'TK-2026/0410',
-    company_name: 'Hotel Baía & Turismo, Lda.',
-    contact_email: 'recepcao@hotelbaia.ao',
-    subject: 'Dúvida sobre alteração de alíquota no módulo de alojamento',
-    category: 'faturacao',
-    priority: 'medium',
-    status: 'resolved',
-    createdAt: Date.now() - 3600000 * 24,
-    messagesCount: 4
-  },
-  {
-    id: '4',
-    ticket_number: 'TK-2026/0409',
-    company_name: 'Auto Mecânica Luanda S.A.',
-    contact_email: 'oficina@automecanica.ao',
-    subject: 'Solicitação de 3 novas licenças para terminais de oficina',
-    category: 'licenciamento',
-    priority: 'low',
-    status: 'closed',
-    createdAt: Date.now() - 3600000 * 48,
-    messagesCount: 2
-  }
-];
-
 export const AdminSuporte: React.FC = () => {
-  const [tickets, setTickets] = useState<SupportTicket[]>(INITIAL_TICKETS);
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'in_progress' | 'resolved'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -91,35 +41,77 @@ export const AdminSuporte: React.FC = () => {
   // Chat message thread
   const [chatMessage, setChatMessage] = useState('');
   const [messages, setMessages] = useState<Array<{ sender: string; text: string; time: string }>>([
-    { sender: 'Cliente', text: 'Boa tarde, estou a precisar de ajuda com a configuração remota.', time: '14:20' },
-    { sender: 'Suporte Kivora', text: 'Olá! Claro, por favor indique o código RustDesk / AnyDesk da sua máquina.', time: '14:22' }
+    { sender: 'Suporte Kivora', text: 'Linha de apoio ao cliente ativa. Indique como podemos ajudar.', time: '09:00' }
   ]);
 
-  const handleCreateTicket = (e: React.FormEvent) => {
+  // Sincronização em Tempo Real com Firestore (/support_tickets)
+  useEffect(() => {
+    try {
+      const unsub = onSnapshot(collection(db, 'support_tickets'), (snapshot) => {
+        const fireTickets: SupportTicket[] = [];
+        let count = 1;
+        snapshot.forEach((docSnap) => {
+          const d = docSnap.data();
+          const num = String(count++).padStart(4, '0');
+          fireTickets.push({
+            id: docSnap.id,
+            ticket_number: d.ticket_number || `TK-2026/${num}`,
+            company_name: d.company_name || d.company || 'Empresa Cliente',
+            contact_email: d.contact_email || d.email || '',
+            subject: d.subject || d.assunto || 'Chamado de Suporte',
+            category: d.category || 'tecnico',
+            priority: d.priority || 'medium',
+            status: d.status || 'open',
+            createdAt: Number(d.createdAt) || Number(d.created_at) || Date.now(),
+            remote_code: d.remote_code || d.anydesk_id || undefined,
+            messagesCount: Number(d.messagesCount) || 1,
+          });
+        });
+
+        setTickets(fireTickets);
+        setLoading(false);
+      }, (err) => {
+        console.warn('Erro ao escutar support_tickets:', err);
+        setLoading(false);
+      });
+
+      return () => unsub();
+    } catch (e) {
+      console.warn(e);
+      setLoading(false);
+    }
+  }, []);
+
+  const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!company || !subject) return;
 
-    const newTk: SupportTicket = {
-      id: Date.now().toString(),
-      ticket_number: `TK-2026/04${tickets.length + 15}`,
-      company_name: company,
-      contact_email: email || 'cliente@empresa.ao',
-      subject,
-      category,
-      priority,
-      status: 'open',
-      createdAt: Date.now(),
-      remote_code: remoteCode || undefined,
-      messagesCount: 1
-    };
+    const tkId = `tk_${Date.now()}`;
+    const tkNum = `TK-2026/${String(tickets.length + 1).padStart(4, '0')}`;
 
-    setTickets([newTk, ...tickets]);
-    setShowModal(false);
-    setCompany('');
-    setEmail('');
-    setSubject('');
-    setRemoteCode('');
-    alert(`Ticket #${newTk.ticket_number} registado com sucesso no Helpdesk Kivora!`);
+    try {
+      await setDoc(doc(db, 'support_tickets', tkId), {
+        ticket_number: tkNum,
+        company_name: company,
+        contact_email: email || 'cliente@empresa.ao',
+        subject,
+        category,
+        priority,
+        status: 'open',
+        createdAt: Date.now(),
+        remote_code: remoteCode || null,
+        messagesCount: 1
+      }, { merge: true });
+
+      setShowModal(false);
+      setCompany('');
+      setEmail('');
+      setSubject('');
+      setRemoteCode('');
+      alert(`Ticket #${tkNum} registado com sucesso no Firebase!`);
+    } catch (err: any) {
+      alert('Erro ao criar ticket no Firebase: ' + err.message);
+    }
   };
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -136,10 +128,18 @@ export const AdminSuporte: React.FC = () => {
     setChatMessage('');
   };
 
-  const handleUpdateStatus = (id: string, status: SupportTicket['status']) => {
-    setTickets(tickets.map(t => t.id === id ? { ...t, status } : t));
-    if (selectedTicket && selectedTicket.id === id) {
-      setSelectedTicket({ ...selectedTicket, status });
+  const handleUpdateStatus = async (id: string, status: SupportTicket['status']) => {
+    try {
+      await updateDoc(doc(db, 'support_tickets', id), {
+        status
+      });
+
+      setTickets(tickets.map(t => t.id === id ? { ...t, status } : t));
+      if (selectedTicket && selectedTicket.id === id) {
+        setSelectedTicket({ ...selectedTicket, status });
+      }
+    } catch (err: any) {
+      alert('Erro ao atualizar status do ticket: ' + err.message);
     }
   };
 
@@ -260,58 +260,76 @@ export const AdminSuporte: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredTickets.map((tk) => (
-                <tr key={tk.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="p-4 font-mono font-bold text-blue-600">{tk.ticket_number}</td>
-                  <td className="p-4">
-                    <p className="font-bold text-slate-900">{tk.company_name}</p>
-                    <p className="text-slate-400 text-[10px]">{tk.contact_email}</p>
-                  </td>
-                  <td className="p-4">
-                    <p className="font-bold text-slate-800">{tk.subject}</p>
-                    <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase">
-                      {tk.category}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    {tk.remote_code ? (
-                      <span className="font-mono text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">
-                        {tk.remote_code}
-                      </span>
-                    ) : (
-                      <span className="text-slate-400 text-[11px] italic">Sem código</span>
-                    )}
-                  </td>
-                  <td className="p-4">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                      tk.priority === 'urgent' ? 'bg-red-50 text-red-700 border border-red-200' :
-                      tk.priority === 'high' ? 'bg-orange-50 text-orange-700 border border-orange-200' :
-                      tk.priority === 'medium' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                      'bg-slate-100 text-slate-600'
-                    }`}>
-                      {tk.priority}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      tk.status === 'open' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                      tk.status === 'in_progress' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                      'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                    }`}>
-                      {tk.status === 'open' ? 'Aberto' : tk.status === 'in_progress' ? 'Em Atendimento' : 'Resolvido'}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right">
-                    <button
-                      onClick={() => setSelectedTicket(tk)}
-                      className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-xl font-bold text-[11px] inline-flex items-center gap-1 shadow-sm transition-all"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      <span>Atender</span>
-                    </button>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-slate-400">
+                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
+                    <span>A sincronizar chamados do Firebase...</span>
                   </td>
                 </tr>
-              ))}
+              ) : filteredTickets.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-slate-400">
+                    <Headphones className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                    <p className="font-bold text-slate-700">Nenhum chamado de suporte encontrado</p>
+                    <p className="text-[11px] mt-1 text-slate-400">
+                      Os chamados abertos pelas empresas clientes e pelo site aparecerão aqui em tempo real.
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                filteredTickets.map((tk) => (
+                  <tr key={tk.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-4 font-mono font-bold text-blue-600">{tk.ticket_number}</td>
+                    <td className="p-4">
+                      <p className="font-bold text-slate-900">{tk.company_name}</p>
+                      <p className="text-slate-400 text-[10px]">{tk.contact_email}</p>
+                    </td>
+                    <td className="p-4">
+                      <p className="font-bold text-slate-800">{tk.subject}</p>
+                      <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase">
+                        {tk.category}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      {tk.remote_code ? (
+                        <span className="font-mono text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">
+                          {tk.remote_code}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 text-[11px] italic">Sem código</span>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                        tk.priority === 'urgent' ? 'bg-red-50 text-red-700 border border-red-200' :
+                        tk.priority === 'high' ? 'bg-orange-50 text-orange-700 border border-orange-200' :
+                        tk.priority === 'medium' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                        'bg-slate-100 text-slate-600'
+                      }`}>
+                        {tk.priority}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        tk.status === 'open' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                        tk.status === 'in_progress' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                        'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      }`}>
+                        {tk.status === 'open' ? 'Aberto' : tk.status === 'in_progress' ? 'Em Atendimento' : 'Resolvido'}
+                      </span>
+                    </td>
+                    <td className="p-4 text-right">
+                      <button
+                        onClick={() => setSelectedTicket(tk)}
+                        className="bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold px-3 py-1.5 rounded-lg text-[11px] transition-colors"
+                      >
+                        Atender
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

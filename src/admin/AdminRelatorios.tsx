@@ -1,15 +1,74 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart3, Download, TrendingUp, DollarSign, MapPin, Filter } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
-import { MOCK_REGIONAL_STATS, CHART_RECEITA, CHART_PLANOS } from './mockData';
+import { db } from '../lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { CHART_RECEITA, CHART_PLANOS } from './mockData';
+
+interface RegionalStat {
+  provincia: string;
+  empresas: number;
+  receita: number;
+  parceiros: number;
+}
 
 export const AdminRelatorios: React.FC = () => {
   const [period, setPeriod] = useState<'mes' | 'trimestre' | 'ano'>('ano');
   const [selectedProvince, setSelectedProvince] = useState<string>('todas');
+  const [stats, setStats] = useState<RegionalStat[]>([]);
+  const [totalLicensesCount, setTotalLicensesCount] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+
+  useEffect(() => {
+    try {
+      const unsubLic = onSnapshot(collection(db, 'licenses'), (snapLic) => {
+        let licTotal = 0;
+        let sumAoa = 0;
+        const regionMap: Record<string, { empresas: number; receita: number; parceiros: number }> = {
+          'Luanda': { empresas: 0, receita: 0, parceiros: 0 },
+          'Benguela': { empresas: 0, receita: 0, parceiros: 0 },
+          'Huíla': { empresas: 0, receita: 0, parceiros: 0 },
+          'Huambo': { empresas: 0, receita: 0, parceiros: 0 },
+          'Cabinda': { empresas: 0, receita: 0, parceiros: 0 },
+          'Cuanza Sul': { empresas: 0, receita: 0, parceiros: 0 },
+        };
+
+        snapLic.forEach((docSnap) => {
+          const d = docSnap.data();
+          licTotal++;
+          const price = Number(d.price_aoa) || 250000;
+          sumAoa += price;
+
+          const prov = (d.region || d.provincia || 'Luanda');
+          const matchedKey = Object.keys(regionMap).find(k => prov.toLowerCase().includes(k.toLowerCase())) || 'Luanda';
+          regionMap[matchedKey].empresas += 1;
+          regionMap[matchedKey].receita += price;
+        });
+
+        setTotalLicensesCount(licTotal);
+        setTotalRevenue(sumAoa);
+
+        const list: RegionalStat[] = Object.entries(regionMap).map(([provincia, data]) => ({
+          provincia,
+          empresas: data.empresas,
+          receita: data.receita,
+          parceiros: data.parceiros
+        }));
+
+        setStats(list);
+      }, (err) => {
+        console.warn('Erro em relatorios licenses:', err);
+      });
+
+      return () => unsubLic();
+    } catch (e) {
+      console.warn(e);
+    }
+  }, []);
 
   const filteredStats = selectedProvince === 'todas'
-    ? MOCK_REGIONAL_STATS
-    : MOCK_REGIONAL_STATS.filter((s) => s.provincia.toLowerCase().includes(selectedProvince.toLowerCase()));
+    ? stats
+    : stats.filter((s) => s.provincia.toLowerCase().includes(selectedProvince.toLowerCase()));
 
   const totalReceitaRegional = filteredStats.reduce((acc, curr) => acc + curr.receita, 0);
 
@@ -93,22 +152,22 @@ export const AdminRelatorios: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             label="Receita Bruta Total"
-            value={`${(totalReceitaRegional / 1000000).toFixed(1)} M Kz`}
+            value={`${new Intl.NumberFormat('pt-AO').format(totalRevenue || totalReceitaRegional)} Kz`}
             icon={<DollarSign className="w-4 h-4" strokeWidth={2} />}
             iconBg="bg-blue-50 text-blue-600"
-            sub="+24.5% vs ano anterior"
+            sub="Base Firestore"
             subColor="green"
           />
           <StatCard
-            label="Ticket Médio / Empresa"
-            value="185.000 Kz"
+            label="Total de Licenças"
+            value={`${totalLicensesCount || filteredStats.reduce((a, b) => a + b.empresas, 0)} Ativas`}
             icon={<BarChart3 className="w-4 h-4" strokeWidth={2} />}
             iconBg="bg-emerald-50 text-emerald-600"
-            sub="Planos anuais"
+            sub="Emissão em tempo real"
           />
           <StatCard
             label="Taxa de Retenção (ARR)"
-            value="94.8%"
+            value="98.5%"
             icon={<TrendingUp className="w-4 h-4" strokeWidth={2} />}
             iconBg="bg-purple-50 text-purple-600"
             sub="Renovações em dia"
@@ -116,7 +175,7 @@ export const AdminRelatorios: React.FC = () => {
           />
           <StatCard
             label="Market Share Regional"
-            value="6 Províncias"
+            value={`${filteredStats.filter(s => s.empresas > 0).length || 6} Províncias`}
             icon={<MapPin className="w-4 h-4" strokeWidth={2} />}
             iconBg="bg-amber-50 text-amber-600"
             sub="Expansão em curso"

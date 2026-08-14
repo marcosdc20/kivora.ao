@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Users, UserPlus, Shield, Key, Mail, CheckCircle, XCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Users, UserPlus, Shield, Key, Mail, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
-import { MOCK_ADMIN_USERS } from './mockData';
 import { AdminUser } from './types';
+import { db } from '../lib/firebase';
+import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
 
 const NIVEL_BADGES: Record<string, { label: string; color: string }> = {
   super_admin: { label: 'Super Admin', color: 'bg-purple-50 text-purple-700 border-purple-200' },
@@ -12,32 +13,91 @@ const NIVEL_BADGES: Record<string, { label: string; color: string }> = {
 };
 
 export const AdminUtilizadores: React.FC = () => {
-  const [users, setUsers] = useState<AdminUser[]>(MOCK_ADMIN_USERS);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [loading, setLoading] = useState(true);
   const [modalNovo, setModalNovo] = useState(false);
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [funcao, setFuncao] = useState('');
-  const [nivel, setNivel] = useState<AdminUser['nivel']>('suporte');
+  const [nivel, setNivel] = useState<AdminUser['nivel']>('super_admin');
 
-  const handleAddUser = (e: React.FormEvent) => {
+  // Sincronização em Tempo Real com Firestore (/admins e /users)
+  useEffect(() => {
+    try {
+      const unsub = onSnapshot(collection(db, 'admins'), (snapshot) => {
+        const fireAdmins: AdminUser[] = [];
+        snapshot.forEach((docSnap) => {
+          const d = docSnap.data();
+          fireAdmins.push({
+            id: docSnap.id,
+            nome: d.nome || d.name || 'Administrador',
+            email: d.email || docSnap.id,
+            funcao: d.funcao || d.role_label || 'Direção Executiva',
+            nivel: (d.nivel || 'super_admin') as AdminUser['nivel'],
+            status: d.status || 'ativo',
+            ultimoAcesso: d.ultimoAcesso || 'Recente',
+          });
+        });
+
+        if (fireAdmins.length === 0) {
+          // Garante a exibição da conta mestre do sistema
+          fireAdmins.push({
+            id: 'admin-master',
+            nome: 'Administrador Kivora',
+            email: 'admin@kivora.ao',
+            funcao: 'Administrador de Sistemas & Licenças',
+            nivel: 'super_admin',
+            status: 'ativo',
+            ultimoAcesso: 'Hoje',
+          });
+        }
+
+        setUsers(fireAdmins);
+        setLoading(false);
+      }, (err) => {
+        console.warn('Erro ao escutar admins:', err);
+        setLoading(false);
+      });
+
+      return () => unsub();
+    } catch (e) {
+      console.warn(e);
+      setLoading(false);
+    }
+  }, []);
+
+  const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome || !email) return;
 
-    const newU: AdminUser = {
-      id: `u-${Date.now()}`,
-      nome,
-      email,
-      funcao: funcao || 'Membro da Equipa',
-      nivel,
-      status: 'ativo',
-      ultimoAcesso: 'Nunca',
-    };
+    const uId = `admin_${Date.now()}`;
+    try {
+      await setDoc(doc(db, 'admins', uId), {
+        nome,
+        email,
+        funcao: funcao || 'Membro da Equipa Executiva',
+        nivel,
+        status: 'ativo',
+        created_at: Date.now()
+      }, { merge: true });
 
-    setUsers([...users, newU]);
-    setModalNovo(false);
-    setNome('');
-    setEmail('');
-    setFuncao('');
+      await setDoc(doc(db, 'users', email.toLowerCase().trim()), {
+        nome,
+        email: email.toLowerCase().trim(),
+        role: 'admin',
+        password: 'kivora' + Math.floor(1000 + Math.random() * 9000),
+        status: 'ativo',
+        created_at: Date.now()
+      }, { merge: true });
+
+      setModalNovo(false);
+      setNome('');
+      setEmail('');
+      setFuncao('');
+      alert(`Administrador ${nome} registado com sucesso no Firebase!`);
+    } catch (err: any) {
+      alert('Erro ao registar administrador no Firebase: ' + err.message);
+    }
   };
 
   return (
@@ -102,23 +162,31 @@ export const AdminUtilizadores: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {users.map((u) => {
-                const badge = NIVEL_BADGES[u.nivel];
-                return (
-                  <tr key={u.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-black text-xs flex items-center justify-center">
-                          {u.nome.charAt(0)}
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-slate-400">
+                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
+                    <span>A carregar administradores do Firebase...</span>
+                  </td>
+                </tr>
+              ) : (
+                users.map((u) => {
+                  const badge = NIVEL_BADGES[u.nivel];
+                  return (
+                    <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-black text-xs flex items-center justify-center">
+                            {u.nome.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900">{u.nome}</p>
+                            <p className="text-slate-400 text-[11px] flex items-center gap-1">
+                              <Mail className="w-3 h-3 text-slate-400" /> {u.email}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-bold text-slate-900">{u.nome}</p>
-                          <p className="text-slate-400 text-[11px] flex items-center gap-1">
-                            <Mail className="w-3 h-3 text-slate-400" /> {u.email}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
+                      </td>
                     <td className="px-4 py-3.5 text-slate-700 font-semibold">{u.funcao}</td>
                     <td className="px-4 py-3.5">
                       <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${badge.color}`}>
@@ -137,9 +205,10 @@ export const AdminUtilizadores: React.FC = () => {
                         </span>
                       )}
                     </td>
-                  </tr>
-                );
-              })}
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

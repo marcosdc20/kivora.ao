@@ -29,63 +29,9 @@ interface AdminParceirosProps {
   initialTab?: 'todos' | 'candidaturas';
 }
 
-const INITIAL_PARTNERS: Partner[] = [
-  {
-    id: '1',
-    code: 'REV-LUANDA-01',
-    name: 'AngoSolutions TI & Consultoria',
-    email: 'comercial@angosolutions.ao',
-    phone: '+244 923 456 789',
-    region: 'Luanda',
-    commission_rate: 20,
-    total_sales: 3450000,
-    balance_aoa: 690000,
-    status: 'active',
-    createdAt: Date.now() - 45 * 86400000
-  },
-  {
-    id: '2',
-    code: 'REV-BENGUELA-02',
-    name: 'Lobito Tech & Automação Comercial',
-    email: 'lobito.tech@gmail.com',
-    phone: '+244 912 345 678',
-    region: 'Benguela',
-    commission_rate: 25,
-    total_sales: 2100000,
-    balance_aoa: 525000,
-    status: 'active',
-    createdAt: Date.now() - 30 * 86400000
-  },
-  {
-    id: '3',
-    code: 'REV-HUILA-03',
-    name: 'Sul Digital Lubango, Lda.',
-    email: 'geral@suldigital.co.ao',
-    phone: '+244 933 111 222',
-    region: 'Huíla (Lubango)',
-    commission_rate: 15,
-    total_sales: 850000,
-    balance_aoa: 127500,
-    status: 'pending',
-    createdAt: Date.now() - 5 * 86400000
-  },
-  {
-    id: '4',
-    code: 'REV-CABINDA-04',
-    name: 'Cabinda Sistemas & Redes',
-    email: 'info@cabindasistemas.ao',
-    phone: '+244 944 555 666',
-    region: 'Cabinda',
-    commission_rate: 20,
-    total_sales: 1200000,
-    balance_aoa: 240000,
-    status: 'active',
-    createdAt: Date.now() - 15 * 86400000
-  }
-];
-
 export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'todos' }) => {
-  const [partners, setPartners] = useState<Partner[]>(INITIAL_PARTNERS);
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'todos' | 'candidaturas'>(initialTab);
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -119,35 +65,29 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
           firePartners.push({
             id: docSnap.id,
             code: d.code || docSnap.id,
-            name: d.name || d.responsible || 'Parceiro Sem Nome',
+            name: d.name || d.responsible || d.nome_responsavel || 'Parceiro Sem Nome',
             email: d.email || '',
-            phone: d.phone || '',
-            region: d.region || 'Luanda',
+            phone: d.phone || d.telefone || '',
+            region: d.region || d.provincia || 'Luanda',
             commission_rate: Number(d.commission_rate) || 20,
             total_sales: Number(d.total_sales) || 0,
             balance_aoa: Number(d.balance_aoa) || 0,
             status: d.status || 'pending',
-            createdAt: Number(d.createdAt) || Date.now(),
+            createdAt: Number(d.createdAt) || Number(d.created_at) || Date.now(),
           });
         });
 
-        if (firePartners.length > 0) {
-          // Merge com mock data para exibição rica
-          const combined = [...firePartners];
-          INITIAL_PARTNERS.forEach((ip) => {
-            if (!combined.some(c => c.code === ip.code || c.email === ip.email)) {
-              combined.push(ip);
-            }
-          });
-          setPartners(combined);
-        }
+        setPartners(firePartners);
+        setLoading(false);
       }, (err) => {
         console.warn('Erro ao escutar coleção partners:', err);
+        setLoading(false);
       });
 
       return () => unsub();
     } catch (e) {
       console.warn(e);
+      setLoading(false);
     }
   }, []);
 
@@ -363,62 +303,83 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {(tab === 'todos' ? partners : pendingPartners).map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="p-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
-                        {p.code}
-                      </span>
-                    </div>
-                    <p className="font-bold text-slate-900 mt-1">{p.name}</p>
-                    <p className="text-slate-400 text-[10px]">{p.email} • {p.phone}</p>
-                  </td>
-                  <td className="p-4 font-semibold text-slate-700">{p.region}</td>
-                  <td className="p-4 font-bold text-purple-700 bg-purple-50/50">{p.commission_rate}%</td>
-                  <td className="p-4 font-mono font-bold text-slate-900">{fmt(p.total_sales)} Kz</td>
-                  <td className="p-4 font-mono font-bold text-emerald-700">{fmt(p.balance_aoa)} Kz</td>
-                  <td className="p-4">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      p.status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                      p.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                      'bg-red-50 text-red-700 border border-red-200'
-                    }`}>
-                      {p.status === 'active' ? 'Ativo' : p.status === 'pending' ? 'Pendente' : 'Suspenso'}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        onClick={() => copyRefLink(p)}
-                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Copiar Link de Referência"
-                      >
-                        {copiedCode === p.code ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
-
-                      {p.status === 'pending' && (
-                        <button
-                          onClick={() => handleApprovePartner(p)}
-                          disabled={approving === p.id}
-                          className="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg font-bold text-[11px] flex items-center gap-1 shadow-sm transition-all"
-                        >
-                          {approving === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
-                          <span>Aprovar</span>
-                        </button>
-                      )}
-
-                      <button
-                        onClick={() => setSelectedPartner(p)}
-                        className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
-                        title="Ver Detalhes"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-slate-400">
+                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
+                    <span>A carregar parceiros do Firebase...</span>
                   </td>
                 </tr>
-              ))}
+              ) : (tab === 'todos' ? partners : pendingPartners).length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-slate-400">
+                    <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                    <p className="font-bold text-slate-700">Nenhum parceiro encontrado</p>
+                    <p className="text-[11px] mt-1 text-slate-400">
+                      {tab === 'candidaturas'
+                        ? 'Não há candidaturas pendentes no momento. As novas submissões do site aparecerão aqui.'
+                        : 'Registe um novo parceiro ou aprove as candidaturas recebidas pelo site.'}
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                (tab === 'todos' ? partners : pendingPartners).map((p) => (
+                  <tr key={p.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                          {p.code}
+                        </span>
+                      </div>
+                      <p className="font-bold text-slate-900 mt-1">{p.name}</p>
+                      <p className="text-slate-400 text-[10px]">{p.email} • {p.phone}</p>
+                    </td>
+                    <td className="p-4 font-semibold text-slate-700">{p.region}</td>
+                    <td className="p-4 font-bold text-purple-700 bg-purple-50/50">{p.commission_rate}%</td>
+                    <td className="p-4 font-mono font-bold text-slate-900">{fmt(p.total_sales)} Kz</td>
+                    <td className="p-4 font-mono font-bold text-emerald-700">{fmt(p.balance_aoa)} Kz</td>
+                    <td className="p-4">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        p.status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                        p.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                        'bg-red-50 text-red-700 border border-red-200'
+                      }`}>
+                        {p.status === 'active' ? 'Ativo' : p.status === 'pending' ? 'Pendente' : 'Suspenso'}
+                      </span>
+                    </td>
+                    <td className="p-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => copyRefLink(p)}
+                          className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Copiar Link de Referência"
+                        >
+                          {copiedCode === p.code ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+
+                        {p.status === 'pending' && (
+                          <button
+                            onClick={() => handleApprovePartner(p)}
+                            disabled={approving === p.id}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg font-bold text-[11px] flex items-center gap-1 shadow-sm transition-all"
+                          >
+                            {approving === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                            <span>Aprovar</span>
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => setSelectedPartner(p)}
+                          className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                          title="Ver Detalhes"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
