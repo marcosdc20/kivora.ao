@@ -169,14 +169,14 @@ export const AdminSuporte: React.FC = () => {
   const partnerTkCount = tickets.filter(t => t.created_by_role === 'partner').length;
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 overflow-y-auto bg-slate-50 flex flex-col w-full min-w-0 font-sans">
       <AdminTopbar
         title="Central de Suporte & Atendimento Multilateral"
         subtitle="Gerenciamento unificado de tickets: Clientes Diretos, Clientes de Parceiros e Apoio aos Revendedores."
         actions={
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/20 transition-all cursor-pointer"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/20 transition-all cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Novo Ticket de Apoio</span>
@@ -184,8 +184,9 @@ export const AdminSuporte: React.FC = () => {
         }
       />
 
-      {/* Cards de Métricas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 flex flex-col min-w-0">
+        {/* Cards de Métricas */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Chamados em Aberto"
           value={openCount}
@@ -413,6 +414,8 @@ export const AdminSuporte: React.FC = () => {
             </div>
           )}
         </div>
+
+      </div>
 
       </div>
 

@@ -212,7 +212,7 @@ interface TopbarProps {
 
 export const AdminTopbar: React.FC<TopbarProps> = ({ title, subtitle, onMenuToggle, actions }) => {
   return (
-    <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200/80 flex-shrink-0">
+    <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 bg-white border-b border-slate-200/80 flex-shrink-0 w-full">
       <div className="flex items-center gap-3">
         {onMenuToggle && (
           <button onClick={onMenuToggle} className="lg:hidden text-slate-500 hover:text-slate-900">

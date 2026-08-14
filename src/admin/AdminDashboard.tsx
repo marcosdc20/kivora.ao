@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { getPlanLabel, formatLicenseDate } from './services/licenseService';
 import { subscribeAllDebts, PartnerDebtEntry } from './services/partnerDebtService';
+import { AdminTopbar } from './AdminComponents';
 
 const fmt = (n: number) => n.toLocaleString('pt-AO');
 
@@ -85,23 +86,23 @@ export const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-6">
-      
-      {/* Header com Atualização */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight">Painel de Gestão & Controlo</h1>
-          <p className="text-xs text-slate-500 mt-0.5">Métricas em tempo real da base de dados Firebase (faturasimples)</p>
-        </div>
-        <button
-          onClick={() => refresh()}
-          disabled={loading}
-          className="bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-2 shadow-sm transition-all"
-        >
-          <RotateCcw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : ''}`} />
-          <span>Atualizar Dados</span>
-        </button>
-      </div>
+    <div className="flex-1 overflow-y-auto bg-slate-50 flex flex-col w-full min-w-0 font-sans">
+      <AdminTopbar
+        title="Painel de Gestão & Controlo"
+        subtitle="Métricas em tempo real da base de dados Firebase (faturasimples)"
+        actions={
+          <button
+            onClick={() => refresh()}
+            disabled={loading}
+            className="bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+          >
+            <RotateCcw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : ''}`} />
+            <span>Atualizar Dados</span>
+          </button>
+        }
+      />
+
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 flex flex-col min-w-0">
 
       {error && (
         <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
@@ -372,6 +373,8 @@ export const AdminDashboard: React.FC = () => {
             </tbody>
           </table>
         </div>
+      </div>
+
       </div>
 
       <FirebaseAuthModal
