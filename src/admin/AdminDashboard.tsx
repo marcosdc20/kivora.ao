@@ -14,7 +14,7 @@ import { getPlanLabel, formatLicenseDate } from './services/licenseService';
 const fmt = (n: number) => n.toLocaleString('pt-AO');
 
 export const AdminDashboard: React.FC = () => {
-  const { licenses, loading } = useLicenses();
+  const { licenses, loading, error, refresh } = useLicenses();
 
   const activeLicenses = licenses.filter(l => l.status === 'active' && (!l.expires_at || l.expires_at >= Date.now()));
   const expiredLicenses = licenses.filter(l => l.status === 'expired' || (l.expires_at && l.expires_at < Date.now()));
@@ -82,13 +82,29 @@ export const AdminDashboard: React.FC = () => {
           <p className="text-xs text-slate-500 mt-0.5">Métricas em tempo real da base de dados Firebase (faturasimples)</p>
         </div>
         <button
-          onClick={() => window.location.reload()}
+          onClick={() => refresh()}
+          disabled={loading}
           className="bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-2 shadow-sm transition-all"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
+          <RotateCcw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : ''}`} />
           <span>Atualizar Dados</span>
         </button>
       </div>
+
+      {error && (
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 flex items-center justify-between">
+          <div>
+            <p className="font-bold">Aviso de Sincronização:</p>
+            <p className="text-[11px] text-amber-700 mt-0.5">{error}</p>
+          </div>
+          <button
+            onClick={() => refresh()}
+            className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-3 py-1.5 rounded-xl shrink-0"
+          >
+            Tentar Novamente
+          </button>
+        </div>
+      )}
 
       {/* Top Metrics Row — Valores Reais */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">

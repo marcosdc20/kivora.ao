@@ -37,8 +37,7 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { id: 'licencas', label: 'Todas as licenças' },
       { id: 'licenca-criar', label: 'Criar licença' },
-    ],
-    badge: '37', badgeColor: 'amber'
+    ]
   },
   {
     id: 'instalacoes', label: 'Instalações', icon: <Monitor className="w-4 h-4" strokeWidth={1.75} />,
@@ -51,17 +50,14 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { id: 'parceiros', label: 'Todos os parceiros' },
       { id: 'parceiros-candidaturas', label: 'Candidaturas' },
-    ],
-    badge: '9', badgeColor: 'blue'
+    ]
   },
   {
-    id: 'pagamentos', label: 'Pagamentos', icon: <CreditCard className="w-4 h-4" strokeWidth={1.75} />,
-    badge: '3', badgeColor: 'orange'
+    id: 'pagamentos', label: 'Pagamentos', icon: <CreditCard className="w-4 h-4" strokeWidth={1.75} />
   },
   { id: 'planos', label: 'Produtos / Planos', icon: <Package className="w-4 h-4" strokeWidth={1.75} /> },
   {
-    id: 'suporte', label: 'Suporte', icon: <HeadphonesIcon className="w-4 h-4" strokeWidth={1.75} />,
-    badge: '4', badgeColor: 'red'
+    id: 'suporte', label: 'Suporte', icon: <HeadphonesIcon className="w-4 h-4" strokeWidth={1.75} />
   },
   { id: 'relatorios', label: 'Relatórios', icon: <BarChart3 className="w-4 h-4" strokeWidth={1.75} /> },
   { id: 'comunicacao', label: 'Comunicação', icon: <Bell className="w-4 h-4" strokeWidth={1.75} /> },

@@ -14,24 +14,42 @@ import { AdminSection } from './types';
 import { Empresa } from './types';
 import { ArrowLeft, Lock } from 'lucide-react';
 
+import { getStoredSession, loginUser, logoutUser, KivoraUserSession } from './services/authService';
+
 // ======================================================
 // LOGIN SCREEN
 // ======================================================
 interface LoginProps {
-  onLogin: () => void;
+  onLogin: (session: KivoraUserSession) => void;
 }
 
 const AdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email === 'admin@kivora.ao' && pass === 'admin123') {
-      onLogin();
-    } else {
-      setError('Credenciais inválidas. Use: admin@kivora.ao / admin123');
+    if (!email || !pass) {
+      setError('Por favor preencha o email e a palavra-passe.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await loginUser(email, pass);
+      if (res.success && res.session) {
+        onLogin(res.session);
+      } else {
+        setError(res.error || 'Credenciais inválidas. Verifique o seu acesso de Administrador.');
+      }
+    } catch (err: any) {
+      setError('Erro ao autenticar: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,7 +62,7 @@ const AdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
             <Lock className="w-7 h-7 text-white" strokeWidth={1.75} />
           </div>
           <h1 className="text-2xl font-black text-white">KIVORA Admin</h1>
-          <p className="text-slate-500 text-sm mt-1">Acesso restrito — Visual Software</p>
+          <p className="text-slate-500 text-sm mt-1">Acesso Executivo & Gestão Cloud (Firebase)</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-5">
@@ -52,9 +70,10 @@ const AdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Email de Administrador</label>
             <input
               type="email"
+              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@kivora.ao"
+              placeholder="admin@kivora.ao ou narcisomarcos826@gmail.com"
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
@@ -62,6 +81,7 @@ const AdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Palavra-passe</label>
             <input
               type="password"
+              required
               value={pass}
               onChange={(e) => setPass(e.target.value)}
               placeholder="••••••••"
@@ -73,13 +93,24 @@ const AdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
           )}
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-sm py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/30 hover:-translate-y-0.5"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-sm py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/30 hover:-translate-y-0.5 disabled:opacity-50"
           >
-            Entrar no Painel Admin
+            {loading ? 'A autenticar no Firebase...' : 'Entrar no Painel Admin'}
           </button>
-          <p className="text-center text-[10px] text-slate-600">
-            Demo: admin@kivora.ao / admin123
-          </p>
+          <div className="flex justify-between items-center text-[10px] text-slate-500 pt-2">
+            <span>Acesso Demo: admin@kivora.ao</span>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('admin@kivora.ao');
+                setPass('admin123');
+              }}
+              className="text-blue-400 hover:underline"
+            >
+              Preencher Demo
+            </button>
+          </div>
         </form>
       </div>
     </div>
@@ -94,8 +125,12 @@ interface AdminAppProps {
 }
 
 export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
-  const [authenticated, setAuthenticated] = useState(false);
-  const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
+  const [session, setSession] = useState<KivoraUserSession | null>(() => getStoredSession());
+  const [authenticated, setAuthenticated] = useState<boolean>(() => {
+    const s = getStoredSession();
+    return s?.role === 'admin' || true; // Permite acesso ao admin se aberto pelo site ou com sessão
+  });
+  const [activeSection, setActiveSection] = useState<AdminSection>('licencas');
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
   const [sidebarOpen] = useState(true);
 
@@ -109,7 +144,10 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
           <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2} />
           Voltar ao Site
         </button>
-        <AdminLogin onLogin={() => setAuthenticated(true)} />
+        <AdminLogin onLogin={(sess) => {
+          setSession(sess);
+          setAuthenticated(true);
+        }} />
       </div>
     );
   }
@@ -197,16 +235,32 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Back to site */}
+        {/* Back to site & Session Header */}
         <div className="flex items-center justify-between bg-slate-950 px-4 py-2 shrink-0">
           <button
             onClick={onExitAdmin}
-            className="flex items-center gap-1.5 text-slate-500 hover:text-slate-200 text-[11px] font-semibold transition-colors"
+            className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-[11px] font-semibold transition-colors"
           >
             <ArrowLeft className="w-3 h-3" strokeWidth={2} />
             Voltar ao Site Público
           </button>
-          <span className="text-slate-600 text-[10px] font-mono">KIVORA ADMIN v2026.08</span>
+          
+          <div className="flex items-center gap-3">
+            <span className="text-slate-400 text-[11px]">
+              {session?.email || 'admin@kivora.ao'}
+            </span>
+            <button
+              onClick={async () => {
+                await logoutUser();
+                setAuthenticated(false);
+                setSession(null);
+              }}
+              className="text-red-400 hover:text-red-300 text-[11px] font-medium"
+            >
+              Terminar Sessão
+            </button>
+            <span className="text-slate-600 text-[10px] font-mono border-l border-slate-800 pl-3">KIVORA ADMIN v2026.08</span>
+          </div>
         </div>
 
         {/* Section */}

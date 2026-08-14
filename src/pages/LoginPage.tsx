@@ -182,11 +182,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
               </button>
               <button
                 type="button"
-                onClick={() => handleQuickFill('5412398765', 'cliente123')}
+                onClick={() => handleQuickFill('5002863944', 'cliente123')}
                 className="py-1.5 px-2 rounded-lg bg-slate-100 hover:bg-violet-50 hover:text-violet-700 text-slate-600 transition-colors text-center truncate"
-                title="Cliente: 5412398765"
+                title="Cliente: 5002863944 (Visual Software)"
               >
-                🏢 Cliente
+                🏢 Cliente (NIF)
               </button>
             </div>
           </div>

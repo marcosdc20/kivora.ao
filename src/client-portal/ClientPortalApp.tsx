@@ -28,18 +28,18 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
   // Procura a licença real do cliente no Firebase
   const clientLicense = licenses.find(
-    (l) => (session?.nif && l.nif === session.nif) || (session?.email && l.client_email === session.email)
-  ) || {
-    id: session?.licenseKey || 'KVRA-987A-432B-8910',
-    company_name: session?.companyName || session?.nome || 'Visual Comércio Geral, Lda',
-    nif: session?.nif || '5412398765',
-    plan_type: 'annual' as const,
+    (l) => (session?.nif && l.nif === session.nif) || (session?.email && l.client_email.toLowerCase() === session.email.toLowerCase()) || (session?.licenseKey && l.id === session.licenseKey)
+  ) || licenses[0] || {
+    id: session?.licenseKey || 'KVRA-LI0D-8OPE-DV3A',
+    company_name: session?.companyName || session?.nome || 'VISUAL SOFTWARE - COMÉRCIO E PRESTAÇÃO DE SERVIÇOS, LDA',
+    nif: session?.nif || '5002863944',
+    plan_type: 'monthly' as const,
     status: 'active' as const,
-    created_at: Date.now() - 30 * 86400000,
-    expires_at: Date.now() + 335 * 86400000,
-    hardware_id: 'HW-CAIXA-01-LUANDA',
-    extra_seats: 2,
-    max_users: 3,
+    created_at: 1784206261078,
+    expires_at: 1786834800000,
+    hardware_id: 'FD44-D3FB-48C7-CA44',
+    extra_seats: 6,
+    max_users: 1,
   };
 
   const handleCopyKey = () => {
