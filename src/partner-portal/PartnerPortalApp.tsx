@@ -7,8 +7,8 @@ import {
 } from 'lucide-react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { getStoredSession, clearStoredSession, KivoraUserSession } from '../admin/services/authService';
-import { useCompanies, useLicenses } from '../admin/hooks/useFirebase';
-import { createLicense, calculateExpiresAt } from '../admin/services/licenseService';
+import { useCompanies } from '../admin/hooks/useFirebase';
+import { createLicense, calculateExpiresAt, subscribePartnerLicenses } from '../admin/services/licenseService';
 import {
   SupportTicket, createSupportTicket, sendTicketMessage, updateTicketStatus, subscribePartnerTickets
 } from '../admin/services/supportService';
@@ -16,7 +16,7 @@ import {
   subscribePartnerPricing, subscribePartnerDebts, recordPartnerDebt,
   DEFAULT_PARTNER_PRICING, PartnerPricingPlan, PartnerDebtEntry
 } from '../admin/services/partnerDebtService';
-import type { PlanType } from '../admin/types';
+import type { PlanType, KivoraLicense } from '../admin/types';
 
 interface PartnerPortalAppProps {
   onLogout: () => void;
@@ -29,7 +29,7 @@ const fmt = (n: number) => n.toLocaleString('pt-AO');
 export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) => {
   const session: KivoraUserSession | null = getStoredSession();
   const { companies, addCompany } = useCompanies();
-  const { licenses } = useLicenses();
+  const [myPartnerLicenses, setMyPartnerLicenses] = useState<KivoraLicense[]>([]);
 
   const [activeSection, setActiveSection] = useState<PartnerSection>('dashboard');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -97,14 +97,17 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     return () => unsub();
   }, [partnerCode]);
 
-  // Licenças e Clientes associados ao parceiro em tempo real
-  const myPartnerLicenses = licenses.filter(l =>
-    (l.notes && l.notes.includes(partnerCode)) ||
-    (l.client_email && l.client_email.toLowerCase() === session?.email?.toLowerCase()) ||
-    (l.notes && l.notes.toLowerCase().includes('parceiro'))
-  );
+  // Subscrição em Tempo Real apenas às Licenças deste Parceiro (Multi-Tenant Segregado)
+  useEffect(() => {
+    if (!partnerCode) return;
+    const unsub = subscribePartnerLicenses(partnerCode, (list) => {
+      setMyPartnerLicenses(list);
+    });
+    return () => unsub();
+  }, [partnerCode]);
 
   const partnerClients = companies.filter(c =>
+    (c.partner_id && c.partner_id === partnerCode) ||
     (c.address && c.address.includes(partnerCode)) ||
     myPartnerLicenses.some(l => l.nif === c.nif)
   );
@@ -151,6 +154,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         expires_at: expiresAt,
         price_aoa: priceAoa,
         notes: `Emitida pelo parceiro ${partnerCode}`,
+        partner_id: partnerCode,
         extra_seats: extraSeats,
       });
 
@@ -177,6 +181,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
           email: clientEmail,
           phone: '',
           address: `Parceiro: ${partnerCode}`,
+          partner_id: partnerCode,
           status: 'active',
         });
       }

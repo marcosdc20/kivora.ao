@@ -34,16 +34,16 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
   // Procura a licença real do cliente no Firebase
   const clientLicense = licenses.find(
     (l) => (session?.nif && l.nif === session.nif) || (session?.email && l.client_email.toLowerCase() === session.email.toLowerCase()) || (session?.licenseKey && l.id === session.licenseKey)
-  ) || licenses[0] || {
-    id: session?.licenseKey || 'KVRA-LI0D-8OPE-DV3A',
-    company_name: session?.companyName || session?.nome || 'VISUAL SOFTWARE - COMÉRCIO E PRESTAÇÃO DE SERVIÇOS, LDA',
-    nif: session?.nif || '5002863944',
+  ) || {
+    id: session?.licenseKey || 'PENDING-ACTIVATION',
+    company_name: session?.companyName || session?.nome || 'Empresa Cliente Kivora',
+    nif: session?.nif || 'Não Registado',
     plan_type: 'monthly' as const,
     status: 'active' as const,
-    created_at: 1784206261078,
-    expires_at: 1786834800000,
-    hardware_id: 'FD44-D3FB-48C7-CA44',
-    extra_seats: 6,
+    created_at: Date.now(),
+    expires_at: Date.now() + 30 * 86400000,
+    hardware_id: null,
+    extra_seats: 0,
     max_users: 1,
   };
 

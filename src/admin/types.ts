@@ -25,6 +25,7 @@ export interface KivoraLicense {
   expires_at: number | null;     // null = vitalício
   price_aoa?: number;
   notes?: string;
+  partner_id?: string;
   activated_at?: number | null;
   extra_seats?: number;
   max_users?: number;
@@ -37,6 +38,7 @@ export interface Company {
   email: string;
   phone: string;
   address?: string;
+  partner_id?: string;
   status: 'active' | 'suspended' | 'blocked';
   createdAt: number;
 }
@@ -49,6 +51,7 @@ export interface CreateLicenseParams {
   expires_at: number | null;
   price_aoa?: number;
   notes?: string;
+  partner_id?: string;
   extra_seats?: number;
 }
 

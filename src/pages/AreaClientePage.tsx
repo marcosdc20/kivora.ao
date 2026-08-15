@@ -49,16 +49,16 @@ export const AreaClientePage: React.FC<AreaClientePageProps> = ({ onNavigatePage
         let foundLic: KivoraLicense | null = null;
         snapshot.forEach((docSnap) => {
           const d = docSnap.data();
-          if (
-            (session?.email && (d.client_email || '').toLowerCase() === session.email.toLowerCase()) ||
-            (session?.nome && (d.company_name || '').toLowerCase().includes(session.nome.toLowerCase())) ||
-            (!foundLic) // fallback para primeira licença real disponível
-          ) {
+          const matchesEmail = session?.email && (d.client_email || '').toLowerCase() === session.email.toLowerCase();
+          const matchesCompany = session?.nome && (d.company_name || '').toLowerCase() === session.nome.toLowerCase();
+          const matchesNif = session?.nif && d.nif === session.nif;
+
+          if (matchesEmail || matchesCompany || matchesNif) {
             foundLic = {
               id: docSnap.id,
               client_email: d.client_email || clientEmail,
               company_name: d.company_name || clientCompanyName,
-              nif: d.nif || '5419082341',
+              nif: d.nif || session?.nif || 'Não Registado',
               plan_type: d.plan_type || 'annual',
               status: d.status || 'active',
               hardware_id: d.hardware_id ?? null,
@@ -66,8 +66,9 @@ export const AreaClientePage: React.FC<AreaClientePageProps> = ({ onNavigatePage
               expires_at: d.expires_at ?? (Date.now() + 365 * 86400000),
               price_aoa: d.price_aoa || 250000,
               notes: d.notes || '',
+              partner_id: d.partner_id || undefined,
               activated_at: d.activated_at ?? null,
-              extra_seats: d.extra_seats ?? 2,
+              extra_seats: d.extra_seats ?? 0,
             };
           }
         });

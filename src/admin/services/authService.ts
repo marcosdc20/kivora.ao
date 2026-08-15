@@ -73,32 +73,40 @@ export async function loginUser(
   const cleanId = identifier.trim().toLowerCase();
   const cleanPass = pass.trim();
 
-  // 1. Tentar Autenticação Direta no Firebase Auth (se for e-mail)
+  // 1. Autenticação via Firebase Auth (se for e-mail)
   if (cleanId.includes('@')) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, cleanId, cleanPass);
       const user = userCredential.user;
 
-      // Verificar se é administrador na coleção /admins/{uid}
+      // Verificar se é administrador na coleção /admins/{uid} ou /users
       let isAdminUser = false;
+      let userName = user.displayName || 'Administrador Kivora';
       try {
         const adminDoc = await getDoc(doc(db, 'admins', user.uid));
         if (adminDoc.exists()) {
           isAdminUser = true;
+          userName = adminDoc.data()?.nome || userName;
+        } else {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists() && userDoc.data()?.role === 'admin') {
+            isAdminUser = true;
+            userName = userDoc.data()?.nome || userName;
+          }
         }
       } catch {
-        // se a consulta falhar mas for o email do admin ou master
-        if (cleanId === 'admin@kivora.ao' || cleanId.includes('narcisomarcos') || cleanId.includes('marcos')) {
+        // Fallback apenas para email mestre autenticado com sucesso pelo Firebase Auth
+        if (cleanId === 'admin@kivora.ao') {
           isAdminUser = true;
         }
       }
 
-      if (isAdminUser || cleanId === 'admin@kivora.ao' || cleanId.includes('narcisomarcos')) {
+      if (isAdminUser) {
         const session: KivoraUserSession = {
           id: user.uid,
           email: user.email || cleanId,
           role: 'admin',
-          nome: user.displayName || 'Administrador Executivo Kivora',
+          nome: userName,
           status: 'active',
         };
         setStoredSession(session);
@@ -107,56 +115,6 @@ export async function loginUser(
     } catch (authError: any) {
       console.log('Firebase Auth direto não logou ou é perfil de cliente/parceiro:', authError.code);
     }
-  }
-
-  // 2. Verificação de Acessos Predefinidos de Demonstração / Master
-  if (
-    (cleanId === 'admin@kivora.ao' || cleanId === 'admin' || cleanId.includes('narcisomarcos')) &&
-    (cleanPass === 'admin123' || cleanPass === 'kivora2026' || cleanPass === 'admin')
-  ) {
-    const session: KivoraUserSession = {
-      id: auth.currentUser?.uid || 'admin_master',
-      email: cleanId.includes('@') ? cleanId : 'admin@kivora.ao',
-      role: 'admin',
-      nome: 'Administrador Executivo Kivora',
-      status: 'active',
-    };
-    setStoredSession(session);
-    return { success: true, session };
-  }
-
-  if (
-    (cleanId === 'parceiro@kivora.ao' || cleanId === 'parceiro-ao-042' || cleanId === 'parceiro') &&
-    (cleanPass === 'parceiro123' || cleanPass === 'admin123')
-  ) {
-    const session: KivoraUserSession = {
-      id: 'partner_042',
-      email: 'parceiro@kivora.ao',
-      role: 'parceiro',
-      nome: 'Soluções de TI Luanda, Lda',
-      partnerCode: 'PARCEIRO-AO-042',
-      status: 'active',
-    };
-    setStoredSession(session);
-    return { success: true, session };
-  }
-
-  if (
-    (cleanId === 'cliente@empresa.ao' || cleanId === '5412398765' || cleanId === '5002863944' || cleanId === 'cliente') &&
-    (cleanPass === 'cliente123' || cleanPass === 'admin123')
-  ) {
-    const session: KivoraUserSession = {
-      id: 'client_demo',
-      email: cleanId.includes('@') ? cleanId : 'narcisomarcos826@gmail.com',
-      role: 'cliente',
-      nome: 'VISUAL SOFTWARE - COMÉRCIO E PRESTAÇÃO DE SERVIÇOS, LDA',
-      nif: '5002863944',
-      companyName: 'VISUAL SOFTWARE - COMÉRCIO E PRESTAÇÃO DE SERVIÇOS, LDA',
-      licenseKey: 'KVRA-LI0D-8OPE-DV3A',
-      status: 'active',
-    };
-    setStoredSession(session);
-    return { success: true, session };
   }
 
   // 3. Consulta em Tempo Real no Firestore (Coleções: users, partners, licenses)

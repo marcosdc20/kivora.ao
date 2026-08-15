@@ -64,6 +64,7 @@ export async function createLicense(params: CreateLicenseParams): Promise<Kivora
     expires_at: params.expires_at,
     price_aoa: params.price_aoa ?? 0,
     notes: params.notes ?? '',
+    partner_id: params.partner_id ?? undefined,
     activated_at: null,
     extra_seats: params.extra_seats ?? 0,
   };
@@ -97,6 +98,7 @@ export async function listAllLicenses(filters?: LicenseFilters): Promise<KivoraL
       expires_at: data.expires_at ?? null,
       price_aoa: data.price_aoa ?? 0,
       notes: data.notes ?? '',
+      partner_id: data.partner_id || undefined,
       activated_at: data.activated_at ?? null,
       extra_seats: data.extra_seats ?? 0,
     };
@@ -119,7 +121,7 @@ export async function listAllLicenses(filters?: LicenseFilters): Promise<KivoraL
   return list;
 }
 
-/** Assina alterações em tempo real nas licenças */
+/** Assina alterações em tempo real nas licenças (Administrador Geral) */
 export function subscribeToLicenses(
   onUpdate: (licenses: KivoraLicense[]) => void,
   onError?: (err: Error) => void
@@ -142,6 +144,7 @@ export function subscribeToLicenses(
           expires_at: data.expires_at ?? null,
           price_aoa: data.price_aoa ?? 0,
           notes: data.notes ?? '',
+          partner_id: data.partner_id || undefined,
           activated_at: data.activated_at ?? null,
           extra_seats: data.extra_seats ?? 0,
         };
@@ -153,6 +156,110 @@ export function subscribeToLicenses(
       if (onError) onError(error);
     }
   );
+}
+
+/** Assina apenas as licenças vinculadas a um parceiro específico (Segregação Multi-Tenant) */
+export function subscribePartnerLicenses(
+  partnerCode: string,
+  onUpdate: (licenses: KivoraLicense[]) => void
+) {
+  const q = query(collection(db, 'licenses'));
+  return onSnapshot(
+    q,
+    (snap) => {
+      const list: KivoraLicense[] = [];
+      snap.docs.forEach((d) => {
+        const data = d.data();
+        const matchesPartner = (data.partner_id && data.partner_id === partnerCode) ||
+          (data.notes && data.notes.includes(partnerCode)) ||
+          (data.client_email && data.client_email.toLowerCase() === partnerCode.toLowerCase());
+        
+        if (matchesPartner) {
+          list.push({
+            id: d.id,
+            client_email: data.client_email || '',
+            company_name: data.company_name || 'Sem Nome',
+            nif: data.nif || '999999999',
+            plan_type: data.plan_type || 'monthly',
+            status: data.status || 'active',
+            hardware_id: data.hardware_id ?? null,
+            created_at: data.created_at || Date.now(),
+            expires_at: data.expires_at ?? null,
+            price_aoa: data.price_aoa ?? 0,
+            notes: data.notes ?? '',
+            partner_id: data.partner_id || partnerCode,
+            activated_at: data.activated_at ?? null,
+            extra_seats: data.extra_seats ?? 0,
+          });
+        }
+      });
+      onUpdate(list);
+    },
+    (error) => {
+      console.warn('Erro ao escutar licenças do parceiro:', error);
+    }
+  );
+}
+
+/** Assina apenas a licença vinculada a um cliente por NIF ou Email (Segregação do Cliente) */
+export function subscribeClientLicense(
+  identifier: { nif?: string; email?: string; licenseKey?: string },
+  onUpdate: (license: KivoraLicense | null) => void
+) {
+  if (identifier.licenseKey) {
+    return onSnapshot(doc(db, 'licenses', identifier.licenseKey), (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        onUpdate({
+          id: snap.id,
+          client_email: data.client_email || '',
+          company_name: data.company_name || 'Sem Nome',
+          nif: data.nif || '999999999',
+          plan_type: data.plan_type || 'monthly',
+          status: data.status || 'active',
+          hardware_id: data.hardware_id ?? null,
+          created_at: data.created_at || Date.now(),
+          expires_at: data.expires_at ?? null,
+          price_aoa: data.price_aoa ?? 0,
+          notes: data.notes ?? '',
+          partner_id: data.partner_id || undefined,
+          activated_at: data.activated_at ?? null,
+          extra_seats: data.extra_seats ?? 0,
+        });
+      } else {
+        onUpdate(null);
+      }
+    });
+  }
+
+  const q = query(collection(db, 'licenses'));
+  return onSnapshot(q, (snap) => {
+    let found: KivoraLicense | null = null;
+    snap.docs.forEach((d) => {
+      const data = d.data();
+      const matchNif = identifier.nif && data.nif === identifier.nif;
+      const matchEmail = identifier.email && (data.client_email || '').toLowerCase() === identifier.email.toLowerCase();
+      if (matchNif || matchEmail) {
+        found = {
+          id: d.id,
+          client_email: data.client_email || '',
+          company_name: data.company_name || 'Sem Nome',
+          nif: data.nif || '999999999',
+          plan_type: data.plan_type || 'monthly',
+          status: data.status || 'active',
+          hardware_id: data.hardware_id ?? null,
+          created_at: data.created_at || Date.now(),
+          expires_at: data.expires_at ?? null,
+          price_aoa: data.price_aoa ?? 0,
+          notes: data.notes ?? '',
+          partner_id: data.partner_id || undefined,
+          activated_at: data.activated_at ?? null,
+          extra_seats: data.extra_seats ?? 0,
+        };
+      }
+    });
+    onUpdate(found);
+  });
 }
 
 /** Busca uma única licença */
