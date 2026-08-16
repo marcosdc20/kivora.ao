@@ -49,7 +49,7 @@ export const AdminAuditoria: React.FC = () => {
             id: 'log-sys-ready',
             action: 'Inicialização do Hub de Auditoria',
             category: 'system',
-            target: 'Google Cloud Firestore (faturasimples)',
+            target: 'Google Cloud Firestore (Kivora Cloud)',
             actor_email: 'admin@kivora.ao',
             ip_address: '102.214.12.89 (Luanda)',
             timestamp: Date.now(),

@@ -5,23 +5,27 @@ import { HomePage } from './pages/HomePage';
 import { ModulosPage } from './pages/ModulosPage';
 import { ModuloDetailPage } from './pages/ModuloDetailPage';
 import { SolucoesPage } from './pages/SolucoesPage';
+import { SetoresPage } from './pages/SetoresPage';
 import { DownloadPage } from './pages/DownloadPage';
 import { ParceirosPage } from './pages/ParceirosPage';
 import { RecursosPage } from './pages/RecursosPage';
 import { FinanceiroPage } from './pages/FinanceiroPage';
 import { SuportePage } from './pages/SuportePage';
+import { AboutPage } from './pages/AboutPage';
 import { NoticiasPage } from './pages/NoticiasPage';
 import { NoticiaDetailPage } from './pages/NoticiaDetailPage';
 import { LoginPage } from './pages/LoginPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
 import { CandidaturaParceiroPage } from './pages/CandidaturaParceiroPage';
+import { ValidarLicencaPage } from './pages/ValidarLicencaPage';
 import { DemoModal } from './components/DemoModal';
 import { AdminApp } from './admin/AdminApp';
 import { ClientPortalApp } from './client-portal/ClientPortalApp';
 import { PartnerPortalApp } from './partner-portal/PartnerPortalApp';
 import { KIVORA_MODULES } from './data/kivoraData';
 import { KivoraModule, NewsPost } from './types/kivora';
+import { getStoredSession } from './admin/services/authService';
 
 export function App() {
   const [activePage, setActivePage] = useState<PageId>('home');
@@ -38,26 +42,14 @@ export function App() {
         loader.style.opacity = '0';
         setTimeout(() => {
           loader.remove();
-        }, 400);
+        }, 500);
       }, 300);
     }
   }, []);
 
-  const handleNavigatePage = (page: PageId, sectionId?: string) => {
+  const handleNavigatePage = (page: PageId, _sectionId?: string) => {
     setActivePage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    if (sectionId && page === 'home') {
-      setTimeout(() => {
-        const el = document.getElementById(sectionId);
-        if (el) {
-          const headerOffset = 80;
-          const elementPosition = el.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-          window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-        }
-      }, 100);
-    }
   };
 
   const handleSelectModule = (moduleItem: KivoraModule) => {
@@ -77,21 +69,46 @@ export function App() {
     setIsDemoModalOpen(true);
   };
 
-  // ─── Portais Executivos de Ecrã Completo ─────────────────────────────────────
+  // ─── Portais Executivos de Ecrã Completo com Guarda de Autenticação ─────────
+  const currentSession = getStoredSession();
 
   if (activePage === 'admin') {
+    if (!currentSession || currentSession.role !== 'admin') {
+      return (
+        <LoginPage
+          onBackToHome={() => handleNavigatePage('home')}
+          onNavigatePage={handleNavigatePage}
+        />
+      );
+    }
     return (
       <AdminApp onExitAdmin={() => handleNavigatePage('home')} />
     );
   }
 
   if (activePage === 'area-cliente') {
+    if (!currentSession || currentSession.role !== 'cliente') {
+      return (
+        <LoginPage
+          onBackToHome={() => handleNavigatePage('home')}
+          onNavigatePage={handleNavigatePage}
+        />
+      );
+    }
     return (
       <ClientPortalApp onLogout={() => handleNavigatePage('home')} />
     );
   }
 
   if (activePage === 'area-parceiro') {
+    if (!currentSession || currentSession.role !== 'parceiro') {
+      return (
+        <LoginPage
+          onBackToHome={() => handleNavigatePage('home')}
+          onNavigatePage={handleNavigatePage}
+        />
+      );
+    }
     return (
       <PartnerPortalApp onLogout={() => handleNavigatePage('home')} />
     );
@@ -109,7 +126,7 @@ export function App() {
   return (
     <div className="min-h-screen flex flex-col bg-white selection:bg-[#2563EB] selection:text-white relative font-sans">
       
-      {/* Header Fixo com Suporte Multi-Página */}
+      {/* Header Fixo com Suporte Multi-Página e Mega Menu */}
       <Header
         activePage={activePage}
         onNavigatePage={handleNavigatePage}
@@ -140,6 +157,46 @@ export function App() {
           />
         )}
 
+        {activePage === 'setores' && (
+          <SetoresPage
+            initialSector="retalho"
+            onOpenDemoModal={handleOpenDemoModal}
+            onNavigatePage={handleNavigatePage}
+          />
+        )}
+
+        {activePage === 'retalho' && (
+          <SetoresPage
+            initialSector="retalho"
+            onOpenDemoModal={handleOpenDemoModal}
+            onNavigatePage={handleNavigatePage}
+          />
+        )}
+
+        {activePage === 'restauracao' && (
+          <SetoresPage
+            initialSector="restauracao"
+            onOpenDemoModal={handleOpenDemoModal}
+            onNavigatePage={handleNavigatePage}
+          />
+        )}
+
+        {activePage === 'farmacia' && (
+          <SetoresPage
+            initialSector="farmacia"
+            onOpenDemoModal={handleOpenDemoModal}
+            onNavigatePage={handleNavigatePage}
+          />
+        )}
+
+        {activePage === 'servicos' && (
+          <SetoresPage
+            initialSector="servicos"
+            onOpenDemoModal={handleOpenDemoModal}
+            onNavigatePage={handleNavigatePage}
+          />
+        )}
+
         {activePage === 'download' && (
           <DownloadPage
             onOpenDemoModal={handleOpenDemoModal}
@@ -148,7 +205,10 @@ export function App() {
         )}
 
         {activePage === 'planos' && (
-          <FinanceiroPage onOpenDemoModal={handleOpenDemoModal} />
+          <FinanceiroPage
+            onOpenDemoModal={handleOpenDemoModal}
+            onNavigatePage={handleNavigatePage}
+          />
         )}
 
         {activePage === 'parceiros' && (
@@ -170,6 +230,10 @@ export function App() {
           <SuportePage initialSubject={selectedForSupport} />
         )}
 
+        {activePage === 'sobre' && (
+          <AboutPage onOpenDemoModal={() => handleOpenDemoModal('Apresentação Institucional')} />
+        )}
+
         {activePage === 'modulos' && (
           <ModulosPage
             onSelectModule={handleSelectModule}
@@ -188,7 +252,7 @@ export function App() {
         {activePage === 'faturacao' && (
           <ModuloDetailPage
             module={KIVORA_MODULES.find((m) => m.id === 'faturacao-agt') || KIVORA_MODULES[0]}
-            onBack={() => handleNavigatePage('home')}
+            onBack={() => handleNavigatePage('funcionalidades')}
             onOpenDemoModal={handleOpenDemoModal}
           />
         )}
@@ -196,7 +260,31 @@ export function App() {
         {activePage === 'pos' && (
           <ModuloDetailPage
             module={KIVORA_MODULES.find((m) => m.id === 'pos-multicaixa') || KIVORA_MODULES[1]}
-            onBack={() => handleNavigatePage('home')}
+            onBack={() => handleNavigatePage('funcionalidades')}
+            onOpenDemoModal={handleOpenDemoModal}
+          />
+        )}
+
+        {activePage === 'stock' && (
+          <ModuloDetailPage
+            module={KIVORA_MODULES.find((m) => m.id === 'gestao-stock') || KIVORA_MODULES[3]}
+            onBack={() => handleNavigatePage('funcionalidades')}
+            onOpenDemoModal={handleOpenDemoModal}
+          />
+        )}
+
+        {activePage === 'rh' && (
+          <ModuloDetailPage
+            module={KIVORA_MODULES.find((m) => m.id === 'recursos-humanos') || KIVORA_MODULES[4]}
+            onBack={() => handleNavigatePage('funcionalidades')}
+            onOpenDemoModal={handleOpenDemoModal}
+          />
+        )}
+
+        {activePage === 'contabilidade' && (
+          <ModuloDetailPage
+            module={KIVORA_MODULES.find((m) => m.id === 'contabilidade-saft') || KIVORA_MODULES[5]}
+            onBack={() => handleNavigatePage('funcionalidades')}
             onOpenDemoModal={handleOpenDemoModal}
           />
         )}
@@ -218,6 +306,10 @@ export function App() {
 
         {activePage === 'termos' && (
           <TermsPage onBack={() => handleNavigatePage('home')} />
+        )}
+
+        {activePage === 'validar-licenca' && (
+          <ValidarLicencaPage onBackToHome={() => handleNavigatePage('home')} />
         )}
       </main>
 

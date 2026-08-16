@@ -34,14 +34,12 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
     <div className="min-h-screen bg-white text-slate-900 page-enter">
       
       {/* Hero com imagem */}
-      <div className="pt-16">
-        <PageHero
-          image="/imagens/pacote-de-instalação-com-disco.png"
-          tag="Download Gratuito"
-          title="KIVORA Desktop para Windows"
-          sub="Instale o sistema de gestão e faturação da sua empresa. Base de dados 100% local, sem mensalidades escondidas."
-        />
-      </div>
+      <PageHero
+        image="/imagens/2149272217.jpg"
+        tag="Download Gratuito"
+        title="KIVORA Desktop para Windows"
+        sub="Instale o sistema de gestão e faturação da sua empresa. Base de dados 100% local, sem mensalidades escondidas."
+      />
 
       {/* Download Box Principal */}
       <section className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16 py-20">

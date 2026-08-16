@@ -27,14 +27,12 @@ export const SolucoesPage: React.FC<SolucoesPageProps> = ({ onOpenDemoModal, onN
     <div className="min-h-screen bg-white text-slate-900 page-enter">
 
       {/* Hero com imagem */}
-      <div className="pt-16">
-        <PageHero
-          image="/imagens/servidor.png"
-          tag="Arquitetura Local"
-          title="Soluções para cada tipo de empresa"
-          sub="PC único ou rede com múltiplos postos — o KIVORA adapta-se à sua estrutura sem depender de internet."
-        />
-      </div>
+      <PageHero
+        image="/imagens/136227.jpg"
+        tag="Arquitetura Local"
+        title="Soluções para cada tipo de empresa"
+        sub="PC único ou rede com múltiplos postos — o KIVORA adapta-se à sua estrutura sem depender de internet."
+      />
 
       {/* Secção 1 — PC Único */}
       <section className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16 py-24 grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">

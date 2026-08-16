@@ -3,17 +3,20 @@ import {
   Plus, Eye, Check, X,
   DollarSign, Users, CheckCircle2, Loader2, Copy,
   Key, MessageSquare, Search, Ban, RotateCcw,
-  Tag, TrendingDown, Wallet, Edit2, Save
+  Tag, TrendingDown, Wallet, Edit2, Save,
+  ShieldCheck, Sliders, Download, Sparkles, Award
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
-import { createOrApprovePartnerAccount } from './services/authService';
+import { createOrApprovePartnerAccount, setPartnerSuspensionStatus } from './services/authService';
 import { db } from '../lib/firebase';
 import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import {
   subscribePartnerPricing, savePartnerPricing, subscribeAllDebts, markDebtsPaid,
-  DEFAULT_PARTNER_PRICING,
+  subscribePartnerPolicy, savePartnerPolicy,
+  DEFAULT_PARTNER_PRICING, DEFAULT_PARTNER_POLICY
 } from './services/partnerDebtService';
-import type { PartnerPricingPlan, PartnerDebtEntry } from './services/partnerDebtService';
+import type { PartnerPricingPlan, PartnerDebtEntry, PartnerLicensingPolicy } from './services/partnerDebtService';
+import { PartnerOfficialCertificatesModal, PartnerCertificateData } from '../components/PartnerOfficialCertificatesModal';
 
 export interface Partner {
   id: string;
@@ -25,6 +28,10 @@ export interface Partner {
   debt_aoa: number;
   total_paid_aoa: number;
   total_sales: number;
+  credit_slots_limit: number;
+  credit_limit_aoa: number;
+  wallet_balance_aoa: number;
+  tier: 'bronze' | 'silver' | 'gold' | 'diamond';
   status: 'active' | 'pending' | 'suspended';
   createdAt: number;
 }
@@ -32,7 +39,7 @@ export interface Partner {
 interface AdminParceirosProps {
   onCandidaturas?: () => void;
   onBack?: () => void;
-  initialTab?: 'todos' | 'candidaturas';
+  initialTab?: 'todos' | 'candidaturas' | 'precos' | 'politicas' | 'extrato_geral';
 }
 
 const fmt = (n: number) => n.toLocaleString('pt-AO');
@@ -40,8 +47,9 @@ const fmt = (n: number) => n.toLocaleString('pt-AO');
 export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'todos' }) => {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'todos' | 'candidaturas' | 'precos'>(initialTab === 'candidaturas' ? 'candidaturas' : 'todos');
+  const [tab, setTab] = useState<'todos' | 'candidaturas' | 'precos' | 'politicas' | 'extrato_geral'>(initialTab);
   const [search, setSearch] = useState('');
+  const [tierFilter, setTierFilter] = useState<string>('todos');
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -50,22 +58,36 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     open: boolean; partnerName: string; email: string; password: string; partnerCode: string; phone: string;
   } | null>(null);
   const [copiedCredentials, setCopiedCredentials] = useState(false);
+  const [certificatesPartnerModal, setCertificatesPartnerModal] = useState<PartnerCertificateData | null>(null);
 
   const [allDebts, setAllDebts] = useState<PartnerDebtEntry[]>([]);
   const [partnerDebts, setPartnerDebts] = useState<PartnerDebtEntry[]>([]);
   const [selectedDebtIds, setSelectedDebtIds] = useState<string[]>([]);
+  const [globalSelectedDebtIds, setGlobalSelectedDebtIds] = useState<string[]>([]);
+  const [debtFilterStatus, setDebtFilterStatus] = useState<'todos' | 'pendentes' | 'pagos' | 'provisorios'>('pendentes');
   const [markingPaid, setMarkingPaid] = useState(false);
+
+  const [editTier, setEditTier] = useState<'bronze' | 'silver' | 'gold' | 'diamond'>('bronze');
+  const [editCreditSlots, setEditCreditSlots] = useState<number>(2);
+  const [topUpAmount, setTopUpAmount] = useState<number>(0);
+  const [savingFinancials, setSavingFinancials] = useState(false);
 
   const [pricingPlans, setPricingPlans] = useState<PartnerPricingPlan[]>(DEFAULT_PARTNER_PRICING);
   const [editingPricing, setEditingPricing] = useState(false);
   const [pricingDraft, setPricingDraft] = useState<PartnerPricingPlan[]>(DEFAULT_PARTNER_PRICING);
   const [savingPricing, setSavingPricing] = useState(false);
 
+  const [policy, setPolicy] = useState<PartnerLicensingPolicy>(DEFAULT_PARTNER_POLICY);
+  const [policyDraft, setPolicyDraft] = useState<PartnerLicensingPolicy>(DEFAULT_PARTNER_POLICY);
+  const [savingPolicy, setSavingPolicy] = useState(false);
+  const [newReqInput, setNewReqInput] = useState('');
+
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [region, setRegion] = useState('Luanda');
+  const [newPartnerTier, setNewPartnerTier] = useState<'bronze' | 'silver' | 'gold' | 'diamond'>('bronze');
 
   useEffect(() => {
     try {
@@ -75,6 +97,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
           const d = docSnap.data();
           const pCode = (d.code || docSnap.id).toUpperCase().trim();
           const existing = map.get(pCode);
+
+          const tier = (d.tier as any) || 'bronze';
+          const defaultSlots = policy.tier_slots[tier as keyof typeof policy.tier_slots] || 2;
 
           const item: Partner = {
             id: docSnap.id,
@@ -86,11 +111,14 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             debt_aoa: Number(d.debt_aoa) || 0,
             total_paid_aoa: Number(d.total_paid_aoa) || 0,
             total_sales: Number(d.total_sales) || 0,
+            credit_slots_limit: Number(d.credit_slots_limit) || defaultSlots,
+            credit_limit_aoa: Number(d.credit_limit_aoa) || 250000,
+            wallet_balance_aoa: Number(d.wallet_balance_aoa) || 0,
+            tier,
             status: d.status || 'pending',
             createdAt: Number(d.createdAt) || Number(d.created_at) || Date.now(),
           };
 
-          // Prioritize 'active' or most recent if duplicated
           if (!existing) {
             map.set(pCode, item);
           } else if (existing.status !== 'active' && item.status === 'active') {
@@ -104,7 +132,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       }, (err) => { console.warn('Erro partners:', err); setLoading(false); });
       return () => unsub();
     } catch (e) { console.warn(e); setLoading(false); }
-  }, []);
+  }, [policy]);
 
   useEffect(() => {
     const unsub = subscribeAllDebts(setAllDebts);
@@ -120,9 +148,19 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   }, []);
 
   useEffect(() => {
+    const unsub = subscribePartnerPolicy((p) => {
+      setPolicy(p);
+      setPolicyDraft(p);
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
     if (selectedPartner) {
       setPartnerDebts(allDebts.filter(d => d.partner_id === selectedPartner.id || d.partner_id === selectedPartner.code));
       setSelectedDebtIds([]);
+      setEditTier(selectedPartner.tier || 'bronze');
+      setEditCreditSlots(selectedPartner.credit_slots_limit || 2);
     }
   }, [selectedPartner, allDebts]);
 
@@ -130,17 +168,34 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const pendingPartners = partners.filter(p => p.status === 'pending');
   const totalDebtAoa = allDebts.filter(d => !d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
   const totalReceivedAoa = allDebts.filter(d => d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
+  const totalProvisionalDebts = allDebts.filter(d => d.is_provisional && !d.paid).length;
 
   const getPartnerPendingDebt = (pid: string) =>
     allDebts.filter(d => (d.partner_id === pid || (partners.find(p => p.id === pid)?.code && d.partner_id === partners.find(p => p.id === pid)?.code)) && !d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
+  
   const getPartnerLicenseCount = (pid: string) =>
     allDebts.filter(d => d.partner_id === pid || (partners.find(p => p.id === pid)?.code && d.partner_id === partners.find(p => p.id === pid)?.code)).length;
+  
+  const getPartnerActiveCreditSlots = (pid: string) =>
+    allDebts.filter(d => (d.partner_id === pid || (partners.find(p => p.id === pid)?.code && d.partner_id === partners.find(p => p.id === pid)?.code)) && !d.paid && d.payment_method !== 'wallet').length;
 
   const filteredPartners = (tab === 'candidaturas' ? pendingPartners : partners).filter(p => {
+    const matchesTier = tierFilter === 'todos' || p.tier === tierFilter;
+    if (!matchesTier) return false;
     if (!search) return true;
     const s = search.toLowerCase();
     return p.name.toLowerCase().includes(s) || p.code.toLowerCase().includes(s) ||
       p.email.toLowerCase().includes(s) || p.region.toLowerCase().includes(s);
+  });
+
+  const filteredGlobalDebts = allDebts.filter(d => {
+    if (debtFilterStatus === 'pendentes' && d.paid) return false;
+    if (debtFilterStatus === 'pagos' && !d.paid) return false;
+    if (debtFilterStatus === 'provisorios' && (!d.is_provisional || d.paid)) return false;
+    if (!search) return true;
+    const s = search.toLowerCase();
+    return d.company_name.toLowerCase().includes(s) || d.license_id.toLowerCase().includes(s) ||
+      d.partner_name.toLowerCase().includes(s) || d.partner_id.toLowerCase().includes(s);
   });
 
   const handleAddPartner = async (e: React.FormEvent) => {
@@ -148,13 +203,15 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     if (!name || !code) return;
     const pCode = code.toUpperCase().trim();
     const pwd = `kivora${Math.floor(1000 + Math.random() * 9000)}`;
+    const initialSlots = policy.tier_slots[newPartnerTier] || 2;
     try {
       await setDoc(doc(db, 'partners', pCode), {
         id: pCode, code: pCode, name, email, phone, region,
+        tier: newPartnerTier, credit_slots_limit: initialSlots,
         debt_aoa: 0, total_paid_aoa: 0, total_sales: 0,
         status: 'active', createdAt: Date.now(),
       }, { merge: true });
-      await createOrApprovePartnerAccount({ nome: name, email, phone, region, partnerCode: pCode });
+      await createOrApprovePartnerAccount({ nome: name, email, phone, region, partnerCode: pCode, tier: newPartnerTier });
       setShowModal(false); setName(''); setCode(''); setEmail(''); setPhone('');
       setCredentialsModal({ open: true, partnerName: name, email, password: pwd, partnerCode: pCode, phone });
     } catch (err: any) { alert('Erro ao registar parceiro: ' + err.message); }
@@ -163,10 +220,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const handleApprovePartner = async (p: Partner) => {
     setApproving(p.id);
     const pwd = `kivora${Math.floor(1000 + Math.random() * 9000)}`;
+    const initialSlots = policy.tier_slots[p.tier || 'bronze'] || 2;
     try {
-      await setDoc(doc(db, 'partners', p.id), { status: 'active', code: p.code }, { merge: true });
+      await setDoc(doc(db, 'partners', p.id), { status: 'active', code: p.code, credit_slots_limit: initialSlots }, { merge: true });
       if (p.id !== p.code) {
-        await setDoc(doc(db, 'partners', p.code), { status: 'active', code: p.code }, { merge: true });
+        await setDoc(doc(db, 'partners', p.code), { status: 'active', code: p.code, credit_slots_limit: initialSlots }, { merge: true });
       }
       await createOrApprovePartnerAccount({ nome: p.name, email: p.email, phone: p.phone, region: p.region, partnerCode: p.code });
       setCredentialsModal({ open: true, partnerName: p.name, email: p.email, password: pwd, partnerCode: p.code, phone: p.phone });
@@ -178,36 +236,47 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     const ns = p.status === 'active' ? 'suspended' : 'active';
     if (!confirm(`${ns === 'suspended' ? 'Suspender' : 'Reativar'} ${p.name}?`)) return;
     try {
-      await setDoc(doc(db, 'partners', p.id), { status: ns }, { merge: true });
-      if (p.id !== p.code) {
-        await setDoc(doc(db, 'partners', p.code), { status: ns }, { merge: true });
-      }
+      await setPartnerSuspensionStatus(p.id, p.code, p.email, ns);
+      alert(`Parceiro ${p.name} ${ns === 'suspended' ? 'suspenso' : 'reativado'} com sucesso em todas as coleções!`);
     } catch (err: any) { alert('Erro: ' + err.message); }
   };
 
-  const handleMarkPaid = async () => {
-    if (!selectedDebtIds.length) return;
+  const handleMarkPaid = async (debtIds: string[]) => {
+    if (!debtIds.length) return;
     setMarkingPaid(true);
     try {
-      await markDebtsPaid(selectedDebtIds);
+      await markDebtsPaid(debtIds);
       if (selectedPartner) {
-        const amount = partnerDebts.filter(d => selectedDebtIds.includes(d.id)).reduce((a, d) => a + d.cost_aoa, 0);
+        const amount = partnerDebts.filter(d => debtIds.includes(d.id)).reduce((a, d) => a + d.cost_aoa, 0);
         await setDoc(doc(db, 'partners', selectedPartner.id), {
           total_paid_aoa: (selectedPartner.total_paid_aoa || 0) + amount,
           debt_aoa: Math.max(0, getPartnerPendingDebt(selectedPartner.id) - amount),
         }, { merge: true });
       }
       setSelectedDebtIds([]);
-      alert('Pagamento registado com sucesso!');
-    } catch (err: any) { alert('Erro: ' + err.message); }
+      setGlobalSelectedDebtIds([]);
+      alert(`Liquidação de ${debtIds.length} fatura(s) concluída com sucesso! Licenças provisórias foram promovidas a definitivas.`);
+    } catch (err: any) { alert('Erro ao liquidar: ' + err.message); }
     finally { setMarkingPaid(false); }
   };
 
   const handleSavePricing = async () => {
     setSavingPricing(true);
-    try { await savePartnerPricing(pricingDraft); setEditingPricing(false); alert('Preços atualizados!'); }
+    try { await savePartnerPricing(pricingDraft); setEditingPricing(false); alert('Tabela de preços de atacado atualizada com sucesso!'); }
     catch (err: any) { alert('Erro: ' + err.message); }
     finally { setSavingPricing(false); }
+  };
+
+  const handleSavePolicy = async () => {
+    setSavingPolicy(true);
+    try {
+      await savePartnerPolicy(policyDraft);
+      alert('Políticas de Licenciamento & Quotas guardadas no Firebase com sucesso!');
+    } catch (err: any) {
+      alert('Erro ao guardar políticas: ' + err.message);
+    } finally {
+      setSavingPolicy(false);
+    }
   };
 
   const copyRefLink = (p: Partner) => {
@@ -216,47 +285,50 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50">
+    <div className="flex-1 overflow-y-auto bg-slate-50 font-sans">
       <AdminTopbar
-        title="Rede de Parceiros & Revenda"
-        subtitle="Gestão de canais de distribuição, dívidas por licença e preços de atacado"
+        title="Rede de Parceiros & Políticas de Licenciamento"
+        subtitle="Gestão de quotas de crédito, faturamento de atacado, carteiras pré-pagas e homologações"
         actions={
-          <button onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md shadow-blue-600/20 transition-all">
-            <Plus className="w-4 h-4" /><span>Registar Novo Parceiro</span>
+          <button
+            onClick={() => setShowModal(true)}
+            className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Novo Parceiro</span>
           </button>
         }
       />
 
       <div className="p-6 space-y-5">
-        {/* KPIs */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Parceiros Ativos" value={activePartners.length}
-            sub={`${pendingPartners.length} aguardam aprovação`} subColor="green"
+            sub={`${pendingPartners.length} aguardam homologação`} subColor="green"
             icon={<Users className="w-4 h-4" />} iconBg="bg-blue-50 text-blue-600" />
           <StatCard label="Licenças Emitidas" value={allDebts.length}
-            sub="Por todos os parceiros" subColor="green"
+            sub={`${totalProvisionalDebts} provisórias ativas`} subColor="amber"
             icon={<Key className="w-4 h-4" />} iconBg="bg-emerald-50 text-emerald-600" />
           <StatCard label="Dívida Total Pendente" value={`${fmt(totalDebtAoa)} Kz`}
             sub="A receber dos parceiros" subColor="amber"
             icon={<TrendingDown className="w-4 h-4" />} iconBg="bg-amber-50 text-amber-600" />
-          <StatCard label="Total Recebido" value={`${fmt(totalReceivedAoa)} Kz`}
-            sub="Pagamentos confirmados" subColor="green"
+          <StatCard label="Total Recebido (Atacado)" value={`${fmt(totalReceivedAoa)} Kz`}
+            sub="Pagamentos liquidados" subColor="green"
             icon={<Wallet className="w-4 h-4" />} iconBg="bg-purple-50 text-purple-600" />
         </div>
 
-        {/* Tabs */}
-        <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
+        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
           {[
-            { id: 'todos', label: `Todos os Parceiros (${partners.length})` },
-            { id: 'candidaturas', label: 'Candidaturas Pendentes', badge: pendingPartners.length },
-            { id: 'precos', label: 'Tabela de Preços' },
+            { id: 'todos', label: `Parceiros & Quotas (${partners.length})`, icon: <Users className="w-3.5 h-3.5" /> },
+            { id: 'candidaturas', label: 'Candidaturas Pendentes', icon: <CheckCircle2 className="w-3.5 h-3.5" />, badge: pendingPartners.length },
+            { id: 'politicas', label: 'Políticas & Quotas de Crédito', icon: <Sliders className="w-3.5 h-3.5" /> },
+            { id: 'precos', label: 'Tabela de Preços Atacado', icon: <Tag className="w-3.5 h-3.5" /> },
+            { id: 'extrato_geral', label: 'Extrato Geral de Dívidas', icon: <DollarSign className="w-3.5 h-3.5" /> },
           ].map((t) => (
             <button key={t.id} onClick={() => setTab(t.id as any)}
-              className={`text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
+              className={`text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
                 tab === t.id ? 'bg-slate-950 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'}`}>
-              {t.id === 'precos' && <Tag className="w-3.5 h-3.5" />}
-              {t.label}
+              {t.icon}
+              <span>{t.label}</span>
               {t.badge && t.badge > 0 && (
                 <span className="bg-amber-500 text-white text-[10px] px-1.5 rounded-full font-black">{t.badge}</span>
               )}
@@ -264,7 +336,446 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
           ))}
         </div>
 
-        {/* ABA: Tabela de Preços */}
+        {tab === 'todos' && (
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="relative flex-1 w-full">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <input
+                  type="text"
+                  placeholder="Pesquisar por nome, código PRT, email, província..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <span className="text-xs font-bold text-slate-500">Categoria:</span>
+                <select
+                  value={tierFilter}
+                  onChange={(e) => setTierFilter(e.target.value)}
+                  className="bg-slate-50 border border-slate-200 text-xs font-bold rounded-xl px-3 py-2 text-slate-700"
+                >
+                  <option value="todos">Todos os Níveis</option>
+                  <option value="bronze">Bronze (Iniciante)</option>
+                  <option value="silver">Silver (Ativo)</option>
+                  <option value="gold">Gold (Avançado)</option>
+                  <option value="diamond">Diamond (Master)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                    <tr>
+                      <th className="p-4">Parceiro</th>
+                      <th className="p-4">Categoria</th>
+                      <th className="p-4">Slots a Crédito</th>
+                      <th className="p-4">Saldo Carteira</th>
+                      <th className="p-4">Dívida Pendente</th>
+                      <th className="p-4">Estado</th>
+                      <th className="p-4 text-right">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {loading ? (
+                      <tr><td colSpan={7} className="p-8 text-center text-slate-400">
+                        <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
+                        <span>A carregar parceiros do Firebase...</span>
+                      </td></tr>
+                    ) : filteredPartners.length === 0 ? (
+                      <tr><td colSpan={7} className="p-8 text-center text-slate-400">
+                        <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                        <p className="font-bold text-slate-700">Nenhum parceiro encontrado</p>
+                      </td></tr>
+                    ) : filteredPartners.map((p) => {
+                      const debt = getPartnerPendingDebt(p.id);
+                      const lics = getPartnerLicenseCount(p.id);
+                      const activeSlots = getPartnerActiveCreditSlots(p.id);
+                      const slotsLimit = p.credit_slots_limit || policy.tier_slots[p.tier] || 2;
+                      const isSlotsFull = activeSlots >= slotsLimit;
+
+                      return (
+                        <tr key={p.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="p-4">
+                            <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{p.code}</span>
+                            <p className="font-bold text-slate-900 mt-1">{p.name}</p>
+                            <p className="text-slate-400 text-[10px]">{p.email} • {p.phone} • {p.region}</p>
+                          </td>
+                          <td className="p-4">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                              p.tier === 'diamond' ? 'bg-purple-100 text-purple-800 border border-purple-200' :
+                              p.tier === 'gold' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+                              p.tier === 'silver' ? 'bg-slate-200 text-slate-800 border border-slate-300' :
+                              'bg-amber-50 text-amber-900 border border-amber-200'
+                            }`}>
+                              <Sparkles className="w-3 h-3" />
+                              <span>{p.tier}</span>
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex flex-col">
+                              <span className={`font-mono font-bold text-xs ${isSlotsFull ? 'text-amber-700' : 'text-slate-900'}`}>
+                                {activeSlots} / {slotsLimit} em uso
+                              </span>
+                              <span className="text-[10px] text-slate-400">{lics} licenças emitidas</span>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <span className="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                              {fmt(p.wallet_balance_aoa || 0)} Kz
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            {debt > 0 ? (
+                              <span className="font-mono font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">{fmt(debt)} Kz</span>
+                            ) : (
+                              <span className="text-emerald-600 font-bold text-[11px]">✓ Regularizado</span>
+                            )}
+                          </td>
+                          <td className="p-4">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              p.status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                              p.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                              'bg-red-50 text-red-700 border border-red-200'}`}>
+                              {p.status === 'active' ? 'Ativo' : p.status === 'pending' ? 'Pendente' : 'Suspenso'}
+                            </span>
+                          </td>
+                          <td className="p-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => setCertificatesPartnerModal({
+                                  partnerName: p.name,
+                                  partnerCode: p.code,
+                                  tier: p.tier,
+                                  region: p.region,
+                                  email: p.email,
+                                  phone: p.phone,
+                                  createdAt: p.createdAt,
+                                })}
+                                title="Emitir Certificados Oficiais (Visual Software & Kivora)"
+                                className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                              >
+                                <Award className="w-3.5 h-3.5" />
+                              </button>
+                              <button onClick={() => copyRefLink(p)} title="Copiar Link Ref"
+                                className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
+                                {copiedCode === p.code ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                              </button>
+                              {p.status !== 'pending' && (
+                                <button onClick={() => handleToggleSuspend(p)}
+                                  title={p.status === 'active' ? 'Suspender' : 'Reativar'}
+                                  className={`p-1.5 rounded-lg transition-colors cursor-pointer ${p.status === 'active' ? 'text-slate-400 hover:text-red-600 hover:bg-red-50' : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'}`}>
+                                  {p.status === 'active' ? <Ban className="w-3.5 h-3.5" /> : <RotateCcw className="w-3.5 h-3.5" />}
+                                </button>
+                              )}
+                              <button onClick={() => setSelectedPartner(p)} title="Configurar Quotas & Ver Licenças"
+                                className="p-1.5 text-slate-600 hover:text-slate-950 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer">
+                                <Eye className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tab === 'candidaturas' && (
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
+            <h3 className="font-black text-slate-900 text-sm">Candidaturas de Novos Parceiros</h3>
+            <p className="text-xs text-slate-500">Aprove as solicitações para criar a conta de revendedor no Firebase com credenciais automáticas.</p>
+
+            {pendingPartners.length === 0 ? (
+              <div className="p-10 text-center text-slate-400">
+                <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
+                <p className="font-bold text-slate-700">Todas as candidaturas foram homologadas!</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {pendingPartners.map((p) => (
+                  <div key={p.id} className="py-4 flex items-center justify-between gap-4">
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm">{p.name}</p>
+                      <p className="text-xs text-slate-500">{p.email} • {p.phone} • {p.region}</p>
+                      <span className="inline-block mt-1 text-[10px] bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded font-bold">
+                        Aguardando Homologação
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleApprovePartner(p)}
+                      disabled={approving === p.id}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
+                    >
+                      {approving === p.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                      <span>Aprovar & Gerar Acesso</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === 'politicas' && (
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-6">
+            <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
+                  <Sliders className="w-5 h-5 text-blue-600" />
+                  <span>Configuração das Regras de Licenciamento & Crédito</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Defina os limites de slots por categoria de parceiro, tolerância de atraso e travas automáticas anti-calote.
+                </p>
+              </div>
+
+              <button
+                onClick={handleSavePolicy}
+                disabled={savingPolicy}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md shadow-emerald-600/20 flex items-center gap-2 cursor-pointer shrink-0"
+              >
+                {savingPolicy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Guardar Políticas no Firebase</span>
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              
+              <div className="space-y-3">
+                <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <Key className="w-4 h-4 text-amber-600" />
+                  <span>1. Quotas Padrão de Slots de Crédito por Categoria</span>
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Quantidade máxima de licenças que um parceiro deste nível pode emitir a crédito sem liquidação prévia:
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+                  {[
+                    { key: 'bronze', label: 'Bronze (Iniciante)', desc: 'Novos parceiros homologados' },
+                    { key: 'silver', label: 'Silver (Ativo)', desc: 'Parceiros com vendas regulares' },
+                    { key: 'gold', label: 'Gold (Avançado)', desc: 'Revendedores com alto volume' },
+                    { key: 'diamond', label: 'Diamond (Master)', desc: 'Distribuidores oficiais e masters' },
+                  ].map((t) => (
+                    <div key={t.key} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                      <span className="text-[11px] font-black uppercase text-slate-800 block">{t.label}</span>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min={1}
+                          max={100}
+                          value={policyDraft.tier_slots[t.key as keyof typeof policyDraft.tier_slots]}
+                          onChange={(e) => {
+                            const val = Math.max(1, Number(e.target.value) || 1);
+                            setPolicyDraft({
+                              ...policyDraft,
+                              tier_slots: {
+                                ...policyDraft.tier_slots,
+                                [t.key]: val,
+                              }
+                            });
+                          }}
+                          className="w-20 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold text-center"
+                        />
+                        <span className="text-xs font-bold text-slate-600">Slots de Crédito</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400">{t.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-4 border-t border-slate-100">
+                <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>2. Prazos e Travas de Segurança Anti-Inadimplência</span>
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                    <label className="text-xs font-bold text-slate-800 block">Tolerância de Vencimento de Dívidas (Dias)</label>
+                    <p className="text-[11px] text-slate-500">Se o parceiro tiver faturas pendentes emitidas há mais tempo que este limite, novas emissões a crédito são bloqueadas:</p>
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="number"
+                        min={1}
+                        max={90}
+                        value={policyDraft.overdue_tolerance_days}
+                        onChange={(e) => setPolicyDraft({ ...policyDraft, overdue_tolerance_days: Number(e.target.value) || 15 })}
+                        className="w-24 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                      />
+                      <span className="text-xs font-bold text-slate-700">Dias corridos</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                    <label className="text-xs font-bold text-slate-800 block">Ativação Provisória para Vitalício a Crédito (Dias)</label>
+                    <p className="text-[11px] text-slate-500">Prazo inicial que a licença vitalícia funciona no cliente antes da liquidação da fatura pelo parceiro:</p>
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="number"
+                        min={7}
+                        max={90}
+                        value={policyDraft.provisional_lifetime_days}
+                        onChange={(e) => setPolicyDraft({ ...policyDraft, provisional_lifetime_days: Number(e.target.value) || 30 })}
+                        className="w-24 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                      />
+                      <span className="text-xs font-bold text-slate-700">Dias de proteção inicial</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                    <label className="text-xs font-bold text-slate-800 block">Custo de Atacado por Posto Extra (Kz)</label>
+                    <p className="text-[11px] text-slate-500">Valor cobrado ao parceiro por cada terminal / computador adicional em rede:</p>
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="number"
+                        step={5000}
+                        value={policyDraft.extra_seat_cost_aoa}
+                        onChange={(e) => setPolicyDraft({ ...policyDraft, extra_seat_cost_aoa: Number(e.target.value) || 25000 })}
+                        className="w-36 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                      />
+                      <span className="text-xs font-bold text-slate-700">Kz / Posto</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                    <label className="text-xs font-bold text-slate-800 block">Recarga Mínima da Carteira Pré-Paga (Kz)</label>
+                    <p className="text-[11px] text-slate-500">Valor mínimo sugerido para transferências de recarga de Wallet:</p>
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="number"
+                        step={10000}
+                        value={policyDraft.min_wallet_topup_aoa}
+                        onChange={(e) => setPolicyDraft({ ...policyDraft, min_wallet_topup_aoa: Number(e.target.value) || 50000 })}
+                        className="w-36 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                      />
+                      <span className="text-xs font-bold text-slate-700">Kz Mínimo</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seção 3: Requisitos de Homologação de Parceiros & Taxa de Adesão */}
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <Award className="w-4 h-4 text-purple-600" />
+                  <span>3. Taxa de Adesão & Requisitos para se Tornar Parceiro</span>
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Configure o valor cobrado para homologação inicial e os critérios exigidos exibidos na página de candidatura:
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                    <label className="text-xs font-bold text-slate-800 block">Taxa de Adesão / Homologação (Kz)</label>
+                    <p className="text-[11px] text-slate-500">Valor único cobrado para ativação do credenciamento e emissão dos certificados oficiais:</p>
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="number"
+                        step={5000}
+                        value={policyDraft.partner_membership_fee_aoa ?? 25000}
+                        onChange={(e) => setPolicyDraft({ ...policyDraft, partner_membership_fee_aoa: Number(e.target.value) || 0 })}
+                        className="w-36 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                      />
+                      <span className="text-xs font-bold text-slate-700">Kz / Adesão</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                    <label className="text-xs font-bold text-slate-800 block">IBAN / Conta para Pagamento da Taxa</label>
+                    <div className="space-y-1.5 pt-1">
+                      <input
+                        type="text"
+                        placeholder="Banco (ex: BAI / BFA)"
+                        value={policyDraft.membership_bank_info?.bank || ''}
+                        onChange={(e) => setPolicyDraft({
+                          ...policyDraft,
+                          membership_bank_info: { ...(policyDraft.membership_bank_info || DEFAULT_PARTNER_POLICY.membership_bank_info), bank: e.target.value }
+                        })}
+                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium"
+                      />
+                      <input
+                        type="text"
+                        placeholder="IBAN (ex: AO06 0040...)"
+                        value={policyDraft.membership_bank_info?.iban || ''}
+                        onChange={(e) => setPolicyDraft({
+                          ...policyDraft,
+                          membership_bank_info: { ...(policyDraft.membership_bank_info || DEFAULT_PARTNER_POLICY.membership_bank_info), iban: e.target.value }
+                        })}
+                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                  <label className="text-xs font-bold text-slate-800 block">Critérios & Requisitos Exigidos do Candidato</label>
+                  <div className="space-y-2">
+                    {(policyDraft.partner_requirements || DEFAULT_PARTNER_POLICY.partner_requirements).map((req, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={req}
+                          onChange={(e) => {
+                            const list = [...(policyDraft.partner_requirements || DEFAULT_PARTNER_POLICY.partner_requirements)];
+                            list[idx] = e.target.value;
+                            setPolicyDraft({ ...policyDraft, partner_requirements: list });
+                          }}
+                          className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const list = (policyDraft.partner_requirements || DEFAULT_PARTNER_POLICY.partner_requirements).filter((_, i) => i !== idx);
+                            setPolicyDraft({ ...policyDraft, partner_requirements: list });
+                          }}
+                          className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg cursor-pointer"
+                          title="Remover Requisito"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-2">
+                    <input
+                      type="text"
+                      placeholder="Adicionar novo requisito (ex: Experiência comprovada em suporte técnico)..."
+                      value={newReqInput}
+                      onChange={(e) => setNewReqInput(e.target.value)}
+                      className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newReqInput.trim()) return;
+                        const current = policyDraft.partner_requirements || DEFAULT_PARTNER_POLICY.partner_requirements;
+                        setPolicyDraft({ ...policyDraft, partner_requirements: [...current, newReqInput.trim()] });
+                        setNewReqInput('');
+                      }}
+                      className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Adicionar</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
         {tab === 'precos' && (
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
@@ -278,16 +789,16 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 {editingPricing ? (
                   <>
                     <button onClick={() => { setEditingPricing(false); setPricingDraft(pricingPlans); }}
-                      className="text-xs font-bold text-slate-500 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100">Cancelar</button>
+                      className="text-xs font-bold text-slate-500 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 cursor-pointer">Cancelar</button>
                     <button onClick={handleSavePricing} disabled={savingPricing}
-                      className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm">
+                      className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm cursor-pointer">
                       {savingPricing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                       <span>Guardar no Firebase</span>
                     </button>
                   </>
                 ) : (
                   <button onClick={() => { setEditingPricing(true); setPricingDraft([...pricingPlans]); }}
-                    className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm">
+                    className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm cursor-pointer">
                     <Edit2 className="w-3.5 h-3.5" /><span>Editar Preços</span>
                   </button>
                 )}
@@ -308,290 +819,401 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                       <span className="text-xs font-bold text-slate-500">Kz</span>
                     </div>
                   ) : (
-                    <span className="font-mono font-black text-slate-900 text-base">{fmt(plan.cost_aoa)} Kz</span>
+                    <span className="font-mono font-black text-slate-900 text-sm">{fmt(plan.cost_aoa)} Kz</span>
                   )}
                 </div>
               ))}
-              <div className="p-4 bg-blue-50 rounded-2xl border border-blue-200 text-xs text-blue-900">
-                <strong className="font-black">Como funciona:</strong> Cada licença emitida pelo parceiro gera automaticamente uma dívida com o custo acima. O parceiro define o preço de venda ao cliente livremente — a sua margem é a diferença.
-              </div>
             </div>
           </div>
         )}
 
-        {/* ABA: Parceiros */}
-        {(tab === 'todos' || tab === 'candidaturas') && (
-          <>
-            <div className="relative max-w-sm">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-              <input type="text" placeholder="Pesquisar parceiro, código, email..." value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs placeholder-slate-400 focus:outline-none focus:border-blue-500 font-medium shadow-sm" />
+        {tab === 'extrato_geral' && (
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-4 p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-black text-slate-900 text-sm">Extrato Geral de Faturamento & Liquidações</h3>
+                <p className="text-xs text-slate-500">Consulte todas as licenças geradas pela rede e faça liquidações em lote.</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {globalSelectedDebtIds.length > 0 && (
+                  <button
+                    onClick={() => handleMarkPaid(globalSelectedDebtIds)}
+                    disabled={markingPaid}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
+                  >
+                    {markingPaid ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                    <span>Liquidar Selecionadas ({globalSelectedDebtIds.length})</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    const headers = ['Licenca_ID', 'Parceiro', 'Empresa_Cliente', 'Plano', 'Custo_Kivora_AOA', 'Estado', 'Data'];
+                    const rows = filteredGlobalDebts.map(d => [
+                      d.license_id,
+                      `"${(d.partner_name || d.partner_id || '').replace(/"/g, '""')}"`,
+                      `"${(d.company_name || '').replace(/"/g, '""')}"`,
+                      d.plan_type,
+                      d.cost_aoa,
+                      d.paid ? 'Pago' : d.is_provisional ? 'Provisório' : 'Pendente',
+                      new Date(d.created_at).toISOString().split('T')[0]
+                    ]);
+                    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+                    const link = document.createElement('a');
+                    link.setAttribute('href', encodeURI(csvContent));
+                    link.setAttribute('download', `extrato_geral_kivora_${new Date().toISOString().split('T')[0]}.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Exportar CSV</span>
+                </button>
+              </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-              <div className="overflow-x-auto w-full">
-                <table className="w-full text-xs text-left min-w-[650px]">
-                <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 uppercase font-black text-[10px] tracking-wider">
-                    <th className="p-4">Código / Parceiro</th>
-                    <th className="p-4">Região</th>
-                    <th className="p-4">Licenças</th>
-                    <th className="p-4">Dívida Pendente</th>
-                    <th className="p-4">Estado</th>
-                    <th className="p-4 text-right">Ações</th>
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+              {[
+                { id: 'pendentes', label: 'Dívidas Pendentes' },
+                { id: 'provisorios', label: 'Provisórias (Aguardam Acerto)' },
+                { id: 'pagos', label: 'Liquidadas' },
+                { id: 'todos', label: 'Todas as Faturas' },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setDebtFilterStatus(f.id as any)}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                    debtFilterStatus === f.id ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                  <tr>
+                    <th className="p-3 w-8">
+                      <input
+                        type="checkbox"
+                        checked={globalSelectedDebtIds.length > 0 && globalSelectedDebtIds.length === filteredGlobalDebts.filter(d => !d.paid).length}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setGlobalSelectedDebtIds(filteredGlobalDebts.filter(d => !d.paid).map(d => d.id));
+                          } else {
+                            setGlobalSelectedDebtIds([]);
+                          }
+                        }}
+                        className="rounded accent-emerald-600"
+                      />
+                    </th>
+                    <th className="p-3">Licença</th>
+                    <th className="p-3">Parceiro</th>
+                    <th className="p-3">Empresa Cliente</th>
+                    <th className="p-3">Plano</th>
+                    <th className="p-3">Custo Atacado</th>
+                    <th className="p-3">Estado</th>
+                    <th className="p-3">Data</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {loading ? (
-                    <tr><td colSpan={6} className="p-8 text-center text-slate-400">
-                      <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
-                      <span>A carregar parceiros do Firebase...</span>
-                    </td></tr>
-                  ) : filteredPartners.length === 0 ? (
-                    <tr><td colSpan={6} className="p-8 text-center text-slate-400">
-                      <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                      <p className="font-bold text-slate-700">
-                        {search ? `Nenhum resultado para "${search}"` : tab === 'candidaturas' ? 'Sem candidaturas pendentes' : 'Nenhum parceiro encontrado'}
-                      </p>
-                    </td></tr>
-                  ) : filteredPartners.map((p) => {
-                    const debt = getPartnerPendingDebt(p.id);
-                    const lics = getPartnerLicenseCount(p.id);
-                    return (
-                      <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="p-4">
-                          <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{p.code}</span>
-                          <p className="font-bold text-slate-900 mt-1">{p.name}</p>
-                          <p className="text-slate-400 text-[10px]">{p.email} • {p.phone}</p>
-                        </td>
-                        <td className="p-4 font-semibold text-slate-700">{p.region}</td>
-                        <td className="p-4 font-black text-slate-900">{lics}</td>
-                        <td className="p-4">
-                          {debt > 0 ? (
-                            <span className="font-mono font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">{fmt(debt)} Kz</span>
-                          ) : (
-                            <span className="text-emerald-600 font-bold text-[11px]">✓ Regularizado</span>
-                          )}
-                        </td>
-                        <td className="p-4">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            p.status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                            p.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                            'bg-red-50 text-red-700 border border-red-200'}`}>
-                            {p.status === 'active' ? 'Ativo' : p.status === 'pending' ? 'Pendente' : 'Suspenso'}
-                          </span>
-                        </td>
-                        <td className="p-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button onClick={() => copyRefLink(p)} title="Copiar Link Ref"
-                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                              {copiedCode === p.code ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                            </button>
-                            {p.status === 'pending' && (
-                              <button onClick={() => handleApprovePartner(p)} disabled={approving === p.id}
-                                className="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg font-bold text-[11px] flex items-center gap-1 shadow-sm transition-all">
-                                {approving === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
-                                <span>Aprovar</span>
-                              </button>
-                            )}
-                            {p.status !== 'pending' && (
-                              <button onClick={() => handleToggleSuspend(p)}
-                                title={p.status === 'active' ? 'Suspender' : 'Reativar'}
-                                className={`p-1.5 rounded-lg transition-colors ${p.status === 'active' ? 'text-slate-400 hover:text-red-600 hover:bg-red-50' : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'}`}>
-                                {p.status === 'active' ? <Ban className="w-3.5 h-3.5" /> : <RotateCcw className="w-3.5 h-3.5" />}
-                              </button>
-                            )}
-                            <button onClick={() => setSelectedPartner(p)} title="Ver Dívidas"
-                              className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors">
-                              <Eye className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {filteredGlobalDebts.length === 0 ? (
+                    <tr><td colSpan={8} className="p-8 text-center text-slate-400">Nenhum registo encontrado com este filtro.</td></tr>
+                  ) : filteredGlobalDebts.map((d) => (
+                    <tr key={d.id} className="hover:bg-slate-50">
+                      <td className="p-3">
+                        <input
+                          type="checkbox"
+                          disabled={d.paid}
+                          checked={globalSelectedDebtIds.includes(d.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) setGlobalSelectedDebtIds(prev => [...prev, d.id]);
+                            else setGlobalSelectedDebtIds(prev => prev.filter(id => id !== d.id));
+                          }}
+                          className="rounded accent-emerald-600"
+                        />
+                      </td>
+                      <td className="p-3 font-mono font-bold text-blue-700">{d.license_id}</td>
+                      <td className="p-3 font-semibold text-slate-800">{d.partner_name || d.partner_id}</td>
+                      <td className="p-3 font-bold text-slate-900">{d.company_name}</td>
+                      <td className="p-3 font-semibold">{d.plan_type}</td>
+                      <td className="p-3 font-mono font-bold text-slate-900">{fmt(d.cost_aoa)} Kz</td>
+                      <td className="p-3">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          d.paid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                          d.is_provisional ? 'bg-amber-100 text-amber-800 border border-amber-300' :
+                          'bg-amber-50 text-amber-700 border border-amber-200'
+                        }`}>
+                          {d.paid ? '✓ Pago' : d.is_provisional ? 'Provisório (30D)' : 'Pendente'}
+                        </span>
+                      </td>
+                      <td className="p-3 text-slate-400">{new Date(d.created_at).toLocaleDateString('pt-AO')}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
-              </div>
             </div>
-          </>
+          </div>
         )}
+
       </div>
 
-      {/* MODAL: Novo Parceiro */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-slate-900">Registar Novo Parceiro</h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900"><X className="w-4 h-4" /></button>
+      {selectedPartner && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn max-h-[90vh] flex flex-col">
+            
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black">
+                  {selectedPartner.name.slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 text-base">{selectedPartner.name}</h3>
+                  <p className="text-xs text-slate-500 font-mono">Código: {selectedPartner.code} • {selectedPartner.region}</p>
+                </div>
+              </div>
+              <button onClick={() => setSelectedPartner(null)} className="text-slate-400 hover:text-slate-900 cursor-pointer"><X className="w-5 h-5" /></button>
             </div>
-            <form onSubmit={handleAddPartner} className="space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Nome / Empresa</label>
-                <input type="text" required placeholder="Ex: Luanda Tech Solutions" value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium focus:outline-none focus:border-blue-500" />
+
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4 shrink-0 text-xs">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                <span className="font-bold text-slate-800 uppercase text-[10px] flex items-center gap-1.5">
+                  <Sliders className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Configuração Individual de Quotas & Categoria</span>
+                </span>
+                <span className="font-mono text-[10px] text-slate-500">ID: {selectedPartner.id}</span>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Código Único</label>
-                  <input type="text" required placeholder="REV-LUANDA-05" value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-mono font-bold focus:outline-none focus:border-blue-500" />
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Categoria</label>
+                  <select
+                    value={editTier}
+                    onChange={(e) => setEditTier(e.target.value as any)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold"
+                  >
+                    <option value="bronze">Bronze ({policy.tier_slots.bronze} Slots)</option>
+                    <option value="silver">Silver ({policy.tier_slots.silver} Slots)</option>
+                    <option value="gold">Gold ({policy.tier_slots.gold} Slots)</option>
+                    <option value="diamond">Diamond ({policy.tier_slots.diamond} Slots)</option>
+                  </select>
                 </div>
+
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Telefone</label>
-                  <input type="tel" placeholder="+244 923 000 000" value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium focus:outline-none focus:border-blue-500" />
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Quota Slots Crédito</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={editCreditSlots}
+                    onChange={(e) => setEditCreditSlots(Number(e.target.value) || 1)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                  />
+                </div>
+
+                <div className="flex items-end">
+                  <button
+                    onClick={async () => {
+                      setSavingFinancials(true);
+                      try {
+                        await setDoc(doc(db, 'partners', selectedPartner.id), {
+                          tier: editTier,
+                          credit_slots_limit: editCreditSlots,
+                        }, { merge: true });
+                        alert('Categoria e Quota de Slots atualizadas no Firebase!');
+                      } catch (e: any) { alert('Erro: ' + e.message); }
+                      finally { setSavingFinancials(false); }
+                    }}
+                    disabled={savingFinancials}
+                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2 rounded-xl transition-all cursor-pointer"
+                  >
+                    {savingFinancials ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto" /> : 'Atualizar Quota'}
+                  </button>
                 </div>
               </div>
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Email Comercial</label>
-                <input type="email" required placeholder="parceiro@empresa.ao" value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium focus:outline-none focus:border-blue-500" />
-              </div>
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Província</label>
-                <select value={region} onChange={(e) => setRegion(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-white font-bold focus:outline-none focus:border-blue-500">
-                  {['Luanda','Benguela','Huíla (Lubango)','Cabinda','Huambo','Cuanza Sul','Uíge','Namibe','Outra Província'].map(r => (
-                    <option key={r} value={r}>{r}</option>
-                  ))}
-                </select>
-              </div>
-              <p className="text-[11px] text-blue-700 bg-blue-50 border border-blue-200 rounded-xl p-3">
-                O parceiro paga à Kivora por cada licença que emite. Preços definidos na aba "Tabela de Preços".
-              </p>
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100">Cancelar</button>
-                <button type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20">
-                  Criar Parceiro
+
+              <div className="pt-2 border-t border-slate-200 flex items-center gap-2">
+                <div className="flex-1 space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Injetar Saldo na Carteira Pré-Paga (Kz)</label>
+                  <input
+                    type="number"
+                    step={10000}
+                    placeholder="Ex: 150000"
+                    value={topUpAmount || ''}
+                    onChange={(e) => setTopUpAmount(Number(e.target.value))}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                  />
+                </div>
+                <button
+                  onClick={async () => {
+                    if (!topUpAmount || topUpAmount <= 0) return;
+                    setSavingFinancials(true);
+                    try {
+                      const cur = selectedPartner.wallet_balance_aoa || 0;
+                      await setDoc(doc(db, 'partners', selectedPartner.id), { wallet_balance_aoa: cur + topUpAmount }, { merge: true });
+                      alert(`Saldo de ${fmt(topUpAmount)} Kz creditado na carteira!`);
+                      setTopUpAmount(0);
+                    } catch (e: any) { alert('Erro: ' + e.message); }
+                    finally { setSavingFinancials(false); }
+                  }}
+                  disabled={savingFinancials || !topUpAmount}
+                  className="mt-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer shrink-0"
+                >
+                  Recarregar Carteira
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: Dívidas do Parceiro */}
-      {selectedPartner && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{selectedPartner.code}</span>
-                <h3 className="text-base font-black text-slate-900">{selectedPartner.name}</h3>
-              </div>
-              <button onClick={() => setSelectedPartner(null)} className="text-slate-400 hover:text-slate-900"><X className="w-4 h-4" /></button>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 shrink-0">
-              {[
-                { label: 'Dívida Pendente', value: `${fmt(getPartnerPendingDebt(selectedPartner.id))} Kz`, color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200' },
-                { label: 'Total Pago', value: `${fmt(selectedPartner.total_paid_aoa || 0)} Kz`, color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' },
-                { label: 'Licenças Emitidas', value: partnerDebts.length, color: 'text-blue-700', bg: 'bg-blue-50 border-blue-200' },
-              ].map(item => (
-                <div key={item.label} className={`p-3 rounded-2xl border ${item.bg} text-center`}>
-                  <span className="text-[10px] uppercase font-bold text-slate-500 block">{item.label}</span>
-                  <span className={`font-black text-sm font-mono ${item.color}`}>{item.value}</span>
-                </div>
-              ))}
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-              <div className="flex items-center justify-between mb-2 sticky top-0 bg-white py-1 z-10">
-                <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">Licenças & Dívidas</h4>
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between sticky top-0 bg-white py-1 z-10">
+                <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Licenças Geradas ({partnerDebts.length})</h4>
+                {selectedDebtIds.length > 0 && (
                   <button
-                    onClick={() => {
-                      const headers = ['Licenca_ID', 'Empresa', 'Plano', 'Custo_Devido_Kivora_AOA', 'Cobrado_Cliente_AOA', 'Estado', 'Data'];
-                      const rows = partnerDebts.map(d => [
-                        d.license_id,
-                        `"${(d.company_name || '').replace(/"/g, '""')}"`,
-                        d.plan_type,
-                        d.cost_aoa,
-                        d.client_price_aoa,
-                        d.paid ? 'Pago' : 'Pendente',
-                        new Date(d.created_at).toISOString().split('T')[0]
-                      ]);
-                      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-                      const link = document.createElement('a');
-                      link.setAttribute('href', encodeURI(csvContent));
-                      link.setAttribute('download', `extrato_${selectedPartner.code}_${new Date().toISOString().split('T')[0]}.csv`);
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                    }}
-                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition-all"
+                    onClick={() => handleMarkPaid(selectedDebtIds)}
+                    disabled={markingPaid}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 cursor-pointer"
                   >
-                    <span>CSV</span>
+                    {markingPaid ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                    <span>Liquidar Selecionadas ({selectedDebtIds.length})</span>
                   </button>
-
-                  {selectedDebtIds.length > 0 && (
-                    <button onClick={handleMarkPaid} disabled={markingPaid}
-                      className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm">
-                      {markingPaid ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
-                      <span>Registar Pagamento ({selectedDebtIds.length})</span>
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
 
               {partnerDebts.length === 0 ? (
                 <div className="p-8 text-center text-slate-400">
-                  <DollarSign className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                  <p className="font-bold text-slate-700 text-sm">Nenhuma licença emitida</p>
-                  <p className="text-xs">Este parceiro ainda não emitiu licenças.</p>
+                  <Key className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                  <p className="text-xs">Nenhuma licença emitida por este parceiro.</p>
                 </div>
-              ) : partnerDebts.map((debt) => (
-                <label key={debt.id} className={`flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition-all ${
-                  debt.paid ? 'bg-slate-50 border-slate-100 opacity-60' :
-                  selectedDebtIds.includes(debt.id) ? 'bg-emerald-50 border-emerald-300' :
-                  'bg-white border-slate-200 hover:border-slate-300'}`}>
-                  <input type="checkbox" disabled={debt.paid}
-                    checked={selectedDebtIds.includes(debt.id)}
+              ) : partnerDebts.map((d) => (
+                <label key={d.id} className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${
+                  d.paid ? 'bg-slate-50 border-slate-100 opacity-60' :
+                  selectedDebtIds.includes(d.id) ? 'bg-emerald-50 border-emerald-300' :
+                  'bg-white border-slate-200 hover:border-slate-300'
+                }`}>
+                  <input
+                    type="checkbox"
+                    disabled={d.paid}
+                    checked={selectedDebtIds.includes(d.id)}
                     onChange={(e) => {
-                      if (e.target.checked) setSelectedDebtIds(prev => [...prev, debt.id]);
-                      else setSelectedDebtIds(prev => prev.filter(id => id !== debt.id));
+                      if (e.target.checked) setSelectedDebtIds(prev => [...prev, d.id]);
+                      else setSelectedDebtIds(prev => prev.filter(id => id !== d.id));
                     }}
-                    className="w-4 h-4 accent-emerald-600 cursor-pointer" />
+                    className="w-4 h-4 rounded accent-emerald-600"
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-[10px] font-bold text-blue-600">{debt.license_id}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                        debt.paid ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
-                        {debt.paid ? '✓ Pago' : 'Pendente'}
+                      <span className="font-mono text-xs font-bold text-blue-700">{d.license_id}</span>
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                        d.paid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                        d.is_provisional ? 'bg-amber-100 text-amber-800 border border-amber-300' :
+                        'bg-amber-50 text-amber-700 border border-amber-200'
+                      }`}>
+                        {d.paid ? '✓ Pago' : d.is_provisional ? 'Provisório (30D)' : 'Pendente'}
                       </span>
                     </div>
-                    <p className="text-xs font-bold text-slate-900 truncate">{debt.company_name}</p>
-                    <p className="text-[10px] text-slate-400">{new Date(debt.created_at).toLocaleDateString('pt-AO')} • {debt.plan_type}</p>
+                    <p className="text-xs font-bold text-slate-900 truncate mt-0.5">{d.company_name}</p>
+                    <p className="text-[10px] text-slate-400">{new Date(d.created_at).toLocaleDateString('pt-AO')} • Plano: {d.plan_type}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="font-mono font-black text-slate-900 text-xs">{fmt(debt.cost_aoa)} Kz</p>
-                    <p className="text-[10px] text-slate-400">custo Kivora</p>
-                    {debt.client_price_aoa > 0 && (
-                      <p className="text-[10px] text-emerald-600 font-bold">Venda: {fmt(debt.client_price_aoa)} Kz</p>
-                    )}
+                    <span className="font-mono font-black text-slate-900 text-xs">{fmt(d.cost_aoa)} Kz</span>
                   </div>
                 </label>
               ))}
             </div>
 
-            <div className="flex justify-end shrink-0 pt-2 border-t border-slate-100">
-              <button onClick={() => setSelectedPartner(null)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100">Fechar</button>
+            <div className="flex items-center justify-between pt-2 border-t border-slate-100 shrink-0 gap-2">
+              <button
+                onClick={() => setCertificatesPartnerModal({
+                  partnerName: selectedPartner.name,
+                  partnerCode: selectedPartner.code,
+                  tier: selectedPartner.tier,
+                  region: selectedPartner.region,
+                  email: selectedPartner.email,
+                  phone: selectedPartner.phone,
+                  createdAt: selectedPartner.createdAt,
+                })}
+                className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
+              >
+                <Award className="w-4 h-4 text-amber-200" />
+                <span>Ver Certificados Oficiais (Visual & Kivora)</span>
+              </button>
+
+              <button onClick={() => setSelectedPartner(null)} className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer">
+                Fechar
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL: Credenciais */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-black text-slate-900">Registar Novo Parceiro</h3>
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900 cursor-pointer"><X className="w-5 h-5" /></button>
+            </div>
+            <form onSubmit={handleAddPartner} className="space-y-4 text-xs">
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase">Nome da Empresa / Revendedor</label>
+                <input type="text" required placeholder="Ex: Luanda Softwares, Lda." value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium focus:outline-none focus:border-blue-500" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 uppercase">Código Único (PRT)</label>
+                  <input type="text" required placeholder="Ex: PRT-LUA-01" value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-mono font-bold focus:outline-none focus:border-blue-500 uppercase" />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 uppercase">Categoria Inicial</label>
+                  <select
+                    value={newPartnerTier}
+                    onChange={(e) => setNewPartnerTier(e.target.value as any)}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 bg-slate-50 font-bold"
+                  >
+                    <option value="bronze">Bronze ({policy.tier_slots.bronze} Slots)</option>
+                    <option value="silver">Silver ({policy.tier_slots.silver} Slots)</option>
+                    <option value="gold">Gold ({policy.tier_slots.gold} Slots)</option>
+                    <option value="diamond">Diamond ({policy.tier_slots.diamond} Slots)</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase">Email de Acesso</label>
+                <input type="email" required placeholder="parceiro@empresa.ao" value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium focus:outline-none focus:border-blue-500" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 uppercase">Telefone / WhatsApp</label>
+                  <input type="text" placeholder="+244 923 000 000" value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium focus:outline-none focus:border-blue-500" />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 uppercase">Província</label>
+                  <input type="text" placeholder="Luanda" value={region}
+                    onChange={(e) => setRegion(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium focus:outline-none focus:border-blue-500" />
+                </div>
+              </div>
+              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3 rounded-xl shadow-md transition-all cursor-pointer">
+                Registar & Ativar Acesso
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {credentialsModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 animate-fadeIn">
@@ -599,11 +1221,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><Key className="w-5 h-5" /></div>
                 <div>
-                  <h3 className="text-base font-black text-slate-900">Acesso de Parceiro Ativado!</h3>
+                  <h3 className="text-base font-black text-slate-900">Acesso de Parceiro Homologado!</h3>
                   <p className="text-xs text-slate-500">Credenciais gravadas no Firebase</p>
                 </div>
               </div>
-              <button onClick={() => setCredentialsModal(null)} className="text-slate-400 hover:text-slate-900"><X className="w-5 h-5" /></button>
+              <button onClick={() => setCredentialsModal(null)} className="text-slate-400 hover:text-slate-900 cursor-pointer"><X className="w-5 h-5" /></button>
             </div>
             <div className="bg-slate-950 text-white rounded-2xl p-5 space-y-3 font-mono text-xs select-all border border-slate-800">
               {([
@@ -623,7 +1245,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               <button onClick={() => {
                 navigator.clipboard.writeText(`🎉 Portal Parceiro KIVORA\n\n👤 ${credentialsModal.email}\n🔑 ${credentialsModal.password}\n🏷️ ${credentialsModal.partnerCode}\n🌐 https://kivora.ao/#login`);
                 setCopiedCredentials(true); setTimeout(() => setCopiedCredentials(false), 2500);
-              }} className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all">
+              }} className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                 {copiedCredentials ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                 <span>{copiedCredentials ? 'Copiado!' : 'Copiar Mensagem'}</span>
               </button>
@@ -635,12 +1257,39 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 </a>
               )}
             </div>
-            <button onClick={() => setCredentialsModal(null)}
-              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">
-              Concluir & Fechar
-            </button>
+
+            <div className="pt-2 border-t border-slate-100 flex gap-2">
+              <button
+                onClick={() => {
+                  setCertificatesPartnerModal({
+                    partnerName: credentialsModal.partnerName,
+                    partnerCode: credentialsModal.partnerCode,
+                    email: credentialsModal.email,
+                    phone: credentialsModal.phone,
+                    tier: 'bronze',
+                    createdAt: Date.now(),
+                  });
+                }}
+                className="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <Award className="w-4 h-4 text-amber-200" />
+                <span>Emitir Certificados Oficiais</span>
+              </button>
+              <button onClick={() => setCredentialsModal(null)}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer">
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
+      )}
+
+      {/* Render do Modal de Certificados Oficiais */}
+      {certificatesPartnerModal && (
+        <PartnerOfficialCertificatesModal
+          partner={certificatesPartnerModal}
+          onClose={() => setCertificatesPartnerModal(null)}
+        />
       )}
     </div>
   );

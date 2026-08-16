@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { KivoraLogo } from './KivoraLogo';
 import { PageId } from './Header';
-import { Phone, Mail, MapPin, ShieldCheck, Download, GitBranch } from 'lucide-react';
+import { Phone, Mail, MapPin, ShieldCheck, Download } from 'lucide-react';
 import { subscribeSystemSettings, getCachedSystemSettings, SystemCompanySettings } from '../services/systemSettingsService';
 
 interface FooterProps {
@@ -26,7 +26,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
   };
 
   return (
-    <footer className="bg-slate-950 text-slate-300 border-t border-slate-800 text-xs">
+    <footer className="bg-slate-950 text-slate-300 border-t border-slate-800 text-xs print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
 
@@ -37,7 +37,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
             </div>
 
             <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
-              {settings.fullName}. Software certificado pela AGT para emissão local de documentos comerciais e conformidade com o Decreto Presidencial n.º 71/25.
+              {settings.fullName}. Software certificado para emissão local de documentos fiscais e conformidade integral com o Decreto Presidencial n.º 71/25 da República de Angola.
             </p>
 
             <div className="flex items-center gap-2 p-3 bg-slate-900 rounded-xl border border-slate-800 text-slate-300 w-fit">
@@ -54,8 +54,8 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
             <ul className="space-y-2">
               <li>
                 <a
-                  href="#funcionalidades"
-                  onClick={(e) => handleLinkClick(e, 'funcionalidades')}
+                  href="#faturacao"
+                  onClick={(e) => handleLinkClick(e, 'faturacao')}
                   className="hover:text-white transition-colors"
                 >
                   Faturação Eletrónica AGT
@@ -64,7 +64,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
               <li>
                 <a
                   href="#pos"
-                  onClick={(e) => handleLinkClick(e, 'funcionalidades')}
+                  onClick={(e) => handleLinkClick(e, 'pos')}
                   className="hover:text-white transition-colors"
                 >
                   Ponto de Venda (POS) Local
@@ -72,11 +72,29 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
               </li>
               <li>
                 <a
-                  href="#solucoes"
-                  onClick={(e) => handleLinkClick(e, 'solucoes')}
+                  href="#stock"
+                  onClick={(e) => handleLinkClick(e, 'stock')}
                   className="hover:text-white transition-colors"
                 >
-                  Modo Rede Local (LAN)
+                  Stock & Armazéns
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#rh"
+                  onClick={(e) => handleLinkClick(e, 'rh')}
+                  className="hover:text-white transition-colors"
+                >
+                  Recursos Humanos & IRT 2026
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#setores"
+                  onClick={(e) => handleLinkClick(e, 'setores')}
+                  className="hover:text-white transition-colors text-blue-400 font-semibold"
+                >
+                  Soluções por Setor de Atividade
                 </a>
               </li>
               <li>
@@ -100,11 +118,20 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
             <ul className="space-y-2">
               <li>
                 <a
+                  href="#sobre"
+                  onClick={(e) => handleLinkClick(e, 'sobre')}
+                  className="hover:text-white transition-colors"
+                >
+                  Sobre a Visual Software
+                </a>
+              </li>
+              <li>
+                <a
                   href="#planos"
                   onClick={(e) => handleLinkClick(e, 'planos')}
                   className="hover:text-white transition-colors"
                 >
-                  Licenças e Preços
+                  Licenças e Preços (Simulador)
                 </a>
               </li>
               <li>
@@ -118,35 +145,32 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
               </li>
               <li>
                 <a
-                  href="#recursos"
-                  onClick={(e) => handleLinkClick(e, 'recursos')}
+                  href="#candidatura-parceiro"
+                  onClick={(e) => handleLinkClick(e, 'candidatura-parceiro')}
                   className="hover:text-white transition-colors"
                 >
-                  Base de Conhecimento
+                  Candidatura de Distribuidor
                 </a>
               </li>
               <li>
                 <a
-                  href="#suporte"
-                  onClick={(e) => handleLinkClick(e, 'suporte')}
+                  href="#noticias"
+                  onClick={(e) => handleLinkClick(e, 'noticias')}
                   className="hover:text-white transition-colors"
                 >
-                  Suporte Técnico
+                  Notícias & Legislação AGT
                 </a>
               </li>
-              {settings.githubUrl && (
-                <li>
-                  <a
-                    href={settings.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-white transition-colors flex items-center gap-1.5 text-slate-400"
-                  >
-                    <GitBranch className="w-3.5 h-3.5" />
-                    <span>Repositório GitHub</span>
-                  </a>
-                </li>
-              )}
+              <li>
+                <a
+                  href="#validar-licenca"
+                  onClick={(e) => handleLinkClick(e, 'validar-licenca')}
+                  className="hover:text-white text-emerald-400 font-bold transition-colors flex items-center gap-1.5"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Validar Licença AGT</span>
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -168,8 +192,8 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
                   {settings.email}
                 </a>
               </li>
-              <li className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-blue-400 shrink-0" strokeWidth={1.75} />
+              <li className="flex items-start gap-2">
+                <MapPin className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" strokeWidth={1.75} />
                 <span>{settings.address}</span>
               </li>
             </ul>

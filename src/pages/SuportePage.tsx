@@ -25,14 +25,12 @@ export const SuportePage: React.FC<SuportePageProps> = () => {
   return (
     <div className="min-h-screen bg-white text-slate-900 page-enter">
 
-      <div className="pt-16">
-        <PageHero
-          image="/imagens/imagem2.png"
-          tag="Suporte Técnico"
-          title="Estamos aqui para ajudar"
-          sub="Equipa técnica disponível para instalações, configurações de rede local e resolução de problemas."
-        />
-      </div>
+      <PageHero
+        image="/imagens/2148708903.jpg"
+        tag="Suporte Técnico"
+        title="Estamos aqui para ajudar"
+        sub="Equipa técnica disponível para instalações, configurações de rede local e resolução de problemas."
+      />
 
       <section className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16 py-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

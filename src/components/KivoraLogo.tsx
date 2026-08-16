@@ -16,35 +16,25 @@ export const KivoraLogo: React.FC<KivoraLogoProps> = ({
   useOfficialImage = true,
 }) => {
   const sizeMap = {
-    sm: { height: 'h-7', text: 'text-lg', subText: 'text-[9px]' },
-    md: { height: 'h-9 md:h-10', text: 'text-xl md:text-2xl', subText: 'text-[9px] md:text-[10px]' },
-    lg: { height: 'h-12 md:h-14', text: 'text-2xl md:text-3xl', subText: 'text-[11px]' },
-    xl: { height: 'h-16 md:h-20', text: 'text-3xl md:text-4xl', subText: 'text-xs' },
+    sm: { height: 'h-8 sm:h-9', text: 'text-lg', subText: 'text-[9px]' },
+    md: { height: 'h-11 sm:h-12 md:h-14', text: 'text-xl md:text-2xl', subText: 'text-[10px] md:text-[11px]' },
+    lg: { height: 'h-14 sm:h-16 md:h-20', text: 'text-2xl md:text-3xl', subText: 'text-xs' },
+    xl: { height: 'h-20 sm:h-24 md:h-28', text: 'text-3xl md:text-4xl', subText: 'text-sm' },
   };
 
   const currentSize = sizeMap[size];
-  const textColor = variant === 'white' ? 'text-white' : 'text-[#0B192C]';
-  const subTextColor = variant === 'white' ? 'text-blue-200' : 'text-slate-500';
+  const textColor = variant === 'white' ? 'text-white' : 'text-slate-900';
+  const subTextColor = variant === 'white' ? 'text-slate-300' : 'text-slate-500';
 
   if (useOfficialImage) {
-    const logoSrc = variant === 'white' ? '/imagens/logo_sem_fundo.png' : '/imagens/logo_kivora.png';
     return (
-      <div className={`flex items-center gap-3 select-none ${className}`}>
+      <div className={`flex items-center gap-2 select-none ${className}`}>
+        {/* Transparent Official Logo - No awkward white box */}
         <img
-          src={logoSrc}
-          alt="Kivora Logo"
+          src="/imagens/logo_sem_fundo.png"
+          alt="Kivora ERP"
           className={`${currentSize.height} w-auto object-contain transition-transform duration-300 group-hover:scale-105`}
         />
-        {showText && (
-          <div className="flex flex-col">
-            <span className={`font-extrabold ${textColor} ${currentSize.text} tracking-wider font-sans leading-none flex items-center`}>
-              KIVOR<span className="text-[#F59E0B]">A</span>
-            </span>
-            <span className={`${subTextColor} ${currentSize.subText} font-semibold uppercase tracking-[0.2em] leading-none mt-1`}>
-              Gestão & Faturação AGT
-            </span>
-          </div>
-        )}
       </div>
     );
   }
@@ -53,12 +43,12 @@ export const KivoraLogo: React.FC<KivoraLogoProps> = ({
     <div className={`flex items-center gap-2.5 select-none ${className}`}>
       {/* Kivora Emblem 'K' Icon */}
       <svg
-        width={size === 'sm' ? 32 : size === 'md' ? 40 : size === 'lg' ? 52 : 64}
-        height={size === 'sm' ? 28 : size === 'md' ? 36 : size === 'lg' ? 46 : 56}
+        width={size === 'sm' ? 28 : size === 'md' ? 36 : size === 'lg' ? 44 : 54}
+        height={size === 'sm' ? 28 : size === 'md' ? 36 : size === 'lg' ? 44 : 54}
         viewBox="0 0 200 180"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="transition-transform duration-300 group-hover:scale-105 flex-shrink-0"
+        className="transition-transform duration-300 group-hover:scale-105 shrink-0"
       >
         <defs>
           <linearGradient id="kivoraBlueStem" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -102,14 +92,14 @@ export const KivoraLogo: React.FC<KivoraLogoProps> = ({
 
       {showText && (
         <div className="flex flex-col">
-          <div className={`font-extrabold ${textColor} ${currentSize.text} tracking-wider font-sans leading-none flex items-center`}>
+          <div className={`font-black ${textColor} ${currentSize.text} tracking-tight font-sans leading-none flex items-center`}>
             <span>KIVOR</span>
             <span className="relative inline-block ml-[1px]">
               A
-              <span className="absolute bottom-[2px] left-[32%] border-l-[3.5px] border-l-transparent border-r-[3.5px] border-r-transparent border-b-[6px] border-b-[#F59E0B]"></span>
+              <span className="absolute bottom-[2px] left-[32%] border-l-[3px] border-l-transparent border-r-[3px] border-r-transparent border-b-[5px] border-b-[#F59E0B]"></span>
             </span>
           </div>
-          <span className={`${subTextColor} ${currentSize.subText} font-semibold uppercase tracking-[0.2em] leading-none mt-1`}>
+          <span className={`${subTextColor} ${currentSize.subText} font-semibold uppercase tracking-[0.18em] leading-none mt-1`}>
             Gestão & Faturação AGT
           </span>
         </div>

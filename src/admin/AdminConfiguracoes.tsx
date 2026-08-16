@@ -52,7 +52,7 @@ const INITIAL_RELEASES: UpdateRelease[] = [
     version: '1.2.0-beta.1',
     channel: 'beta',
     releaseDate: '2026-07-12',
-    changelog: 'Integração inicial com novo motor de IA fiscal AGT e impressão térmica de 58mm customizável.\nTeste de stress para modo multiloja com mais de 20 terminais simultâneos.',
+    changelog: 'Integração inicial com novo motor de validação fiscal AGT e impressão térmica de 58mm customizável.\nTeste de stress para modo multiloja com mais de 20 terminais simultâneos.',
     downloadUrl: 'https://cdn.kivora.ao/releases/v1.2.0-beta.1/KIVORA_1.2.0_beta.exe',
     mandatory: false,
     rolloutPercentage: 35,

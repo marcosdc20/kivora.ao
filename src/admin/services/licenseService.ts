@@ -67,6 +67,8 @@ export async function createLicense(params: CreateLicenseParams): Promise<Kivora
     partner_id: params.partner_id ?? undefined,
     activated_at: null,
     extra_seats: params.extra_seats ?? 0,
+    is_provisional: params.is_provisional ?? false,
+    provisional_target_plan: params.provisional_target_plan,
   };
 
   await setDoc(doc(db, 'licenses', key), {
@@ -77,6 +79,26 @@ export async function createLicense(params: CreateLicenseParams): Promise<Kivora
   });
 
   return data;
+}
+
+/** Promove uma licença provisória para definitiva após confirmação de liquidação */
+export async function promoteProvisionalLicenseToDefinitive(licenseId: string, targetPlan?: PlanType): Promise<void> {
+  const lRef = doc(db, 'licenses', licenseId);
+  const snap = await getDoc(lRef);
+  if (!snap.exists()) return;
+
+  const data = snap.data();
+  const finalPlan = targetPlan || data.provisional_target_plan || data.plan_type || 'annual';
+  const definitiveExpiresAt = calculateExpiresAt(finalPlan);
+
+  await updateDoc(lRef, {
+    is_provisional: false,
+    plan_type: finalPlan,
+    expires_at: definitiveExpiresAt,
+    _expires_at_ts: definitiveExpiresAt ? Timestamp.fromMillis(definitiveExpiresAt) : null,
+    notes: (data.notes || '').replace(/\[PROVISÓRIA.*?\]\s*/g, '') + ` [LIQUIDADO E DEFINITIVO EM ${new Date().toLocaleDateString('pt-AO')}]`,
+    updated_at: Date.now(),
+  });
 }
 
 /** Lista todas as licenças do Firebase Firestore */

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
-import { ArrowRight, FileText, Video, BookOpen, Download, X, Sparkles } from 'lucide-react';
+import { ArrowRight, FileText, Video, BookOpen, Download, X, Sparkles, Search } from 'lucide-react';
 import { PageId } from '../components/Header';
 import { CURRENT_RELEASE } from '../data/kivoraData';
 
@@ -36,6 +36,7 @@ function useScrollReveal() {
 export const RecursosPage: React.FC<RecursosPageProps> = ({ onNavigatePage }) => {
   useScrollReveal();
   const [selectedResource, setSelectedResource] = useState<ResourceItem | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const resources: ResourceItem[] = [
     {
@@ -140,42 +141,81 @@ export const RecursosPage: React.FC<RecursosPageProps> = ({ onNavigatePage }) =>
   return (
     <div className="min-h-screen bg-white text-slate-900 page-enter">
 
-      <div className="pt-16">
-        <PageHero
-          image="/imagens/pacote.png"
-          tag="Centro de Recursos"
-          title="Documentação, tutoriais e guias de conformidade"
-          sub="Tudo o que precisa para instalar, configurar e tirar o máximo partido do KIVORA."
-        />
-      </div>
+      <PageHero
+        image="/imagens/2149153824.jpg"
+        tag="Centro de Recursos"
+        title="Documentação, tutoriais e guias de conformidade"
+        sub="Tudo o que precisa para instalar, configurar e tirar o máximo partido do KIVORA."
+      />
 
-      <section className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16 py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {resources.map((res, i) => (
-            <div
-              key={i}
-              data-reveal
-              onClick={() => setSelectedResource(res)}
-              className="sr-init bg-white border border-slate-200 rounded-3xl p-7 flex flex-col gap-4 hover:border-blue-400/40 hover:shadow-lg transition-all group cursor-pointer"
-              style={{ transitionDelay: `${Math.min(i, 4) * 70}ms` }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                  {res.icon}
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{res.category}</span>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-black text-slate-950 mb-2 leading-snug group-hover:text-blue-600 transition-colors">{res.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">{res.desc}</p>
-              </div>
-              <button className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 group/btn transition-colors self-start cursor-pointer">
-                <span>{res.action}</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" strokeWidth={2} />
+      <section className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16 py-16 space-y-10">
+        
+        {/* Barra de Pesquisa Rápida */}
+        <div className="max-w-xl mx-auto">
+          <div className="relative">
+            <Search className="w-5 h-5 text-slate-400 absolute left-4 top-3.5" />
+            <input
+              type="text"
+              placeholder="Pesquisar guias, tutoriais, SAF-T, impressoras, AGT..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white shadow-xs transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3.5 top-3.5 text-xs text-slate-400 hover:text-slate-600 font-bold bg-slate-200 hover:bg-slate-300 w-5 h-5 rounded-full flex items-center justify-center cursor-pointer"
+              >
+                ×
               </button>
-            </div>
-          ))}
+            )}
+          </div>
         </div>
+
+        {/* Grelha de Recursos */}
+        {resources.filter(r => 
+          r.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          r.desc.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          r.category.toLowerCase().includes(searchQuery.toLowerCase())
+        ).length === 0 ? (
+          <div className="text-center py-12 text-slate-400 text-xs">
+            <p className="font-bold text-slate-700 text-sm">Nenhum guia encontrado para "{searchQuery}"</p>
+            <p className="mt-1">Tente pesquisar por termos como "instalação", "SAF-T", "faturação" ou "AGT".</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {resources
+              .filter(r => 
+                r.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                r.desc.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                r.category.toLowerCase().includes(searchQuery.toLowerCase())
+              )
+              .map((res, i) => (
+                <div
+                  key={i}
+                  data-reveal
+                  onClick={() => setSelectedResource(res)}
+                  className="sr-init bg-white border border-slate-200 rounded-3xl p-7 flex flex-col gap-4 hover:border-blue-400/40 hover:shadow-lg transition-all group cursor-pointer"
+                  style={{ transitionDelay: `${Math.min(i, 4) * 70}ms` }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                      {res.icon}
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{res.category}</span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-black text-slate-950 mb-2 leading-snug group-hover:text-blue-600 transition-colors">{res.title}</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed">{res.desc}</p>
+                  </div>
+                  <button className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 group/btn transition-colors self-start cursor-pointer">
+                    <span>{res.action}</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" strokeWidth={2} />
+                  </button>
+                </div>
+              ))}
+          </div>
+        )}
       </section>
 
       {/* Resource Guide Reader Modal */}

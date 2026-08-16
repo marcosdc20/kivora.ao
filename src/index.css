@@ -112,12 +112,9 @@
 .page-hero {
   position: relative;
   width: 100%;
-  height: 52vh;
-  min-height: 340px;
-  max-height: 520px;
-  overflow: hidden;
+  min-height: 380px;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
 }
 
 .page-hero img {
@@ -137,13 +134,13 @@
 .page-hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.30) 60%, rgba(0,0,0,0.10) 100%);
+  background: linear-gradient(to top, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.65) 60%, rgba(15,23,42,0.40) 100%);
 }
 
 .page-hero-content {
   position: relative;
   z-index: 10;
-  padding: 2.5rem 2rem 3rem;
+  padding: 2rem 1.5rem;
   width: 100%;
   max-width: 80rem;
   margin: 0 auto;
@@ -217,3 +214,53 @@
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ================================================================
+   PRINT STYLESHEET — Impressão e Exportação PDF do Certificado A4
+   ================================================================ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 6mm;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 10pt !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Oculta tudo que não for o certificado */
+  .no-print,
+  header,
+  footer,
+  nav,
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Ajusta o container do certificado para preencher 1 página A4 */
+  .certificate-page-wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+    background: transparent !important;
+  }
+
+  .certificate-document {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 20px 24px !important;
+    box-shadow: none !important;
+    border: 2px solid #0f172a !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    border-radius: 12px !important;
+  }
+}
+

@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import {
   TrendingUp, Shield, CheckCircle2, AlertCircle,
-  Ban, RotateCcw, Key, Loader2, Users, Wallet, TrendingDown
+  Ban, RotateCcw, Key, Users, Wallet, TrendingDown
 } from 'lucide-react';
 import { useLicenses } from './hooks/useFirebase';
 import { FirebaseAuthModal } from './components/FirebaseAuthModal';
@@ -79,8 +79,8 @@ export const AdminDashboard: React.FC = () => {
   if (loading && licenses.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center py-24 text-slate-500 bg-slate-50">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-4" />
-        <p className="font-bold text-xs">A carregar métricas em tempo real do Firebase...</p>
+        <div className="w-8 h-8 rounded-full border-[2.5px] border-slate-200 border-t-amber-500 border-r-amber-500 animate-spin mb-3" />
+        <p className="font-semibold text-xs text-slate-500">A carregar dados do painel...</p>
       </div>
     );
   }
@@ -89,7 +89,7 @@ export const AdminDashboard: React.FC = () => {
     <div className="flex-1 overflow-y-auto bg-slate-50 flex flex-col w-full min-w-0 font-sans">
       <AdminTopbar
         title="Painel de Gestão & Controlo"
-        subtitle="Métricas em tempo real da base de dados Firebase (faturasimples)"
+        subtitle="Métricas em tempo real de licenças, clientes, parceiros e faturamento"
         actions={
           <button
             onClick={() => refresh()}

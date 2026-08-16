@@ -18,31 +18,31 @@ interface HeroCarouselProps {
 
 const SLIDES: SlideProps[] = [
   {
-    image: '/imagens/imagem.png',
+    image: '/imagens/46908.jpg',
     tagline: 'Faturação Eletrónica Certificada AGT',
     headline: 'Emita faturas legais\nem Angola, sem papel,\nsem complicações.',
     sub: 'Conformidade total com DS.120, QR Code e assinatura digital RS256 homologados pela AGT.',
     cta: { label: 'Baixar KIVORA Grátis', action: 'download' },
     align: 'left',
-    overlay: 'from-black/80 via-black/50 to-transparent',
+    overlay: 'from-black/85 via-black/55 to-transparent',
   },
   {
-    image: '/imagens/imagem2.png',
+    image: '/imagens/13608.jpg',
     tagline: 'Ponto de Venda — POS de Balcão',
     headline: 'Vendas mais rápidas.\nFecho de caixa\nsem erros.',
     sub: 'Impressão térmica de talões, gestão de turno e integração multicaixa num único sistema.',
     cta: { label: 'Ver Demonstração', action: 'demo' },
     align: 'left',
-    overlay: 'from-black/80 via-black/50 to-transparent',
+    overlay: 'from-black/85 via-black/55 to-transparent',
   },
   {
-    image: '/imagens/servidor.png',
+    image: '/imagens/136227.jpg',
     tagline: 'Rede Local LAN — Multi-Postos',
     headline: 'Um sistema para toda\na sua empresa,\nsem depender da internet.',
     sub: 'Ligue caixas, gerência e armazém na mesma rede local. Dados 100% na sua empresa.',
     cta: { label: 'Conhecer Soluções', action: 'demo' },
     align: 'left',
-    overlay: 'from-black/80 via-black/50 to-transparent',
+    overlay: 'from-black/85 via-black/55 to-transparent',
   },
 ];
 
@@ -99,7 +99,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
           <img
             src={s.image}
             alt={s.headline}
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-cover object-[center_top]"
           />
           {/* Overlay escuro */}
           <div className={`absolute inset-0 bg-gradient-to-r ${s.overlay}`} />
@@ -108,8 +108,8 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
         </div>
       ))}
 
-      {/* Conteúdo do Slide */}
-      <div className="relative z-10 h-full flex items-center">
+      {/* Conteúdo do Slide com espaçamento para Navbar Fixa */}
+      <div className="relative z-10 h-full flex items-center pt-24 sm:pt-28 pb-16">
         <div className={`max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 w-full ${slide.align === 'center' ? 'text-center' : 'text-left'}`}>
           <div
             key={current}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle, Send, Building, Phone, Mail, User, ShieldCheck, Sparkles, MessageCircle, Loader2 } from 'lucide-react';
+import { X, CheckCircle, Send, Building, Phone, Mail, User, ShieldCheck, MessageCircle, Loader2, Sparkles, Monitor } from 'lucide-react';
 import { KIVORA_INFO } from '../data/kivoraData';
 import { db } from '../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
@@ -26,7 +26,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
     businessSector: 'Comércio / Retalho',
     storesCount: '1 Loja',
     interestedModule: initialModule || 'Faturação Eletrónica AGT + POS',
-    installationMode: 'Kivora Cloud (Nuvem)',
+    installationMode: 'KIVORA Standalone (1 Posto Local)',
     notes: '',
   });
 
@@ -61,50 +61,52 @@ export const DemoModal: React.FC<DemoModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-fadeIn">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-100 relative">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 relative animate-scaleUp">
         
-        {/* Header Banner */}
-        <div className="bg-gradient-to-r from-[#0B192C] via-[#1E40AF] to-[#2563EB] p-6 text-white relative">
+        {/* Header - Sleek Kivora Slate Theme */}
+        <div className="bg-slate-950 p-6 sm:p-8 text-white relative border-b border-slate-800">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-white/80 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors"
+            aria-label="Fechar"
+            className="absolute top-5 right-5 text-slate-400 hover:text-white p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 transition-all cursor-pointer"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
           
-          <div className="flex items-center gap-2 text-amber-400 text-xs font-extrabold uppercase tracking-widest mb-1">
-            <Sparkles className="w-4 h-4" />
-            <span>Demonstração Gratuita Kivora ERP</span>
+          <div className="inline-flex items-center gap-1.5 text-blue-400 text-xs font-black uppercase tracking-widest bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-full mb-3">
+            <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+            <span>Demonstração Oficial Kivora ERP</span>
           </div>
           
-          <h3 className="text-2xl font-black tracking-tight">
+          <h3 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
             Solicite uma Apresentação Personalizada
           </h3>
-          <p className="text-blue-100 text-sm mt-1">
-            Descubra como o Kivora simplifica a Faturação AGT, Controlo de Stock e Gestão Financeira da sua empresa.
+          <p className="text-slate-400 text-xs sm:text-sm mt-2 max-w-xl leading-relaxed">
+            Descubra como o KIVORA simplifica a Faturação AGT, Controlo de Stock e Gestão Financeira da sua empresa.
           </p>
         </div>
 
         {/* Content Body */}
-        <div className="p-6 md:p-8 max-h-[80vh] overflow-y-auto">
+        <div className="p-6 sm:p-8 max-h-[75vh] overflow-y-auto">
           {submitted ? (
-            <div className="text-center py-6 space-y-4">
-              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-                <CheckCircle className="w-10 h-10" />
+            <div className="text-center py-6 space-y-5">
+              <div className="w-16 h-16 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
+                <CheckCircle className="w-9 h-9" />
               </div>
-              <h4 className="text-2xl font-bold text-slate-800">
-                Pedido Enviado com Sucesso!
-              </h4>
-              <p className="text-slate-600 max-w-md mx-auto text-sm leading-relaxed">
-                Obrigado pelo seu interesse no <strong>Kivora ERP</strong>. A sua solicitação foi registada na nossa base de dados e um dos nossos consultores fiscais entrará em contacto dentro de poucas horas.
-              </p>
+              <div>
+                <h4 className="text-2xl font-black text-slate-900">
+                  Pedido Enviado com Sucesso!
+                </h4>
+                <p className="text-slate-600 max-w-md mx-auto text-xs sm:text-sm leading-relaxed mt-2">
+                  Obrigado pelo seu interesse no <strong>KIVORA ERP</strong>. A sua solicitação foi registada e um dos nossos consultores entrará em contacto muito em breve.
+                </p>
+              </div>
               
-              <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 text-xs text-blue-900 max-w-md mx-auto space-y-1 text-left">
-                <p className="font-bold text-sm text-blue-950 mb-1">Acompanhamento e Apoio Direto:</p>
-                <p>• <strong>Telefone:</strong> {KIVORA_INFO.phoneDisplay}</p>
-                <p>• <strong>Email Comercial:</strong> {KIVORA_INFO.email}</p>
-                <p>• <strong>Sede:</strong> {KIVORA_INFO.address}</p>
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-700 max-w-md mx-auto space-y-1.5 text-left">
+                <p className="font-bold text-xs text-slate-900 mb-1">Apoio Direto da Visual Software:</p>
+                <p className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-blue-600" /> <span>{KIVORA_INFO.phoneDisplay}</span></p>
+                <p className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-blue-600" /> <span>{KIVORA_INFO.email}</span></p>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
@@ -112,119 +114,122 @@ export const DemoModal: React.FC<DemoModalProps> = ({
                   href={getWhatsAppLink()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg shadow-emerald-600/25 transition-all text-xs"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-emerald-600/20 transition-all text-xs"
                 >
                   <MessageCircle className="w-4 h-4" />
                   <span>Conversar no WhatsApp Agora</span>
                 </a>
                 <button
                   onClick={handleReset}
-                  className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg transition-all text-xs cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-colors cursor-pointer"
                 >
-                  Concluir
+                  Fechar Janela
                 </button>
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+              {/* Linha 1: Empresa & NIF */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                     Nome da Empresa / Negócio *
                   </label>
                   <div className="relative">
-                    <Building className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
+                    <Building className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                     <input
                       type="text"
                       required
                       placeholder="Ex: Comercial Luanda Lda"
                       value={formData.companyName}
                       onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                     NIF da Empresa (Opcional)
                   </label>
                   <div className="relative">
-                    <ShieldCheck className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
+                    <ShieldCheck className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                     <input
                       type="text"
                       placeholder="Ex: 5412345678"
                       value={formData.nif}
                       onChange={(e) => setFormData({ ...formData, nif: e.target.value })}
-                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+              {/* Linha 2: Responsável & Telefone */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                     Seu Nome *
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
+                    <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                     <input
                       type="text"
                       required
-                      placeholder="Nome completo"
+                      placeholder="Nome completo do responsável"
                       value={formData.contactName}
                       onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
-                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                     Telefone / WhatsApp *
                   </label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
+                    <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                     <input
                       type="tel"
                       required
                       placeholder="+244 9XX XXX XXX"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
                     />
                   </div>
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+              {/* Linha 3: Email Corporativo & Ramo */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                     Email Corporativo *
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                     <input
                       type="email"
                       required
                       placeholder="seuemail@empresa.ao"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
                     />
                   </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                     Ramo de Atividade
                   </label>
                   <select
                     value={formData.businessSector}
                     onChange={(e) => setFormData({ ...formData, businessSector: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all cursor-pointer"
                   >
                     <option value="Comércio / Retalho">Comércio / Retalho / Loja</option>
                     <option value="Supermercado / Mercearia">Supermercado / Mercearia</option>
@@ -235,48 +240,52 @@ export const DemoModal: React.FC<DemoModalProps> = ({
                     <option value="Outro">Outro Ramo</option>
                   </select>
                 </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Modalidade de Instalação Preferida
-                  </label>
-                  <select
-                    value={formData.installationMode}
-                    onChange={(e) => setFormData({ ...formData, installationMode: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                  >
-                    <option value="Kivora Cloud (Nuvem)">Kivora Cloud (Nuvem AGT)</option>
-                    <option value="Kivora Desktop (Local / Disco)">Kivora Desktop (Local / Com Disco)</option>
-                    <option value="Arquitetura Híbrida (Multiloja)">Arquitetura Híbrida (POS Local + Nuvem)</option>
-                  </select>
-                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+              {/* Linha 4: Modalidade de Instalação */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <Monitor className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Modalidade de Instalação Preferida</span>
+                </label>
+                <select
+                  value={formData.installationMode}
+                  onChange={(e) => setFormData({ ...formData, installationMode: e.target.value })}
+                  className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all cursor-pointer"
+                >
+                  <option value="KIVORA Standalone (1 Posto Local)">KIVORA Standalone (Instalação Local / 1 Posto)</option>
+                  <option value="KIVORA Rede Local LAN (Multi-Postos)">KIVORA Rede Local LAN (Múltiplos Postos / Servidor)</option>
+                  <option value="Solução Personalizada / Grande Empresa">Solução Personalizada / Múltiplas Lojas</option>
+                </select>
+              </div>
+
+              {/* Linha 5: Mensagem */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                   Mensagem ou Requisitos Específicos (Opcional)
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Ex: Gostaria de saber mais sobre a integração com a AGT e migração de dados de outro sistema..."
+                  placeholder="Ex: Gostaria de saber mais sobre a integração com a AGT e migração de dados..."
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all resize-none"
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-100">
+              {/* Botões do Rodapé */}
+              <div className="pt-3 flex items-center justify-end gap-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-5 py-2.5 text-slate-600 hover:text-slate-900 font-bold text-sm"
+                  className="px-5 py-3 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-bold text-xs sm:text-sm transition-all cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 text-white font-extrabold px-6 py-2.5 rounded-xl shadow-lg shadow-blue-500/25 transition-all duration-200 flex items-center gap-2 cursor-pointer"
+                  className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-xs sm:text-sm px-7 py-3 rounded-xl shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 hover:-translate-y-0.5 transition-all flex items-center gap-2 cursor-pointer"
                 >
                   {submitting ? (
                     <>

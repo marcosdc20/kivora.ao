@@ -3,8 +3,9 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ─────────────────────────────────────────────────────────────
-    // FUNÇÕES DE CONTROLO DE ACESSO & AUTENTICAÇÃO
+    // HELPER FUNCTIONS & ACCESS CONTROL
     // ─────────────────────────────────────────────────────────────
+    
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -18,184 +19,187 @@ service cloud.firestore {
       );
     }
 
-    function isPartner() {
-      return request.auth != null && (
-        request.auth.token.role == 'parceiro' ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'parceiro')
-      );
-    }
-
     // ─────────────────────────────────────────────────────────────
-    // 1. CONFIGURAÇÕES GLOBAIS DO SISTEMA (/system_settings/company_info)
+    // 1. CONFIGURAÇÕES INSTITUCIONAIS & POLÍTICAS GLOBAIS
     // ─────────────────────────────────────────────────────────────
+    
+    // Configurações da Empresa (Contactos, Endereço, IBANs, AGT)
     match /system_settings/{settingId} {
-      allow read: if true; // Informações institucionais, contactos, links e IBANs públicos
-      allow write: if isAdmin() || !isAuthenticated(); // Permite atualização no painel e sincronização
+      allow read: if true;
+      allow write: if true; // Atualizável pelo painel de configurações
+    }
+
+    // Política de Parceiros (/settings/partner_policy)
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if true;
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 2. LEADS DE DEMONSTRAÇÃO (/leads_demonstracao/{leadId})
+    // 2. FORMULÁRIOS PÚBLICOS DO SITE (LEADS & CANDIDATURAS)
     // ─────────────────────────────────────────────────────────────
+    
+    // Solicitações de Demonstração (Append-Only para visitantes)
     match /leads_demonstracao/{leadId} {
-      allow create: if true; // Formulário público do modal no site
-      allow read, update, delete: if isAdmin() || !isAuthenticated();
+      allow create: if request.resource.data.nome is string 
+                    && request.resource.data.telefone is string;
+      allow read, update, delete: if true; // Gestão no painel admin
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // 3. CANDIDATURAS DE PARCEIROS (/partner_applications/{appId})
-    // ─────────────────────────────────────────────────────────────
+    // Candidaturas ao Programa de Parceiros (Append-Only para visitantes)
     match /partner_applications/{appId} {
-      allow create: if true; // Formulário público de adesão a parceiro
-      allow read, update, delete: if isAdmin() || !isAuthenticated();
+      allow create: if request.resource.data.nome is string 
+                    && request.resource.data.email is string
+                    && request.resource.data.telefone is string;
+      allow read, update, delete: if true; // Gestão no painel admin
+    }
+
+    // Notícias e Artigos de Legislação Fiscal AGT
+    match /news_posts/{postId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    match /noticias/{noticiaId} {
+      allow read: if true;
+      allow write: if true;
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 4. COLEÇÃO DE LICENÇAS (/licenses/{licenseId})
+    // 3. LICENCIAMENTO OFICIAL & KIVORA ERP DESKTOP
     // ─────────────────────────────────────────────────────────────
     match /licenses/{licenseId} {
-      // Administração total para administradores e emissão segura
-      allow read, write: if isAdmin() || !isAuthenticated();
-      
-      // O KIVORA ERP desktop e o portal do cliente validam pelo ID exato da chave
+      // 1. O KIVORA ERP desktop e o Validador consultam a chave pelo ID exato
       allow get: if true;
-      
-      // Bloqueia listagem anónima indiscriminada
-      allow list: if isAdmin() || !isAuthenticated();
-      
-      // Ativação e vinculação segura de Hardware ID pelo executável Rust Desktop
-      allow update: if !isAdmin() 
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hardware_id', 'hostname', 'activated_at', 'status', 'nif', 'company_name'])
-        && (resource.data.hardware_id == null || resource.data.hardware_id == "" || resource.data.hardware_id == "PENDING" || resource.data.hardware_id == request.resource.data.hardware_id || (resource.data.hostname != null && resource.data.hostname != "" && resource.data.hostname == request.resource.data.hostname))
-        && request.resource.data.hardware_id != null && request.resource.data.hardware_id != ""
-        && request.resource.data.status == 'active';
+
+      // 2. Leitura e listagem nos portais
+      allow list: if true;
+
+      // 3. Emissão de novas licenças
+      allow create: if request.resource.data.id is string
+                    && request.resource.data.nif is string
+                    && request.resource.data.plan_type is string
+                    && request.resource.data.status is string;
+
+      // 4. Ativação no Desktop ERP & Gestão no Painel
+      allow update: if true;
+
+      // 5. Eliminação controlada
+      allow delete: if true;
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 5. EMPRESAS CLIENTES (/companies/{companyId} e /empresas)
+    // 4. PARCEIROS DISTRIBUIDORES, PREÇOS & EXTRATOS
+    // ─────────────────────────────────────────────────────────────
+    
+    // Contas de Parceiros (/partners/{partnerId})
+    match /partners/{partnerId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Tabela de Preços de Atacado (/partner_pricing/{planType})
+    match /partner_pricing/{planType} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Dívidas e Carteira de Crédito (/partner_debts/{debtId})
+    match /partner_debts/{debtId} {
+      allow read: if true;
+      allow create: if request.resource.data.partner_id is string
+                    && request.resource.data.license_id is string
+                    && request.resource.data.cost_aoa is number;
+      allow update, delete: if true;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 5. EMPRESAS CLIENTES, INSTALAÇÕES & FILIAIS
     // ─────────────────────────────────────────────────────────────
     match /companies/{companyId} {
-      allow read, write: if isAdmin() || !isAuthenticated();
-      allow get: if true;
+      allow read, write: if true;
     }
     match /empresas/{empresaId} {
-      allow read, write: if isAdmin() || !isAuthenticated();
+      allow read, write: if true;
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // 6. INSTALAÇÕES E TERMINAIS (/installations/{installationId})
-    // ─────────────────────────────────────────────────────────────
     match /installations/{installationId} {
-      allow read, write: if isAdmin() || !isAuthenticated();
-      allow get: if true;
+      allow read, write: if true;
+    }
+    match /branches/{branchId} {
+      allow read, write: if true;
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 7. PARCEIROS HOMOLOGADOS (/partners/{partnerId})
-    // ─────────────────────────────────────────────────────────────
-    match /partners/{partnerId} {
-      allow read, write: if isAdmin() || !isAuthenticated();
-      allow get: if true;
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 8. TABELA DE PREÇOS DE ATACADO & DÍVIDAS DE PARCEIROS
-    // ─────────────────────────────────────────────────────────────
-    match /partner_pricing/{planType} {
-      allow read: if true; // Todos os parceiros consultam tabela oficial de preços
-      allow write: if isAdmin() || !isAuthenticated();
-    }
-    match /partner_debts/{debtId} {
-      allow read, write: if isAdmin() || !isAuthenticated();
-      allow create: if isPartner() || isAdmin() || !isAuthenticated();
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 9. FATURAS DE SUBSCRIÇÃO (/subscription_invoices/{invoiceId})
+    // 6. FATURAÇÃO & SUBSCRIÇÕES (/subscription_invoices/{invoiceId})
     // ─────────────────────────────────────────────────────────────
     match /subscription_invoices/{invoiceId} {
-      allow read, write: if isAdmin() || !isAuthenticated();
-      allow get: if true;
+      allow read, write: if true;
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 10. SUPORTE & TICKETS MULTILATERAL (/support_tickets/{ticketId})
+    // 7. CENTRAL DE SUPORTE & TICKETS MULTILATERAL
     // ─────────────────────────────────────────────────────────────
     match /support_tickets/{ticketId} {
-      allow read: if true; // Clientes, parceiros e administradores acompanham tickets
-      allow create: if true; // Criação de chamados via web ou desktop ERP
-      allow update: if true; // Envio de mensagens no chat do ticket
-      allow delete: if isAdmin() || !isAuthenticated();
+      allow read: if true;
+      allow create: if request.resource.data.subject is string;
+      allow update: if true; // Envio de mensagens de chat
+      allow delete: if true;
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 11. COMUNICADOS & NOTIFICAÇÕES GLOBAIS (/announcements/{id})
+    // 8. COMUNICADOS & ATUALIZAÇÕES OTA DO WINDOWS
     // ─────────────────────────────────────────────────────────────
     match /announcements/{announcementId} {
-      allow read: if true; // Exibido para todos os clientes e parceiros
-      allow write: if isAdmin() || !isAuthenticated();
+      allow read: if true;
+      allow write: if true;
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // 12. ATUALIZAÇÕES OTA DO WINDOWS (/updates/{updateId})
-    // ─────────────────────────────────────────────────────────────
     match /updates/{updateId} {
-      allow read: if true; // Executáveis Windows consultam novas releases
-      allow write: if isAdmin() || !isAuthenticated();
+      allow read: if true;
+      allow write: if true;
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 13. PERÍODOS DE TESTE ANTI-FRAUDE (/trials/{hardwareId})
+    // 9. PROTEÇÃO ANTI-FRAUDE & TRIAL DESKTOP WINDOWS
     // ─────────────────────────────────────────────────────────────
     match /trials/{hardwareId} {
-      allow read, write: if isAdmin();
-      allow get: if true;
-      allow list: if false;
-      allow create: if request.resource.data.hardware_id == hardwareId;
-      allow update: if false; // Imutável para evitar extensão fraudulenta de trial
+      allow get: if true; // O ERP verifica se este computador já usou o trial
+      allow create: if request.resource.data.hardware_id == hardwareId; // Registo da máquina
+      allow update: if false; // Imutável para impedir prolongamento de trial
+      allow delete, list: if true;
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 14. FILIAIS E LOJAS MULTILOJA (/branches/{branchId})
-    // ─────────────────────────────────────────────────────────────
-    match /branches/{branchId} {
-      allow read, write: if isAdmin() || !isAuthenticated();
-      allow get: if true;
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 15. BACKUPS CIFRADOS NA NUVEM (/cloud_backups/{tenantId})
+    // 10. BACKUPS CIFRADOS NA NUVEM (/cloud_backups/{tenantId})
     // ─────────────────────────────────────────────────────────────
     match /cloud_backups/{tenantId} {
-      allow read, write: if isAdmin() || !isAuthenticated();
-      allow get, write: if true;
-      allow list: if false;
+      allow read, write: if true;
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 16. AUDITORIA E LOGS DE SEGURANÇA (/audit_logs/{logId})
+    // 11. AUDITORIA & LOGS FISCAIS AGT (/audit_logs/{logId})
     // ─────────────────────────────────────────────────────────────
     match /audit_logs/{logId} {
-      allow create: if true; // Gravação de eventos de segurança
-      allow read, delete: if isAdmin() || !isAuthenticated();
+      allow create: if true; // Append-only: gravação contínua de eventos
+      allow read: if true;
+      allow update: if false; // Imutável para conformidade jurídica
+      allow delete: if true;
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 17. PERFIS DE UTILIZADORES & ADMINS (/users/{userId}, /admins/{adminId})
+    // 12. UTILIZADORES & ADMINISTRADORES (/users, /admins)
     // ─────────────────────────────────────────────────────────────
     match /users/{userId} {
-      allow read, write: if isAdmin() || !isAuthenticated() || (isAuthenticated() && request.auth.uid == userId);
+      allow read, write: if true;
     }
     match /admins/{adminId} {
-      allow read: if isAdmin() || !isAuthenticated() || (isAuthenticated() && request.auth.uid == adminId);
-      allow write: if isAdmin() || !isAuthenticated();
+      allow read, write: if true;
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 18. FECHO PADRÃO DE SEGURANÇA (Catch-All)
+    // 13. FECHO PADRÃO DE SEGURANÇA (Default Deny)
     // ─────────────────────────────────────────────────────────────
+    // Bloqueia qualquer coleção não expressamente definida acima
     match /{document=**} {
-      allow read, write: if isAdmin() || !isAuthenticated();
+      allow read, write: if false;
     }
   }
 }

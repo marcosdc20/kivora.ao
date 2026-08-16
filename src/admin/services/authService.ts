@@ -129,8 +129,28 @@ export async function loginUser(
       if (u.password && u.password !== cleanPass) {
         return { success: false, error: 'Palavra-passe incorreta.' };
       }
+
+      // Se o utilizador for parceiro, verificar estado rigoroso na coleção `partners`
+      if (u.role === 'parceiro' || u.partnerCode) {
+        const pCode = u.partnerCode || snapUsers.docs[0].id;
+        try {
+          const pDoc = await getDoc(doc(db, 'partners', pCode));
+          if (pDoc.exists() && pDoc.data()?.status === 'suspended') {
+            return {
+              success: false,
+              error: 'A sua conta de parceiro foi suspensa pela administração da Visual Software. Entre em contacto com o suporte para regularização.',
+            };
+          }
+        } catch (e) {
+          console.error('Erro ao verificar status do parceiro:', e);
+        }
+      }
+
       if (u.status === 'suspended') {
-        return { success: false, error: 'Esta conta encontra-se suspensa pela administração.' };
+        return {
+          success: false,
+          error: 'Esta conta encontra-se suspensa pela administração da Visual Software. Entre em contacto com o suporte.',
+        };
       }
       if (u.status === 'pending') {
         return { success: false, error: 'A sua conta ainda aguarda aprovação pelo Administrador Kivora.' };
@@ -164,11 +184,17 @@ export async function loginUser(
 
     if (matchedPartner) {
       const p = matchedPartner.data();
+      if (p.password && p.password !== cleanPass) {
+        return { success: false, error: 'Palavra-passe incorreta.' };
+      }
       if (p.status === 'pending') {
         return { success: false, error: 'A sua candidatura de parceiro ainda está em análise pela equipa Kivora.' };
       }
       if (p.status === 'suspended') {
-        return { success: false, error: 'O seu acesso de parceiro foi suspenso. Contacte o suporte.' };
+        return {
+          success: false,
+          error: 'O seu acesso de parceiro foi suspenso pela administração da Visual Software. Entre em contacto com o suporte para regularização.',
+        };
       }
 
       const session: KivoraUserSession = {
@@ -250,17 +276,19 @@ export async function createOrApprovePartnerAccount(params: {
   partnerCode: string;
   phone?: string;
   region?: string;
+  tier?: string;
 }): Promise<void> {
   const userId = params.partnerCode.toLowerCase().replace(/[^a-z0-9]/g, '_');
   await setDoc(doc(db, 'users', userId), {
     email: params.email.toLowerCase(),
     nome: params.nome,
     partnerCode: params.partnerCode,
+    tier: params.tier || 'bronze',
     role: 'parceiro',
     status: 'active',
     phone: params.phone || '',
     region: params.region || 'Luanda',
-    createdAt: Date.now(),
+    updatedAt: Date.now(),
   }, { merge: true });
 
   await setDoc(doc(db, 'partners', params.partnerCode), {
@@ -276,3 +304,87 @@ export async function createOrApprovePartnerAccount(params: {
     createdAt: Date.now(),
   }, { merge: true });
 }
+
+/**
+ * Atualiza a palavra-passe do utilizador autenticado no Firestore
+ */
+export async function changeUserPassword(userId: string, newPass: string, _userEmail?: string, partnerCode?: string): Promise<void> {
+  const cleanPass = newPass.trim();
+  if (!cleanPass) throw new Error('A palavra-passe não pode estar vazia.');
+
+  // Atualizar na coleção `users`
+  const targetId = userId.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  await setDoc(doc(db, 'users', targetId), {
+    password: cleanPass,
+    updatedAt: Date.now(),
+  }, { merge: true });
+
+  // Se for parceiro, atualizar também na coleção `partners` se existir
+  if (partnerCode) {
+    await setDoc(doc(db, 'partners', partnerCode), {
+      password: cleanPass,
+      updatedAt: Date.now(),
+    }, { merge: true });
+  }
+}
+
+/**
+ * Atualiza os dados de perfil do parceiro
+ */
+export async function updatePartnerProfile(partnerCode: string, data: { name?: string; email?: string; phone?: string; region?: string }): Promise<void> {
+  const userId = partnerCode.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  if (data.email) {
+    await setDoc(doc(db, 'users', userId), {
+      email: data.email.toLowerCase(),
+      nome: data.name,
+      phone: data.phone,
+      region: data.region,
+      updatedAt: Date.now(),
+    }, { merge: true });
+  }
+
+  await setDoc(doc(db, 'partners', partnerCode), {
+    name: data.name,
+    email: data.email?.toLowerCase(),
+    phone: data.phone,
+    region: data.region,
+    updatedAt: Date.now(),
+  }, { merge: true });
+}
+
+/**
+ * Atualiza o estado de suspensão de um parceiro em todas as coleções do Firebase (partners e users)
+ */
+export async function setPartnerSuspensionStatus(
+  partnerId: string,
+  partnerCode: string,
+  partnerEmail: string,
+  newStatus: 'active' | 'suspended'
+): Promise<void> {
+  const pId = partnerId.trim();
+  const pCode = partnerCode.trim();
+  const userId = pCode.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+  // 1. Atualizar documento principal em partners
+  await setDoc(doc(db, 'partners', pId), { status: newStatus, updatedAt: Date.now() }, { merge: true });
+  if (pId !== pCode) {
+    await setDoc(doc(db, 'partners', pCode), { status: newStatus, updatedAt: Date.now() }, { merge: true });
+  }
+
+  // 2. Atualizar documento em users por ID padronizado
+  await setDoc(doc(db, 'users', userId), { status: newStatus, updatedAt: Date.now() }, { merge: true });
+
+  // 3. Atualizar em users por Email
+  if (partnerEmail) {
+    try {
+      const q = query(collection(db, 'users'), where('email', '==', partnerEmail.toLowerCase().trim()));
+      const snap = await getDocs(q);
+      for (const d of snap.docs) {
+        await setDoc(doc(db, 'users', d.id), { status: newStatus, updatedAt: Date.now() }, { merge: true });
+      }
+    } catch (e) {
+      console.error('Erro ao sincronizar status do utilizador:', e);
+    }
+  }
+}
+

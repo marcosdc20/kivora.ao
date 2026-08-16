@@ -29,6 +29,8 @@ export interface KivoraLicense {
   activated_at?: number | null;
   extra_seats?: number;
   max_users?: number;
+  is_provisional?: boolean;
+  provisional_target_plan?: PlanType;
 }
 
 export interface Company {
@@ -53,6 +55,8 @@ export interface CreateLicenseParams {
   notes?: string;
   partner_id?: string;
   extra_seats?: number;
+  is_provisional?: boolean;
+  provisional_target_plan?: PlanType;
 }
 
 export interface LicenseFilters {

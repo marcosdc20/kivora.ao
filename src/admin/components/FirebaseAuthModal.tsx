@@ -67,7 +67,7 @@ export const FirebaseAuthModal: React.FC<FirebaseAuthModalProps> = ({
           </div>
           <div>
             <h3 className="text-base font-black text-slate-900">Autenticar no Firebase Admin</h3>
-            <p className="text-xs text-slate-500">Acesso seguro às licenças do projeto faturasimples</p>
+            <p className="text-xs text-slate-500">Acesso seguro de auditoria KIVORA Cloud</p>
           </div>
         </div>
 

@@ -48,14 +48,12 @@ export const ModulosPage: React.FC<ModulosPageProps> = ({ onSelectModule, onOpen
     <div className="min-h-screen bg-white text-slate-900 page-enter">
 
       {/* Hero */}
-      <div className="pt-16">
-        <PageHero
-          image="/imagens/imagem.png"
-          tag="Catálogo de Módulos"
-          title="Funcionalidades especializadas para a sua atividade"
-          sub="Do talão ao balanço, o KIVORA cobre todas as operações da sua empresa numa única plataforma instalada localmente."
-        />
-      </div>
+      <PageHero
+        image="/imagens/13608.jpg"
+        tag="Catálogo de Módulos"
+        title="Funcionalidades especializadas para a sua atividade"
+        sub="Do talão ao balanço, o KIVORA cobre todas as operações da sua empresa numa única plataforma instalada localmente."
+      />
 
       {/* Filtros */}
       <section className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16 pt-12 pb-4">
