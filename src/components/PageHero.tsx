@@ -45,14 +45,14 @@ export const PageHero: React.FC<PageHeroProps> = ({
             )}
           </div>
 
-          {/* Coluna Imagem Completa (Direita) - Exibe a foto 100% inteira sem cortes de rostos */}
-          <div className="lg:col-span-5">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-900/80 p-2 sm:p-2.5 backdrop-blur-sm group">
+          {/* Coluna Imagem - Exibição 100% inteira sem cortes de rosto, sem moldura e sem sombras */}
+          <div className="lg:col-span-5 flex items-center justify-center">
+            <div className="w-full max-w-md flex items-center justify-center">
               <img
                 src={image}
                 alt={title}
                 loading="eager"
-                className="w-full h-auto max-h-[380px] sm:max-h-[420px] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-[1.02]"
+                className="w-full h-auto max-h-[460px] sm:max-h-[500px] object-contain select-none pointer-events-none"
               />
             </div>
           </div>

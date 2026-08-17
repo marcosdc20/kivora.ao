@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
   Search, Key, Printer, ArrowLeft,
-  CheckCircle2, Copy
+  CheckCircle2, Copy, ShieldCheck
 } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { formatLicenseDate, getPlanLabel } from '../admin/services/licenseService';
 import type { KivoraLicense } from '../admin/types';
+
+import desktopImg from '../assets/kivora/pc-descktop-kivora.png';
 
 interface ValidarLicencaPageProps {
   onBackToHome: () => void;
@@ -139,6 +141,33 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
           </form>
         </div>
 
+        {/* Estado Inicial: Explicação com Desktop */}
+        {!searched && (
+          <div className="print-hide bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            <div className="md:col-span-7 space-y-3">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Segurança Anti-Fraude & AGT
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+                Validação de Licenças por Hardware Fingerprint
+              </h2>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                As licenças do KIVORA ERP são vinculadas com segurança aos computadores da sua empresa. Aqui pode consultar o estado fiscal, a validade e emitir o Certificado Oficial de Conformidade.
+              </p>
+            </div>
+            <div className="md:col-span-5 flex justify-center">
+              <div className="w-full max-w-[240px] aspect-[4/3] bg-slate-50 rounded-2xl p-3 border border-slate-100 flex items-center justify-center overflow-hidden">
+                <img
+                  src={desktopImg}
+                  alt="Computador Desktop Kivora"
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Resultado: Erro */}
         {searched && !loading && errorMessage && (
           <div className="print-hide p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-800 text-center">
@@ -181,115 +210,148 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
             CERTIFICADO OFICIAL — DESIGN SÉRIO, LIMPO E CORPORATIVO (A4)
             ================================================================ */}
         {searched && !loading && licenseData && (
-          <div className="certificate-document bg-white text-slate-900 p-8 sm:p-12 border border-slate-300 shadow-xl space-y-8 print:border print:border-slate-400 print:p-8">
+          <div className="printable-document certificate-document a4-document bg-white text-slate-900 w-full max-w-[800px] mx-auto p-10 sm:p-14 shadow-2xl border border-slate-200 flex flex-col justify-between min-h-[1050px] print:border-none print:shadow-none print:p-0 print:m-0 print:w-full print:max-w-none print:min-h-[265mm] font-sans">
             
-            {/* Cabeçalho do Certificado */}
-            <div className="flex items-start justify-between border-b border-slate-200 pb-6">
-              <div className="space-y-1">
-                <img
-                  src="/imagens/logo_sem_fundo.png"
-                  alt="Kivora ERP"
-                  className="h-10 w-auto object-contain mb-2"
-                />
-                <p className="text-xs font-bold text-slate-900">Kivora Tecnologias, Lda.</p>
-                <p className="text-[11px] text-slate-500">NIF: 5417088920 • Luanda, Angola</p>
-                <p className="text-[11px] text-slate-500">Software Certificado pela AGT n.º 384/AGT/2024</p>
-              </div>
+            {/* Top Corporate Line — No fluxo do documento com margem inferior generosa */}
+            <div className="w-full h-1.5 bg-slate-900 mb-6 print:mb-6 shrink-0" />
 
-              <div className="text-right space-y-2">
-                <img
-                  src={qrCodeUrl}
-                  alt="QR Code de Verificação"
-                  className="w-20 h-20 border border-slate-200 p-1 bg-white ml-auto"
-                />
-                <div className="text-[10px] text-slate-500 font-mono">
-                  <p>Certificado: <strong className="text-slate-900">KVRA-{licenseData.id.slice(-6)}</strong></p>
-                  <p>Emissão: {formatLicenseDate(licenseData.created_at)}</p>
+            <div className="space-y-6 sm:space-y-7 flex-1">
+              {/* Cabeçalho do Certificado */}
+              <div className="flex items-start justify-between border-b-2 border-slate-900 pb-5">
+                <div className="space-y-1">
+                  <img
+                    src="/imagens/logo_sem_fundo.png"
+                    alt="Kivora ERP"
+                    className="h-10 w-auto object-contain mb-1.5"
+                  />
+                  <span className="font-black text-lg tracking-tight text-slate-950 block leading-tight">
+                    Kivora Tecnologias, Lda.
+                  </span>
+                  <p className="text-[11px] text-slate-700 font-bold">
+                    Software Certificado pela AGT n.º 384/AGT/2024 • Dec. Presidencial n.º 71/25
+                  </p>
+                  <p className="text-[10px] text-slate-500">
+                    NIF: 5417088920 • Luanda, República de Angola
+                  </p>
+                </div>
+
+                <div className="text-right flex flex-col items-end">
+                  <img
+                    src={qrCodeUrl}
+                    alt="QR Code de Verificação"
+                    className="w-16 h-16 border border-slate-300 p-1 rounded bg-white shadow-2xs"
+                  />
+                  <div className="text-[9px] text-slate-600 font-mono mt-1 font-bold">
+                    <p>REG. KVRA-LIC-{licenseData.id.slice(-6).toUpperCase()}</p>
+                    <p>Emissão: {formatLicenseDate(licenseData.created_at)}</p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Título do Documento */}
-            <div className="text-center space-y-1 py-2">
-              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-950 uppercase">
-                Certificado de Licenciamento de Software
-              </h2>
-              <p className="text-xs text-slate-600">
-                Kivora ERP • Sistema de Gestão Comercial e Facturação
-              </p>
-            </div>
+              {/* Título do Documento */}
+              <div className="text-center space-y-1.5 pt-1">
+                <span className="inline-block text-[10px] font-black uppercase text-blue-900 bg-blue-50 border border-blue-200 px-3.5 py-1 rounded-full tracking-wider">
+                  Certificação Oficial de Licenciamento & Conformidade Fiscal AGT
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 uppercase">
+                  Certificado de Licenciamento de Software
+                </h2>
+                <p className="text-xs text-slate-600 font-semibold uppercase tracking-wider">
+                  Kivora ERP • Sistema de Gestão Comercial e Facturação Certificada
+                </p>
+              </div>
 
-            {/* Texto de Certificação */}
-            <p className="text-xs text-slate-700 leading-relaxed text-justify">
-              A <strong>Kivora Tecnologias, Lda.</strong> certifica que a entidade abaixo identificada é titular de uma licença legítima do software <strong>Kivora ERP</strong>, devidamente registada na nossa base de dados central e em conformidade com as normas fiscais e requisitos de faturação em vigor na República de Angola.
-            </p>
+              {/* Texto de Certificação */}
+              <div className="text-center max-w-2xl mx-auto text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3 pt-1">
+                <p className="text-xs text-slate-600">
+                  A <strong>Kivora Tecnologias, Lda.</strong> certifica para todos os efeitos legais e fiscais que a entidade:
+                </p>
+                <div className="bg-slate-50 border-y-2 border-slate-300 py-3.5 px-6">
+                  <h3 className="text-lg sm:text-xl font-black text-slate-950 uppercase tracking-wide">
+                    {licenseData.company_name}
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed text-justify">
+                  Inscrita sob o NIF n.º <strong>{licenseData.nif}</strong>, é titular legítima da licença de uso do software <strong>Kivora ERP</strong>, devidamente registada no servidor central de licenciamento e autorizada para emissão de faturas e gestão de operações em conformidade com as normas tributárias em vigor na República de Angola.
+                </p>
+              </div>
 
-            {/* Tabela Estruturada de Detalhes da Licença */}
-            <div className="border border-slate-200 overflow-hidden text-xs">
-              <table className="w-full text-left divide-y divide-slate-200">
-                <tbody className="divide-y divide-slate-200">
-                  <tr className="bg-slate-50/70">
-                    <td className="py-2.5 px-4 font-semibold text-slate-600 w-1/3">Entidade Licenciada:</td>
-                    <td className="py-2.5 px-4 font-bold text-slate-900">{licenseData.company_name}</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-4 font-semibold text-slate-600">NIF do Contribuinte:</td>
-                    <td className="py-2.5 px-4 font-mono font-bold text-slate-900">{licenseData.nif}</td>
-                  </tr>
-                  <tr className="bg-slate-50/70">
-                    <td className="py-2.5 px-4 font-semibold text-slate-600">Chave de Licença (Serial Key):</td>
-                    <td className="py-2.5 px-4 font-mono font-bold text-blue-700">{licenseData.id}</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-4 font-semibold text-slate-600">Produto & Versão:</td>
-                    <td className="py-2.5 px-4 text-slate-800">Kivora ERP v2.4 (Edição Comercial)</td>
-                  </tr>
-                  <tr className="bg-slate-50/70">
-                    <td className="py-2.5 px-4 font-semibold text-slate-600">Plano / Modalidade:</td>
-                    <td className="py-2.5 px-4 font-bold text-slate-900">{getPlanLabel(licenseData.plan_type)}</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-4 font-semibold text-slate-600">Postos Autorizados:</td>
-                    <td className="py-2.5 px-4 text-slate-800">{1 + (licenseData.extra_seats || 0)} Posto(s) de Trabalho (Rede Local)</td>
-                  </tr>
-                  <tr className="bg-slate-50/70">
-                    <td className="py-2.5 px-4 font-semibold text-slate-600">Validade da Licença:</td>
-                    <td className="py-2.5 px-4 font-bold text-slate-900">
-                      {licenseData.expires_at ? formatLicenseDate(licenseData.expires_at) : 'Licença Vitalícia (Sem Expiração)'}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-4 font-semibold text-slate-600">Estado da Licença:</td>
-                    <td className="py-2.5 px-4 font-bold">
-                      {isLicenseActive ? (
-                        <span className="text-emerald-700">● VÁLIDA E ACTIVA</span>
-                      ) : (
-                        <span className="text-amber-700">● EXPIRADA</span>
-                      )}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+              {/* Tabela Estruturada de Detalhes da Licença */}
+              <div className="border border-slate-300 rounded-lg overflow-hidden text-xs">
+                <div className="bg-slate-100 border-b border-slate-300 px-4 py-2 font-black text-slate-800 uppercase text-[10px] tracking-wider">
+                  Especificação Técnica e Fiscal da Licença
+                </div>
+                <table className="w-full text-left divide-y divide-slate-200">
+                  <tbody className="divide-y divide-slate-200">
+                    <tr>
+                      <td className="py-3 px-4 font-semibold text-slate-600 w-1/3 bg-slate-50/60">Entidade Licenciada:</td>
+                      <td className="py-3 px-4 font-black text-slate-950">{licenseData.company_name}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">NIF do Contribuinte:</td>
+                      <td className="py-3 px-4 font-mono font-bold text-slate-900">{licenseData.nif}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Chave de Licença (Serial Key):</td>
+                      <td className="py-3 px-4 font-mono font-black text-blue-700">{licenseData.id}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Produto & Versão:</td>
+                      <td className="py-3 px-4 text-slate-900 font-bold">Kivora ERP v2.4 (Edição Comercial & Multi-posto)</td>
+                    </tr>
+                    <tr>
+                      <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Plano / Modalidade:</td>
+                      <td className="py-3 px-4 font-bold text-slate-900">{getPlanLabel(licenseData.plan_type)}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Postos de Trabalho Autorizados:</td>
+                      <td className="py-3 px-4 text-slate-900 font-bold">{1 + (licenseData.extra_seats || 0)} Posto(s) Autorizado(s) em Rede Local</td>
+                    </tr>
+                    <tr>
+                      <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Validade da Licença:</td>
+                      <td className="py-3 px-4 font-bold text-slate-900">
+                        {licenseData.expires_at ? formatLicenseDate(licenseData.expires_at) : 'Licença Vitalícia (Sem Expiração)'}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Estado da Licença:</td>
+                      <td className="py-3 px-4 font-bold">
+                        {isLicenseActive ? (
+                          <span className="text-emerald-700">● VÁLIDA E ACTIVA NO SISTEMA CENTRAL</span>
+                        ) : (
+                          <span className="text-amber-700">● EXPIRADA</span>
+                        )}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
-            {/* Conformidade Fiscal AGT */}
-            <div className="bg-slate-50 p-4 border border-slate-200 text-xs text-slate-600 leading-relaxed text-justify">
-              <strong>Conformidade Legal & Fiscal:</strong> O software Kivora ERP cumpre integralmente os requisitos de assinatura digital de faturas (RSA-2048) e exportação do ficheiro SAF-T (AO), nos termos do Regime Jurídico das Facturas e do Decreto Presidencial n.º 71/25 da República de Angola.
+              {/* Conformidade Fiscal AGT */}
+              <div className="bg-slate-50 p-4 border border-slate-200 rounded-lg text-xs text-slate-600 leading-relaxed text-justify space-y-1">
+                <p className="font-bold text-slate-900 text-[11px] uppercase tracking-wide">
+                  Conformidade Legal & Fiscal AGT:
+                </p>
+                <p>
+                  O software Kivora ERP cumpre integralmente os requisitos de assinatura digital de faturas por chave criptográfica RSA-2048 e exportação do ficheiro SAF-T (AO), nos termos do Regime Jurídico das Facturas e do Decreto Presidencial n.º 71/25 da República de Angola.
+                </p>
+              </div>
             </div>
 
             {/* Rodapé e Assinatura */}
-            <div className="pt-6 border-t border-slate-200 flex items-end justify-between text-xs">
-              <div className="space-y-1">
-                <p className="text-[11px] font-bold text-slate-900">Kivora Tecnologias, Lda.</p>
-                <p className="text-[10px] text-slate-500">Departamento de Licenciamento & Sistemas</p>
-                <p className="text-[10px] text-slate-400">Verificação online disponível em https://kivora.ao</p>
+            <div className="pt-8 border-t-2 border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-6 text-[11px] avoid-break mt-6">
+              <div className="text-center sm:text-left space-y-0.5">
+                <p className="font-black text-slate-950 text-xs">KIVORA TECNOLOGIAS, LDA.</p>
+                <p className="text-slate-500 text-[10px]">Departamento de Licenciamento & Sistemas</p>
+                <p className="text-slate-400 text-[9px]">Verificação online disponível em https://kivora.ao</p>
               </div>
 
-              <div className="text-right">
-                <div className="w-48 border-b border-slate-400 pb-1 mb-1">
-                  <p className="text-[11px] font-bold text-slate-900">Direção Técnica</p>
+              <div className="text-center sm:text-right border-t sm:border-t-0 sm:border-l border-slate-200 pt-4 sm:pt-0 sm:pl-6 space-y-1">
+                <div className="w-48 border-b border-slate-600 pb-1 mb-1 mx-auto sm:ml-auto">
+                  <p className="font-serif italic text-slate-800 text-xs font-bold">Direção Técnica Kivora</p>
                 </div>
-                <p className="text-[10px] text-slate-400">Assinatura Digital Autorizada</p>
+                <p className="font-black text-slate-950 text-[10px] uppercase">Direção Técnica & Engenharia</p>
+                <p className="text-slate-400 text-[9px] font-mono">Assinatura Digital Autorizada</p>
               </div>
             </div>
 

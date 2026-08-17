@@ -10,6 +10,20 @@ export default defineConfig({
     watch: {
       ignored: ['**/imagens/**', '**/dist/**']
     }
+  },
+  build: {
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-firebase': ['firebase/app', 'firebase/firestore', 'firebase/auth'],
+          'vendor-icons': ['lucide-react'],
+          'vendor-charts': ['recharts'],
+        }
+      }
+    }
   }
 });
+
 

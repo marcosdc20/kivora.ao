@@ -1,0 +1,37 @@
+# robots.txt for KIVORA ERP (kivora.ao)
+# https://www.robotstxt.org/
+
+User-agent: *
+Allow: /
+Allow: /precos
+Allow: /modulos
+Allow: /loja
+Allow: /hardware
+Allow: /diretorio-parceiros
+Allow: /download
+Allow: /recursos
+Allow: /noticias
+Allow: /sobre
+Allow: /suporte
+Allow: /validar
+Allow: /parceiros
+Allow: /candidatura-parceiro
+Allow: /casos-sucesso
+Allow: /seguranca
+Allow: /comparativo
+Allow: /calculadora-fiscal
+Allow: /termos
+Allow: /privacidade
+
+# Bloqueio de Áreas Privadas e Painéis Administrativos
+Disallow: /admin/
+Disallow: /admin
+Disallow: /area-parceiro/
+Disallow: /area-parceiro
+Disallow: /area-cliente/
+Disallow: /area-cliente
+Disallow: /login/
+Disallow: /login
+
+# Declaração do Sitemap Oficial para os motores de busca (Google, Bing, Yandex)
+Sitemap: https://kivora.ao/sitemap.xml

@@ -216,51 +216,93 @@
 }
 
 /* ================================================================
-   PRINT STYLESHEET — Impressão e Exportação PDF do Certificado A4
+   PRINT STYLESHEET — Impressão e Exportação PDF em Formato A4 Padrão
    ================================================================ */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 8mm 6mm;
+    margin: 10mm 12mm;
   }
 
-  html, body {
+  *, *::before, *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  html, body, #root {
     background: #ffffff !important;
+    background-color: #ffffff !important;
     color: #0f172a !important;
     margin: 0 !important;
     padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
     font-size: 10pt !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    overflow: visible !important;
   }
 
-  /* Oculta tudo que não for o certificado */
-  .no-print,
-  header,
-  footer,
-  nav,
-  .print-hide {
-    display: none !important;
+  /* 1. Oculta tudo na página por padrão durante a impressão */
+  body * {
+    visibility: hidden;
   }
 
-  /* Ajusta o container do certificado para preencher 1 página A4 */
-  .certificate-page-wrapper {
-    padding: 0 !important;
-    margin: 0 !important;
-    min-height: 0 !important;
-    background: transparent !important;
+  /* 2. Revela ESTRITAMENTE o documento imprimível e todos os seus nós descendentes */
+  .printable-document,
+  .printable-document *,
+  .certificate-document,
+  .certificate-document *,
+  .invoice-document,
+  .invoice-document *,
+  .a4-document,
+  .a4-document * {
+    visibility: visible !important;
   }
 
-  .certificate-document {
+  /* 3. Posiciona o documento imprimível no topo da folha A4, eliminando o painel de fundo */
+  .printable-document,
+  .certificate-document,
+  .invoice-document,
+  .a4-document {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 auto !important;
-    padding: 20px 24px !important;
+    min-height: 265mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    border: none !important;
+    border-radius: 0 !important;
     box-shadow: none !important;
-    border: 2px solid #0f172a !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    border-radius: 12px !important;
+    z-index: 999999 !important;
+  }
+
+  /* Garante que nenhum contêiner pai corte o documento */
+  .modal-overlay,
+  .modal-sheet,
+  .modal-container,
+  .certificate-page-wrapper,
+  main,
+  div {
+    overflow: visible !important;
+  }
+
+  /* Impede quebras de página indesejadas dentro de blocos essenciais */
+  .avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }
+
 

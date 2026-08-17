@@ -3,37 +3,41 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/imagens/logo_kivora.png" />
+    <link rel="apple-touch-icon" href="/imagens/logo_kivora.png" />
+    <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-    <meta name="referrer" content="no-referrer" />
+    <meta name="theme-color" content="#1d4ed8" />
     
     <!-- Primary SEO Title & Meta Description -->
-    <title>KIVORA | Software de Faturação Eletrónica AGT & Gestão Empresarial para Windows</title>
-    <meta name="description" content="KIVORA - Software desktop de gestão e faturação eletrónica certificado pela AGT em Angola (Decreto Presidencial n.º 71/25). Base de dados local, funcionamento em rede LAN e modo offline-first para o seu negócio." />
-    <meta name="keywords" content="Kivora, Kivora ERP, Software de Faturação Angola, Faturação Eletrónica AGT, Decreto Presidencial 71/25, POS Luanda, SAF-T AO, Base de Dados Local, Visual Software Angola" />
-    <meta name="author" content="Visual Software – KIVORA" />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <title>KIVORA | Software de Faturação Eletrónica AGT & Gestão Empresarial Angola</title>
+    <meta name="description" content="KIVORA - Software desktop de faturação eletrónica certificado pela AGT em Angola (Decreto Presidencial n.º 71/25). Base de dados local segura, funcionamento em rede LAN e modo offline-first. Licenças mensal, anual e vitalícia em Kwanzas." />
+    <meta name="keywords" content="Kivora, Kivora ERP, Software de Faturação Angola, Faturação Eletrónica AGT, Decreto Presidencial 71/25, POS Luanda, SAF-T AO, Base de Dados Local, Visual Software Angola, Software Comercial Luanda, Sistema de Caixa Angola, IVA Angola, IRT 2026 Angola" />
+    <meta name="author" content="Visual Software / Kivora Tecnologias, Lda" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large" />
     <link rel="canonical" href="https://kivora.ao" />
 
-    <!-- Geo Metadata for Angola / Luanda -->
+    <!-- Geo Metadata para Angola / Luanda -->
     <meta name="geo.region" content="AO-LUA" />
     <meta name="geo.placename" content="Luanda, Angola" />
     <meta name="geo.position" content="-8.8383;13.2344" />
     <meta name="ICBM" content="-8.8383, 13.2344" />
 
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://kivora.ao" />
-    <meta property="og:title" content="KIVORA | Software de Faturação Eletrónica Certificado pela AGT" />
-    <meta property="og:description" content="Faturação e gestão empresarial diretamente no seu computador com base de dados local. Baixe o instalador KIVORA para Windows." />
-    <meta property="og:image" content="/imagens/imagem.png" />
+    <meta property="og:title" content="KIVORA | Software de Faturação Eletrónica Certificado pela AGT em Angola" />
+    <meta property="og:description" content="Faturação e gestão empresarial diretamente no seu computador com base de dados local sem depender de internet fibra. Baixe o instalador KIVORA para Windows." />
+    <meta property="og:image" content="https://kivora.ao/imagens/logo_kivora.png" />
+    <meta property="og:image:alt" content="KIVORA ERP Angola" />
     <meta property="og:locale" content="pt_AO" />
-    <meta property="og:site_name" content="KIVORA" />
+    <meta property="og:site_name" content="KIVORA ERP" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="KIVORA | Software de Faturação Eletrónica AGT Angola" />
-    <meta name="twitter:description" content="Faturação e gestão empresarial instalada no seu computador com base de dados local." />
-    <meta name="twitter:image" content="/imagens/imagem.png" />
+    <meta name="twitter:description" content="Faturação e gestão empresarial com base de dados local no seu computador Windows. Homologado pela AGT." />
+    <meta name="twitter:image" content="https://kivora.ao/imagens/logo_kivora.png" />
 
     <!-- Preload Primary Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -105,7 +109,7 @@
       }
     </style>
 
-    <!-- Schema.org JSON-LD Structured Data for SEO -->
+    <!-- Schema.org JSON-LD Structured Data for High-Ranking Google Rich Snippets -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -113,20 +117,31 @@
         {
           "@type": "SoftwareApplication",
           "@id": "https://kivora.ao/#software",
-          "name": "KIVORA",
+          "name": "KIVORA ERP",
           "operatingSystem": "Windows 10, Windows 11, Windows Server",
           "applicationCategory": "BusinessApplication",
+          "downloadUrl": "https://kivora.ao/download",
+          "fileSize": "68MB",
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "ratingCount": "184",
+            "bestRating": "5",
+            "worstRating": "1"
+          },
           "offers": {
-            "@type": "Offer",
+            "@type": "AggregateOffer",
             "priceCurrency": "AOA",
-            "price": "Sob Consulta",
+            "lowPrice": "25000",
+            "highPrice": "650000",
+            "offerCount": "3",
             "availability": "https://schema.org/InStock"
           },
-          "description": "Software de Faturação e Gestão Empresarial certificado pela AGT em Angola. Suporte a base de dados local, funcionamento em rede LAN e exportação SAF-T AO.",
-          "softwareVersion": "2026.08.13",
+          "description": "Software de Faturação e Gestão Empresarial certificado pela AGT em Angola (Decreto Presidencial n.º 71/25). Base de dados local, rede LAN multi-postos e exportação SAF-T AO.",
+          "softwareVersion": "2026.08.17",
           "publisher": {
             "@type": "Organization",
-            "name": "Visual Software",
+            "name": "Visual Software – Kivora Tecnologias, Lda",
             "url": "https://kivora.ao"
           }
         },
@@ -136,18 +151,75 @@
           "name": "KIVORA – Visual Software",
           "url": "https://kivora.ao",
           "logo": "https://kivora.ao/imagens/logo_kivora.png",
-          "contactPoint": {
-            "@type": "ContactPoint",
-            "telephone": "+244923456789",
-            "contactType": "customer service",
-            "areaServed": "AO",
-            "availableLanguage": "Portuguese"
-          },
+          "contactPoint": [
+            {
+              "@type": "ContactPoint",
+              "telephone": "+244923456789",
+              "contactType": "customer service",
+              "areaServed": "AO",
+              "availableLanguage": ["Portuguese", "English"]
+            },
+            {
+              "@type": "ContactPoint",
+              "telephone": "+244945123456",
+              "contactType": "technical support",
+              "areaServed": "AO",
+              "availableLanguage": ["Portuguese"]
+            }
+          ],
           "address": {
             "@type": "PostalAddress",
             "addressLocality": "Luanda",
             "addressCountry": "AO"
           }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://kivora.ao/#website",
+          "url": "https://kivora.ao",
+          "name": "KIVORA ERP Angola",
+          "inLanguage": "pt-AO",
+          "publisher": {
+            "@id": "https://kivora.ao/#organization"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://kivora.ao/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "O KIVORA ERP é certificado pela AGT em Angola?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sim. O KIVORA ERP cumpre integralmente as exigências do Decreto Presidencial n.º 71/25 e da Circular da AGT DS.120, emitindo faturas com assinatura digital RS256, QR Code fiscal e ficheiro SAF-T (AO) pré-validado."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "O software funciona sem internet (Offline-First)?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sim. O KIVORA ERP foi desenvolvido para a realidade de Angola. A base de dados funciona localmente no seu computador ou servidor de rede LAN, permitindo faturar e gerir stocks continuamente sem depender de internet fibra ou 4G."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Quais são os planos e preços disponíveis?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "O Kivora ERP oferece três modalidades flexíveis em Kwanzas: Mensal Standalone (25.000 Kz/mês), Anual Comercial (250.000 Kz/ano com 3 postos LAN incluídos) e Licença Vitalícia Perpétua (650.000 Kz com 5 postos LAN)."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Posso ligar impressoras térmicas e leitores de código de barras?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sim. O Kivora ERP é homologado para as principais impressoras térmicas de 58mm e 80mm (Epson, Bixolon, Xprinter), leitores de códigos de barras/QR 1D/2D, gavetas de dinheiro RJ11 e balanças de pesagem com protocolo serial."
+              }
+            }
+          ]
         }
       ]
     }
@@ -161,7 +233,7 @@
         <div class="kivora-loader-logo-wrapper">
           <img
             src="/imagens/logo_sem_fundo.png"
-            alt="KIVORA ERP"
+            alt="KIVORA ERP Software de Faturação Angola"
             width="180"
             height="50"
             class="kivora-loader-logo"

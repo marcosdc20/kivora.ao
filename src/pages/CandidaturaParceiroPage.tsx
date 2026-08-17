@@ -12,6 +12,8 @@ import {
   PartnerLicensingPolicy
 } from '../admin/services/partnerDebtService';
 
+import parceirosImg from '../assets/kivora/parceiros-kivora.png';
+
 interface CandidaturaParceiroPageProps {
   onBack: () => void;
   onNavigateHome: () => void;
@@ -153,7 +155,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
           {/* Card de Imagem Ilustrativa */}
           <div className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-md relative group">
             <img
-              src="/imagens/1163.jpg"
+              src={parceirosImg}
               alt="Parceria e Credenciamento Kivora"
               className="w-full h-80 object-cover object-[center_top] group-hover:scale-105 transition-transform duration-700"
             />

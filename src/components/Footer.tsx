@@ -46,10 +46,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
             </div>
           </div>
 
-          {/* Col 2: Software & Módulos */}
+          {/* Col 2: Software & Ferramentas */}
           <div className="space-y-3">
             <h4 className="font-extrabold text-white uppercase tracking-wider text-[11px]">
-              Software & Módulos
+              Software & Ferramentas
             </h4>
             <ul className="space-y-2">
               <li>
@@ -90,11 +90,29 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
               </li>
               <li>
                 <a
-                  href="#setores"
-                  onClick={(e) => handleLinkClick(e, 'setores')}
-                  className="hover:text-white transition-colors text-blue-400 font-semibold"
+                  href="#loja"
+                  onClick={(e) => handleLinkClick(e, 'loja')}
+                  className="hover:text-white text-amber-400 font-bold transition-colors"
                 >
-                  Soluções por Setor de Atividade
+                  Loja Oficial de Equipamentos & Kits
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#calculadora-fiscal"
+                  onClick={(e) => handleLinkClick(e, 'calculadora-fiscal')}
+                  className="hover:text-white text-emerald-400 font-semibold transition-colors"
+                >
+                  Calculadora Fiscal IRT & IVA
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#comparativo"
+                  onClick={(e) => handleLinkClick(e, 'comparativo')}
+                  className="hover:text-white text-blue-400 font-semibold transition-colors"
+                >
+                  Comparativo vs Nuvem / Dólar
                 </a>
               </li>
               <li>
@@ -110,19 +128,37 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
             </ul>
           </div>
 
-          {/* Col 3: Empresa & Parceiros */}
+          {/* Col 3: Empresa, Parceiros & Segurança */}
           <div className="space-y-3">
             <h4 className="font-extrabold text-white uppercase tracking-wider text-[11px]">
-              Empresa & Parcerias
+              Soluções & Confiança
             </h4>
             <ul className="space-y-2">
               <li>
                 <a
-                  href="#sobre"
-                  onClick={(e) => handleLinkClick(e, 'sobre')}
-                  className="hover:text-white transition-colors"
+                  href="#casos-sucesso"
+                  onClick={(e) => handleLinkClick(e, 'casos-sucesso')}
+                  className="hover:text-white text-emerald-300 font-medium transition-colors"
                 >
-                  Sobre a Visual Software
+                  Casos de Sucesso em Angola
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#seguranca"
+                  onClick={(e) => handleLinkClick(e, 'seguranca')}
+                  className="hover:text-white text-indigo-300 font-medium transition-colors"
+                >
+                  Centro de Cibersegurança
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#hardware"
+                  onClick={(e) => handleLinkClick(e, 'hardware')}
+                  className="hover:text-white text-amber-400 font-semibold transition-colors"
+                >
+                  Hardware & Impressoras
                 </a>
               </li>
               <li>
@@ -136,29 +172,20 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
               </li>
               <li>
                 <a
+                  href="#diretorio-parceiros"
+                  onClick={(e) => handleLinkClick(e, 'diretorio-parceiros')}
+                  className="hover:text-white text-blue-300 font-medium transition-colors"
+                >
+                  Diretório Nacional de Parceiros
+                </a>
+              </li>
+              <li>
+                <a
                   href="#parceiros"
                   onClick={(e) => handleLinkClick(e, 'parceiros')}
                   className="hover:text-white transition-colors"
                 >
                   Programa de Revendedores
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#candidatura-parceiro"
-                  onClick={(e) => handleLinkClick(e, 'candidatura-parceiro')}
-                  className="hover:text-white transition-colors"
-                >
-                  Candidatura de Distribuidor
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#noticias"
-                  onClick={(e) => handleLinkClick(e, 'noticias')}
-                  className="hover:text-white transition-colors"
-                >
-                  Notícias & Legislação AGT
                 </a>
               </li>
               <li>

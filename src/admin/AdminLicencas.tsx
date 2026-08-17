@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Plus, Search, Key, CheckSquare,
   X, Copy, Ban, RotateCcw, Unlink, Trash2, Clock, CheckCircle2,
@@ -13,6 +13,10 @@ import {
   getPlanLabel, formatLicenseDate, calculateExpiresAt, promoteProvisionalLicenseToDefinitive
 } from './services/licenseService';
 import { createClientAccount } from './services/authService';
+import {
+  subscribePartnerPolicy, DEFAULT_PARTNER_POLICY,
+  PartnerLicensingPolicy, getAdminSeatCost
+} from './services/partnerDebtService';
 import type { KivoraLicense, PlanType } from './types';
 
 // ============================
@@ -24,6 +28,7 @@ interface LicencasProps {
 
 export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
   const { licenses, loading, error, refresh } = useLicenses();
+  const [policy, setPolicy] = useState<PartnerLicensingPolicy>(DEFAULT_PARTNER_POLICY);
   const [modalAuth, setModalAuth] = useState(false);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('todos');
@@ -35,6 +40,11 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
   // Estado para Gestão de Terminais / Postos Extras
   const [seatsModalLic, setSeatsModalLic] = useState<KivoraLicense | null>(null);
   const [newExtraSeats, setNewExtraSeats] = useState<number>(0);
+
+  useEffect(() => {
+    const unsub = subscribePartnerPolicy((p) => setPolicy(p));
+    return () => unsub();
+  }, []);
 
   const filtered = licenses.filter((l) => {
     const s = search.toLowerCase();
@@ -499,6 +509,22 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                     />
                     <span className="text-slate-500 font-bold whitespace-nowrap">Postos Extras</span>
                   </div>
+                </div>
+              </div>
+
+              {/* Informação Financeira do Terminal Configurado */}
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between text-xs">
+                <div>
+                  <span className="text-slate-500 font-medium block text-[11px]">Custo Unitário Configurado (Admin):</span>
+                  <span className="font-mono font-bold text-slate-800">
+                    {getAdminSeatCost(policy).toLocaleString('pt-AO')} Kz / posto extra
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-slate-500 font-medium block text-[11px]">Valor Total dos Postos:</span>
+                  <span className="font-mono font-black text-blue-600">
+                    {(newExtraSeats * getAdminSeatCost(policy)).toLocaleString('pt-AO')} Kz
+                  </span>
                 </div>
               </div>
 

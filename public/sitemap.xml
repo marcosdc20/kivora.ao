@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- 1. Página Principal (Homepage) -->
+  <url>
+    <loc>https://kivora.ao/</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://kivora.ao/imagens/logo_kivora.png</image:loc>
+      <image:title>KIVORA - Software de Faturação Eletrónica AGT em Angola</image:title>
+    </image:image>
+  </url>
+
+  <!-- 2. Loja Oficial de Hardware & Kits POS -->
+  <url>
+    <loc>https://kivora.ao/loja</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
+  <!-- 3. Preços e Simulador Multi-Postos -->
+  <url>
+    <loc>https://kivora.ao/precos</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
+  <!-- 4. Calculadora Fiscal de IRT & IVA Angola -->
+  <url>
+    <loc>https://kivora.ao/calculadora-fiscal</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
+  <!-- 5. Casos de Sucesso em Angola -->
+  <url>
+    <loc>https://kivora.ao/casos-sucesso</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- 6. Centro de Cibersegurança & Conformidade Legal -->
+  <url>
+    <loc>https://kivora.ao/seguranca</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- 7. Comparativo de Mercado (Kivora vs Nuvem/Dólar) -->
+  <url>
+    <loc>https://kivora.ao/comparativo</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- 8. Hardware & Periféricos Homologados -->
+  <url>
+    <loc>https://kivora.ao/hardware</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- 9. Diretório Nacional de Parceiros por Província -->
+  <url>
+    <loc>https://kivora.ao/diretorio-parceiros</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- 10. Centro de Downloads & Chave de Teste -->
+  <url>
+    <loc>https://kivora.ao/download</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- 11. Módulos do Sistema ERP -->
+  <url>
+    <loc>https://kivora.ao/modulos</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- 12. Base de Conhecimento & Manuais Fiscais AGT -->
+  <url>
+    <loc>https://kivora.ao/recursos</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- 13. Notícias & Legislação Fiscal AGT -->
+  <url>
+    <loc>https://kivora.ao/noticias</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 14. Central de Suporte & Chamados -->
+  <url>
+    <loc>https://kivora.ao/suporte</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 15. Validador Oficial de Licenças de Software -->
+  <url>
+    <loc>https://kivora.ao/validar</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 16. Programa de Parceiros & Revenda -->
+  <url>
+    <loc>https://kivora.ao/parceiros</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 17. Candidatura de Parceiro -->
+  <url>
+    <loc>https://kivora.ao/candidatura-parceiro</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <!-- 18. Sobre a Kivora / Visual Software -->
+  <url>
+    <loc>https://kivora.ao/sobre</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- 19. Termos de Serviço -->
+  <url>
+    <loc>https://kivora.ao/termos</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <!-- 20. Política de Privacidade -->
+  <url>
+    <loc>https://kivora.ao/privacidade</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+</urlset>

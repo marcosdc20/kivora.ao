@@ -4,6 +4,8 @@ import { KIVORA_INFO } from '../data/kivoraData';
 import { db } from '../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
+import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
+
 interface DemoModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -64,27 +66,38 @@ export const DemoModal: React.FC<DemoModalProps> = ({
     <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 relative animate-scaleUp">
         
-        {/* Header - Sleek Kivora Slate Theme */}
-        <div className="bg-slate-950 p-6 sm:p-8 text-white relative border-b border-slate-800">
+        {/* Header - Limpo em Fundo Branco */}
+        <div className="bg-white p-6 sm:p-8 text-slate-900 relative border-b border-slate-200">
           <button
             onClick={onClose}
             aria-label="Fechar"
-            className="absolute top-5 right-5 text-slate-400 hover:text-white p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 transition-all cursor-pointer"
+            className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer z-10"
           >
             <X className="w-5 h-5" />
           </button>
           
-          <div className="inline-flex items-center gap-1.5 text-blue-400 text-xs font-black uppercase tracking-widest bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-full mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-            <span>Demonstração Oficial Kivora ERP</span>
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 rounded-full overflow-hidden border border-slate-200 shrink-0 hidden sm:block bg-slate-50">
+              <img
+                src={welcomeImg}
+                alt="Consultor Kivora"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div>
+              <div className="inline-flex items-center gap-1.5 text-blue-700 text-xs font-black uppercase tracking-widest bg-blue-50 border border-blue-200 px-3 py-1 rounded-full mb-2">
+                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                <span>Demonstração Oficial Kivora ERP</span>
+              </div>
+              
+              <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight text-slate-950">
+                Solicite uma Apresentação Personalizada
+              </h3>
+              <p className="text-slate-600 text-xs mt-1 max-w-lg leading-relaxed">
+                Descubra como o KIVORA simplifica a Faturação AGT, Controlo de Stock e Gestão Financeira.
+              </p>
+            </div>
           </div>
-          
-          <h3 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
-            Solicite uma Apresentação Personalizada
-          </h3>
-          <p className="text-slate-400 text-xs sm:text-sm mt-2 max-w-xl leading-relaxed">
-            Descubra como o KIVORA simplifica a Faturação AGT, Controlo de Stock e Gestão Financeira da sua empresa.
-          </p>
         </div>
 
         {/* Content Body */}

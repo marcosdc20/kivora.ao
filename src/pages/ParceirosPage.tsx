@@ -6,6 +6,8 @@ import {
   PartnerLicensingPolicy
 } from '../admin/services/partnerDebtService';
 
+import parceirosImg from '../assets/kivora/parceiros-kivora.png';
+
 function useScrollReveal() {
   useEffect(() => {
     const els = document.querySelectorAll('[data-reveal]');
@@ -45,7 +47,7 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
     <div className="min-h-screen bg-white text-slate-900 page-enter">
 
       <PageHero
-        image="/imagens/1085.jpg"
+        image={parceirosImg}
         tag="Programa de Parceiros & Canais"
         title="Revenda o KIVORA ERP e cresça connosco"
         sub="Torne-se distribuidor oficial da Visual Software e lucre com margens de atacado em cada licença na sua região."

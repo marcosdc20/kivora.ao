@@ -3,6 +3,9 @@ import { PageHero } from '../components/PageHero';
 import { ShieldCheck, Award, Users, CheckCircle, Sparkles, MapPin, Phone, Mail } from 'lucide-react';
 import { KIVORA_INFO } from '../data/kivoraData';
 
+import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
+import tabletImg from '../assets/kivora/jovem-empresaria-com-tablet.png';
+
 interface AboutPageProps {
   onOpenDemoModal: () => void;
 }
@@ -13,7 +16,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
       
       {/* Header Banner Showcase */}
       <PageHero
-        image="/imagens/1163.jpg"
+        image={welcomeImg}
         tag="Sobre a Visual Software & KIVORA"
         title="Tecnologia de Gestão e Faturação para Angola"
         sub="Desenvolvemos o KIVORA ERP para capacitar empresários e gestores angolanos com software robusto, alinhado com as normas da AGT e com suporte presencial em Luanda."
@@ -53,12 +56,12 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
 
           </div>
 
-          <div className="lg:col-span-6">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200 bg-slate-100 p-2 sm:p-3 group">
+          <div className="lg:col-span-6 flex items-center justify-center">
+            <div className="w-full max-w-lg">
               <img
-                src={KIVORA_INFO.appOverviewImage}
-                alt="Kivora Software Platform"
-                className="w-full h-auto rounded-2xl object-cover"
+                src={tabletImg}
+                alt="Gestão Moderna Kivora ERP"
+                className="w-full h-auto max-h-[500px] object-contain"
               />
             </div>
           </div>

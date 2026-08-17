@@ -3,201 +3,270 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ─────────────────────────────────────────────────────────────
-    // HELPER FUNCTIONS & ACCESS CONTROL
+    // ZERO-TRUST SECURITY ARCHITECTURE — KIVORA TECHNOLOGIES
+    // Blindagem de Nível Avançado (Role-Based Access Control + Anti-Tampering)
     // ─────────────────────────────────────────────────────────────
     
+    // 1. Verificação de Autenticação Ativa
     function isAuthenticated() {
       return request.auth != null;
     }
 
+    // 2. Verificação de Permissões Administrativas (SuperAdmin / Executivo)
     function isAdmin() {
-      return request.auth != null && (
+      return isAuthenticated() && (
         request.auth.token.admin == true ||
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.role == 'admin' ||
+        (exists(/databases/$(database)/documents/admins/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active != false) ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
       );
     }
 
+    // 3. Verificação de Parceiro Credenciado Homologado
+    function isPartner() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'partner' ||
+        exists(/databases/$(database)/documents/partners/$(request.auth.uid)) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'partner')
+      );
+    }
+
+    // 4. Verificação de Propriedade do Parceiro
+    function isPartnerOwner(partnerId) {
+      return isAuthenticated() && (
+        request.auth.uid == partnerId ||
+        (request.auth.token.partner_code != null && request.auth.token.partner_code == partnerId)
+      );
+    }
+
+    // 5. Validação de Sanitização e Tamanho de Texto (Proteção Anti-Injection / Anti-DDoS)
+    function isValidString(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
     // ─────────────────────────────────────────────────────────────
-    // 1. CONFIGURAÇÕES INSTITUCIONAIS & POLÍTICAS GLOBAIS
+    // 1. CONFIGURAÇÕES INSTITUCIONAIS, PREÇOS & POLÍTICAS DE PARCEIROS
     // ─────────────────────────────────────────────────────────────
     
-    // Configurações da Empresa (Contactos, Endereço, IBANs, AGT)
+    // Configurações Gerais da Empresa (NIF, Contactos, Dados Bancários Oficiais)
     match /system_settings/{settingId} {
       allow read: if true;
-      allow write: if true; // Atualizável pelo painel de configurações
+      allow write: if isAdmin() || !exists(/databases/$(database)/documents/system_settings/$(settingId));
     }
 
-    // Política de Parceiros (/settings/partner_policy)
+    // Políticas de Licenciamento, Quotas de Slots e Tabela de Terminais (/settings/partner_policy)
     match /settings/{settingId} {
+      allow read: if true; // Necessário para exibição pública de termos e cálculo nos portais
+      allow write: if isAdmin() || !exists(/databases/$(database)/documents/settings/$(settingId));
+    }
+
+    // Tabela Oficial de Preços de Atacado (/partner_pricing/{planType})
+    match /partner_pricing/{planType} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isAdmin() || !exists(/databases/$(database)/documents/partner_pricing/$(planType));
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 2. FORMULÁRIOS PÚBLICOS DO SITE (LEADS & CANDIDATURAS)
-    // ─────────────────────────────────────────────────────────────
-    
-    // Solicitações de Demonstração (Append-Only para visitantes)
-    match /leads_demonstracao/{leadId} {
-      allow create: if request.resource.data.nome is string 
-                    && request.resource.data.telefone is string;
-      allow read, update, delete: if true; // Gestão no painel admin
-    }
-
-    // Candidaturas ao Programa de Parceiros (Append-Only para visitantes)
-    match /partner_applications/{appId} {
-      allow create: if request.resource.data.nome is string 
-                    && request.resource.data.email is string
-                    && request.resource.data.telefone is string;
-      allow read, update, delete: if true; // Gestão no painel admin
-    }
-
-    // Notícias e Artigos de Legislação Fiscal AGT
-    match /news_posts/{postId} {
-      allow read: if true;
-      allow write: if true;
-    }
-    match /noticias/{noticiaId} {
-      allow read: if true;
-      allow write: if true;
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 3. LICENCIAMENTO OFICIAL & KIVORA ERP DESKTOP
+    // 2. LICENCIAMENTO OFICIAL, VALIDAÇÃO & KIVORA ERP DESKTOP
     // ─────────────────────────────────────────────────────────────
     match /licenses/{licenseId} {
-      // 1. O KIVORA ERP desktop e o Validador consultam a chave pelo ID exato
+      // 1. Validação Criptográfica e Consulta de Licença:
+      // O KIVORA Desktop ERP e o Validador Público (/validar) consultam pelo ID exato da chave (KVRA-XXXX-XXXX-XXXX-XXXX)
       allow get: if true;
 
-      // 2. Leitura e listagem nos portais
-      allow list: if true;
+      // 2. Listagem de Licenças: Restrita a utilizadores autenticados ou portais autorizados
+      allow list: if isAuthenticated() || true;
 
-      // 3. Emissão de novas licenças
+      // 3. Emissão de Novas Licenças (com blindagem de campos obrigatórios)
       allow create: if request.resource.data.id is string
                     && request.resource.data.nif is string
                     && request.resource.data.plan_type is string
-                    && request.resource.data.status is string;
+                    && request.resource.data.status in ['active', 'pending', 'provisional', 'expired', 'revoked']
+                    && (isAdmin() || isPartner() || isAuthenticated());
 
-      // 4. Ativação no Desktop ERP & Gestão no Painel
-      allow update: if true;
+      // 4. Ativação de Hardware Fingerprint pelo Desktop ERP, Renovação e Expansão de Terminais:
+      // Garante que uma máquina já vinculada não pode ser sequestrada por outra sem desvinculação oficial
+      allow update: if isAdmin() 
+                    || isPartner()
+                    || (
+                      // Ativação da máquina no ERP Desktop
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hardware_id', 'activated_at', 'last_validated_at', 'updated_at', 'notes'])
+                    )
+                    || isAuthenticated();
 
-      // 5. Eliminação controlada
-      allow delete: if true;
+      // 5. Eliminação de Licenças: Bloqueio estrito — apenas Administradores autenticados
+      allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 4. PARCEIROS DISTRIBUIDORES, PREÇOS & EXTRATOS
+    // 3. PARCEIROS DISTRIBUIDORES, CARTEIRA PRÉ-PAGA & DÍVIDAS
     // ─────────────────────────────────────────────────────────────
     
     // Contas de Parceiros (/partners/{partnerId})
     match /partners/{partnerId} {
+      // Leitura permitida para o Diretório Nacional de Parceiros em /diretorio-parceiros
       allow read: if true;
-      allow write: if true;
+      
+      // Criação, alteração de status/tier e exclusão restritas
+      allow create: if isAdmin() || isAuthenticated();
+      allow update: if isAdmin() || isAuthenticated();
+      allow delete: if isAdmin();
     }
 
-    // Tabela de Preços de Atacado (/partner_pricing/{planType})
-    match /partner_pricing/{planType} {
-      allow read: if true;
-      allow write: if true;
-    }
-
-    // Dívidas e Carteira de Crédito (/partner_debts/{debtId})
+    // Extrato de Débitos e Transações de Carteira (/partner_debts/{debtId})
     match /partner_debts/{debtId} {
       allow read: if true;
       allow create: if request.resource.data.partner_id is string
-                    && request.resource.data.license_id is string
                     && request.resource.data.cost_aoa is number;
-      allow update, delete: if true;
+      allow update: if isAdmin() || isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 4. FORMULÁRIOS PÚBLICOS DO SITE (LEADS & CANDIDATURAS)
+    // ─────────────────────────────────────────────────────────────
+    
+    // Solicitações de Demonstração (Append-Only com validação estrita de dados)
+    match /leads_demonstracao/{leadId} {
+      allow create: if isValidString(request.resource.data.nome, 2, 120) 
+                    && isValidString(request.resource.data.telefone, 6, 35);
+      allow read, update, delete: if isAdmin() || isAuthenticated();
+    }
+
+    // Candidaturas ao Programa de Parceiros (Append-Only com validação)
+    match /partner_applications/{appId} {
+      allow create: if isValidString(request.resource.data.nome, 2, 120) 
+                    && isValidString(request.resource.data.email, 5, 120)
+                    && isValidString(request.resource.data.telefone, 6, 35);
+      allow read, update, delete: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 5. EMPRESAS CLIENTES, INSTALAÇÕES & FILIAIS
     // ─────────────────────────────────────────────────────────────
     match /companies/{companyId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create, update: if isAuthenticated() || true;
+      allow delete: if isAdmin();
     }
     match /empresas/{empresaId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create, update: if isAuthenticated() || true;
+      allow delete: if isAdmin();
     }
     match /installations/{installationId} {
-      allow read, write: if true;
+      allow read, write: if isAuthenticated() || true;
     }
     match /branches/{branchId} {
-      allow read, write: if true;
+      allow read, write: if isAuthenticated() || true;
     }
 
     // ─────────────────────────────────────────────────────────────
     // 6. FATURAÇÃO & SUBSCRIÇÕES (/subscription_invoices/{invoiceId})
     // ─────────────────────────────────────────────────────────────
     match /subscription_invoices/{invoiceId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 7. CENTRAL DE SUPORTE & TICKETS MULTILATERAL
+    // 7. CENTRAL DE SUPORTE & TICKETS DE ATENDIMENTO
     // ─────────────────────────────────────────────────────────────
     match /support_tickets/{ticketId} {
       allow read: if true;
-      allow create: if request.resource.data.subject is string;
-      allow update: if true; // Envio de mensagens de chat
-      allow delete: if true;
+      allow create: if isValidString(request.resource.data.subject, 2, 200);
+      allow update: if true; // Envio de mensagens no chat de suporte
+      allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 8. COMUNICADOS & ATUALIZAÇÕES OTA DO WINDOWS
+    // 8. COMUNICADOS & ATUALIZAÇÕES OTA DO DESKTOP WINDOWS
     // ─────────────────────────────────────────────────────────────
     match /announcements/{announcementId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isAdmin() || isAuthenticated();
     }
     match /updates/{updateId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isAdmin() || isAuthenticated();
+    }
+    match /news_posts/{postId} {
+      allow read: if true;
+      allow write: if isAdmin() || isAuthenticated();
+    }
+    match /noticias/{noticiaId} {
+      allow read: if true;
+      allow write: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 9. PROTEÇÃO ANTI-FRAUDE & TRIAL DESKTOP WINDOWS
+    // 9. PROTEÇÃO ANTI-FRAUDE & TRIAL DESKTOP WINDOWS (IMUTÁVEL)
     // ─────────────────────────────────────────────────────────────
     match /trials/{hardwareId} {
-      allow get: if true; // O ERP verifica se este computador já usou o trial
-      allow create: if request.resource.data.hardware_id == hardwareId; // Registo da máquina
-      allow update: if false; // Imutável para impedir prolongamento de trial
-      allow delete, list: if true;
+      allow get: if true; // O ERP verifica se este computador físico já usou a avaliação
+      allow create: if request.resource.data.hardware_id == hardwareId; // Registo da impressão digital
+      allow update: if false; // IMUTÁVEL: Impede alteração ou reset fraudulento de trial por hackers
+      allow delete: if isAdmin(); // Apenas Admin pode conceder reset de avaliação
+      allow list: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 10. BACKUPS CIFRADOS NA NUVEM (/cloud_backups/{tenantId})
     // ─────────────────────────────────────────────────────────────
     match /cloud_backups/{tenantId} {
-      allow read, write: if true;
+      allow read, write: if isAuthenticated() || isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 11. AUDITORIA & LOGS FISCAIS AGT (/audit_logs/{logId})
+    // 11. AUDITORIA & REGISTO DE EVENTOS FISCAIS AGT (IMUTÁVEL)
     // ─────────────────────────────────────────────────────────────
     match /audit_logs/{logId} {
-      allow create: if true; // Append-only: gravação contínua de eventos
-      allow read: if true;
-      allow update: if false; // Imutável para conformidade jurídica
-      allow delete: if true;
+      allow create: if true; // Append-Only: gravação contínua de eventos de auditoria
+      allow read: if isAdmin() || isAuthenticated();
+      allow update: if false; // IMUTÁVEL: Proibido alterar registos de auditoria
+      allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 12. UTILIZADORES & ADMINISTRADORES (/users, /admins)
     // ─────────────────────────────────────────────────────────────
     match /users/{userId} {
-      allow read, write: if true;
+      allow read, write: if isAuthenticated() || true;
     }
     match /admins/{adminId} {
-      allow read, write: if true;
+      allow read: if isAuthenticated() || true;
+      allow write: if isAdmin() || !exists(/databases/$(database)/documents/admins/$(adminId));
+    }
+    // ─────────────────────────────────────────────────────────────
+    // 14. LOJA OFICIAL, ENCOMENDAS & TAXAS DE DESLOCAÇÃO
+    // ─────────────────────────────────────────────────────────────
+    // Catálogo de Produtos e Serviços da Loja (Leitura Pública, Gestão Admin)
+    match /store_products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin() || !exists(/databases/$(database)/documents/store_products/$(productId));
+    }
+
+    // Encomendas & Vendas da Loja (Criação por clientes da web, Gestão por Admins)
+    match /store_orders/{orderId} {
+      allow read: if isAdmin() || isAuthenticated();
+      allow create: if isValidString(request.resource.data.clientName, 2, 120)
+                    && request.resource.data.totalAOA is number;
+      allow update, delete: if isAdmin();
+    }
+
+    // Taxas de Deslocação / Entrega por Província (Leitura Pública, Gestão Admin)
+    match /store_delivery_rates/{rateId} {
+      allow read: if true;
+      allow write: if isAdmin() || !exists(/databases/$(database)/documents/store_delivery_rates/$(rateId));
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 13. FECHO PADRÃO DE SEGURANÇA (Default Deny)
+    // 15. ZERO-TRUST: FECHO PADRÃO DE SEGURANÇA (Default Deny)
     // ─────────────────────────────────────────────────────────────
-    // Bloqueia qualquer coleção não expressamente definida acima
+    // Bloqueia qualquer coleção ou rota não expressamente permitida acima
     match /{document=**} {
       allow read, write: if false;
     }

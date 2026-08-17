@@ -48,32 +48,46 @@ export const PartnerOfficialCertificatesModal: React.FC<PartnerOfficialCertifica
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-4xl w-full shadow-2xl border border-slate-200 flex flex-col max-h-[95vh] overflow-hidden animate-fadeIn">
+    <div className="modal-overlay fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-6 overflow-y-auto print:static print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible">
+      <div className="modal-sheet bg-slate-900 rounded-2xl max-w-5xl w-full shadow-2xl border border-slate-800 flex flex-col max-h-[96vh] overflow-hidden animate-fadeIn print:border-none print:shadow-none print:rounded-none print:bg-transparent print:max-h-none print:overflow-visible print:w-full print:max-w-none">
         
         {/* Modal Top Bar (Hidden on Print) */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50/80 shrink-0 print:hidden">
-          <div>
-            <div className="flex items-center gap-2">
-              <Award className="w-5 h-5 text-amber-600" />
-              <h3 className="font-black text-slate-900 text-base">Documentos & Certificados Oficiais do Parceiro</h3>
+        <div className="p-4 sm:p-5 border-b border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-950 shrink-0 print:hidden text-white">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+              <Award className="w-5 h-5" />
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Certificação institucional emitida pela <strong>VISUAL SOFTWARE</strong> e Autorização de Revenda <strong>KIVORA ERP</strong>.
-            </p>
+            <div>
+              <h3 className="font-black text-white text-base">Documentos & Certificados Oficiais em A4</h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Modelos institucionais emitidos pela <strong>VISUAL SOFTWARE</strong> e <strong>KIVORA ERP</strong>.
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 self-end sm:self-auto">
             <button
-              onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition-all cursor-pointer"
+              onClick={() => {
+                navigator.clipboard.writeText(validationUrl);
+                setCopiedLink(true);
+                setTimeout(() => setCopiedLink(false), 2500);
+              }}
+              className="text-slate-300 hover:text-white font-bold text-xs px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Imprimir / Salvar PDF (A4)</span>
+              {copiedLink ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedLink ? 'Link Copiado' : 'Copiar Link'}</span>
+            </button>
+
+            <button
+              onClick={handlePrint}
+              className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition-all cursor-pointer"
+            >
+              <Printer className="w-4 h-4" />
+              <span>Imprimir / PDF (A4)</span>
             </button>
             <button
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -81,301 +95,340 @@ export const PartnerOfficialCertificatesModal: React.FC<PartnerOfficialCertifica
         </div>
 
         {/* Tab Switcher (Hidden on Print) */}
-        <div className="px-5 pt-3 pb-2 border-b border-slate-100 flex gap-2 bg-white shrink-0 print:hidden">
+        <div className="px-5 py-3 border-b border-slate-800 flex gap-2 bg-slate-900/90 shrink-0 print:hidden overflow-x-auto">
           <button
             onClick={() => setActiveDoc('parceria_visual')}
-            className={`text-xs font-bold px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-2 ${
+            className={`text-xs font-bold px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
               activeDoc === 'parceria_visual'
-                ? 'bg-blue-900 text-white shadow-sm'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
-            <ShieldCheck className="w-4 h-4 text-blue-300" />
-            <span>1. Certificado de Parceria (Visual Software)</span>
+            <ShieldCheck className="w-4 h-4 text-blue-200" />
+            <span>1. Certificado de Parceria Comercial (Visual Software)</span>
           </button>
 
           <button
             onClick={() => setActiveDoc('revenda_kivora')}
-            className={`text-xs font-bold px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-2 ${
+            className={`text-xs font-bold px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
               activeDoc === 'revenda_kivora'
-                ? 'bg-amber-600 text-white shadow-sm'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-amber-600 text-white shadow-md'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
             <FileText className="w-4 h-4 text-amber-200" />
-            <span>2. Autorização de Revenda (Kivora ERP)</span>
+            <span>2. Autorização de Revenda de Software (Kivora ERP)</span>
           </button>
         </div>
 
-        {/* Certificate Container (A4 Printable Document) */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-100/60 flex justify-center">
+        {/* Certificate Preview Wrapper (A4 Viewport) */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-950/70 flex justify-center print:p-0 print:m-0 print:bg-transparent print:overflow-visible">
           
           {/* =========================================================================
-              DOCUMENTO 1: CERTIFICADO DE PARCERIA & HOMOLOGAÇÃO COM A VISUAL SOFTWARE
+              DOCUMENTO 1: CERTIFICADO DE PARCERIA COMERCIAL (VISUAL SOFTWARE)
               ========================================================================= */}
           {activeDoc === 'parceria_visual' && (
-            <div className="certificate-document bg-white border border-slate-300 rounded-2xl p-8 sm:p-12 max-w-[800px] w-full shadow-lg relative flex flex-col justify-between min-h-[980px] print:shadow-none print:border-0 print:p-0 print:m-0 print:min-h-0 text-slate-900 font-sans">
+            <div className="printable-document certificate-document a4-document bg-white text-slate-900 w-full max-w-[800px] min-h-[1050px] p-10 sm:p-14 shadow-2xl flex flex-col justify-between relative print:shadow-none print:p-0 print:m-0 print:min-h-0 print:w-full print:max-w-none print:min-h-[265mm] font-sans">
               
-              {/* Moldura Interna Clássica e Séria */}
-              <div className="border border-slate-200 p-8 sm:p-10 rounded-xl relative flex flex-col justify-between h-full space-y-6">
-                
-                {/* Cabeçalho Oficial: Visual Software */}
-                <div className="flex items-start justify-between border-b border-slate-200 pb-6">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 bg-slate-900 text-white flex items-center justify-center font-black text-xs rounded-md">
+              {/* Top Corporate Line — No fluxo do documento com margem inferior generosa */}
+              <div className="w-full h-1.5 bg-slate-900 mb-6 print:mb-6 shrink-0" />
+
+              <div className="space-y-6 sm:space-y-7 flex-1">
+                {/* Header Oficial: Visual Software */}
+                <div className="flex items-start justify-between border-b-2 border-slate-900 pb-5">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 bg-slate-950 text-white flex items-center justify-center font-black text-sm rounded-lg tracking-wider">
                         VS
                       </div>
-                      <span className="font-black text-lg sm:text-xl tracking-tight text-slate-950">
-                        VISUAL SOFTWARE
-                      </span>
+                      <div>
+                        <span className="font-black text-xl tracking-tight text-slate-950 block leading-tight">
+                          VISUAL SOFTWARE
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
+                          Divisão de Tecnologia, Sistemas e Gestão Comercial
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mt-1">
-                      Divisão de Tecnologia, Sistemas e Gestão Comercial
-                    </p>
-                    <p className="text-[10px] text-slate-400">
+                    <p className="text-[10px] text-slate-500 font-medium pt-1">
                       NIF: 5417088920 • Luanda, República de Angola
                     </p>
                   </div>
 
                   <div className="text-right flex flex-col items-end">
                     <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(validationUrl)}&margin=0`}
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(validationUrl)}&margin=0`}
                       alt="QR de Validação Institucional"
-                      className="w-16 h-16 border border-slate-200 p-1 rounded-lg bg-white"
+                      className="w-16 h-16 border border-slate-300 p-1 rounded bg-white shadow-2xs"
                     />
-                    <span className="text-[9px] font-mono text-slate-400 mt-1 font-bold">
+                    <span className="text-[9px] font-mono text-slate-600 mt-1 font-bold">
                       N.º {vsRegNumber}
                     </span>
                   </div>
                 </div>
 
-                {/* Título do Certificado */}
-                <div className="text-center space-y-2 my-2">
-                  <span className="inline-block text-[10px] font-black uppercase text-blue-800 bg-blue-50 border border-blue-200 px-3 py-1 rounded-full tracking-wider">
+                {/* Título Oficial do Certificado */}
+                <div className="text-center space-y-1.5 pt-1">
+                  <span className="inline-block text-[10px] font-black uppercase text-blue-900 bg-blue-50 border border-blue-200 px-3.5 py-1 rounded-full tracking-wider">
                     Programa Nacional de Canais & Distribuição Autorizada
                   </span>
                   <h1 className="text-2xl sm:text-3xl font-black text-slate-950 uppercase tracking-tight">
                     Certificado de Parceria Comercial
                   </h1>
-                  <p className="text-xs text-slate-500 font-medium">
-                    Homologação Técnica e Credenciação de Canal Autorizado
+                  <p className="text-xs text-slate-600 font-semibold uppercase tracking-wider">
+                    Homologação Técnica e Credenciação Institucional de Canal
                   </p>
                 </div>
 
                 {/* Declaração Formal */}
-                <div className="text-center max-w-2xl mx-auto text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+                <div className="text-center max-w-2xl mx-auto text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3 pt-1">
+                  <p className="text-xs text-slate-600">
+                    A <strong>VISUAL SOFTWARE</strong> atesta e certifica nos termos do seu regulamento corporativo de canais que a entidade:
+                  </p>
+                  <div className="bg-slate-50 border-y-2 border-slate-300 py-3.5 px-6">
+                    <h2 className="text-lg sm:text-xl font-black text-slate-950 uppercase tracking-wide">
+                      {partnerName}
+                    </h2>
+                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed text-justify">
+                    Inscrita sob o NIF n.º <strong>{partnerNif}</strong> e portadora do Código Oficial de Parceiro <strong>{partnerCode}</strong>, concluiu com distinção o processo de validação técnica, operacional e comercial, encontrando-se formalmente <strong>HOMOLOGADA E CREDENCIADA</strong> como parceiro oficial autorizado para distribuição, implementação e suporte de soluções de software de gestão em todo o território nacional.
+                  </p>
+                </div>
+
+                {/* Tabela Estruturada de Detalhes da Parceria */}
+                <div className="border border-slate-300 rounded-lg overflow-hidden text-xs">
+                  <div className="bg-slate-100 border-b border-slate-300 px-4 py-2 font-black text-slate-800 uppercase text-[10px] tracking-wider">
+                    Especificação do Credenciamento Oficial
+                  </div>
+                  <table className="w-full text-left divide-y divide-slate-200">
+                    <tbody className="divide-y divide-slate-200">
+                      <tr>
+                        <td className="py-3 px-4 font-semibold text-slate-600 w-1/3 bg-slate-50/60">Categoria da Parceria:</td>
+                        <td className="py-3 px-4 font-black text-slate-950 uppercase">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-900 border border-blue-200 text-xs">
+                            {partnerTier} PARTNER
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Âmbito Territorial:</td>
+                        <td className="py-3 px-4 font-bold text-slate-900">
+                          {partnerRegion} • República de Angola
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Data de Homologação:</td>
+                        <td className="py-3 px-4 font-bold text-slate-900">
+                          {issueDateFormatted}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Validade do Credenciamento:</td>
+                        <td className="py-3 px-4 font-bold text-slate-900">
+                          Anual (Renovação Contínua)
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Estado do Credenciamento:</td>
+                        <td className="py-3 px-4 font-bold text-emerald-700">
+                          ● HOMOLOGADO E ACTIVO NA REDE NACIONAL
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Competências Autorizadas */}
+                <div className="bg-slate-50 p-4 border border-slate-200 rounded-lg text-xs text-slate-600 leading-relaxed text-justify space-y-1">
+                  <p className="font-bold text-slate-900 text-[11px] uppercase tracking-wide">
+                    Âmbito de Actuação Autorizado:
+                  </p>
                   <p>
-                    A <strong>VISUAL SOFTWARE</strong> certifica para os devidos efeitos que a entidade:
-                  </p>
-                  <p className="text-base sm:text-lg font-black text-slate-950 py-1 uppercase tracking-wide border-y border-slate-100">
-                    {partnerName}
-                  </p>
-                  <p className="text-xs text-slate-600 leading-normal">
-                    Inscrita sob o NIF n.º <strong>{partnerNif}</strong> e portadora do Código Oficial de Parceiro <strong>{partnerCode}</strong>, cumpre integralmente os requisitos de qualificação técnica, operacional e comercial, encontrando-se formalmente <strong>HOMOLOGADA E CREDENCIADA</strong> como parceiro oficial de distribuição de soluções tecnológicas.
+                    O titular deste certificado está plenamente capacitado para apresentação comercial, demonstração técnica, ativação e fornecimento de licenças de software, configuração de postos de trabalho e prestação de assistência de primeira linha a clientes finais.
                   </p>
                 </div>
-
-                {/* Tabela de Especificação da Parceria */}
-                <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
-                  <div className="bg-slate-50 border-b border-slate-200 px-4 py-2 font-bold text-slate-700 uppercase text-[10px] tracking-wider">
-                    Dados de Registo & Credenciação
-                  </div>
-                  <div className="divide-y divide-slate-100">
-                    <div className="grid grid-cols-3 p-3">
-                      <span className="text-slate-500 font-medium">Categoria da Parceria:</span>
-                      <span className="col-span-2 font-bold text-slate-900 uppercase">
-                        {partnerTier} PARTNER
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-3 p-3">
-                      <span className="text-slate-500 font-medium">Âmbito Territorial:</span>
-                      <span className="col-span-2 font-bold text-slate-900">
-                        {partnerRegion} • República de Angola
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-3 p-3">
-                      <span className="text-slate-500 font-medium">Data de Homologação:</span>
-                      <span className="col-span-2 font-bold text-slate-900">
-                        {issueDateFormatted}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-3 p-3">
-                      <span className="text-slate-500 font-medium">Estado do Credenciamento:</span>
-                      <span className="col-span-2 font-bold text-emerald-700 flex items-center gap-1.5">
-                        ● HOMOLOGADO E ACTIVO
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Rodapé e Assinaturas Institucionais */}
-                <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-6 text-[11px]">
-                  <div className="text-center sm:text-left space-y-0.5">
-                    <p className="font-bold text-slate-900">VISUAL SOFTWARE — ANGOLA</p>
-                    <p className="text-slate-400 text-[10px]">Departamento de Parcerias & Operações Comerciais</p>
-                    <p className="text-slate-400 text-[10px]">Validável em https://kivora.ao/#validar-parceiro</p>
-                  </div>
-
-                  <div className="text-center sm:text-right border-t sm:border-t-0 sm:border-l border-slate-200 pt-4 sm:pt-0 sm:pl-6 space-y-1">
-                    <div className="w-44 h-9 border-b border-slate-400 mx-auto sm:ml-auto flex items-end justify-center pb-1">
-                      <span className="font-serif italic text-slate-700 text-xs">Visual Software Direção</span>
-                    </div>
-                    <p className="font-bold text-slate-900 text-[10px] uppercase">Direção Comercial & Canais</p>
-                    <p className="text-slate-400 text-[9px]">Chave Digital: {vsRegNumber}</p>
-                  </div>
-                </div>
-
               </div>
+
+              {/* Rodapé e Assinaturas Institucionais */}
+              <div className="pt-8 border-t-2 border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-6 text-[11px] avoid-break mt-6">
+                <div className="text-center sm:text-left space-y-0.5">
+                  <p className="font-black text-slate-950 text-xs">VISUAL SOFTWARE — ANGOLA</p>
+                  <p className="text-slate-500 text-[10px]">Departamento de Parcerias & Operações Comerciais</p>
+                  <p className="text-slate-400 text-[9px]">Validação pública online: {validationUrl}</p>
+                </div>
+
+                <div className="text-center sm:text-right border-t sm:border-t-0 sm:border-l border-slate-200 pt-4 sm:pt-0 sm:pl-6 space-y-1">
+                  <div className="w-48 border-b border-slate-600 pb-1 mb-1 mx-auto sm:ml-auto">
+                    <p className="font-serif italic text-slate-800 text-xs font-bold">Visual Software Direção</p>
+                  </div>
+                  <p className="font-black text-slate-950 text-[10px] uppercase">Direção Comercial & Canais</p>
+                  <p className="text-slate-400 text-[9px] font-mono">Chave de Autenticação: {vsRegNumber}</p>
+                </div>
+              </div>
+
             </div>
           )}
 
           {/* =========================================================================
-              DOCUMENTO 2: CERTIFICADO DE AUTORIZAÇÃO DE REVENDA DO SOFTWARE KIVORA ERP
+              DOCUMENTO 2: AUTORIZAÇÃO DE REVENDA DE SOFTWARE (KIVORA ERP)
               ========================================================================= */}
           {activeDoc === 'revenda_kivora' && (
-            <div className="certificate-document bg-white border border-slate-300 rounded-2xl p-8 sm:p-12 max-w-[800px] w-full shadow-lg relative flex flex-col justify-between min-h-[980px] print:shadow-none print:border-0 print:p-0 print:m-0 print:min-h-0 text-slate-900 font-sans">
+            <div className="printable-document certificate-document a4-document bg-white text-slate-900 w-full max-w-[800px] min-h-[1050px] p-10 sm:p-14 shadow-2xl flex flex-col justify-between relative print:shadow-none print:p-0 print:m-0 print:min-h-0 print:w-full print:max-w-none print:min-h-[265mm] font-sans">
               
-              {/* Moldura Interna Clássica e Séria */}
-              <div className="border border-slate-200 p-8 sm:p-10 rounded-xl relative flex flex-col justify-between h-full space-y-6">
-                
-                {/* Cabeçalho Oficial: Kivora ERP + Visual Software */}
-                <div className="flex items-start justify-between border-b border-slate-200 pb-6">
-                  <div>
+              {/* Top Corporate Line — No fluxo do documento com margem inferior generosa */}
+              <div className="w-full h-1.5 bg-slate-900 mb-6 print:mb-6 shrink-0" />
+
+              <div className="space-y-6 sm:space-y-7 flex-1">
+                {/* Cabeçalho Oficial: Kivora ERP + AGT */}
+                <div className="flex items-start justify-between border-b-2 border-slate-900 pb-5">
+                  <div className="space-y-1">
                     <img
                       src="/imagens/logo_sem_fundo.png"
                       alt="Kivora ERP"
-                      className="h-10 w-auto object-contain"
+                      className="h-10 w-auto object-contain mb-1.5"
                     />
-                    <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider mt-2">
+                    <span className="font-black text-lg tracking-tight text-slate-950 block leading-tight">
                       Software de Faturação & Gestão Comercial
+                    </span>
+                    <p className="text-[11px] text-slate-700 font-bold">
+                      Certificação Fiscal AGT n.º 384/AGT/2024 • Decreto Presidencial n.º 71/25
                     </p>
-                    <p className="text-[10px] text-slate-500 font-semibold">
-                      Certificação Fiscal AGT n.º 384/AGT/2024 • Dec. Presidencial n.º 71/25
+                    <p className="text-[10px] text-slate-400">
+                      Propriedade Industrial e Direitos Reservados à Visual Software
                     </p>
                   </div>
 
                   <div className="text-right flex flex-col items-end">
                     <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(validationUrl)}&margin=0`}
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(validationUrl)}&margin=0`}
                       alt="QR de Autorização de Revenda"
-                      className="w-16 h-16 border border-slate-200 p-1 rounded-lg bg-white"
+                      className="w-16 h-16 border border-slate-300 p-1 rounded bg-white shadow-2xs"
                     />
-                    <span className="text-[9px] font-mono text-slate-400 mt-1 font-bold">
+                    <span className="text-[9px] font-mono text-slate-600 mt-1 font-bold">
                       AUT. {kvraRegNumber}
                     </span>
                   </div>
                 </div>
 
                 {/* Título da Autorização */}
-                <div className="text-center space-y-2 my-2">
-                  <span className="inline-block text-[10px] font-black uppercase text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full tracking-wider">
+                <div className="text-center space-y-1.5 pt-1">
+                  <span className="inline-block text-[10px] font-black uppercase text-amber-900 bg-amber-50 border border-amber-200 px-3.5 py-1 rounded-full tracking-wider">
                     Outorga de Licença de Comercialização & Distribuição
                   </span>
                   <h1 className="text-2xl sm:text-3xl font-black text-slate-950 uppercase tracking-tight">
                     Autorização de Revenda de Software
                   </h1>
-                  <p className="text-xs text-slate-500 font-medium">
+                  <p className="text-xs text-slate-600 font-semibold uppercase tracking-wider">
                     Concessão Formal para Distribuição do Kivora ERP em Angola
                   </p>
                 </div>
 
                 {/* Declaração Formal de Outorga */}
-                <div className="text-center max-w-2xl mx-auto text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+                <div className="text-center max-w-2xl mx-auto text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3 pt-1">
                   <p className="text-xs text-slate-600">
-                    A <strong>VISUAL SOFTWARE</strong>, titular dos direitos de exploração e propriedade industrial da plataforma <strong>KIVORA ERP</strong>, confere pelo presente instrumento autorização expressa à entidade:
+                    A <strong>VISUAL SOFTWARE</strong>, entidade titular dos direitos de exploração e propriedade industrial da plataforma <strong>KIVORA ERP</strong>, confere pelo presente instrumento autorização expressa à entidade:
                   </p>
-                  <p className="text-base sm:text-lg font-black text-slate-950 py-1 uppercase tracking-wide border-y border-slate-100">
-                    {partnerName}
-                  </p>
-                  <p className="text-xs text-slate-600 leading-normal">
-                    Portadora do NIF n.º <strong>{partnerNif}</strong> e Código de Revendedor <strong>{partnerCode}</strong>, com plenos poderes para <strong>comercialização, emissão de licenças, instalação de postos de trabalho e suporte técnico</strong> do software Kivora ERP perante clientes comerciais em todo o território nacional.
+                  <div className="bg-slate-50 border-y-2 border-slate-300 py-3.5 px-6">
+                    <h2 className="text-lg sm:text-xl font-black text-slate-950 uppercase tracking-wide">
+                      {partnerName}
+                    </h2>
+                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed text-justify">
+                    Pessoa coletiva portadora do NIF n.º <strong>{partnerNif}</strong> e Código de Revendedor <strong>{partnerCode}</strong>, com plenos poderes para <strong>comercialização, fornecimento de licenças de uso, instalação e configuração de postos em rede local e suporte operacional</strong> do software Kivora ERP perante clientes comerciais em toda a República de Angola.
                   </p>
                 </div>
 
                 {/* Tabela de Especificação da Concessão */}
-                <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
-                  <div className="bg-slate-50 border-b border-slate-200 px-4 py-2 font-bold text-slate-700 uppercase text-[10px] tracking-wider">
-                    Termos da Concessão de Revenda
+                <div className="border border-slate-300 rounded-lg overflow-hidden text-xs">
+                  <div className="bg-slate-100 border-b border-slate-300 px-4 py-2 font-black text-slate-800 uppercase text-[10px] tracking-wider">
+                    Termos da Concessão de Revenda Autorizada
                   </div>
-                  <div className="divide-y divide-slate-100">
-                    <div className="grid grid-cols-3 p-3">
-                      <span className="text-slate-500 font-medium">Software Autorizado:</span>
-                      <span className="col-span-2 font-bold text-slate-900">
-                        Kivora ERP v2.4 (Edição Comercial & Multi-posto)
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-3 p-3">
-                      <span className="text-slate-500 font-medium">Certificação AGT:</span>
-                      <span className="col-span-2 font-bold text-slate-900">
-                        Certificado Oficial n.º 384/AGT/2024
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-3 p-3">
-                      <span className="text-slate-500 font-medium">Modalidade Autorizada:</span>
-                      <span className="col-span-2 font-bold text-slate-900">
-                        Canal Oficial de Distribuição, Ativação de Licenças e Suporte
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-3 p-3">
-                      <span className="text-slate-500 font-medium">Estado da Autorização:</span>
-                      <span className="col-span-2 font-bold text-emerald-700 flex items-center gap-1.5">
-                        ● AUTORIZAÇÃO EM VIGOR E REGULARIZADA
-                      </span>
-                    </div>
-                  </div>
+                  <table className="w-full text-left divide-y divide-slate-200">
+                    <tbody className="divide-y divide-slate-200">
+                      <tr>
+                        <td className="py-3 px-4 font-semibold text-slate-600 w-1/3 bg-slate-50/60">Software Autorizado:</td>
+                        <td className="py-3 px-4 font-bold text-slate-900">
+                          Kivora ERP v2.4 (Edição Comercial & Multi-posto)
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Certificação Fiscal AGT:</td>
+                        <td className="py-3 px-4 font-black text-slate-950">
+                          Certificado Oficial n.º 384/AGT/2024
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Modalidade Autorizada:</td>
+                        <td className="py-3 px-4 font-bold text-slate-900">
+                          Canal Oficial de Distribuição, Ativação de Licenças e Suporte
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Módulos Abrangidos:</td>
+                        <td className="py-3 px-4 text-slate-800">
+                          Faturação Certificada, Stocks, Tesouraria, SAF-T (AO), Relatórios
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Estado da Autorização:</td>
+                        <td className="py-3 px-4 font-bold text-emerald-700">
+                          ● AUTORIZAÇÃO EM VIGOR E REGULARIZADA
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
 
-                {/* Rodapé e Assinaturas */}
-                <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-6 text-[11px]">
-                  <div className="text-center sm:text-left space-y-0.5">
-                    <p className="font-bold text-slate-900">KIVORA TECNOLOGIAS & VISUAL SOFTWARE</p>
-                    <p className="text-slate-400 text-[10px]">Departamento de Licenciamento & Engenharia de Software</p>
-                    <p className="text-slate-400 text-[10px]">Verificação pública em https://kivora.ao/#validar-parceiro</p>
-                  </div>
-
-                  <div className="text-center sm:text-right border-t sm:border-t-0 sm:border-l border-slate-200 pt-4 sm:pt-0 sm:pl-6 space-y-1">
-                    <div className="w-44 h-9 border-b border-slate-400 mx-auto sm:ml-auto flex items-end justify-center pb-1">
-                      <span className="font-serif italic text-slate-700 text-xs">Direção Técnica Kivora</span>
-                    </div>
-                    <p className="font-bold text-slate-900 text-[10px] uppercase">Direção Técnica e Engenharia</p>
-                    <p className="text-slate-400 text-[9px]">Chave Digital: {kvraRegNumber}</p>
-                  </div>
+                {/* Conformidade Fiscal e Legal */}
+                <div className="bg-slate-50 p-4 border border-slate-200 rounded-lg text-xs text-slate-600 leading-relaxed text-justify space-y-1">
+                  <p className="font-bold text-slate-900 text-[11px] uppercase tracking-wide">
+                    Garantia de Conformidade Legal & Tributária:
+                  </p>
+                  <p>
+                    O software Kivora ERP cumpre com rigor os requisitos de assinatura digital com chave assimétrica RSA-2048, comunicação e exportação do ficheiro SAF-T (AO), em total alinhamento com as normas da AGT e o Decreto Presidencial n.º 71/25.
+                  </p>
                 </div>
-
               </div>
+
+              {/* Rodapé e Assinaturas */}
+              <div className="pt-8 border-t-2 border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-6 text-[11px] avoid-break mt-6">
+                <div className="text-center sm:text-left space-y-0.5">
+                  <p className="font-black text-slate-950 text-xs">KIVORA TECNOLOGIAS & VISUAL SOFTWARE</p>
+                  <p className="text-slate-500 text-[10px]">Departamento de Licenciamento & Engenharia de Software</p>
+                  <p className="text-slate-400 text-[9px]">Verificação pública em https://kivora.ao/#validar-parceiro</p>
+                </div>
+
+                <div className="text-center sm:text-right border-t sm:border-t-0 sm:border-l border-slate-200 pt-4 sm:pt-0 sm:pl-6 space-y-1">
+                  <div className="w-48 border-b border-slate-600 pb-1 mb-1 mx-auto sm:ml-auto">
+                    <p className="font-serif italic text-slate-800 text-xs font-bold">Direção Técnica Kivora</p>
+                  </div>
+                  <p className="font-black text-slate-950 text-[10px] uppercase">Direção Técnica e Engenharia</p>
+                  <p className="text-slate-400 text-[9px] font-mono">Chave Digital: {kvraRegNumber}</p>
+                </div>
+              </div>
+
             </div>
           )}
 
         </div>
 
         {/* Modal Footer / Actions (Hidden on Print) */}
-        <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 bg-white shrink-0 print:hidden text-xs">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(validationUrl);
-                setCopiedLink(true);
-                setTimeout(() => setCopiedLink(false), 2500);
-              }}
-              className="text-slate-600 hover:text-slate-900 font-bold px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center gap-1.5 cursor-pointer"
-            >
-              {copiedLink ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedLink ? 'Link Copiado!' : 'Copiar Link de Verificação'}</span>
-            </button>
+        <div className="p-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-950 shrink-0 print:hidden text-xs">
+          <div className="text-slate-400 text-[11px]">
+            Documento formatado em <strong>A4 standard</strong> para arquivamento oficial ou apresentação ao cliente.
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
+              className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer transition-all"
             >
               <Printer className="w-4 h-4" />
               <span>Imprimir Certificado Ativo</span>
             </button>
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl font-bold text-slate-300 hover:text-white hover:bg-slate-800 cursor-pointer transition-colors"
             >
               Fechar
             </button>

@@ -633,21 +633,6 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   </div>
 
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                    <label className="text-xs font-bold text-slate-800 block">Custo de Atacado por Posto Extra (Kz)</label>
-                    <p className="text-[11px] text-slate-500">Valor cobrado ao parceiro por cada terminal / computador adicional em rede:</p>
-                    <div className="flex items-center gap-2 pt-1">
-                      <input
-                        type="number"
-                        step={5000}
-                        value={policyDraft.extra_seat_cost_aoa}
-                        onChange={(e) => setPolicyDraft({ ...policyDraft, extra_seat_cost_aoa: Number(e.target.value) || 25000 })}
-                        className="w-36 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
-                      />
-                      <span className="text-xs font-bold text-slate-700">Kz / Posto</span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
                     <label className="text-xs font-bold text-slate-800 block">Recarga Mínima da Carteira Pré-Paga (Kz)</label>
                     <p className="text-[11px] text-slate-500">Valor mínimo sugerido para transferências de recarga de Wallet:</p>
                     <div className="flex items-center gap-2 pt-1">
@@ -660,6 +645,108 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                       />
                       <span className="text-xs font-bold text-slate-700">Kz Mínimo</span>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seção 3: Custos & Políticas de Terminais Adicionais (Rede Local LAN) */}
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <Users className="w-4 h-4 text-blue-600" />
+                    <span>3. Configuração de Custos de Terminais / Postos Extras</span>
+                  </h4>
+                  <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
+                    Diferenciado por Nível (Tier)
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500">
+                  Configure o valor cobrado nas vendas diretas do Admin e o custo de atacado por terminal com desconto progressivo para cada nível de parceiro:
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                    <label className="text-xs font-bold text-slate-800 block">Preço de Terminal para Venda Final / Admin (Kz)</label>
+                    <p className="text-[11px] text-slate-500">Valor cobrado quando o Admin adiciona postos a clientes ou nas vendas públicas:</p>
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="number"
+                        step={5000}
+                        value={policyDraft.admin_extra_seat_cost_aoa || 35000}
+                        onChange={(e) => setPolicyDraft({
+                          ...policyDraft,
+                          admin_extra_seat_cost_aoa: Number(e.target.value) || 35000,
+                          retail_extra_seat_price_aoa: Number(e.target.value) || 35000,
+                          extra_seat_cost_aoa: Number(e.target.value) || 35000,
+                        })}
+                        className="w-36 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                      />
+                      <span className="text-xs font-bold text-slate-700">Kz / Posto Final</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                    <label className="text-xs font-bold text-slate-800 block">Custo Base de Atacado para Parceiros (Kz)</label>
+                    <p className="text-[11px] text-slate-500">Referência base de custo por computador em rede cobrado aos parceiros:</p>
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="number"
+                        step={5000}
+                        value={policyDraft.partner_extra_seat_base_cost_aoa || 25000}
+                        onChange={(e) => setPolicyDraft({
+                          ...policyDraft,
+                          partner_extra_seat_base_cost_aoa: Number(e.target.value) || 25000,
+                        })}
+                        className="w-36 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                      />
+                      <span className="text-xs font-bold text-slate-700">Kz / Posto Base</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tabela de Custo de Terminal por Nível */}
+                <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-200/80 space-y-3">
+                  <span className="text-xs font-black uppercase text-blue-900 block">
+                    Custo de Atacado por Posto Conforme o Nível do Parceiro (Tier):
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {[
+                      { key: 'bronze', label: 'Bronze', defaultVal: 25000, desc: 'Margem: 10.000 Kz' },
+                      { key: 'silver', label: 'Silver', defaultVal: 20000, desc: 'Margem: 15.000 Kz' },
+                      { key: 'gold', label: 'Gold', defaultVal: 15000, desc: 'Margem: 20.000 Kz' },
+                      { key: 'diamond', label: 'Diamond', defaultVal: 10000, desc: 'Margem: 25.000 Kz' },
+                    ].map((t) => (
+                      <div key={t.key} className="bg-white p-3 rounded-xl border border-blue-200/60 space-y-1.5">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[11px] font-black uppercase text-slate-800">{t.label}</span>
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                            {t.desc}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="number"
+                            step={2500}
+                            value={policyDraft.tier_extra_seat_costs?.[t.key as keyof typeof policyDraft.tier_extra_seat_costs] ?? t.defaultVal}
+                            onChange={(e) => {
+                              const val = Math.max(1000, Number(e.target.value) || t.defaultVal);
+                              setPolicyDraft({
+                                ...policyDraft,
+                                tier_extra_seat_costs: {
+                                  bronze: policyDraft.tier_extra_seat_costs?.bronze ?? 25000,
+                                  silver: policyDraft.tier_extra_seat_costs?.silver ?? 20000,
+                                  gold: policyDraft.tier_extra_seat_costs?.gold ?? 15000,
+                                  diamond: policyDraft.tier_extra_seat_costs?.diamond ?? 10000,
+                                  [t.key]: val,
+                                }
+                              });
+                            }}
+                            className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-mono font-bold text-slate-900"
+                          />
+                          <span className="text-[11px] font-bold text-slate-500">Kz</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

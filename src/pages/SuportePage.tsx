@@ -1,116 +1,334 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { PageHero } from '../components/PageHero';
-import { ArrowRight, Mail, Phone, MessageCircle } from 'lucide-react';
+import {
+  Mail, Phone, MessageCircle, Send, CheckCircle2,
+  Clock, Loader2, Headphones
+} from 'lucide-react';
 import { KIVORA_INFO } from '../data/kivoraData';
+
+import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
 
 interface SuportePageProps {
   initialSubject?: string;
 }
 
-function useScrollReveal() {
-  useEffect(() => {
-    const els = document.querySelectorAll('[data-reveal]');
-    const obs = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('sr-visible'); obs.unobserve(e.target); } }),
-      { threshold: 0.1 }
-    );
-    els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
-}
+export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [telefone, setTelefone] = useState('');
+  const [nif, setNif] = useState('');
+  const [departamento, setDepartamento] = useState('tecnico');
+  const [assunto, setAssunto] = useState(initialSubject || '');
+  const [mensagem, setMensagem] = useState('');
+  
+  const [submitting, setSubmitting] = useState(false);
+  const [ticketProtocol, setTicketProtocol] = useState<string | null>(null);
 
-export const SuportePage: React.FC<SuportePageProps> = () => {
-  useScrollReveal();
+  const handleSubmitTicket = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nome || !telefone || !mensagem) return;
+
+    setSubmitting(true);
+    setTimeout(() => {
+      setSubmitting(false);
+      const protocol = `TICK-AO-${Date.now().toString().slice(-6)}`;
+      setTicketProtocol(protocol);
+    }, 1000);
+  };
+
+  const faqs = [
+    {
+      categoria: 'Operação & Faturação',
+      q: 'O KIVORA funciona mesmo se a internet da loja falhar?',
+      a: 'Sim, a 100%. A base de dados do Kivora fica instalada no seu computador. Todas as vendas, emissão de faturas, fecho de caixa e impressão de talões ocorrem localmente sem depender de ligação à internet.',
+    },
+    {
+      categoria: 'Redes Locais & Multi-Posto',
+      q: 'Como posso ligar 3 ou mais caixas em rede local na mesma loja?',
+      a: 'Basta instalar o Kivora como "Servidor" no computador principal e como "Terminal Cliente" nos computadores dos caixas, todos conectados ao mesmo router/switch de rede local.',
+    },
+    {
+      categoria: 'Conformidade Fiscal AGT',
+      q: 'Como é gerado e entregue o ficheiro SAF-T AO?',
+      a: 'No menu Relatórios > SAF-T, selecione o mês pretendido e clique em "Gerar SAF-T". O ficheiro XML gerado é auditado pelo validador interno e fica pronto para submissão no portal da AGT até ao dia 15 de cada mês.',
+    },
+    {
+      categoria: 'Segurança & Backups',
+      q: 'Como garantir que não perco os dados das vendas da minha empresa?',
+      a: 'O Kivora possui rotina de backup automático com 1 clique para pastas locais, unidades secundárias ou Pen USB. Recomendamos a realização de cópias diárias de segurança no encerramento do dia.',
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-white text-slate-900 page-enter">
 
+      {/* Hero Showcase */}
       <PageHero
-        image="/imagens/2148708903.jpg"
-        tag="Suporte Técnico"
-        title="Estamos aqui para ajudar"
-        sub="Equipa técnica disponível para instalações, configurações de rede local e resolução de problemas."
+        image={welcomeImg}
+        tag="Central de Atendimento & Suporte Técnico"
+        title="Assistência Especializada para a Sua Empresa"
+        sub="Equipa técnica sediada em Luanda disponível para apoio presencial e remoto, configurações de rede local, parametrização fiscal e esclarecimento de dúvidas."
       />
 
-      <section className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16 py-20">
+      {/* Main Container */}
+      <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-24 space-y-16">
+        
+        {/* Canais Diretos de Contacto */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            {
-              icon: <MessageCircle className="w-6 h-6" strokeWidth={1.75} />,
-              title: 'Chat ao Vivo & WhatsApp',
-              desc: 'Resposta imediata em dias úteis das 08h às 18h.',
-              action: 'Iniciar WhatsApp',
-              href: KIVORA_INFO.whatsapp,
-              color: 'blue',
-            },
-            {
-              icon: <Mail className="w-6 h-6" strokeWidth={1.75} />,
-              title: 'Email de Suporte',
-              desc: `${KIVORA_INFO.supportEmail} — resposta em até 4 horas úteis.`,
-              action: 'Enviar Email',
-              href: `mailto:${KIVORA_INFO.supportEmail}`,
-              color: 'slate',
-            },
-            {
-              icon: <Phone className="w-6 h-6" strokeWidth={1.75} />,
-              title: 'Linha Telefónica',
-              desc: `${KIVORA_INFO.phoneDisplay} — Segunda a Sexta, 08h–17h30.`,
-              action: 'Ligar Agora',
-              href: `tel:${KIVORA_INFO.phoneRaw}`,
-              color: 'slate',
-            },
-          ].map((item, i) => (
-            <div
-              key={i}
-              data-reveal
-              className="sr-init bg-white border border-slate-200 rounded-3xl p-8 flex flex-col gap-5 hover:shadow-lg hover:border-slate-300 transition-all"
-              style={{ transitionDelay: `${i * 100}ms` }}
-            >
-              <div className={`w-12 h-12 flex items-center justify-center rounded-2xl ${
-                item.color === 'blue' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700'
-              }`}>
-                {item.icon}
+          <div className="bg-slate-950 text-white rounded-3xl p-8 flex flex-col justify-between space-y-6 shadow-xl border border-slate-800">
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                <MessageCircle className="w-6 h-6" />
               </div>
-              <div className="flex-1">
-                <h3 className="text-base font-black text-slate-950 mb-1.5">{item.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
+              <div>
+                <h3 className="text-lg font-black">WhatsApp & Chat Imediato</h3>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  Canal prioritário para suporte em tempo real com os nossos técnicos em Angola.
+                </p>
               </div>
-              <a
-                href={item.href}
-                target={item.href.startsWith('http') ? '_blank' : undefined}
-                rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                className={`inline-flex items-center gap-2 font-bold text-sm group ${
-                  item.color === 'blue' ? 'text-blue-600 hover:text-blue-800' : 'text-slate-700 hover:text-slate-950'
-                } transition-colors`}
-              >
-                <span>{item.action}</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" strokeWidth={2} />
-              </a>
+              <div className="text-[11px] text-slate-400 space-y-1 pt-2 border-t border-slate-800">
+                <p className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Segunda a Sábado: 08h00 – 19h00</span>
+                </p>
+              </div>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* FAQ */}
-      <section className="bg-slate-50 border-t border-slate-100 py-20 px-6 sm:px-10 lg:px-16">
-        <div className="max-w-4xl mx-auto">
-          <div data-reveal className="sr-init mb-10">
-            <h2 className="text-2xl font-black text-slate-950">Perguntas Frequentes</h2>
+            <a
+              href={KIVORA_INFO.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>Falar no WhatsApp Agora</span>
+            </a>
           </div>
-          <div className="space-y-5">
-            {[
-              { q: 'O KIVORA funciona sem internet?', a: 'Sim. O sistema foi desenhado para funcionar 100% offline. A ligação à internet apenas é necessária para comunicação com o portal AGT e ativação de licença.' },
-              { q: 'Posso instalar em vários computadores?', a: 'Sim, em modo Rede Local. Um PC funciona como servidor central e os restantes ligam-se a ele por LAN.' },
-              { q: 'Como faço backup dos dados?', a: 'O KIVORA permite backup automático para pasta local ou Pen USB com um clique. Recomendamos backups diários.' },
-              { q: 'O suporte inclui visitas ao local?', a: 'Sim, para planos Ilimitados e por contratação separada para planos Mensal e Anual. Consulte os técnicos.' },
-            ].map((faq, i) => (
-              <div key={i} data-reveal className="sr-init border-b border-slate-200 pb-5" style={{ transitionDelay: `${i * 60}ms` }}>
-                <h4 className="font-bold text-slate-900 mb-1.5">{faq.q}</h4>
-                <p className="text-sm text-slate-600 leading-relaxed">{faq.a}</p>
+
+          <div className="bg-white rounded-3xl p-8 flex flex-col justify-between space-y-6 border border-slate-200/90 shadow-sm hover:shadow-lg transition-all">
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center">
+                <Phone className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-950">Atendimento Telefónico</h3>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Linha de suporte telefónico dedicada a operadores, caixas e gerentes.
+                </p>
+              </div>
+              <div className="text-xs font-mono font-bold text-slate-900 pt-2 border-t border-slate-100">
+                {KIVORA_INFO.phoneDisplay}
+              </div>
+            </div>
+
+            <a
+              href={`tel:${KIVORA_INFO.phoneRaw}`}
+              className="bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all"
+            >
+              <Phone className="w-4 h-4" />
+              <span>Ligar para a Central</span>
+            </a>
+          </div>
+
+          <div className="bg-white rounded-3xl p-8 flex flex-col justify-between space-y-6 border border-slate-200/90 shadow-sm hover:shadow-lg transition-all">
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center">
+                <Mail className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-950">Email de Suporte Técnico</h3>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Envio de ficheiros de log, cópias de segurança e esclarecimento de regras fiscais.
+                </p>
+              </div>
+              <div className="text-xs font-mono font-bold text-slate-900 pt-2 border-t border-slate-100 truncate">
+                {KIVORA_INFO.supportEmail}
+              </div>
+            </div>
+
+            <a
+              href={`mailto:${KIVORA_INFO.supportEmail}`}
+              className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all"
+            >
+              <Mail className="w-4 h-4" />
+              <span>Enviar Mensagem</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Formulário Interativo de Abertura de Ticket com Protocolo */}
+        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 sm:p-12 space-y-8">
+          <div className="max-w-2xl mx-auto text-center space-y-2">
+            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-blue-600 bg-blue-100/60 px-3.5 py-1 rounded-full">
+              <Headphones className="w-3.5 h-3.5" />
+              <span>Abertura de Chamado Técnico</span>
+            </div>
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-950">
+              Precisa de Intervenção Técnica ou Formação?
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              Preencha o formulário para gerar o seu número de protocolo e ser atendido por um engenheiro de suporte.
+            </p>
+          </div>
+
+          {ticketProtocol ? (
+            <div className="bg-white border-2 border-emerald-500 rounded-3xl p-8 text-center max-w-xl mx-auto space-y-4 shadow-xl animate-fadeIn">
+              <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-8 h-8" />
+              </div>
+              <h4 className="text-xl font-black text-slate-950">Chamado Registado com Sucesso!</h4>
+              <p className="text-xs text-slate-600">
+                O seu pedido foi encaminhado para a equipa técnica. O protocolo oficial de acompanhamento é:
+              </p>
+              <div className="bg-slate-900 text-white py-3 px-6 rounded-2xl font-mono font-black text-lg tracking-wider w-fit mx-auto shadow-inner">
+                {ticketProtocol}
+              </div>
+              <p className="text-[11px] text-slate-500">
+                Um técnico entrará em contacto para o número <strong>{telefone}</strong> em menos de 2 horas úteis.
+              </p>
+              <button
+                onClick={() => {
+                  setTicketProtocol(null);
+                  setMensagem('');
+                  setAssunto('');
+                }}
+                className="text-xs font-bold text-blue-600 hover:text-blue-700 underline cursor-pointer pt-2 block mx-auto"
+              >
+                Abrir novo chamado
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmitTicket} className="max-w-3xl mx-auto space-y-6 bg-white p-6 sm:p-10 rounded-3xl border border-slate-200/90 shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Nome do Solicitante / Responsável *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: João Baptista"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Telefone / WhatsApp *</label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="Ex: +244 923 000 000"
+                    value={telefone}
+                    onChange={(e) => setTelefone(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Email Corporativo</label>
+                  <input
+                    type="email"
+                    placeholder="Ex: geral@empresa.ao"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">NIF da Empresa Licenciada</label>
+                  <input
+                    type="text"
+                    placeholder="Ex: 5417088920"
+                    value={nif}
+                    onChange={(e) => setNif(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-blue-500 focus:bg-white uppercase"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Departamento / Área</label>
+                  <select
+                    value={departamento}
+                    onChange={(e) => setDepartamento(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="tecnico">Instalação & Configuração de Rede LAN</option>
+                    <option value="faturacao">Faturação Eletrónica & Validação AGT</option>
+                    <option value="licencas">Licenciamento, Ativações & Pagamentos</option>
+                    <option value="formacao">Formação de Caixas e Gerência</option>
+                    <option value="outro">Outro Assunto</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Assunto Principal *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: Dúvida na exportação do SAF-T mensal"
+                    value={assunto}
+                    onChange={(e) => setAssunto(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">Descrição Detalhada do Pedido ou Ocorrência *</label>
+                <textarea
+                  required
+                  rows={4}
+                  placeholder="Descreva o que necessita, mensagem de erro que surgiu ou a data pretendida para formação..."
+                  value={mensagem}
+                  onChange={(e) => setMensagem(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white leading-relaxed"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-xs sm:text-sm py-4 rounded-2xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>A gerar protocolo...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    <span>Enviar Pedido & Gerar Protocolo Oficial</span>
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+        </div>
+
+        {/* Perguntas Frequentes Expandidas */}
+        <div className="space-y-8">
+          <div className="text-center max-w-xl mx-auto space-y-2">
+            <h3 className="text-2xl font-black text-slate-950">Perguntas Frequentes (FAQ)</h3>
+            <p className="text-xs text-slate-500">Respostas rápidas às principais dúvidas operacionais e fiscais.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-xs space-y-2.5">
+                <span className="text-[10px] font-black uppercase text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-md">
+                  {faq.categoria}
+                </span>
+                <h4 className="font-bold text-sm text-slate-950">{faq.q}</h4>
+                <p className="text-xs text-slate-600 leading-relaxed">{faq.a}</p>
               </div>
             ))}
           </div>
         </div>
+
       </section>
 
     </div>

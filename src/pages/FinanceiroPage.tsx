@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { PageHero } from '../components/PageHero';
-import { CheckCircle2, ArrowRight, Calculator, ShieldCheck, Key, HelpCircle, Monitor, Sparkles } from 'lucide-react';
+import {
+  CheckCircle2, ArrowRight, Calculator, ShieldCheck, Key,
+  HelpCircle, Monitor, TrendingDown
+} from 'lucide-react';
 import { PageId } from '../components/Header';
 
 interface FinanceiroPageProps {
@@ -25,71 +28,82 @@ const PLANS: Plan[] = [
     name: 'Mensal Standalone',
     price: '25.000',
     period: '/ mês',
-    desc: 'Flexibilidade total sem contratos de fidelização. Ideal para 1 computador isolado.',
+    desc: 'Flexibilidade total sem contratos de fidelização. Ideal para 1 computador isolado ou início de atividade.',
     features: [
       '1 Posto de Trabalho Standalone',
       'Faturação Eletrónica AGT DS.120 com QR Code',
-      'POS de Balcão e Fecho de Caixa',
-      'Gestão de Stock Básica',
-      'Exportação SAF-T AO mensal',
-      'Atualizações fiscais incluídas',
+      'POS de Balcão e Fecho de Caixa com Relatório Z',
+      'Gestão de Stock Básica e Preços de Venda',
+      'Exportação SAF-T AO mensal sem erros',
+      'Atualizações fiscais legais incluídas',
       'Suporte por email e WhatsApp em horário comercial',
     ],
     ctaText: 'Aderir ao Plano Mensal',
   },
   {
     id: 'anual',
-    name: 'Anual Multi-Postos',
+    name: 'Anual Multi-Postos (Recomendado)',
     price: '250.000',
     period: '/ ano',
-    desc: 'A opção mais vantajosa para pequenas e médias empresas. Poupe mais de 16% e ganhe postos em rede LAN.',
+    desc: 'A opção mais rentável para empresas ativas. Inclui 3 postos em rede local e poupança imediata.',
     features: [
-      'Até 5 Postos de Trabalho em Rede LAN',
+      'Até 3 Postos de Trabalho em Rede LAN (Caixas + Servidor)',
       'Tudo do Plano Mensal incluído',
       'Módulo de Recursos Humanos & IRT 2026',
       'Contabilidade PGC-AO & SAF-T Completo',
-      'Multidepósito e Controlo de Validades de Stock',
+      'Multidepósito e Controlo de Validades e Lotes',
       'Suporte Técnico Prioritário (SLA 4h)',
-      'Formação inicial da equipa incluída',
+      'Formação operacional da equipa incluída',
     ],
     highlight: true,
     ctaText: 'Adquirir Licença Anual',
   },
   {
-    id: 'ilimitado',
-    name: 'Corporativo & Rede Ilimitada',
-    price: 'Sob Consulta',
-    period: '',
-    desc: 'Para empresas com múltiplos estabelecimentos, cadeias de lojas e requisitos à medida.',
+    id: 'vitalicio',
+    name: 'Licença Vitalícia Perpétua',
+    price: '650.000',
+    period: 'pagamento único',
+    desc: 'Sem renovações anuais ou mensalidades. A licença definitiva para a sua empresa com 5 postos LAN.',
     features: [
-      'Postos ilimitados em Rede Local / Servidor Dedicado',
-      'Instalação e parametrização presencial no local',
-      'Módulos customizados por ramo de atividade',
-      'Formação presencial certificada para operadores',
-      'Gestor de conta executivo dedicado',
-      'SLA de Suporte Técnico em até 2 horas',
-      'Backup automático local com espelhamento',
+      '5 Postos de Trabalho em Rede Local / Servidor Dedicado',
+      'Licença perpétua sem expiração',
+      'Instalação e parametrização presencial ou remota assistida',
+      'Todos os módulos do Kivora ERP desbloqueados',
+      'Formação presencial certificada para operadores e gerentes',
+      'Gestor de conta executivo e canal VIP de atendimento',
+      'Cópia de segurança automática local e em Pen USB',
     ],
-    ctaText: 'Solicitar Proposta à Medida',
+    ctaText: 'Adquirir Licença Perpétua',
   },
 ];
 
 export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal, onNavigatePage }) => {
-  // Simulador de Investimento
+  // Simulador de Investimento & ROI
   const [terminals, setTerminals] = useState<number>(3);
-  const [billingCycle, setBillingCycle] = useState<'annual' | 'monthly'>('annual');
+  const [selectedPlanType, setSelectedPlanType] = useState<'anual' | 'mensal' | 'vitalicio'>('anual');
 
-  // Cálculo da simulação
-  const baseMonthlyPerTerminal = 15000;
-  const baseAnnualPerTerminal = 120000; // Desconto de ~33%
-  
-  const estimatedPrice = billingCycle === 'annual'
-    ? terminals * baseAnnualPerTerminal
-    : terminals * baseMonthlyPerTerminal;
+  // Cálculos harmonizados
+  const calculatePrice = () => {
+    if (selectedPlanType === 'mensal') {
+      const extra = Math.max(0, terminals - 1);
+      return (25000 + extra * 10000);
+    }
+    if (selectedPlanType === 'anual') {
+      const extra = Math.max(0, terminals - 3);
+      return (250000 + extra * 35000);
+    }
+    // Vitalício
+    const extra = Math.max(0, terminals - 5);
+    return (650000 + extra * 60000);
+  };
 
-  const savings = billingCycle === 'annual'
-    ? (terminals * baseMonthlyPerTerminal * 12) - (terminals * baseAnnualPerTerminal)
-    : 0;
+  const calculatedPrice = calculatePrice();
+
+  // Comparação com Cloud ERP (USD $80/mês + Internet Fibra 40.000 Kz/mês)
+  // 1 ano de Cloud ERP = ($80 * 12 * 900 Kz) + (40000 * 12) = 864.000 + 480.000 = ~1.344.000 Kz/ano
+  const cloudErpAnnualCost = 1344000;
+  const kivoraAnnualEquivalent = selectedPlanType === 'anual' ? calculatedPrice : calculatedPrice * 12;
+  const realSavingsAoa = Math.max(0, cloudErpAnnualCost - kivoraAnnualEquivalent);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 page-enter">
@@ -98,8 +112,8 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
       <PageHero
         image="/imagens/46908.jpg"
         tag="Planos & Licenças Oficiais"
-        title="Investimento Transparente, Sem Mensalidades Escondidas"
-        sub="Software instalado localmente na sua empresa com licenciamento anual ou mensal. Inclui suporte técnico e todas as atualizações legais da AGT."
+        title="Investimento Transparente, Sem Custos Escondidos"
+        sub="Software instalado localmente na sua empresa com licenciamento em Kwanzas (AOA). Inclui suporte técnico e todas as atualizações fiscais da AGT."
       />
 
       {/* Banner de Validador de Licença */}
@@ -111,7 +125,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
             </div>
             <div>
               <strong className="text-sm font-bold block">Já possui uma Chave de Licença KIVORA?</strong>
-              <span className="text-xs text-slate-400">Consulte a validade fiscal, estado do hardware e data de renovação no validador público.</span>
+              <span className="text-xs text-slate-400">Consulte a autenticidade fiscal, postos autorizados e validade no validador oficial.</span>
             </div>
           </div>
           <button
@@ -128,55 +142,52 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
       <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-24 space-y-12">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <span className="text-xs font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/60">
-            Tabela de Preços
+            Tabela de Preços Oficiais
           </span>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-950">
-            Escolha o Plano Ideal para a Sua Empresa
+            Escolha a Modalidade de Licenciamento
           </h2>
           <p className="text-slate-600 text-sm leading-relaxed">
-            Sem custos adicionais por documento emitido. Licenciamento claro em Kwanzas (AOA).
+            Preços claros em Kwanzas (AOA) com IVA incluído no regime de isenção de software e sem cobrança por fatura emitida.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
           {PLANS.map((plan) => (
             <div
               key={plan.id}
-              className={`rounded-3xl p-8 sm:p-9 border flex flex-col justify-between transition-all ${
+              className={`rounded-3xl p-8 sm:p-10 flex flex-col justify-between transition-all duration-300 relative ${
                 plan.highlight
-                  ? 'bg-slate-950 text-white border-slate-800 shadow-2xl shadow-slate-950/30 ring-2 ring-blue-500/40 relative'
-                  : 'bg-white text-slate-900 border-slate-200 hover:border-slate-300 hover:shadow-xl'
+                  ? 'bg-slate-950 text-white shadow-2xl border-2 border-blue-500/50 scale-[1.02] z-10'
+                  : 'bg-white text-slate-900 border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-slate-300'
               }`}
             >
               {plan.highlight && (
-                <div className="absolute -top-3.5 left-8 bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest px-3.5 py-1 rounded-full shadow-md flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" />
-                  <span>Mais Recomendado</span>
-                </div>
+                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full shadow-md">
+                  Mais Popular em Angola
+                </span>
               )}
 
               <div className="space-y-6">
                 <div>
-                  <h3 className={`text-xl font-black ${plan.highlight ? 'text-white' : 'text-slate-950'}`}>
-                    {plan.name}
-                  </h3>
+                  <h3 className="text-xl font-black">{plan.name}</h3>
                   <p className={`text-xs mt-1.5 leading-relaxed ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>
                     {plan.desc}
                   </p>
                 </div>
 
-                <div className={`p-4 rounded-2xl border ${plan.highlight ? 'bg-slate-900/80 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
-                  <div className="flex items-baseline gap-1.5">
-                    {plan.price !== 'Sob Consulta' && (
-                      <span className={`text-xs font-bold ${plan.highlight ? 'text-blue-400' : 'text-slate-500'}`}>Kz</span>
-                    )}
+                <div className="pt-2 border-t border-slate-100/10">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-sm font-bold text-blue-600">Kz</span>
                     <span className="text-3xl sm:text-4xl font-black tracking-tight">{plan.price}</span>
-                    <span className={`text-xs font-medium ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>{plan.period}</span>
+                    <span className={`text-xs font-semibold ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>
+                      {plan.period}
+                    </span>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <span className={`text-[11px] font-black uppercase tracking-wider block ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>
+                <div className="space-y-3 pt-2">
+                  <span className={`text-[11px] font-black uppercase tracking-wider block ${plan.highlight ? 'text-slate-400' : 'text-slate-400'}`}>
                     Recursos Inclusos:
                   </span>
                   <ul className="space-y-2.5">
@@ -208,31 +219,73 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
         </div>
       </section>
 
-      {/* Simulador Interativo de Investimento */}
+      {/* Simulador Interativo & Comparador de ROI */}
       <section className="bg-slate-50 border-y border-slate-200/80 py-20 px-6 sm:px-10 lg:px-16">
         <div className="max-w-4xl mx-auto space-y-10">
           
           <div className="text-center space-y-2">
             <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-blue-600 bg-blue-100/60 px-3.5 py-1 rounded-full">
               <Calculator className="w-3.5 h-3.5" />
-              <span>Simulador Interativo</span>
+              <span>Simulador de Licenciamento & ROI</span>
             </div>
             <h3 className="text-2xl sm:text-3xl font-black text-slate-950">
-              Calcule o Valor à Medida da Sua Empresa
+              Personalize o Seu Pacote e Veja a Poupança Real
             </h3>
             <p className="text-slate-600 text-xs sm:text-sm max-w-lg mx-auto">
-              Selecione o número de computadores / postos de trabalho e veja o valor estimado da licença em Kwanzas.
+              Selecione o número de computadores na sua rede local e compare os custos com soluções cloud importadas.
             </p>
           </div>
 
           <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-xl space-y-8">
             
+            {/* Escolha da Modalidade */}
+            <div className="space-y-2">
+              <span className="text-xs font-bold text-slate-700 block">Modalidade de Licenciamento Desejada:</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button
+                  onClick={() => setSelectedPlanType('anual')}
+                  className={`p-3.5 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    selectedPlanType === 'anual'
+                      ? 'bg-slate-950 text-white border-slate-950 shadow-md'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>Anual Multi-Postos</span>
+                  {selectedPlanType === 'anual' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+                </button>
+
+                <button
+                  onClick={() => setSelectedPlanType('mensal')}
+                  className={`p-3.5 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    selectedPlanType === 'mensal'
+                      ? 'bg-slate-950 text-white border-slate-950 shadow-md'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>Mensal Standalone</span>
+                  {selectedPlanType === 'mensal' && <CheckCircle2 className="w-4 h-4 text-blue-400" />}
+                </button>
+
+                <button
+                  onClick={() => setSelectedPlanType('vitalicio')}
+                  className={`p-3.5 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    selectedPlanType === 'vitalicio'
+                      ? 'bg-slate-950 text-white border-slate-950 shadow-md'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>Vitalício / Perpétuo</span>
+                  {selectedPlanType === 'vitalicio' && <CheckCircle2 className="w-4 h-4 text-amber-400" />}
+                </button>
+              </div>
+            </div>
+
             {/* Controlo de Postos */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="font-bold text-xs sm:text-sm text-slate-800 flex items-center gap-2">
                   <Monitor className="w-4 h-4 text-blue-600" />
-                  <span>Número de Postos de Trabalho (Computadores em Rede LAN):</span>
+                  <span>Número de Postos de Trabalho (Caixas + Terminais em Rede LAN):</span>
                 </label>
                 <span className="text-xl sm:text-2xl font-black text-blue-600 bg-blue-50 border border-blue-200 px-4 py-1 rounded-xl">
                   {terminals} {terminals === 1 ? 'Posto' : 'Postos'}
@@ -248,65 +301,54 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
               />
               <div className="flex justify-between text-[11px] text-slate-400 font-bold">
-                <span>1 PC (Standalone)</span>
-                <span>5 PCs (Média Loja)</span>
-                <span>10 PCs (Supermercado)</span>
-                <span>15 PCs (Grande Rede)</span>
-              </div>
-            </div>
-
-            {/* Ciclo de Pagamento */}
-            <div className="space-y-2">
-              <span className="text-xs font-bold text-slate-700 block">Periodicidade de Pagamento:</span>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => setBillingCycle('annual')}
-                  className={`p-3.5 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                    billingCycle === 'annual'
-                      ? 'bg-slate-950 text-white border-slate-950 shadow-md'
-                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                  }`}
-                >
-                  <span>Anual (Poupe até 33%)</span>
-                  {billingCycle === 'annual' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
-                </button>
-
-                <button
-                  onClick={() => setBillingCycle('monthly')}
-                  className={`p-3.5 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                    billingCycle === 'monthly'
-                      ? 'bg-slate-950 text-white border-slate-950 shadow-md'
-                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                  }`}
-                >
-                  <span>Mensal (Sem Contrato)</span>
-                  {billingCycle === 'monthly' && <CheckCircle2 className="w-4 h-4 text-blue-400" />}
-                </button>
+                <span>1 PC (Balcão Único)</span>
+                <span>3 PCs (Loja Normal)</span>
+                <span>7 PCs (Supermercado)</span>
+                <span>15 PCs (Rede Completa)</span>
               </div>
             </div>
 
             {/* Resultado do Cálculo */}
             <div className="p-6 bg-slate-900 text-white rounded-2xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="space-y-1 text-center sm:text-left">
-                <span className="text-slate-400 text-xs font-semibold">Valor Total Estimado:</span>
+                <span className="text-slate-400 text-xs font-semibold">Valor Total da Licença:</span>
                 <div className="flex items-baseline justify-center sm:justify-start gap-1">
                   <span className="text-xs font-bold text-blue-400">Kz</span>
-                  <span className="text-3xl sm:text-4xl font-black text-white">{estimatedPrice.toLocaleString('pt-AO')}</span>
-                  <span className="text-xs text-slate-400">/ {billingCycle === 'annual' ? 'ano' : 'mês'}</span>
-                </div>
-                {savings > 0 && (
-                  <span className="text-[11px] text-emerald-400 font-bold block">
-                    ✓ Poupança anual de {savings.toLocaleString('pt-AO')} Kz em relação ao plano mensal!
+                  <span className="text-3xl sm:text-4xl font-black text-white">{calculatedPrice.toLocaleString('pt-AO')}</span>
+                  <span className="text-xs text-slate-400">
+                    / {selectedPlanType === 'anual' ? 'ano' : selectedPlanType === 'mensal' ? 'mês' : 'pagamento único'}
                   </span>
-                )}
+                </div>
+                <span className="text-[11px] text-slate-400 block pt-1">
+                  {selectedPlanType === 'anual'
+                    ? `Inclui 3 postos base + ${Math.max(0, terminals - 3)} posto(s) adicional(is) em rede LAN.`
+                    : selectedPlanType === 'mensal'
+                    ? `Inclui 1 posto base + ${Math.max(0, terminals - 1)} terminal(is) adicional(is).`
+                    : `Inclui 5 postos base + ${Math.max(0, terminals - 5)} terminal(is) vitalício(s).`}
+                </span>
               </div>
 
               <button
-                onClick={() => onOpenDemoModal(`Simulação: ${terminals} Postos (${billingCycle === 'annual' ? 'Anual' : 'Mensal'}) - Kz ${estimatedPrice.toLocaleString('pt-AO')}`)}
+                onClick={() => onOpenDemoModal(`Simulação: ${terminals} Postos (${selectedPlanType.toUpperCase()}) - Kz ${calculatedPrice.toLocaleString('pt-AO')}`)}
                 className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl shadow-lg shadow-blue-600/30 transition-all hover:-translate-y-0.5 cursor-pointer shrink-0"
               >
-                <span>Solicitar Licença Desta Simulação</span>
+                <span>Solicitar Proposta Desta Simulação</span>
               </button>
+            </div>
+
+            {/* Comparativo de Poupança Real vs Softwares Cloud */}
+            <div className="p-5 bg-blue-50 border border-blue-200/80 rounded-2xl text-xs space-y-2">
+              <div className="flex items-center gap-2 font-black text-blue-950 text-sm">
+                <TrendingDown className="w-4 h-4 text-emerald-600" />
+                <span>Comparativo de Custo & Confiabilidade com Sistemas na Nuvem</span>
+              </div>
+              <p className="text-blue-900 leading-relaxed">
+                Ao contrário de softwares baseados na nuvem internacional (que cobram mensalidades em USD e bloqueiam as vendas se a internet fibra falhar), o <strong>KIVORA ERP funciona 100% offline</strong> no computador da sua loja.
+              </p>
+              <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-blue-200 text-[11px] font-bold text-blue-950">
+                <span>✓ Zero risco de paragem de caixas por quebra de internet</span>
+                <span className="text-emerald-700 font-mono">Poupança estimada: ~{realSavingsAoa.toLocaleString('pt-AO')} Kz / ano</span>
+              </div>
             </div>
 
           </div>
@@ -324,7 +366,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
           {[
             {
               q: 'A licença inclui atualizações fiscais da AGT?',
-              a: 'Sim. Todas as atualizações tributárias (IRT 2026, novas diretrizes do SAF-T, DS.120 e regras de IVA) estão incluídas sem qualquer custo extra durante a validade da licença ativa.',
+              a: 'Sim. Todas as atualizações tributárias (IRT 2026, novas diretrizes do SAF-T AO, DS.120 e regras de IVA) estão incluídas sem qualquer custo extra durante a validade da licença ativa.',
             },
             {
               q: 'Como funciona a ativação da licença no computador?',

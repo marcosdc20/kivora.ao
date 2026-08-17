@@ -21,7 +21,7 @@ import { useCompanies } from '../admin/hooks/useFirebase';
 import {
   createLicense, calculateExpiresAt, subscribePartnerLicenses,
   revokeLicense, reactivateLicense, releaseLicenseFromDevice,
-  extendLicenseExpiry, formatLicenseDate, getPlanLabel
+  extendLicenseExpiry, formatLicenseDate, getPlanLabel, updateLicenseSeats
 } from '../admin/services/licenseService';
 import {
   SupportTicket, createSupportTicket, sendTicketMessage,
@@ -32,10 +32,12 @@ import {
   subscribePartnerAccount, deductPartnerWallet, getActiveCreditSlots,
   hasOverdueDebts, getOldestUnpaidDebtDays,
   subscribePartnerPolicy, DEFAULT_PARTNER_POLICY,
-  DEFAULT_PARTNER_PRICING, PartnerPricingPlan, PartnerDebtEntry, PartnerAccount, PartnerLicensingPolicy
+  DEFAULT_PARTNER_PRICING, PartnerPricingPlan, PartnerDebtEntry, PartnerAccount, PartnerLicensingPolicy,
+  getPartnerSeatCost
 } from '../admin/services/partnerDebtService';
 import type { PlanType, KivoraLicense, Company } from '../admin/types';
 import { PartnerOfficialCertificatesModal } from '../components/PartnerOfficialCertificatesModal';
+import { LicenseOfficialCertificateModal } from '../components/LicenseOfficialCertificateModal';
 
 interface PartnerPortalAppProps {
   onLogout: () => void;
@@ -86,6 +88,9 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const [selectedLicenseForCert, setSelectedLicenseForCert] = useState<KivoraLicense | null>(null);
   const [selectedLicenseForInvoice, setSelectedLicenseForInvoice] = useState<KivoraLicense | null>(null);
   const [renewLicenseModal, setRenewLicenseModal] = useState<{ open: boolean; license: KivoraLicense | null; days: number }>({ open: false, license: null, days: 30 });
+  const [addSeatsModalLic, setAddSeatsModalLic] = useState<KivoraLicense | null>(null);
+  const [seatsToAdd, setSeatsToAdd] = useState<number>(1);
+  const [addSeatsSubmitting, setAddSeatsSubmitting] = useState<boolean>(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -242,9 +247,18 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     return true;
   });
 
-  // Cálculos Financeiros & Sistema de Quotas de Slots
-  const currentPlanCost = pricingPlans.find((p) => p.plan_type === plan)?.cost_aoa ?? 120000;
-  const partnerMargin = Math.max(0, priceAoa - currentPlanCost);
+  // Cálculos Financeiros & Sistema de Quotas de Slots (Incluindo Terminais por Nível de Parceiro)
+  const basePlanCost = pricingPlans.find((p) => p.plan_type === plan)?.cost_aoa ?? 120000;
+  const partnerSeatCost = getPartnerSeatCost(partnerAccount?.tier || 'bronze', policy);
+  const totalExtraSeatsCost = extraSeats * partnerSeatCost;
+  const currentTotalCost = basePlanCost + totalExtraSeatsCost;
+
+  const currentPlanCost = basePlanCost; // Referência do plano base
+
+  const retailSeatPrice = policy.retail_extra_seat_price_aoa || 35000;
+  const totalExtraSeatsClientPrice = extraSeats * retailSeatPrice;
+  const totalClientPrice = priceAoa + totalExtraSeatsClientPrice;
+  const partnerMargin = Math.max(0, totalClientPrice - currentTotalCost);
 
   const walletBalance = partnerAccount?.wallet_balance_aoa || 0;
   const creditSlotsLimit = partnerAccount?.credit_slots_limit || policy.tier_slots[partnerAccount?.tier || 'bronze'] || 2;
@@ -261,7 +275,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     0
   );
 
-  const canPayWithWallet = walletBalance >= currentPlanCost;
+  const canPayWithWallet = walletBalance >= currentTotalCost;
   const canPayWithCredit = !canPayWithWallet && availableCreditSlots > 0 && !isOverdue;
 
   const handlePlanChange = (p: PlanType) => {
@@ -296,7 +310,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
       // 1. Pagamento via Wallet (Pré-pago) -> 100% definitivo e livre de travas
       if (canPayWithWallet) {
-        const deducted = await deductPartnerWallet(partnerCode, currentPlanCost);
+        const deducted = await deductPartnerWallet(partnerCode, currentTotalCost);
         if (deducted) {
           isPaid = true;
           paymentMethod = 'wallet';
@@ -336,12 +350,12 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         nif,
         plan_type: plan,
         expires_at: expiresAt,
-        price_aoa: priceAoa,
+        price_aoa: totalClientPrice,
         notes: isProvisional
-          ? `[PROVISÓRIA ${provisionalDays} DIAS - ${plan === 'lifetime' ? 'VITALÍCIO' : 'MULTI-POSTOS'} PENDENTE] Emitida a crédito pelo parceiro ${partnerCode}. Tornar-se-á definitiva após liquidação.`
+          ? `[PROVISÓRIA ${provisionalDays} DIAS - ${plan === 'lifetime' ? 'VITALÍCIO' : 'MULTI-POSTOS'} PENDENTE] Emitida a crédito pelo parceiro ${partnerCode} (${extraSeats} terminais extras). Tornar-se-á definitiva após liquidação.`
           : paymentMethod === 'wallet'
-          ? `Emitida e 100% paga via Carteira Pré-paga pelo parceiro ${partnerCode}.`
-          : `Emitida a crédito (Slot ${activeSlotsInUse + 1}/${creditSlotsLimit}) pelo parceiro ${partnerCode}.`,
+          ? `Emitida e 100% paga via Carteira Pré-paga pelo parceiro ${partnerCode} (${extraSeats} terminais extras).`
+          : `Emitida a crédito (Slot ${activeSlotsInUse + 1}/${creditSlotsLimit}) pelo parceiro ${partnerCode} (${extraSeats} terminais extras).`,
         partner_id: partnerCode,
         extra_seats: extraSeats,
         is_provisional: isProvisional,
@@ -355,8 +369,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         license_id: lic.id,
         company_name: companyName,
         plan_type: plan,
-        cost_aoa: currentPlanCost,
-        client_price_aoa: priceAoa,
+        cost_aoa: currentTotalCost,
+        client_price_aoa: totalClientPrice,
         created_at: Date.now(),
         paid: isPaid,
         paid_at: isPaid ? Date.now() : null,
@@ -385,6 +399,69 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       showToast('Erro ao emitir licença: ' + err.message);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // Handler para Adicionar Terminais a uma Licença Existente
+  const handleAddSeatsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addSeatsModalLic || seatsToAdd <= 0) return;
+    setAddSeatsSubmitting(true);
+
+    try {
+      const pSeatCost = getPartnerSeatCost(partnerAccount?.tier || 'bronze', policy);
+      const expansionCost = seatsToAdd * pSeatCost;
+      const expansionClientPrice = seatsToAdd * (policy.retail_extra_seat_price_aoa || 35000);
+      const currentSeats = addSeatsModalLic.extra_seats || 0;
+      const newTotalExtraSeats = currentSeats + seatsToAdd;
+
+      let isPaid = false;
+      let paymentMethod: 'wallet' | 'credit' = 'credit';
+
+      if (walletBalance >= expansionCost) {
+        const deducted = await deductPartnerWallet(partnerCode, expansionCost);
+        if (deducted) {
+          isPaid = true;
+          paymentMethod = 'wallet';
+        }
+      } else if (availableCreditSlots > 0 && !isOverdue) {
+        isPaid = false;
+        paymentMethod = 'credit';
+      } else {
+        if (isOverdue) {
+          alert(`Bloqueio de Crédito: Regularize os débitos pendentes há mais de ${overdueDaysLimit} dias ou recarregue a Wallet.`);
+        } else {
+          alert(`Limite de Quota Atingido: Saldo insuficiente na Wallet (${fmt(walletBalance)} Kz vs ${fmt(expansionCost)} Kz) e sem slots de crédito.`);
+        }
+        setAddSeatsSubmitting(false);
+        return;
+      }
+
+      // 1. Atualizar licença no Firebase
+      await updateLicenseSeats(addSeatsModalLic.id, newTotalExtraSeats);
+
+      // 2. Registar débito/transação no extrato do parceiro
+      await recordPartnerDebt({
+        partner_id: partnerCode,
+        partner_name: partnerName,
+        license_id: addSeatsModalLic.id,
+        company_name: `${addSeatsModalLic.company_name} (+${seatsToAdd} Postos LAN)`,
+        plan_type: addSeatsModalLic.plan_type,
+        cost_aoa: expansionCost,
+        client_price_aoa: expansionClientPrice,
+        created_at: Date.now(),
+        paid: isPaid,
+        paid_at: isPaid ? Date.now() : null,
+        payment_method: paymentMethod,
+      });
+
+      showToast(`+${seatsToAdd} terminal(ais) adicionado(s) com sucesso à licença de ${addSeatsModalLic.company_name}!`);
+      setAddSeatsModalLic(null);
+      setSeatsToAdd(1);
+    } catch (err: any) {
+      showToast('Erro ao expandir terminais: ' + err.message);
+    } finally {
+      setAddSeatsSubmitting(false);
     }
   };
 
@@ -1420,6 +1497,17 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                           <div className="flex items-center gap-2">
                             <button
+                              onClick={() => {
+                                setAddSeatsModalLic(lic);
+                                setSeatsToAdd(1);
+                              }}
+                              className="text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl font-bold border border-blue-200 flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Users className="w-3.5 h-3.5" />
+                              <span>+ Postos LAN</span>
+                            </button>
+
+                            <button
                               onClick={() => setRenewLicenseModal({ open: true, license: lic, days: 30 })}
                               className="text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl font-bold border border-emerald-200 flex items-center gap-1.5 cursor-pointer"
                             >
@@ -1721,10 +1809,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     </div>
 
                     <div className="space-y-1">
-                      <label className="font-bold text-slate-700 uppercase">Preço que cobra ao Cliente (Kz)</label>
+                      <label className="font-bold text-slate-700 uppercase">Preço Base do Software p/ Cliente (Kz)</label>
                       <input
                         type="number"
-                        min={currentPlanCost}
+                        min={basePlanCost}
                         value={priceAoa}
                         onChange={(e) => setPriceAoa(Number(e.target.value))}
                         className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-mono font-bold focus:bg-white focus:outline-none focus:border-emerald-500"
@@ -1732,30 +1820,65 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700 uppercase">Computadores Adicionais (Extra Seats)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      max={20}
-                      value={extraSeats}
-                      onChange={(e) => setExtraSeats(Number(e.target.value) || 0)}
-                      className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-bold focus:bg-white focus:outline-none focus:border-emerald-500"
-                    />
+                  {/* Seletor de Postos Extras com Política por Nível */}
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
+                    <div className="flex justify-between items-center flex-wrap gap-2">
+                      <label className="font-bold text-slate-800 uppercase text-[11px] flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5 text-blue-600" />
+                        <span>Computadores Adicionais / Rede Local (Extra Seats)</span>
+                      </label>
+                      <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                        Nível {partnerAccount?.tier?.toUpperCase() || 'BRONZE'}: {fmt(partnerSeatCost)} Kz / posto
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
+                      {[0, 1, 2, 3, 4, 5, 8, 10].map((st) => (
+                        <button
+                          key={st}
+                          type="button"
+                          onClick={() => setExtraSeats(st)}
+                          className={`py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                            extraSeats === st
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                          }`}
+                        >
+                          +{st}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+                      <span>Total de Computadores: <strong className="text-slate-800">{1 + extraSeats} PC(s)</strong></span>
+                      {extraSeats > 0 && (
+                        <span>Custo Terminais: <strong className="text-blue-700 font-mono">{fmt(totalExtraSeatsCost)} Kz</strong></span>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Resumo Financeiro da Operação */}
+                  {/* Resumo Financeiro da Operação com Discriminação Completa */}
                   <div className="p-5 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white rounded-2xl space-y-2.5 text-xs shadow-md">
                     <div className="flex justify-between items-center text-slate-300">
-                      <span>Custo Kivora (sua dívida a liquidar):</span>
-                      <strong className="text-amber-400 font-mono text-sm">{fmt(currentPlanCost)} Kz</strong>
+                      <span>Custo Licença Base (Atacado):</span>
+                      <span className="font-mono text-slate-200 font-bold">{fmt(basePlanCost)} Kz</span>
+                    </div>
+                    {extraSeats > 0 && (
+                      <div className="flex justify-between items-center text-blue-300">
+                        <span>{extraSeats} Posto(s) Extra ({fmt(partnerSeatCost)} Kz/unid):</span>
+                        <span className="font-mono font-bold">+{fmt(totalExtraSeatsCost)} Kz</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center text-amber-400 font-bold pt-1 border-t border-slate-800">
+                      <span>Total Débito Kivora (a liquidar/wallet):</span>
+                      <strong className="font-mono text-sm">{fmt(currentTotalCost)} Kz</strong>
                     </div>
                     <div className="flex justify-between items-center text-slate-300">
-                      <span>Preço de Venda ao Cliente:</span>
-                      <strong className="text-white font-mono text-sm">{fmt(priceAoa)} Kz</strong>
+                      <span>Preço Cobrado ao Cliente Final:</span>
+                      <strong className="text-white font-mono text-sm">{fmt(totalClientPrice)} Kz</strong>
                     </div>
-                    <div className="flex justify-between items-center pt-2.5 border-t border-slate-800">
-                      <span className="font-bold text-emerald-400">Sua Margem / Lucro Bruto Líquido:</span>
+                    <div className="flex justify-between items-center pt-2 border-t border-slate-800">
+                      <span className="font-bold text-emerald-400">Sua Margem Líquida Estimada:</span>
                       <strong className="text-emerald-400 font-mono text-lg font-black">+{fmt(partnerMargin)} Kz</strong>
                     </div>
                   </div>
@@ -2724,91 +2847,11 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
       {/* MODAL: CERTIFICADO OFICIAL DE LICENCIAMENTO (AGT) */}
       {selectedLicenseForCert && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 animate-fadeIn relative">
-            <button
-              onClick={() => setSelectedLicenseForCert(null)}
-              className="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
-            >
-              ✕
-            </button>
-
-            {/* Certificado Layout */}
-            <div className="border-4 border-slate-900 p-6 sm:p-8 rounded-2xl bg-white space-y-6 text-center relative overflow-hidden">
-              <div className="absolute top-2 right-2 opacity-10 pointer-events-none">
-                <ShieldCheck className="w-32 h-32 text-slate-950" />
-              </div>
-
-              <div className="flex justify-center">
-                <KivoraLogo variant="dark" size="md" useOfficialImage={true} />
-              </div>
-
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300 inline-block">
-                  Certificado Oficial de Licenciamento & Conformidade Fiscal AGT
-                </span>
-                <h3 className="text-base sm:text-lg font-black text-slate-950 mt-2">
-                  AUTORIZAÇÃO DE USO — KIVORA DESKTOP ERP
-                </h3>
-              </div>
-
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-2 text-left">
-                <div className="flex justify-between border-b border-slate-200 pb-1">
-                  <span className="text-slate-500 font-medium">Titular da Licença:</span>
-                  <strong className="text-slate-950 font-bold">{selectedLicenseForCert.company_name}</strong>
-                </div>
-                <div className="flex justify-between border-b border-slate-200 pb-1">
-                  <span className="text-slate-500 font-medium">NIF do Contribuinte:</span>
-                  <strong className="text-slate-950 font-mono font-bold">{selectedLicenseForCert.nif}</strong>
-                </div>
-                <div className="flex justify-between border-b border-slate-200 pb-1">
-                  <span className="text-slate-500 font-medium">Chave de Ativação KVRA:</span>
-                  <strong className="text-emerald-700 font-mono font-black">{selectedLicenseForCert.id}</strong>
-                </div>
-                <div className="flex justify-between border-b border-slate-200 pb-1">
-                  <span className="text-slate-500 font-medium">Plano & Modalidade:</span>
-                  <strong className="text-slate-950 font-bold">{getPlanLabel(selectedLicenseForCert.plan_type)}</strong>
-                </div>
-                <div className="flex justify-between border-b border-slate-200 pb-1">
-                  <span className="text-slate-500 font-medium">Data de Expiração:</span>
-                  <strong className="text-slate-950 font-mono font-bold">{formatLicenseDate(selectedLicenseForCert.expires_at)}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Parceiro Emissor Homologado:</span>
-                  <strong className="text-slate-950 font-mono">{partnerCode}</strong>
-                </div>
-              </div>
-
-              <div className="text-[10px] text-slate-500 leading-relaxed">
-                Este certificado comprova que o software Kivora Desktop ERP está devidamente licenciado para a empresa acima identificada, cumprindo os requisitos de certificação fiscal da Administração Geral Tributária (AGT) de Angola.
-              </div>
-
-              <div className="pt-2 flex justify-between items-center text-[10px] text-slate-400 font-mono border-t border-slate-200">
-                <span>Verificação: VALID-KVRA-AO</span>
-                <span>{new Date().toLocaleDateString('pt-AO')}</span>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setSelectedLicenseForCert(null)}
-                className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
-              >
-                Fechar
-              </button>
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white flex items-center gap-2 shadow-md cursor-pointer"
-              >
-                <Printer className="w-4 h-4" />
-                <span>Imprimir Certificado</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <LicenseOfficialCertificateModal
+          license={selectedLicenseForCert}
+          partnerCode={partnerCode}
+          onClose={() => setSelectedLicenseForCert(null)}
+        />
       )}
 
       {/* MODAL: RENOVAR / PRORROGAR LICENÇA */}
@@ -3134,6 +3177,141 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   className="px-6 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 cursor-pointer"
                 >
                   {submittingAdminTicket ? 'A Enviar ao Admin...' : 'Enviar Solicitação'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ADICIONAR / EXPANDIR TERMINAIS EM REDE LOCAL */}
+      {addSeatsModalLic && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Expandir Terminais LAN</h3>
+                  <p className="text-xs text-slate-500">{addSeatsModalLic.company_name}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAddSeatsModalLic(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleAddSeatsSubmit} className="space-y-4 text-xs">
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Chave da Licença:</span>
+                  <span className="font-mono font-bold text-slate-900">{addSeatsModalLic.id}</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Capacidade Atual:</span>
+                  <span className="font-bold text-slate-800">{1 + (addSeatsModalLic.extra_seats || 0)} Computador(es)</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Seu Nível de Homologação:</span>
+                  <span className="font-bold text-blue-700 uppercase bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                    {partnerAccount?.tier || 'Bronze'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Seletor de Quantidade a Adicionar */}
+              <div className="space-y-2">
+                <label className="font-bold text-slate-800 uppercase text-[11px] block">
+                  Quantos postos extras deseja adicionar? *
+                </label>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {[1, 2, 3, 5, 10].map((st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => setSeatsToAdd(st)}
+                      className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                        seatsToAdd === st
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      +{st} Posto{st > 1 ? 's' : ''}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="pt-1">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={1}
+                      max={50}
+                      value={seatsToAdd}
+                      onChange={(e) => setSeatsToAdd(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
+                    />
+                    <span className="text-slate-500 font-bold whitespace-nowrap">Posto(s)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Resumo Financeiro da Expansão */}
+              {(() => {
+                const pSeatCost = getPartnerSeatCost(partnerAccount?.tier || 'bronze', policy);
+                const expansionCost = seatsToAdd * pSeatCost;
+                const clientExpPrice = seatsToAdd * (policy.retail_extra_seat_price_aoa || 35000);
+                const expMargin = clientExpPrice - expansionCost;
+                const canWallet = walletBalance >= expansionCost;
+
+                return (
+                  <div className="p-4 bg-gradient-to-br from-slate-950 to-slate-900 text-white rounded-2xl space-y-2 text-xs shadow-md">
+                    <div className="flex justify-between items-center text-slate-300">
+                      <span>Custo Unitário p/ Seu Nível:</span>
+                      <span className="font-mono font-bold text-blue-300">{fmt(pSeatCost)} Kz / posto</span>
+                    </div>
+                    <div className="flex justify-between items-center text-amber-400 font-bold">
+                      <span>Total Débito Atacado ({seatsToAdd}x):</span>
+                      <span className="font-mono text-sm">{fmt(expansionCost)} Kz</span>
+                    </div>
+                    <div className="flex justify-between items-center text-slate-300">
+                      <span>Preço Sugerido ao Cliente:</span>
+                      <span className="font-mono font-bold text-white">{fmt(clientExpPrice)} Kz</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-1.5 border-t border-slate-800 text-emerald-400 font-bold">
+                      <span>Seu Lucro Líquido Estimado:</span>
+                      <span className="font-mono text-sm">+{fmt(expMargin)} Kz</span>
+                    </div>
+                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                      <span>Método de Liquidação:</span>
+                      <span className={canWallet ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>
+                        {canWallet ? `Wallet Pré-paga (${fmt(walletBalance)} Kz disp.)` : 'Slot de Crédito Rotativo'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div className="flex justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setAddSeatsModalLic(null)}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={addSeatsSubmitting}
+                  className="px-6 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span>{addSeatsSubmitting ? 'A Processar...' : `Confirmar +${seatsToAdd} Posto(s)`}</span>
                 </button>
               </div>
             </form>

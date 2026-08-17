@@ -13,6 +13,7 @@ import { AdminUtilizadores } from './AdminUtilizadores';
 import { AdminAuditoria } from './AdminAuditoria';
 import { AdminPlanos } from './AdminPlanos';
 import { AdminConfiguracoes } from './AdminConfiguracoes';
+import { AdminLoja } from './AdminLoja';
 import { AdminSection } from './types';
 import { Empresa } from './types';
 import { ArrowLeft, Lock, Menu } from 'lucide-react';
@@ -180,6 +181,9 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
       case 'instalacoes':
         return <AdminInstalacoes />;
 
+      case 'loja':
+        return <AdminLoja />;
+
       case 'parceiros':
         return <AdminParceiros onCandidaturas={() => navigate('parceiros-candidaturas')} />;
 
@@ -216,7 +220,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex h-full flex-shrink-0">
         <AdminSidebar
@@ -243,7 +247,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden w-full min-w-0">
+      <div className="flex-1 flex flex-col overflow-hidden w-full min-w-0 bg-slate-50">
         {/* Back to site & Session Header */}
         <div className="flex items-center justify-between bg-slate-950 px-3 sm:px-4 py-2 shrink-0 border-b border-slate-800">
           <div className="flex items-center gap-2">
@@ -283,7 +287,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
         </div>
 
         {/* Section */}
-        <div className="flex-1 overflow-hidden flex min-w-0">
+        <div className="flex-1 overflow-y-auto flex flex-col min-w-0 bg-slate-50">
           {renderSection()}
         </div>
       </div>

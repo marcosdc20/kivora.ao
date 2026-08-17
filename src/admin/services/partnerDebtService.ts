@@ -58,10 +58,27 @@ export interface PartnerLicensingPolicy {
     gold: number;
     diamond: number;
   };
+  // Custo de terminal extra para o Admin / Venda direta (Cliente final)
+  admin_extra_seat_cost_aoa: number;
+
+  // Custo base de terminal extra de atacado para parceiro
+  partner_extra_seat_base_cost_aoa: number;
+
+  // Custo de terminal extra por Nível do parceiro (Bronze, Silver, Gold, Diamond)
+  tier_extra_seat_costs: {
+    bronze: number;
+    silver: number;
+    gold: number;
+    diamond: number;
+  };
+
+  // Preço sugerido de venda de terminal ao cliente final
+  retail_extra_seat_price_aoa: number;
+
   overdue_tolerance_days: number;
   provisional_lifetime_days: number;
   require_provisional_lifetime: boolean;
-  extra_seat_cost_aoa: number;
+  extra_seat_cost_aoa: number; // Mantido para compatibilidade retroativa
   min_wallet_topup_aoa: number;
   partner_membership_fee_aoa: number;
   partner_requirements: string[];
@@ -81,6 +98,15 @@ export const DEFAULT_PARTNER_POLICY: PartnerLicensingPolicy = {
     gold: 8,
     diamond: 15,
   },
+  admin_extra_seat_cost_aoa: 35000,
+  partner_extra_seat_base_cost_aoa: 25000,
+  tier_extra_seat_costs: {
+    bronze: 25000,
+    silver: 20000,
+    gold: 15000,
+    diamond: 10000,
+  },
+  retail_extra_seat_price_aoa: 35000,
   overdue_tolerance_days: 15,
   provisional_lifetime_days: 30,
   require_provisional_lifetime: true,
@@ -102,6 +128,36 @@ export const DEFAULT_PARTNER_POLICY: PartnerLicensingPolicy = {
 };
 
 export const TIER_DEFAULT_SLOTS: Record<'bronze' | 'silver' | 'gold' | 'diamond', number> = DEFAULT_PARTNER_POLICY.tier_slots;
+
+/**
+ * Retorna o custo unitário do terminal extra para um determinado parceiro consoante o seu nível (tier)
+ */
+export function getPartnerSeatCost(
+  tier: 'bronze' | 'silver' | 'gold' | 'diamond' = 'bronze',
+  policy: PartnerLicensingPolicy = DEFAULT_PARTNER_POLICY
+): number {
+  if (policy.tier_extra_seat_costs && policy.tier_extra_seat_costs[tier] !== undefined) {
+    return policy.tier_extra_seat_costs[tier];
+  }
+  if (policy.partner_extra_seat_base_cost_aoa !== undefined) {
+    const discounts: Record<'bronze' | 'silver' | 'gold' | 'diamond', number> = {
+      bronze: 0,
+      silver: 0.20,
+      gold: 0.40,
+      diamond: 0.60,
+    };
+    const discount = discounts[tier] || 0;
+    return Math.round(policy.partner_extra_seat_base_cost_aoa * (1 - discount));
+  }
+  return policy.extra_seat_cost_aoa || 25000;
+}
+
+/**
+ * Retorna o custo unitário do terminal extra para vendas diretas do Admin / Preço público
+ */
+export function getAdminSeatCost(policy: PartnerLicensingPolicy = DEFAULT_PARTNER_POLICY): number {
+  return policy.admin_extra_seat_cost_aoa || policy.extra_seat_cost_aoa || 35000;
+}
 
 export async function savePartnerPolicy(policy: PartnerLicensingPolicy): Promise<void> {
   await setDoc(doc(db, 'settings', 'partner_policy'), {

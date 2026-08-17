@@ -1,7 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import { HeroCarousel } from '../components/HeroCarousel';
-import { CheckCircle2, ArrowRight, Download, Shield, Wifi, Zap } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Download, Shield, Wifi, Zap, Monitor, Laptop, Check, Sparkles, Award, Headphones } from 'lucide-react';
 import { PageId } from '../components/Header';
+
+import posImg from '../assets/kivora/pc-pos-kivora.png';
+import desktopImg from '../assets/kivora/pc-descktop-kivora.png';
+import laptopImg from '../assets/kivora/pc-laptop-kivora.png';
+import empresariaTabletImg from '../assets/kivora/jovem-empresaria-com-tablet.png';
+import empresarioBoasVindasImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
+import parceirosImg from '../assets/kivora/parceiros-kivora.png';
 
 interface HomePageProps {
   onSelectModule: (module: any) => void;
@@ -168,6 +175,98 @@ export const HomePage: React.FC<HomePageProps> = ({
               delay={200}
             />
           </div>
+
+          {/* ========== SEÇÃO MULTI-DISPOSITIVOS: POS, DESKTOP E LAPTOP ========== */}
+          <div data-reveal className="sr-init mt-20 pt-16 border-t border-slate-100">
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <span className="text-blue-600 font-bold text-xs uppercase tracking-widest">Flexibilidade Total de Hardware</span>
+              <h3 className="mt-2 text-3xl font-black text-slate-950 tracking-tight">
+                Instale em Qualquer Computador da Sua Empresa
+              </h3>
+              <p className="mt-2 text-sm text-slate-600">
+                O KIVORA foi desenvolvido para correr de forma nativa e ultra-rápida no Windows em três formatos de postos de trabalho:
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              {/* 1. POS TOUCH */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 flex flex-col justify-between hover:border-blue-500/50 hover:shadow-xl transition-all duration-300 group">
+                <div>
+                  <div className="aspect-[4/3] bg-white rounded-2xl p-4 border border-slate-200/60 mb-5 flex items-center justify-center overflow-hidden">
+                    <img
+                      src={posImg}
+                      alt="Terminal Touch POS KIVORA"
+                      className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 font-bold text-[11px] mb-2">
+                    <Monitor className="w-3 h-3" />
+                    Terminal Touch POS
+                  </div>
+                  <h4 className="text-base font-bold text-slate-900 mb-1">Caixas Rápidos & Restauração</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                    Interface tátil de toque direto para supermercados, padarias e restaurantes. Emite talões e comanda mesas num piscar de olhos.
+                  </p>
+                </div>
+                <div className="space-y-1.5 text-xs text-slate-700 pt-3 border-t border-slate-200/60">
+                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Compatível com ecrã 15.6" Touch</div>
+                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Impressão Térmica 80mm com QR Code</div>
+                </div>
+              </div>
+
+              {/* 2. DESKTOP */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 flex flex-col justify-between hover:border-blue-500/50 hover:shadow-xl transition-all duration-300 group">
+                <div>
+                  <div className="aspect-[4/3] bg-white rounded-2xl p-4 border border-slate-200/60 mb-5 flex items-center justify-center overflow-hidden">
+                    <img
+                      src={desktopImg}
+                      alt="Computador Desktop KIVORA"
+                      className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700 font-bold text-[11px] mb-2">
+                    <Monitor className="w-3 h-3" />
+                    Computador Desktop
+                  </div>
+                  <h4 className="text-base font-bold text-slate-900 mb-1">Escritório & Rede Local LAN</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                    Ideal para estações de backoffice, contabilidade, gestão de armazém e servidor central multi-postos em rede interna.
+                  </p>
+                </div>
+                <div className="space-y-1.5 text-xs text-slate-700 pt-3 border-t border-slate-200/60">
+                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Multi-utilizadores com permissões</div>
+                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Exportação SAF-T AO e Mapas Fiscais</div>
+                </div>
+              </div>
+
+              {/* 3. LAPTOP */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 flex flex-col justify-between hover:border-blue-500/50 hover:shadow-xl transition-all duration-300 group">
+                <div>
+                  <div className="aspect-[4/3] bg-white rounded-2xl p-4 border border-slate-200/60 mb-5 flex items-center justify-center overflow-hidden">
+                    <img
+                      src={laptopImg}
+                      alt="Portátil Laptop KIVORA"
+                      className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 font-bold text-[11px] mb-2">
+                    <Laptop className="w-3 h-3" />
+                    Portátil / Laptop
+                  </div>
+                  <h4 className="text-base font-bold text-slate-900 mb-1">Gestores & Vendas em Mobilidade</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                    Perfeito para gerentes, consultores e equipas de vendas em viagem. Funciona 100% offline onde quer que vá.
+                  </p>
+                </div>
+                <div className="space-y-1.5 text-xs text-slate-700 pt-3 border-t border-slate-200/60">
+                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Windows 10 e 11 nativo</div>
+                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Leve, rápido e sem mensalidades</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </section>
 
         {/* ========== SHOWCASE — Imagem Grande + Texto ========== */}
@@ -250,6 +349,180 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <span>Ver Soluções de Rede</span>
                 <ArrowRight className="w-4 h-4" strokeWidth={2} />
               </button>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========== SEÇÃO 1 (ÁREA BRANCA): JOVEM EMPRESÁRIA COM TABLET ========== */}
+        <section className="py-14 sm:py-20 lg:py-24 bg-white border-t border-slate-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            
+            {/* Texto */}
+            <div data-reveal className="sr-init lg:col-span-6 space-y-4 sm:space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold">
+                <Sparkles className="w-3.5 h-3.5" />
+                Gestão Moderna & Mobilidade Empresarial
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black text-slate-950 leading-tight">
+                O Seu Negócio Sob Controlo em Qualquer Lugar
+              </h2>
+
+              <p className="text-slate-600 text-xs sm:text-sm lg:text-base leading-relaxed">
+                Acompanhe o desempenho das suas vendas, fechos de caixa e movimentações de stock com relatórios gerenciais claros e em tempo real. O <strong>KIVORA ERP</strong> foi desenhado para simplificar a vida dos gestores em Angola.
+              </p>
+
+              <div className="space-y-2.5 sm:space-y-3 pt-2">
+                {[
+                  'Acompanhe múltiplos postos de trabalho e filiais',
+                  'Fecho de turno de caixas sem divergências',
+                  'Relatórios financeiros e mapas fiscais instantâneos',
+                  'Conformidade total com a AGT e Decreto Presidencial n.º 71/25',
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-800">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-3 sm:pt-4 flex items-center gap-4">
+                <button
+                  onClick={() => onNavigatePage('solucoes')}
+                  className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs sm:text-sm px-6 sm:px-7 py-3 sm:py-3.5 rounded-2xl shadow-lg shadow-blue-600/25 transition-all hover:-translate-y-0.5 cursor-pointer w-full sm:w-auto"
+                >
+                  <span>Conhecer Todas as Soluções</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Imagem Limpa em Fundo Branco (Sem sombras artificiais) */}
+            <div data-reveal className="sr-init sr-right lg:col-span-6 flex items-center justify-center">
+              <div className="w-full max-w-xs sm:max-w-md lg:max-w-lg">
+                <img
+                  src={empresariaTabletImg}
+                  alt="Jovem Empresária com Tablet KIVORA ERP"
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-auto max-h-[320px] sm:max-h-[440px] lg:max-h-[520px] object-contain"
+                />
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========== SEÇÃO 2 (FUNDO AZUL ESCURO): JOVEM EMPRESÁRIO / CONSULTORIA & BOAS-VINDAS ========== */}
+        <section className="py-14 sm:py-20 lg:py-24 bg-slate-950 text-white border-t border-slate-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            
+            {/* Imagem Limpa na Esquerda sobre o fundo azul escuro */}
+            <div data-reveal className="sr-init sr-left lg:col-span-6 flex items-center justify-center order-2 lg:order-1">
+              <div className="w-full max-w-xs sm:max-w-md lg:max-w-lg flex items-center justify-center">
+                <img
+                  src={empresarioBoasVindasImg}
+                  alt="Consultor KIVORA ERP"
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-auto max-h-[320px] sm:max-h-[440px] lg:max-h-[540px] object-contain select-none pointer-events-none"
+                />
+              </div>
+            </div>
+
+            {/* Texto na Direita */}
+            <div data-reveal className="sr-init lg:col-span-6 space-y-6 order-1 lg:order-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
+                <Headphones className="w-3.5 h-3.5" />
+                Consultoria e Suporte Local em Angola
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">
+                Estamos Prontos Para Ajudar a Sua Empresa a Crescer
+              </h2>
+
+              <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                Não fica sozinho na implementação do seu sistema de faturação. A nossa equipa técnica sediada em Luanda presta acompanhamento presencial, configuração de rede local e formação completa para a sua equipa.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800">
+                  <p className="font-bold text-white text-xs sm:text-sm mb-1">Apoio Presencial & Remoto</p>
+                  <p className="text-[11px] text-slate-400">Técnicos especializados disponíveis 6 dias por semana via WhatsApp e chamadas.</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800">
+                  <p className="font-bold text-white text-xs sm:text-sm mb-1">Formação de Operadores</p>
+                  <p className="text-[11px] text-slate-400">Treinamos os seus caixas e gerentes para faturar sem erros desde o primeiro dia.</p>
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center gap-4">
+                <button
+                  onClick={() => onOpenDemoModal('Consultoria Geral')}
+                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-2xl shadow-lg shadow-blue-600/30 transition-all hover:-translate-y-0.5 cursor-pointer"
+                >
+                  <span>Agendar Demonstração VIP</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========== SEÇÃO 3 (ÁREA BRANCA): PROGRAMA DE PARCEIROS ========== */}
+        <section className="py-14 sm:py-20 lg:py-24 bg-white border-t border-slate-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            
+            {/* Texto */}
+            <div data-reveal className="sr-init lg:col-span-6 space-y-4 sm:space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">
+                <Award className="w-3.5 h-3.5" />
+                Canais de Distribuição & Revenda
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black text-slate-950 leading-tight">
+                Seja Parceiro Certificado KIVORA na Sua Província
+              </h2>
+
+              <p className="text-slate-600 text-xs sm:text-sm lg:text-base leading-relaxed">
+                Junte-se à maior rede de distribuição de software certificado em Angola. Compre licenças a preço de atacado, defina a sua margem de lucro e emita certificados oficiais aos seus clientes.
+              </p>
+
+              <div className="space-y-2.5 sm:space-y-3 pt-2">
+                <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-800">
+                  <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>Portal exclusivo com emissão instantânea de licenças 24/7</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-800">
+                  <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>Certificado oficial de revenda e kit comercial completo</span>
+                </div>
+              </div>
+
+              <div className="pt-3 sm:pt-4 flex items-center gap-4">
+                <button
+                  onClick={() => onNavigatePage('parceiros')}
+                  className="inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-slate-950 font-black text-xs sm:text-sm px-6 sm:px-7 py-3 sm:py-3.5 rounded-2xl shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-0.5 cursor-pointer w-full sm:w-auto"
+                >
+                  <span>Conhecer Programa de Parceiros</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Imagem Limpa em Fundo Branco */}
+            <div data-reveal className="sr-init sr-right lg:col-span-6 flex items-center justify-center">
+              <div className="w-full max-w-xs sm:max-w-md lg:max-w-lg">
+                <img
+                  src={parceirosImg}
+                  alt="Parceiros KIVORA ERP em Angola"
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-auto max-h-[320px] sm:max-h-[440px] lg:max-h-[500px] object-contain"
+                />
+              </div>
             </div>
 
           </div>

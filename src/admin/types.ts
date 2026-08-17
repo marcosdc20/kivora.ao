@@ -205,6 +205,74 @@ export interface PlanoProduto {
   ativo: boolean;
 }
 
+export interface StoreProductAdmin {
+  id: string;
+  category: 'kits' | 'printers' | 'scanners' | 'terminals' | 'accessories' | 'licenses' | 'services';
+  categoryLabel: string;
+  name: string;
+  brand: string;
+  image: string; // URL da imagem
+  galleryImages?: string[];
+  priceAOA: number;
+  originalPriceAOA?: number;
+  discountPercent?: number;
+  badge?: string;
+  rating?: number;
+  reviewsCount?: number;
+  salesCount?: number;
+  shortDesc: string;
+  specsTable: { label: string; value: string }[];
+  inStock: boolean;
+  stockQty?: number;
+  stockLocation: string;
+  warranty: string;
+  sku: string;
+  active: boolean;
+  createdAt: number;
+  updatedAt?: number;
+}
+
+export type StoreOrderStatus = 'pending' | 'proforma_sent' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
+
+export interface StoreOrderItem {
+  productId: string;
+  productName: string;
+  sku?: string;
+  unitPriceAOA: number;
+  quantity: number;
+  subtotalAOA: number;
+}
+
+export interface StoreOrder {
+  id: string;
+  orderNumber: string;
+  clientName: string;
+  clientNif: string;
+  clientPhone: string;
+  clientEmail?: string;
+  deliveryProvince: string;
+  deliveryAddress?: string;
+  deliveryFeeAOA: number;
+  subtotalAOA: number;
+  totalAOA: number;
+  status: StoreOrderStatus;
+  items: StoreOrderItem[];
+  createdAt: number;
+  updatedAt?: number;
+  notes?: string;
+  paymentMethod?: 'transferencia' | 'multicaixa' | 'dinheiro' | 'outro';
+}
+
+export interface DeliveryRate {
+  id: string;
+  province: string;
+  regionOrCity: string;
+  feeAOA: number;
+  estimatedDays: string;
+  active: boolean;
+  notes?: string;
+}
+
 export type AdminSection =
   | 'dashboard'
   | 'empresas'
@@ -212,6 +280,7 @@ export type AdminSection =
   | 'licencas'
   | 'licenca-criar'
   | 'instalacoes'
+  | 'loja'
   | 'parceiros'
   | 'parceiros-candidaturas'
   | 'pagamentos'
@@ -222,3 +291,4 @@ export type AdminSection =
   | 'utilizadores'
   | 'auditoria'
   | 'configuracoes';
+

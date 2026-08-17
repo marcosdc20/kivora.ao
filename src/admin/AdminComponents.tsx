@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Building2, Key, Monitor, Handshake,
   CreditCard, Package, HeadphonesIcon, BarChart3,
   Bell, Users, ScrollText, Settings, ChevronDown,
-  ChevronRight, LogOut, Shield, X, Menu
+  ChevronRight, LogOut, Shield, X, Menu, ShoppingBag
 } from 'lucide-react';
 import { AdminSection } from './types';
 
@@ -44,6 +44,13 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { id: 'instalacoes', label: 'Computadores' },
     ]
+  },
+  {
+    id: 'loja',
+    label: 'Loja & Vendas',
+    icon: <ShoppingBag className="w-4 h-4 text-amber-400" strokeWidth={1.75} />,
+    badge: 'Novo',
+    badgeColor: 'amber'
   },
   {
     id: 'parceiros', label: 'Parceiros', icon: <Handshake className="w-4 h-4" strokeWidth={1.75} />,
