@@ -191,4 +191,28 @@
     <priority>0.85</priority>
   </url>
 
+  <!-- 24. Guia Oficial de Conformidade AGT & Decreto 71/25 -->
+  <url>
+    <loc>https://kivora.ao/guia-agt</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- 25. Central de Manuais & Tutoriais Rápidos -->
+  <url>
+    <loc>https://kivora.ao/manuais</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- 26. Simulador de Retorno de Investimento (ROI) -->
+  <url>
+    <loc>https://kivora.ao/simulador-roi</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
 </urlset>

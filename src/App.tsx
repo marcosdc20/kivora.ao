@@ -31,6 +31,9 @@ import { CalculadoraFiscalPage } from './pages/CalculadoraFiscalPage';
 import { LojaPage } from './pages/LojaPage';
 import { InvestidoresPage } from './pages/InvestidoresPage';
 import { ProvinciasPage } from './pages/ProvinciasPage';
+import { GuiaAgtPage } from './pages/GuiaAgtPage';
+import { ManuaisPage } from './pages/ManuaisPage';
+import { SimuladorRoiPage } from './pages/SimuladorRoiPage';
 import { DemoModal } from './components/DemoModal';
 import { AdminApp } from './admin/AdminApp';
 import { ClientPortalApp } from './client-portal/ClientPortalApp';
@@ -224,6 +227,21 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     title: 'Presença nas 18 Províncias de Angola | Cobertura Nacional - KIVORA ERP',
     desc: 'Consulte os parceiros credenciados, postos instalados e capacidade de suporte presencial nas 18 províncias de Angola.',
     path: '/provincias',
+  },
+  'guia-agt': {
+    title: 'Guia Oficial de Conformidade AGT & Decreto 71/25 | KIVORA ERP',
+    desc: 'Guia de regras de faturação eletrónica, regimes de IVA, prazos de envio do SAF-T AO e checklist de auditoria tributária da AGT em Angola.',
+    path: '/guia-agt',
+  },
+  manuais: {
+    title: 'Central de Manuais & Tutoriais Rápidos | KIVORA ERP',
+    desc: 'Base de conhecimento e manuais passo a passo para operadores de caixa, gerentes de stock, contabilistas e equipas de TI.',
+    path: '/manuais',
+  },
+  'simulador-roi': {
+    title: 'Simulador de Poupança & Retorno de Investimento (ROI) | KIVORA ERP',
+    desc: 'Calcule em Kwanzas quanto a sua empresa pode poupar por ano ao eliminar quebras de stock e automatizar a conformidade fiscal da AGT.',
+    path: '/simulador-roi',
   },
   loja: {
     title: 'Loja Oficial de Hardware POS & Impressoras Térmicas Angola | KIVORA',
@@ -629,6 +647,27 @@ export function App() {
           <ProvinciasPage
             onNavigatePage={handleNavigatePage}
             onOpenDemoModal={handleOpenDemoModal}
+          />
+        )}
+
+        {activePage === 'guia-agt' && (
+          <GuiaAgtPage
+            onOpenDemoModal={handleOpenDemoModal}
+            onNavigatePage={handleNavigatePage}
+          />
+        )}
+
+        {activePage === 'manuais' && (
+          <ManuaisPage
+            onOpenDemoModal={handleOpenDemoModal}
+            onNavigatePage={handleNavigatePage}
+          />
+        )}
+
+        {activePage === 'simulador-roi' && (
+          <SimuladorRoiPage
+            onOpenDemoModal={handleOpenDemoModal}
+            onNavigatePage={handleNavigatePage}
           />
         )}
       </main>

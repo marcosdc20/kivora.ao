@@ -52,6 +52,9 @@ export type PageId =
   | 'calculadora-fiscal'
   | 'investidores'
   | 'provincias'
+  | 'guia-agt'
+  | 'manuais'
+  | 'simulador-roi'
   | 'admin';
 
 interface HeaderProps {
@@ -167,6 +170,7 @@ export const Header: React.FC<HeaderProps> = ({
       name: 'Ferramentas',
       mainPage: 'calculadora-fiscal',
       items: [
+        { name: 'Simulador de Poupança (ROI)', desc: 'Calcule a redução de perdas e poupança anual', page: 'simulador-roi', icon: <TrendingUp className="w-4 h-4" />, badge: 'Simulador' },
         { name: 'Calculadora Fiscal IRT & IVA', desc: 'Simulador gratuito de salários e retenções', page: 'calculadora-fiscal', icon: <Calculator className="w-4 h-4" />, badge: 'Grátis' },
         { name: 'Validar Licença Oficial AGT', desc: 'Verificação instantânea de autenticidade', page: 'validar-licenca', icon: <Key className="w-4 h-4" /> },
         { name: 'Hardware & Impressoras', desc: 'Kits e periféricos compatíveis com Kivora', page: 'hardware', icon: <Server className="w-4 h-4" /> },
@@ -200,8 +204,9 @@ export const Header: React.FC<HeaderProps> = ({
       name: 'Recursos',
       mainPage: 'recursos',
       items: [
-        { name: 'Centro de Cibersegurança', desc: 'Criptografia local e proteção militar de dados', page: 'seguranca', icon: <ShieldCheck className="w-4 h-4" />, badge: 'Seguro' },
-        { name: 'Manuais & Legislação AGT', desc: 'Documentos e guias de faturação fiscal', page: 'recursos', icon: <BookOpen className="w-4 h-4" /> },
+        { name: 'Guia de Conformidade AGT', desc: 'Decreto 71/25, prazos de SAF-T e checklist', page: 'guia-agt', icon: <FileCheck className="w-4 h-4" />, badge: 'Oficial' },
+        { name: 'Central de Manuais & Tutoriais', desc: 'Guias práticos para caixas, gerentes e TI', page: 'manuais', icon: <BookOpen className="w-4 h-4" />, badge: 'Passo a Passo' },
+        { name: 'Centro de Cibersegurança', desc: 'Criptografia local e proteção de dados', page: 'seguranca', icon: <ShieldCheck className="w-4 h-4" /> },
         { name: 'Notícias do Setor Fiscal', desc: 'Decretos presidenciais e novidades tributárias', page: 'noticias', icon: <Newspaper className="w-4 h-4" /> },
         { name: 'Centro de Downloads', desc: 'Baixe o executável oficial para Windows 64-bit', page: 'download', icon: <Download className="w-4 h-4" /> },
       ]

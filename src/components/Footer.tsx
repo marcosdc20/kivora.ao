@@ -136,6 +136,33 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
             <ul className="space-y-2">
               <li>
                 <a
+                  href="#guia-agt"
+                  onClick={(e) => handleLinkClick(e, 'guia-agt')}
+                  className="hover:text-white text-emerald-400 font-bold transition-colors"
+                >
+                  Guia Oficial AGT & Decreto 71/25
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#manuais"
+                  onClick={(e) => handleLinkClick(e, 'manuais')}
+                  className="hover:text-white text-blue-400 font-bold transition-colors"
+                >
+                  Central de Manuais & Tutoriais
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#simulador-roi"
+                  onClick={(e) => handleLinkClick(e, 'simulador-roi')}
+                  className="hover:text-white text-amber-400 font-bold transition-colors"
+                >
+                  Simulador de Poupança (ROI)
+                </a>
+              </li>
+              <li>
+                <a
                   href="#casos-sucesso"
                   onClick={(e) => handleLinkClick(e, 'casos-sucesso')}
                   className="hover:text-white text-emerald-300 font-medium transition-colors"
