@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Plus, Search, Key, CheckSquare,
   X, Copy, Ban, RotateCcw, Unlink, Trash2, Clock, CheckCircle2,
-  Loader2, Building2, Monitor, Users, ShieldCheck
+  Loader2, Building2, Monitor, Users, ShieldCheck, Download
 } from 'lucide-react';
 import { AdminTopbar, StatusBadge } from './AdminComponents';
 import { useLicenses, useCompanies } from './hooks/useFirebase';
@@ -160,6 +160,26 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
     }
   };
 
+  const handleExportLicensesCSV = () => {
+    const csvHeader = 'Chave Licença,Empresa,NIF,Email Cliente,Plano,Estado,Terminais Extras,Criada Em,Expira Em,Preço (Kz)\n';
+    const csvRows = filtered
+      .map((l) => {
+        const createdStr = l.created_at ? new Date(l.created_at).toLocaleDateString('pt-AO') : '-';
+        const expiresStr = l.expires_at ? new Date(l.expires_at).toLocaleDateString('pt-AO') : 'Vitalícia';
+        return `"${l.id}","${l.company_name || ''}","${l.nif || ''}","${l.client_email || ''}","${getPlanLabel(l.plan_type)}","${l.status || 'active'}",${l.extra_seats || 0},"${createdStr}","${expiresStr}",${l.price_aoa || 0}`;
+      })
+      .join('\n');
+
+    const blob = new Blob([csvHeader + csvRows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `licencas_kivora_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="flex-1 overflow-y-auto bg-slate-50">
       <AdminTopbar
@@ -167,6 +187,14 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
         subtitle="Emissão, aumento de terminais e controlo em tempo real de licenças do software Kivora ERP"
         actions={
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleExportLicensesCSV}
+              className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold px-3 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
+              title="Exportar licenças filtradas para CSV"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-500" />
+              <span>Exportar CSV</span>
+            </button>
             <button
               onClick={() => refresh()}
               disabled={loading}
