@@ -6,6 +6,7 @@ import {
 } from '../services/systemSettingsService';
 import { db } from '../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
+import { triggerKivoraConfetti } from '../utils/confetti';
 
 import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
 
@@ -29,12 +30,18 @@ export const DemoModal: React.FC<DemoModalProps> = ({
     contactName: '',
     phone: '',
     email: '',
-    businessSector: 'Comércio / Retalho',
+    businessSector: 'Comércio Geral / Retalho',
     storesCount: '1 Loja',
-    interestedModule: initialModule || 'Faturação Eletrónica AGT + POS',
-    installationMode: 'KIVORA Standalone (1 Posto Local)',
+    interestedModule: initialModule || 'Kivora Gestão Comercial & POS',
+    installationMode: 'Posto Único (Caixa Local)',
     notes: '',
   });
+
+  useEffect(() => {
+    if (initialModule) {
+      setFormData((prev) => ({ ...prev, interestedModule: initialModule }));
+    }
+  }, [initialModule]);
 
   useEffect(() => {
     const unsub = subscribeSystemSettings(setSettings);
@@ -58,6 +65,11 @@ export const DemoModal: React.FC<DemoModalProps> = ({
     } finally {
       setSubmitting(false);
       setSubmitted(true);
+      try {
+        triggerKivoraConfetti();
+      } catch {
+        // ignore
+      }
     }
   };
 

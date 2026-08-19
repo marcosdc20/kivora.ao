@@ -161,7 +161,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                 {slide.cta.action === 'download' ? (
                   <button
                     onClick={() => onNavigatePage('download')}
-                    className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold text-xs sm:text-sm px-6 sm:px-7 py-3 sm:py-3.5 rounded-2xl shadow-xl shadow-blue-600/30 transition-all hover:-translate-y-0.5 cursor-pointer"
+                    className="shimmer-button inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold text-xs sm:text-sm px-6 sm:px-7 py-3 sm:py-3.5 rounded-2xl shadow-xl shadow-blue-600/30 transition-all hover:-translate-y-0.5 cursor-pointer"
                   >
                     <Download className="w-4 h-4" strokeWidth={2} />
                     <span>{slide.cta.label}</span>

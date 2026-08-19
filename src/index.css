@@ -323,4 +323,42 @@
   }
 }
 
+/* ================================================================
+   SHIMMER BUTTON — Reflexo metálico suave e sutil no botão de ação
+   ================================================================ */
+.shimmer-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.12) 30%,
+    rgba(255, 255, 255, 0.28) 35%,
+    rgba(255, 255, 255, 0.12) 40%,
+    transparent 50%
+  );
+  transform: rotate(30deg) translateY(-120%);
+  animation: buttonShimmer 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes buttonShimmer {
+  0% {
+    transform: rotate(30deg) translateY(-120%);
+  }
+  25%, 100% {
+    transform: rotate(30deg) translateY(120%);
+  }
+}
+
+
 

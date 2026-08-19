@@ -14,6 +14,7 @@ import {
   subscribeSystemSettings, getCachedSystemSettings,
   SystemCompanySettings
 } from '../services/systemSettingsService';
+import { triggerKivoraConfetti } from '../utils/confetti';
 
 import parceirosImg from '../assets/kivora/parceiros-kivora.png';
 
@@ -114,10 +115,20 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
       }, { merge: true });
 
       setSubmittedProtocol(protocolCode);
+      try {
+        triggerKivoraConfetti();
+      } catch {
+        // ignore
+      }
     } catch (err: any) {
       console.error('Erro ao submeter candidatura:', err);
       // Fallback amigável para o candidato
       setSubmittedProtocol(protocolCode);
+      try {
+        triggerKivoraConfetti();
+      } catch {
+        // ignore
+      }
     } finally {
       setSubmitting(false);
     }

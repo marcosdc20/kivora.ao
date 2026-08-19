@@ -14,6 +14,8 @@ import {
 
 import laptopImg from '../assets/kivora/pc-laptop-kivora.png';
 
+import { triggerKivoraConfetti } from '../utils/confetti';
+
 interface DownloadPageProps {
   onOpenDemoModal: (subject?: string) => void;
   onNavigatePage: (page: PageId) => void;
@@ -54,6 +56,11 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
 
   const handleStartDownload = () => {
     setDownloading(true);
+    try {
+      triggerKivoraConfetti();
+    } catch {
+      // ignore
+    }
     const targetUrl = getDirectDownloadUrl(settings.downloadUrl || DEFAULT_SETTINGS.downloadUrl);
 
     setTimeout(() => {
@@ -164,7 +171,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
                 <button
                   onClick={handleStartDownload}
                   disabled={downloading}
-                  className="inline-flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 text-white font-bold text-sm sm:text-base px-7 py-3.5 rounded-xl shadow-sm transition-all cursor-pointer"
+                  className="shimmer-button inline-flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 text-white font-bold text-sm sm:text-base px-7 py-3.5 rounded-xl shadow-md shadow-blue-600/20 transition-all cursor-pointer"
                 >
                   <Download className="w-5 h-5" />
                   <span>{downloading ? 'A preparar download...' : 'Baixar Instalador (.exe)'}</span>

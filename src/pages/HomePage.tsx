@@ -12,6 +12,9 @@ import {
   PartnerBrandLogo
 } from '../services/systemSettingsService';
 
+import { CardSpotlight } from '../components/effects/CardSpotlight';
+import { SystemArchitectureFlow } from '../components/effects/SystemArchitectureFlow';
+
 import posImg from '../assets/kivora/pc-pos-kivora.png';
 import desktopImg from '../assets/kivora/pc-descktop-kivora.png';
 import laptopImg from '../assets/kivora/pc-laptop-kivora.png';
@@ -111,9 +114,9 @@ interface FeatureCardProps {
 }
 
 const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, desc, delay = 0 }) => (
-  <div
+  <CardSpotlight
     data-reveal
-    className="sr-init bg-white border border-slate-200/80 rounded-3xl p-8 flex flex-col gap-4 hover:border-blue-500/40 hover:shadow-lg transition-all duration-300 group"
+    className="sr-init p-8 flex flex-col gap-4 hover:border-blue-500/40 hover:shadow-lg transition-all duration-300 group"
     style={{ transitionDelay: `${delay}ms` }}
   >
     <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
@@ -123,7 +126,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, desc, delay = 0 
       <h3 className="text-base font-bold text-slate-950 mb-1.5">{title}</h3>
       <p className="text-sm text-slate-600 leading-relaxed">{desc}</p>
     </div>
-  </div>
+  </CardSpotlight>
 );
 
 // Etapa do fluxo de instalação
@@ -269,7 +272,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             
             {/* 1. Empresas Ativas */}
-            <div data-reveal className="sr-init bg-slate-900/90 border border-slate-800 p-8 rounded-3xl text-center space-y-2 hover:border-blue-500/40 transition-colors">
+            <div data-reveal className="sr-init bg-slate-900/90 border border-slate-800 p-8 rounded-3xl text-center space-y-2 hover:border-blue-500/40 hover:scale-[1.02] transition-all duration-300">
               <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mx-auto mb-3">
                 <Building2 className="w-6 h-6" />
               </div>
@@ -281,7 +284,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* 2. Terminais LAN */}
-            <div data-reveal className="sr-init bg-slate-900/90 border border-slate-800 p-8 rounded-3xl text-center space-y-2 hover:border-emerald-500/40 transition-colors" style={{ transitionDelay: '100ms' }}>
+            <div data-reveal className="sr-init bg-slate-900/90 border border-slate-800 p-8 rounded-3xl text-center space-y-2 hover:border-emerald-500/40 hover:scale-[1.02] transition-all duration-300" style={{ transitionDelay: '100ms' }}>
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto mb-3">
                 <Monitor className="w-6 h-6" />
               </div>
@@ -293,7 +296,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* 3. Faturas Emitidas */}
-            <div data-reveal className="sr-init bg-slate-900/90 border border-slate-800 p-8 rounded-3xl text-center space-y-2 hover:border-amber-500/40 transition-colors" style={{ transitionDelay: '200ms' }}>
+            <div data-reveal className="sr-init bg-slate-900/90 border border-slate-800 p-8 rounded-3xl text-center space-y-2 hover:border-amber-500/40 hover:scale-[1.02] transition-all duration-300" style={{ transitionDelay: '200ms' }}>
               <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto mb-3">
                 <Shield className="w-6 h-6" />
               </div>
@@ -305,7 +308,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* 4. Províncias de Angola */}
-            <div data-reveal className="sr-init bg-slate-900/90 border border-slate-800 p-8 rounded-3xl text-center space-y-2 hover:border-indigo-500/40 transition-colors" style={{ transitionDelay: '300ms' }}>
+            <div data-reveal className="sr-init bg-slate-900/90 border border-slate-800 p-8 rounded-3xl text-center space-y-2 hover:border-indigo-500/40 hover:scale-[1.02] transition-all duration-300" style={{ transitionDelay: '300ms' }}>
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto mb-3">
                 <MapPin className="w-6 h-6" />
               </div>
@@ -362,7 +365,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div data-reveal className="sr-init mt-12 text-center">
             <button
               onClick={() => onNavigatePage('download')}
-              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-8 py-4 rounded-2xl shadow-lg shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-600/30"
+              className="shimmer-button inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-8 py-4 rounded-2xl shadow-lg shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-600/30"
             >
               <Download className="w-4 h-4" strokeWidth={2} />
               <span>Baixar KIVORA Setup — Grátis</span>
@@ -538,7 +541,13 @@ export const HomePage: React.FC<HomePageProps> = ({
                 />
               </div>
             </div>
+          </div>
+        </section>
 
+        {/* ========== ARQUITETURA HÍBRIDA & FLUXO AGT OFFLINE-FIRST ========== */}
+        <section className="py-12 px-4 sm:px-8 lg:px-16 max-w-7xl mx-auto">
+          <div data-reveal className="sr-init">
+            <SystemArchitectureFlow />
           </div>
         </section>
 
