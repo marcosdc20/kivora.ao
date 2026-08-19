@@ -3,7 +3,8 @@ import {
   ShieldCheck, Smartphone, Save,
   Database, Download, Loader2, Rocket, RotateCcw,
   X, GitBranch, CreditCard, Building2, ExternalLink, Plus, Tag,
-  TrendingUp, Award, Briefcase, MapPin, Trash2, Monitor
+  TrendingUp, Award, Briefcase, MapPin, Trash2, Monitor,
+  Bell, Megaphone
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -74,7 +75,7 @@ const INITIAL_RELEASES: UpdateRelease[] = [
   }
 ];
 
-type ConfigTab = 'geral' | 'precos' | 'metricas' | 'marcas' | 'investidores' | 'provincias' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups';
+type ConfigTab = 'geral' | 'precos' | 'notificacoes' | 'comunicados' | 'metricas' | 'marcas' | 'investidores' | 'provincias' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups';
 
 export const AdminConfiguracoes: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ConfigTab>('geral');
@@ -306,6 +307,8 @@ export const AdminConfiguracoes: React.FC = () => {
           {[
             { id: 'geral', label: 'Geral & Empresa', icon: <Building2 className="w-4 h-4" /> },
             { id: 'precos', label: 'Planos & Preços', icon: <Tag className="w-4 h-4" /> },
+            { id: 'notificacoes', label: 'Notificações & Webhook', icon: <Bell className="w-4 h-4" /> },
+            { id: 'comunicados', label: 'Avisos & Comunicados', icon: <Megaphone className="w-4 h-4" /> },
             { id: 'metricas', label: 'Métricas & Números', icon: <TrendingUp className="w-4 h-4" /> },
             { id: 'marcas', label: 'Logótipos & Marcas', icon: <Award className="w-4 h-4" /> },
             { id: 'investidores', label: 'Investidores & Governança', icon: <Briefcase className="w-4 h-4" /> },
@@ -313,7 +316,7 @@ export const AdminConfiguracoes: React.FC = () => {
             { id: 'contactos', label: 'Telefones & WhatsApp', icon: <Smartphone className="w-4 h-4" /> },
             { id: 'links', label: 'Links, GitHub & Download', icon: <GitBranch className="w-4 h-4" /> },
             { id: 'bancos', label: 'Contas Bancárias (IBANs)', icon: <CreditCard className="w-4 h-4" /> },
-            { id: 'agt', label: 'Certificação AGT', icon: <ShieldCheck className="w-4 h-4" /> },
+            { id: 'agt', label: 'Certificação AGT & Fiscal', icon: <ShieldCheck className="w-4 h-4" /> },
             { id: 'updates', label: 'Atualizações OTA', icon: <Rocket className="w-4 h-4" /> },
             { id: 'backups', label: 'Backups Nuvem', icon: <Database className="w-4 h-4" /> },
           ].map((tab) => (
@@ -753,6 +756,170 @@ export const AdminConfiguracoes: React.FC = () => {
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Planos & Preços</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* TAB: NOTIFICAÇÕES & WEBHOOK */}
+        {activeTab === 'notificacoes' && (
+          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-base font-black text-slate-900">Notificações, Leads & Integrações Webhook</h3>
+              <p className="text-xs text-slate-500">Configure os canais de recepção de agendamentos de demonstrações, candidaturas de parceiros e automação de marketing</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="font-bold text-slate-700 uppercase flex items-center justify-between">
+                  <span>URL do Webhook Externo (Zapier / Make / n8n / CRM)</span>
+                  <span className="text-[10px] text-slate-400 font-normal">Opcional</span>
+                </label>
+                <input
+                  type="url"
+                  value={settings.webhookUrl || ''}
+                  onChange={(e) => handleChange('webhookUrl', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="https://webhook.site/sua-url-ou-zapier"
+                />
+                <p className="text-[10px] text-slate-400">Todos os pedidos de demonstração e candidaturas de parceiros podem ser enviados em JSON para este endpoint.</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Email de Recepção de Leads (Demonstrações)</label>
+                <input
+                  type="email"
+                  value={settings.notifyEmailLeads || ''}
+                  onChange={(e) => handleChange('notifyEmailLeads', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="comercial@kivora.ao"
+                />
+                <p className="text-[10px] text-slate-400">Caixa de correio alertada quando um cliente solicita uma demonstração.</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Email de Recepção de Candidaturas de Parceiros</label>
+                <input
+                  type="email"
+                  value={settings.notifyEmailPartners || ''}
+                  onChange={(e) => handleChange('notifyEmailPartners', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="parceiros@kivora.ao"
+                />
+                <p className="text-[10px] text-slate-400">Caixa de correio alertada quando um revendedor envia candidatura.</p>
+              </div>
+
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="font-bold text-slate-700 uppercase">Mensagem Padrão de Abertura no WhatsApp</label>
+                <input
+                  type="text"
+                  value={settings.whatsappDefaultMessage || ''}
+                  onChange={(e) => handleChange('whatsappDefaultMessage', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="Olá! Gostaria de agendar uma demonstração do KIVORA ERP para a minha empresa."
+                />
+                <p className="text-[10px] text-slate-400">Texto pré-preenchido quando o visitante clica no botão de WhatsApp do site.</p>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Guardar Notificações</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* TAB: AVISOS & COMUNICADOS */}
+        {activeTab === 'comunicados' && (
+          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-base font-black text-slate-900">Barra de Avisos Globais & Banner de Cookies</h3>
+              <p className="text-xs text-slate-500">Configure avisos de topo, comunicados de atualizações fiscais e consentimento de cookies</p>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-blue-50/60 border border-blue-200 space-y-4 text-xs">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold text-slate-900">Barra de Anúncio / Comunicado no Topo do Portal</h4>
+                  <p className="text-[11px] text-slate-500">Exibe uma faixa de destaque no cabeçalho de todas as páginas públicas.</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.announcementBarEnabled || false}
+                    onChange={(e) => handleChange('announcementBarEnabled', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+
+              {settings.announcementBarEnabled && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-blue-200/60">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Badge / Etiqueta</label>
+                    <input
+                      type="text"
+                      value={settings.announcementBadge || ''}
+                      onChange={(e) => handleChange('announcementBadge', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      placeholder="DECRETO 71/25"
+                    />
+                  </div>
+                  <div className="space-y-1 md:col-span-2">
+                    <label className="font-bold text-slate-700">Texto da Mensagem</label>
+                    <input
+                      type="text"
+                      value={settings.announcementText || ''}
+                      onChange={(e) => handleChange('announcementText', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:border-blue-600 outline-none"
+                      placeholder="Conformidade integral com o Decreto Presidencial n.º 71/25 e novas regras fiscais da AGT 2026."
+                    />
+                  </div>
+                  <div className="space-y-1 md:col-span-3">
+                    <label className="font-bold text-slate-700">Link de Destino ao Clicar (Rota ou URL)</label>
+                    <input
+                      type="text"
+                      value={settings.announcementLink || ''}
+                      onChange={(e) => handleChange('announcementLink', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 focus:border-blue-600 outline-none"
+                      placeholder="/guia-agt"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+              <div>
+                <h4 className="font-bold text-slate-900">Banner de Política de Cookies & Privacidade</h4>
+                <p className="text-[11px] text-slate-500">Exibe a caixa de aviso de cookies no primeiro acesso do visitante.</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.cookieBannerEnabled !== false}
+                  onChange={(e) => handleChange('cookieBannerEnabled', e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Guardar Avisos & Comunicados</span>
               </button>
             </div>
           </form>
@@ -1608,6 +1775,32 @@ export const AdminConfiguracoes: React.FC = () => {
                   placeholder="Programa Validado nº 321/AGT/2026"
                 />
                 <p className="text-[10px] text-slate-400">Este texto é exibido no topo do portal do cliente e no rodapé do site.</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Referência do Decreto Presidencial</label>
+                <input
+                  type="text"
+                  value={settings.agtDecretoRef || ''}
+                  onChange={(e) => handleChange('agtDecretoRef', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="Decreto Presidencial n.º 71/25"
+                />
+                <p className="text-[10px] text-slate-400">Marco regulatório exibido nas páginas fiscais e rodapé.</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Dia Limite de Submissão do SAF-T AO</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={31}
+                  value={settings.saftSubmissionDeadlineDay ?? 15}
+                  onChange={(e) => handleChange('saftSubmissionDeadlineDay', Number(e.target.value))}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold font-mono text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="15"
+                />
+                <p className="text-[10px] text-slate-400">Dia limite do mês subsequente para submissão do XML à AGT.</p>
               </div>
             </div>
 

@@ -111,6 +111,23 @@ export interface SystemCompanySettings {
   planVitalicioCta?: string;
   planVitalicioExtraTerminal?: number;
 
+  // Comunicados de Topo & Cookies
+  announcementBarEnabled?: boolean;
+  announcementText?: string;
+  announcementLink?: string;
+  announcementBadge?: string;
+  cookieBannerEnabled?: boolean;
+
+  // Notificações & Webhook
+  webhookUrl?: string;
+  notifyEmailLeads?: string;
+  notifyEmailPartners?: string;
+  whatsappDefaultMessage?: string;
+
+  // Parâmetros Fiscais AGT
+  agtDecretoRef?: string;
+  saftSubmissionDeadlineDay?: number;
+
   whatsappUrl: string;
   facebookUrl: string;
   instagramUrl: string;
@@ -268,6 +285,23 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   planVitalicioFeatures: '5 Postos de Trabalho em Rede Local / Servidor Dedicado\nLicença perpétua sem expiração\nInstalação e parametrização presencial ou remota assistida\nTodos os módulos do Kivora ERP desbloqueados\nFormação presencial certificada para operadores e gerentes\nGestor de conta executivo e canal VIP de atendimento\nCópia de segurança automática local e em Pen USB',
   planVitalicioCta: 'Adquirir Licença Perpétua',
   planVitalicioExtraTerminal: 60000,
+  // Comunicados de Topo & Cookies
+  announcementBarEnabled: false,
+  announcementText: 'Conformidade integral com o Decreto Presidencial n.º 71/25 e novas regras fiscais da AGT 2026.',
+  announcementLink: '/guia-agt',
+  announcementBadge: 'DECRETO 71/25',
+  cookieBannerEnabled: true,
+
+  // Notificações & Webhook
+  webhookUrl: '',
+  notifyEmailLeads: 'comercial@kivora.ao',
+  notifyEmailPartners: 'parceiros@kivora.ao',
+  whatsappDefaultMessage: 'Olá! Gostaria de saber mais sobre o KIVORA ERP.',
+
+  // Parâmetros Fiscais AGT
+  agtDecretoRef: 'Decreto Presidencial n.º 71/25',
+  saftSubmissionDeadlineDay: 15,
+
   whatsappUrl: KIVORA_INFO.whatsapp,
   facebookUrl: KIVORA_INFO.facebook,
   instagramUrl: KIVORA_INFO.instagram,

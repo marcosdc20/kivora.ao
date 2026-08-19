@@ -114,6 +114,20 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
         createdAt: Date.now(),
       }, { merge: true });
 
+      // 3. Disparo opcional de webhook externo se configurado no Admin
+      if (settings.webhookUrl && settings.webhookUrl.startsWith('http')) {
+        fetch(settings.webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'candidatura_parceiro',
+            timestamp: new Date().toISOString(),
+            data: applicationData
+          }),
+          mode: 'no-cors'
+        }).catch((e) => console.warn('Erro silencioso no Webhook:', e));
+      }
+
       setSubmittedProtocol(protocolCode);
       try {
         triggerKivoraConfetti();

@@ -682,16 +682,18 @@ export function App() {
         initialModule={demoInitialModule}
       />
 
-      {/* Botão flutuante WhatsApp (configurável pelo Admin) */}
+      {/* Botão flutuante WhatsApp (configurável pelo Admin no Firebase) */}
       <WhatsAppButton
         phoneNumber={appSettings.phoneRaw || '244923456789'}
-        message="Olá! Gostaria de saber mais sobre o KIVORA ERP."
+        message={appSettings.whatsappDefaultMessage || 'Olá! Gostaria de saber mais sobre o KIVORA ERP.'}
       />
 
-      {/* Banner de Consentimento de Cookies & Privacidade */}
-      <CookieBanner
-        onNavigatePrivacy={() => handleNavigatePage('privacidade')}
-      />
+      {/* Banner de Consentimento de Cookies & Privacidade (controlado pelo Admin) */}
+      {appSettings.cookieBannerEnabled !== false && (
+        <CookieBanner
+          onNavigatePrivacy={() => handleNavigatePage('privacidade')}
+        />
+      )}
 
     </div>
   );

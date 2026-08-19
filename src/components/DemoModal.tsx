@@ -60,6 +60,20 @@ export const DemoModal: React.FC<DemoModalProps> = ({
         status: 'pendente',
         source: 'site_modal_demonstracao',
       });
+
+      // Disparo opcional de webhook externo se configurado no Admin
+      if (settings.webhookUrl && settings.webhookUrl.startsWith('http')) {
+        fetch(settings.webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'lead_demonstracao',
+            timestamp: new Date().toISOString(),
+            data: formData
+          }),
+          mode: 'no-cors'
+        }).catch((e) => console.warn('Erro silencioso no Webhook:', e));
+      }
     } catch (err) {
       console.warn('Erro ao gravar lead no Firebase:', err);
     } finally {
