@@ -26,6 +26,39 @@ export interface SystemCompanySettings {
   minStorage?: string;
   minCpu?: string;
   releaseNotes?: string;
+  // Configurações da Tabela de Preços & Planos
+  pricingTag?: string;
+  pricingTitle?: string;
+  pricingSubtitle?: string;
+
+  // Plano Mensal
+  planMensalName?: string;
+  planMensalPrice?: string;
+  planMensalPeriod?: string;
+  planMensalDesc?: string;
+  planMensalFeatures?: string;
+  planMensalCta?: string;
+  planMensalExtraTerminal?: number;
+
+  // Plano Anual
+  planAnualName?: string;
+  planAnualPrice?: string;
+  planAnualPeriod?: string;
+  planAnualDesc?: string;
+  planAnualBadge?: string;
+  planAnualFeatures?: string;
+  planAnualCta?: string;
+  planAnualExtraTerminal?: number;
+
+  // Plano Vitalício
+  planVitalicioName?: string;
+  planVitalicioPrice?: string;
+  planVitalicioPeriod?: string;
+  planVitalicioDesc?: string;
+  planVitalicioFeatures?: string;
+  planVitalicioCta?: string;
+  planVitalicioExtraTerminal?: number;
+
   whatsappUrl: string;
   facebookUrl: string;
   instagramUrl: string;
@@ -93,6 +126,39 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   minStorage: '2 GB livres em SSD (+ base de dados)',
   minCpu: 'Intel Core i3 / AMD Ryzen 3 ou superior',
   releaseNotes: '• Motor de faturação certificado em estrita conformidade com a AGT\n• Base de dados 100% local com funcionamento sem internet\n• Módulo de POS de balcão e gestão de stock integrada\n• Exportação e validação oficial de SAF-T (AO)',
+
+  // Configurações de Preços Padrão
+  pricingTag: 'Tabela de Preços Oficiais',
+  pricingTitle: 'Escolha a Modalidade de Licenciamento',
+  pricingSubtitle: 'Preços claros em Kwanzas (AOA) com IVA incluído no regime de isenção de software e sem cobrança por fatura emitida.',
+
+  // Plano Mensal
+  planMensalName: 'Mensal Standalone',
+  planMensalPrice: '25.000',
+  planMensalPeriod: '/ mês',
+  planMensalDesc: 'Flexibilidade total sem contratos de fidelização. Ideal para 1 computador isolado ou início de atividade.',
+  planMensalFeatures: '1 Posto de Trabalho Standalone\nFaturação Eletrónica AGT DS.120 com QR Code\nPOS de Balcão e Fecho de Caixa com Relatório Z\nGestão de Stock Básica e Preços de Venda\nExportação SAF-T AO mensal sem erros\nAtualizações fiscais legais incluídas\nSuporte por email e WhatsApp em horário comercial',
+  planMensalCta: 'Aderir ao Plano Mensal',
+  planMensalExtraTerminal: 10000,
+
+  // Plano Anual
+  planAnualName: 'Anual Multi-Postos (Recomendado)',
+  planAnualPrice: '250.000',
+  planAnualPeriod: '/ ano',
+  planAnualDesc: 'A opção mais rentável para empresas ativas. Inclui 3 postos em rede local e poupança imediata.',
+  planAnualBadge: 'MAIS POPULAR EM ANGOLA',
+  planAnualFeatures: 'Até 3 Postos de Trabalho em Rede LAN (Caixas + Servidor)\nTudo do Plano Mensal incluído\nMódulo de Recursos Humanos & IRT 2026\nContabilidade PGC-AO & SAF-T Completo\nMultidepósito e Controlo de Validades e Lotes\nSuporte Técnico Prioritário (SLA 4h)\nFormação operacional da equipa incluída',
+  planAnualCta: 'Adquirir Licença Anual',
+  planAnualExtraTerminal: 35000,
+
+  // Plano Vitalício
+  planVitalicioName: 'Licença Vitalícia Perpétua',
+  planVitalicioPrice: '650.000',
+  planVitalicioPeriod: 'pagamento único',
+  planVitalicioDesc: 'Sem renovações anuais ou mensalidades. A licença definitiva para a sua empresa com 5 postos LAN.',
+  planVitalicioFeatures: '5 Postos de Trabalho em Rede Local / Servidor Dedicado\nLicença perpétua sem expiração\nInstalação e parametrização presencial ou remota assistida\nTodos os módulos do Kivora ERP desbloqueados\nFormação presencial certificada para operadores e gerentes\nGestor de conta executivo e canal VIP de atendimento\nCópia de segurança automática local e em Pen USB',
+  planVitalicioCta: 'Adquirir Licença Perpétua',
+  planVitalicioExtraTerminal: 60000,
   whatsappUrl: KIVORA_INFO.whatsapp,
   facebookUrl: KIVORA_INFO.facebook,
   instagramUrl: KIVORA_INFO.instagram,

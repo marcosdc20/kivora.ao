@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck, Smartphone, Save,
   Database, Download, Loader2, Rocket, RotateCcw,
-  X, GitBranch, CreditCard, Building2, ExternalLink, Plus
+  X, GitBranch, CreditCard, Building2, ExternalLink, Plus, Tag
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -72,7 +72,7 @@ const INITIAL_RELEASES: UpdateRelease[] = [
   }
 ];
 
-type ConfigTab = 'geral' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups';
+type ConfigTab = 'geral' | 'precos' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups';
 
 export const AdminConfiguracoes: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ConfigTab>('geral');
@@ -231,6 +231,7 @@ export const AdminConfiguracoes: React.FC = () => {
         <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
           {[
             { id: 'geral', label: 'Geral & Empresa', icon: <Building2 className="w-4 h-4" /> },
+            { id: 'precos', label: 'Planos & Preços', icon: <Tag className="w-4 h-4" /> },
             { id: 'contactos', label: 'Telefones & WhatsApp', icon: <Smartphone className="w-4 h-4" /> },
             { id: 'links', label: 'Links, GitHub & Download', icon: <GitBranch className="w-4 h-4" /> },
             { id: 'bancos', label: 'Contas Bancárias (IBANs)', icon: <CreditCard className="w-4 h-4" /> },
@@ -298,24 +299,24 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Título Completo / Slogan</label>
+                <label className="font-bold text-slate-700 uppercase">Nome Completo do Produto</label>
                 <input
                   type="text"
                   value={settings.fullName}
                   onChange={(e) => handleChange('fullName', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
-                  placeholder="Kivora – Sistema de Gestão Empresarial & Faturação Eletrónica AGT"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="Kivora Desktop ERP & POS"
                 />
               </div>
 
-              <div className="md:col-span-2 space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Morada da Sede / Atendimento Presencial</label>
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="font-bold text-slate-700 uppercase">Endereço Físico / Sede</label>
                 <input
                   type="text"
                   value={settings.address}
                   onChange={(e) => handleChange('address', e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
-                  placeholder="Ex: Luanda, Angola – Atendimento Presencial & Assistência Técnica"
+                  placeholder="Edifício KIVORA, Rua Principal, Luanda, Angola"
                 />
               </div>
             </div>
@@ -328,6 +329,352 @@ export const AdminConfiguracoes: React.FC = () => {
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Alterações</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* TAB 2: PLANOS & PREÇOS (CONFIGURAÇÃO COMPLETA DA TABELA OFICIAL) */}
+        {activeTab === 'precos' && (
+          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-8">
+            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-black text-slate-900">Tabela de Preços, Planos & Simulador</h3>
+                <p className="text-xs text-slate-500">Configure os valores, descrições, recursos e botões da página de preços (/planos)</p>
+              </div>
+            </div>
+
+            {/* Configurações Gerais do Cabeçalho */}
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+              <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Cabeçalho da Secção</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700">Tag Superior</label>
+                  <input
+                    type="text"
+                    value={settings.pricingTag || ''}
+                    onChange={(e) => handleChange('pricingTag', e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    placeholder="Tabela de Preços Oficiais"
+                  />
+                </div>
+                <div className="space-y-1 md:col-span-2">
+                  <label className="font-bold text-slate-700">Título Principal</label>
+                  <input
+                    type="text"
+                    value={settings.pricingTitle || ''}
+                    onChange={(e) => handleChange('pricingTitle', e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    placeholder="Escolha a Modalidade de Licenciamento"
+                  />
+                </div>
+                <div className="space-y-1 md:col-span-3">
+                  <label className="font-bold text-slate-700">Subtítulo / Descrição</label>
+                  <input
+                    type="text"
+                    value={settings.pricingSubtitle || ''}
+                    onChange={(e) => handleChange('pricingSubtitle', e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-600 outline-none"
+                    placeholder="Preços claros em Kwanzas (AOA) com IVA incluído no regime de isenção de software e sem cobrança por fatura emitida."
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Grelha dos 3 Planos */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
+              {/* PLANO 1: MENSAL STANDALONE */}
+              <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3.5 flex flex-col justify-between">
+                <div className="space-y-3 text-xs">
+                  <div className="border-b border-slate-200 pb-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                      Plano 1
+                    </span>
+                    <h4 className="font-black text-slate-900 text-sm mt-1">Mensal Standalone</h4>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Nome do Plano</label>
+                    <input
+                      type="text"
+                      value={settings.planMensalName || ''}
+                      onChange={(e) => handleChange('planMensalName', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      placeholder="Mensal Standalone"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-700">Preço (AOA)</label>
+                      <input
+                        type="text"
+                        value={settings.planMensalPrice || ''}
+                        onChange={(e) => handleChange('planMensalPrice', e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-blue-600 focus:border-blue-600 outline-none"
+                        placeholder="25.000"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-700">Período</label>
+                      <input
+                        type="text"
+                        value={settings.planMensalPeriod || ''}
+                        onChange={(e) => handleChange('planMensalPeriod', e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:border-blue-600 outline-none"
+                        placeholder="/ mês"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Descrição Curta</label>
+                    <textarea
+                      rows={2}
+                      value={settings.planMensalDesc || ''}
+                      onChange={(e) => handleChange('planMensalDesc', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:border-blue-600 outline-none leading-relaxed"
+                      placeholder="Flexibilidade total sem contratos de fidelização..."
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Preço Terminal Extra (Simulador)</label>
+                    <input
+                      type="number"
+                      value={settings.planMensalExtraTerminal ?? 10000}
+                      onChange={(e) => handleChange('planMensalExtraTerminal', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      placeholder="10000"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Texto do Botão (CTA)</label>
+                    <input
+                      type="text"
+                      value={settings.planMensalCta || ''}
+                      onChange={(e) => handleChange('planMensalCta', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      placeholder="Aderir ao Plano Mensal"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Recursos Inclusos (1 por linha)</label>
+                    <textarea
+                      rows={6}
+                      value={settings.planMensalFeatures || ''}
+                      onChange={(e) => handleChange('planMensalFeatures', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-mono text-[11px] text-slate-800 focus:border-blue-600 outline-none leading-relaxed"
+                      placeholder="1 Posto de Trabalho Standalone&#10;Faturação Eletrónica AGT DS.120 com QR Code"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* PLANO 2: ANUAL MULTI-POSTOS (RECOMENDADO) */}
+              <div className="p-5 rounded-2xl bg-blue-50/50 border-2 border-blue-300 space-y-3.5 flex flex-col justify-between">
+                <div className="space-y-3 text-xs">
+                  <div className="border-b border-blue-200 pb-2 flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-2 py-0.5 rounded border border-blue-200">
+                      Plano 2 (Destaque)
+                    </span>
+                    <span className="text-[10px] font-bold text-blue-800">Mais Popular</span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Nome do Plano</label>
+                    <input
+                      type="text"
+                      value={settings.planAnualName || ''}
+                      onChange={(e) => handleChange('planAnualName', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      placeholder="Anual Multi-Postos (Recomendado)"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Badge Superior</label>
+                    <input
+                      type="text"
+                      value={settings.planAnualBadge || ''}
+                      onChange={(e) => handleChange('planAnualBadge', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-blue-700 focus:border-blue-600 outline-none uppercase"
+                      placeholder="MAIS POPULAR EM ANGOLA"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-700">Preço (AOA)</label>
+                      <input
+                        type="text"
+                        value={settings.planAnualPrice || ''}
+                        onChange={(e) => handleChange('planAnualPrice', e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-blue-600 focus:border-blue-600 outline-none"
+                        placeholder="250.000"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-700">Período</label>
+                      <input
+                        type="text"
+                        value={settings.planAnualPeriod || ''}
+                        onChange={(e) => handleChange('planAnualPeriod', e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:border-blue-600 outline-none"
+                        placeholder="/ ano"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Descrição Curta</label>
+                    <textarea
+                      rows={2}
+                      value={settings.planAnualDesc || ''}
+                      onChange={(e) => handleChange('planAnualDesc', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:border-blue-600 outline-none leading-relaxed"
+                      placeholder="A opção mais rentável para empresas ativas..."
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Preço Terminal Extra (Simulador)</label>
+                    <input
+                      type="number"
+                      value={settings.planAnualExtraTerminal ?? 35000}
+                      onChange={(e) => handleChange('planAnualExtraTerminal', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      placeholder="35000"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Texto do Botão (CTA)</label>
+                    <input
+                      type="text"
+                      value={settings.planAnualCta || ''}
+                      onChange={(e) => handleChange('planAnualCta', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      placeholder="Adquirir Licença Anual"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Recursos Inclusos (1 por linha)</label>
+                    <textarea
+                      rows={6}
+                      value={settings.planAnualFeatures || ''}
+                      onChange={(e) => handleChange('planAnualFeatures', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-mono text-[11px] text-slate-800 focus:border-blue-600 outline-none leading-relaxed"
+                      placeholder="Até 3 Postos de Trabalho em Rede LAN&#10;Tudo do Plano Mensal incluído"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* PLANO 3: VITALÍCIO PERPÉTUO */}
+              <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3.5 flex flex-col justify-between">
+                <div className="space-y-3 text-xs">
+                  <div className="border-b border-slate-200 pb-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-purple-600 bg-purple-50 px-2 py-0.5 rounded border border-purple-100">
+                      Plano 3
+                    </span>
+                    <h4 className="font-black text-slate-900 text-sm mt-1">Licença Vitalícia Perpétua</h4>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Nome do Plano</label>
+                    <input
+                      type="text"
+                      value={settings.planVitalicioName || ''}
+                      onChange={(e) => handleChange('planVitalicioName', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      placeholder="Licença Vitalícia Perpétua"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-700">Preço (AOA)</label>
+                      <input
+                        type="text"
+                        value={settings.planVitalicioPrice || ''}
+                        onChange={(e) => handleChange('planVitalicioPrice', e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-blue-600 focus:border-blue-600 outline-none"
+                        placeholder="650.000"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-700">Período</label>
+                      <input
+                        type="text"
+                        value={settings.planVitalicioPeriod || ''}
+                        onChange={(e) => handleChange('planVitalicioPeriod', e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:border-blue-600 outline-none"
+                        placeholder="pagamento único"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Descrição Curta</label>
+                    <textarea
+                      rows={2}
+                      value={settings.planVitalicioDesc || ''}
+                      onChange={(e) => handleChange('planVitalicioDesc', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:border-blue-600 outline-none leading-relaxed"
+                      placeholder="Sem renovações anuais ou mensalidades..."
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Preço Terminal Extra (Simulador)</label>
+                    <input
+                      type="number"
+                      value={settings.planVitalicioExtraTerminal ?? 60000}
+                      onChange={(e) => handleChange('planVitalicioExtraTerminal', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      placeholder="60000"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Texto do Botão (CTA)</label>
+                    <input
+                      type="text"
+                      value={settings.planVitalicioCta || ''}
+                      onChange={(e) => handleChange('planVitalicioCta', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      placeholder="Adquirir Licença Perpétua"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Recursos Inclusos (1 por linha)</label>
+                    <textarea
+                      rows={6}
+                      value={settings.planVitalicioFeatures || ''}
+                      onChange={(e) => handleChange('planVitalicioFeatures', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-mono text-[11px] text-slate-800 focus:border-blue-600 outline-none leading-relaxed"
+                      placeholder="5 Postos de Trabalho em Rede Local&#10;Licença perpétua sem expiração"
+                    />
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Guardar Planos & Preços</span>
               </button>
             </div>
           </form>

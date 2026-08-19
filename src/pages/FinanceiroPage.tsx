@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
   CheckCircle2, ArrowRight, Calculator, ShieldCheck, Key,
   HelpCircle, Monitor, TrendingDown
 } from 'lucide-react';
 import { PageId } from '../components/Header';
+import {
+  SystemCompanySettings, DEFAULT_SETTINGS,
+  subscribeSystemSettings, getCachedSystemSettings
+} from '../services/systemSettingsService';
 
 interface FinanceiroPageProps {
   onOpenDemoModal: (subject?: string) => void;
@@ -19,88 +23,116 @@ interface Plan {
   desc: string;
   features: string[];
   highlight?: boolean;
+  highlightBadge?: string;
   ctaText: string;
 }
 
-const PLANS: Plan[] = [
-  {
-    id: 'mensal',
-    name: 'Mensal Standalone',
-    price: '25.000',
-    period: '/ mês',
-    desc: 'Flexibilidade total sem contratos de fidelização. Ideal para 1 computador isolado ou início de atividade.',
-    features: [
-      '1 Posto de Trabalho Standalone',
-      'Faturação Eletrónica AGT DS.120 com QR Code',
-      'POS de Balcão e Fecho de Caixa com Relatório Z',
-      'Gestão de Stock Básica e Preços de Venda',
-      'Exportação SAF-T AO mensal sem erros',
-      'Atualizações fiscais legais incluídas',
-      'Suporte por email e WhatsApp em horário comercial',
-    ],
-    ctaText: 'Aderir ao Plano Mensal',
-  },
-  {
-    id: 'anual',
-    name: 'Anual Multi-Postos (Recomendado)',
-    price: '250.000',
-    period: '/ ano',
-    desc: 'A opção mais rentável para empresas ativas. Inclui 3 postos em rede local e poupança imediata.',
-    features: [
-      'Até 3 Postos de Trabalho em Rede LAN (Caixas + Servidor)',
-      'Tudo do Plano Mensal incluído',
-      'Módulo de Recursos Humanos & IRT 2026',
-      'Contabilidade PGC-AO & SAF-T Completo',
-      'Multidepósito e Controlo de Validades e Lotes',
-      'Suporte Técnico Prioritário (SLA 4h)',
-      'Formação operacional da equipa incluída',
-    ],
-    highlight: true,
-    ctaText: 'Adquirir Licença Anual',
-  },
-  {
-    id: 'vitalicio',
-    name: 'Licença Vitalícia Perpétua',
-    price: '650.000',
-    period: 'pagamento único',
-    desc: 'Sem renovações anuais ou mensalidades. A licença definitiva para a sua empresa com 5 postos LAN.',
-    features: [
-      '5 Postos de Trabalho em Rede Local / Servidor Dedicado',
-      'Licença perpétua sem expiração',
-      'Instalação e parametrização presencial ou remota assistida',
-      'Todos os módulos do Kivora ERP desbloqueados',
-      'Formação presencial certificada para operadores e gerentes',
-      'Gestor de conta executivo e canal VIP de atendimento',
-      'Cópia de segurança automática local e em Pen USB',
-    ],
-    ctaText: 'Adquirir Licença Perpétua',
-  },
-];
-
 export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal, onNavigatePage }) => {
-  // Simulador de Investimento & ROI
+  const [settings, setSettings] = useState<SystemCompanySettings>(() => getCachedSystemSettings());
   const [terminals, setTerminals] = useState<number>(3);
   const [selectedPlanType, setSelectedPlanType] = useState<'anual' | 'mensal' | 'vitalicio'>('anual');
+
+  useEffect(() => {
+    const unsub = subscribeSystemSettings((newSettings) => {
+      setSettings(newSettings);
+    });
+    return () => unsub();
+  }, []);
+
+  const parseFeatures = (text?: string, fallback: string[] = []): string[] => {
+    if (!text) return fallback;
+    return text.split('\n').map(l => l.trim().replace(/^[•\-\*]\s*/, '')).filter(Boolean);
+  };
+
+  const dynamicPlans: Plan[] = [
+    {
+      id: 'mensal',
+      name: settings.planMensalName || DEFAULT_SETTINGS.planMensalName || 'Mensal Standalone',
+      price: settings.planMensalPrice || DEFAULT_SETTINGS.planMensalPrice || '25.000',
+      period: settings.planMensalPeriod || DEFAULT_SETTINGS.planMensalPeriod || '/ mês',
+      desc: settings.planMensalDesc || DEFAULT_SETTINGS.planMensalDesc || 'Flexibilidade total sem contratos de fidelização. Ideal para 1 computador isolado ou início de atividade.',
+      features: parseFeatures(settings.planMensalFeatures, [
+        '1 Posto de Trabalho Standalone',
+        'Faturação Eletrónica AGT DS.120 com QR Code',
+        'POS de Balcão e Fecho de Caixa com Relatório Z',
+        'Gestão de Stock Básica e Preços de Venda',
+        'Exportação SAF-T AO mensal sem erros',
+        'Atualizações fiscais legais incluídas',
+        'Suporte por email e WhatsApp em horário comercial',
+      ]),
+      ctaText: settings.planMensalCta || DEFAULT_SETTINGS.planMensalCta || 'Aderir ao Plano Mensal',
+    },
+    {
+      id: 'anual',
+      name: settings.planAnualName || DEFAULT_SETTINGS.planAnualName || 'Anual Multi-Postos (Recomendado)',
+      price: settings.planAnualPrice || DEFAULT_SETTINGS.planAnualPrice || '250.000',
+      period: settings.planAnualPeriod || DEFAULT_SETTINGS.planAnualPeriod || '/ ano',
+      desc: settings.planAnualDesc || DEFAULT_SETTINGS.planAnualDesc || 'A opção mais rentável para empresas ativas. Inclui 3 postos em rede local e poupança imediata.',
+      features: parseFeatures(settings.planAnualFeatures, [
+        'Até 3 Postos de Trabalho em Rede LAN (Caixas + Servidor)',
+        'Tudo do Plano Mensal incluído',
+        'Módulo de Recursos Humanos & IRT 2026',
+        'Contabilidade PGC-AO & SAF-T Completo',
+        'Multidepósito e Controlo de Validades e Lotes',
+        'Suporte Técnico Prioritário (SLA 4h)',
+        'Formação operacional da equipa incluída',
+      ]),
+      highlight: true,
+      highlightBadge: settings.planAnualBadge || DEFAULT_SETTINGS.planAnualBadge || 'MAIS POPULAR EM ANGOLA',
+      ctaText: settings.planAnualCta || DEFAULT_SETTINGS.planAnualCta || 'Adquirir Licença Anual',
+    },
+    {
+      id: 'vitalicio',
+      name: settings.planVitalicioName || DEFAULT_SETTINGS.planVitalicioName || 'Licença Vitalícia Perpétua',
+      price: settings.planVitalicioPrice || DEFAULT_SETTINGS.planVitalicioPrice || '650.000',
+      period: settings.planVitalicioPeriod || DEFAULT_SETTINGS.planVitalicioPeriod || 'pagamento único',
+      desc: settings.planVitalicioDesc || DEFAULT_SETTINGS.planVitalicioDesc || 'Sem renovações anuais ou mensalidades. A licença definitiva para a sua empresa com 5 postos LAN.',
+      features: parseFeatures(settings.planVitalicioFeatures, [
+        '5 Postos de Trabalho em Rede Local / Servidor Dedicado',
+        'Licença perpétua sem expiração',
+        'Instalação e parametrização presencial ou remota assistida',
+        'Todos os módulos do Kivora ERP desbloqueados',
+        'Formação presencial certificada para operadores e gerentes',
+        'Gestor de conta executivo e canal VIP de atendimento',
+        'Cópia de segurança automática local e em Pen USB',
+      ]),
+      ctaText: settings.planVitalicioCta || DEFAULT_SETTINGS.planVitalicioCta || 'Adquirir Licença Perpétua',
+    },
+  ];
+
+  const parseNumeric = (val?: string, fallback: number = 0): number => {
+    if (!val) return fallback;
+    const num = parseInt(val.replace(/\D/g, ''), 10);
+    return isNaN(num) ? fallback : num;
+  };
+
+  const baseMensal = parseNumeric(settings.planMensalPrice, 25000);
+  const extraMensal = Number(settings.planMensalExtraTerminal ?? 10000);
+
+  const baseAnual = parseNumeric(settings.planAnualPrice, 250000);
+  const extraAnual = Number(settings.planAnualExtraTerminal ?? 35000);
+
+  const baseVitalicio = parseNumeric(settings.planVitalicioPrice, 650000);
+  const extraVitalicio = Number(settings.planVitalicioExtraTerminal ?? 60000);
 
   // Cálculos harmonizados
   const calculatePrice = () => {
     if (selectedPlanType === 'mensal') {
       const extra = Math.max(0, terminals - 1);
-      return (25000 + extra * 10000);
+      return (baseMensal + extra * extraMensal);
     }
     if (selectedPlanType === 'anual') {
       const extra = Math.max(0, terminals - 3);
-      return (250000 + extra * 35000);
+      return (baseAnual + extra * extraAnual);
     }
     // Vitalício
     const extra = Math.max(0, terminals - 5);
-    return (650000 + extra * 60000);
+    return (baseVitalicio + extra * extraVitalicio);
   };
 
   const calculatedPrice = calculatePrice();
 
   // Comparação com Cloud ERP (USD $80/mês + Internet Fibra 40.000 Kz/mês)
-  // 1 ano de Cloud ERP = ($80 * 12 * 900 Kz) + (40000 * 12) = 864.000 + 480.000 = ~1.344.000 Kz/ano
   const cloudErpAnnualCost = 1344000;
   const kivoraAnnualEquivalent = selectedPlanType === 'anual' ? calculatedPrice : calculatedPrice * 12;
   const realSavingsAoa = Math.max(0, cloudErpAnnualCost - kivoraAnnualEquivalent);
@@ -142,18 +174,18 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
       <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-24 space-y-12">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <span className="text-xs font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/60">
-            Tabela de Preços Oficiais
+            {settings.pricingTag || DEFAULT_SETTINGS.pricingTag || 'Tabela de Preços Oficiais'}
           </span>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-950">
-            Escolha a Modalidade de Licenciamento
+            {settings.pricingTitle || DEFAULT_SETTINGS.pricingTitle || 'Escolha a Modalidade de Licenciamento'}
           </h2>
           <p className="text-slate-600 text-sm leading-relaxed">
-            Preços claros em Kwanzas (AOA) com IVA incluído no regime de isenção de software e sem cobrança por fatura emitida.
+            {settings.pricingSubtitle || DEFAULT_SETTINGS.pricingSubtitle || 'Preços claros em Kwanzas (AOA) com IVA incluído no regime de isenção de software e sem cobrança por fatura emitida.'}
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-          {PLANS.map((plan) => (
+          {dynamicPlans.map((plan) => (
             <div
               key={plan.id}
               className={`rounded-3xl p-8 sm:p-10 flex flex-col justify-between transition-all duration-300 relative ${
@@ -164,7 +196,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
             >
               {plan.highlight && (
                 <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full shadow-md">
-                  Mais Popular em Angola
+                  {plan.highlightBadge || 'Mais Popular em Angola'}
                 </span>
               )}
 
