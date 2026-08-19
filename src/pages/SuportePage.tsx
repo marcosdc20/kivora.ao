@@ -8,6 +8,7 @@ import {
   subscribeSystemSettings, getCachedSystemSettings,
   SystemCompanySettings
 } from '../services/systemSettingsService';
+import { createSupportTicket } from '../admin/services/supportService';
 
 import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
 
@@ -21,7 +22,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
   const [email, setEmail] = useState('');
   const [telefone, setTelefone] = useState('');
   const [nif, setNif] = useState('');
-  const [departamento, setDepartamento] = useState('tecnico');
+  const [departamento, setDepartamento] = useState<'faturacao' | 'tecnico' | 'licenciamento' | 'multiloja'>('tecnico');
   const [assunto, setAssunto] = useState(initialSubject || '');
   const [mensagem, setMensagem] = useState('');
   
@@ -33,16 +34,58 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
     return () => unsub();
   }, []);
 
-  const handleSubmitTicket = (e: React.FormEvent) => {
+  const handleSubmitTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome || !telefone || !mensagem) return;
 
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      const newTicket = await createSupportTicket({
+        company_name: nome,
+        nif: nif || undefined,
+        contact_email: email || `${telefone.replace(/[^0-9]/g, '')}@kivora.ao`,
+        contact_phone: telefone,
+        subject: assunto || 'Pedido de Assistência Técnica',
+        category: departamento,
+        priority: 'medium',
+        initial_message: mensagem,
+        target_type: 'admin',
+        created_by_role: 'client',
+        sender_name: nome
+      });
+
+      setTicketProtocol(newTicket.ticket_number || `TICK-AO-${Date.now().toString().slice(-6)}`);
+
+      // Disparo para Webhook configurado no Firebase
+      if (settings.webhookUrl) {
+        try {
+          fetch(settings.webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              event: 'support_ticket_created',
+              ticketNumber: newTicket.ticket_number,
+              nome,
+              telefone,
+              email,
+              nif,
+              departamento,
+              assunto,
+              mensagem,
+              createdAt: new Date().toISOString()
+            })
+          }).catch(() => {});
+        } catch {
+          // ignore
+        }
+      }
+    } catch {
+      // Fallback gracioso
+      const fallbackProtocol = `TICK-AO-${Date.now().toString().slice(-6)}`;
+      setTicketProtocol(fallbackProtocol);
+    } finally {
       setSubmitting(false);
-      const protocol = `TICK-AO-${Date.now().toString().slice(-6)}`;
-      setTicketProtocol(protocol);
-    }, 1000);
+    }
   };
 
   const faqs = [
@@ -295,14 +338,13 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                   <label className="text-xs font-bold text-slate-700">Departamento / Área</label>
                   <select
                     value={departamento}
-                    onChange={(e) => setDepartamento(e.target.value)}
+                    onChange={(e) => setDepartamento(e.target.value as any)}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-500"
                   >
                     <option value="tecnico">Instalação & Configuração de Rede LAN</option>
                     <option value="faturacao">Faturação Eletrónica & Validação AGT</option>
-                    <option value="licencas">Licenciamento, Ativações & Pagamentos</option>
-                    <option value="formacao">Formação de Caixas e Gerência</option>
-                    <option value="outro">Outro Assunto</option>
+                    <option value="licenciamento">Licenciamento, Ativações & Pagamentos</option>
+                    <option value="multiloja">Multi-Posto & Multi-Loja</option>
                   </select>
                 </div>
 
