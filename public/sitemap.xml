@@ -162,9 +162,33 @@
   <!-- 20. Política de Privacidade -->
   <url>
     <loc>https://kivora.ao/privacidade</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-19</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
+  </url>
+
+  <!-- 21. Investidores & Capital -->
+  <url>
+    <loc>https://kivora.ao/investidores</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <!-- 22. Cobertura nas 18 Províncias de Angola -->
+  <url>
+    <loc>https://kivora.ao/provincias</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 23. Setores de Atividade -->
+  <url>
+    <loc>https://kivora.ao/setores</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
   </url>
 
 </urlset>

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { subscribeSystemSettings, getCachedSystemSettings, SystemCompanySettings } from './services/systemSettingsService';
+import WhatsAppButton from './components/WhatsAppButton';
 import { Header, PageId } from './components/Header';
 import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
@@ -251,6 +253,13 @@ export function App() {
   const [selectedForSupport] = useState<string>('');
   const [isDemoModalOpen, setIsDemoModalOpen] = useState<boolean>(false);
   const [demoInitialModule, setDemoInitialModule] = useState<string>('');
+  const [appSettings, setAppSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
+
+  // Subscrição em tempo real das settings (WhatsApp, telefone, etc.)
+  useEffect(() => {
+    const unsub = subscribeSystemSettings(setAppSettings);
+    return unsub;
+  }, []);
 
   // ─── Sincronização Dinâmica de SEO & Metadados ──────────────────────────────
   useEffect(() => {
@@ -631,6 +640,12 @@ export function App() {
         isOpen={isDemoModalOpen}
         onClose={() => setIsDemoModalOpen(false)}
         initialModule={demoInitialModule}
+      />
+
+      {/* Botão flutuante WhatsApp (configurável pelo Admin) */}
+      <WhatsAppButton
+        phoneNumber={appSettings.phoneRaw || '244923456789'}
+        message="Olá! Gostaria de saber mais sobre o KIVORA ERP."
       />
 
     </div>
