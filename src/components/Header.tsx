@@ -144,7 +144,7 @@ export const Header: React.FC<HeaderProps> = ({
         { name: 'Restauração & Bares', desc: 'Gestão de mesas, pedidos e impressão em cozinha', page: 'restauracao', icon: <Utensils className="w-4 h-4" /> },
         { name: 'Farmácias & Saúde', desc: 'Controlo de validades, lotes e receituário', page: 'farmacia', icon: <Pill className="w-4 h-4" /> },
         { name: 'Prestação de Serviços', desc: 'Faturas-proforma, avenças e orçamentos', page: 'servicos', icon: <Briefcase className="w-4 h-4" /> },
-        { name: 'Casos de Sucesso em Angola', desc: 'Empresas reais que faturam com Kivora', page: 'casos-sucesso', icon: <Award className="w-4 h-4 text-emerald-600" />, badge: 'Clientes' },
+        { name: 'Casos de Sucesso em Angola', desc: 'Empresas reais que faturam com Kivora', page: 'casos-sucesso', icon: <Award className="w-4 h-4" />, badge: 'Clientes' },
         { name: 'Arquitetura Local (LAN)', desc: 'Funcionamento 100% offline e em rede interna', page: 'solucoes', icon: <Server className="w-4 h-4" /> },
       ],
       footerLink: { label: 'Ver visão geral de todos os setores', page: 'setores' }
@@ -156,7 +156,7 @@ export const Header: React.FC<HeaderProps> = ({
       items: [
         { name: 'Planos & Tabela de Preços', desc: 'Licenciamento transparente em Kwanzas', page: 'planos', icon: <CreditCard className="w-4 h-4" /> },
         { name: 'Simulador de Postos LAN', desc: 'Calcule o custo exato de terminais adicionais', page: 'planos', icon: <Calculator className="w-4 h-4" /> },
-        { name: 'Comparativo vs Nuvem / Dólar', desc: 'Poupança real sem custos em moeda estrangeira', page: 'comparativo', icon: <Boxes className="w-4 h-4 text-blue-600" />, badge: 'Análise' },
+        { name: 'Comparativo vs Nuvem / Dólar', desc: 'Poupança real sem custos em moeda estrangeira', page: 'comparativo', icon: <Boxes className="w-4 h-4" />, badge: 'Análise' },
       ]
     },
     {
@@ -164,8 +164,8 @@ export const Header: React.FC<HeaderProps> = ({
       name: 'Ferramentas',
       mainPage: 'calculadora-fiscal',
       items: [
-        { name: 'Calculadora Fiscal IRT & IVA', desc: 'Simulador gratuito de salários e retenções', page: 'calculadora-fiscal', icon: <Calculator className="w-4 h-4 text-emerald-600" />, badge: 'Grátis' },
-        { name: 'Validar Licença Oficial AGT', desc: 'Verificação instantânea de autenticidade', page: 'validar-licenca', icon: <Key className="w-4 h-4 text-blue-600" /> },
+        { name: 'Calculadora Fiscal IRT & IVA', desc: 'Simulador gratuito de salários e retenções', page: 'calculadora-fiscal', icon: <Calculator className="w-4 h-4" />, badge: 'Grátis' },
+        { name: 'Validar Licença Oficial AGT', desc: 'Verificação instantânea de autenticidade', page: 'validar-licenca', icon: <Key className="w-4 h-4" /> },
         { name: 'Hardware & Impressoras', desc: 'Kits e periféricos compatíveis com Kivora', page: 'hardware', icon: <Server className="w-4 h-4" /> },
       ]
     },
@@ -174,7 +174,7 @@ export const Header: React.FC<HeaderProps> = ({
       name: 'Loja',
       mainPage: 'loja',
       items: [
-        { name: 'Loja Oficial de Equipamentos', desc: 'Hardware homologado com garantia em Luanda', page: 'loja', icon: <ShoppingBag className="w-4 h-4 text-amber-500" />, badge: 'Oficial' },
+        { name: 'Loja Oficial de Equipamentos', desc: 'Hardware homologado com garantia em Luanda', page: 'loja', icon: <ShoppingBag className="w-4 h-4" />, badge: 'Oficial' },
         { name: 'Kits Completos de Caixa POS', desc: 'Computador, impressora, scanner e gaveta', page: 'loja', icon: <Boxes className="w-4 h-4" /> },
         { name: 'Impressoras Térmicas 80mm', desc: 'Alta velocidade e corte automático de papel', page: 'loja', icon: <Printer className="w-4 h-4" /> },
         { name: 'Leitores de Código & QR', desc: 'Leitura rápida de artigos e faturas', page: 'loja', icon: <ScanLine className="w-4 h-4" /> },
@@ -196,10 +196,10 @@ export const Header: React.FC<HeaderProps> = ({
       name: 'Recursos',
       mainPage: 'recursos',
       items: [
-        { name: 'Centro de Cibersegurança', desc: 'Criptografia local e proteção militar de dados', page: 'seguranca', icon: <ShieldCheck className="w-4 h-4 text-indigo-600" />, badge: 'Seguro' },
+        { name: 'Centro de Cibersegurança', desc: 'Criptografia local e proteção militar de dados', page: 'seguranca', icon: <ShieldCheck className="w-4 h-4" />, badge: 'Seguro' },
         { name: 'Manuais & Legislação AGT', desc: 'Documentos e guias de faturação fiscal', page: 'recursos', icon: <BookOpen className="w-4 h-4" /> },
         { name: 'Notícias do Setor Fiscal', desc: 'Decretos presidenciais e novidades tributárias', page: 'noticias', icon: <Newspaper className="w-4 h-4" /> },
-        { name: 'Centro de Downloads', desc: 'Baixe o executável oficial para Windows 64-bit', page: 'download', icon: <Download className="w-4 h-4 text-blue-600" /> },
+        { name: 'Centro de Downloads', desc: 'Baixe o executável oficial para Windows 64-bit', page: 'download', icon: <Download className="w-4 h-4" /> },
       ]
     },
     {
@@ -207,7 +207,7 @@ export const Header: React.FC<HeaderProps> = ({
       name: 'Suporte',
       mainPage: 'suporte',
       items: [
-        { name: 'Central de Atendimento & FAQ', desc: 'Apoio técnico presencial e remoto em Luanda', page: 'suporte', icon: <HelpCircle className="w-4 h-4 text-blue-600" /> },
+        { name: 'Central de Atendimento & FAQ', desc: 'Apoio técnico presencial e remoto em Luanda', page: 'suporte', icon: <HelpCircle className="w-4 h-4" /> },
         { name: 'Sobre a Visual Software', desc: 'Empresa detentora e criadora do Kivora', page: 'sobre', icon: <Building2 className="w-4 h-4" /> },
       ]
     }
@@ -306,9 +306,9 @@ export const Header: React.FC<HeaderProps> = ({
                           <button
                             key={idx}
                             onClick={() => handleNavClick(item.page)}
-                            className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-blue-50/70 active:bg-blue-100 transition-all text-left group/item cursor-pointer"
+                            className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 active:bg-blue-50/80 transition-all text-left group/item cursor-pointer"
                           >
-                            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 group-hover/item:bg-blue-600 group-hover/item:text-white flex items-center justify-center shrink-0 transition-all shadow-xs mt-0.5">
+                            <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 group-hover/item:bg-blue-50 group-hover/item:text-blue-600 flex items-center justify-center shrink-0 transition-all mt-0.5 [&_svg]:stroke-current">
                               {item.icon}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -317,13 +317,13 @@ export const Header: React.FC<HeaderProps> = ({
                                   {item.name}
                                 </span>
                                 {item.badge && (
-                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200 shrink-0">
+                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
                                     {item.badge}
                                   </span>
                                 )}
                               </div>
                               {item.desc && (
-                                <p className="text-[11px] text-slate-500 group-hover/item:text-slate-700 leading-snug line-clamp-1 mt-0.5 font-normal">
+                                <p className="text-[11px] text-slate-500 group-hover/item:text-slate-600 leading-snug line-clamp-1 mt-0.5 font-normal">
                                   {item.desc}
                                 </p>
                               )}
