@@ -772,6 +772,29 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     { id: 'perfil', label: 'Conta & Segurança', icon: ShieldCheck },
   ];
 
+  // ─── TELA DE ACESSO RESTRITO (SESSÃO INVÁLIDA OU EXPIRADA) ─────────────────────
+  if (!session || (session.role !== 'parceiro' && session.role !== 'admin')) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-center">
+        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-6 text-white shadow-2xl">
+          <div className="w-14 h-14 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto">
+            <ShieldCheck className="w-7 h-7" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold">Acesso Restrito a Parceiros</h2>
+            <p className="text-xs text-slate-400">É necessário iniciar sessão com uma conta de parceiro credenciado para aceder a este portal.</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/30 cursor-pointer"
+          >
+            Ir para Início de Sessão
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // ─── TELA DE BLOQUEIO DE PARCEIRO SUSPENSO ──────────────────────────────────────
   if (partnerAccount?.status === 'suspended' || session?.status === 'suspended') {
     const whatsAppMessage = `Olá Direção Kivora / Visual Software. Sou o parceiro credenciado ${partnerName} (Código: ${partnerCode}, Email: ${session?.email || ''}). A minha conta no Portal do Parceiro encontra-se suspensa e pretendo solicitar o esclarecimento e a regularização do meu acesso.`;

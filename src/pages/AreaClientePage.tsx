@@ -176,6 +176,28 @@ export const AreaClientePage: React.FC<AreaClientePageProps> = ({ onNavigatePage
     onNavigatePage('login');
   };
 
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-center">
+        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-6 text-white shadow-2xl">
+          <div className="w-14 h-14 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-2xl flex items-center justify-center mx-auto">
+            <Key className="w-7 h-7" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold">Área Exclusiva do Cliente</h2>
+            <p className="text-xs text-slate-400">Por favor, inicie sessão com o seu e-mail, NIF ou chave de licença para aceder às faturas, licenças e suporte técnico.</p>
+          </div>
+          <button
+            onClick={() => onNavigatePage('login')}
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/30 cursor-pointer"
+          >
+            Iniciar Sessão
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center text-slate-500 font-sans">

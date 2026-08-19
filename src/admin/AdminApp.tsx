@@ -46,6 +46,10 @@ const AdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
     try {
       const res = await loginUser(email, pass);
       if (res.success && res.session) {
+        if (res.session.role !== 'admin') {
+          setError('Acesso não autorizado: Esta conta não possui privilégios de Administrador.');
+          return;
+        }
         onLogin(res.session);
       } else {
         setError(res.error || 'Credenciais inválidas. Verifique o seu acesso de Administrador.');

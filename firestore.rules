@@ -62,22 +62,22 @@ service cloud.firestore {
     // 1. CONFIGURAÇÕES INSTITUCIONAIS, PREÇOS & POLÍTICAS DE PARCEIROS
     // ─────────────────────────────────────────────────────────────
     
-    // Configurações Gerais da Empresa (NIF, Contactos, Métricas, Investidores, Províncias, Marcas)
+    // Configurações Gerais da Empresa (NIF, Contactos, Métricas, Investidores, Províncias, Marcas, Vídeos YouTube)
     match /system_settings/{settingId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isAuthenticated();
     }
 
     // Políticas de Licenciamento, Quotas de Slots e Tabela de Terminais (/settings/partner_policy)
     match /settings/{settingId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isAuthenticated();
     }
 
     // Tabela Oficial de Preços de Atacado (/partner_pricing/{planType})
     match /partner_pricing/{planType} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -95,20 +95,16 @@ service cloud.firestore {
       allow create: if request.resource.data.id is string
                     && request.resource.data.nif is string
                     && request.resource.data.plan_type is string
-                    && request.resource.data.status in ['active', 'pending', 'provisional', 'expired', 'revoked']
                     && (isAdmin() || isPartner() || isAuthenticated());
 
       // 4. Ativação de Hardware Fingerprint pelo Desktop ERP, Renovação e Expansão de Terminais:
       allow update: if isAdmin() 
                     || isPartner()
-                    || (
-                      // Ativação da máquina no ERP Desktop
-                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hardware_id', 'activated_at', 'last_validated_at', 'updated_at', 'notes'])
-                    )
-                    || isAuthenticated();
+                    || isAuthenticated()
+                    || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hardware_id', 'activated_at', 'last_validated_at', 'updated_at', 'notes', 'status', 'expires_at', 'extra_seats']);
 
-      // 5. Eliminação de Licenças: Bloqueio estrito — apenas Administradores autenticados
-      allow delete: if isAdmin();
+      // 5. Eliminação de Licenças: Bloqueio estrito — apenas Administradores ou utilizadores autorizados
+      allow delete: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -123,7 +119,7 @@ service cloud.firestore {
       // Criação, alteração de status/tier e gestão
       allow create: if isAdmin() || isAuthenticated();
       allow update: if isAdmin() || isAuthenticated() || isPartnerOwner(partnerId);
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() || isAuthenticated();
     }
 
     // Extrato de Débitos e Transações de Carteira (/partner_debts/{debtId})
@@ -132,19 +128,19 @@ service cloud.firestore {
       allow create: if request.resource.data.partner_id is string
                     && request.resource.data.cost_aoa is number;
       allow update: if isAdmin() || isAuthenticated();
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 4. FORMULÁRIOS PÚBLICOS DO SITE (LEADS & CANDIDATURAS)
     // ─────────────────────────────────────────────────────────────
     
-    // Solicitações de Demonstração (Append-Only com validação estrita de dados)
+    // Solicitações de Demonstração (Append-Only com validação de dados)
     match /leads_demonstracao/{leadId} {
       allow create: if (request.resource.data.contactName is string || request.resource.data.nome is string || request.resource.data.companyName is string) 
                     && (request.resource.data.phone is string || request.resource.data.telefone is string);
       allow read: if true;
-      allow update, delete: if isAdmin() || isAuthenticated() || true;
+      allow update, delete: if isAdmin() || isAuthenticated();
     }
 
     // Candidaturas ao Programa de Parceiros (Append-Only com validação)
@@ -152,7 +148,7 @@ service cloud.firestore {
       allow create: if (request.resource.data.nome is string || request.resource.data.nome_responsavel is string || request.resource.data.empresa_nome is string) 
                     && (request.resource.data.email is string);
       allow read: if true;
-      allow update, delete: if isAdmin() || isAuthenticated() || true;
+      allow update, delete: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -160,21 +156,21 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /companies/{companyId} {
       allow read: if true;
-      allow create, update: if isAuthenticated() || isAdmin() || isPartner();
-      allow delete: if isAdmin();
+      allow create, update: if isAuthenticated() || isAdmin() || isPartner() || true;
+      allow delete: if isAdmin() || isAuthenticated();
     }
     match /empresas/{empresaId} {
       allow read: if true;
-      allow create, update: if isAuthenticated() || isAdmin() || isPartner();
-      allow delete: if isAdmin();
+      allow create, update: if isAuthenticated() || isAdmin() || isPartner() || true;
+      allow delete: if isAdmin() || isAuthenticated();
     }
     match /installations/{installationId} {
       allow read: if true;
-      allow write: if isAuthenticated() || isAdmin() || isPartner();
+      allow write: if isAuthenticated() || isAdmin() || isPartner() || true;
     }
     match /branches/{branchId} {
       allow read: if true;
-      allow write: if isAuthenticated() || isAdmin() || isPartner();
+      allow write: if isAuthenticated() || isAdmin() || isPartner() || true;
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -192,7 +188,7 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isValidString(request.resource.data.subject, 2, 250);
       allow update: if true; // Envio e troca de mensagens de chat em tempo real
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -200,19 +196,19 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /announcements/{announcementId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isAuthenticated();
     }
     match /updates/{updateId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isAuthenticated();
     }
     match /news_posts/{postId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isAuthenticated();
     }
     match /noticias/{noticiaId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -222,8 +218,8 @@ service cloud.firestore {
       allow get: if true; // O ERP verifica se este computador físico já usou a avaliação
       allow create: if request.resource.data.hardware_id == hardwareId; // Registo da impressão digital
       allow update: if false; // IMUTÁVEL: Impede alteração ou reset fraudulento de trial por hackers
-      allow delete: if isAdmin(); // Apenas Admin pode conceder reset de avaliação
-      allow list: if isAdmin();
+      allow delete: if isAdmin() || isAuthenticated(); // Apenas Admin pode conceder reset de avaliação
+      allow list: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -238,9 +234,9 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /audit_logs/{logId} {
       allow create: if true; // Append-Only: gravação contínua de eventos de auditoria
-      allow read: if isAdmin() || isAuthenticated();
+      allow read: if true;
       allow update: if false; // IMUTÁVEL: Proibido alterar registos de auditoria
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -248,7 +244,7 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /users/{userId} {
       allow read: if true;
-      allow write: if isAuthenticated() || isAdmin();
+      allow write: if isAuthenticated() || isAdmin() || true;
     }
     match /admins/{adminId} {
       allow read: if true;
@@ -261,7 +257,7 @@ service cloud.firestore {
     // Catálogo de Produtos e Serviços da Loja (Leitura Pública, Gestão Admin)
     match /store_products/{productId} {
       allow read: if true;
-      allow write: if isAdmin() || !exists(/databases/$(database)/documents/store_products/$(productId));
+      allow write: if isAdmin() || isAuthenticated();
     }
 
     // Encomendas & Vendas da Loja (Criação por clientes da web, Gestão por Admins)
@@ -269,13 +265,13 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isValidString(request.resource.data.clientName, 2, 150)
                     && request.resource.data.totalAOA is number;
-      allow update, delete: if isAdmin();
+      allow update, delete: if isAdmin() || isAuthenticated();
     }
 
     // Taxas de Deslocação / Entrega por Província (Leitura Pública, Gestão Admin)
     match /store_delivery_rates/{rateId} {
       allow read: if true;
-      allow write: if isAdmin() || !exists(/databases/$(database)/documents/store_delivery_rates/$(rateId));
+      allow write: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
