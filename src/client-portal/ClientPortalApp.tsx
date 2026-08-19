@@ -16,6 +16,7 @@ import {
   subscribeClientTickets
 } from '../admin/services/supportService';
 import type { KivoraLicense } from '../admin/types';
+import { getCachedSystemSettings, getDirectDownloadUrl } from '../services/systemSettingsService';
 
 interface ClientPortalAppProps {
   onLogout: () => void;
@@ -640,7 +641,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                     </p>
                   </div>
                   <a
-                    href={CURRENT_RELEASE.downloadUrl}
+                    href={getDirectDownloadUrl(getCachedSystemSettings().downloadUrl || CURRENT_RELEASE.downloadUrl)}
                     target="_blank"
                     rel="noreferrer"
                     className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 transition-all cursor-pointer"

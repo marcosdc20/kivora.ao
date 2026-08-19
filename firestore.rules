@@ -17,6 +17,12 @@ service cloud.firestore {
       return isAuthenticated() && (
         request.auth.token.admin == true ||
         request.auth.token.role == 'admin' ||
+        request.auth.token.email in [
+          'admin@kivora.ao',
+          'narcisomarcos826@gmail.com',
+          'comercial@kivora.ao',
+          'suporte@kivora.ao'
+        ] ||
         (exists(/databases/$(database)/documents/admins/$(request.auth.uid)) && 
          get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active != false) ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
@@ -54,19 +60,19 @@ service cloud.firestore {
     // Configurações Gerais da Empresa (NIF, Contactos, Dados Bancários Oficiais)
     match /system_settings/{settingId} {
       allow read: if true;
-      allow write: if isAdmin() || !exists(/databases/$(database)/documents/system_settings/$(settingId));
+      allow write: if isAdmin();
     }
 
     // Políticas de Licenciamento, Quotas de Slots e Tabela de Terminais (/settings/partner_policy)
     match /settings/{settingId} {
       allow read: if true; // Necessário para exibição pública de termos e cálculo nos portais
-      allow write: if isAdmin() || !exists(/databases/$(database)/documents/settings/$(settingId));
+      allow write: if isAdmin();
     }
 
     // Tabela Oficial de Preços de Atacado (/partner_pricing/{planType})
     match /partner_pricing/{planType} {
       allow read: if true;
-      allow write: if isAdmin() || !exists(/databases/$(database)/documents/partner_pricing/$(planType));
+      allow write: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -149,19 +155,21 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /companies/{companyId} {
       allow read: if true;
-      allow create, update: if isAuthenticated() || true;
+      allow create, update: if isAuthenticated() || isAdmin();
       allow delete: if isAdmin();
     }
     match /empresas/{empresaId} {
       allow read: if true;
-      allow create, update: if isAuthenticated() || true;
+      allow create, update: if isAuthenticated() || isAdmin();
       allow delete: if isAdmin();
     }
     match /installations/{installationId} {
-      allow read, write: if isAuthenticated() || true;
+      allow read: if true;
+      allow write: if isAuthenticated() || isAdmin();
     }
     match /branches/{branchId} {
-      allow read, write: if isAuthenticated() || true;
+      allow read: if true;
+      allow write: if isAuthenticated() || isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -187,19 +195,19 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /announcements/{announcementId} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin();
     }
     match /updates/{updateId} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin();
     }
     match /news_posts/{postId} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin();
     }
     match /noticias/{noticiaId} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -234,11 +242,12 @@ service cloud.firestore {
     // 12. UTILIZADORES & ADMINISTRADORES (/users, /admins)
     // ─────────────────────────────────────────────────────────────
     match /users/{userId} {
-      allow read, write: if isAuthenticated() || true;
+      allow read: if true;
+      allow write: if isAuthenticated() || isAdmin();
     }
     match /admins/{adminId} {
-      allow read: if isAuthenticated() || true;
-      allow write: if isAdmin() || !exists(/databases/$(database)/documents/admins/$(adminId));
+      allow read: if isAuthenticated() || isAdmin();
+      allow write: if isAdmin() || (isAuthenticated() && request.auth.uid == adminId);
     }
     // ─────────────────────────────────────────────────────────────
     // 14. LOJA OFICIAL, ENCOMENDAS & TAXAS DE DESLOCAÇÃO

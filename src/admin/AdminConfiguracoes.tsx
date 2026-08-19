@@ -9,7 +9,8 @@ import { db } from '../lib/firebase';
 import { AdminTopbar } from './AdminComponents';
 import {
   SystemCompanySettings, DEFAULT_SETTINGS,
-  subscribeSystemSettings, saveSystemSettings
+  subscribeSystemSettings, saveSystemSettings,
+  getDirectDownloadUrl
 } from '../services/systemSettingsService';
 
 export interface UpdateRelease {
@@ -416,36 +417,81 @@ export const AdminConfiguracoes: React.FC = () => {
           <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
             <div className="border-b border-slate-100 pb-3">
               <h3 className="text-base font-black text-slate-900">Links Externos, Repositório GitHub & Setup Windows</h3>
-              <p className="text-xs text-slate-500">Configure o link do GitHub e a URL direta para descarregar o instalador desktop</p>
+              <p className="text-xs text-slate-500">Configure o link do GitHub e a URL direta para descarregar o instalador desktop (.exe)</p>
+            </div>
+
+            {/* Dica Informativa GitHub & Download */}
+            <div className="p-4 rounded-2xl bg-blue-50/80 border border-blue-200 text-xs text-blue-900 space-y-1">
+              <p className="font-bold flex items-center gap-1.5">
+                <GitBranch className="w-4 h-4 text-blue-600" />
+                <span>Compatibilidade Total com GitHub Releases & Arquivos Raw</span>
+              </p>
+              <p className="text-[11px] text-blue-800 leading-relaxed">
+                Pode colar links do GitHub (ex: <code>.../blob/main/setup.exe</code>), Google Drive ou VPS. O Kivora converte automaticamente URLs do GitHub Blob para <strong>download direto de ficheiro binário</strong> sem abrir a página HTML de código.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div className="space-y-1.5 md:col-span-2">
-                <label className="font-bold text-slate-700 uppercase flex items-center gap-2">
-                  <span>Link do Repositório no GitHub</span>
-                  <a href={settings.githubUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline inline-flex items-center gap-1">
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
+                <label className="font-bold text-slate-700 uppercase flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <GitBranch className="w-3.5 h-3.5 text-slate-500" />
+                    Link do Repositório no GitHub
+                  </span>
+                  {settings.githubUrl && (
+                    <a
+                      href={settings.githubUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-600 hover:underline inline-flex items-center gap-1 font-bold text-[11px]"
+                    >
+                      <span>Abrir Repositório</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
                 </label>
                 <input
                   type="text"
                   value={settings.githubUrl}
                   onChange={(e) => handleChange('githubUrl', e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
-                  placeholder="https://github.com/marcosdc20/kivora.ao"
+                  placeholder="https://github.com/marcosdc20/kivora-setup-vers-o"
                 />
               </div>
 
               <div className="space-y-1.5 md:col-span-2">
-                <label className="font-bold text-slate-700 uppercase">Link de Download Direto do Instalador (.exe / .msi)</label>
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-slate-700 uppercase flex items-center gap-1.5">
+                    <Download className="w-3.5 h-3.5 text-slate-500" />
+                    Link de Download Direto do Instalador (.exe / .msi)
+                  </label>
+                  {settings.downloadUrl && (
+                    <a
+                      href={getDirectDownloadUrl(settings.downloadUrl)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-bold text-[11px] bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors"
+                      title="Testar se o ficheiro .exe descarrega diretamente no navegador"
+                    >
+                      <Download className="w-3 h-3" />
+                      <span>Testar Download Direto</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </div>
                 <input
                   type="text"
                   value={settings.downloadUrl}
-                  onChange={(e) => handleChange('downloadUrl', e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    handleChange('downloadUrl', val);
+                  }}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
-                  placeholder="https://cdn.kivora.ao/releases/Kivora_Setup_v2026.exe"
+                  placeholder="https://github.com/marcosdc20/kivora-setup-vers-o/raw/main/KIVORA_1.1.0_x64-setup.exe"
                 />
-                <p className="text-[10px] text-slate-400">Pode colar links do Firebase Storage, Google Drive direto ou servidor VPS.</p>
+                <div className="flex items-center justify-between text-[10px] text-slate-400">
+                  <span>URL direta convertida: <code className="text-slate-600 font-mono">{getDirectDownloadUrl(settings.downloadUrl) || 'Nenhuma'}</code></span>
+                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -455,7 +501,7 @@ export const AdminConfiguracoes: React.FC = () => {
                   value={settings.releaseVersion}
                   onChange={(e) => handleChange('releaseVersion', e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
-                  placeholder="2026.08.13"
+                  placeholder="1.1.0"
                 />
               </div>
 
@@ -466,7 +512,7 @@ export const AdminConfiguracoes: React.FC = () => {
                   value={settings.releaseDate}
                   onChange={(e) => handleChange('releaseDate', e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
-                  placeholder="13 de Agosto de 2026"
+                  placeholder="17 de Agosto de 2026"
                 />
               </div>
             </div>

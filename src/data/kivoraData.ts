@@ -33,12 +33,12 @@ export const KIVORA_INFO = {
 // DADOS DO DOWNLOAD DO KIVORA SETUP (DESKTOP)
 // ============================
 export const CURRENT_RELEASE: SoftwareRelease = {
-  version: '2026.08.13',
-  date: '13 de Agosto de 2026',
+  version: '1.1.0',
+  date: '17 de Agosto de 2026',
   fileSize: '48.5 MB',
   architecture: '64 bits (x64)',
   os: 'Windows 10 / 11 / Windows Server',
-  downloadUrl: '/imagens/pacote-de-instalação-com-disco.png',
+  downloadUrl: 'https://github.com/marcosdc20/kivora-setup-vers-o/raw/main/KIVORA_1.1.0_x64-setup.exe',
   changelog: [
     'Atualização das tabelas fiscais de IRT e retenção de INSS 2026',
     'Melhorias no motor de numeração sequencial de séries da AGT',

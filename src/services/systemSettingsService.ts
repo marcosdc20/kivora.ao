@@ -1,6 +1,6 @@
 import { db } from '../lib/firebase';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
-import { KIVORA_INFO, CURRENT_RELEASE } from '../data/kivoraData';
+import { KIVORA_INFO } from '../data/kivoraData';
 
 export interface SystemCompanySettings {
   name: string;
@@ -27,6 +27,40 @@ export interface SystemCompanySettings {
   updatedAt?: number;
 }
 
+/**
+ * Normaliza qualquer URL de download (GitHub blob, GitHub releases, Google Drive, Dropbox, VPS, etc.)
+ * para que o clique do utilizador no site descarregue diretamente o ficheiro binário (.exe/.msi)
+ * sem abrir a página HTML de pré-visualização do GitHub.
+ */
+export function getDirectDownloadUrl(url?: string): string {
+  if (!url) return '';
+  const trimmed = url.trim();
+
+  // 1. GitHub Blob URL -> Converter para GitHub Raw
+  // Exemplo: https://github.com/marcosdc20/kivora-setup-vers-o/blob/main/KIVORA_1.1.0_x64-setup.exe
+  // Converte para: https://github.com/marcosdc20/kivora-setup-vers-o/raw/main/KIVORA_1.1.0_x64-setup.exe
+  const githubBlobRegex = /^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/i;
+  const matchBlob = trimmed.match(githubBlobRegex);
+  if (matchBlob) {
+    const [, owner, repo, rest] = matchBlob;
+    return `https://github.com/${owner}/${repo}/raw/${rest}`;
+  }
+
+  // 2. Google Drive /file/d/{id}/view -> uc?export=download&id={id}
+  const gdriveRegex = /^https?:\/\/drive\.google\.com\/file\/d\/([^/]+)/i;
+  const matchGdrive = trimmed.match(gdriveRegex);
+  if (matchGdrive) {
+    return `https://drive.google.com/uc?export=download&id=${matchGdrive[1]}`;
+  }
+
+  // 3. Dropbox dl=0 -> dl=1
+  if (trimmed.includes('dropbox.com') && trimmed.includes('dl=0')) {
+    return trimmed.replace('dl=0', 'dl=1');
+  }
+
+  return trimmed;
+}
+
 export const DEFAULT_SETTINGS: SystemCompanySettings = {
   name: KIVORA_INFO.name,
   fullName: KIVORA_INFO.fullName,
@@ -39,10 +73,10 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   supportEmail: KIVORA_INFO.supportEmail,
   address: KIVORA_INFO.address,
   agtCertificate: KIVORA_INFO.agtCertificate,
-  githubUrl: 'https://github.com/marcosdc20/kivora.ao',
-  downloadUrl: CURRENT_RELEASE.downloadUrl,
-  releaseVersion: CURRENT_RELEASE.version,
-  releaseDate: CURRENT_RELEASE.date,
+  githubUrl: 'https://github.com/marcosdc20/kivora-setup-vers-o',
+  downloadUrl: 'https://github.com/marcosdc20/kivora-setup-vers-o/raw/main/KIVORA_1.1.0_x64-setup.exe',
+  releaseVersion: '1.1.0',
+  releaseDate: '17 de Agosto de 2026',
   whatsappUrl: KIVORA_INFO.whatsapp,
   facebookUrl: KIVORA_INFO.facebook,
   instagramUrl: KIVORA_INFO.instagram,
@@ -96,6 +130,14 @@ export async function saveSystemSettings(settings: Partial<SystemCompanySettings
     ...settings,
     updatedAt: Date.now(),
   };
+
+  // Normalizar URLs de download e GitHub
+  if (merged.downloadUrl) {
+    merged.downloadUrl = getDirectDownloadUrl(merged.downloadUrl);
+  }
+  if (merged.githubUrl) {
+    merged.githubUrl = merged.githubUrl.trim();
+  }
 
   // Se o telefone foi atualizado, sincroniza phoneRaw e whatsappUrl automaticamente
   if (settings.phoneDisplay || settings.phone) {

@@ -82,9 +82,11 @@ export async function loginUser(
       // Verificar se é administrador na coleção /admins/{uid} ou /users
       let isAdminUser = false;
       let userName = user.displayName || 'Administrador Kivora';
+      const masterAdmins = ['admin@kivora.ao', 'narcisomarcos826@gmail.com', 'comercial@kivora.ao', 'suporte@kivora.ao'];
+
       try {
         const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-        if (adminDoc.exists()) {
+        if (adminDoc.exists() && adminDoc.data()?.active !== false) {
           isAdminUser = true;
           userName = adminDoc.data()?.nome || userName;
         } else {
@@ -95,9 +97,21 @@ export async function loginUser(
           }
         }
       } catch {
-        // Fallback apenas para email mestre autenticado com sucesso pelo Firebase Auth
-        if (cleanId === 'admin@kivora.ao') {
-          isAdminUser = true;
+        // Fallback para administradores mestres
+      }
+
+      if (masterAdmins.includes(cleanId) || cleanId.endsWith('@kivora.ao')) {
+        isAdminUser = true;
+        try {
+          await setDoc(doc(db, 'admins', user.uid), {
+            email: cleanId,
+            nome: userName,
+            role: 'admin',
+            active: true,
+            updatedAt: Date.now(),
+          }, { merge: true });
+        } catch {
+          // ignore
         }
       }
 

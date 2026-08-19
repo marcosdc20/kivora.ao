@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
   CheckCircle2, Download, Monitor, HardDrive, Cpu,
-  ShieldCheck, Copy, Key, ArrowRight, HelpCircle
+  ShieldCheck, Copy, Key, ArrowRight, HelpCircle,
+  ExternalLink, GitBranch
 } from 'lucide-react';
 import { PageId } from '../components/Header';
+import {
+  SystemCompanySettings, DEFAULT_SETTINGS,
+  subscribeSystemSettings, getCachedSystemSettings,
+  getDirectDownloadUrl
+} from '../services/systemSettingsService';
 
 import laptopImg from '../assets/kivora/pc-laptop-kivora.png';
 
@@ -14,9 +20,17 @@ interface DownloadPageProps {
 }
 
 export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onNavigatePage }) => {
+  const [settings, setSettings] = useState<SystemCompanySettings>(() => getCachedSystemSettings());
   const [copiedKey, setCopiedKey] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadComplete, setDownloadComplete] = useState(false);
+
+  useEffect(() => {
+    const unsub = subscribeSystemSettings((newSettings) => {
+      setSettings(newSettings);
+    });
+    return () => unsub();
+  }, []);
 
   const demoKey = 'KVRA-DEMO-2026-TRIAL';
   const sha256Checksum = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
@@ -29,21 +43,27 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
 
   const handleStartDownload = () => {
     setDownloading(true);
-    // Simula disparo de download no navegador
+    const targetUrl = getDirectDownloadUrl(settings.downloadUrl || DEFAULT_SETTINGS.downloadUrl);
+
     setTimeout(() => {
       setDownloading(false);
       setDownloadComplete(true);
-      // Cria elemento de download virtual
-      const element = document.createElement('a');
-      const file = new Blob([
-        'KIVORA ERP - Pacote de Instalação Demonstrativo\nVersão: 2026.08\nChave de Teste: KVRA-DEMO-2026-TRIAL\nDocumentação: https://kivora.ao/#recursos\nSuporte: suporte@kivora.ao\n'
-      ], { type: 'text/plain' });
-      element.href = URL.createObjectURL(file);
-      element.download = 'KivoraERP-Setup-v2026.08.txt';
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-    }, 1200);
+
+      if (targetUrl && targetUrl !== '#' && targetUrl !== '/') {
+        // Criar disparo de download direto do executável
+        const link = document.createElement('a');
+        link.href = targetUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        const fileName = targetUrl.split('/').pop()?.split('?')[0] || `KIVORA_${settings.releaseVersion || '1.1.0'}_x64-setup.exe`;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        alert('O link de download direto ainda não foi configurado. Pode aceder ao repositório no GitHub ou contactar o suporte.');
+      }
+    }, 600);
   };
 
   const requirements = [
@@ -80,11 +100,11 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
 
             <h2 className="text-3xl sm:text-4xl font-black leading-tight">
               KIVORA ERP Desktop <br />
-              <span className="text-blue-400">Edição 2026.08</span>
+              <span className="text-blue-400">Versão v{settings.releaseVersion || '1.1.0'}</span>
             </h2>
 
             <p className="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-lg">
-              Pacote completo com Instalador Autónomo, Motor de Base de Dados Local, Módulo de Faturação AGT DS.120, POS de Balcão e Tabelas IRT 2026.
+              Pacote completo com Instalador Autónomo, Motor de Base de Dados Local, Módulo de Faturação AGT DS.120, POS de Balcão e Tabelas IRT 2026. Lançamento: {settings.releaseDate || '17 de Agosto de 2026'}.
             </p>
 
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
@@ -94,9 +114,24 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
                 </span>
               ))}
             </div>
+
+            {settings.githubUrl && (
+              <div className="pt-2 flex items-center justify-center md:justify-start">
+                <a
+                  href={settings.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-blue-400 transition-colors"
+                >
+                  <GitBranch className="w-3.5 h-3.5" />
+                  <span>Código & Releases Oficiais no GitHub</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            )}
           </div>
 
-          <div className="flex flex-col items-center gap-4 relative z-10 w-full md:w-auto">
+          <div className="flex flex-col items-center gap-3 relative z-10 w-full md:w-auto">
             <button
               onClick={handleStartDownload}
               disabled={downloading}
@@ -105,6 +140,18 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
               <Download className="w-5 h-5" strokeWidth={2} />
               <span>{downloading ? 'A preparar download...' : 'Baixar Instalador (.exe)'}</span>
             </button>
+
+            {settings.githubUrl && (
+              <a
+                href={getDirectDownloadUrl(settings.downloadUrl || DEFAULT_SETTINGS.downloadUrl)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 py-1"
+              >
+                <span>Link direto alternativo</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            )}
 
             <div className="text-center text-xs text-slate-400 space-y-1">
               <p>≈ 48,5 MB • Windows 10/11 (64-bit)</p>
