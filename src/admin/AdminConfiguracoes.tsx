@@ -12,7 +12,7 @@ import {
   SystemCompanySettings, DEFAULT_SETTINGS,
   subscribeSystemSettings, saveSystemSettings,
   getDirectDownloadUrl, PartnerBrandLogo, InvestorSettings,
-  DEFAULT_PARTNER_LOGOS, DEFAULT_PROVINCES, DEFAULT_INVESTOR_SETTINGS
+  DEFAULT_PROVINCES, DEFAULT_INVESTOR_SETTINGS
 } from '../services/systemSettingsService';
 
 export interface UpdateRelease {
@@ -118,9 +118,7 @@ export const AdminConfiguracoes: React.FC = () => {
       active: true,
     };
 
-    const currentBrands = settings.partnerLogos && settings.partnerLogos.length > 0
-      ? settings.partnerLogos
-      : DEFAULT_PARTNER_LOGOS;
+    const currentBrands = settings.partnerLogos || [];
 
     setSettings(prev => ({
       ...prev,
@@ -133,9 +131,7 @@ export const AdminConfiguracoes: React.FC = () => {
   };
 
   const handleToggleBrandActive = (id: string) => {
-    const currentBrands = settings.partnerLogos && settings.partnerLogos.length > 0
-      ? settings.partnerLogos
-      : DEFAULT_PARTNER_LOGOS;
+    const currentBrands = settings.partnerLogos || [];
 
     setSettings(prev => ({
       ...prev,
@@ -144,9 +140,7 @@ export const AdminConfiguracoes: React.FC = () => {
   };
 
   const handleDeleteBrand = (id: string) => {
-    const currentBrands = settings.partnerLogos && settings.partnerLogos.length > 0
-      ? settings.partnerLogos
-      : DEFAULT_PARTNER_LOGOS;
+    const currentBrands = settings.partnerLogos || [];
 
     setSettings(prev => ({
       ...prev,
@@ -950,7 +944,7 @@ export const AdminConfiguracoes: React.FC = () => {
             <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-base font-black text-slate-900">
-                  Marcas Cadastradas ({(settings.partnerLogos || DEFAULT_PARTNER_LOGOS).length})
+                  Marcas Cadastradas ({(settings.partnerLogos || []).length})
                 </h3>
                 <button
                   onClick={handleSaveSettings}
@@ -963,7 +957,7 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {(settings.partnerLogos || DEFAULT_PARTNER_LOGOS).map((brand) => (
+                {(settings.partnerLogos || []).map((brand) => (
                   <div
                     key={brand.id}
                     className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition-all ${

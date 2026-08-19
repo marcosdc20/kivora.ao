@@ -1,5 +1,5 @@
 import { db } from '../lib/firebase';
-import { doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot, collection } from 'firebase/firestore';
 import { KIVORA_INFO } from '../data/kivoraData';
 
 export interface PartnerBrandLogo {
@@ -177,18 +177,7 @@ export const DEFAULT_PROVINCES: ProvinceStat[] = [
   { id: 'bengo', name: 'Bengo', capital: 'Caxito', activeClients: 14, certifiedPartners: 1, status: 'Ativo' },
 ];
 
-export const DEFAULT_PARTNER_LOGOS: PartnerBrandLogo[] = [
-  { id: '1', name: 'Supermercados Aliança & Filhos', type: 'cliente', sector: 'Retalho & Supermercados', province: 'Luanda', active: true },
-  { id: '2', name: 'Restaurante & Lounge Baía Azul', type: 'cliente', sector: 'Restauração & Bares', province: 'Benguela', active: true },
-  { id: '3', name: 'Farmácias Vida & Saúde', type: 'cliente', sector: 'Farmácias & Saúde', province: 'Huambo', active: true },
-  { id: '4', name: 'Centro Grossista do Kikolo', type: 'cliente', sector: 'Grossistas & Armazéns', province: 'Luanda', active: true },
-  { id: '5', name: 'Luanda Tech Solutions, Lda', type: 'parceiro', sector: 'Integração de Sistemas', province: 'Luanda', active: true },
-  { id: '6', name: 'Benguela Automação Comercial', type: 'parceiro', sector: 'Equipamentos & POS', province: 'Benguela', active: true },
-  { id: '7', name: 'Planalto Central IT', type: 'parceiro', sector: 'Suporte Técnico LAN', province: 'Huambo', active: true },
-  { id: '8', name: 'Lubango Sistemas & Redes', type: 'parceiro', sector: 'Consultoria TI', province: 'Huíla', active: true },
-  { id: '9', name: 'Cabinda Digital Networks', type: 'parceiro', sector: 'Distribuidor Oficial', province: 'Cabinda', active: true },
-  { id: '10', name: 'Global Audit & Contabilidade', type: 'cliente', sector: 'Serviços Fiscais', province: 'Luanda', active: true },
-];
+export const DEFAULT_PARTNER_LOGOS: PartnerBrandLogo[] = [];
 
 export const DEFAULT_INVESTOR_SETTINGS: InvestorSettings = {
   title: 'Relações com Investidores & Governança',
@@ -359,5 +348,108 @@ export async function saveSystemSettings(settings: Partial<SystemCompanySettings
   } catch (err) {
     console.error('Erro ao guardar configurações no Firebase:', err);
     throw err;
+  }
+}
+
+/**
+ * Escuta em tempo real exclusivamente todas as empresas e parceiros
+ * registados no Firebase Firestore (coleções 'companies', 'partners' e 'system_settings').
+ */
+export function subscribeAllRegisteredBrands(callback: (brands: PartnerBrandLogo[]) => void): () => void {
+  let companiesList: PartnerBrandLogo[] = [];
+  let partnersList: PartnerBrandLogo[] = [];
+  let customList: PartnerBrandLogo[] = [];
+
+  const emit = () => {
+    const map = new Map<string, PartnerBrandLogo>();
+
+    // 1. Marcas cadastradas explicitamente no painel admin
+    customList.forEach((b) => {
+      if (b.name && b.active !== false) {
+        map.set(b.name.toLowerCase().trim(), b);
+      }
+    });
+
+    // 2. Parceiros homologados no Firebase ('partners')
+    partnersList.forEach((p) => {
+      if (p.name && p.active !== false) {
+        const key = p.name.toLowerCase().trim();
+        if (!map.has(key) || !map.get(key)?.logoUrl) {
+          map.set(key, p);
+        }
+      }
+    });
+
+    // 3. Empresas clientes no Firebase ('companies')
+    companiesList.forEach((c) => {
+      if (c.name && c.active !== false) {
+        const key = c.name.toLowerCase().trim();
+        if (!map.has(key) || !map.get(key)?.logoUrl) {
+          map.set(key, c);
+        }
+      }
+    });
+
+    callback(Array.from(map.values()));
+  };
+
+  try {
+    const unsubCompanies = onSnapshot(collection(db, 'companies'), (snap) => {
+      companiesList = snap.docs.map((docSnap) => {
+        const d = docSnap.data();
+        return {
+          id: docSnap.id,
+          name: (d.name || d.razaoSocial || d.company_name || '').trim(),
+          logoUrl: d.logoUrl || d.logo_url || d.logo || undefined,
+          type: 'cliente' as const,
+          sector: d.sector || d.ramoAtividade || undefined,
+          province: d.province || d.city || d.provincia || d.address || undefined,
+          active: d.status !== 'inactive',
+        };
+      }).filter((c) => c.name.length > 0);
+      emit();
+    }, (err) => {
+      console.warn('Erro ao escutar companies no Firebase:', err);
+    });
+
+    const unsubPartners = onSnapshot(collection(db, 'partners'), (snap) => {
+      partnersList = snap.docs.map((docSnap) => {
+        const d = docSnap.data();
+        const partnerName = (d.empresa || d.company_name || d.name || d.nome || '').trim();
+        return {
+          id: docSnap.id,
+          name: partnerName,
+          logoUrl: d.logoUrl || d.logo_url || d.logo || undefined,
+          type: 'parceiro' as const,
+          sector: d.sector || d.tier || undefined,
+          province: d.region || d.provincia || d.city || undefined,
+          active: d.status === 'active' || d.status === 'approved' || d.status === 'homologado' || !d.status,
+        };
+      }).filter((p) => p.name.length > 0);
+      emit();
+    }, (err) => {
+      console.warn('Erro ao escutar partners no Firebase:', err);
+    });
+
+    const unsubSettings = onSnapshot(doc(db, 'system_settings', 'company_info'), (snap) => {
+      if (snap.exists()) {
+        const data = snap.data() as SystemCompanySettings;
+        customList = (data.partnerLogos || []).filter((b) => b.active !== false);
+      } else {
+        customList = [];
+      }
+      emit();
+    }, (err) => {
+      console.warn('Erro ao escutar system_settings partnerLogos:', err);
+    });
+
+    return () => {
+      unsubCompanies();
+      unsubPartners();
+      unsubSettings();
+    };
+  } catch (err) {
+    console.warn('Erro subscribeAllRegisteredBrands:', err);
+    return () => {};
   }
 }

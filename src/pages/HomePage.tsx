@@ -8,7 +8,8 @@ import {
 import { PageId } from '../components/Header';
 import {
   subscribeSystemSettings, getCachedSystemSettings,
-  SystemCompanySettings, DEFAULT_PARTNER_LOGOS
+  SystemCompanySettings, subscribeAllRegisteredBrands,
+  PartnerBrandLogo
 } from '../services/systemSettingsService';
 
 import posImg from '../assets/kivora/pc-pos-kivora.png';
@@ -154,15 +155,16 @@ export const HomePage: React.FC<HomePageProps> = ({
   useScrollReveal();
   const sectionsRef = useRef<HTMLDivElement>(null);
   const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
+  const [partnerLogos, setPartnerLogos] = useState<PartnerBrandLogo[]>([]);
 
   useEffect(() => {
-    const unsub = subscribeSystemSettings(setSettings);
-    return () => unsub();
+    const unsubSettings = subscribeSystemSettings(setSettings);
+    const unsubBrands = subscribeAllRegisteredBrands(setPartnerLogos);
+    return () => {
+      unsubSettings();
+      unsubBrands();
+    };
   }, []);
-
-  const partnerLogos = (settings.partnerLogos && settings.partnerLogos.length > 0)
-    ? settings.partnerLogos.filter((p) => p.active !== false)
-    : DEFAULT_PARTNER_LOGOS;
 
   return (
     <div className="bg-white text-slate-900">
@@ -188,61 +190,63 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </div>
 
-      {/* ========== CARROSSEL MARQUEE DE PARCEIROS & CLIENTES (CÍRCULO + NOME) ========== */}
-      <section className="py-12 bg-slate-50 border-b border-slate-200/80 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-center sm:text-left">
-            <span className="text-blue-600 font-bold text-xs uppercase tracking-widest block">
-              Ecossistema Empresarial em Angola
-            </span>
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 mt-0.5">
-              Empresas & Parceiros que Confiam no KIVORA
-            </h3>
+      {/* ========== CARROSSEL MARQUEE DE PARCEIROS & CLIENTES (APENAS REGISTADOS NO FIREBASE) ========== */}
+      {partnerLogos.length > 0 && (
+        <section className="py-12 bg-slate-50 border-b border-slate-200/80 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-6 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <span className="text-blue-600 font-bold text-xs uppercase tracking-widest block">
+                Ecossistema Empresarial em Angola
+              </span>
+              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 mt-0.5">
+                Empresas & Parceiros Cadastrados no KIVORA
+              </h3>
+            </div>
+            <button
+              onClick={() => onNavigatePage('diretorio-parceiros')}
+              className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <span>Ver Diretório Nacional</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
-          <button
-            onClick={() => onNavigatePage('diretorio-parceiros')}
-            className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <span>Ver Diretório Nacional</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
 
-        {/* Marquee Container */}
-        <div className="relative w-full overflow-hidden">
-          <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none" />
+          {/* Marquee Container */}
+          <div className="relative w-full overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none" />
 
-          <div className="animate-marquee flex items-center gap-8 py-3">
-            {[...partnerLogos, ...partnerLogos].map((partner, idx) => (
-              <div
-                key={`${partner.id}-${idx}`}
-                className="flex flex-col items-center text-center gap-2 shrink-0 select-none group cursor-pointer"
-              >
-                {/* Círculo do Logótipo */}
-                <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center p-3.5 group-hover:border-blue-500 group-hover:shadow-md group-hover:scale-105 transition-all duration-300">
-                  {partner.logoUrl ? (
-                    <img
-                      src={partner.logoUrl}
-                      alt={partner.name}
-                      className="max-h-full max-w-full object-contain rounded-full"
-                    />
-                  ) : (
-                    <div className="w-full h-full rounded-full bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center font-black text-sm sm:text-base transition-colors">
-                      {partner.name.substring(0, 2).toUpperCase()}
-                    </div>
-                  )}
+            <div className="animate-marquee flex items-center gap-8 py-3">
+              {[...partnerLogos, ...partnerLogos].map((partner, idx) => (
+                <div
+                  key={`${partner.id}-${idx}`}
+                  className="flex flex-col items-center text-center gap-2 shrink-0 select-none group cursor-pointer"
+                >
+                  {/* Círculo do Logótipo */}
+                  <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center p-3.5 group-hover:border-blue-500 group-hover:shadow-md group-hover:scale-105 transition-all duration-300">
+                    {partner.logoUrl ? (
+                      <img
+                        src={partner.logoUrl}
+                        alt={partner.name}
+                        className="max-h-full max-w-full object-contain rounded-full"
+                      />
+                    ) : (
+                      <div className="w-full h-full rounded-full bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center font-black text-sm sm:text-base transition-colors">
+                        {partner.name.substring(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Nome do Parceiro Por Baixo */}
+                  <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors max-w-[120px] sm:max-w-[140px] truncate block">
+                    {partner.name}
+                  </span>
                 </div>
-
-                {/* Nome do Parceiro Por Baixo */}
-                <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors max-w-[120px] sm:max-w-[140px] truncate block">
-                  {partner.name}
-                </span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ========== NÚMEROS & IMPACTO COM ANIMAÇÃO DE CONTAGEM ========== */}
       <section className="py-20 bg-slate-950 text-white border-y border-slate-800 relative overflow-hidden">

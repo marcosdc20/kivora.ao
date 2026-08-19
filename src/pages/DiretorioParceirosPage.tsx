@@ -1,10 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
   MapPin, Phone, MessageCircle, ShieldCheck, Award,
   Search, Users, ArrowRight, Building2
 } from 'lucide-react';
 import { PageId } from '../components/Header';
+import { db } from '../lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 import parceirosImg from '../assets/kivora/parceiros-kivora.png';
 
@@ -13,7 +15,7 @@ interface DiretorioParceirosPageProps {
   onOpenDemoModal?: (subject?: string) => void;
 }
 
-interface PartnerDirectoryEntry {
+export interface PartnerDirectoryEntry {
   id: string;
   name: string;
   code: string;
@@ -43,106 +45,52 @@ const PROVINCIAS_ANGOLA = [
   'Zaire',
 ];
 
-const MOCK_PARTNERS: PartnerDirectoryEntry[] = [
-  {
-    id: '1',
-    name: 'M.C VISUAL - COMÉRCIO & PRESTAÇÃO DE SERVIÇOS, LDA',
-    code: 'PARC-LUA-6694',
-    provincia: 'Luanda',
-    cidade: 'Viana & Belas',
-    tier: 'Diamond',
-    responsible: 'Eng. Narciso Marcos',
-    phone: '+244 923 000 000',
-    whatsapp: 'https://wa.me/244923000000',
-    email: 'comercial@mcvisual.ao',
-    specialties: ['Instalação de Redes LAN', 'Retalho & Supermercados', 'Faturação Certificada AGT', 'Assistência Presencial'],
-    certifiedSince: '2024',
-    address: 'Viana, Estrada de Catete, Luanda',
-  },
-  {
-    id: '2',
-    name: 'LOGITECH TECNOLOGIAS & SISTEMAS',
-    code: 'PARC-LUA-3972',
-    provincia: 'Luanda',
-    cidade: 'Talatona & Maianga',
-    tier: 'Gold',
-    responsible: 'Dra. Sandra Tavares',
-    phone: '+244 934 000 111',
-    whatsapp: 'https://wa.me/244934000111',
-    email: 'suporte@logitech-ao.com',
-    specialties: ['Restauração & Bares', 'POS Tátil', 'Equipamentos e Impressoras Térmicas'],
-    certifiedSince: '2024',
-    address: 'Talatona, Via Expressa, Luanda',
-  },
-  {
-    id: '3',
-    name: 'BENGUELA SOFT & HARDWARE SOLUTIONS',
-    code: 'PARC-BEN-1044',
-    provincia: 'Benguela',
-    cidade: 'Benguela & Lobito',
-    tier: 'Gold',
-    responsible: 'Eng. Carlos Domingos',
-    phone: '+244 922 456 789',
-    whatsapp: 'https://wa.me/244922456789',
-    email: 'contacto@benguelasoft.ao',
-    specialties: ['Farmácias & Clínicas', 'Retalho', 'Configuração de Servidores Locais'],
-    certifiedSince: '2025',
-    address: 'Avenida Norton de Matos, Lobito',
-  },
-  {
-    id: '4',
-    name: 'HUAMBO DIGITAL & INFORMÁTICA',
-    code: 'PARC-HUA-5521',
-    provincia: 'Huambo',
-    cidade: 'Huambo Centro',
-    tier: 'Silver',
-    responsible: 'Manuel Fernandes',
-    phone: '+244 945 123 456',
-    whatsapp: 'https://wa.me/244945123456',
-    email: 'huambodigital@gmail.com',
-    specialties: ['Prestação de Serviços', 'Comércio Geral', 'Formação de Operadores de Caixa'],
-    certifiedSince: '2025',
-    address: 'Rua do Comércio, Edifício Huambo',
-  },
-  {
-    id: '5',
-    name: 'LUBANGO TECH & REDES',
-    code: 'PARC-HUI-8830',
-    provincia: 'Huíla',
-    cidade: 'Lubango',
-    tier: 'Silver',
-    responsible: 'Eng. Teresa Chissingui',
-    phone: '+244 938 777 888',
-    whatsapp: 'https://wa.me/244938777888',
-    email: 'info@lubangotech.ao',
-    specialties: ['Supermercados', 'Hotéis & Restaurantes', 'Cabos e Routers LAN'],
-    certifiedSince: '2025',
-    address: 'Bairro da Lage, Lubango',
-  },
-  {
-    id: '6',
-    name: 'CABINDA BUSINESS SOFTWARE',
-    code: 'PARC-CAB-3319',
-    provincia: 'Cabinda',
-    cidade: 'Cabinda Centro',
-    tier: 'Bronze',
-    responsible: 'Pedro Nzita',
-    phone: '+244 929 333 444',
-    whatsapp: 'https://wa.me/244929333444',
-    email: 'cabindasoftware@gmail.com',
-    specialties: ['Retalho', 'Faturação Eletrónica AGT', 'Suporte Técnico Local'],
-    certifiedSince: '2026',
-    address: 'Rua do Porto, Cabinda',
-  },
-];
-
 export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ onNavigatePage }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProvincia, setSelectedProvincia] = useState('Todas as Províncias');
   const [selectedTier, setSelectedTier] = useState<string>('todos');
+  const [partners, setPartners] = useState<PartnerDirectoryEntry[]>([]);
+
+  useEffect(() => {
+    try {
+      const unsub = onSnapshot(collection(db, 'partners'), (snap) => {
+        const list: PartnerDirectoryEntry[] = snap.docs.map((docSnap) => {
+          const d = docSnap.data();
+          const tierStr = (d.tier || 'bronze').toString().toLowerCase();
+          const tierCap = tierStr === 'diamond' ? 'Diamond' : tierStr === 'gold' ? 'Gold' : tierStr === 'silver' ? 'Silver' : 'Bronze';
+          const pCode = (d.code || docSnap.id).toUpperCase().trim();
+          const phone = d.phone || d.telefone || '+244 923 000 000';
+          const cleanPhone = phone.replace(/\D/g, '');
+
+          return {
+            id: docSnap.id,
+            name: (d.empresa || d.company_name || d.name || d.nome || 'Parceiro Homologado').trim(),
+            code: pCode,
+            provincia: d.region || d.provincia || 'Luanda',
+            cidade: d.city || d.cidade || d.region || 'Luanda',
+            tier: tierCap as any,
+            responsible: d.responsible || d.nome_responsavel || d.nome || 'Direção Comercial',
+            phone: phone,
+            whatsapp: d.whatsapp || `https://wa.me/${cleanPhone}`,
+            email: d.email || 'parceiro@kivora.ao',
+            specialties: Array.isArray(d.specialties) ? d.specialties : ['Instalação de Redes LAN', 'Faturação Certificada AGT', 'Suporte Técnico Local'],
+            certifiedSince: d.certifiedSince || (d.createdAt ? new Date(d.createdAt).getFullYear().toString() : '2025'),
+            address: d.address || d.endereco || `${d.provincia || 'Luanda'}, Angola`,
+          };
+        }).filter(p => p.name.length > 0);
+
+        setPartners(list);
+      }, (err) => {
+        console.warn('Erro ao carregar parceiros do Firestore:', err);
+      });
+      return () => unsub();
+    } catch (e) {
+      console.warn('Erro onSnapshot partners:', e);
+    }
+  }, []);
 
   const filteredPartners = useMemo(() => {
-    return MOCK_PARTNERS.filter((p) => {
+    return partners.filter((p) => {
       const matchProv = selectedProvincia === 'Todas as Províncias' || p.provincia === selectedProvincia;
       const matchTier = selectedTier === 'todos' || p.tier.toLowerCase() === selectedTier.toLowerCase();
       const matchQuery =
@@ -154,7 +102,7 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
 
       return matchProv && matchTier && matchQuery;
     });
-  }, [searchQuery, selectedProvincia, selectedTier]);
+  }, [partners, searchQuery, selectedProvincia, selectedTier]);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 page-enter">
@@ -229,12 +177,32 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
         </div>
 
         {/* Grelha de Parceiros */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {filteredPartners.map((partner) => (
-            <div
-              key={partner.id}
-              className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-xl hover:border-blue-400 transition-all flex flex-col justify-between space-y-6"
+        {filteredPartners.length === 0 ? (
+          <div className="bg-slate-50 border border-slate-200 rounded-3xl p-12 text-center space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center mx-auto">
+              <Search className="w-6 h-6" />
+            </div>
+            <div className="space-y-1 max-w-md mx-auto">
+              <h3 className="text-base font-black text-slate-900">Nenhum parceiro encontrado nesta região</h3>
+              <p className="text-xs text-slate-500">
+                Seja o primeiro distribuidor homologado da sua província e comece a fornecer o KIVORA ERP.
+              </p>
+            </div>
+            <button
+              onClick={() => onNavigatePage('candidatura-parceiro')}
+              className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md inline-flex items-center gap-2 cursor-pointer"
             >
+              <span>Candidatar a Parceiro</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {filteredPartners.map((partner) => (
+              <div
+                key={partner.id}
+                className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-xl hover:border-blue-400 transition-all flex flex-col justify-between space-y-6"
+              >
               <div className="space-y-4">
                 {/* Header do Card */}
                 <div className="flex items-start justify-between gap-2">
@@ -314,6 +282,7 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
             </div>
           ))}
         </div>
+        )}
 
         {/* Banner CTA para Candidatura */}
         <div className="bg-slate-950 text-white rounded-3xl p-8 sm:p-12 border border-slate-800 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
