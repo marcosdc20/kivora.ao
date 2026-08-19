@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { subscribeSystemSettings, getCachedSystemSettings, SystemCompanySettings } from './services/systemSettingsService';
 import WhatsAppButton from './components/WhatsAppButton';
+import { CookieBanner } from './components/CookieBanner';
 import { Header, PageId } from './components/Header';
 import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
@@ -646,6 +647,11 @@ export function App() {
       <WhatsAppButton
         phoneNumber={appSettings.phoneRaw || '244923456789'}
         message="Olá! Gostaria de saber mais sobre o KIVORA ERP."
+      />
+
+      {/* Banner de Consentimento de Cookies & Privacidade */}
+      <CookieBanner
+        onNavigatePrivacy={() => handleNavigatePage('privacidade')}
       />
 
     </div>
