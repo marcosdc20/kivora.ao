@@ -18,6 +18,14 @@ export interface SystemCompanySettings {
   downloadUrl: string;
   releaseVersion: string;
   releaseDate: string;
+  fileSize?: string;
+  sha256Checksum?: string;
+  demoKey?: string;
+  minOs?: string;
+  minRam?: string;
+  minStorage?: string;
+  minCpu?: string;
+  releaseNotes?: string;
   whatsappUrl: string;
   facebookUrl: string;
   instagramUrl: string;
@@ -72,11 +80,19 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   email: KIVORA_INFO.email,
   supportEmail: KIVORA_INFO.supportEmail,
   address: KIVORA_INFO.address,
-  agtCertificate: KIVORA_INFO.agtCertificate,
+  agtCertificate: 'Certificação AGT n.º 384/AGT/2024',
   githubUrl: 'https://github.com/marcosdc20/kivora-setup-vers-o',
   downloadUrl: 'https://github.com/marcosdc20/kivora-setup-vers-o/raw/main/KIVORA_1.1.0_x64-setup.exe',
   releaseVersion: '1.1.0',
-  releaseDate: '17 de Agosto de 2026',
+  releaseDate: '19 de Agosto de 2026',
+  fileSize: '78.4 MB',
+  sha256Checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+  demoKey: 'KVRA-DEMO-2026-TRIAL',
+  minOs: 'Windows 10 / 11 (64-bit)',
+  minRam: '4 GB RAM (Recomendado 8 GB)',
+  minStorage: '2 GB livres em SSD (+ base de dados)',
+  minCpu: 'Intel Core i3 / AMD Ryzen 3 ou superior',
+  releaseNotes: '• Motor de faturação certificado em estrita conformidade com a AGT\n• Base de dados 100% local com funcionamento sem internet\n• Módulo de POS de balcão e gestão de stock integrada\n• Exportação e validação oficial de SAF-T (AO)',
   whatsappUrl: KIVORA_INFO.whatsapp,
   facebookUrl: KIVORA_INFO.facebook,
   instagramUrl: KIVORA_INFO.instagram,

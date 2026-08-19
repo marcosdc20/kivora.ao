@@ -3,7 +3,7 @@ import { PageHero } from '../components/PageHero';
 import {
   CheckCircle2, Download, Monitor, HardDrive, Cpu,
   ShieldCheck, Copy, Key, ArrowRight, HelpCircle,
-  ExternalLink, GitBranch
+  ExternalLink, GitBranch, Check
 } from 'lucide-react';
 import { PageId } from '../components/Header';
 import {
@@ -22,6 +22,7 @@ interface DownloadPageProps {
 export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onNavigatePage }) => {
   const [settings, setSettings] = useState<SystemCompanySettings>(() => getCachedSystemSettings());
   const [copiedKey, setCopiedKey] = useState(false);
+  const [copiedChecksum, setCopiedChecksum] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadComplete, setDownloadComplete] = useState(false);
 
@@ -32,13 +33,23 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
     return () => unsub();
   }, []);
 
-  const demoKey = 'KVRA-DEMO-2026-TRIAL';
-  const sha256Checksum = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+  const cleanVersion = (settings.releaseVersion || DEFAULT_SETTINGS.releaseVersion).replace(/^v+/i, '');
+  const activeFileSize = settings.fileSize || DEFAULT_SETTINGS.fileSize || '78.4 MB';
+  const activeDemoKey = settings.demoKey || DEFAULT_SETTINGS.demoKey || 'KVRA-DEMO-2026-TRIAL';
+  const activeChecksum = settings.sha256Checksum || DEFAULT_SETTINGS.sha256Checksum || 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+  const activeReleaseDate = settings.releaseDate || DEFAULT_SETTINGS.releaseDate || '19 de Agosto de 2026';
+  const activeAgtCert = settings.agtCertificate || DEFAULT_SETTINGS.agtCertificate || 'Certificação AGT n.º 384/AGT/2024';
 
   const handleCopyKey = () => {
-    navigator.clipboard.writeText(demoKey);
+    navigator.clipboard.writeText(activeDemoKey);
     setCopiedKey(true);
     setTimeout(() => setCopiedKey(false), 2500);
+  };
+
+  const handleCopyChecksum = () => {
+    navigator.clipboard.writeText(activeChecksum);
+    setCopiedChecksum(true);
+    setTimeout(() => setCopiedChecksum(false), 2500);
   };
 
   const handleStartDownload = () => {
@@ -50,249 +61,286 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
       setDownloadComplete(true);
 
       if (targetUrl && targetUrl !== '#' && targetUrl !== '/') {
-        // Criar disparo de download direto do executável
         const link = document.createElement('a');
         link.href = targetUrl;
         link.target = '_blank';
         link.rel = 'noopener noreferrer';
-        const fileName = targetUrl.split('/').pop()?.split('?')[0] || `KIVORA_${settings.releaseVersion || '1.1.0'}_x64-setup.exe`;
+        const fileName = targetUrl.split('/').pop()?.split('?')[0] || `KIVORA_${cleanVersion}_x64-setup.exe`;
         link.setAttribute('download', fileName);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       } else {
-        alert('O link de download direto ainda não foi configurado. Pode aceder ao repositório no GitHub ou contactar o suporte.');
+        alert('O link de download direto ainda não foi configurado no painel administrativo.');
       }
-    }, 600);
+    }, 400);
   };
 
   const requirements = [
-    { icon: <Monitor className="w-5 h-5" />, label: 'Sistema Operativo', val: 'Windows 10 / 11 (64-bit)' },
-    { icon: <Cpu className="w-5 h-5" />, label: 'Processador Mínimo', val: 'Intel Core i3 / AMD Ryzen 3 (ou superior)' },
-    { icon: <HardDrive className="w-5 h-5" />, label: 'Memória RAM', val: 'Mínimo 4 GB (recomendado 8 GB)' },
-    { icon: <HardDrive className="w-5 h-5" />, label: 'Espaço em Disco', val: '2 GB livres em SSD (+ base de dados)' },
+    { 
+      icon: <Monitor className="w-4 h-4 text-blue-600" />, 
+      label: 'Sistema Operativo', 
+      val: settings.minOs || DEFAULT_SETTINGS.minOs || 'Windows 10 / 11 (64-bit)' 
+    },
+    { 
+      icon: <Cpu className="w-4 h-4 text-blue-600" />, 
+      label: 'Processador (CPU)', 
+      val: settings.minCpu || DEFAULT_SETTINGS.minCpu || 'Intel Core i3 / AMD Ryzen 3 ou superior' 
+    },
+    { 
+      icon: <HardDrive className="w-4 h-4 text-blue-600" />, 
+      label: 'Memória RAM', 
+      val: settings.minRam || DEFAULT_SETTINGS.minRam || '4 GB RAM (Recomendado 8 GB)' 
+    },
+    { 
+      icon: <HardDrive className="w-4 h-4 text-blue-600" />, 
+      label: 'Armazenamento', 
+      val: settings.minStorage || DEFAULT_SETTINGS.minStorage || '2 GB livres em SSD (+ base de dados)' 
+    },
   ];
 
+  // Parse das notas de versão
+  const rawReleaseNotes = settings.releaseNotes || DEFAULT_SETTINGS.releaseNotes || '';
+  const releaseNotesList = rawReleaseNotes
+    .split('\n')
+    .map(line => line.trim().replace(/^[•\-\*]\s*/, ''))
+    .filter(Boolean);
+
   return (
-    <div className="min-h-screen bg-white text-slate-900 page-enter">
+    <div className="min-h-screen bg-slate-50 text-slate-900 page-enter">
       
-      {/* Hero com imagem do Laptop KIVORA */}
+      {/* Hero com imagem corporativa */}
       <PageHero
         image={laptopImg}
-        tag="Centro Oficial de Downloads"
+        tag="Distribuição Oficial de Software"
         title="Instale o KIVORA Desktop no Seu Computador"
         sub="Software executivo para Windows 10 e 11. Base de dados 100% local, emissão de faturas certificadas pela AGT e funcionamento sem internet."
       />
 
-      {/* Download Box Principal */}
-      <section className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-20 space-y-12">
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-10">
         
-        <div className="bg-slate-950 text-white rounded-3xl p-8 sm:p-14 flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl border border-slate-800 relative overflow-hidden">
+        {/* Painel Principal de Download (Design Clean & Corporativo) */}
+        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-10 space-y-8">
           
-          {/* Badge Decorativo de Fundo */}
-          <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="flex-1 space-y-5 relative z-10 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-bold">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Certificação AGT n.º 384/AGT/2024</span>
-            </div>
-
-            <h2 className="text-3xl sm:text-4xl font-black leading-tight">
-              KIVORA ERP Desktop <br />
-              <span className="text-blue-400">Versão v{settings.releaseVersion || '1.1.0'}</span>
-            </h2>
-
-            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-lg">
-              Pacote completo com Instalador Autónomo, Motor de Base de Dados Local, Módulo de Faturação AGT DS.120, POS de Balcão e Tabelas IRT 2026. Lançamento: {settings.releaseDate || '17 de Agosto de 2026'}.
-            </p>
-
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
-              {['AGT DS.120', 'IRT 2026', 'SAF-T Angola', 'Offline-First', 'Rede LAN'].map((tag) => (
-                <span key={tag} className="text-[11px] font-semibold px-3 py-1 rounded-full bg-slate-900 text-slate-300 border border-slate-800">
-                  {tag}
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
+            <div className="space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 border border-blue-200/80 text-blue-800 text-xs font-bold tracking-tight">
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                  <span>{activeAgtCert}</span>
                 </span>
-              ))}
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+                  Versão Estável
+                </span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+                Kivora ERP Desktop <span className="text-blue-700 font-mono">v{cleanVersion}</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600">
+                Lançamento oficial: <span className="font-semibold text-slate-800">{activeReleaseDate}</span> • Arquitetura 64-bit
+              </p>
             </div>
 
-            {settings.githubUrl && (
-              <div className="pt-2 flex items-center justify-center md:justify-start">
-                <a
-                  href={settings.githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-blue-400 transition-colors"
-                >
-                  <GitBranch className="w-3.5 h-3.5" />
-                  <span>Código & Releases Oficiais no GitHub</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-col items-center gap-3 relative z-10 w-full md:w-auto">
-            <button
-              onClick={handleStartDownload}
-              disabled={downloading}
-              className="inline-flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-black text-base px-8 py-4 rounded-2xl shadow-xl shadow-blue-600/40 transition-all hover:-translate-y-0.5 w-full sm:w-auto cursor-pointer"
-            >
-              <Download className="w-5 h-5" strokeWidth={2} />
-              <span>{downloading ? 'A preparar download...' : 'Baixar Instalador (.exe)'}</span>
-            </button>
-
+            {/* Ações Rápidas de Repositório */}
             {settings.githubUrl && (
               <a
-                href={getDirectDownloadUrl(settings.downloadUrl || DEFAULT_SETTINGS.downloadUrl)}
+                href={settings.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 py-1"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-200 transition-colors cursor-pointer"
               >
-                <span>Link direto alternativo</span>
-                <ExternalLink className="w-3 h-3" />
+                <GitBranch className="w-3.5 h-3.5 text-slate-600" />
+                <span>Repositório GitHub</span>
+                <ExternalLink className="w-3 h-3 text-slate-400" />
               </a>
             )}
+          </div>
 
-            <div className="text-center text-xs text-slate-400 space-y-1">
-              <p>≈ 48,5 MB • Windows 10/11 (64-bit)</p>
+          {/* CTA de Download */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+            
+            <div className="lg:col-span-2 space-y-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <button
+                  onClick={handleStartDownload}
+                  disabled={downloading}
+                  className="inline-flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 text-white font-bold text-sm sm:text-base px-7 py-3.5 rounded-xl shadow-sm transition-all cursor-pointer"
+                >
+                  <Download className="w-5 h-5" />
+                  <span>{downloading ? 'A preparar download...' : 'Baixar Instalador (.exe)'}</span>
+                </button>
+
+                {settings.githubUrl && (
+                  <a
+                    href={getDirectDownloadUrl(settings.downloadUrl || DEFAULT_SETTINGS.downloadUrl)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs px-4 py-3 rounded-xl border border-slate-200 transition-colors"
+                  >
+                    <span>Download Direto Alternativo</span>
+                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                  </a>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-500">
+                <span>Tamanho: <strong className="text-slate-800">{activeFileSize}</strong></span>
+                <span>•</span>
+                <span>Plataforma: <strong className="text-slate-800">Windows 10 / 11 (x64)</strong></span>
+                <span>•</span>
+                <span>Instalação: <strong className="text-slate-800">Autónoma</strong></span>
+              </div>
+
               {downloadComplete && (
-                <span className="text-emerald-400 font-bold block animate-fadeIn">
-                  ✓ Download iniciado! Execute o ficheiro descarregado.
-                </span>
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-semibold flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Download iniciado com sucesso. Execute o ficheiro descarregado para iniciar a instalação.</span>
+                </div>
               )}
             </div>
+
+            {/* Cartão de Chave de Demonstração */}
+            <div className="bg-slate-50 border border-slate-200/90 rounded-xl p-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                  <Key className="w-3.5 h-3.5 text-blue-600" />
+                  Chave de Demonstração
+                </span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">15 Dias</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <code className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-900 flex-1 truncate select-all">
+                  {activeDemoKey}
+                </code>
+                <button
+                  onClick={handleCopyKey}
+                  className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shrink-0 cursor-pointer"
+                  title="Copiar chave de demonstração"
+                >
+                  {copiedKey ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedKey ? 'Copiada' : 'Copiar'}</span>
+                </button>
+              </div>
+              <p className="text-[10px] text-slate-500 leading-tight">
+                Utilize esta chave para testar todas as funcionalidades do sistema no seu computador.
+              </p>
+            </div>
+
           </div>
 
         </div>
 
-        {/* Chave de Teste Demonstrativa Gratuita (15 Dias) */}
-        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
-          <div className="space-y-1 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2 text-slate-900 font-black text-sm">
-              <Key className="w-4 h-4 text-blue-600" />
-              <span>Chave de Demonstração & Avaliação (15 Dias Grátis)</span>
-            </div>
-            <p className="text-xs text-slate-600">
-              Copie a chave abaixo para ativar o software após a instalação e testar todas as funcionalidades.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 w-full md:w-auto justify-center">
-            <div className="bg-white border border-slate-300 px-4 py-2.5 rounded-xl font-mono font-black text-xs sm:text-sm text-blue-900 tracking-wider">
-              {demoKey}
-            </div>
-            <button
-              onClick={handleCopyKey}
-              className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
-            >
-              <Copy className="w-3.5 h-3.5" />
-              <span>{copiedKey ? 'Copiada!' : 'Copiar Chave'}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Verificação de Integridade & Requisitos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Requisitos Mínimos & Notas de Lançamento */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          {/* Requisitos do Sistema */}
-          <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
+          {/* Requisitos Técnicos */}
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 space-y-4">
             <div>
-              <h3 className="text-lg font-black text-slate-950">Requisitos Mínimos do Sistema</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Compatível com qualquer computador ou portátil moderno.</p>
+              <h3 className="text-base font-black text-slate-950">Requisitos do Sistema</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Especificações para execução local sem lentidão.</p>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {requirements.map((req, i) => (
-                <div key={i} className="flex items-center gap-3.5 p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                  <div className="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-blue-600 shadow-2xs shrink-0">
+                <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <div className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg shrink-0">
                     {req.icon}
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{req.label}</span>
-                    <span className="text-xs font-bold text-slate-900">{req.val}</span>
+                    <span className="text-xs font-bold text-slate-900 block truncate">{req.val}</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Notas de Lançamento & Integridade */}
-          <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs flex flex-col justify-between">
-            <div className="space-y-4">
+          {/* Notas de Lançamento (Changelog) */}
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 space-y-4 flex flex-col justify-between">
+            <div className="space-y-3">
               <div>
-                <h3 className="text-lg font-black text-slate-950">Notas de Lançamento (v2026.08)</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Novidades e conformidades da última versão estável:</p>
+                <h3 className="text-base font-black text-slate-950">Novidades da Versão v{cleanVersion}</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Recursos e conformidades implementadas nesta compilação:</p>
               </div>
 
-              <ul className="space-y-2.5 text-xs text-slate-700">
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Emissão de faturas com assinatura criptográfica RSA-2048 e QR Code homologado AGT.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Novos escalões de Retenção na Fonte e IRT 2026 integrados no processamento salarial.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Suporte a impressoras térmicas USB/Ethernet e abertura automática de gaveta RJ11.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Novo assistente de exportação e pré-validação do ficheiro SAF-T (AO).</span>
-                </li>
+              <ul className="space-y-2 text-xs text-slate-700">
+                {releaseNotesList.length > 0 ? (
+                  releaseNotesList.map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <span className="leading-relaxed">{item}</span>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-slate-400 text-xs italic">Nenhuma nota configurada para esta versão.</li>
+                )}
               </ul>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 text-[10px] text-slate-400 space-y-1">
-              <span className="font-bold text-slate-600 uppercase tracking-wider block">Assinatura Digital SHA-256:</span>
-              <p className="font-mono bg-slate-50 p-2 rounded-lg border border-slate-200 break-all select-all">
-                {sha256Checksum}
+            {/* Checksum SHA-256 */}
+            <div className="pt-3 border-t border-slate-100 space-y-1">
+              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <span>Assinatura Digital SHA-256</span>
+                <button
+                  onClick={handleCopyChecksum}
+                  className="text-blue-600 hover:underline flex items-center gap-1 font-semibold normal-case cursor-pointer"
+                >
+                  {copiedChecksum ? 'Copiado!' : 'Copiar Hash'}
+                </button>
+              </div>
+              <p className="font-mono text-[10px] bg-slate-50 p-2 rounded-lg border border-slate-200 text-slate-600 break-all select-all">
+                {activeChecksum}
               </p>
             </div>
           </div>
 
         </div>
 
-        {/* Passos de Instalação */}
-        <div className="bg-slate-950 text-white rounded-3xl p-8 sm:p-12 space-y-8">
-          <div className="text-center max-w-xl mx-auto space-y-2">
-            <h3 className="text-2xl font-black">Como Instalar em 3 Minutos</h3>
-            <p className="text-xs text-slate-400">Processo simples e totalmente guiado pelo assistente.</p>
+        {/* 3 Passos Simples de Instalação */}
+        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 space-y-6">
+          <div>
+            <h3 className="text-lg font-black text-slate-950">Instalação em 3 Passos</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Processo guiado pelo assistente de configuração em minutos.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs">
-            <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-2">
-              <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">1</div>
-              <h4 className="font-black text-white text-sm">Execute o Setup</h4>
-              <p className="text-slate-400 leading-relaxed">
-                Abra o instalador descarregado e siga as instruções no ecrã. O sistema instala todos os componentes automaticamente.
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+              <div className="w-7 h-7 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center">
+                1
+              </div>
+              <h4 className="font-bold text-slate-900 text-xs">Execute o Instalador</h4>
+              <p className="text-[11px] text-slate-600 leading-relaxed">
+                Abra o ficheiro <code>.exe</code> descarregado e siga os passos do assistente de instalação no Windows.
               </p>
             </div>
 
-            <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-2">
-              <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">2</div>
-              <h4 className="font-black text-white text-sm">Ative a Chave</h4>
-              <p className="text-slate-400 leading-relaxed">
-                Introduza a chave de teste ou a sua chave definitiva adquirida para desbloquear a base de dados local.
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+              <div className="w-7 h-7 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center">
+                2
+              </div>
+              <h4 className="font-bold text-slate-900 text-xs">Introduza a Chave</h4>
+              <p className="text-[11px] text-slate-600 leading-relaxed">
+                Insira a sua chave de demonstração ou a licença adquirida para inicializar a base de dados local.
               </p>
             </div>
 
-            <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-2">
-              <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">3</div>
-              <h4 className="font-black text-white text-sm">Comece a Faturar</h4>
-              <p className="text-slate-400 leading-relaxed">
-                Configure os dados da sua empresa (NIF e morada) e emita faturas legais de imediato no balcão.
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+              <div className="w-7 h-7 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center">
+                3
+              </div>
+              <h4 className="font-bold text-slate-900 text-xs">Comece a Faturar</h4>
+              <p className="text-[11px] text-slate-600 leading-relaxed">
+                Configure os dados da sua empresa e comece a registar vendas e emitir faturas certificadas.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Banner de Ajuda & Licenciamento */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-slate-50 border border-slate-200 rounded-3xl text-xs">
+        {/* Rodapé de Assistência */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 bg-white border border-slate-200/90 rounded-2xl shadow-xs text-xs">
           <div className="flex items-center gap-3 text-slate-700">
-            <HelpCircle className="w-5 h-5 text-blue-600 shrink-0" />
-            <span>Precisa de assistência técnica na instalação ou aquisição de licença definitiva?</span>
+            <HelpCircle className="w-4 h-4 text-blue-600 shrink-0" />
+            <span>Precisa de apoio na instalação ou aquisição de licenças comerciais?</span>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -305,7 +353,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
             <span className="text-slate-300">•</span>
             <button
               onClick={() => onOpenDemoModal('Pedido de Licença Comercial')}
-              className="bg-slate-950 hover:bg-slate-800 text-white font-bold px-4 py-2 rounded-xl transition-all cursor-pointer"
+              className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer"
             >
               Pedir Licença
             </button>
@@ -317,4 +365,5 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
     </div>
   );
 };
+
 

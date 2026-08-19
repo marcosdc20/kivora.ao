@@ -499,9 +499,21 @@ export const AdminConfiguracoes: React.FC = () => {
                 <input
                   type="text"
                   value={settings.releaseVersion}
-                  onChange={(e) => handleChange('releaseVersion', e.target.value)}
+                  onChange={(e) => handleChange('releaseVersion', e.target.value.replace(/^v+/i, ''))}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
                   placeholder="1.1.0"
+                />
+                <span className="text-[10px] text-slate-400">Exibido no site como: v{settings.releaseVersion || '1.1.0'}</span>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Tamanho do Arquivo (.exe)</label>
+                <input
+                  type="text"
+                  value={settings.fileSize || ''}
+                  onChange={(e) => handleChange('fileSize', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="78.4 MB"
                 />
               </div>
 
@@ -512,8 +524,88 @@ export const AdminConfiguracoes: React.FC = () => {
                   value={settings.releaseDate}
                   onChange={(e) => handleChange('releaseDate', e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
-                  placeholder="17 de Agosto de 2026"
+                  placeholder="19 de Agosto de 2026"
                 />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Chave de Demonstração / Avaliação</label>
+                <input
+                  type="text"
+                  value={settings.demoKey || ''}
+                  onChange={(e) => handleChange('demoKey', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-blue-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="KVRA-DEMO-2026-TRIAL"
+                />
+              </div>
+
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="font-bold text-slate-700 uppercase">Assinatura Digital SHA-256 (Checksum)</label>
+                <input
+                  type="text"
+                  value={settings.sha256Checksum || ''}
+                  onChange={(e) => handleChange('sha256Checksum', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono text-[11px] text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                />
+              </div>
+
+              <div className="md:col-span-2 pt-2 border-t border-slate-100">
+                <h4 className="font-black text-slate-900 text-xs uppercase tracking-wider mb-2">Requisitos Mínimos do Sistema</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">Sistema Operativo</label>
+                    <input
+                      type="text"
+                      value={settings.minOs || ''}
+                      onChange={(e) => handleChange('minOs', e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                      placeholder="Windows 10 / 11 (64-bit)"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">Memória RAM</label>
+                    <input
+                      type="text"
+                      value={settings.minRam || ''}
+                      onChange={(e) => handleChange('minRam', e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                      placeholder="4 GB RAM (Recomendado 8 GB)"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">Espaço em Disco</label>
+                    <input
+                      type="text"
+                      value={settings.minStorage || ''}
+                      onChange={(e) => handleChange('minStorage', e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                      placeholder="2 GB livres em SSD (+ base de dados)"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">Processador (CPU)</label>
+                    <input
+                      type="text"
+                      value={settings.minCpu || ''}
+                      onChange={(e) => handleChange('minCpu', e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                      placeholder="Intel Core i3 / AMD Ryzen 3 ou superior"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1.5 md:col-span-2 pt-2 border-t border-slate-100">
+                <label className="font-bold text-slate-700 uppercase">Notas da Versão / Novidades (Changelog)</label>
+                <textarea
+                  rows={4}
+                  value={settings.releaseNotes || ''}
+                  onChange={(e) => handleChange('releaseNotes', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none leading-relaxed"
+                  placeholder="• Motor de faturação certificado em conformidade com a AGT&#10;• Base de dados 100% local com funcionamento sem internet"
+                />
+                <span className="text-[10px] text-slate-400">Escreva um item por linha para formatar os tópicos no site.</span>
               </div>
             </div>
 
