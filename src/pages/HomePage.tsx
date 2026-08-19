@@ -14,6 +14,7 @@ import {
 
 import { CardSpotlight } from '../components/effects/CardSpotlight';
 import { SystemArchitectureFlow } from '../components/effects/SystemArchitectureFlow';
+import { YouTubePlayer } from '../components/YouTubePlayer';
 
 import posImg from '../assets/kivora/pc-pos-kivora.png';
 import desktopImg from '../assets/kivora/pc-descktop-kivora.png';
@@ -341,6 +342,34 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       <div ref={sectionsRef}>
+
+        {/* ========== VÍDEO SPOTLIGHT — KIVORA EM AÇÃO ========== */}
+        {settings.videoHomeUrl && (
+          <section className="py-20 px-6 sm:px-10 lg:px-16 max-w-6xl mx-auto">
+            <div data-reveal className="sr-init text-center max-w-2xl mx-auto mb-10 space-y-2">
+              <span className="text-blue-600 font-bold text-xs uppercase tracking-widest">
+                Tour Virtual & Demonstração
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
+                {settings.videoHomeTitle || 'Conheça o KIVORA ERP em Ação'}
+              </h2>
+              <p className="text-sm text-slate-600">
+                {settings.videoHomeDesc || 'Veja em menos de 2 minutos como emitir faturas certificadas, operar o POS e fechar o caixa sem internet.'}
+              </p>
+            </div>
+
+            <div data-reveal className="sr-init">
+              <YouTubePlayer
+                videoUrl={settings.videoHomeUrl}
+                title={settings.videoHomeTitle || 'Conheça o KIVORA ERP'}
+                subtitle={settings.videoHomeDesc}
+                badge="Demonstração Oficial"
+                accentColor="blue"
+                aspectRatio="video"
+              />
+            </div>
+          </section>
+        )}
 
         {/* ========== COMO FUNCIONA — 5 Passos ========== */}
         <section className="py-24 px-6 sm:px-10 lg:px-16 max-w-7xl mx-auto">

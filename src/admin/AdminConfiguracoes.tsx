@@ -4,7 +4,7 @@ import {
   Database, Download, Loader2, Rocket, RotateCcw,
   X, GitBranch, CreditCard, Building2, ExternalLink, Plus, Tag,
   TrendingUp, Award, Briefcase, MapPin, Trash2, Monitor,
-  Bell, Megaphone
+  Bell, Megaphone, Video, Youtube
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -75,7 +75,7 @@ const INITIAL_RELEASES: UpdateRelease[] = [
   }
 ];
 
-type ConfigTab = 'geral' | 'precos' | 'notificacoes' | 'comunicados' | 'metricas' | 'marcas' | 'investidores' | 'provincias' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups';
+type ConfigTab = 'geral' | 'precos' | 'videos' | 'notificacoes' | 'comunicados' | 'metricas' | 'marcas' | 'investidores' | 'provincias' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups';
 
 export const AdminConfiguracoes: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ConfigTab>('geral');
@@ -307,6 +307,7 @@ export const AdminConfiguracoes: React.FC = () => {
           {[
             { id: 'geral', label: 'Geral & Empresa', icon: <Building2 className="w-4 h-4" /> },
             { id: 'precos', label: 'Planos & Preços', icon: <Tag className="w-4 h-4" /> },
+            { id: 'videos', label: 'Vídeos YouTube', icon: <Video className="w-4 h-4" /> },
             { id: 'notificacoes', label: 'Notificações & Webhook', icon: <Bell className="w-4 h-4" /> },
             { id: 'comunicados', label: 'Avisos & Comunicados', icon: <Megaphone className="w-4 h-4" /> },
             { id: 'metricas', label: 'Métricas & Números', icon: <TrendingUp className="w-4 h-4" /> },
@@ -756,6 +757,284 @@ export const AdminConfiguracoes: React.FC = () => {
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Planos & Preços</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* TAB: VÍDEOS & MULTIMÉDIA DO YOUTUBE */}
+        {activeTab === 'videos' && (
+          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-8">
+            <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <Youtube className="w-5 h-5 text-red-600" />
+                  <span>Vídeos do YouTube no Site Oficial</span>
+                </h3>
+                <p className="text-xs text-slate-500">Configure links do YouTube (normais, encurtados ou shorts) que são exibidos de forma moderna e sem molduras pesadas</p>
+              </div>
+            </div>
+
+            {/* Dica de formato YouTube */}
+            <div className="p-4 rounded-2xl bg-red-50/70 border border-red-200/80 text-xs text-red-900 flex items-start gap-3">
+              <Youtube className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-bold text-slate-900">Formatos de Links Suportados Automaticamente:</p>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Pode colar links directos como <code>https://www.youtube.com/watch?v=XXXXXX</code>, links partilhados <code>https://youtu.be/XXXXXX</code>, links de Shorts <code>https://www.youtube.com/shorts/XXXXXX</code> ou links de incorporação <code>/embed/</code>. O sistema converte automaticamente com modo de privacidade e alta definição.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+              
+              {/* 1. Vídeo da Homepage */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <span className="font-black text-slate-900 uppercase tracking-wider text-[11px] text-blue-600">
+                      1. Página Inicial (Homepage)
+                    </span>
+                    <span className="text-[10px] bg-blue-100/80 text-blue-700 font-bold px-2 py-0.5 rounded">
+                      Secção Principal
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Link do YouTube</label>
+                    <input
+                      type="url"
+                      value={settings.videoHomeUrl || ''}
+                      onChange={(e) => handleChange('videoHomeUrl', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono text-slate-900 focus:border-blue-600 outline-none"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Título do Vídeo</label>
+                    <input
+                      type="text"
+                      value={settings.videoHomeTitle || ''}
+                      onChange={(e) => handleChange('videoHomeTitle', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      placeholder="Conheça o KIVORA ERP em Ação"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Descrição / Subtítulo</label>
+                    <input
+                      type="text"
+                      value={settings.videoHomeDesc || ''}
+                      onChange={(e) => handleChange('videoHomeDesc', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:border-blue-600 outline-none"
+                      placeholder="Demonstração rápida da interface do POS..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Vídeo dos Manuais de Apoio */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <span className="font-black text-slate-900 uppercase tracking-wider text-[11px] text-amber-600">
+                      2. Central de Manuais & Tutoriais
+                    </span>
+                    <span className="text-[10px] bg-amber-100/80 text-amber-700 font-bold px-2 py-0.5 rounded">
+                      Área de Manuais
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Link do YouTube</label>
+                    <input
+                      type="url"
+                      value={settings.videoManuaisUrl || ''}
+                      onChange={(e) => handleChange('videoManuaisUrl', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono text-slate-900 focus:border-amber-600 outline-none"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Título do Tutorial</label>
+                    <input
+                      type="text"
+                      value={settings.videoManuaisTitle || ''}
+                      onChange={(e) => handleChange('videoManuaisTitle', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-amber-600 outline-none"
+                      placeholder="Guia Rápido: Operação de Caixa & Fecho Z"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Descrição / Dica</label>
+                    <input
+                      type="text"
+                      value={settings.videoManuaisDesc || ''}
+                      onChange={(e) => handleChange('videoManuaisDesc', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:border-amber-600 outline-none"
+                      placeholder="Aprenda passo a passo como realizar a abertura..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Vídeo do Programa de Parceiros */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <span className="font-black text-slate-900 uppercase tracking-wider text-[11px] text-purple-600">
+                      3. Programa de Parceiros
+                    </span>
+                    <span className="text-[10px] bg-purple-100/80 text-purple-700 font-bold px-2 py-0.5 rounded">
+                      Página de Parceiros
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Link do YouTube</label>
+                    <input
+                      type="url"
+                      value={settings.videoParceirosUrl || ''}
+                      onChange={(e) => handleChange('videoParceirosUrl', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono text-slate-900 focus:border-purple-600 outline-none"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Título do Vídeo de Parcerias</label>
+                    <input
+                      type="text"
+                      value={settings.videoParceirosTitle || ''}
+                      onChange={(e) => handleChange('videoParceirosTitle', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-purple-600 outline-none"
+                      placeholder="Programa Oficial de Parceiros & Revendedores"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Descrição</label>
+                    <input
+                      type="text"
+                      value={settings.videoParceirosDesc || ''}
+                      onChange={(e) => handleChange('videoParceirosDesc', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:border-purple-600 outline-none"
+                      placeholder="Descubra como lucrar até 50% de margem com a revenda..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. Vídeo do Guia AGT */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <span className="font-black text-slate-900 uppercase tracking-wider text-[11px] text-emerald-600">
+                      4. Guia Oficial AGT (Decreto 71/25)
+                    </span>
+                    <span className="text-[10px] bg-emerald-100/80 text-emerald-700 font-bold px-2 py-0.5 rounded">
+                      Conformidade Fiscal
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Link do YouTube</label>
+                    <input
+                      type="url"
+                      value={settings.videoAgtUrl || ''}
+                      onChange={(e) => handleChange('videoAgtUrl', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono text-slate-900 focus:border-emerald-600 outline-none"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Título</label>
+                    <input
+                      type="text"
+                      value={settings.videoAgtTitle || ''}
+                      onChange={(e) => handleChange('videoAgtTitle', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-emerald-600 outline-none"
+                      placeholder="Exigências do Decreto 71/25 & Faturação AGT"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Descrição</label>
+                    <input
+                      type="text"
+                      value={settings.videoAgtDesc || ''}
+                      onChange={(e) => handleChange('videoAgtDesc', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:border-emerald-600 outline-none"
+                      placeholder="Entenda os regimes de IVA e a regra de anulação..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 5. Vídeo de Hardware & POS */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between md:col-span-2">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <span className="font-black text-slate-900 uppercase tracking-wider text-[11px] text-slate-800">
+                      5. Hardware & Equipamentos POS
+                    </span>
+                    <span className="text-[10px] bg-slate-200 text-slate-800 font-bold px-2 py-0.5 rounded">
+                      Página de Hardware
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-700">Link do YouTube</label>
+                      <input
+                        type="url"
+                        value={settings.videoHardwareUrl || ''}
+                        onChange={(e) => handleChange('videoHardwareUrl', e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono text-slate-900 focus:border-blue-600 outline-none"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-700">Título</label>
+                      <input
+                        type="text"
+                        value={settings.videoHardwareTitle || ''}
+                        onChange={(e) => handleChange('videoHardwareTitle', e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                        placeholder="Instalação Rápida de Impressoras Térmicas 80mm"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-700">Descrição</label>
+                      <input
+                        type="text"
+                        value={settings.videoHardwareDesc || ''}
+                        onChange={(e) => handleChange('videoHardwareDesc', e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:border-blue-600 outline-none"
+                        placeholder="Configuração plug-and-play de impressoras ESC/POS..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Guardar Vídeos YouTube</span>
               </button>
             </div>
           </form>

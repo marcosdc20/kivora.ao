@@ -9,6 +9,7 @@ import {
   subscribeSystemSettings, getCachedSystemSettings,
   SystemCompanySettings
 } from '../services/systemSettingsService';
+import { YouTubePlayer } from '../components/YouTubePlayer';
 
 import parceirosImg from '../assets/kivora/parceiros-kivora.png';
 
@@ -131,6 +132,34 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
             <span className="text-[11px] text-slate-500">Liquidação após análise da candidatura</span>
           </div>
         </div>
+
+        {/* Vídeo do Programa de Parceiros */}
+        {settings.videoParceirosUrl && (
+          <div data-reveal className="sr-init space-y-6 pt-6">
+            <div className="text-center max-w-2xl mx-auto space-y-2">
+              <span className="text-purple-600 font-bold text-xs uppercase tracking-widest">
+                Apresentação Comercial
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-950">
+                {settings.videoParceirosTitle || 'Como Funciona o Programa de Canais & Distribuição'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500">
+                {settings.videoParceirosDesc || 'Entenda em detalhe o modelo de negócio, margens de revenda até 50% e suporte direto aos parceiros.'}
+              </p>
+            </div>
+
+            <div className="max-w-4xl mx-auto">
+              <YouTubePlayer
+                videoUrl={settings.videoParceirosUrl}
+                title={settings.videoParceirosTitle}
+                subtitle={settings.videoParceirosDesc}
+                badge="Vídeo para Parceiros"
+                accentColor="purple"
+                aspectRatio="video"
+              />
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Formulário / CTA */}

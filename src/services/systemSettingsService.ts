@@ -124,6 +124,27 @@ export interface SystemCompanySettings {
   notifyEmailPartners?: string;
   whatsappDefaultMessage?: string;
 
+  // Vídeos do YouTube (Configuráveis no Admin & Firebase)
+  videoHomeUrl?: string;
+  videoHomeTitle?: string;
+  videoHomeDesc?: string;
+
+  videoManuaisUrl?: string;
+  videoManuaisTitle?: string;
+  videoManuaisDesc?: string;
+
+  videoParceirosUrl?: string;
+  videoParceirosTitle?: string;
+  videoParceirosDesc?: string;
+
+  videoAgtUrl?: string;
+  videoAgtTitle?: string;
+  videoAgtDesc?: string;
+
+  videoHardwareUrl?: string;
+  videoHardwareTitle?: string;
+  videoHardwareDesc?: string;
+
   // Parâmetros Fiscais AGT
   agtDecretoRef?: string;
   saftSubmissionDeadlineDay?: number;
@@ -171,6 +192,33 @@ export function getDirectDownloadUrl(url?: string): string {
   }
 
   return trimmed;
+}
+
+/**
+ * Converte qualquer formato de URL do YouTube (watch, youtu.be, embed, shorts) para uma URL de embed segura e otimizada.
+ */
+export function getYouTubeEmbedUrl(url?: string): string | null {
+  if (!url) return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+
+  // Formatos:
+  // - https://www.youtube.com/watch?v=VIDEO_ID
+  // - https://youtu.be/VIDEO_ID
+  // - https://www.youtube.com/embed/VIDEO_ID
+  // - https://www.youtube.com/shorts/VIDEO_ID
+  const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i;
+  const match = trimmed.match(regExp);
+
+  if (match && match[1]) {
+    return `https://www.youtube-nocookie.com/embed/${match[1]}?rel=0&modestbranding=1&autoplay=0`;
+  }
+
+  if (trimmed.includes('/embed/')) {
+    return trimmed;
+  }
+
+  return null;
 }
 
 export const DEFAULT_PROVINCES: ProvinceStat[] = [
@@ -298,9 +346,26 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   notifyEmailPartners: 'parceiros@kivora.ao',
   whatsappDefaultMessage: 'Olá! Gostaria de saber mais sobre o KIVORA ERP.',
 
-  // Parâmetros Fiscais AGT
-  agtDecretoRef: 'Decreto Presidencial n.º 71/25',
-  saftSubmissionDeadlineDay: 15,
+  // Vídeos do YouTube (Configuráveis no Admin & Firebase)
+  videoHomeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', // Link configurável no Admin
+  videoHomeTitle: 'Conheça o KIVORA ERP em Ação',
+  videoHomeDesc: 'Demonstração rápida da interface do POS, emissão com QR Code AGT e funcionamento 100% offline.',
+
+  videoManuaisUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  videoManuaisTitle: 'Guia Rápido: Operação de Caixa & Fecho Z',
+  videoManuaisDesc: 'Aprenda passo a passo como realizar a abertura de turno, registo de vendas por código de barras e emissão do relatório diário Z.',
+
+  videoParceirosUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  videoParceirosTitle: 'Programa Oficial de Parceiros & Revendedores',
+  videoParceirosDesc: 'Descubra como lucrar até 50% de margem com a distribuição e implantação do KIVORA ERP na sua província.',
+
+  videoAgtUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  videoAgtTitle: 'Exigências do Decreto 71/25 & Faturação AGT',
+  videoAgtDesc: 'Entenda os regimes de IVA (14% e 7%), a regra de anulação com Nota de Crédito e os prazos do SAF-T AO.',
+
+  videoHardwareUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  videoHardwareTitle: 'Instalação Rápida de Impressoras Térmicas 80mm',
+  videoHardwareDesc: 'Configuração plug-and-play de impressoras ESC/POS USB, gavetas elétricas RJ11 e leitores 2D.',
 
   whatsappUrl: KIVORA_INFO.whatsapp,
   facebookUrl: KIVORA_INFO.facebook,

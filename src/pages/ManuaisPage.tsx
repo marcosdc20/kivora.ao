@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
   BookOpen, Search, Sparkles, HelpCircle,
   ArrowRight, ShieldCheck, Printer
 } from 'lucide-react';
 import { PageId } from '../components/Header';
+import { YouTubePlayer } from '../components/YouTubePlayer';
+import {
+  subscribeSystemSettings, getCachedSystemSettings,
+  SystemCompanySettings
+} from '../services/systemSettingsService';
 
 import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
 
@@ -27,9 +32,15 @@ interface GuiaItem {
 }
 
 export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNavigatePage }) => {
+  const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
   const [selectedCategory, setSelectedCategory] = useState<RoleCategory>('todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeGuideId, setActiveGuideId] = useState<string | null>('caixa-1');
+
+  useEffect(() => {
+    const unsub = subscribeSystemSettings(setSettings);
+    return () => unsub();
+  }, []);
 
   const guias: GuiaItem[] = [
     {
@@ -250,6 +261,37 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
           </div>
 
         </div>
+
+        {/* Vídeo Tutorial em Destaque — Sem Molduras Pesadas */}
+        {settings.videoManuaisUrl && (
+          <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-800 text-white space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <span className="text-amber-400 font-bold text-xs uppercase tracking-widest flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Vídeo-Aula em Destaque
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black text-white">
+                  {settings.videoManuaisTitle || 'Guia Rápido: Operação de Caixa & Fecho Z'}
+                </h3>
+                <p className="text-xs text-slate-400 max-w-2xl">
+                  {settings.videoManuaisDesc || 'Aprenda passo a passo como realizar a abertura de turno, registo de vendas por código de barras e emissão do relatório diário Z.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="max-w-4xl mx-auto">
+              <YouTubePlayer
+                videoUrl={settings.videoManuaisUrl}
+                title={settings.videoManuaisTitle}
+                subtitle={settings.videoManuaisDesc}
+                badge="Tutorial em Vídeo"
+                accentColor="amber"
+                aspectRatio="video"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Master-Detail Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

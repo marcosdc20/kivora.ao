@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
   CheckCircle2, AlertTriangle,
@@ -6,6 +6,11 @@ import {
   Scale, Database, Clock, Sparkles
 } from 'lucide-react';
 import { PageId } from '../components/Header';
+import { YouTubePlayer } from '../components/YouTubePlayer';
+import {
+  subscribeSystemSettings, getCachedSystemSettings,
+  SystemCompanySettings
+} from '../services/systemSettingsService';
 
 import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
 
@@ -15,8 +20,14 @@ interface GuiaAgtPageProps {
 }
 
 export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNavigatePage }) => {
+  const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
   // Estado do checklist de prontidão fiscal
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    const unsub = subscribeSystemSettings(setSettings);
+    return () => unsub();
+  }, []);
 
   const checklist = [
     {
@@ -248,6 +259,37 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
             ))}
           </div>
         </section>
+
+        {/* Vídeo Explicativo do Decreto 71/25 & Faturação AGT */}
+        {settings.videoAgtUrl && (
+          <section className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-800 text-white space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <span className="text-emerald-400 font-bold text-xs uppercase tracking-widest flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Vídeo Jurídico & Fiscal
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black text-white">
+                  {settings.videoAgtTitle || 'Exigências do Decreto 71/25 & Faturação AGT'}
+                </h3>
+                <p className="text-xs text-slate-400 max-w-2xl">
+                  {settings.videoAgtDesc || 'Entenda os regimes de IVA (14% e 7%), a regra de anulação com Nota de Crédito e os prazos do SAF-T AO.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="max-w-4xl mx-auto">
+              <YouTubePlayer
+                videoUrl={settings.videoAgtUrl}
+                title={settings.videoAgtTitle}
+                subtitle={settings.videoAgtDesc}
+                badge="Guia Fiscal AGT"
+                accentColor="emerald"
+                aspectRatio="video"
+              />
+            </div>
+          </section>
+        )}
 
         {/* 3. Checklist Interativo de Conformidade */}
         <section className="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 shadow-2xl border border-slate-800 space-y-8">

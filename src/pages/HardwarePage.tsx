@@ -1,11 +1,16 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
   Printer, ScanLine, Scale, Monitor,
-  CheckCircle2, ShieldCheck, Download
+  CheckCircle2, ShieldCheck, Download, Sparkles
 } from 'lucide-react';
 import { PageId } from '../components/Header';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+import { YouTubePlayer } from '../components/YouTubePlayer';
+import {
+  subscribeSystemSettings, getCachedSystemSettings,
+  SystemCompanySettings
+} from '../services/systemSettingsService';
 
 import posImg from '../assets/kivora/pc-pos-kivora.png';
 
@@ -150,8 +155,14 @@ const HARDWARE_CATEGORIES: HardwareCategory[] = [
 ];
 
 export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onNavigatePage }) => {
+  const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
   const [activeCat, setActiveCat] = useState<string>('printers');
   const pageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const unsub = subscribeSystemSettings(setSettings);
+    return () => unsub();
+  }, []);
 
   useScrollReveal(pageRef, [activeCat]);
 
@@ -191,6 +202,35 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
             Consultar Compatibilidade Grátis
           </button>
         </div>
+
+        {/* Vídeo de Instalação de Hardware & Equipamentos POS */}
+        {settings.videoHardwareUrl && (
+          <div data-reveal className="space-y-6">
+            <div className="text-center max-w-2xl mx-auto space-y-2">
+              <span className="text-blue-600 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                Guia em Vídeo
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-950">
+                {settings.videoHardwareTitle || 'Instalação Rápida de Impressoras Térmicas 80mm'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600">
+                {settings.videoHardwareDesc || 'Configuração plug-and-play de impressoras ESC/POS USB, gavetas elétricas RJ11 e leitores 2D.'}
+              </p>
+            </div>
+
+            <div className="max-w-4xl mx-auto">
+              <YouTubePlayer
+                videoUrl={settings.videoHardwareUrl}
+                title={settings.videoHardwareTitle}
+                subtitle={settings.videoHardwareDesc}
+                badge="Hardware & POS"
+                accentColor="blue"
+                aspectRatio="video"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Tabs de Seleção de Categoria */}
         <div className="space-y-8">
