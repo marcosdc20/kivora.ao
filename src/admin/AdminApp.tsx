@@ -152,7 +152,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
   const renderSection = () => {
     switch (activeSection) {
       case 'dashboard':
-        return <AdminDashboard />;
+        return <AdminDashboard onNavigate={navigate} />;
 
       case 'empresas':
         return (

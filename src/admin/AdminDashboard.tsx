@@ -1,7 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import {
   TrendingUp, Shield, CheckCircle2, AlertCircle,
-  Ban, RotateCcw, Key, Users, Wallet, TrendingDown
+  Ban, RotateCcw, Key, Users, Wallet, TrendingDown,
+  UserCheck, ArrowRight, PhoneCall
 } from 'lucide-react';
 import { useLicenses } from './hooks/useFirebase';
 import { FirebaseAuthModal } from './components/FirebaseAuthModal';
@@ -13,17 +14,56 @@ import {
 import { getPlanLabel, formatLicenseDate } from './services/licenseService';
 import { subscribeAllDebts, PartnerDebtEntry } from './services/partnerDebtService';
 import { AdminTopbar } from './AdminComponents';
+import { db } from '../lib/firebase';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { AdminSection } from './types';
 
 const fmt = (n: number) => n.toLocaleString('pt-AO');
 
-export const AdminDashboard: React.FC = () => {
+interface AdminDashboardProps {
+  onNavigate?: (section: AdminSection) => void;
+}
+
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
   const { licenses, loading, error, refresh } = useLicenses();
   const [modalAuth, setModalAuth] = useState(false);
   const [partnerDebts, setPartnerDebts] = useState<PartnerDebtEntry[]>([]);
+  const [pendingCandidaturasCount, setPendingCandidaturasCount] = useState<number>(0);
+  const [pendingDemoLeadsCount, setPendingDemoLeadsCount] = useState<number>(0);
 
   useEffect(() => {
     const unsub = subscribeAllDebts(setPartnerDebts);
     return () => unsub();
+  }, []);
+
+  // Escuta de candidaturas de parceiros pendentes
+  useEffect(() => {
+    try {
+      const q = query(collection(db, 'partner_applications'), where('status', '==', 'pending'));
+      const unsub = onSnapshot(q, (snap) => {
+        setPendingCandidaturasCount(snap.size);
+      }, (err) => {
+        console.warn('Erro ao escutar candidaturas:', err);
+      });
+      return () => unsub();
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Escuta de leads de demonstração pendentes
+  useEffect(() => {
+    try {
+      const q = query(collection(db, 'leads_demonstracao'), where('status', '==', 'pendente'));
+      const unsub = onSnapshot(q, (snap) => {
+        setPendingDemoLeadsCount(snap.size);
+      }, (err) => {
+        console.warn('Erro ao escutar leads_demonstracao:', err);
+      });
+      return () => unsub();
+    } catch {
+      // ignore
+    }
   }, []);
 
   const totalPartnerDebtPending = partnerDebts.filter(d => !d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
@@ -259,6 +299,57 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Action Center — Pendências de Candidaturas & Leads de Demonstração */}
+      {(pendingCandidaturasCount > 0 || pendingDemoLeadsCount > 0) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {pendingCandidaturasCount > 0 && (
+            <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black">
+                  <UserCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-amber-950">
+                    {pendingCandidaturasCount} {pendingCandidaturasCount === 1 ? 'Candidatura de Parceiro' : 'Candidaturas de Parceiros'}
+                  </h4>
+                  <p className="text-[11px] text-amber-800">Aguardam homologação e atribuição de quotas</p>
+                </div>
+              </div>
+              <button
+                onClick={() => onNavigate?.('parceiros-candidaturas')}
+                className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all shrink-0 cursor-pointer shadow-xs"
+              >
+                <span>Homologar</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {pendingDemoLeadsCount > 0 && (
+            <div className="bg-blue-500/10 border border-blue-500/30 p-4 rounded-2xl flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">
+                  <PhoneCall className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-blue-950">
+                    {pendingDemoLeadsCount} {pendingDemoLeadsCount === 1 ? 'Pedido de Demonstração' : 'Pedidos de Demonstração'}
+                  </h4>
+                  <p className="text-[11px] text-blue-800">Clientes aguardam agendamento pelo suporte comercial</p>
+                </div>
+              </div>
+              <button
+                onClick={() => onNavigate?.('suporte')}
+                className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all shrink-0 cursor-pointer shadow-xs"
+              >
+                <span>Ver Contactos</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
