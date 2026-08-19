@@ -19,17 +19,17 @@ export const PageHero: React.FC<PageHeroProps> = ({
   sub,
 }) => {
   return (
-    <div className="relative w-full bg-slate-950 text-white pt-28 sm:pt-36 pb-14 sm:pb-20 overflow-hidden border-b border-slate-800/80">
+    <div className="relative w-full bg-slate-950 text-white pt-28 sm:pt-36 pb-0 overflow-hidden border-b border-slate-800/80">
       
       {/* Efeitos de iluminação ambiente no fundo */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-10 w-72 h-72 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 lg:px-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end">
           
           {/* Coluna Texto (Esquerda) */}
-          <div className="lg:col-span-7 space-y-4 text-left">
+          <div className="lg:col-span-7 space-y-4 text-left pb-12 sm:pb-16 lg:pb-20">
             {tag && (
               <span className="inline-block text-xs font-black uppercase tracking-widest text-blue-400 border border-blue-500/40 bg-blue-500/10 px-3.5 py-1.5 rounded-full shadow-sm">
                 {tag}
@@ -45,14 +45,16 @@ export const PageHero: React.FC<PageHeroProps> = ({
             )}
           </div>
 
-          {/* Coluna Imagem - Exibição 100% inteira sem cortes de rosto, sem moldura e sem sombras */}
-          <div className="lg:col-span-5 flex items-center justify-center">
-            <div className="w-full max-w-md flex items-center justify-center">
+          {/* Coluna Imagem - Exibição em destaque ancorada na base sem cortes artificiais */}
+          <div className="lg:col-span-5 flex items-end justify-center self-end">
+            <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl relative flex items-end justify-center">
+              {/* Glow sutil */}
+              <div className="absolute inset-0 bg-gradient-to-t from-blue-600/20 via-transparent to-transparent rounded-full filter blur-2xl -z-10 transform translate-y-8" />
               <img
                 src={image}
                 alt={title}
                 loading="eager"
-                className="w-full h-auto max-h-[460px] sm:max-h-[500px] object-contain select-none pointer-events-none"
+                className="w-full h-auto max-h-[460px] sm:max-h-[540px] lg:max-h-[620px] object-contain object-bottom block select-none pointer-events-none"
               />
             </div>
           </div>

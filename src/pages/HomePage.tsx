@@ -588,11 +588,11 @@ export const HomePage: React.FC<HomePageProps> = ({
         </section>
 
         {/* ========== SEÇÃO 1 (ÁREA BRANCA): JOVEM EMPRESÁRIA COM TABLET ========== */}
-        <section className="py-14 sm:py-20 lg:py-24 bg-white border-t border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <section className="pt-16 sm:pt-20 lg:pt-24 pb-0 bg-white border-t border-slate-100 overflow-hidden relative">
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end">
             
             {/* Texto */}
-            <div data-reveal className="sr-init lg:col-span-6 space-y-4 sm:space-y-6">
+            <div data-reveal className="sr-init lg:col-span-6 space-y-4 sm:space-y-6 pb-12 sm:pb-16 lg:pb-20">
               <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold">
                 <Sparkles className="w-3.5 h-3.5" />
                 Gestão Moderna & Mobilidade Empresarial
@@ -631,15 +631,17 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
             </div>
 
-            {/* Imagem Limpa em Fundo Branco (Sem sombras artificiais) */}
-            <div data-reveal className="sr-init sr-right lg:col-span-6 flex items-center justify-center">
-              <div className="w-full max-w-xs sm:max-w-md lg:max-w-lg">
+            {/* Imagem em Destaque Ancorada na Base */}
+            <div data-reveal className="sr-init sr-right lg:col-span-6 flex items-end justify-center self-end">
+              <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl relative flex items-end justify-center">
+                {/* Glow de realce suave */}
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-100/40 via-blue-50/20 to-transparent rounded-full filter blur-2xl -z-10 transform translate-y-8" />
                 <img
                   src={empresariaTabletImg}
                   alt="Jovem Empresária com Tablet KIVORA ERP"
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-auto max-h-[320px] sm:max-h-[440px] lg:max-h-[520px] object-contain"
+                  className="w-full h-auto max-h-[460px] sm:max-h-[560px] lg:max-h-[640px] xl:max-h-[700px] object-contain object-bottom block"
                 />
               </div>
             </div>
@@ -648,24 +650,26 @@ export const HomePage: React.FC<HomePageProps> = ({
         </section>
 
         {/* ========== SEÇÃO 2 (FUNDO AZUL ESCURO): JOVEM EMPRESÁRIO / CONSULTORIA & BOAS-VINDAS ========== */}
-        <section className="py-14 sm:py-20 lg:py-24 bg-slate-950 text-white border-t border-slate-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <section className="pt-16 sm:pt-20 lg:pt-24 pb-0 bg-slate-950 text-white border-t border-slate-800 overflow-hidden relative">
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end">
             
-            {/* Imagem Limpa na Esquerda sobre o fundo azul escuro */}
-            <div data-reveal className="sr-init sr-left lg:col-span-6 flex items-center justify-center order-2 lg:order-1">
-              <div className="w-full max-w-xs sm:max-w-md lg:max-w-lg flex items-center justify-center">
+            {/* Imagem em Destaque Ancorada na Base na Esquerda */}
+            <div data-reveal className="sr-init sr-left lg:col-span-6 flex items-end justify-center self-end order-2 lg:order-1">
+              <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl relative flex items-end justify-center">
+                {/* Glow azul para destaque volumétrico */}
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-600/20 via-blue-500/10 to-transparent rounded-full filter blur-3xl -z-10 transform translate-y-10" />
                 <img
                   src={empresarioBoasVindasImg}
                   alt="Consultor KIVORA ERP"
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-auto max-h-[320px] sm:max-h-[440px] lg:max-h-[540px] object-contain select-none pointer-events-none"
+                  className="w-full h-auto max-h-[460px] sm:max-h-[560px] lg:max-h-[640px] xl:max-h-[700px] object-contain object-bottom block select-none pointer-events-none"
                 />
               </div>
             </div>
 
             {/* Texto na Direita */}
-            <div data-reveal className="sr-init lg:col-span-6 space-y-6 order-1 lg:order-2">
+            <div data-reveal className="sr-init lg:col-span-6 space-y-6 order-1 lg:order-2 pb-12 sm:pb-16 lg:pb-20">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
                 <Headphones className="w-3.5 h-3.5" />
                 Consultoria e Suporte Local em Angola
@@ -705,11 +709,11 @@ export const HomePage: React.FC<HomePageProps> = ({
         </section>
 
         {/* ========== SEÇÃO 3 (ÁREA BRANCA): PROGRAMA DE PARCEIROS ========== */}
-        <section className="py-14 sm:py-20 lg:py-24 bg-white border-t border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <section className="pt-16 sm:pt-20 lg:pt-24 pb-0 bg-white border-t border-slate-100 overflow-hidden relative">
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end">
             
             {/* Texto */}
-            <div data-reveal className="sr-init lg:col-span-6 space-y-4 sm:space-y-6">
+            <div data-reveal className="sr-init lg:col-span-6 space-y-4 sm:space-y-6 pb-12 sm:pb-16 lg:pb-20">
               <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">
                 <Award className="w-3.5 h-3.5" />
                 Canais de Distribuição & Revenda
@@ -745,15 +749,17 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
             </div>
 
-            {/* Imagem Limpa em Fundo Branco */}
-            <div data-reveal className="sr-init sr-right lg:col-span-6 flex items-center justify-center">
-              <div className="w-full max-w-xs sm:max-w-md lg:max-w-lg">
+            {/* Imagem em Destaque Ancorada na Base */}
+            <div data-reveal className="sr-init sr-right lg:col-span-6 flex items-end justify-center self-end">
+              <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl relative flex items-end justify-center">
+                {/* Glow âmbar suave */}
+                <div className="absolute inset-0 bg-gradient-to-t from-amber-100/40 via-amber-50/20 to-transparent rounded-full filter blur-2xl -z-10 transform translate-y-8" />
                 <img
                   src={parceirosImg}
                   alt="Parceiros KIVORA ERP em Angola"
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-auto max-h-[320px] sm:max-h-[440px] lg:max-h-[500px] object-contain"
+                  className="w-full h-auto max-h-[460px] sm:max-h-[560px] lg:max-h-[640px] xl:max-h-[700px] object-contain object-bottom block"
                 />
               </div>
             </div>
