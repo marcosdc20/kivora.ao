@@ -188,15 +188,15 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </div>
 
-      {/* ========== CARROSSEL MARQUEE DE PARCEIROS & CLIENTES ========== */}
-      <section className="py-10 bg-slate-50 border-b border-slate-200/80 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 mb-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* ========== CARROSSEL MARQUEE DE PARCEIROS & CLIENTES (CÍRCULO + NOME) ========== */}
+      <section className="py-12 bg-slate-50 border-b border-slate-200/80 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-center sm:text-left">
             <span className="text-blue-600 font-bold text-xs uppercase tracking-widest block">
               Ecossistema Empresarial em Angola
             </span>
             <h3 className="text-base sm:text-lg font-extrabold text-slate-900 mt-0.5">
-              Empresas & Parceiros Certificados que Confiam no KIVORA
+              Empresas & Parceiros que Confiam no KIVORA
             </h3>
           </div>
           <button
@@ -213,42 +213,31 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none" />
 
-          <div className="animate-marquee flex items-center gap-5 py-2">
+          <div className="animate-marquee flex items-center gap-8 py-3">
             {[...partnerLogos, ...partnerLogos].map((partner, idx) => (
               <div
                 key={`${partner.id}-${idx}`}
-                className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-blue-300 transition-all shrink-0 select-none group"
+                className="flex flex-col items-center text-center gap-2 shrink-0 select-none group cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-black text-xs shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                {/* Círculo do Logótipo */}
+                <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center p-3.5 group-hover:border-blue-500 group-hover:shadow-md group-hover:scale-105 transition-all duration-300">
                   {partner.logoUrl ? (
                     <img
                       src={partner.logoUrl}
                       alt={partner.name}
-                      className="w-full h-full object-contain rounded-xl"
+                      className="max-h-full max-w-full object-contain rounded-full"
                     />
                   ) : (
-                    partner.name.substring(0, 2).toUpperCase()
+                    <div className="w-full h-full rounded-full bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center font-black text-sm sm:text-base transition-colors">
+                      {partner.name.substring(0, 2).toUpperCase()}
+                    </div>
                   )}
                 </div>
-                <div className="text-left">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors whitespace-nowrap">
-                      {partner.name}
-                    </span>
-                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider shrink-0 ${
-                      partner.type === 'parceiro'
-                        ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                        : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                    }`}>
-                      {partner.type === 'parceiro' ? 'Parceiro' : 'Cliente'}
-                    </span>
-                  </div>
-                  {(partner.sector || partner.province) && (
-                    <span className="text-[10px] text-slate-500 block leading-tight">
-                      {[partner.sector, partner.province].filter(Boolean).join(' • ')}
-                    </span>
-                  )}
-                </div>
+
+                {/* Nome do Parceiro Por Baixo */}
+                <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors max-w-[120px] sm:max-w-[140px] truncate block">
+                  {partner.name}
+                </span>
               </div>
             ))}
           </div>
