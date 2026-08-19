@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
   MapPin, Search,
@@ -9,6 +9,7 @@ import {
   subscribeSystemSettings, getCachedSystemSettings,
   SystemCompanySettings, DEFAULT_PROVINCES
 } from '../services/systemSettingsService';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 import parceirosImg from '../assets/kivora/parceiros-kivora.png';
 
@@ -21,9 +22,12 @@ export const ProvinciasPage: React.FC<ProvinciasPageProps> = ({
   onNavigatePage,
   onOpenDemoModal
 }) => {
+  const pageRef = useRef<HTMLDivElement>(null);
   const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<'todos' | 'ativo' | 'expansao'>('todos');
+
+  useScrollReveal(pageRef, [settings, search, filterStatus]);
 
   useEffect(() => {
     const unsub = subscribeSystemSettings(setSettings);
@@ -56,7 +60,7 @@ export const ProvinciasPage: React.FC<ProvinciasPageProps> = ({
   }, [provinces]);
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 page-enter">
+    <div ref={pageRef} className="min-h-screen bg-white text-slate-900 page-enter">
       
       {/* Hero Showcase */}
       <PageHero
@@ -71,7 +75,7 @@ export const ProvinciasPage: React.FC<ProvinciasPageProps> = ({
 
         {/* 1. Resumo Executivo Nacional */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
+          <div data-reveal data-delay="100" className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
             <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
               <Building2 className="w-6 h-6" />
             </div>
@@ -79,7 +83,7 @@ export const ProvinciasPage: React.FC<ProvinciasPageProps> = ({
             <p className="text-xs text-slate-600 font-semibold uppercase tracking-wider">Empresas & Postos Faturando</p>
           </div>
 
-          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
+          <div data-reveal data-delay="200" className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
             <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
               <Award className="w-6 h-6" />
             </div>
@@ -87,7 +91,7 @@ export const ProvinciasPage: React.FC<ProvinciasPageProps> = ({
             <p className="text-xs text-slate-600 font-semibold uppercase tracking-wider">Técnicos & Distribuidores Certificados</p>
           </div>
 
-          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
+          <div data-reveal data-delay="300" className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
             <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3">
               <MapPin className="w-6 h-6" />
             </div>
@@ -97,7 +101,7 @@ export const ProvinciasPage: React.FC<ProvinciasPageProps> = ({
         </section>
 
         {/* 2. Barra de Busca e Filtros */}
-        <section className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+        <section data-reveal className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
           <div className="relative w-full sm:w-80">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
@@ -132,9 +136,11 @@ export const ProvinciasPage: React.FC<ProvinciasPageProps> = ({
 
         {/* 3. Grelha das 18 Províncias de Angola */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProvinces.map((prov) => (
+          {filteredProvinces.map((prov, pIdx) => (
             <div
               key={prov.id}
+              data-reveal
+              data-delay={((pIdx % 3) + 1) * 100}
               className="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-sm hover:shadow-lg hover:border-blue-300 transition-all duration-300 flex flex-col justify-between group"
             >
               <div>
@@ -193,7 +199,7 @@ export const ProvinciasPage: React.FC<ProvinciasPageProps> = ({
         </section>
 
         {/* 4. Chamada para Novos Parceiros Provinciais */}
-        <section className="bg-slate-950 text-white rounded-3xl p-8 sm:p-12 border border-slate-800 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-8">
+        <section data-reveal className="bg-slate-950 text-white rounded-3xl p-8 sm:p-12 border border-slate-800 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-8">
           <div className="space-y-3 text-center lg:text-left max-w-xl">
             <span className="text-amber-400 font-bold text-xs uppercase tracking-widest">Oportunidade de Negócio</span>
             <h3 className="text-2xl sm:text-3xl font-black">

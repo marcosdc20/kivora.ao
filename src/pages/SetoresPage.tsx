@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { PageHero } from '../components/PageHero';
 import { ShoppingCart, Utensils, Pill, Briefcase, CheckCircle2, ArrowRight, ShieldCheck, Download, Monitor, Zap } from 'lucide-react';
 import { PageId } from '../components/Header';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 import supermercadoImg from '../assets/kivora/supermercado-kivora.jpg';
 import restauranteImg from '../assets/kivora/restaurante-kivora.jpg';
@@ -119,11 +120,14 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
   initialSector = 'retalho',
 }) => {
   const [activeSectorId, setActiveSectorId] = useState<string>(initialSector);
+  const pageRef = useRef<HTMLDivElement>(null);
 
   const currentSector = SECTORS.find((s) => s.id === activeSectorId) || SECTORS[0];
 
+  useScrollReveal(pageRef, [activeSectorId]);
+
   return (
-    <div className="min-h-screen bg-white text-slate-900 page-enter">
+    <div ref={pageRef} className="min-h-screen bg-white text-slate-900 page-enter">
 
       {/* Showcase Hero */}
       <PageHero
@@ -134,7 +138,7 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
       />
 
       {/* Tabs de Seleção de Setor */}
-      <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 -mt-8 relative z-20">
+      <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 -mt-8 relative z-20" data-reveal>
         <div className="bg-white p-2 sm:p-3 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xl flex flex-wrap gap-2 justify-center">
           {SECTORS.map((sec) => {
             const isActive = sec.id === activeSectorId;
@@ -163,7 +167,7 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
         
         {/* Bloco de Apresentação */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-          <div className="lg:col-span-6 space-y-6">
+          <div className="lg:col-span-6 space-y-6" data-reveal data-reveal-dir="left">
             <span className="inline-block text-xs font-black uppercase tracking-widest text-blue-600 bg-blue-50 border border-blue-200/80 px-3.5 py-1 rounded-full">
               {currentSector.tagline}
             </span>
@@ -176,7 +180,7 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               {currentSector.highlights.map((hl, i) => (
-                <div key={i} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
+                <div key={i} data-reveal data-delay={(i + 1) * 100} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
                   <strong className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                     <Zap className="w-4 h-4 text-blue-600 shrink-0" />
                     <span>{hl.title}</span>
@@ -206,7 +210,7 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
             </div>
           </div>
 
-          <div className="lg:col-span-6">
+          <div className="lg:col-span-6" data-reveal data-reveal-dir="right">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200 bg-slate-100 p-2 sm:p-3 group">
               <img
                 src={currentSector.image}
@@ -225,7 +229,7 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
         </div>
 
         {/* Grelha de Funcionalidades Técnicas */}
-        <div className="bg-slate-50 border border-slate-200/90 rounded-3xl p-8 sm:p-12 space-y-6">
+        <div className="bg-slate-50 border border-slate-200/90 rounded-3xl p-8 sm:p-12 space-y-6" data-reveal>
           <div className="space-y-2">
             <span className="text-blue-600 text-xs font-black uppercase tracking-widest">Recursos Inclusos</span>
             <h3 className="text-2xl font-black text-slate-950">
@@ -235,7 +239,7 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
             {currentSector.features.map((feat, idx) => (
-              <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-start gap-3">
+              <div key={idx} data-reveal data-delay={((idx % 3) + 1) * 100} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-start gap-3">
                 <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" strokeWidth={2} />
                 <span className="text-xs text-slate-700 font-medium leading-relaxed">{feat}</span>
               </div>
@@ -246,7 +250,7 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
       </section>
 
       {/* CTA Final */}
-      <section className="bg-slate-950 py-20 px-6 sm:px-10 lg:px-16 text-white text-center">
+      <section className="bg-slate-950 py-20 px-6 sm:px-10 lg:px-16 text-white text-center" data-reveal>
         <div className="max-w-3xl mx-auto space-y-5">
           <Monitor className="w-10 h-10 text-blue-400 mx-auto" strokeWidth={1.75} />
           <h2 className="text-3xl sm:text-4xl font-black">

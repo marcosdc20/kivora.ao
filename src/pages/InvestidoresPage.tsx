@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
   TrendingUp, ShieldCheck, Building2, Award,
@@ -10,6 +10,7 @@ import {
   subscribeSystemSettings, getCachedSystemSettings,
   SystemCompanySettings
 } from '../services/systemSettingsService';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 import executivosImg from '../assets/kivora/executivos-kivora.jpg';
 
@@ -21,7 +22,10 @@ interface InvestidoresPageProps {
 export const InvestidoresPage: React.FC<InvestidoresPageProps> = ({
   onNavigatePage,
 }) => {
+  const pageRef = useRef<HTMLDivElement>(null);
   const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
+
+  useScrollReveal(pageRef, [settings]);
 
   useEffect(() => {
     const unsub = subscribeSystemSettings(setSettings);
@@ -31,7 +35,7 @@ export const InvestidoresPage: React.FC<InvestidoresPageProps> = ({
   const inv = settings.investorInfo || {};
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 page-enter">
+    <div ref={pageRef} className="min-h-screen bg-white text-slate-900 page-enter">
       
       {/* Hero Showcase */}
       <PageHero
@@ -46,7 +50,7 @@ export const InvestidoresPage: React.FC<InvestidoresPageProps> = ({
 
         {/* 1. Métricas Principais de Solidez */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
+          <div data-reveal data-delay="100" className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
             <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
               <TrendingUp className="w-6 h-6" />
             </div>
@@ -54,7 +58,7 @@ export const InvestidoresPage: React.FC<InvestidoresPageProps> = ({
             <p className="text-xs text-slate-600 font-semibold uppercase tracking-wider">Crescimento Anual em Postos</p>
           </div>
 
-          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
+          <div data-reveal data-delay="200" className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
             <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
               <ShieldCheck className="w-6 h-6" />
             </div>
@@ -62,7 +66,7 @@ export const InvestidoresPage: React.FC<InvestidoresPageProps> = ({
             <p className="text-xs text-slate-600 font-semibold uppercase tracking-wider">{settings.agtCertificate}</p>
           </div>
 
-          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
+          <div data-reveal data-delay="300" className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
             <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3">
               <Globe2 className="w-6 h-6" />
             </div>
@@ -70,7 +74,7 @@ export const InvestidoresPage: React.FC<InvestidoresPageProps> = ({
             <p className="text-xs text-slate-600 font-semibold uppercase tracking-wider">Presença Territorial Nacional</p>
           </div>
 
-          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
+          <div data-reveal data-delay="400" className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
             <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-3">
               <Building2 className="w-6 h-6" />
             </div>
@@ -81,7 +85,7 @@ export const InvestidoresPage: React.FC<InvestidoresPageProps> = ({
 
         {/* 2. Tese de Investimento & Diferenciais de Mercado */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
+          <div className="space-y-6" data-reveal data-reveal-dir="left">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold">
               <Briefcase className="w-3.5 h-3.5" />
               Tese Estratégica
@@ -99,7 +103,7 @@ export const InvestidoresPage: React.FC<InvestidoresPageProps> = ({
                 { title: 'Barreira Regulatória AGT', desc: 'Software devidamente certificado com emissão de SAF-T AO e QR Code fiscal auditado.' },
                 { title: 'Canal de Distribuição em Escala', desc: 'Rede credenciada de técnicos e integradores de TI em todas as 18 províncias.' },
               ].map((item, idx) => (
-                <div key={idx} className="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                <div key={idx} data-reveal data-delay={(idx + 1) * 100} className="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="text-xs sm:text-sm font-bold text-slate-900">{item.title}</h4>
@@ -110,7 +114,7 @@ export const InvestidoresPage: React.FC<InvestidoresPageProps> = ({
             </div>
           </div>
 
-          <div className="bg-slate-950 text-white rounded-3xl p-8 sm:p-10 border border-slate-800 shadow-2xl space-y-6">
+          <div className="bg-slate-950 text-white rounded-3xl p-8 sm:p-10 border border-slate-800 shadow-2xl space-y-6" data-reveal data-reveal-dir="right">
             <div className="flex items-center gap-3 border-b border-slate-800 pb-5">
               <Award className="w-8 h-8 text-amber-400" />
               <div>
@@ -155,7 +159,7 @@ export const InvestidoresPage: React.FC<InvestidoresPageProps> = ({
         </section>
 
         {/* 3. Compromisso com Transparência e Expansão */}
-        <section className="bg-gradient-to-br from-blue-50 via-white to-slate-50 p-8 sm:p-12 rounded-3xl border border-blue-100 text-center space-y-6">
+        <section data-reveal className="bg-gradient-to-br from-blue-50 via-white to-slate-50 p-8 sm:p-12 rounded-3xl border border-blue-100 text-center space-y-6">
           <div className="max-w-3xl mx-auto space-y-4">
             <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
               Pronto para Expandir Connosco em Angola?
@@ -186,3 +190,4 @@ export const InvestidoresPage: React.FC<InvestidoresPageProps> = ({
     </div>
   );
 };
+

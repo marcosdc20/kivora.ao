@@ -1,22 +1,26 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   ShieldCheck, Lock, Key, Server,
   CheckCircle2, FileText, Download,
   ArrowRight, Database
 } from 'lucide-react';
 import { PageId } from '../components/Header';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 interface SegurancaPageProps {
   onNavigatePage: (page: PageId) => void;
 }
 
 export const SegurancaPage: React.FC<SegurancaPageProps> = ({ onNavigatePage }) => {
+  const pageRef = useRef<HTMLElement>(null);
+  useScrollReveal(pageRef);
+
   return (
-    <main className="min-h-screen bg-slate-50 pt-28 pb-20">
+    <main ref={pageRef} className="min-h-screen bg-slate-50 pt-28 pb-20 page-enter">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header da Página */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-16" data-reveal>
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/80 border border-blue-200 text-blue-900 text-xs font-bold uppercase tracking-wider mb-4">
             <Lock className="w-3.5 h-3.5 text-[#1d4ed8]" />
             Cibersegurança & Conformidade Fiscal
@@ -33,7 +37,7 @@ export const SegurancaPage: React.FC<SegurancaPageProps> = ({ onNavigatePage }) 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           
           {/* Pilar 1: Criptografia Assimétrica */}
-          <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-lg transition-all">
+          <div data-reveal data-delay="100" className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-lg transition-all">
             <div className="w-14 h-14 rounded-2xl bg-blue-50 text-[#1d4ed8] flex items-center justify-center mb-6">
               <Key className="w-7 h-7" />
             </div>
@@ -56,7 +60,7 @@ export const SegurancaPage: React.FC<SegurancaPageProps> = ({ onNavigatePage }) 
           </div>
 
           {/* Pilar 2: Base Local Cifrada AES-256 */}
-          <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-lg transition-all">
+          <div data-reveal data-delay="200" className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-lg transition-all">
             <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6">
               <Database className="w-7 h-7" />
             </div>
@@ -79,7 +83,7 @@ export const SegurancaPage: React.FC<SegurancaPageProps> = ({ onNavigatePage }) 
           </div>
 
           {/* Pilar 3: Hardware Fingerprint */}
-          <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-lg transition-all">
+          <div data-reveal data-delay="300" className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-lg transition-all">
             <div className="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-6">
               <Server className="w-7 h-7" />
             </div>
@@ -104,7 +108,7 @@ export const SegurancaPage: React.FC<SegurancaPageProps> = ({ onNavigatePage }) 
         </div>
 
         {/* Quadro Comparativo de Conformidade AGT & Leis de Angola */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 mb-16 shadow-sm">
+        <div data-reveal className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 mb-16 shadow-sm">
           <div className="max-w-3xl mb-8">
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">
               Conformidade Legal & Fiscal em Angola
@@ -144,7 +148,7 @@ export const SegurancaPage: React.FC<SegurancaPageProps> = ({ onNavigatePage }) 
         </div>
 
         {/* Camadas de Segurança em Nuvem & Portais Web */}
-        <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 mb-16 shadow-xl">
+        <div data-reveal className="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 mb-16 shadow-xl">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">
               Blindagem Web nos Portais de Parceiros e Clientes
@@ -186,7 +190,7 @@ export const SegurancaPage: React.FC<SegurancaPageProps> = ({ onNavigatePage }) 
         </div>
 
         {/* CTA */}
-        <div className="text-center">
+        <div data-reveal className="text-center">
           <p className="text-slate-600 text-sm mb-4">
             Deseja testar a robustez e a velocidade do KIVORA na prática?
           </p>

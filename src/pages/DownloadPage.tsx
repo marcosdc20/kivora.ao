@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
   CheckCircle2, Download, Monitor, HardDrive, Cpu,
@@ -15,6 +15,7 @@ import {
 import laptopImg from '../assets/kivora/pc-laptop-kivora.png';
 
 import { triggerKivoraConfetti } from '../utils/confetti';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 interface DownloadPageProps {
   onOpenDemoModal: (subject?: string) => void;
@@ -22,7 +23,9 @@ interface DownloadPageProps {
 }
 
 export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onNavigatePage }) => {
+  const pageRef = useRef<HTMLDivElement>(null);
   const [settings, setSettings] = useState<SystemCompanySettings>(() => getCachedSystemSettings());
+  useScrollReveal(pageRef, [settings]);
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedChecksum, setCopiedChecksum] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -114,7 +117,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
     .filter(Boolean);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 page-enter">
+    <div ref={pageRef} className="min-h-screen bg-slate-50 text-slate-900 page-enter">
       
       {/* Hero com imagem corporativa */}
       <PageHero
@@ -127,7 +130,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-10">
         
         {/* Painel Principal de Download (Design Clean & Corporativo) */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-10 space-y-8">
+        <div data-reveal className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-10 space-y-8">
           
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
             <div className="space-y-1.5">
@@ -241,7 +244,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Requisitos Técnicos */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 space-y-4">
+          <div data-reveal data-reveal-dir="left" className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 space-y-4">
             <div>
               <h3 className="text-base font-black text-slate-950">Requisitos do Sistema</h3>
               <p className="text-xs text-slate-500 mt-0.5">Especificações para execução local sem lentidão.</p>
@@ -263,7 +266,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
           </div>
 
           {/* Notas de Lançamento (Changelog) */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 space-y-4 flex flex-col justify-between">
+          <div data-reveal data-reveal-dir="right" className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 space-y-4 flex flex-col justify-between">
             <div className="space-y-3">
               <div>
                 <h3 className="text-base font-black text-slate-950">Novidades da Versão v{cleanVersion}</h3>
@@ -304,14 +307,14 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
         </div>
 
         {/* 3 Passos Simples de Instalação */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 space-y-6">
+        <div data-reveal className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 space-y-6">
           <div>
             <h3 className="text-lg font-black text-slate-950">Instalação em 3 Passos</h3>
             <p className="text-xs text-slate-500 mt-0.5">Processo guiado pelo assistente de configuração em minutos.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+            <div data-reveal data-delay="100" className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
               <div className="w-7 h-7 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center">
                 1
               </div>
@@ -321,7 +324,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+            <div data-reveal data-delay="200" className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
               <div className="w-7 h-7 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center">
                 2
               </div>
@@ -331,7 +334,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+            <div data-reveal data-delay="300" className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
               <div className="w-7 h-7 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center">
                 3
               </div>
@@ -344,7 +347,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
         </div>
 
         {/* Rodapé de Assistência */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 bg-white border border-slate-200/90 rounded-2xl shadow-xs text-xs">
+        <div data-reveal className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 bg-white border border-slate-200/90 rounded-2xl shadow-xs text-xs">
           <div className="flex items-center gap-3 text-slate-700">
             <HelpCircle className="w-4 h-4 text-blue-600 shrink-0" />
             <span>Precisa de apoio na instalação ou aquisição de licenças comerciais?</span>

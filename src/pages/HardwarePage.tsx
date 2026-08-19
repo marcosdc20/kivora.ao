@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
   Printer, ScanLine, Scale, Monitor,
   CheckCircle2, ShieldCheck, Download
 } from 'lucide-react';
 import { PageId } from '../components/Header';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 import posImg from '../assets/kivora/pc-pos-kivora.png';
 
@@ -58,40 +59,40 @@ const HARDWARE_CATEGORIES: HardwareCategory[] = [
         brand: 'Xprinter',
         type: 'Impressora Térmica 80mm & 58mm',
         specs: ['Excelente custo-benefício', 'Ideal para retalho e restauração', 'Driver Windows 10/11 100% testado'],
-        connection: 'USB / Rede LAN',
+        connection: 'USB / Rede / Bluetooth',
         verified: true,
       },
     ],
   },
   {
     id: 'scanners',
-    name: 'Leitores de Código de Barras & QR',
+    name: 'Leitores de Código de Barras & 2D',
     icon: <ScanLine className="w-5 h-5" />,
-    tagline: 'Leitura Instantânea de Artigos, Lotes e QR Codes de Faturação',
-    description: 'Leitores 1D (EAN-13, Code 128) e 2D (QR Code, DataMatrix) com suporte a leitura em ecrãs de telemóvel e modo mãos-livres com suporte.',
+    tagline: 'Leitura Instantânea de EAN-13, Datamatrix e QR Codes',
+    description: 'Leitores manuais e fixos de balcão de alta precisão com suporte a leitura em ecrãs de telemóvel.',
     models: [
       {
-        name: 'Voyager 1400g / 1250g',
+        name: 'Voyager 1200g / 1400g 2D',
         brand: 'Honeywell',
-        type: 'Leitor 1D/2D Imager USB',
-        specs: ['Leitura de códigos danificados ou rasurados', 'Suporte com sensor automático', 'Plug & Play sem configuração'],
-        connection: 'USB',
+        type: 'Leitor Laser 1D & Imager 2D',
+        specs: ['Leitura rápida mesmo em códigos danificados', 'Suporte a mãos livres incluso', 'Conexão USB Plug & Play sem drivers'],
+        connection: 'USB HID / Teclado Emulado',
         verified: true,
       },
       {
-        name: 'DS2208 / Symbol LS2208',
-        brand: 'Zebra Technologies',
-        type: 'Leitor Laser / Imager de Alta Precisão',
-        specs: ['Alcance alargado de leitura', 'Construção robusta anti-queda (1.5m)', 'Modo contínuo de checkout'],
-        connection: 'USB / RS-232',
-        verified: true,
-      },
-      {
-        name: 'QuickScan QD2400',
+        name: 'QuickScan QD2400 / QBT2400',
         brand: 'Datalogic',
-        type: 'Leitor 2D Omnidirecional',
-        specs: ['Mira LED de alta visibilidade', 'Leitura rápida em qualquer ângulo', 'Ideal para balcões com espaço reduzido'],
-        connection: 'USB',
+        type: 'Leitor Imager 2D de Balcão',
+        specs: ['Mira iluminada de alta precisão', 'Design ergonómico e resistente a quedas', 'Excelente leitura de faturas e bilhetes'],
+        connection: 'USB / Sem Fios Bluetooth',
+        verified: true,
+      },
+      {
+        name: 'Symbol LS2208 / DS2208',
+        brand: 'Zebra',
+        type: 'Leitor Laser 1D / 2D Industrial',
+        specs: ['Padrão de referência global em retalho', 'Construção durável com vidro temperado', 'Garantia de leitura omnidirecional'],
+        connection: 'USB / RS-232',
         verified: true,
       },
     ],
@@ -150,11 +151,14 @@ const HARDWARE_CATEGORIES: HardwareCategory[] = [
 
 export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onNavigatePage }) => {
   const [activeCat, setActiveCat] = useState<string>('printers');
+  const pageRef = useRef<HTMLDivElement>(null);
+
+  useScrollReveal(pageRef, [activeCat]);
 
   const currentCategory = HARDWARE_CATEGORIES.find((c) => c.id === activeCat) || HARDWARE_CATEGORIES[0];
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 page-enter">
+    <div ref={pageRef} className="min-h-screen bg-white text-slate-900 page-enter">
       
       {/* Hero Showcase */}
       <PageHero
@@ -168,7 +172,7 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
       <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-24 space-y-16">
         
         {/* Banner de Garantia Plug & Play */}
-        <div className="bg-slate-950 text-white rounded-3xl p-8 sm:p-10 border border-slate-800 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+        <div data-reveal className="bg-slate-950 text-white rounded-3xl p-8 sm:p-10 border border-slate-800 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
               <ShieldCheck className="w-4 h-4" />
@@ -229,6 +233,8 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
               {currentCategory.models.map((model, idx) => (
                 <div
                   key={idx}
+                  data-reveal
+                  data-delay={((idx % 3) + 1) * 100}
                   className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-lg hover:border-blue-400 transition-all flex flex-col justify-between space-y-6"
                 >
                   <div className="space-y-4">
@@ -270,7 +276,7 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
         </div>
 
         {/* Guia de Ligação & Dicas Técnicas */}
-        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 sm:p-12 space-y-8">
+        <div data-reveal className="bg-slate-50 border border-slate-200 rounded-3xl p-8 sm:p-12 space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <h3 className="text-xl sm:text-2xl font-black text-slate-950">
               Como configurar os seus periféricos no KIVORA
@@ -281,7 +287,7 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-2">
+            <div data-reveal data-delay="100" className="bg-white p-5 rounded-2xl border border-slate-200 space-y-2">
               <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">1</div>
               <h4 className="font-black text-slate-950 text-sm">Ligue o Periférico</h4>
               <p className="text-slate-600 leading-relaxed">
@@ -289,7 +295,7 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
               </p>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-2">
+            <div data-reveal data-delay="200" className="bg-white p-5 rounded-2xl border border-slate-200 space-y-2">
               <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">2</div>
               <h4 className="font-black text-slate-950 text-sm">Selecione no KIVORA</h4>
               <p className="text-slate-600 leading-relaxed">
@@ -297,7 +303,7 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
               </p>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-2">
+            <div data-reveal data-delay="300" className="bg-white p-5 rounded-2xl border border-slate-200 space-y-2">
               <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">3</div>
               <h4 className="font-black text-slate-950 text-sm">Teste de Emissão</h4>
               <p className="text-slate-600 leading-relaxed">
@@ -308,7 +314,7 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
         </div>
 
         {/* CTA para Download ou Apoio */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
+        <div data-reveal className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
           <div className="space-y-2 text-center md:text-left">
             <h3 className="text-2xl sm:text-3xl font-black">
               Pronto para configurar o seu posto de venda?
