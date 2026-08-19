@@ -3,6 +3,11 @@ import { PageHero } from '../components/PageHero';
 import { ShoppingCart, Utensils, Pill, Briefcase, CheckCircle2, ArrowRight, ShieldCheck, Download, Monitor, Zap } from 'lucide-react';
 import { PageId } from '../components/Header';
 
+import supermercadoImg from '../assets/kivora/supermercado-kivora.jpg';
+import restauranteImg from '../assets/kivora/restaurante-kivora.jpg';
+import farmaciaImg from '../assets/kivora/farmacia-kivora.jpg';
+import executivosImg from '../assets/kivora/executivos-kivora.jpg';
+
 interface SetoresPageProps {
   onOpenDemoModal: (subject?: string) => void;
   onNavigatePage: (page: PageId) => void;
@@ -28,7 +33,7 @@ const SECTORS: SectorInfo[] = [
     icon: <ShoppingCart className="w-5 h-5" />,
     tagline: 'Alta Rotação de Caixa & Leitor de Código de Barras',
     description: 'Concebido para mercearias, boutiques, lojas de conveniência e grandes superfícies. Vendas rápidas em menos de 3 segundos com suporte a balanças, leitores óticos e impressão de talões.',
-    image: '/imagens/13608.jpg',
+    image: supermercadoImg,
     features: [
       'Leitura ultra-rápida de códigos de barras EAN-13, QR Code e balança de pesagem',
       'Fecho de caixa cego por operador e controlo rigoroso de quebras e sangrias',
@@ -49,7 +54,7 @@ const SECTORS: SectorInfo[] = [
     icon: <Utensils className="w-5 h-5" />,
     tagline: 'Gestão de Mesas, Pedidos & Impressão em Cozinha',
     description: 'Solução ágil para restaurantes, bares, pastelarias, lanchonetes e hotéis. Permite controlo de mesas abertas, divisão de contas por cliente e pedidos diretos para impressoras de bar e cozinha.',
-    image: '/imagens/136227.jpg',
+    image: restauranteImg,
     features: [
       'Mapa visual de salas e mesas com estado em tempo real (Livre, Ocupada, Conta Pedida)',
       'Envio de pedidos para impressoras de produção (Cozinha, Copa e Bar)',
@@ -70,7 +75,7 @@ const SECTORS: SectorInfo[] = [
     icon: <Pill className="w-5 h-5" />,
     tagline: 'Controlo Rigoroso de Lotes, Validades & Receitas',
     description: 'Especializado para farmácias comunitárias, postos de saúde, clínicas e ervanárias. Rastreabilidade completa de medicamentos por lote, fabricante e prazo de validade com regras de isenção de IVA.',
-    image: '/imagens/46908.jpg',
+    image: farmaciaImg,
     features: [
       'Controlo de lotes e alertas de medicamentos a caducar nos próximos 30, 60 e 90 dias',
       'Aplicação automática de isenção de IVA (Código M02/M04) para medicamentos essenciais',
@@ -91,7 +96,7 @@ const SECTORS: SectorInfo[] = [
     icon: <Briefcase className="w-5 h-5" />,
     tagline: 'Avenças Mensais, Retenção na Fonte de 6.5% & Proformas',
     description: 'Ideal para escritórios de contabilidade, advocacia, empresas de segurança, consultorias e empresas de TI. Emita Facturas e Proformas com retenção na fonte automática e gestão de contratos recorrentes.',
-    image: '/imagens/2149153824.jpg',
+    image: executivosImg,
     features: [
       'Cálculo automático de Retenção na Fonte de 6.5% e Imposto de Selo de 1%',
       'Conversão instantânea de Facturas Proforma em Facturas Definitivas com 1 clique',

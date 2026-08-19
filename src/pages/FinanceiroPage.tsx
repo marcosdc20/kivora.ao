@@ -10,6 +10,8 @@ import {
   subscribeSystemSettings, getCachedSystemSettings
 } from '../services/systemSettingsService';
 
+import executivosImg from '../assets/kivora/executivos-kivora.jpg';
+
 interface FinanceiroPageProps {
   onOpenDemoModal: (subject?: string) => void;
   onNavigatePage?: (page: PageId) => void;
@@ -142,7 +144,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
 
       {/* Hero Showcase */}
       <PageHero
-        image="/imagens/46908.jpg"
+        image={executivosImg}
         tag="Planos & Licenças Oficiais"
         title="Investimento Transparente, Sem Custos Escondidos"
         sub="Software instalado localmente na sua empresa com licenciamento em Kwanzas (AOA). Inclui suporte técnico e todas as atualizações fiscais da AGT."

@@ -59,6 +59,7 @@ interface HeaderProps {
 
 interface DropdownItem {
   name: string;
+  desc?: string;
   page: PageId;
   icon?: React.ReactNode;
   badge?: string;
@@ -126,36 +127,36 @@ export const Header: React.FC<HeaderProps> = ({
       name: 'Módulos',
       mainPage: 'funcionalidades',
       items: [
-        { name: 'Faturação Eletrónica AGT', page: 'faturacao', icon: <FileCheck className="w-4 h-4" /> },
-        { name: 'Ponto de Venda (POS)', page: 'pos', icon: <ShoppingCart className="w-4 h-4" /> },
-        { name: 'Stock & Armazéns', page: 'stock', icon: <Boxes className="w-4 h-4" /> },
-        { name: 'Recursos Humanos & IRT', page: 'rh', icon: <Users className="w-4 h-4" /> },
-        { name: 'Contabilidade & SAF-T AO', page: 'contabilidade', icon: <ShieldCheck className="w-4 h-4" /> },
+        { name: 'Faturação Eletrónica AGT', desc: 'Motor fiscal DS.120 com assinatura RSA e QR Code', page: 'faturacao', icon: <FileCheck className="w-4 h-4" /> },
+        { name: 'Ponto de Venda (POS)', desc: 'Faturação ágil de balcão, talões e fecho Z', page: 'pos', icon: <ShoppingCart className="w-4 h-4" /> },
+        { name: 'Stock & Armazéns', desc: 'Inventário, controlo de lotes e multidepósito', page: 'stock', icon: <Boxes className="w-4 h-4" /> },
+        { name: 'Recursos Humanos & IRT', desc: 'Processamento salarial e mapas fiscais 2026', page: 'rh', icon: <Users className="w-4 h-4" /> },
+        { name: 'Contabilidade & SAF-T AO', desc: 'Plano Geral PGC e ficheiro mensal auditado', page: 'contabilidade', icon: <ShieldCheck className="w-4 h-4" /> },
       ],
-      footerLink: { label: 'Ver todos os módulos', page: 'funcionalidades' }
+      footerLink: { label: 'Explorar todos os 5 módulos principais', page: 'funcionalidades' }
     },
     {
       id: 'solucoes',
       name: 'Soluções',
       mainPage: 'solucoes',
       items: [
-        { name: 'Arquitetura Local (LAN)', page: 'solucoes', icon: <Server className="w-4 h-4" /> },
-        { name: 'Casos de Sucesso em Angola', page: 'casos-sucesso', icon: <Award className="w-4 h-4 text-emerald-600" />, badge: 'Clientes' },
-        { name: 'Retalho & Supermercados', page: 'retalho', icon: <ShoppingCart className="w-4 h-4" /> },
-        { name: 'Restauração & Bares', page: 'restauracao', icon: <Utensils className="w-4 h-4" /> },
-        { name: 'Farmácias & Saúde', page: 'farmacia', icon: <Pill className="w-4 h-4" /> },
-        { name: 'Prestação de Serviços', page: 'servicos', icon: <Briefcase className="w-4 h-4" /> },
+        { name: 'Retalho & Supermercados', desc: 'Caixas rápidos, pesagem e código de barras', page: 'retalho', icon: <ShoppingCart className="w-4 h-4" /> },
+        { name: 'Restauração & Bares', desc: 'Gestão de mesas, pedidos e impressão em cozinha', page: 'restauracao', icon: <Utensils className="w-4 h-4" /> },
+        { name: 'Farmácias & Saúde', desc: 'Controlo de validades, lotes e receituário', page: 'farmacia', icon: <Pill className="w-4 h-4" /> },
+        { name: 'Prestação de Serviços', desc: 'Faturas-proforma, avenças e orçamentos', page: 'servicos', icon: <Briefcase className="w-4 h-4" /> },
+        { name: 'Casos de Sucesso em Angola', desc: 'Empresas reais que faturam com Kivora', page: 'casos-sucesso', icon: <Award className="w-4 h-4 text-emerald-600" />, badge: 'Clientes' },
+        { name: 'Arquitetura Local (LAN)', desc: 'Funcionamento 100% offline e em rede interna', page: 'solucoes', icon: <Server className="w-4 h-4" /> },
       ],
-      footerLink: { label: 'Ver todos os setores', page: 'setores' }
+      footerLink: { label: 'Ver visão geral de todos os setores', page: 'setores' }
     },
     {
       id: 'planos',
       name: 'Preços',
       mainPage: 'planos',
       items: [
-        { name: 'Planos & Tabela de Preços', page: 'planos', icon: <CreditCard className="w-4 h-4" /> },
-        { name: 'Simulador de Postos LAN', page: 'planos', icon: <Calculator className="w-4 h-4" /> },
-        { name: 'Comparativo vs Nuvem / Dólar', page: 'comparativo', icon: <Boxes className="w-4 h-4 text-blue-600" />, badge: 'Novo' },
+        { name: 'Planos & Tabela de Preços', desc: 'Licenciamento transparente em Kwanzas', page: 'planos', icon: <CreditCard className="w-4 h-4" /> },
+        { name: 'Simulador de Postos LAN', desc: 'Calcule o custo exato de terminais adicionais', page: 'planos', icon: <Calculator className="w-4 h-4" /> },
+        { name: 'Comparativo vs Nuvem / Dólar', desc: 'Poupança real sem custos em moeda estrangeira', page: 'comparativo', icon: <Boxes className="w-4 h-4 text-blue-600" />, badge: 'Análise' },
       ]
     },
     {
@@ -163,9 +164,9 @@ export const Header: React.FC<HeaderProps> = ({
       name: 'Ferramentas',
       mainPage: 'calculadora-fiscal',
       items: [
-        { name: 'Calculadora Fiscal IRT & IVA', page: 'calculadora-fiscal', icon: <Calculator className="w-4 h-4 text-emerald-600" />, badge: 'Grátis' },
-        { name: 'Validar Licença Oficial AGT', page: 'validar-licenca', icon: <Key className="w-4 h-4 text-blue-600" /> },
-        { name: 'Hardware & Impressoras', page: 'hardware', icon: <Server className="w-4 h-4" /> },
+        { name: 'Calculadora Fiscal IRT & IVA', desc: 'Simulador gratuito de salários e retenções', page: 'calculadora-fiscal', icon: <Calculator className="w-4 h-4 text-emerald-600" />, badge: 'Grátis' },
+        { name: 'Validar Licença Oficial AGT', desc: 'Verificação instantânea de autenticidade', page: 'validar-licenca', icon: <Key className="w-4 h-4 text-blue-600" /> },
+        { name: 'Hardware & Impressoras', desc: 'Kits e periféricos compatíveis com Kivora', page: 'hardware', icon: <Server className="w-4 h-4" /> },
       ]
     },
     {
@@ -173,11 +174,11 @@ export const Header: React.FC<HeaderProps> = ({
       name: 'Loja',
       mainPage: 'loja',
       items: [
-        { name: 'Loja Oficial de Equipamentos', page: 'loja', icon: <ShoppingBag className="w-4 h-4 text-amber-500" />, badge: 'Oficial' },
-        { name: 'Kits Completos de Caixa POS', page: 'loja', icon: <Boxes className="w-4 h-4" /> },
-        { name: 'Impressoras Térmicas 80mm', page: 'loja', icon: <Printer className="w-4 h-4" /> },
-        { name: 'Leitores de Código & QR', page: 'loja', icon: <ScanLine className="w-4 h-4" /> },
-        { name: 'Terminais Touch POS', page: 'loja', icon: <Monitor className="w-4 h-4" /> },
+        { name: 'Loja Oficial de Equipamentos', desc: 'Hardware homologado com garantia em Luanda', page: 'loja', icon: <ShoppingBag className="w-4 h-4 text-amber-500" />, badge: 'Oficial' },
+        { name: 'Kits Completos de Caixa POS', desc: 'Computador, impressora, scanner e gaveta', page: 'loja', icon: <Boxes className="w-4 h-4" /> },
+        { name: 'Impressoras Térmicas 80mm', desc: 'Alta velocidade e corte automático de papel', page: 'loja', icon: <Printer className="w-4 h-4" /> },
+        { name: 'Leitores de Código & QR', desc: 'Leitura rápida de artigos e faturas', page: 'loja', icon: <ScanLine className="w-4 h-4" /> },
+        { name: 'Terminais Touch POS', desc: 'Monitores táteis industriais de alta resistência', page: 'loja', icon: <Monitor className="w-4 h-4" /> },
       ]
     },
     {
@@ -185,9 +186,9 @@ export const Header: React.FC<HeaderProps> = ({
       name: 'Parceiros',
       mainPage: 'parceiros',
       items: [
-        { name: 'Programa de Distribuidores', page: 'parceiros', icon: <Award className="w-4 h-4" /> },
-        { name: 'Diretório Nacional de Técnicos', page: 'diretorio-parceiros', icon: <Building2 className="w-4 h-4" /> },
-        { name: 'Candidatura de Parceiro', page: 'candidatura-parceiro', icon: <FileCheck className="w-4 h-4" /> },
+        { name: 'Programa de Distribuidores', desc: 'Preços de atacado e margem livre de revenda', page: 'parceiros', icon: <Award className="w-4 h-4" /> },
+        { name: 'Diretório Nacional de Técnicos', desc: 'Consulte os parceiros certificados em Angola', page: 'diretorio-parceiros', icon: <Building2 className="w-4 h-4" /> },
+        { name: 'Candidatura de Parceiro', desc: 'Submeta a sua proposta de credenciamento', page: 'candidatura-parceiro', icon: <FileCheck className="w-4 h-4" /> },
       ]
     },
     {
@@ -195,10 +196,10 @@ export const Header: React.FC<HeaderProps> = ({
       name: 'Recursos',
       mainPage: 'recursos',
       items: [
-        { name: 'Centro de Cibersegurança', page: 'seguranca', icon: <ShieldCheck className="w-4 h-4 text-indigo-600" />, badge: 'Militar' },
-        { name: 'Manuais & Legislação AGT', page: 'recursos', icon: <BookOpen className="w-4 h-4" /> },
-        { name: 'Notícias do Setor Fiscal', page: 'noticias', icon: <Newspaper className="w-4 h-4" /> },
-        { name: 'Centro de Downloads', page: 'download', icon: <Download className="w-4 h-4" /> },
+        { name: 'Centro de Cibersegurança', desc: 'Criptografia local e proteção militar de dados', page: 'seguranca', icon: <ShieldCheck className="w-4 h-4 text-indigo-600" />, badge: 'Seguro' },
+        { name: 'Manuais & Legislação AGT', desc: 'Documentos e guias de faturação fiscal', page: 'recursos', icon: <BookOpen className="w-4 h-4" /> },
+        { name: 'Notícias do Setor Fiscal', desc: 'Decretos presidenciais e novidades tributárias', page: 'noticias', icon: <Newspaper className="w-4 h-4" /> },
+        { name: 'Centro de Downloads', desc: 'Baixe o executável oficial para Windows 64-bit', page: 'download', icon: <Download className="w-4 h-4 text-blue-600" /> },
       ]
     },
     {
@@ -206,8 +207,8 @@ export const Header: React.FC<HeaderProps> = ({
       name: 'Suporte',
       mainPage: 'suporte',
       items: [
-        { name: 'Central de Chamados & FAQ', page: 'suporte', icon: <HelpCircle className="w-4 h-4" /> },
-        { name: 'Sobre a Visual Software', page: 'sobre', icon: <Building2 className="w-4 h-4" /> },
+        { name: 'Central de Atendimento & FAQ', desc: 'Apoio técnico presencial e remoto em Luanda', page: 'suporte', icon: <HelpCircle className="w-4 h-4 text-blue-600" /> },
+        { name: 'Sobre a Visual Software', desc: 'Empresa detentora e criadora do Kivora', page: 'sobre', icon: <Building2 className="w-4 h-4" /> },
       ]
     }
   ];
@@ -290,38 +291,47 @@ export const Header: React.FC<HeaderProps> = ({
                     <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${isOpen ? 'rotate-180 text-blue-600' : 'text-slate-400'}`} />
                   </button>
 
-                  {/* Standard Clean Website Dropdown Menu */}
+                  {/* Modern Enterprise Dropdown Menu (Human, Rich Cards) */}
                   {isOpen && group.items && (
                     <div 
-                      className="absolute top-full left-0 mt-1 min-w-[240px] bg-white rounded-xl shadow-xl shadow-slate-900/10 border border-slate-200/90 py-1.5 px-1.5 z-50 animate-fadeIn"
+                      className="absolute top-full left-0 mt-2 w-[340px] sm:w-[380px] bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl shadow-slate-900/15 border border-slate-200/90 p-2 z-50 animate-fadeIn"
                     >
-                      <div className="space-y-0.5">
+                      <div className="space-y-1">
                         {group.items.map((item, idx) => (
                           <button
                             key={idx}
                             onClick={() => handleNavClick(item.page)}
-                            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50/70 transition-colors text-left group/item cursor-pointer whitespace-nowrap"
+                            className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left group/item cursor-pointer"
                           >
-                            <div className="flex items-center gap-2.5">
-                              <span className="text-slate-400 group-hover/item:text-blue-600 transition-colors shrink-0">
-                                {item.icon}
-                              </span>
-                              <span>{item.name}</span>
+                            <div className="w-8 h-8 rounded-xl bg-slate-100/90 text-slate-700 group-hover/item:bg-blue-600 group-hover/item:text-white flex items-center justify-center shrink-0 transition-all shadow-2xs mt-0.5">
+                              {item.icon}
                             </div>
-                            {item.badge && (
-                              <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-700">
-                                {item.badge}
-                              </span>
-                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-1.5">
+                                <span className="text-xs font-bold text-slate-900 group-hover/item:text-blue-600 transition-colors truncate">
+                                  {item.name}
+                                </span>
+                                {item.badge && (
+                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200/60 shrink-0">
+                                    {item.badge}
+                                  </span>
+                                )}
+                              </div>
+                              {item.desc && (
+                                <p className="text-[11px] text-slate-500 leading-snug line-clamp-1 mt-0.5 font-normal">
+                                  {item.desc}
+                                </p>
+                              )}
+                            </div>
                           </button>
                         ))}
                       </div>
 
                       {group.footerLink && (
-                        <div className="mt-1 pt-1 border-t border-slate-100">
+                        <div className="mt-1.5 pt-1.5 border-t border-slate-100">
                           <button
                             onClick={() => handleNavClick(group.footerLink!.page)}
-                            className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:bg-blue-50/60 transition-colors text-left cursor-pointer whitespace-nowrap"
+                            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50/70 transition-colors text-left cursor-pointer"
                           >
                             <span>{group.footerLink.label}</span>
                             <ChevronRight className="w-3.5 h-3.5" />

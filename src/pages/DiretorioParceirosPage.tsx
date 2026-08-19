@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { PageId } from '../components/Header';
 
+import parceirosImg from '../assets/kivora/parceiros-kivora.png';
+
 interface DiretorioParceirosPageProps {
   onNavigatePage: (page: PageId) => void;
   onOpenDemoModal?: (subject?: string) => void;
@@ -159,7 +161,7 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
       
       {/* Hero Showcase */}
       <PageHero
-        image="/imagens/1085.jpg"
+        image={parceirosImg}
         tag="Rede Nacional de Distribuidores"
         title="Encontre um Parceiro Autorizado em Angola"
         sub="Técnicos e empresas credenciadas pela Visual Software para instalação presencial, configuração de redes locais, fornecimento de impressoras e formação da sua equipa."

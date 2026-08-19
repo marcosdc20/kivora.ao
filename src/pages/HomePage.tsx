@@ -9,6 +9,8 @@ import laptopImg from '../assets/kivora/pc-laptop-kivora.png';
 import empresariaTabletImg from '../assets/kivora/jovem-empresaria-com-tablet.png';
 import empresarioBoasVindasImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
 import parceirosImg from '../assets/kivora/parceiros-kivora.png';
+import executivosImg from '../assets/kivora/executivos-kivora.jpg';
+import supermercadoImg from '../assets/kivora/supermercado-kivora.jpg';
 
 interface HomePageProps {
   onSelectModule: (module: any) => void;
@@ -308,8 +310,8 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div data-reveal className="sr-init sr-right">
               <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
                 <img
-                  src="/imagens/pacote-de-instalação-com-disco.png"
-                  alt="KIVORA Instalação Local"
+                  src={supermercadoImg}
+                  alt="Operação de Caixa Kivora no Retalho"
                   className="w-full h-auto object-cover"
                 />
               </div>
@@ -326,8 +328,8 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div data-reveal className="sr-init sr-left order-2 lg:order-1">
               <div className="rounded-3xl overflow-hidden border border-slate-200 shadow-xl">
                 <img
-                  src="/imagens/servidor.png"
-                  alt="Rede Local KIVORA"
+                  src={executivosImg}
+                  alt="Gestão de Empresas e Contabilidade Kivora"
                   className="w-full h-auto object-cover"
                 />
               </div>

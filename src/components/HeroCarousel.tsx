@@ -4,6 +4,9 @@ import { ChevronLeft, ChevronRight, ArrowRight, Download } from 'lucide-react';
 import laptopImg from '../assets/kivora/pc-laptop-kivora.png';
 import posImg from '../assets/kivora/pc-pos-kivora.png';
 import desktopImg from '../assets/kivora/pc-descktop-kivora.png';
+import executivosImg from '../assets/kivora/executivos-kivora.jpg';
+import supermercadoImg from '../assets/kivora/supermercado-kivora.jpg';
+import restauranteImg from '../assets/kivora/restaurante-kivora.jpg';
 
 interface SlideProps {
   image: string;
@@ -24,7 +27,7 @@ interface HeroCarouselProps {
 
 const SLIDES: SlideProps[] = [
   {
-    image: '/imagens/46908.jpg',
+    image: executivosImg,
     tagline: 'Faturação Eletrónica Certificada AGT',
     headline: 'Emita faturas legais\nem Angola, sem papel,\nsem complicações.',
     sub: 'Conformidade total com DS.120, QR Code e assinatura digital RS256 homologados pela AGT.',
@@ -35,7 +38,7 @@ const SLIDES: SlideProps[] = [
     deviceAlt: 'Portátil Laptop KIVORA ERP',
   },
   {
-    image: '/imagens/13608.jpg',
+    image: supermercadoImg,
     tagline: 'Ponto de Venda — POS de Balcão',
     headline: 'Vendas mais rápidas.\nFecho de caixa\nsem erros.',
     sub: 'Impressão térmica de talões, gestão de turno e integração multicaixa num único sistema.',
@@ -46,7 +49,7 @@ const SLIDES: SlideProps[] = [
     deviceAlt: 'Terminal Touch POS KIVORA ERP',
   },
   {
-    image: '/imagens/136227.jpg',
+    image: restauranteImg,
     tagline: 'Rede Local LAN — Multi-Postos',
     headline: 'Um sistema para toda\na sua empresa,\nsem depender da internet.',
     sub: 'Ligue caixas, gerência e armazém na mesma rede local. Dados 100% na sua empresa.',

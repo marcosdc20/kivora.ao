@@ -3,6 +3,10 @@ import { PageHero } from '../components/PageHero';
 import { CheckCircle2, Monitor, Network, Server, ArrowRight, Download } from 'lucide-react';
 import { PageId } from '../components/Header';
 
+import supermercadoImg from '../assets/kivora/supermercado-kivora.jpg';
+import executivosImg from '../assets/kivora/executivos-kivora.jpg';
+import restauranteImg from '../assets/kivora/restaurante-kivora.jpg';
+
 interface SolucoesPageProps {
   onOpenDemoModal: (subject?: string) => void;
   onNavigatePage: (page: PageId) => void;
@@ -28,7 +32,7 @@ export const SolucoesPage: React.FC<SolucoesPageProps> = ({ onOpenDemoModal, onN
 
       {/* Hero com imagem */}
       <PageHero
-        image="/imagens/136227.jpg"
+        image={executivosImg}
         tag="Arquitetura Local"
         title="Soluções para cada tipo de empresa"
         sub="PC único ou rede com múltiplos postos — o KIVORA adapta-se à sua estrutura sem depender de internet."
@@ -70,7 +74,7 @@ export const SolucoesPage: React.FC<SolucoesPageProps> = ({ onOpenDemoModal, onN
         </div>
         <div data-reveal className="sr-init sr-right">
           <div className="rounded-3xl overflow-hidden border border-slate-200 shadow-xl">
-            <img src="/imagens/pacote-de-instalação-com-disco.png" alt="KIVORA Standalone" className="w-full h-auto object-cover" />
+            <img src={supermercadoImg} alt="KIVORA Standalone" className="w-full h-auto object-cover" />
           </div>
         </div>
       </section>
@@ -80,7 +84,7 @@ export const SolucoesPage: React.FC<SolucoesPageProps> = ({ onOpenDemoModal, onN
         <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16 grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
           <div data-reveal className="sr-init sr-left order-2 lg:order-1">
             <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
-              <img src="/imagens/servidor.png" alt="Rede LAN KIVORA" className="w-full h-auto object-cover" />
+              <img src={restauranteImg} alt="Rede LAN KIVORA" className="w-full h-auto object-cover" />
             </div>
           </div>
           <div data-reveal className="sr-init order-1 lg:order-2 space-y-5">

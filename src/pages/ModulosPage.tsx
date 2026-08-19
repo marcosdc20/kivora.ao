@@ -4,6 +4,8 @@ import { KIVORA_MODULES } from '../data/kivoraData';
 import { KivoraModule } from '../types/kivora';
 import { CheckCircle2, ArrowRight, Search } from 'lucide-react';
 
+import supermercadoImg from '../assets/kivora/supermercado-kivora.jpg';
+
 interface ModulosPageProps {
   onSelectModule: (module: KivoraModule) => void;
   onOpenDemoModal: (subject?: string) => void;
@@ -49,7 +51,7 @@ export const ModulosPage: React.FC<ModulosPageProps> = ({ onSelectModule, onOpen
 
       {/* Hero */}
       <PageHero
-        image="/imagens/13608.jpg"
+        image={supermercadoImg}
         tag="Catálogo de Módulos"
         title="Funcionalidades especializadas para a sua atividade"
         sub="Do talão ao balanço, o KIVORA cobre todas as operações da sua empresa numa única plataforma instalada localmente."

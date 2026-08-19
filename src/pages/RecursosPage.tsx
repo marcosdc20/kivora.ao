@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import { PageId } from '../components/Header';
 
+import executivosImg from '../assets/kivora/executivos-kivora.jpg';
+
 interface RecursosPageProps {
   onNavigatePage: (page: PageId) => void;
 }
@@ -148,7 +150,7 @@ export const RecursosPage: React.FC<RecursosPageProps> = ({ onNavigatePage }) =>
       
       {/* Hero Showcase */}
       <PageHero
-        image="/imagens/1163.jpg"
+        image={executivosImg}
         tag="Base de Conhecimento & Manuais"
         title="Documentação Operacional & Fiscal do KIVORA"
         sub="Guias práticos, normas da AGT, manuais de redes locais e procedimentos para tirar o máximo partido do software na sua empresa."
