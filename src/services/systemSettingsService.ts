@@ -2,6 +2,36 @@ import { db } from '../lib/firebase';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { KIVORA_INFO } from '../data/kivoraData';
 
+export interface PartnerBrandLogo {
+  id: string;
+  name: string;
+  logoUrl?: string;
+  type: 'parceiro' | 'cliente';
+  sector?: string;
+  province?: string;
+  active: boolean;
+}
+
+export interface ProvinceStat {
+  id: string;
+  name: string;
+  capital: string;
+  activeClients: number;
+  certifiedPartners: number;
+  status: 'Ativo' | 'Em Expansão';
+}
+
+export interface InvestorSettings {
+  title?: string;
+  subtitle?: string;
+  summary?: string;
+  annualGrowth?: string;
+  legalEntity?: string;
+  shareCapital?: string;
+  auditedBy?: string;
+  contactEmail?: string;
+}
+
 export interface SystemCompanySettings {
   name: string;
   fullName: string;
@@ -31,6 +61,23 @@ export interface SystemCompanySettings {
   minStorage?: string;
   minCpu?: string;
   releaseNotes?: string;
+
+  // Métricas do Sistema
+  statCompaniesCount?: number;
+  statTerminalsCount?: number;
+  statInvoicesCount?: string;
+  statUptimePercent?: string;
+  statProvincesCount?: number;
+
+  // Carrossel de Logos & Marcas
+  partnerLogos?: PartnerBrandLogo[];
+
+  // Informações de Investidores
+  investorInfo?: InvestorSettings;
+
+  // Cobertura por Províncias
+  provincesCoverage?: ProvinceStat[];
+
   // Configurações da Tabela de Preços & Planos
   pricingTag?: string;
   pricingTitle?: string;
@@ -109,6 +156,51 @@ export function getDirectDownloadUrl(url?: string): string {
   return trimmed;
 }
 
+export const DEFAULT_PROVINCES: ProvinceStat[] = [
+  { id: 'luanda', name: 'Luanda', capital: 'Luanda', activeClients: 420, certifiedPartners: 18, status: 'Ativo' },
+  { id: 'benguela', name: 'Benguela', capital: 'Benguela', activeClients: 110, certifiedPartners: 6, status: 'Ativo' },
+  { id: 'huambo', name: 'Huambo', capital: 'Huambo', activeClients: 75, certifiedPartners: 4, status: 'Ativo' },
+  { id: 'huila', name: 'Huíla', capital: 'Lubango', activeClients: 68, certifiedPartners: 4, status: 'Ativo' },
+  { id: 'cabinda', name: 'Cabinda', capital: 'Cabinda', activeClients: 45, certifiedPartners: 3, status: 'Ativo' },
+  { id: 'cuanza-sul', name: 'Cuanza Sul', capital: 'Sumbe', activeClients: 32, certifiedPartners: 2, status: 'Ativo' },
+  { id: 'uige', name: 'Uíge', capital: 'Uíge', activeClients: 28, certifiedPartners: 2, status: 'Ativo' },
+  { id: 'namibe', name: 'Namibe', capital: 'Moçâmedes', activeClients: 24, certifiedPartners: 2, status: 'Ativo' },
+  { id: 'malanje', name: 'Malanje', capital: 'Malanje', activeClients: 20, certifiedPartners: 2, status: 'Ativo' },
+  { id: 'zaire', name: 'Zaire', capital: 'Mbanza Kongo', activeClients: 16, certifiedPartners: 1, status: 'Ativo' },
+  { id: 'bie', name: 'Bié', capital: 'Cuito', activeClients: 15, certifiedPartners: 1, status: 'Ativo' },
+  { id: 'moxico', name: 'Moxico', capital: 'Luena', activeClients: 12, certifiedPartners: 1, status: 'Ativo' },
+  { id: 'lunda-norte', name: 'Lunda Norte', capital: 'Dundo', activeClients: 10, certifiedPartners: 1, status: 'Ativo' },
+  { id: 'lunda-sul', name: 'Lunda Sul', capital: 'Saurimo', activeClients: 11, certifiedPartners: 1, status: 'Ativo' },
+  { id: 'cunene', name: 'Cunene', capital: 'Ondjiva', activeClients: 9, certifiedPartners: 1, status: 'Ativo' },
+  { id: 'cuanza-norte', name: 'Cuanza Norte', capital: 'Ndalatando', activeClients: 8, certifiedPartners: 1, status: 'Ativo' },
+  { id: 'cuando-cubango', name: 'Cuando Cubango', capital: 'Menongue', activeClients: 7, certifiedPartners: 1, status: 'Em Expansão' },
+  { id: 'bengo', name: 'Bengo', capital: 'Caxito', activeClients: 14, certifiedPartners: 1, status: 'Ativo' },
+];
+
+export const DEFAULT_PARTNER_LOGOS: PartnerBrandLogo[] = [
+  { id: '1', name: 'Supermercados Aliança & Filhos', type: 'cliente', sector: 'Retalho & Supermercados', province: 'Luanda', active: true },
+  { id: '2', name: 'Restaurante & Lounge Baía Azul', type: 'cliente', sector: 'Restauração & Bares', province: 'Benguela', active: true },
+  { id: '3', name: 'Farmácias Vida & Saúde', type: 'cliente', sector: 'Farmácias & Saúde', province: 'Huambo', active: true },
+  { id: '4', name: 'Centro Grossista do Kikolo', type: 'cliente', sector: 'Grossistas & Armazéns', province: 'Luanda', active: true },
+  { id: '5', name: 'Luanda Tech Solutions, Lda', type: 'parceiro', sector: 'Integração de Sistemas', province: 'Luanda', active: true },
+  { id: '6', name: 'Benguela Automação Comercial', type: 'parceiro', sector: 'Equipamentos & POS', province: 'Benguela', active: true },
+  { id: '7', name: 'Planalto Central IT', type: 'parceiro', sector: 'Suporte Técnico LAN', province: 'Huambo', active: true },
+  { id: '8', name: 'Lubango Sistemas & Redes', type: 'parceiro', sector: 'Consultoria TI', province: 'Huíla', active: true },
+  { id: '9', name: 'Cabinda Digital Networks', type: 'parceiro', sector: 'Distribuidor Oficial', province: 'Cabinda', active: true },
+  { id: '10', name: 'Global Audit & Contabilidade', type: 'cliente', sector: 'Serviços Fiscais', province: 'Luanda', active: true },
+];
+
+export const DEFAULT_INVESTOR_SETTINGS: InvestorSettings = {
+  title: 'Relações com Investidores & Governança',
+  subtitle: 'Visual Software, Lda — Pioneirismo e Sustentabilidade Financeira em Software de Gestão em Angola',
+  summary: 'A Visual Software é uma empresa 100% angolana de tecnologia focada em soluções críticas de faturação, automação fiscal AGT e ERP offline-first para empresas em todo o território nacional.',
+  annualGrowth: '+128% ao ano',
+  legalEntity: 'VISUAL SOFTWARE LIMITADA (NIF: 5417089123)',
+  shareCapital: '150.000.000 Kz (Capital Integralmente Realizado)',
+  auditedBy: 'Auditoria Fiscal Independente & Homologação AGT n.º 384/2024',
+  contactEmail: 'investidores@kivora.ao',
+};
+
 export const DEFAULT_SETTINGS: SystemCompanySettings = {
   name: KIVORA_INFO.name,
   fullName: KIVORA_INFO.fullName,
@@ -138,6 +230,22 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   minStorage: '2 GB livres em SSD (+ base de dados)',
   minCpu: 'Intel Core i3 / AMD Ryzen 3 ou superior',
   releaseNotes: '• Motor de faturação certificado em estrita conformidade com a AGT\n• Base de dados 100% local com funcionamento sem internet\n• Módulo de POS de balcão e gestão de stock integrada\n• Exportação e validação oficial de SAF-T (AO)',
+
+  // Métricas do Sistema
+  statCompaniesCount: 850,
+  statTerminalsCount: 2400,
+  statInvoicesCount: '+14.5M',
+  statUptimePercent: '99.98%',
+  statProvincesCount: 18,
+
+  // Carrossel de Logos & Marcas
+  partnerLogos: DEFAULT_PARTNER_LOGOS,
+
+  // Informações de Investidores
+  investorInfo: DEFAULT_INVESTOR_SETTINGS,
+
+  // Cobertura por Províncias
+  provincesCoverage: DEFAULT_PROVINCES,
 
   // Configurações de Preços Padrão
   pricingTag: 'Tabela de Preços Oficiais',

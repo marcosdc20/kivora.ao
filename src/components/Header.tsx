@@ -6,7 +6,8 @@ import {
   Briefcase, Calculator, Key, CreditCard,
   Award, BookOpen, Newspaper,
   Building2, ChevronRight, HelpCircle,
-  ShoppingBag, Printer, ScanLine, Monitor
+  ShoppingBag, Printer, ScanLine, Monitor,
+  MapPin, TrendingUp
 } from 'lucide-react';
 import { KivoraLogo } from './KivoraLogo';
 
@@ -49,6 +50,8 @@ export type PageId =
   | 'seguranca'
   | 'comparativo'
   | 'calculadora-fiscal'
+  | 'investidores'
+  | 'provincias'
   | 'admin';
 
 interface HeaderProps {
@@ -188,6 +191,7 @@ export const Header: React.FC<HeaderProps> = ({
       items: [
         { name: 'Programa de Distribuidores', desc: 'Preços de atacado e margem livre de revenda', page: 'parceiros', icon: <Award className="w-4 h-4" /> },
         { name: 'Diretório Nacional de Técnicos', desc: 'Consulte os parceiros certificados em Angola', page: 'diretorio-parceiros', icon: <Building2 className="w-4 h-4" /> },
+        { name: '18 Províncias de Angola', desc: 'Cobertura nacional e postos de assistência', page: 'provincias', icon: <MapPin className="w-4 h-4" />, badge: 'Nacional' },
         { name: 'Candidatura de Parceiro', desc: 'Submeta a sua proposta de credenciamento', page: 'candidatura-parceiro', icon: <FileCheck className="w-4 h-4" /> },
       ]
     },
@@ -208,6 +212,7 @@ export const Header: React.FC<HeaderProps> = ({
       mainPage: 'suporte',
       items: [
         { name: 'Central de Atendimento & FAQ', desc: 'Apoio técnico presencial e remoto em Luanda', page: 'suporte', icon: <HelpCircle className="w-4 h-4" /> },
+        { name: 'Relações com Investidores', desc: 'Governança corporativa, solidez e crescimento', page: 'investidores', icon: <TrendingUp className="w-4 h-4" /> },
         { name: 'Sobre a Visual Software', desc: 'Empresa detentora e criadora do Kivora', page: 'sobre', icon: <Building2 className="w-4 h-4" /> },
       ]
     }

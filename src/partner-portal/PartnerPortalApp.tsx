@@ -8,7 +8,7 @@ import {
   ExternalLink, Lock, Check, Share2, Sparkles,
   Award, Unlink, UserPlus,
   Receipt, ArrowRight, PhoneCall, Wallet,
-  CreditCard, Clock
+  CreditCard, Clock, Save
 } from 'lucide-react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { CURRENT_RELEASE, KIVORA_INFO } from '../data/kivoraData';
@@ -113,6 +113,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const [newClientEmail, setNewClientEmail] = useState('');
   const [newClientPhone, setNewClientPhone] = useState('');
   const [newClientAddress, setNewClientAddress] = useState('Luanda');
+  const [newClientLogoUrl, setNewClientLogoUrl] = useState('');
   const [addingClient, setAddingClient] = useState(false);
 
   // Extrato & Notificação de Pagamento / Recarga de Wallet
@@ -130,12 +131,24 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const [simMonthlySalePrice, setSimMonthlySalePrice] = useState(25000);
   const [simAnnualSalePrice, setSimAnnualSalePrice] = useState(250000);
 
-  // Perfil & Senha
+  // Perfil & Senha & Branding
+  const [partnerLogoUrl, setPartnerLogoUrl] = useState<string>(
+    localStorage.getItem(`kivora_partner_logo_${session?.id || 'default'}`) || ''
+  );
+  const [partnerBrandingSaved, setPartnerBrandingSaved] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
+
+  const handleSavePartnerBranding = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem(`kivora_partner_logo_${session?.id || 'default'}`, partnerLogoUrl.trim());
+    setPartnerBrandingSaved(true);
+    showToast('Logótipo corporativo gravado com sucesso!');
+    setTimeout(() => setPartnerBrandingSaved(false), 3000);
+  };
 
   // Estados de Suporte do Parceiro
   const [supportTab, setSupportTab] = useState<'clientes' | 'admin'>('clientes');
@@ -2589,6 +2602,60 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 </div>
               </div>
 
+              {/* Personalização de Identidade Visual & Logótipo */}
+              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                      <Award className="w-4 h-4 text-blue-600" />
+                      <span>Identidade Visual & Logótipo da Empresa Parceira</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Este logótipo será impresso nos seus certificados oficiais de técnico credenciado e propostas.
+                    </p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleSavePartnerBranding} className="space-y-4 text-xs">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 p-2 flex items-center justify-center shadow-xs shrink-0">
+                      {partnerLogoUrl ? (
+                        <img src={partnerLogoUrl} alt="Logo Parceiro" className="max-h-full max-w-full object-contain" />
+                      ) : (
+                        <span className="font-black text-slate-400 text-xs text-center">Sem Logo</span>
+                      )}
+                    </div>
+                    <div className="flex-1 w-full space-y-1">
+                      <label className="font-bold text-slate-700 uppercase text-[11px]">URL da Imagem / Logótipo (PNG ou JPG)</label>
+                      <input
+                        type="url"
+                        value={partnerLogoUrl}
+                        onChange={(e) => setPartnerLogoUrl(e.target.value)}
+                        placeholder="https://suaempresa.ao/logo.png"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-blue-500 font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  {partnerBrandingSaved && (
+                    <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl font-bold flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Logótipo corporativo guardado com sucesso!</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2 rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-2"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Gravar Logótipo</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
               {/* Formulário de Alteração de Senha */}
               <div className="pt-4 border-t border-slate-200">
                 <h3 className="text-sm font-black text-slate-900 mb-1 flex items-center gap-2">
@@ -2995,6 +3062,17 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-medium"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase text-[11px]">URL do Logótipo da Empresa Cliente (Opcional)</label>
+                <input
+                  type="url"
+                  placeholder="https://cliente.ao/logo.png"
+                  value={newClientLogoUrl}
+                  onChange={(e) => setNewClientLogoUrl(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-mono text-xs"
+                />
               </div>
 
               <div className="flex justify-end gap-3 pt-2">

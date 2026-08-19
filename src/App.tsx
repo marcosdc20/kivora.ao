@@ -26,6 +26,8 @@ import { SegurancaPage } from './pages/SegurancaPage';
 import { ComparativoPage } from './pages/ComparativoPage';
 import { CalculadoraFiscalPage } from './pages/CalculadoraFiscalPage';
 import { LojaPage } from './pages/LojaPage';
+import { InvestidoresPage } from './pages/InvestidoresPage';
+import { ProvinciasPage } from './pages/ProvinciasPage';
 import { DemoModal } from './components/DemoModal';
 import { AdminApp } from './admin/AdminApp';
 import { ClientPortalApp } from './client-portal/ClientPortalApp';
@@ -209,6 +211,16 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     title: 'Calculadora Fiscal de IRT & IVA Angola | Simulador Gratuito - KIVORA',
     desc: 'Simule salários líquidos, retenção na fonte de IRT 2026, INSS 3%/8% e IVA comercial segundo as tabelas da AGT.',
     path: '/calculadora-fiscal',
+  },
+  investidores: {
+    title: 'Relações com Investidores & Governança Corporativa | KIVORA ERP & Visual Software',
+    desc: 'Conheça a solidez financeira, modelo de negócio local, indicadores de crescimento e conformidade regulatória da Visual Software em Angola.',
+    path: '/investidores',
+  },
+  provincias: {
+    title: 'Presença nas 18 Províncias de Angola | Cobertura Nacional - KIVORA ERP',
+    desc: 'Consulte os parceiros credenciados, postos instalados e capacidade de suporte presencial nas 18 províncias de Angola.',
+    path: '/provincias',
   },
   loja: {
     title: 'Loja Oficial de Hardware POS & Impressoras Térmicas Angola | KIVORA',
@@ -593,6 +605,20 @@ export function App() {
           <LojaPage
             onNavigatePage={handleNavigatePage}
             onOpenDemo={(item) => handleOpenDemoModal(item)}
+          />
+        )}
+
+        {activePage === 'investidores' && (
+          <InvestidoresPage
+            onNavigatePage={handleNavigatePage}
+            onOpenDemoModal={handleOpenDemoModal}
+          />
+        )}
+
+        {activePage === 'provincias' && (
+          <ProvinciasPage
+            onNavigatePage={handleNavigatePage}
+            onOpenDemoModal={handleOpenDemoModal}
           />
         )}
       </main>

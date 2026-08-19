@@ -1,7 +1,15 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { HeroCarousel } from '../components/HeroCarousel';
-import { CheckCircle2, ArrowRight, Download, Shield, Wifi, Zap, Monitor, Laptop, Check, Sparkles, Award, Headphones } from 'lucide-react';
+import {
+  CheckCircle2, ArrowRight, Download, Shield, Wifi,
+  Zap, Monitor, Laptop, Check, Sparkles,
+  Award, Headphones, Building2, MapPin, TrendingUp
+} from 'lucide-react';
 import { PageId } from '../components/Header';
+import {
+  subscribeSystemSettings, getCachedSystemSettings,
+  SystemCompanySettings, DEFAULT_PARTNER_LOGOS
+} from '../services/systemSettingsService';
 
 import posImg from '../assets/kivora/pc-pos-kivora.png';
 import desktopImg from '../assets/kivora/pc-descktop-kivora.png';
@@ -17,6 +25,61 @@ interface HomePageProps {
   onOpenDemoModal: (subject?: string) => void;
   onNavigatePage: (page: PageId) => void;
 }
+
+// Contador animado progressivo baseado em IntersectionObserver
+const AnimatedCounter: React.FC<{
+  end: number;
+  duration?: number;
+  prefix?: string;
+  suffix?: string;
+}> = ({ end, duration = 2000, prefix = '', suffix = '' }) => {
+  const [count, setCount] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !hasStarted) {
+          setHasStarted(true);
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasStarted]);
+
+  useEffect(() => {
+    if (!hasStarted) return;
+    let startTime: number | null = null;
+
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      setCount(Math.floor(easeProgress * end));
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        setCount(end);
+      }
+    };
+
+    requestAnimationFrame(step);
+  }, [hasStarted, end, duration]);
+
+  return (
+    <span ref={ref}>
+      {prefix}{count.toLocaleString('pt-AO')}{suffix}
+    </span>
+  );
+};
 
 // Função para configurar as animações de scroll (IntersectionObserver nativo)
 function useScrollReveal() {
@@ -90,6 +153,16 @@ export const HomePage: React.FC<HomePageProps> = ({
 }) => {
   useScrollReveal();
   const sectionsRef = useRef<HTMLDivElement>(null);
+  const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
+
+  useEffect(() => {
+    const unsub = subscribeSystemSettings(setSettings);
+    return () => unsub();
+  }, []);
+
+  const partnerLogos = (settings.partnerLogos && settings.partnerLogos.length > 0)
+    ? settings.partnerLogos.filter((p) => p.active !== false)
+    : DEFAULT_PARTNER_LOGOS;
 
   return (
     <div className="bg-white text-slate-900">
@@ -114,6 +187,162 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         </div>
       </div>
+
+      {/* ========== CARROSSEL MARQUEE DE PARCEIROS & CLIENTES ========== */}
+      <section className="py-10 bg-slate-50 border-b border-slate-200/80 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 mb-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-center sm:text-left">
+            <span className="text-blue-600 font-bold text-xs uppercase tracking-widest block">
+              Ecossistema Empresarial em Angola
+            </span>
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 mt-0.5">
+              Empresas & Parceiros Certificados que Confiam no KIVORA
+            </h3>
+          </div>
+          <button
+            onClick={() => onNavigatePage('diretorio-parceiros')}
+            className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <span>Ver Diretório Nacional</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Marquee Container */}
+        <div className="relative w-full overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none" />
+
+          <div className="animate-marquee flex items-center gap-5 py-2">
+            {[...partnerLogos, ...partnerLogos].map((partner, idx) => (
+              <div
+                key={`${partner.id}-${idx}`}
+                className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-blue-300 transition-all shrink-0 select-none group"
+              >
+                <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-black text-xs shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  {partner.logoUrl ? (
+                    <img
+                      src={partner.logoUrl}
+                      alt={partner.name}
+                      className="w-full h-full object-contain rounded-xl"
+                    />
+                  ) : (
+                    partner.name.substring(0, 2).toUpperCase()
+                  )}
+                </div>
+                <div className="text-left">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors whitespace-nowrap">
+                      {partner.name}
+                    </span>
+                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider shrink-0 ${
+                      partner.type === 'parceiro'
+                        ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                        : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                    }`}>
+                      {partner.type === 'parceiro' ? 'Parceiro' : 'Cliente'}
+                    </span>
+                  </div>
+                  {(partner.sector || partner.province) && (
+                    <span className="text-[10px] text-slate-500 block leading-tight">
+                      {[partner.sector, partner.province].filter(Boolean).join(' • ')}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========== NÚMEROS & IMPACTO COM ANIMAÇÃO DE CONTAGEM ========== */}
+      <section className="py-20 bg-slate-950 text-white border-y border-slate-800 relative overflow-hidden">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-blue-600/15 blur-[120px] rounded-full pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 relative z-10">
+          <div data-reveal className="sr-init text-center max-w-3xl mx-auto mb-16 space-y-3">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold">
+              <TrendingUp className="w-3.5 h-3.5" />
+              Impacto Real na Economia Angolana
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
+              Os Números Que Comprovam a Nossa Liderança
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm lg:text-base leading-relaxed">
+              Mais de 850 empresas, supermercados, farmácias e restaurantes operam diariamente com a garantia de conformidade fiscal e estabilidade offline do KIVORA.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            {/* 1. Empresas Ativas */}
+            <div data-reveal className="sr-init bg-slate-900/90 border border-slate-800 p-8 rounded-3xl text-center space-y-2 hover:border-blue-500/40 transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mx-auto mb-3">
+                <Building2 className="w-6 h-6" />
+              </div>
+              <div className="text-4xl sm:text-5xl font-black text-white">
+                <AnimatedCounter end={settings.statCompaniesCount || 850} prefix="+" />
+              </div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Empresas & Lojas Ativas</h4>
+              <p className="text-[11px] text-slate-500">A faturar em estrita conformidade com a AGT</p>
+            </div>
+
+            {/* 2. Terminais LAN */}
+            <div data-reveal className="sr-init bg-slate-900/90 border border-slate-800 p-8 rounded-3xl text-center space-y-2 hover:border-emerald-500/40 transition-colors" style={{ transitionDelay: '100ms' }}>
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto mb-3">
+                <Monitor className="w-6 h-6" />
+              </div>
+              <div className="text-4xl sm:text-5xl font-black text-emerald-400">
+                <AnimatedCounter end={settings.statTerminalsCount || 2400} prefix="+" />
+              </div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Terminais POS Instalados</h4>
+              <p className="text-[11px] text-slate-500">Caixas touch, balcões e servidores LAN</p>
+            </div>
+
+            {/* 3. Faturas Emitidas */}
+            <div data-reveal className="sr-init bg-slate-900/90 border border-slate-800 p-8 rounded-3xl text-center space-y-2 hover:border-amber-500/40 transition-colors" style={{ transitionDelay: '200ms' }}>
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto mb-3">
+                <Shield className="w-6 h-6" />
+              </div>
+              <div className="text-4xl sm:text-5xl font-black text-amber-400">
+                {settings.statInvoicesCount || '+14.5M'}
+              </div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Faturas com QR Code AGT</h4>
+              <p className="text-[11px] text-slate-500">Assinatura digital RS256 e SAF-T auditado</p>
+            </div>
+
+            {/* 4. Províncias de Angola */}
+            <div data-reveal className="sr-init bg-slate-900/90 border border-slate-800 p-8 rounded-3xl text-center space-y-2 hover:border-indigo-500/40 transition-colors" style={{ transitionDelay: '300ms' }}>
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto mb-3">
+                <MapPin className="w-6 h-6" />
+              </div>
+              <div className="text-4xl sm:text-5xl font-black text-indigo-400">
+                <AnimatedCounter end={settings.statProvincesCount || 18} suffix="/18" />
+              </div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Cobertura Territorial</h4>
+              <p className="text-[11px] text-slate-500">Técnicos e assistência em todo o país</p>
+            </div>
+
+          </div>
+
+          <div data-reveal className="sr-init mt-12 flex flex-wrap items-center justify-center gap-4 text-center">
+            <button
+              onClick={() => onNavigatePage('casos-sucesso')}
+              className="px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-blue-600/30 transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <span>Ver Todos os Casos de Sucesso</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onNavigatePage('provincias')}
+              className="px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <span>Ver Cobertura nas 18 Províncias</span>
+              <MapPin className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </section>
 
       <div ref={sectionsRef}>
 

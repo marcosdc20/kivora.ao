@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck, Smartphone, Save,
   Database, Download, Loader2, Rocket, RotateCcw,
-  X, GitBranch, CreditCard, Building2, ExternalLink, Plus, Tag
+  X, GitBranch, CreditCard, Building2, ExternalLink, Plus, Tag,
+  TrendingUp, Award, Briefcase, MapPin, Trash2, Monitor
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -10,7 +11,8 @@ import { AdminTopbar } from './AdminComponents';
 import {
   SystemCompanySettings, DEFAULT_SETTINGS,
   subscribeSystemSettings, saveSystemSettings,
-  getDirectDownloadUrl
+  getDirectDownloadUrl, PartnerBrandLogo, InvestorSettings,
+  DEFAULT_PARTNER_LOGOS, DEFAULT_PROVINCES, DEFAULT_INVESTOR_SETTINGS
 } from '../services/systemSettingsService';
 
 export interface UpdateRelease {
@@ -72,7 +74,7 @@ const INITIAL_RELEASES: UpdateRelease[] = [
   }
 ];
 
-type ConfigTab = 'geral' | 'precos' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups';
+type ConfigTab = 'geral' | 'precos' | 'metricas' | 'marcas' | 'investidores' | 'provincias' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups';
 
 export const AdminConfiguracoes: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ConfigTab>('geral');
@@ -95,12 +97,90 @@ export const AdminConfiguracoes: React.FC = () => {
   const [newMandatory, setNewMandatory] = useState(false);
   const [newRollout, setNewRollout] = useState(100);
 
+  // New Brand Logo Form State
+  const [newBrandName, setNewBrandName] = useState('');
+  const [newBrandType, setNewBrandType] = useState<'parceiro' | 'cliente'>('cliente');
+  const [newBrandSector, setNewBrandSector] = useState('');
+  const [newBrandProvince, setNewBrandProvince] = useState('Luanda');
+  const [newBrandLogoUrl, setNewBrandLogoUrl] = useState('');
+
+  const handleAddBrand = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBrandName.trim()) return;
+
+    const newBrand: PartnerBrandLogo = {
+      id: Date.now().toString(),
+      name: newBrandName.trim(),
+      type: newBrandType,
+      sector: newBrandSector.trim() || undefined,
+      province: newBrandProvince.trim() || undefined,
+      logoUrl: newBrandLogoUrl.trim() || undefined,
+      active: true,
+    };
+
+    const currentBrands = settings.partnerLogos && settings.partnerLogos.length > 0
+      ? settings.partnerLogos
+      : DEFAULT_PARTNER_LOGOS;
+
+    setSettings(prev => ({
+      ...prev,
+      partnerLogos: [newBrand, ...currentBrands]
+    }));
+
+    setNewBrandName('');
+    setNewBrandSector('');
+    setNewBrandLogoUrl('');
+  };
+
+  const handleToggleBrandActive = (id: string) => {
+    const currentBrands = settings.partnerLogos && settings.partnerLogos.length > 0
+      ? settings.partnerLogos
+      : DEFAULT_PARTNER_LOGOS;
+
+    setSettings(prev => ({
+      ...prev,
+      partnerLogos: currentBrands.map(b => b.id === id ? { ...b, active: !b.active } : b)
+    }));
+  };
+
+  const handleDeleteBrand = (id: string) => {
+    const currentBrands = settings.partnerLogos && settings.partnerLogos.length > 0
+      ? settings.partnerLogos
+      : DEFAULT_PARTNER_LOGOS;
+
+    setSettings(prev => ({
+      ...prev,
+      partnerLogos: currentBrands.filter(b => b.id !== id)
+    }));
+  };
+
+  const handleProvinceChange = (id: string, field: 'activeClients' | 'certifiedPartners' | 'status', value: any) => {
+    const currentProvinces = settings.provincesCoverage && settings.provincesCoverage.length > 0
+      ? settings.provincesCoverage
+      : DEFAULT_PROVINCES;
+
+    setSettings(prev => ({
+      ...prev,
+      provincesCoverage: currentProvinces.map(p => p.id === id ? { ...p, [field]: value } : p)
+    }));
+  };
+
+  const handleInvestorChange = (field: keyof InvestorSettings, value: string) => {
+    setSettings(prev => ({
+      ...prev,
+      investorInfo: {
+        ...(prev.investorInfo || DEFAULT_INVESTOR_SETTINGS),
+        [field]: value
+      }
+    }));
+  };
+
   useEffect(() => {
     const unsub = subscribeSystemSettings(setSettings);
     return () => unsub();
   }, []);
 
-  const handleChange = (field: keyof SystemCompanySettings, value: string) => {
+  const handleChange = (field: keyof SystemCompanySettings, value: any) => {
     setSettings(prev => ({ ...prev, [field]: value }));
   };
 
@@ -232,6 +312,10 @@ export const AdminConfiguracoes: React.FC = () => {
           {[
             { id: 'geral', label: 'Geral & Empresa', icon: <Building2 className="w-4 h-4" /> },
             { id: 'precos', label: 'Planos & Preços', icon: <Tag className="w-4 h-4" /> },
+            { id: 'metricas', label: 'Métricas & Números', icon: <TrendingUp className="w-4 h-4" /> },
+            { id: 'marcas', label: 'Logótipos & Marcas', icon: <Award className="w-4 h-4" /> },
+            { id: 'investidores', label: 'Investidores & Governança', icon: <Briefcase className="w-4 h-4" /> },
+            { id: 'provincias', label: '18 Províncias', icon: <MapPin className="w-4 h-4" /> },
             { id: 'contactos', label: 'Telefones & WhatsApp', icon: <Smartphone className="w-4 h-4" /> },
             { id: 'links', label: 'Links, GitHub & Download', icon: <GitBranch className="w-4 h-4" /> },
             { id: 'bancos', label: 'Contas Bancárias (IBANs)', icon: <CreditCard className="w-4 h-4" /> },
@@ -675,6 +759,437 @@ export const AdminConfiguracoes: React.FC = () => {
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Planos & Preços</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* TAB: MÉTRICAS & NÚMEROS */}
+        {activeTab === 'metricas' && (
+          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-black text-slate-900">Estatísticas & Números de Impacto</h3>
+                <p className="text-xs text-slate-500">Métricas exibidas com animação de contagem na Homepage e páginas oficiais</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 text-xs">
+              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <label className="font-bold text-slate-800 uppercase flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-blue-600" />
+                  Empresas & Lojas Ativas
+                </label>
+                <input
+                  type="number"
+                  value={settings.statCompaniesCount ?? 850}
+                  onChange={(e) => handleChange('statCompaniesCount', parseInt(e.target.value) || 0)}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-black text-base text-slate-900 focus:border-blue-600 outline-none"
+                  placeholder="850"
+                />
+                <p className="text-[11px] text-slate-500">Número de empresas faturando com o Kivora</p>
+              </div>
+
+              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <label className="font-bold text-slate-800 uppercase flex items-center gap-1.5">
+                  <Monitor className="w-3.5 h-3.5 text-emerald-600" />
+                  Terminais LAN / Caixas Instalados
+                </label>
+                <input
+                  type="number"
+                  value={settings.statTerminalsCount ?? 2400}
+                  onChange={(e) => handleChange('statTerminalsCount', parseInt(e.target.value) || 0)}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-black text-base text-emerald-600 focus:border-blue-600 outline-none"
+                  placeholder="2400"
+                />
+                <p className="text-[11px] text-slate-500">Total de postos físicos em operação</p>
+              </div>
+
+              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <label className="font-bold text-slate-800 uppercase flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                  Volume de Faturas Emitidas
+                </label>
+                <input
+                  type="text"
+                  value={settings.statInvoicesCount || '+14.5M'}
+                  onChange={(e) => handleChange('statInvoicesCount', e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-black text-base text-amber-600 focus:border-blue-600 outline-none"
+                  placeholder="+14.5M"
+                />
+                <p className="text-[11px] text-slate-500">Faturas processadas com QR Code da AGT</p>
+              </div>
+
+              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <label className="font-bold text-slate-800 uppercase flex items-center gap-1.5">
+                  <TrendingUp className="w-3.5 h-3.5 text-blue-600" />
+                  Disponibilidade Operacional (Uptime)
+                </label>
+                <input
+                  type="text"
+                  value={settings.statUptimePercent || '99.98%'}
+                  onChange={(e) => handleChange('statUptimePercent', e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-black text-base text-blue-600 focus:border-blue-600 outline-none"
+                  placeholder="99.98%"
+                />
+                <p className="text-[11px] text-slate-500">Estabilidade sem interrupção de caixas</p>
+              </div>
+
+              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <label className="font-bold text-slate-800 uppercase flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-indigo-600" />
+                  Províncias com Presença Ativa
+                </label>
+                <input
+                  type="number"
+                  value={settings.statProvincesCount ?? 18}
+                  onChange={(e) => handleChange('statProvincesCount', parseInt(e.target.value) || 18)}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-black text-base text-indigo-600 focus:border-blue-600 outline-none"
+                  placeholder="18"
+                />
+                <p className="text-[11px] text-slate-500">Total de províncias de Angola atendidas</p>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Guardar Métricas</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* TAB: LOGÓTIPOS & MARCAS */}
+        {activeTab === 'marcas' && (
+          <div className="space-y-6">
+            {/* Formulário de Adicionar Nova Marca */}
+            <form onSubmit={handleAddBrand} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4">
+              <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Adicionar Empresa Parceira ou Cliente</h3>
+                  <p className="text-xs text-slate-500">Exibido no carrossel da homepage e nas páginas de parceiros</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+                <div className="space-y-1 lg:col-span-2">
+                  <label className="font-bold text-slate-700 uppercase">Nome da Empresa</label>
+                  <input
+                    type="text"
+                    value={newBrandName}
+                    onChange={(e) => setNewBrandName(e.target.value)}
+                    placeholder="Ex: Supermercados Aliança"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-semibold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 uppercase">Tipo</label>
+                  <select
+                    value={newBrandType}
+                    onChange={(e) => setNewBrandType(e.target.value as any)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                  >
+                    <option value="cliente">Cliente</option>
+                    <option value="parceiro">Parceiro TI</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 uppercase">Setor</label>
+                  <input
+                    type="text"
+                    value={newBrandSector}
+                    onChange={(e) => setNewBrandSector(e.target.value)}
+                    placeholder="Ex: Retalho"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-semibold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 uppercase">Província</label>
+                  <input
+                    type="text"
+                    value={newBrandProvince}
+                    onChange={(e) => setNewBrandProvince(e.target.value)}
+                    placeholder="Ex: Luanda"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-semibold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1 text-xs">
+                <label className="font-bold text-slate-700 uppercase">URL do Logótipo (Opcional — se vazio usa iniciais elegantes)</label>
+                <input
+                  type="url"
+                  value={newBrandLogoUrl}
+                  onChange={(e) => setNewBrandLogoUrl(e.target.value)}
+                  placeholder="https://exemplo.ao/logo.png"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-mono text-xs text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end pt-1">
+                <button
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Adicionar à Lista</span>
+                </button>
+              </div>
+            </form>
+
+            {/* Lista Atual de Marcas */}
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-base font-black text-slate-900">
+                  Marcas Cadastradas ({(settings.partnerLogos || DEFAULT_PARTNER_LOGOS).length})
+                </h3>
+                <button
+                  onClick={handleSaveSettings}
+                  disabled={saving}
+                  className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs px-5 py-2 rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer"
+                >
+                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  <span>Salvar Alterações</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {(settings.partnerLogos || DEFAULT_PARTNER_LOGOS).map((brand) => (
+                  <div
+                    key={brand.id}
+                    className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition-all ${
+                      brand.active ? 'bg-slate-50 border-slate-200' : 'bg-slate-100/60 border-slate-200/50 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-black text-xs shrink-0">
+                        {brand.logoUrl ? (
+                          <img src={brand.logoUrl} alt={brand.name} className="w-full h-full object-contain rounded-xl" />
+                        ) : (
+                          brand.name.substring(0, 2).toUpperCase()
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-xs text-slate-900 truncate block">{brand.name}</span>
+                          <span className={`px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider shrink-0 ${
+                            brand.type === 'parceiro' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
+                          }`}>
+                            {brand.type}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 truncate">
+                          {[brand.sector, brand.province].filter(Boolean).join(' • ')}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleBrandActive(brand.id)}
+                        className={`p-1.5 rounded-lg text-xs font-bold ${
+                          brand.active ? 'text-emerald-700 bg-emerald-100' : 'text-slate-500 bg-slate-200'
+                        }`}
+                        title={brand.active ? 'Ativo (clique para ocultar)' : 'Oculto (clique para ativar)'}
+                      >
+                        {brand.active ? 'Ativo' : 'Oculto'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteBrand(brand.id)}
+                        className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                        title="Remover"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: INVESTIDORES & GOVERNANÇA */}
+        {activeTab === 'investidores' && (
+          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-black text-slate-900">Relações com Investidores & Governança</h3>
+                <p className="text-xs text-slate-500">Dados institucionais exibidos na página /investidores</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Título da Seção de Investidores</label>
+                <input
+                  type="text"
+                  value={settings.investorInfo?.title || DEFAULT_INVESTOR_SETTINGS.title}
+                  onChange={(e) => handleInvestorChange('title', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Crescimento Anual</label>
+                <input
+                  type="text"
+                  value={settings.investorInfo?.annualGrowth || DEFAULT_INVESTOR_SETTINGS.annualGrowth}
+                  onChange={(e) => handleInvestorChange('annualGrowth', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-blue-600 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="+128% ao ano"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Entidade Legal</label>
+                <input
+                  type="text"
+                  value={settings.investorInfo?.legalEntity || DEFAULT_INVESTOR_SETTINGS.legalEntity}
+                  onChange={(e) => handleInvestorChange('legalEntity', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Capital Social</label>
+                <input
+                  type="text"
+                  value={settings.investorInfo?.shareCapital || DEFAULT_INVESTOR_SETTINGS.shareCapital}
+                  onChange={(e) => handleInvestorChange('shareCapital', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Auditoria & Homologação</label>
+                <input
+                  type="text"
+                  value={settings.investorInfo?.auditedBy || DEFAULT_INVESTOR_SETTINGS.auditedBy}
+                  onChange={(e) => handleInvestorChange('auditedBy', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-emerald-600 focus:bg-white focus:border-blue-600 outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Email do Conselho de Administração</label>
+                <input
+                  type="email"
+                  value={settings.investorInfo?.contactEmail || DEFAULT_INVESTOR_SETTINGS.contactEmail}
+                  onChange={(e) => handleInvestorChange('contactEmail', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-blue-600 focus:bg-white focus:border-blue-600 outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="font-bold text-slate-700 uppercase">Resumo da Tese de Negócio</label>
+                <textarea
+                  rows={3}
+                  value={settings.investorInfo?.summary || DEFAULT_INVESTOR_SETTINGS.summary}
+                  onChange={(e) => handleInvestorChange('summary', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:bg-white focus:border-blue-600 outline-none leading-relaxed"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Guardar Dados de Investidores</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* TAB: 18 PROVÍNCIAS */}
+        {activeTab === 'provincias' && (
+          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-black text-slate-900">Cobertura nas 18 Províncias de Angola</h3>
+                <p className="text-xs text-slate-500">Configure clientes ativos e parceiros técnicos por região (/provincias)</p>
+              </div>
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-5 py-2 rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer"
+              >
+                {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                <span>Guardar Todas as Províncias</span>
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-bold uppercase text-[11px]">
+                    <th className="py-3 px-4">Província</th>
+                    <th className="py-3 px-4">Capital</th>
+                    <th className="py-3 px-4">Clientes Ativos</th>
+                    <th className="py-3 px-4">Parceiros Certificados</th>
+                    <th className="py-3 px-4">Status de Atendimento</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {(settings.provincesCoverage || DEFAULT_PROVINCES).map((prov) => (
+                    <tr key={prov.id} className="hover:bg-slate-50/70">
+                      <td className="py-2.5 px-4 font-bold text-slate-900">{prov.name}</td>
+                      <td className="py-2.5 px-4 text-slate-500">{prov.capital}</td>
+                      <td className="py-2.5 px-4">
+                        <input
+                          type="number"
+                          value={prov.activeClients}
+                          onChange={(e) => handleProvinceChange(prov.id, 'activeClients', parseInt(e.target.value) || 0)}
+                          className="w-24 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 font-bold text-blue-600 focus:bg-white focus:border-blue-600 outline-none"
+                        />
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <input
+                          type="number"
+                          value={prov.certifiedPartners}
+                          onChange={(e) => handleProvinceChange(prov.id, 'certifiedPartners', parseInt(e.target.value) || 0)}
+                          className="w-24 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 font-bold text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                        />
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <select
+                          value={prov.status}
+                          onChange={(e) => handleProvinceChange(prov.id, 'status', e.target.value as any)}
+                          className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 font-bold text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                        >
+                          <option value="Ativo">Ativo</option>
+                          <option value="Em Expansão">Em Expansão</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Guardar Configurações das 18 Províncias</span>
               </button>
             </div>
           </form>
