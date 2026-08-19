@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
   Mail, Phone, MessageCircle, Send, CheckCircle2,
-  Clock, Loader2, Headphones
+  Clock, Loader2, Headphones, Building2
 } from 'lucide-react';
-import { KIVORA_INFO } from '../data/kivoraData';
+import {
+  subscribeSystemSettings, getCachedSystemSettings,
+  SystemCompanySettings
+} from '../services/systemSettingsService';
 
 import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
 
@@ -13,6 +16,7 @@ interface SuportePageProps {
 }
 
 export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
+  const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -23,6 +27,11 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
   
   const [submitting, setSubmitting] = useState(false);
   const [ticketProtocol, setTicketProtocol] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsub = subscribeSystemSettings(setSettings);
+    return () => unsub();
+  }, []);
 
   const handleSubmitTicket = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,101 +68,135 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
     },
   ];
 
+  const whatsappHref = settings.whatsappUrl || `https://wa.me/${settings.phoneRaw || '244923456789'}`;
+
   return (
-    <div className="min-h-screen bg-white text-slate-900 page-enter">
+    <div className="min-h-screen bg-slate-50/50 text-slate-900 page-enter font-sans">
 
       {/* Hero Showcase */}
       <PageHero
         image={welcomeImg}
         tag="Central de Atendimento & Suporte Técnico"
         title="Assistência Especializada para a Sua Empresa"
-        sub="Equipa técnica sediada em Luanda disponível para apoio presencial e remoto, configurações de rede local, parametrização fiscal e esclarecimento de dúvidas."
+        sub="Equipa técnica sediada em Luanda disponível para apoio presencial e remoto, configurações de rede local, parametrização fiscal e esclarecimento de dúvidas operacionais."
       />
 
       {/* Main Container */}
-      <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-24 space-y-16">
+      <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-20 space-y-16">
         
-        {/* Canais Diretos de Contacto */}
+        {/* Canais Diretos de Contacto Corporativos */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-slate-950 text-white rounded-3xl p-8 flex flex-col justify-between space-y-6 shadow-xl border border-slate-800">
+          
+          {/* Card 1: WhatsApp */}
+          <div className="bg-white rounded-3xl p-7 flex flex-col justify-between space-y-6 border border-slate-200 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
-                <MessageCircle className="w-6 h-6" />
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center">
+                  <MessageCircle className="w-6 h-6" />
+                </div>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Atendimento Ativo
+                </span>
               </div>
               <div>
-                <h3 className="text-lg font-black">WhatsApp & Chat Imediato</h3>
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                  Canal prioritário para suporte em tempo real com os nossos técnicos em Angola.
+                <h3 className="text-base font-black text-slate-900">WhatsApp & Chat Imediato</h3>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Canal prioritário para suporte em tempo real com os nossos técnicos especializados em Angola.
                 </p>
               </div>
-              <div className="text-[11px] text-slate-400 space-y-1 pt-2 border-t border-slate-800">
-                <p className="flex items-center gap-1.5 text-emerald-400 font-semibold">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Segunda a Sábado: 08h00 – 19h00</span>
-                </p>
+              <div className="text-xs font-mono font-bold text-slate-900 pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span>{settings.phoneDisplay}</span>
+                <span className="text-[11px] font-sans font-medium text-slate-400">Direto</span>
+              </div>
+              <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>{settings.supportHours || 'Segunda a Sábado: 08h00 – 19h00'}</span>
               </div>
             </div>
 
             <a
-              href={KIVORA_INFO.whatsapp}
+              href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Falar no WhatsApp Agora</span>
             </a>
           </div>
 
-          <div className="bg-white rounded-3xl p-8 flex flex-col justify-between space-y-6 border border-slate-200/90 shadow-sm hover:shadow-lg transition-all">
+          {/* Card 2: Telefone Central */}
+          <div className="bg-white rounded-3xl p-7 flex flex-col justify-between space-y-6 border border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center">
-                <Phone className="w-6 h-6" />
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center">
+                  <Phone className="w-6 h-6" />
+                </div>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                  Voz & Central
+                </span>
               </div>
               <div>
-                <h3 className="text-lg font-black text-slate-950">Atendimento Telefónico</h3>
+                <h3 className="text-base font-black text-slate-900">Atendimento Telefónico Central</h3>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                  Linha de suporte telefónico dedicada a operadores, caixas e gerentes.
+                  Linha de suporte telefónico dedicada a operadores, caixas, gerentes e contabilistas.
                 </p>
               </div>
-              <div className="text-xs font-mono font-bold text-slate-900 pt-2 border-t border-slate-100">
-                {KIVORA_INFO.phoneDisplay}
+              <div className="text-xs font-mono font-bold text-slate-900 pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span>{settings.phoneDisplay}</span>
+                <span className="text-[11px] font-sans font-medium text-slate-400">Luanda / Nacional</span>
+              </div>
+              <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                <span>{settings.supportHoursSunday || 'Atendimento Comercial & Suporte Remoto'}</span>
               </div>
             </div>
 
             <a
-              href={`tel:${KIVORA_INFO.phoneRaw}`}
-              className="bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all"
+              href={`tel:${settings.phoneRaw || '244923456789'}`}
+              className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
             >
               <Phone className="w-4 h-4" />
               <span>Ligar para a Central</span>
             </a>
           </div>
 
-          <div className="bg-white rounded-3xl p-8 flex flex-col justify-between space-y-6 border border-slate-200/90 shadow-sm hover:shadow-lg transition-all">
+          {/* Card 3: Email Suporte */}
+          <div className="bg-white rounded-3xl p-7 flex flex-col justify-between space-y-6 border border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center">
-                <Mail className="w-6 h-6" />
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center">
+                  <Mail className="w-6 h-6" />
+                </div>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  Logs & Ficheiros
+                </span>
               </div>
               <div>
-                <h3 className="text-lg font-black text-slate-950">Email de Suporte Técnico</h3>
+                <h3 className="text-base font-black text-slate-900">Email de Suporte Técnico & Fiscal</h3>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                  Envio de ficheiros de log, cópias de segurança e esclarecimento de regras fiscais.
+                  Envio de ficheiros de log, cópias de segurança, relatórios e esclarecimento de regras fiscais.
                 </p>
               </div>
-              <div className="text-xs font-mono font-bold text-slate-900 pt-2 border-t border-slate-100 truncate">
-                {KIVORA_INFO.supportEmail}
+              <div className="text-xs font-mono font-bold text-slate-900 pt-3 border-t border-slate-100 truncate">
+                {settings.supportEmail || 'suporte@kivora.ao'}
+              </div>
+              <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                <Building2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                <span className="truncate">{settings.address || 'Luanda, Angola'}</span>
               </div>
             </div>
 
             <a
-              href={`mailto:${KIVORA_INFO.supportEmail}`}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all"
+              href={`mailto:${settings.supportEmail || 'suporte@kivora.ao'}`}
+              className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <Mail className="w-4 h-4" />
-              <span>Enviar Mensagem</span>
+              <span>Enviar Mensagem por Email</span>
             </a>
           </div>
+
         </div>
 
         {/* Formulário Interativo de Abertura de Ticket com Protocolo */}

@@ -5,6 +5,10 @@ import {
   subscribePartnerPolicy, DEFAULT_PARTNER_POLICY,
   PartnerLicensingPolicy
 } from '../admin/services/partnerDebtService';
+import {
+  subscribeSystemSettings, getCachedSystemSettings,
+  SystemCompanySettings
+} from '../services/systemSettingsService';
 
 import parceirosImg from '../assets/kivora/parceiros-kivora.png';
 
@@ -28,13 +32,16 @@ interface ParceirosPageProps {
 
 export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) => {
   useScrollReveal();
+  const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
   const [policy, setPolicy] = useState<PartnerLicensingPolicy>(DEFAULT_PARTNER_POLICY);
 
   useEffect(() => {
-    const unsub = subscribePartnerPolicy((pol) => {
-      setPolicy(pol);
-    });
-    return () => unsub();
+    const unsubSettings = subscribeSystemSettings(setSettings);
+    const unsubPolicy = subscribePartnerPolicy(setPolicy);
+    return () => {
+      unsubSettings();
+      unsubPolicy();
+    };
   }, []);
 
   const handleGoCandidatura = () => {
@@ -49,8 +56,8 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
       <PageHero
         image={parceirosImg}
         tag="Programa de Parceiros & Canais"
-        title="Revenda o KIVORA ERP e cresça connosco"
-        sub="Torne-se distribuidor oficial da Visual Software e lucre com margens de atacado em cada licença na sua região."
+        title={`Revenda o ${settings.fullName} e cresça connosco`}
+        sub={`Torne-se distribuidor oficial da ${settings.company} e lucre com margens de atacado em cada licença na sua região.`}
       />
 
       {/* Benefícios & 2 Documentos Oficiais */}
@@ -97,7 +104,7 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
             <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-2">
               <div className="flex items-center gap-2 text-slate-900 font-bold">
                 <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
-                <span>1. Certificado de Parceria — VISUAL SOFTWARE</span>
+                <span>1. Certificado de Parceria — {settings.company}</span>
               </div>
               <p className="text-slate-500 leading-relaxed text-[11px]">
                 Atesta formalmente o credenciamento e homologação técnica da sua empresa como canal credenciado em território nacional.
@@ -107,10 +114,10 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
             <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-2">
               <div className="flex items-center gap-2 text-slate-900 font-bold">
                 <FileText className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>2. Certificado de Revendedor — KIVORA ERP</span>
+                <span>2. Certificado de Revendedor — {settings.fullName}</span>
               </div>
               <p className="text-slate-500 leading-relaxed text-[11px]">
-                Outorga de autorização da Visual Software para distribuição, instalação e comercialização do software certificado pela AGT (384/2024).
+                Outorga de autorização da {settings.company} para distribuição, instalação e comercialização do software ({settings.agtCertificate}).
               </p>
             </div>
           </div>

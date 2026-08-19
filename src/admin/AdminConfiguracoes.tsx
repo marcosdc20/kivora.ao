@@ -680,17 +680,17 @@ export const AdminConfiguracoes: React.FC = () => {
           </form>
         )}
 
-        {/* TAB 2: CONTACTOS & WHATSAPP */}
+        {/* TAB 3: CONTACTOS & WHATSAPP */}
         {activeTab === 'contactos' && (
           <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
             <div className="border-b border-slate-100 pb-3">
-              <h3 className="text-base font-black text-slate-900">Contactos Oficiais & Linhas de Atendimento</h3>
-              <p className="text-xs text-slate-500">Configuração dos números de WhatsApp e emails de suporte do site</p>
+              <h3 className="text-base font-black text-slate-900">Contactos Oficiais, Horários & Linhas de Atendimento</h3>
+              <p className="text-xs text-slate-500">Configuração de números de WhatsApp, linhas de suporte, horários e emails de contacto do site</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Telefone / WhatsApp Oficial</label>
+                <label className="font-bold text-slate-700 uppercase">Telefone / WhatsApp Principal</label>
                 <input
                   type="text"
                   value={settings.phoneDisplay}
@@ -699,6 +699,39 @@ export const AdminConfiguracoes: React.FC = () => {
                   placeholder="+244 923 456 789"
                 />
                 <p className="text-[10px] text-slate-400">O link do WhatsApp gerado automaticamente será: <code>https://wa.me/{settings.phoneDisplay.replace(/\D/g, '')}</code></p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Linha Comercial / Telefone Secundário</label>
+                <input
+                  type="text"
+                  value={settings.phoneCommercial || ''}
+                  onChange={(e) => handleChange('phoneCommercial', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="+244 923 111 222"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Horário de Atendimento Principal</label>
+                <input
+                  type="text"
+                  value={settings.supportHours || ''}
+                  onChange={(e) => handleChange('supportHours', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="Segunda a Sábado: 08h00 – 19h00"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Horário de Plantão / Fins de Semana</label>
+                <input
+                  type="text"
+                  value={settings.supportHoursSunday || ''}
+                  onChange={(e) => handleChange('supportHoursSunday', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="Domingos e Feriados: Plantão para Urgências"
+                />
               </div>
 
               <div className="space-y-1.5">
@@ -713,13 +746,24 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Email de Suporte Técnico</label>
+                <label className="font-bold text-slate-700 uppercase">Email de Suporte Técnico & Fiscal</label>
                 <input
                   type="email"
                   value={settings.supportEmail}
                   onChange={(e) => handleChange('supportEmail', e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
                   placeholder="suporte@kivora.ao"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">Email de Parcerias & Revendedores</label>
+                <input
+                  type="email"
+                  value={settings.partnerEmail || ''}
+                  onChange={(e) => handleChange('partnerEmail', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="parceiros@kivora.ao"
                 />
               </div>
 
@@ -734,7 +778,7 @@ export const AdminConfiguracoes: React.FC = () => {
                 />
               </div>
 
-              <div className="space-y-1.5 md:col-span-2">
+              <div className="space-y-1.5">
                 <label className="font-bold text-slate-700 uppercase">Página do Facebook</label>
                 <input
                   type="text"
@@ -742,6 +786,17 @@ export const AdminConfiguracoes: React.FC = () => {
                   onChange={(e) => handleChange('facebookUrl', e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
                   placeholder="https://facebook.com/kivora.ao"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 uppercase">LinkedIn Corporativo</label>
+                <input
+                  type="text"
+                  value={settings.linkedinUrl || ''}
+                  onChange={(e) => handleChange('linkedinUrl', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  placeholder="https://linkedin.com/company/kivora"
                 />
               </div>
             </div>

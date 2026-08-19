@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
 import { ShieldCheck, Award, Users, CheckCircle, Sparkles, MapPin, Phone, Mail } from 'lucide-react';
-import { KIVORA_INFO } from '../data/kivoraData';
+import {
+  subscribeSystemSettings, getCachedSystemSettings,
+  SystemCompanySettings
+} from '../services/systemSettingsService';
 
 import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
 import tabletImg from '../assets/kivora/jovem-empresaria-com-tablet.png';
@@ -11,6 +14,12 @@ interface AboutPageProps {
 }
 
 export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
+  const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
+
+  useEffect(() => {
+    const unsub = subscribeSystemSettings(setSettings);
+    return () => unsub();
+  }, []);
   return (
     <div className="min-h-screen bg-white text-slate-900 page-enter">
       
@@ -109,7 +118,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
             </div>
             <div>
               <h4 className="font-bold text-sm text-white">Sede em Luanda</h4>
-              <p className="text-xs text-slate-400 mt-1">{KIVORA_INFO.address}</p>
+              <p className="text-xs text-slate-400 mt-1">{settings.address}</p>
             </div>
           </div>
 
@@ -119,7 +128,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
             </div>
             <div>
               <h4 className="font-bold text-sm text-white">Linha Telefónica</h4>
-              <p className="text-xs text-slate-400 mt-1">{KIVORA_INFO.phoneDisplay}</p>
+              <p className="text-xs text-slate-400 mt-1">{settings.phoneDisplay}</p>
             </div>
           </div>
 
@@ -129,7 +138,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
             </div>
             <div>
               <h4 className="font-bold text-sm text-white">Email Corporativo</h4>
-              <p className="text-xs text-slate-400 mt-1">{KIVORA_INFO.email}</p>
+              <p className="text-xs text-slate-400 mt-1">{settings.email}</p>
             </div>
           </div>
         </div>

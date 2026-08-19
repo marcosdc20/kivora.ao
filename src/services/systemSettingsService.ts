@@ -10,8 +10,13 @@ export interface SystemCompanySettings {
   phone: string;
   phoneRaw: string;
   phoneDisplay: string;
+  phoneCommercial?: string;
   email: string;
   supportEmail: string;
+  partnerEmail?: string;
+  salesEmail?: string;
+  supportHours?: string;
+  supportHoursSunday?: string;
   address: string;
   agtCertificate: string;
   githubUrl: string;
@@ -62,6 +67,8 @@ export interface SystemCompanySettings {
   whatsappUrl: string;
   facebookUrl: string;
   instagramUrl: string;
+  linkedinUrl?: string;
+  telegramUrl?: string;
   ibanBai: string;
   ibanBfa: string;
   ibanTitular: string;
@@ -110,8 +117,13 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   phone: KIVORA_INFO.phone,
   phoneRaw: KIVORA_INFO.phoneRaw,
   phoneDisplay: KIVORA_INFO.phoneDisplay,
+  phoneCommercial: '+244 923 456 789',
   email: KIVORA_INFO.email,
   supportEmail: KIVORA_INFO.supportEmail,
+  partnerEmail: 'parceiros@kivora.ao',
+  salesEmail: 'comercial@kivora.ao',
+  supportHours: 'Segunda a Sábado: 08h00 – 19h00',
+  supportHoursSunday: 'Domingos e Feriados: Plantão para Urgências',
   address: KIVORA_INFO.address,
   agtCertificate: 'Certificação AGT n.º 384/AGT/2024',
   githubUrl: 'https://github.com/marcosdc20/kivora-setup-vers-o',
@@ -162,6 +174,8 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   whatsappUrl: KIVORA_INFO.whatsapp,
   facebookUrl: KIVORA_INFO.facebook,
   instagramUrl: KIVORA_INFO.instagram,
+  linkedinUrl: 'https://linkedin.com/company/kivora',
+  telegramUrl: 'https://t.me/kivora_ao',
   ibanBai: 'AO06 0040 0000 1234 5678 9012 3',
   ibanBfa: 'AO06 0006 0000 9876 5432 1098 7',
   ibanTitular: 'VISUAL SOFTWARE LIMITADA',
