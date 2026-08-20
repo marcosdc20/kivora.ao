@@ -4,7 +4,7 @@ import {
   Database, Download, Loader2, Rocket, RotateCcw,
   X, GitBranch, CreditCard, Building2, ExternalLink, Plus, Tag,
   TrendingUp, Award, Briefcase, MapPin, Trash2, Monitor,
-  Bell, Megaphone, Video, Youtube
+  Bell, Megaphone, Video, Youtube, Mail, Send
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -15,6 +15,11 @@ import {
   getDirectDownloadUrl, PartnerBrandLogo, InvestorSettings,
   DEFAULT_PROVINCES, DEFAULT_INVESTOR_SETTINGS
 } from '../services/systemSettingsService';
+import {
+  SiteEmailConfig, DEFAULT_SITE_EMAIL_CONFIG,
+  subscribeSiteEmailConfig, saveSiteEmailConfig,
+  testSiteEmailConnection
+} from '../services/siteEmailService';
 
 export interface UpdateRelease {
   id: string;
@@ -75,7 +80,7 @@ const INITIAL_RELEASES: UpdateRelease[] = [
   }
 ];
 
-type ConfigTab = 'geral' | 'precos' | 'videos' | 'notificacoes' | 'comunicados' | 'metricas' | 'marcas' | 'investidores' | 'provincias' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups';
+type ConfigTab = 'geral' | 'emails' | 'precos' | 'videos' | 'notificacoes' | 'comunicados' | 'metricas' | 'marcas' | 'investidores' | 'provincias' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups';
 
 export const AdminConfiguracoes: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ConfigTab>('geral');
@@ -84,6 +89,18 @@ export const AdminConfiguracoes: React.FC = () => {
 
   // System Settings State
   const [settings, setSettings] = useState<SystemCompanySettings>(DEFAULT_SETTINGS);
+
+  // Email Config State
+  const [emailConfig, setEmailConfig] = useState<SiteEmailConfig>(DEFAULT_SITE_EMAIL_CONFIG);
+  const [testEmailAddress, setTestEmailAddress] = useState('');
+  const [isTestingEmail, setIsTestingEmail] = useState(false);
+  const [testEmailResult, setTestEmailResult] = useState<{ success: boolean; msg: string } | null>(null);
+  const [savingEmail, setSavingEmail] = useState(false);
+
+  useEffect(() => {
+    const unsub = subscribeSiteEmailConfig((cfg) => setEmailConfig(cfg));
+    return () => unsub();
+  }, []);
 
   // Backups
   const [isExporting, setIsExporting] = useState(false);
@@ -253,6 +270,44 @@ export const AdminConfiguracoes: React.FC = () => {
     }
   };
 
+  const handleSaveEmailConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingEmail(true);
+    try {
+      await saveSiteEmailConfig(emailConfig);
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 4000);
+      alert('Configurações do Serviço de E-mail guardadas no Firebase com sucesso!');
+    } catch (err: any) {
+      alert('Erro ao guardar configurações de e-mail: ' + (err?.message || 'Tente novamente.'));
+    } finally {
+      setSavingEmail(false);
+    }
+  };
+
+  const handleTestEmailSend = async () => {
+    const target = testEmailAddress.trim() || emailConfig.senderEmail;
+    if (!target) {
+      alert('Por favor insira um endereço de e-mail de destino para o teste.');
+      return;
+    }
+
+    setIsTestingEmail(true);
+    setTestEmailResult(null);
+    try {
+      const res = await testSiteEmailConnection(target, emailConfig);
+      if (res.success) {
+        setTestEmailResult({ success: true, msg: `E-mail de teste enviado com sucesso para ${target}! Verifique a caixa de entrada.` });
+      } else {
+        setTestEmailResult({ success: false, msg: `Falha no envio: ${res.error || 'Verifique as credenciais.'}` });
+      }
+    } catch (err: any) {
+      setTestEmailResult({ success: false, msg: err?.message || 'Erro inesperado ao disparar teste.' });
+    } finally {
+      setIsTestingEmail(false);
+    }
+  };
+
   const handlePublishRelease = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newVersion || !newChangelog) return;
@@ -306,6 +361,7 @@ export const AdminConfiguracoes: React.FC = () => {
         <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
           {[
             { id: 'geral', label: 'Geral & Empresa', icon: <Building2 className="w-4 h-4" /> },
+            { id: 'emails', label: 'Serviço de E-mails & API', icon: <Mail className="w-4 h-4" /> },
             { id: 'precos', label: 'Planos & Preços', icon: <Tag className="w-4 h-4" /> },
             { id: 'videos', label: 'Vídeos YouTube', icon: <Video className="w-4 h-4" /> },
             { id: 'notificacoes', label: 'Notificações & Webhook', icon: <Bell className="w-4 h-4" /> },
@@ -414,6 +470,163 @@ export const AdminConfiguracoes: React.FC = () => {
               </button>
             </div>
           </form>
+        )}
+
+        {/* TAB: SERVIÇO DE E-MAILS & NOTIFICAÇÕES (PORTAIS, CLIENTES & PARCEIROS) */}
+        {activeTab === 'emails' && (
+          <div className="space-y-6">
+            <form onSubmit={handleSaveEmailConfig} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+              <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Serviço de E-mails & Notificações KIVORA</h3>
+                  <p className="text-xs text-slate-500">Configuração global para envio de credenciais, licenças, notificações a parceiros e comunicados</p>
+                </div>
+                <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 text-xs font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>Sincronizado via Firestore</span>
+                </div>
+              </div>
+
+              {/* Presets Rápidos */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Predefinições Rápidas de 1 Clique</label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmailConfig(prev => ({
+                        ...prev,
+                        provider: 'resend',
+                        senderEmail: prev.senderEmail || 'onboarding@resend.dev',
+                        senderName: prev.senderName || 'KIVORA ERP',
+                      }));
+                      alert('Predefinição Resend API selecionada. Insira a sua API Key.');
+                    }}
+                    className="px-3 py-1.5 bg-white border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-xs font-bold text-slate-700 hover:text-blue-600 transition-all shadow-xs"
+                  >
+                    ⚡ Resend API (Recomendado — Grátis)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmailConfig(prev => ({
+                        ...prev,
+                        provider: 'sendgrid',
+                        senderName: prev.senderName || 'KIVORA ERP',
+                      }));
+                      alert('Predefinição SendGrid selecionada.');
+                    }}
+                    className="px-3 py-1.5 bg-white border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-xs font-bold text-slate-700 hover:text-blue-600 transition-all shadow-xs"
+                  >
+                    📨 SendGrid API
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700">Provedor Ativo</label>
+                  <select
+                    value={emailConfig.provider || 'resend'}
+                    onChange={(e) => setEmailConfig(prev => ({ ...prev, provider: e.target.value as any }))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                  >
+                    <option value="resend">Resend API (Recomendado — Alta Entrega)</option>
+                    <option value="sendgrid">SendGrid API</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700">Chave API (API Key)</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder={emailConfig.provider === 'sendgrid' ? 'SG.xxxxxxxx...' : 're_xxxxxxxx...'}
+                    value={emailConfig.apiKey || ''}
+                    onChange={(e) => setEmailConfig(prev => ({ ...prev, apiKey: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-mono text-slate-900 focus:border-blue-600 outline-none"
+                  />
+                  <p className="text-[10px] text-slate-400">Obtenha a chave gratuita em resend.com ou sendgrid.com</p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700">E-mail Remetente Oficial</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="onboarding@resend.dev ou geral@kivora.ao"
+                    value={emailConfig.senderEmail || ''}
+                    onChange={(e) => setEmailConfig(prev => ({ ...prev, senderEmail: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                  />
+                  <p className="text-[10px] text-amber-600 font-medium">
+                    💡 No Resend (contas gratuitas sem domínio DNS), use <strong>onboarding@resend.dev</strong>.
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700">Nome de Exibição do Remetente</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="KIVORA Cloud ERP"
+                    value={emailConfig.senderName || ''}
+                    onChange={(e) => setEmailConfig(prev => ({ ...prev, senderName: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={savingEmail}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                >
+                  {savingEmail ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>Guardar Definições de E-mail</span>
+                </button>
+              </div>
+            </form>
+
+            {/* Bloco de Teste de Envio */}
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4">
+              <div className="border-b border-slate-100 pb-2">
+                <h4 className="text-sm font-black text-slate-900">Testar Conexão de E-mail em Tempo Real</h4>
+                <p className="text-xs text-slate-500">Envie um e-mail de teste imediato para qualquer endereço para validar a entrega</p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  placeholder="destino.teste@gmail.com"
+                  value={testEmailAddress}
+                  onChange={(e) => setTestEmailAddress(e.target.value)}
+                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:border-blue-600 outline-none"
+                />
+                <button
+                  type="button"
+                  disabled={isTestingEmail}
+                  onClick={handleTestEmailSend}
+                  className="bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                >
+                  {isTestingEmail ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  <span>{isTestingEmail ? 'A Enviar Teste...' : 'Disparar E-mail de Teste'}</span>
+                </button>
+              </div>
+
+              {testEmailResult && (
+                <div className={`p-4 rounded-2xl border text-xs font-bold flex items-start gap-2.5 animate-fadeIn ${
+                  testEmailResult.success ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'
+                }`}>
+                  <span className="text-base">{testEmailResult.success ? '✅' : '❌'}</span>
+                  <div>
+                    <p>{testEmailResult.msg}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
         {/* TAB 2: PLANOS & PREÇOS (CONFIGURAÇÃO COMPLETA DA TABELA OFICIAL) */}

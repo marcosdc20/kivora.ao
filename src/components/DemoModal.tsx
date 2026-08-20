@@ -10,6 +10,8 @@ import { triggerKivoraConfetti } from '../utils/confetti';
 
 import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
 
+import { sendDemoLeadEmails } from '../services/siteEmailService';
+
 interface DemoModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -59,6 +61,11 @@ export const DemoModal: React.FC<DemoModalProps> = ({
         created_at: Date.now(),
         status: 'pendente',
         source: 'site_modal_demonstracao',
+      });
+
+      // Disparar e-mails automáticos (confirmação ao cliente + alerta à equipa comercial)
+      sendDemoLeadEmails(formData).catch((err) => {
+        console.warn('Erro no envio de e-mails do lead demo:', err);
       });
 
       // Disparo opcional de webhook externo se configurado no Admin

@@ -82,7 +82,7 @@ export async function loginUser(
       // Verificar se é administrador na coleção /admins/{uid} ou /users
       let isAdminUser = false;
       let userName = user.displayName || 'Administrador Kivora';
-      const masterAdmins = ['admin@kivora.ao', 'narcisomarcos826@gmail.com', 'comercial@kivora.ao', 'suporte@kivora.ao'];
+      const masterAdmins = ['admin@kivora.ao', 'kivora.angola@gmail.com', 'narcisomarcos826@gmail.com', 'comercial@kivora.ao', 'suporte@kivora.ao'];
 
       try {
         const adminDoc = await getDoc(doc(db, 'admins', user.uid));

@@ -19,6 +19,7 @@ service cloud.firestore {
         request.auth.token.role == 'admin' ||
         request.auth.token.email in [
           'admin@kivora.ao',
+          'kivora.angola@gmail.com',
           'narcisomarcos826@gmail.com',
           'comercial@kivora.ao',
           'suporte@kivora.ao',

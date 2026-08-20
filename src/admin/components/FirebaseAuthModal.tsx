@@ -14,7 +14,7 @@ export const FirebaseAuthModal: React.FC<FirebaseAuthModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  defaultEmail = 'narcisomarcos826@gmail.com'
+  defaultEmail = 'kivora.angola@gmail.com'
 }) => {
   const [email, setEmail] = useState(defaultEmail);
   const [password, setPassword] = useState('');

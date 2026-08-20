@@ -9,6 +9,7 @@ import {
   SystemCompanySettings
 } from '../services/systemSettingsService';
 import { createSupportTicket } from '../admin/services/supportService';
+import { sendSupportTicketEmails } from '../services/siteEmailService';
 
 import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
 
@@ -54,7 +55,19 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
         sender_name: nome
       });
 
-      setTicketProtocol(newTicket.ticket_number || `TICK-AO-${Date.now().toString().slice(-6)}`);
+      const ticketNum = newTicket.ticket_number || `TICK-AO-${Date.now().toString().slice(-6)}`;
+      setTicketProtocol(ticketNum);
+
+      // Disparar e-mails automáticos de suporte (confirmação ao cliente + alerta à equipa de suporte)
+      sendSupportTicketEmails({
+        nome,
+        email: email || undefined,
+        telefone,
+        ticketNumber: ticketNum,
+        assunto: assunto || 'Pedido de Assistência Técnica',
+        departamento,
+        mensagem
+      }).catch((err) => console.warn('Erro ao disparar e-mails do ticket:', err));
 
       // Disparo para Webhook configurado no Firebase
       if (settings.webhookUrl) {

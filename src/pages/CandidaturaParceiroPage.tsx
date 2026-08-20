@@ -15,6 +15,7 @@ import {
   SystemCompanySettings
 } from '../services/systemSettingsService';
 import { triggerKivoraConfetti } from '../utils/confetti';
+import { sendPartnerApplicationEmails } from '../services/siteEmailService';
 
 import parceirosImg from '../assets/kivora/parceiros-kivora.png';
 
@@ -114,7 +115,19 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
         createdAt: Date.now(),
       }, { merge: true });
 
-      // 3. Disparo opcional de webhook externo se configurado no Admin
+      // 3. Disparo de e-mails automáticos (candidato + alerta admin)
+      sendPartnerApplicationEmails({
+        nome,
+        empresa: empresa || nome,
+        nif,
+        email: email.toLowerCase().trim(),
+        telefone,
+        protocol: protocolCode,
+        provincia,
+        tipoParceria,
+      }).catch((err) => console.warn('Erro ao enviar e-mails de candidatura:', err));
+
+      // 4. Disparo opcional de webhook externo se configurado no Admin
       if (settings.webhookUrl && settings.webhookUrl.startsWith('http')) {
         fetch(settings.webhookUrl, {
           method: 'POST',

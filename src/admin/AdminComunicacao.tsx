@@ -3,7 +3,9 @@ import { Send, Bell, Smartphone, Mail, Plus, CheckCircle, Clock, Loader2 } from 
 import { AdminTopbar, StatCard } from './AdminComponents';
 import { ComunicadoAdmin } from './types';
 import { db } from '../lib/firebase';
-import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, getDocs } from 'firebase/firestore';
+import { sendSiteEmail } from '../services/siteEmailService';
+import { generateBroadcastTemplate } from '../services/emailTemplatesSite';
 
 export const AdminComunicacao: React.FC = () => {
   const [comunicados, setComunicados] = useState<ComunicadoAdmin[]>([]);
@@ -13,6 +15,7 @@ export const AdminComunicacao: React.FC = () => {
   const [canal, setCanal] = useState<'sistema' | 'whatsapp' | 'email'>('sistema');
   const [destinatarios, setDestinatarios] = useState('Todas as Empresas Clientes');
   const [mensagem, setMensagem] = useState('');
+  const [sendingBroadcast, setSendingBroadcast] = useState(false);
 
   // Sincronização em Tempo Real com Firestore (/announcements)
   useEffect(() => {
@@ -64,6 +67,7 @@ export const AdminComunicacao: React.FC = () => {
     e.preventDefault();
     if (!titulo || !mensagem) return;
 
+    setSendingBroadcast(true);
     const cId = `com_${Date.now()}`;
     try {
       await setDoc(doc(db, 'announcements', cId), {
@@ -77,12 +81,47 @@ export const AdminComunicacao: React.FC = () => {
         created_at: Date.now()
       }, { merge: true });
 
+      // Se o canal for e-mail, dispara para destinatários
+      if (canal === 'email') {
+        const emailsToSend: string[] = [];
+
+        // Buscar clientes cadastrados
+        try {
+          const licSnap = await getDocs(collection(db, 'licenses'));
+          licSnap.forEach((d) => {
+            const data = d.data();
+            if (data.client_email && data.client_email.includes('@')) {
+              emailsToSend.push(data.client_email.trim());
+            }
+          });
+        } catch (e) {
+          console.warn('Erro ao obter emails para broadcast:', e);
+        }
+
+        const uniqueEmails = Array.from(new Set(emailsToSend));
+        if (uniqueEmails.length > 0) {
+          const html = generateBroadcastTemplate({
+            title: titulo,
+            body: mensagem,
+            senderTitle: 'Administração Geral KIVORA Cloud ERP'
+          });
+
+          await sendSiteEmail({
+            to: uniqueEmails,
+            subject: `📢 [Comunicado Oficial KIVORA] ${titulo}`,
+            html,
+          });
+        }
+      }
+
       setModalNovo(false);
       setTitulo('');
       setMensagem('');
-      alert(`Comunicado "${titulo}" enviado com sucesso via Firebase!`);
+      alert(`Comunicado "${titulo}" publicado e enviado com sucesso!`);
     } catch (err: any) {
-      alert('Erro ao enviar comunicado no Firebase: ' + err.message);
+      alert('Erro ao enviar comunicado: ' + err.message);
+    } finally {
+      setSendingBroadcast(false);
     }
   };
 
@@ -266,9 +305,11 @@ export const AdminComunicacao: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20"
+                  disabled={sendingBroadcast}
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white shadow-md shadow-blue-600/20 flex items-center gap-2"
                 >
-                  Disparar Transmissão
+                  {sendingBroadcast ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                  <span>{sendingBroadcast ? 'A Disparar...' : 'Disparar Transmissão'}</span>
                 </button>
               </div>
             </form>

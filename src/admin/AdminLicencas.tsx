@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Plus, Search, Key, CheckSquare,
   X, Copy, Ban, RotateCcw, Unlink, Trash2, Clock, CheckCircle2,
-  Loader2, Building2, Monitor, Users, ShieldCheck, Download
+  Loader2, Building2, Monitor, Users, ShieldCheck, Download, Mail
 } from 'lucide-react';
 import { AdminTopbar, StatusBadge } from './AdminComponents';
 import { useLicenses, useCompanies } from './hooks/useFirebase';
@@ -17,6 +17,7 @@ import {
   subscribePartnerPolicy, DEFAULT_PARTNER_POLICY,
   PartnerLicensingPolicy, getAdminSeatCost
 } from './services/partnerDebtService';
+import { sendLicenseToClientEmail, sendClientWelcomeEmail } from '../services/siteEmailService';
 import type { KivoraLicense, PlanType } from './types';
 
 // ============================
@@ -76,6 +77,41 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
     navigator.clipboard.writeText(text);
     setCopiedKey(text);
     setTimeout(() => setCopiedKey(null), 2500);
+  };
+
+  const handleSendLicenseEmail = async (lic: KivoraLicense) => {
+    let targetEmail = lic.client_email;
+    if (!targetEmail) {
+      const emailInput = prompt(`Esta licença não tem e-mail associado. Insira o e-mail do cliente ${lic.company_name}:`);
+      if (!emailInput) return;
+      targetEmail = emailInput.trim();
+    }
+
+    if (!confirm(`Enviar a chave de licença oficial por e-mail para ${targetEmail}?`)) return;
+
+    setActionLoading(lic.id);
+    try {
+      const res = await sendLicenseToClientEmail({
+        clientEmail: targetEmail,
+        companyName: lic.company_name,
+        nif: lic.nif,
+        licenseKey: lic.id,
+        planName: getPlanLabel(lic.plan_type),
+        validUntil: formatLicenseDate(lic.expires_at),
+        seatsCount: 1 + (lic.extra_seats || 0),
+        partnerName: lic.partner_id || undefined,
+      });
+
+      if (res.success) {
+        alert(`Licença enviada com sucesso para ${targetEmail}!`);
+      } else {
+        alert(`Não foi possível enviar o e-mail: ${res.error}\n\nVerifique se o serviço de e-mails está configurado em Configurações ➔ Serviço de E-mails.`);
+      }
+    } catch (err: any) {
+      alert('Erro ao enviar e-mail: ' + err.message);
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleRevoke = async (key: string) => {
@@ -405,6 +441,16 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                             <Monitor className="w-3.5 h-3.5" />
                           </button>
 
+                          {/* ENVIAR LICENÇA POR E-MAIL */}
+                          <button
+                            onClick={() => handleSendLicenseEmail(lic)}
+                            disabled={actionLoading === lic.id}
+                            className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                            title="Enviar Licença e Dados por E-mail ao Cliente"
+                          >
+                            <Mail className="w-3.5 h-3.5" />
+                          </button>
+
                           {lic.hardware_id && (
                             <button
                               onClick={() => handleReleaseDevice(lic.id)}
@@ -731,6 +777,18 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
         licenseKey: lic.id,
       });
 
+      // Dispara envio automático de e-mail de boas-vindas com credenciais
+      if (email && email.includes('@')) {
+        sendClientWelcomeEmail({
+          companyName,
+          nif: companyNif,
+          adminName: companyName,
+          email,
+          licenseKey: lic.id,
+          planName: getPlanLabel(plan),
+        }).catch(err => console.warn('Erro envio automatico de email:', err));
+      }
+
       setCreatedLicense(lic);
     } catch (err: any) {
       console.error('Erro ao gerar licença no Firebase:', err);
@@ -770,13 +828,38 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
             <div className="flex justify-between"><span className="text-slate-500">Validade:</span><span className="font-bold text-slate-900">{formatLicenseDate(createdLicense.expires_at)}</span></div>
             <div className="flex justify-between"><span className="text-slate-500">Valor Cobrado:</span><span className="font-mono font-bold text-slate-900">{new Intl.NumberFormat('pt-AO').format(createdLicense.price_aoa || 0)} Kz</span></div>
           </div>
-          <div className="flex gap-3">
-            <button onClick={() => setCreatedLicense(null)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs py-3.5 rounded-2xl transition-all">
-              Emitir Outra
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={async () => {
+                if (createdLicense.client_email) {
+                  const res = await sendClientWelcomeEmail({
+                    companyName: createdLicense.company_name,
+                    nif: createdLicense.nif,
+                    adminName: createdLicense.company_name,
+                    email: createdLicense.client_email,
+                    licenseKey: createdLicense.id,
+                    planName: getPlanLabel(createdLicense.plan_type),
+                  });
+                  if (res.success) alert(`Credenciais e Licença enviadas com sucesso para ${createdLicense.client_email}!`);
+                  else alert(`Não foi possível enviar o e-mail: ${res.error}`);
+                } else {
+                  alert('Esta licença não tem e-mail de cliente associado.');
+                }
+              }}
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 rounded-2xl shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 cursor-pointer transition-all"
+            >
+              <Mail className="w-4 h-4" />
+              <span>Enviar / Reenviar Licença por E-mail ao Cliente</span>
             </button>
-            <button onClick={onBack} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3.5 rounded-2xl shadow-lg shadow-blue-600/20 transition-all">
-              Ver Todas as Licenças
-            </button>
+            <div className="flex gap-3">
+              <button onClick={() => setCreatedLicense(null)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs py-3.5 rounded-2xl transition-all">
+                Emitir Outra
+              </button>
+              <button onClick={onBack} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3.5 rounded-2xl shadow-lg shadow-blue-600/20 transition-all">
+                Ver Todas as Licenças
+              </button>
+            </div>
           </div>
         </div>
       </div>
