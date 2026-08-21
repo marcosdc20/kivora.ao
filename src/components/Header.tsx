@@ -219,46 +219,47 @@ export const Header: React.FC<HeaderProps> = ({
     <header
       ref={navRef}
       className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md transition-all duration-200 border-b print:hidden ${
-        isScrolled ? 'border-slate-200 shadow-sm py-1.5' : 'border-slate-100 py-2 sm:py-2.5'
+        isScrolled ? 'border-slate-200 shadow-sm' : 'border-slate-100 shadow-xs'
       }`}
     >
-      {/* Top Utility Sub-Bar (Inspirada no estilo Registar.ao) */}
-      <div className="hidden md:block bg-slate-50/90 border-b border-slate-200/60 -mt-2 sm:-mt-2.5 mb-1.5 py-1 px-4 text-[11px] text-slate-500 font-medium">
+      {/* Top Utility Sub-Bar — Cor Azul Oficial do Logo Kivora */}
+      <div className="hidden md:block bg-[#1d4ed8] text-white border-b border-blue-700/60 py-2 sm:py-2.5 px-4 sm:px-6 lg:px-8 text-xs font-medium shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <span className="flex items-center gap-1.5 text-slate-600 font-semibold">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="flex items-center gap-2 text-white font-bold tracking-tight">
+              <ShieldCheck className="w-4 h-4 text-emerald-300 shrink-0" />
               <span>Software Certificado pela AGT • Decreto n.º 71/25</span>
             </span>
             <button
               onClick={() => handleNavClick('noticias')}
-              className="hover:text-blue-600 transition-colors flex items-center gap-1 cursor-pointer"
+              className="text-blue-100 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer font-medium"
             >
-              <Newspaper className="w-3 h-3 text-slate-400" />
+              <Newspaper className="w-3.5 h-3.5 text-blue-200" />
               <span>Notícias Fiscais</span>
             </button>
             <button
               onClick={() => handleNavClick('manuais')}
-              className="hover:text-blue-600 transition-colors flex items-center gap-1 cursor-pointer"
+              className="text-blue-100 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer font-medium"
             >
-              <BookOpen className="w-3 h-3 text-slate-400" />
+              <BookOpen className="w-3.5 h-3.5 text-blue-200" />
               <span>Base de Conhecimento</span>
             </button>
           </div>
           <div className="flex items-center gap-5">
             <button
               onClick={() => handleNavClick('suporte')}
-              className="hover:text-blue-600 transition-colors flex items-center gap-1 cursor-pointer"
+              className="text-blue-100 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer font-medium"
             >
-              <HelpCircle className="w-3 h-3 text-slate-400" />
+              <HelpCircle className="w-3.5 h-3.5 text-blue-200" />
               <span>Suporte & Chamados</span>
             </button>
             <a
               href={settings.whatsappUrl || 'https://wa.me/244923456789'}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-emerald-600 font-bold hover:text-emerald-700 transition-colors flex items-center gap-1"
+              className="inline-flex items-center gap-1.5 bg-blue-900/40 hover:bg-blue-900/70 text-emerald-300 hover:text-emerald-200 font-bold px-3.5 py-1 rounded-full border border-blue-400/30 transition-all font-mono-num"
             >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
               <span>WhatsApp: {settings.phoneDisplay || '(+244) 923 456 789'}</span>
             </a>
           </div>
@@ -311,7 +312,7 @@ export const Header: React.FC<HeaderProps> = ({
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all ${isScrolled ? 'py-1.5' : 'py-2 sm:py-2.5'}`}>
         <div className="flex items-center justify-between min-h-[50px] sm:min-h-[56px]">
 
           {/* Brand Logo Kivora */}
