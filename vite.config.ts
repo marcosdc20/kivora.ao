@@ -88,14 +88,22 @@ function devEmailPlugin(): Plugin {
                 }
               });
 
-              const info = await transporter.sendMail({
+              const mailOptions: any = {
                 from: typeof from === 'string' && from.includes('@') ? from : `"KIVORA ERP" <${user}>`,
-                to: recipients.join(', '),
                 subject,
                 html,
                 text,
                 replyTo: user,
-              });
+              };
+
+              if (recipients.length === 1) {
+                mailOptions.to = recipients[0];
+              } else {
+                mailOptions.to = user;
+                mailOptions.bcc = recipients;
+              }
+
+              const info = await transporter.sendMail(mailOptions);
 
               res.statusCode = 200;
               res.setHeader('Content-Type', 'application/json');

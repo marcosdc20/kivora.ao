@@ -277,6 +277,47 @@ export const AdminComunicacao: React.FC = () => {
     }
   };
 
+  const handleResendEmail = async (com: ComunicadoAdmin) => {
+    const confirmSend = window.confirm(`Deseja disparar este comunicado por e-mail agora para "${com.destinatarios}"?`);
+    if (!confirmSend) return;
+
+    setSendingBroadcast(true);
+    try {
+      const uniqueEmails = await getResolvedEmails(com.destinatarios);
+      if (uniqueEmails.length === 0) {
+        alert('Nenhum endereço de e-mail encontrado para o grupo selecionado.');
+        return;
+      }
+
+      const html = generateBroadcastTemplate({
+        title: com.titulo,
+        body: com.mensagem,
+        senderTitle: 'Administração Geral KIVORA Cloud ERP'
+      });
+
+      const res = await sendSiteEmail({
+        to: uniqueEmails,
+        subject: `[Comunicado Oficial KIVORA] ${com.titulo}`,
+        html,
+      });
+
+      if (res.success) {
+        await setDoc(doc(db, 'announcements', com.id), {
+          canal: 'email',
+          estado: 'enviado',
+          lastEmailSentAt: new Date().toISOString()
+        }, { merge: true });
+        alert(`Comunicado disparado com sucesso por e-mail para ${uniqueEmails.length} destinatários (${uniqueEmails.join(', ')})!`);
+      } else {
+        alert(`Não foi possível enviar o e-mail: ${res.error || 'Verifique o serviço de e-mails em Configurações.'}`);
+      }
+    } catch (err: any) {
+      alert('Erro ao disparar e-mail: ' + err.message);
+    } finally {
+      setSendingBroadcast(false);
+    }
+  };
+
   return (
     <div className="flex-1 overflow-y-auto bg-slate-50">
       <AdminTopbar
@@ -371,15 +412,28 @@ export const AdminComunicacao: React.FC = () => {
                       <span className="text-[10px] uppercase font-bold text-slate-400 block">Destinatários</span>
                       <span className="text-xs font-bold text-slate-800">{com.destinatarios}</span>
                     </div>
-                    {com.estado === 'enviado' ? (
-                      <span className="text-xs font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg border border-emerald-200 flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5" /> Enviado
-                      </span>
-                    ) : (
-                      <span className="text-xs font-bold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-lg border border-amber-200 flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" /> Agendado
-                      </span>
-                    )}
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleResendEmail(com)}
+                        disabled={sendingBroadcast}
+                        className="text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg border border-blue-200 flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+                        title="Disparar este comunicado oficial por e-mail agora"
+                      >
+                        <Mail className="w-3.5 h-3.5" />
+                        <span>Disparar por E-mail</span>
+                      </button>
+
+                      {com.estado === 'enviado' ? (
+                        <span className="text-xs font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg border border-emerald-200 flex items-center gap-1">
+                          <CheckCircle className="w-3.5 h-3.5" /> Enviado
+                        </span>
+                      ) : (
+                        <span className="text-xs font-bold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-lg border border-amber-200 flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" /> Agendado
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))

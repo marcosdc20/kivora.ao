@@ -79,14 +79,20 @@ export default async function handler(req: any, res: any) {
         }
       });
 
-      const mailOptions = {
+      const mailOptions: any = {
         from: typeof from === 'string' && from.includes('@') ? from : `"KIVORA ERP" <${user}>`,
-        to: recipients.join(', '),
         subject,
         html,
         text,
         replyTo: user,
       };
+
+      if (recipients.length === 1) {
+        mailOptions.to = recipients[0];
+      } else {
+        mailOptions.to = user;
+        mailOptions.bcc = recipients;
+      }
 
       const info = await transporter.sendMail(mailOptions);
       return res.status(200).json({ success: true, messageId: info.messageId || `gmail-${Date.now()}` });
