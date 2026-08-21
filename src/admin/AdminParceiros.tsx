@@ -4,13 +4,14 @@ import {
   DollarSign, Users, CheckCircle2, Loader2, Copy,
   Key, MessageSquare, Search, Ban, RotateCcw,
   Tag, TrendingDown, Wallet, Edit2, Save,
-  ShieldCheck, Sliders, Download, Sparkles, Award, Mail
+  ShieldCheck, Sliders, Download, Sparkles, Award, Mail,
+  Phone, Building, MapPin, Trash2, Calendar, FileText
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
 import { createOrApprovePartnerAccount, setPartnerSuspensionStatus } from './services/authService';
 import { sendPartnerCredentialsEmail } from '../services/siteEmailService';
 import { db } from '../lib/firebase';
-import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import {
   subscribePartnerPricing, savePartnerPricing, subscribeAllDebts, markDebtsPaid,
   subscribePartnerPolicy, savePartnerPolicy,
@@ -45,8 +46,29 @@ interface AdminParceirosProps {
 
 const fmt = (n: number) => n.toLocaleString('pt-AO');
 
+export interface PartnerApplicationItem {
+  id: string;
+  nome: string;
+  cargo_responsavel?: string;
+  empresa_nome?: string;
+  empresa?: string;
+  nif?: string;
+  email: string;
+  telefone: string;
+  provincia?: string;
+  municipio?: string;
+  region?: string;
+  tipo_parceria?: string;
+  tem_clientes?: string;
+  experiencia?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: number;
+  protocol?: string;
+}
+
 export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'todos' }) => {
   const [partners, setPartners] = useState<Partner[]>([]);
+  const [applications, setApplications] = useState<PartnerApplicationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'todos' | 'candidaturas' | 'precos' | 'politicas' | 'extrato_geral'>(initialTab);
   const [search, setSearch] = useState('');
@@ -92,6 +114,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const [region, setRegion] = useState('Luanda');
   const [newPartnerTier, setNewPartnerTier] = useState<'bronze' | 'silver' | 'gold' | 'diamond'>('bronze');
 
+  // 1. Escuta em Tempo Real da Coleção `partners`
   useEffect(() => {
     try {
       const unsub = onSnapshot(collection(db, 'partners'), (snapshot) => {
@@ -137,6 +160,40 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     } catch (e) { console.warn(e); setLoading(false); }
   }, [policy]);
 
+  // 2. Escuta em Tempo Real da Coleção `partner_applications` (Candidaturas do Site)
+  useEffect(() => {
+    try {
+      const unsub = onSnapshot(collection(db, 'partner_applications'), (snapshot) => {
+        const list: PartnerApplicationItem[] = [];
+        snapshot.forEach((docSnap) => {
+          const d = docSnap.data();
+          list.push({
+            id: docSnap.id,
+            nome: d.nome || d.nome_responsavel || 'Candidato',
+            cargo_responsavel: d.cargo_responsavel || d.cargo,
+            empresa_nome: d.empresa_nome || d.empresa || d.nome,
+            empresa: d.empresa || d.empresa_nome,
+            nif: d.nif || '',
+            email: d.email || '',
+            telefone: d.telefone || d.phone || '',
+            provincia: d.provincia || 'Luanda',
+            municipio: d.municipio || '',
+            region: d.provincia ? `${d.provincia}${d.municipio ? ` (${d.municipio})` : ''}` : (d.region || 'Luanda'),
+            tipo_parceria: d.tipo_parceria || d.tipoParceria || 'Distribuidor Autorizado',
+            tem_clientes: d.tem_clientes,
+            experiencia: d.experiencia,
+            status: d.status || 'pending',
+            created_at: Number(d.created_at) || Number(d.createdAt) || Date.now(),
+            protocol: d.protocol || d.id,
+          });
+        });
+        list.sort((a, b) => b.created_at - a.created_at);
+        setApplications(list);
+      }, (err) => console.warn('Erro ao escutar partner_applications:', err));
+      return () => unsub();
+    } catch (e) { console.warn(e); }
+  }, []);
+
   useEffect(() => {
     const unsub = subscribeAllDebts(setAllDebts);
     return () => unsub();
@@ -167,8 +224,77 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     }
   }, [selectedPartner, allDebts]);
 
+  // Combina candidaturas do formulário web (`partner_applications`) com registos pendentes de `partners`
+  const pendingApplicationsList = React.useMemo(() => {
+    const list: Array<{
+      id: string;
+      appId?: string;
+      code: string;
+      name: string;
+      responsible?: string;
+      email: string;
+      phone: string;
+      region: string;
+      nif?: string;
+      tipo_parceria?: string;
+      tem_clientes?: string;
+      experiencia?: string;
+      status: string;
+      createdAt: number;
+      protocol?: string;
+      tier?: 'bronze' | 'silver' | 'gold' | 'diamond';
+    }> = [];
+
+    const processedEmails = new Set<string>();
+
+    // 1. Dados ricos de `partner_applications` (site público)
+    applications.filter(a => a.status === 'pending' || !a.status).forEach(app => {
+      const cleanMail = app.email.toLowerCase().trim();
+      processedEmails.add(cleanMail);
+      const pCode = app.protocol || `KVRA-PAR-${Math.floor(100 + Math.random() * 900)}`;
+      list.push({
+        id: app.id,
+        appId: app.id,
+        code: pCode,
+        name: app.empresa_nome || app.empresa || app.nome || 'Candidato a Parceiro',
+        responsible: app.nome,
+        email: app.email,
+        phone: app.telefone,
+        region: app.region || `${app.provincia || 'Luanda'}${app.municipio ? ` (${app.municipio})` : ''}`,
+        nif: app.nif,
+        tipo_parceria: app.tipo_parceria,
+        tem_clientes: app.tem_clientes,
+        experiencia: app.experiencia,
+        status: 'pending',
+        createdAt: app.created_at || Date.now(),
+        protocol: app.protocol,
+        tier: 'bronze',
+      });
+    });
+
+    // 2. Registos pendentes da coleção `partners`
+    partners.filter(p => p.status === 'pending').forEach(p => {
+      const cleanMail = p.email.toLowerCase().trim();
+      if (!processedEmails.has(cleanMail)) {
+        list.push({
+          id: p.id,
+          code: p.code,
+          name: p.name,
+          email: p.email,
+          phone: p.phone,
+          region: p.region,
+          status: 'pending',
+          createdAt: p.createdAt,
+          tier: p.tier,
+        });
+      }
+    });
+
+    return list;
+  }, [applications, partners]);
+
   const activePartners = partners.filter(p => p.status === 'active');
-  const pendingPartners = partners.filter(p => p.status === 'pending');
+  const pendingPartners = pendingApplicationsList;
   const totalDebtAoa = allDebts.filter(d => !d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
   const totalReceivedAoa = allDebts.filter(d => d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
   const totalProvisionalDebts = allDebts.filter(d => d.is_provisional && !d.paid).length;
@@ -182,12 +308,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const getPartnerActiveCreditSlots = (pid: string) =>
     allDebts.filter(d => (d.partner_id === pid || (partners.find(p => p.id === pid)?.code && d.partner_id === partners.find(p => p.id === pid)?.code)) && !d.paid && d.payment_method !== 'wallet').length;
 
-  const filteredPartners = (tab === 'candidaturas' ? pendingPartners : partners).filter(p => {
+  const filteredPartners = (tab === 'candidaturas' ? pendingPartners : partners).filter((p: any) => {
     const matchesTier = tierFilter === 'todos' || p.tier === tierFilter;
     if (!matchesTier) return false;
     if (!search) return true;
     const s = search.toLowerCase();
-    return p.name.toLowerCase().includes(s) || p.code.toLowerCase().includes(s) ||
+    return p.name.toLowerCase().includes(s) || (p.code && p.code.toLowerCase().includes(s)) ||
       p.email.toLowerCase().includes(s) || p.region.toLowerCase().includes(s);
   });
 
@@ -216,7 +342,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       }, { merge: true });
       await createOrApprovePartnerAccount({ nome: name, email, phone, region, partnerCode: pCode, tier: newPartnerTier });
       
-      // Envio automático de e-mail de credenciais ao parceiro
+      // Envio automático de e-mail de credenciais ao parceiro via Google Gmail
       if (email && email.includes('@')) {
         sendPartnerCredentialsEmail({
           partnerEmail: email.toLowerCase().trim(),
@@ -231,30 +357,98 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     } catch (err: any) { alert('Erro ao registar parceiro: ' + err.message); }
   };
 
-  const handleApprovePartner = async (p: Partner) => {
-    setApproving(p.id);
+  const handleApprovePartner = async (cand: any) => {
+    setApproving(cand.id);
     const pwd = `kivora${Math.floor(1000 + Math.random() * 9000)}`;
-    const initialSlots = policy.tier_slots[p.tier || 'bronze'] || 2;
+    const pCode = (cand.code || `KVRA-PAR-${Math.floor(100 + Math.random() * 900)}`).toUpperCase().trim();
+    const initialSlots = policy.tier_slots['bronze'] || 2;
     try {
-      await setDoc(doc(db, 'partners', p.id), { status: 'active', code: p.code, credit_slots_limit: initialSlots }, { merge: true });
-      if (p.id !== p.code) {
-        await setDoc(doc(db, 'partners', p.code), { status: 'active', code: p.code, credit_slots_limit: initialSlots }, { merge: true });
+      // 1. Grava na coleção `partners` com status 'active'
+      await setDoc(doc(db, 'partners', pCode), {
+        id: pCode,
+        code: pCode,
+        name: cand.name,
+        responsible: cand.responsible || cand.name,
+        email: cand.email.toLowerCase().trim(),
+        phone: cand.phone,
+        region: cand.region,
+        nif: cand.nif || '',
+        tier: 'bronze',
+        credit_slots_limit: initialSlots,
+        debt_aoa: 0,
+        total_paid_aoa: 0,
+        total_sales: 0,
+        status: 'active',
+        createdAt: cand.createdAt || Date.now(),
+        approvedAt: Date.now(),
+      }, { merge: true });
+
+      if (cand.id && cand.id !== pCode) {
+        await setDoc(doc(db, 'partners', cand.id), { status: 'active', code: pCode }, { merge: true });
       }
-      await createOrApprovePartnerAccount({ nome: p.name, email: p.email, phone: p.phone, region: p.region, partnerCode: p.code });
-      
-      // Envio automático de e-mail de homologação ao parceiro
-      if (p.email && p.email.includes('@')) {
+
+      // 2. Se for candidatura de `partner_applications`, marca como aprovada
+      if (cand.appId) {
+        await updateDoc(doc(db, 'partner_applications', cand.appId), {
+          status: 'approved',
+          partner_code: pCode,
+          approved_at: Date.now(),
+        }).catch(() => {});
+      }
+
+      // 3. Cria utilizador no portal
+      await createOrApprovePartnerAccount({
+        nome: cand.name,
+        email: cand.email,
+        phone: cand.phone,
+        region: cand.region,
+        partnerCode: pCode,
+      });
+
+      // 4. Envio de e-mail de homologação oficial via Google Gmail (kivora.angola@gmail.com)
+      if (cand.email && cand.email.includes('@')) {
         sendPartnerCredentialsEmail({
-          partnerEmail: p.email.toLowerCase().trim(),
-          partnerName: p.name,
-          partnerCode: p.code,
+          partnerEmail: cand.email.toLowerCase().trim(),
+          partnerName: cand.name,
+          partnerCode: pCode,
           password: pwd,
         }).catch((err) => console.warn('Aviso no envio de e-mail ao parceiro:', err));
       }
 
-      setCredentialsModal({ open: true, partnerName: p.name, email: p.email, password: pwd, partnerCode: p.code, phone: p.phone });
-    } catch (err: any) { alert('Erro ao aprovar: ' + err.message); }
-    finally { setApproving(null); }
+      setCredentialsModal({
+        open: true,
+        partnerName: cand.name,
+        email: cand.email,
+        password: pwd,
+        partnerCode: pCode,
+        phone: cand.phone,
+      });
+    } catch (err: any) {
+      alert('Erro ao aprovar parceiro: ' + err.message);
+    } finally {
+      setApproving(null);
+    }
+  };
+
+  const handleRejectPartner = async (cand: any) => {
+    if (!confirm(`Tem a certeza que deseja rejeitar a candidatura de ${cand.name}?`)) return;
+    try {
+      if (cand.appId) {
+        await updateDoc(doc(db, 'partner_applications', cand.appId), {
+          status: 'rejected',
+          rejected_at: Date.now(),
+        });
+      }
+      if (cand.id) {
+        await updateDoc(doc(db, 'partners', cand.id), {
+          status: 'rejected',
+          rejected_at: Date.now(),
+        }).catch(() => {});
+      }
+      alert('Candidatura arquivada com sucesso.');
+    } catch (err: any) {
+      alert('Erro ao rejeitar: ' + err.message);
+    }
   };
 
   const handleToggleSuspend = async (p: Partner) => {
@@ -544,34 +738,105 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         )}
 
         {tab === 'candidaturas' && (
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
-            <h3 className="font-black text-slate-900 text-sm">Candidaturas de Novos Parceiros</h3>
-            <p className="text-xs text-slate-500">Aprove as solicitações para criar a conta de revendedor no Firebase com credenciais automáticas.</p>
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                  <span>Candidaturas de Novos Parceiros ({pendingPartners.length})</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Solicitações recebidas através do formulário oficial do site e registos pendentes.
+                </p>
+              </div>
+            </div>
 
             {pendingPartners.length === 0 ? (
-              <div className="p-10 text-center text-slate-400">
-                <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
-                <p className="font-bold text-slate-700">Todas as candidaturas foram homologadas!</p>
+              <div className="p-12 text-center text-slate-400 space-y-3">
+                <div className="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-xs">
+                  <CheckCircle2 className="w-8 h-8" />
+                </div>
+                <p className="font-black text-slate-700 text-sm">Todas as candidaturas foram homologadas!</p>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                  Novas solicitações de parceria preenchidas no site em <strong>kivora.ao/#parceiros</strong> aparecerão automaticamente aqui em tempo real.
+                </p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
-                {pendingPartners.map((p) => (
-                  <div key={p.id} className="py-4 flex items-center justify-between gap-4">
-                    <div>
-                      <p className="font-bold text-slate-900 text-sm">{p.name}</p>
-                      <p className="text-xs text-slate-500">{p.email} • {p.phone} • {p.region}</p>
-                      <span className="inline-block mt-1 text-[10px] bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded font-bold">
-                        Aguardando Homologação
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {pendingPartners.map((cand) => (
+                  <div
+                    key={cand.id}
+                    className="p-5 rounded-3xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-emerald-300 hover:shadow-md transition-all space-y-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <span className="font-mono text-[10px] font-black text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
+                          {cand.protocol || cand.code}
+                        </span>
+                        <h4 className="font-black text-slate-900 text-sm mt-1.5">{cand.name}</h4>
+                        {cand.responsible && cand.responsible !== cand.name && (
+                          <p className="text-xs text-slate-600 font-medium">Resp: {cand.responsible}</p>
+                        )}
+                      </div>
+
+                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                        Pendente
                       </span>
                     </div>
-                    <button
-                      onClick={() => handleApprovePartner(p)}
-                      disabled={approving === p.id}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
-                    >
-                      {approving === p.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-                      <span>Aprovar & Gerar Acesso</span>
-                    </button>
+
+                    <div className="grid grid-cols-2 gap-2 text-[11px] bg-white p-3 rounded-2xl border border-slate-200/80">
+                      <div>
+                        <span className="text-slate-400 block text-[10px] font-bold uppercase">NIF:</span>
+                        <strong className="text-slate-800">{cand.nif || 'Não informado'}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[10px] font-bold uppercase">Localização:</span>
+                        <strong className="text-slate-800 truncate block">{cand.region || 'Luanda'}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[10px] font-bold uppercase">Telefone:</span>
+                        <a href={`tel:${cand.phone}`} className="text-blue-600 font-bold hover:underline">
+                          {cand.phone}
+                        </a>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[10px] font-bold uppercase">E-mail:</span>
+                        <a href={`mailto:${cand.email}`} className="text-slate-700 font-medium truncate block hover:text-blue-600">
+                          {cand.email}
+                        </a>
+                      </div>
+                    </div>
+
+                    {cand.tipo_parceria && (
+                      <div className="text-[11px] text-slate-600 space-y-1">
+                        <p><strong>Tipo de Parceria:</strong> <span className="text-emerald-700 font-semibold">{cand.tipo_parceria}</span></p>
+                        {cand.tem_clientes && <p><strong>Clientes Atuais:</strong> {cand.tem_clientes}</p>}
+                        {cand.experiencia && <p><strong>Experiência:</strong> {cand.experiencia}</p>}
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 gap-2">
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        {new Date(cand.createdAt).toLocaleDateString('pt-AO', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </span>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleRejectPartner(cand)}
+                          className="px-3 py-2 text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
+                        >
+                          Arquivar
+                        </button>
+                        <button
+                          onClick={() => handleApprovePartner(cand)}
+                          disabled={approving === cand.id}
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                        >
+                          {approving === cand.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                          <span>Aprovar & Homologar</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
