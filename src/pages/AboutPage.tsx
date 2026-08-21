@@ -6,8 +6,7 @@ import {
   SystemCompanySettings
 } from '../services/systemSettingsService';
 
-import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
-import tabletImg from '../assets/kivora/jovem-empresaria-com-tablet.png';
+import executivosImg from '../assets/kivora/executivos-kivora.jpg';
 
 interface AboutPageProps {
   onOpenDemoModal: () => void;
@@ -25,8 +24,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
       
       {/* Header Banner Showcase */}
       <PageHero
-        image={welcomeImg}
-        tag="Sobre a Visual Software & KIVORA"
+        image={executivosImg}
+        tag="Sobre a Kivora Tecnologias"
         title="Tecnologia de Gestão e Faturação para Angola"
         sub="Desenvolvemos o KIVORA ERP para capacitar empresários e gestores angolanos com software robusto, alinhado com as normas da AGT e com suporte presencial em Luanda."
       />
@@ -41,7 +40,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
             </h2>
             
             <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
-              Fundada em Luanda, a <strong>Visual Software</strong> nasceu com a missão de transformar a forma como as empresas em Angola gerem os seus processos comerciais, financeiros e contabilísticos.
+              Fundada em Luanda, a <strong>Kivora Tecnologias</strong> nasceu com a missão de transformar a forma como as empresas em Angola gerem os seus processos comerciais, financeiros e contabilísticos.
             </p>
 
             <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
@@ -68,9 +67,9 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
           <div className="lg:col-span-6 flex items-center justify-center">
             <div className="w-full max-w-lg">
               <img
-                src={tabletImg}
+                src={executivosImg}
                 alt="Gestão Moderna Kivora ERP"
-                className="w-full h-auto max-h-[500px] object-contain"
+                className="w-full h-[360px] sm:h-[420px] rounded-3xl border border-slate-200 shadow-2xl object-cover"
               />
             </div>
           </div>

@@ -11,7 +11,7 @@ import {
 } from '../services/systemSettingsService';
 import { YouTubePlayer } from '../components/YouTubePlayer';
 
-import parceirosImg from '../assets/kivora/parceiros-kivora.png';
+import executivosImg from '../assets/kivora/executivos-kivora.jpg';
 
 function useScrollReveal() {
   useEffect(() => {
@@ -55,7 +55,7 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
     <div className="min-h-screen bg-white text-slate-900 page-enter">
 
       <PageHero
-        image={parceirosImg}
+        image={executivosImg}
         tag="Programa de Parceiros & Canais"
         title={`Revenda o ${settings.fullName} e cresça connosco`}
         sub={`Torne-se distribuidor oficial da ${settings.company} e lucre com margens de atacado em cada licença na sua região.`}

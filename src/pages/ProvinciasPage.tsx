@@ -11,7 +11,7 @@ import {
 } from '../services/systemSettingsService';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 
-import parceirosImg from '../assets/kivora/parceiros-kivora.png';
+import executivosImg from '../assets/kivora/executivos-kivora.jpg';
 
 interface ProvinciasPageProps {
   onNavigatePage: (page: PageId) => void;
@@ -64,7 +64,7 @@ export const ProvinciasPage: React.FC<ProvinciasPageProps> = ({
       
       {/* Hero Showcase */}
       <PageHero
-        image={parceirosImg}
+        image={executivosImg}
         tag="Cobertura Territorial em Angola"
         title="Presente em Todas as 18 Províncias de Angola"
         sub="Da capital aos municípios do interior, garantimos instalação presencial, assistência técnica rápida e conformidade fiscal AGT para empresas em todo o país."

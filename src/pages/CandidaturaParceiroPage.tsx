@@ -17,7 +17,7 @@ import {
 import { triggerKivoraConfetti } from '../utils/confetti';
 import { sendPartnerApplicationEmails } from '../services/siteEmailService';
 
-import parceirosImg from '../assets/kivora/parceiros-kivora.png';
+import executivosImg from '../assets/kivora/executivos-kivora.jpg';
 
 interface CandidaturaParceiroPageProps {
   onBack: () => void;
@@ -212,9 +212,9 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
           <div className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
             <div className="relative h-48 sm:h-52 bg-slate-100">
               <img
-                src={parceirosImg}
+                src={executivosImg}
                 alt="Parceiros Comerciais Kivora"
-                className="w-full h-full object-cover object-top"
+                className="w-full h-full object-cover object-center"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent flex items-end p-4">
                 <div className="text-white">

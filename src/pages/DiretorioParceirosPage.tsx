@@ -8,7 +8,7 @@ import { PageId } from '../components/Header';
 import { db } from '../lib/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 
-import parceirosImg from '../assets/kivora/parceiros-kivora.png';
+import executivosImg from '../assets/kivora/executivos-kivora.jpg';
 
 interface DiretorioParceirosPageProps {
   onNavigatePage: (page: PageId) => void;
@@ -109,7 +109,7 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
       
       {/* Hero Showcase */}
       <PageHero
-        image={parceirosImg}
+        image={executivosImg}
         tag="Rede Nacional de Distribuidores"
         title="Encontre um Parceiro Autorizado em Angola"
         sub="Técnicos e empresas credenciadas pela Visual Software para instalação presencial, configuração de redes locais, fornecimento de impressoras e formação da sua equipa."

@@ -3,9 +3,7 @@ import { HeroCarousel } from '../components/HeroCarousel';
 import {
   CheckCircle2, ArrowRight, Download, Shield, Wifi,
   Zap, Monitor, Laptop, Check, ShieldCheck,
-  Award, Headphones, Building2, MapPin, TrendingUp,
-  Search, ShoppingCart, ShoppingBag, Utensils, Pill,
-  Briefcase, Boxes
+  Award, Headphones, Building2, MapPin, TrendingUp
 } from 'lucide-react';
 import { PageId } from '../components/Header';
 import {
@@ -23,7 +21,6 @@ import desktopImg from '../assets/kivora/pc-descktop-kivora.png';
 import laptopImg from '../assets/kivora/pc-laptop-kivora.png';
 import empresariaTabletImg from '../assets/kivora/jovem-empresaria-com-tablet.png';
 import empresarioBoasVindasImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
-import parceirosImg from '../assets/kivora/parceiros-kivora.png';
 import executivosImg from '../assets/kivora/executivos-kivora.jpg';
 import supermercadoImg from '../assets/kivora/supermercado-kivora.jpg';
 
@@ -32,16 +29,6 @@ interface HomePageProps {
   onOpenDemoModal: (subject?: string) => void;
   onNavigatePage: (page: PageId) => void;
 }
-
-// Setores sugeridos para o Quick Finder com Ícones Oficiais Lucide (Sem Emojis)
-const QUICK_SECTORS = [
-  { id: 'retalho', label: 'Retalho & Lojas', icon: ShoppingBag, module: 'pos-multicaixa', price: '25.000 Kz / mês', planId: 'mensal' },
-  { id: 'supermercado', label: 'Supermercados & Mercearias', icon: ShoppingCart, module: 'gestao-stock', price: '250.000 Kz / ano', planId: 'anual', popular: true },
-  { id: 'restauracao', label: 'Restauração & Bares', icon: Utensils, module: 'pos-multicaixa', price: '250.000 Kz / ano', planId: 'anual' },
-  { id: 'farmacia', label: 'Farmácias & Saúde', icon: Pill, module: 'faturacao-agt', price: '250.000 Kz / ano', planId: 'anual' },
-  { id: 'servicos', label: 'Prestação de Serviços', icon: Briefcase, module: 'faturacao-agt', price: '25.000 Kz / mês', planId: 'mensal' },
-  { id: 'materiais', label: 'Materiais de Construção', icon: Boxes, module: 'gestao-stock', price: '650.000 Kz / perpétuo', planId: 'vitalicio' },
-];
 
 // Contador animado progressivo baseado em IntersectionObserver
 const AnimatedCounter: React.FC<{
@@ -172,8 +159,6 @@ export const HomePage: React.FC<HomePageProps> = ({
   const sectionsRef = useRef<HTMLDivElement>(null);
   const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
   const [partnerLogos, setPartnerLogos] = useState<PartnerBrandLogo[]>([]);
-  const [searchSector, setSearchSector] = useState<string>('');
-  const [activeSector, setActiveSector] = useState(QUICK_SECTORS[0]);
 
   useEffect(() => {
     const unsubSettings = subscribeSystemSettings(setSettings);
@@ -183,11 +168,6 @@ export const HomePage: React.FC<HomePageProps> = ({
       unsubBrands();
     };
   }, []);
-
-  // Filtragem dinâmica do setor pelo texto digitado
-  const filteredSector = searchSector.trim()
-    ? QUICK_SECTORS.find(s => s.label.toLowerCase().includes(searchSector.toLowerCase())) || activeSector
-    : activeSector;
 
   return (
     <div className="bg-white text-slate-900">
@@ -212,245 +192,6 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         </div>
       </div>
-
-      {/* ========== LOCALIZADOR INTELIGENTE DE SOLUÇÕES FISCAIS POR SETOR ========== */}
-      <section className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 mb-16">
-        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xl shadow-slate-950/5">
-          
-          <div className="text-center max-w-2xl mx-auto mb-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold mb-3">
-              <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-              <span>Homologação AGT por Ramo de Atividade</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
-              Encontre a Solução KIVORA Ideal para a Sua Empresa
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1">
-              Descubra os módulos específicos, periféricos recomendados e conformidade legal para o seu setor em Angola.
-            </p>
-          </div>
-
-          {/* Barra de Pesquisa com Input & Botão */}
-          <div className="relative flex flex-col sm:flex-row items-center gap-3 bg-slate-50 border border-slate-200 rounded-2xl p-2 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
-            <div className="flex items-center gap-3 flex-1 px-3 w-full">
-              <Search className="w-5 h-5 text-slate-400 shrink-0" />
-              <input
-                type="text"
-                value={searchSector}
-                onChange={(e) => setSearchSector(e.target.value)}
-                placeholder="ex: Supermercado, Restaurante, Farmácia, Loja de Roupas, Consultoria..."
-                className="w-full bg-transparent text-sm font-semibold text-slate-900 placeholder-slate-400 focus:outline-none py-2"
-              />
-            </div>
-            <button
-              onClick={() => onOpenDemoModal(filteredSector.label)}
-              className="w-full sm:w-auto bg-[#1d4ed8] hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl transition-all shadow-md shadow-blue-600/20 cursor-pointer flex items-center justify-center gap-2 shrink-0"
-            >
-              <span>Simular Implementação</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Chips de Seleção Rápida */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Setores Populares:</span>
-            {QUICK_SECTORS.map((sector) => {
-              const isSelected = filteredSector.id === sector.id;
-              const SectorIcon = sector.icon;
-              return (
-                <button
-                  key={sector.id}
-                  onClick={() => {
-                    setActiveSector(sector);
-                    setSearchSector('');
-                  }}
-                  className={`text-xs font-semibold px-3.5 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-2 ${
-                    isSelected
-                      ? 'bg-blue-50 border-blue-300 text-blue-700 font-bold shadow-xs'
-                      : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
-                  }`}
-                >
-                  <SectorIcon className={`w-3.5 h-3.5 ${isSelected ? 'text-blue-600' : 'text-slate-500'}`} />
-                  <span>{sector.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Cartão de Resultado Imediato */}
-          <div className="mt-8 pt-6 border-t border-slate-100">
-            <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
-              
-              <div className="flex items-center gap-3.5 text-center md:text-left">
-                <div className="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center justify-center shrink-0">
-                  <Check className="w-6 h-6 stroke-[2.5]" />
-                </div>
-                <div>
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                    <span className="text-base sm:text-lg font-extrabold text-slate-950">
-                      KIVORA ERP para {filteredSector.label}
-                    </span>
-                    <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
-                      100% Homologado AGT
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 mt-0.5">
-                    Certificação DS.120 com QR Code, assinatura digital RS256, rede local e SAF-T AO mensal auditado.
-                  </p>
-                </div>
-              </div>
-
-              {/* Preço e Botão de Ação Direta */}
-              <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
-                <div className="bg-white border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-900 shadow-xs flex items-center gap-1">
-                  <span>{filteredSector.price}</span>
-                </div>
-                <button
-                  onClick={() => onOpenDemoModal(`Adesão: ${filteredSector.label}`)}
-                  className="bg-[#1d4ed8] hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-md shadow-blue-600/20 cursor-pointer flex items-center gap-1.5"
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                  <span>Solicitar Proposta</span>
-                </button>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========== SEÇÃO DE PLANOS & MODALIDADES EM DESTAQUE ========== */}
-      <section className="py-10 max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
-              Planos e Licenciamento em Kwanzas
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-600">
-              Escolha a modalidade ideal para o número de postos de trabalho e caixas da sua empresa.
-            </p>
-          </div>
-          <button
-            onClick={() => onNavigatePage('planos')}
-            className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
-          >
-            <span>Ver Tabela Completa</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          
-          {/* Card 1: Mensal Standalone */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between hover:border-blue-400 hover:shadow-md transition-all text-center group">
-            <div>
-              <h4 className="text-lg font-black text-slate-950 mb-1">
-                Mensal Standalone
-              </h4>
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-4">
-                1 Posto de Trabalho
-              </span>
-              <div className="bg-slate-50 border border-slate-200/80 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-slate-900">
-                25.000,00 Kz / mês
-              </div>
-              <ul className="text-left text-xs text-slate-600 space-y-2 mb-6">
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Faturação com QR Code AGT</li>
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> POS e Fecho de Caixa com Relatório Z</li>
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Exportação SAF-T AO mensal</li>
-              </ul>
-            </div>
-            <button
-              onClick={() => onNavigatePage('planos')}
-              className="w-full bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold text-xs py-2.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
-            >
-              Consultar Plano
-            </button>
-          </div>
-
-          {/* Card 2: Anual Multi-Postos (Destaque Mais Popular) */}
-          <div className="bg-white rounded-2xl border-2 border-blue-600 p-6 flex flex-col justify-between shadow-md relative text-center group">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-black text-[10px] uppercase px-3 py-0.5 rounded-full tracking-wider shadow-xs">
-              Recomendado
-            </div>
-            <div>
-              <h4 className="text-lg font-black text-slate-950 mb-1">
-                Anual Multi-Postos
-              </h4>
-              <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider block mb-4">
-                3 Postos em Rede LAN
-              </span>
-              <div className="bg-blue-50 border border-blue-200 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-blue-900">
-                250.000,00 Kz / ano
-              </div>
-              <ul className="text-left text-xs text-slate-700 space-y-2 mb-6 font-medium">
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> 3 Caixas / Servidor Local LAN</li>
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Recursos Humanos & IRT 2026</li>
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Suporte VIP & Formação Inicial</li>
-              </ul>
-            </div>
-            <button
-              onClick={() => onOpenDemoModal('Licença Anual Multi-Postos')}
-              className="w-full bg-[#1d4ed8] hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-md shadow-blue-600/20 cursor-pointer"
-            >
-              Aderir ao Plano Anual
-            </button>
-          </div>
-
-          {/* Card 3: Vitalício Perpétuo */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between hover:border-blue-400 hover:shadow-md transition-all text-center group">
-            <div>
-              <h4 className="text-lg font-black text-slate-950 mb-1">
-                Vitalício Perpétuo
-              </h4>
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-4">
-                5 Postos Perpétuos
-              </span>
-              <div className="bg-slate-50 border border-slate-200/80 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-slate-900">
-                650.000,00 Kz / único
-              </div>
-              <ul className="text-left text-xs text-slate-600 space-y-2 mb-6">
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Sem anuidade ou mensalidades</li>
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Todos os módulos desbloqueados</li>
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Instalação e parametrização assistida</li>
-              </ul>
-            </div>
-            <button
-              onClick={() => onOpenDemoModal('Licença Vitalícia Perpétua')}
-              className="w-full bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold text-xs py-2.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
-            >
-              Consultar Vitalício
-            </button>
-          </div>
-
-          {/* Card 4: Kit POS Hardware */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between hover:border-blue-400 hover:shadow-md transition-all text-center group">
-            <div>
-              <h4 className="text-lg font-black text-slate-950 mb-1">
-                Kits de Hardware POS
-              </h4>
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-4">
-                Periféricos Homologados
-              </span>
-              <div className="bg-slate-50 border border-slate-200/80 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-slate-900">
-                Desde 185.000,00 Kz
-              </div>
-              <ul className="text-left text-xs text-slate-600 space-y-2 mb-6">
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Impressoras térmicas 80mm com corte</li>
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Leitores 2D e gavetas metálicas RJ11</li>
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> 12 meses de garantia oficial em Luanda</li>
-              </ul>
-            </div>
-            <button
-              onClick={() => onNavigatePage('loja')}
-              className="w-full bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold text-xs py-2.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
-            >
-              Ver Equipamentos
-            </button>
-          </div>
-
-        </div>
-      </section>
 
       {/* ========== CARROSSEL MARQUEE DE PARCEIROS & CLIENTES (APENAS REGISTADOS NO FIREBASE) ========== */}
       {partnerLogos.length > 0 && (
@@ -1033,15 +774,24 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* Imagem em Destaque Ancorada na Base */}
-            <div data-reveal className="sr-init sr-right lg:col-span-6 flex items-end justify-center self-end">
-              <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl relative flex items-end justify-center">
+            <div data-reveal className="sr-init sr-right lg:col-span-6 flex items-end justify-center self-end pb-8 lg:pb-12">
+              <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl relative">
                 <img
-                  src={parceirosImg}
-                  alt="Parceiros KIVORA ERP em Angola"
+                  src={executivosImg}
+                  alt="Rede de Parceiros e Executivos KIVORA ERP em Angola"
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-auto max-h-[460px] sm:max-h-[560px] lg:max-h-[640px] xl:max-h-[700px] object-contain object-bottom block"
+                  className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-3xl border border-slate-200/90 shadow-2xl object-cover block"
                 />
+                <div className="absolute bottom-4 left-4 right-4 p-3.5 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-lg flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-xs font-bold text-slate-900">Rede Oficial de Distribuição</span>
+                  </div>
+                  <span className="text-[11px] font-mono-num font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+                    18 Províncias
+                  </span>
+                </div>
               </div>
             </div>
 
