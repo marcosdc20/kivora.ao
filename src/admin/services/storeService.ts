@@ -82,7 +82,7 @@ export async function saveStoreProduct(product: Partial<StoreProductAdmin> & { n
     const id = product.id || `prod_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const now = Date.now();
 
-    const productData: StoreProductAdmin = {
+    const productData: any = {
       id,
       category: product.category || 'accessories',
       categoryLabel: product.categoryLabel || 'Geral',
@@ -91,8 +91,6 @@ export async function saveStoreProduct(product: Partial<StoreProductAdmin> & { n
       image: product.image || '/imagens/pos_bundle_kit.jpg',
       galleryImages: product.galleryImages || [],
       priceAOA: Number(product.priceAOA) || 0,
-      originalPriceAOA: product.originalPriceAOA ? Number(product.originalPriceAOA) : undefined,
-      discountPercent: product.discountPercent ? Number(product.discountPercent) : undefined,
       badge: product.badge || '',
       rating: product.rating || 5.0,
       reviewsCount: product.reviewsCount || 1,
@@ -108,6 +106,13 @@ export async function saveStoreProduct(product: Partial<StoreProductAdmin> & { n
       createdAt: product.createdAt || now,
       updatedAt: now,
     };
+
+    if (product.originalPriceAOA !== undefined && product.originalPriceAOA !== null && !isNaN(Number(product.originalPriceAOA))) {
+      productData.originalPriceAOA = Number(product.originalPriceAOA);
+    }
+    if (product.discountPercent !== undefined && product.discountPercent !== null && !isNaN(Number(product.discountPercent))) {
+      productData.discountPercent = Number(product.discountPercent);
+    }
 
     await setDoc(doc(db, PRODUCTS_COLLECTION, id), productData, { merge: true });
     return { success: true, id };
