@@ -46,19 +46,6 @@ service cloud.firestore {
       );
     }
 
-    // 4. Verificação de Propriedade do Parceiro
-    function isPartnerOwner(partnerId) {
-      return isAuthenticated() && (
-        request.auth.uid == partnerId ||
-        (request.auth.token.partner_code != null && request.auth.token.partner_code == partnerId)
-      );
-    }
-
-    // 5. Funções de Sanitização e Validação Anti-Injection / Anti-DoS
-    function isValidString(val, minLen, maxLen) {
-      return val is string && val.size() >= minLen && val.size() <= maxLen;
-    }
-
     // ─────────────────────────────────────────────────────────────
     // 1. CONFIGURAÇÕES INSTITUCIONAIS, PREÇOS & POLÍTICAS
     // ─────────────────────────────────────────────────────────────
