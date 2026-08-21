@@ -144,11 +144,11 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* Card 1: WhatsApp */}
-          <div className="bg-white rounded-3xl p-7 flex flex-col justify-between space-y-6 border border-slate-200 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all">
+          <div className="bg-white rounded-2xl p-6 sm:p-7 flex flex-col justify-between space-y-6 border border-slate-200 shadow-xs hover:border-emerald-500/40 hover:shadow-lg transition-all group">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center">
-                  <MessageCircle className="w-6 h-6" />
+                <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                  <MessageCircle className="w-5 h-5" />
                 </div>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -156,7 +156,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                 </span>
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-900">WhatsApp & Chat Imediato</h3>
+                <h3 className="text-base font-black text-slate-900 group-hover:text-emerald-700 transition-colors">WhatsApp & Chat Imediato</h3>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                   Canal prioritário para suporte em tempo real com os nossos técnicos especializados em Angola.
                 </p>
@@ -175,7 +175,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Falar no WhatsApp Agora</span>
@@ -183,18 +183,18 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
           </div>
 
           {/* Card 2: Telefone Central */}
-          <div className="bg-white rounded-3xl p-7 flex flex-col justify-between space-y-6 border border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all">
+          <div className="bg-white rounded-2xl p-6 sm:p-7 flex flex-col justify-between space-y-6 border border-slate-200 shadow-xs hover:border-blue-500/40 hover:shadow-lg transition-all group">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center">
-                  <Phone className="w-6 h-6" />
+                <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all">
+                  <Phone className="w-5 h-5" />
                 </div>
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
                   Voz & Central
                 </span>
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-900">Atendimento Telefónico Central</h3>
+                <h3 className="text-base font-black text-slate-900 group-hover:text-blue-600 transition-colors">Atendimento Telefónico Central</h3>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                   Linha de suporte telefónico dedicada a operadores, caixas, gerentes e contabilistas.
                 </p>
@@ -211,7 +211,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
 
             <a
               href={`tel:${settings.phoneRaw || '244923456789'}`}
-              className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+              className="bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
             >
               <Phone className="w-4 h-4" />
               <span>Ligar para a Central</span>
@@ -219,18 +219,18 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
           </div>
 
           {/* Card 3: Email Suporte */}
-          <div className="bg-white rounded-3xl p-7 flex flex-col justify-between space-y-6 border border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all">
+          <div className="bg-white rounded-2xl p-6 sm:p-7 flex flex-col justify-between space-y-6 border border-slate-200 shadow-xs hover:border-indigo-500/40 hover:shadow-lg transition-all group">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center">
-                  <Mail className="w-6 h-6" />
+                <div className="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                  <Mail className="w-5 h-5" />
                 </div>
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
                   Logs & Ficheiros
                 </span>
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-900">Email de Suporte Técnico & Fiscal</h3>
+                <h3 className="text-base font-black text-slate-900 group-hover:text-indigo-600 transition-colors">Email de Suporte Técnico & Fiscal</h3>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                   Envio de ficheiros de log, cópias de segurança, relatórios e esclarecimento de regras fiscais.
                 </p>

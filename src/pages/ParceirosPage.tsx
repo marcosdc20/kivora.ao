@@ -79,17 +79,19 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
             { title: 'Suporte Técnico Prioritário Nível 2', desc: 'Linha direta com os engenheiros da Kivora para apoio em implementações fiscais e redes locais.' },
             { title: 'Formação & Kits de Marketing', desc: 'Acesso a manuais, apresentações comerciais e material promocional oficial para a sua equipa.' },
           ].map((b, i) => (
-            <div key={i} data-reveal className="sr-init border border-slate-200 rounded-3xl p-6 sm:p-7 hover:border-blue-400/40 hover:shadow-md transition-all bg-white" style={{ transitionDelay: `${i * 80}ms` }}>
-              <CheckCircle2 className="w-5 h-5 text-blue-600 mb-3" strokeWidth={2} />
-              <h3 className="font-black text-slate-950 mb-1.5">{b.title}</h3>
+            <div key={i} data-reveal className="sr-init border border-slate-200 rounded-2xl p-6 sm:p-7 hover:border-blue-500/40 hover:shadow-lg transition-all bg-white group" style={{ transitionDelay: `${i * 80}ms` }}>
+              <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                <CheckCircle2 className="w-5 h-5" strokeWidth={2} />
+              </div>
+              <h3 className="text-base font-black text-slate-950 mb-1.5 group-hover:text-blue-600 transition-colors">{b.title}</h3>
               <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">{b.desc}</p>
             </div>
           ))}
         </div>
 
         {/* Destaque dos 2 Documentos Oficiais */}
-        <div data-reveal className="sr-init p-8 bg-slate-50 rounded-3xl border border-slate-200 space-y-6">
-          <div className="flex items-center gap-3 border-b border-slate-200 pb-4">
+        <div data-reveal className="sr-init p-6 sm:p-8 bg-slate-50 rounded-3xl border border-slate-200 space-y-6">
+          <div className="flex items-center gap-3 border-b border-slate-200/80 pb-4">
             <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center font-black">
               <Award className="w-5 h-5" />
             </div>
@@ -102,9 +104,9 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-2">
+            <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-2">
               <div className="flex items-center gap-2 text-slate-900 font-bold">
-                <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>1. Certificado de Parceria — {settings.company}</span>
               </div>
               <p className="text-slate-500 leading-relaxed text-[11px]">
@@ -112,7 +114,7 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
               </p>
             </div>
 
-            <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-2">
+            <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-2">
               <div className="flex items-center gap-2 text-slate-900 font-bold">
                 <FileText className="w-4 h-4 text-amber-600 shrink-0" />
                 <span>2. Certificado de Revendedor — {settings.fullName}</span>
@@ -124,7 +126,7 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
           </div>
 
           {/* Taxa de Homologação */}
-          <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 text-xs">
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200/80 text-xs">
             <div className="flex items-center gap-2 text-slate-700">
               <CreditCard className="w-4 h-4 text-emerald-600" />
               <span>Taxa única de homologação e credenciamento: <strong className="text-slate-950 font-mono font-black">{fmt(policy.partner_membership_fee_aoa ?? 25000)} Kz</strong></span>
