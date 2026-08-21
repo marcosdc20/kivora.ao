@@ -4,7 +4,7 @@
  * Desenvolvido pela Visual Software, Lda
  */
 
-const LOGO_URL = 'https://kivora.ao/logo.png';
+const LOGO_URL = 'https://raw.githubusercontent.com/marcosdc20/kivora.ao/main/public/logo.png';
 const PORTAL_URL = 'https://kivora.ao/#login';
 const DOWNLOAD_URL = 'https://kivora.ao/#download';
 const SUPPORT_EMAIL = 'suporte@kivora.ao';
@@ -201,7 +201,7 @@ const getEmailBaseLayout = (title: string, contentHtml: string, footerNote?: str
       <tr>
         <td class="header">
           <a href="https://kivora.ao" target="_blank" style="text-decoration: none;">
-            <img src="${LOGO_URL}" alt="KIVORA ERP" width="140" border="0" />
+            <img src="${LOGO_URL}" alt="KIVORA ERP" width="140" border="0" style="display: block; margin: 0 auto 12px auto; max-width: 140px; height: auto;" />
           </a>
           <p class="header-tagline">Sistema de Gestão Empresarial Certificado pela AGT</p>
         </td>
