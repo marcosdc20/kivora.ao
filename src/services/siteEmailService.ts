@@ -370,7 +370,13 @@ export const testSiteEmailConnection = async (
   configOverride?: SiteEmailConfig
 ): Promise<{ success: boolean; error?: string }> => {
   const cfg = configOverride || await getSiteEmailConfig();
-  const providerLabel = cfg.provider === 'resend' ? 'Resend API' : cfg.provider === 'sendgrid' ? 'SendGrid API' : 'SMTP';
+  const providerLabel = cfg.provider === 'gmail' 
+    ? 'Google Gmail Oficial (kivora.angola@gmail.com)' 
+    : cfg.provider === 'resend' 
+      ? 'Resend API' 
+      : cfg.provider === 'sendgrid' 
+        ? 'SendGrid API' 
+        : 'Servidor SMTP';
   const html = generateSiteTestEmailTemplate(providerLabel);
 
   return sendSiteEmail({

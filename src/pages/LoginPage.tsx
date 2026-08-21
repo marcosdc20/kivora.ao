@@ -16,19 +16,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Redireciona automaticamente se já existir uma sessão ativa
-  useEffect(() => {
-    const existing = getStoredSession();
-    if (existing && existing.status === 'active') {
-      if (existing.role === 'admin') {
-        onNavigatePage('admin');
-      } else if (existing.role === 'parceiro') {
-        onNavigatePage('area-parceiro');
-      } else {
-        onNavigatePage('area-cliente');
-      }
-    }
-  }, [onNavigatePage]);
+  const [existingSession, setExistingSession] = useState<KivoraUserSession | null>(() => getStoredSession());
+
+  const handleLogoutExisting = () => {
+    localStorage.removeItem('kivora_user_session');
+    setExistingSession(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +89,47 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
               Acesso seguro para Administradores, Parceiros e Empresas Clientes.
             </p>
           </div>
+
+          {/* Se houver sessão salva no navegador */}
+          {existingSession && existingSession.status === 'active' && (
+            <div className="p-4 bg-blue-50/80 rounded-2xl border border-blue-200 text-xs space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-blue-900">
+                  Sessão Ativa: {existingSession.nome} ({existingSession.role.toUpperCase()})
+                </span>
+                <button
+                  type="button"
+                  onClick={handleLogoutExisting}
+                  className="text-[11px] font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
+                >
+                  Terminar Sessão
+                </button>
+              </div>
+              <p className="text-[11px] text-blue-700">
+                Está autenticado como <strong>{existingSession.email}</strong>.
+              </p>
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (existingSession.role === 'admin') onNavigatePage('admin');
+                    else if (existingSession.role === 'parceiro') onNavigatePage('area-parceiro');
+                    else onNavigatePage('area-cliente');
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl text-center text-xs transition-all shadow-sm cursor-pointer"
+                >
+                  Continuar para o Painel ➔
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogoutExisting}
+                  className="px-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-2 rounded-xl text-xs transition-all cursor-pointer"
+                >
+                  Trocar de Conta
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Smart routing badge */}
           <div className="p-3 bg-amber-50/60 rounded-2xl border border-amber-200/70 text-[11px] text-amber-900 leading-relaxed flex items-start gap-2.5">
