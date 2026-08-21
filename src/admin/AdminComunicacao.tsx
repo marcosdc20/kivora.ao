@@ -63,6 +63,163 @@ export const AdminComunicacao: React.FC = () => {
     }
   }, []);
 
+  const [previewTestEmail, setPreviewTestEmail] = useState('');
+  const [sendingTest, setSendingTest] = useState(false);
+  const [recipientsCount, setRecipientsCount] = useState<{ clients: number; partners: number; all: number }>({ clients: 0, partners: 0, all: 0 });
+
+  // Carregar contagem de emails reais no Firebase
+  useEffect(() => {
+    const fetchEmailsCount = async () => {
+      try {
+        const clientEmails = new Set<string>();
+        const partnerEmails = new Set<string>();
+
+        // 1. Licenças e Empresas
+        const [licSnap, compSnap, partSnap, appSnap, userSnap] = await Promise.all([
+          getDocs(collection(db, 'licenses')).catch(() => ({ forEach: () => {} })),
+          getDocs(collection(db, 'companies')).catch(() => ({ forEach: () => {} })),
+          getDocs(collection(db, 'partners')).catch(() => ({ forEach: () => {} })),
+          getDocs(collection(db, 'partner_applications')).catch(() => ({ forEach: () => {} })),
+          getDocs(collection(db, 'users')).catch(() => ({ forEach: () => {} }))
+        ]);
+
+        licSnap.forEach((d: any) => {
+          const data = d.data();
+          if (data.client_email && data.client_email.includes('@')) clientEmails.add(data.client_email.trim().toLowerCase());
+        });
+
+        compSnap.forEach((d: any) => {
+          const data = d.data();
+          if (data.email && data.email.includes('@')) clientEmails.add(data.email.trim().toLowerCase());
+          if (data.responsavelEmail && data.responsavelEmail.includes('@')) clientEmails.add(data.responsavelEmail.trim().toLowerCase());
+        });
+
+        partSnap.forEach((d: any) => {
+          const data = d.data();
+          if (data.email && data.email.includes('@')) partnerEmails.add(data.email.trim().toLowerCase());
+          if (data.contactEmail && data.contactEmail.includes('@')) partnerEmails.add(data.contactEmail.trim().toLowerCase());
+        });
+
+        appSnap.forEach((d: any) => {
+          const data = d.data();
+          if (data.email && data.email.includes('@')) partnerEmails.add(data.email.trim().toLowerCase());
+        });
+
+        userSnap.forEach((d: any) => {
+          const data = d.data();
+          if (data.email && data.email.includes('@')) {
+            if (data.role === 'partner') partnerEmails.add(data.email.trim().toLowerCase());
+            else if (data.role === 'client') clientEmails.add(data.email.trim().toLowerCase());
+          }
+        });
+
+        const allEmails = new Set([...clientEmails, ...partnerEmails]);
+        setRecipientsCount({
+          clients: clientEmails.size,
+          partners: partnerEmails.size,
+          all: allEmails.size
+        });
+      } catch (e) {
+        console.warn('Erro ao carregar contagem de emails:', e);
+      }
+    };
+
+    fetchEmailsCount();
+  }, [modalNovo]);
+
+  // Função para buscar lista de emails com base no grupo alvo selecionado
+  const getResolvedEmails = async (targetGroup: string): Promise<string[]> => {
+    const clientEmails = new Set<string>();
+    const partnerEmails = new Set<string>();
+
+    try {
+      const [licSnap, compSnap, partSnap, appSnap, userSnap] = await Promise.all([
+        getDocs(collection(db, 'licenses')).catch(() => ({ forEach: () => {} })),
+        getDocs(collection(db, 'companies')).catch(() => ({ forEach: () => {} })),
+        getDocs(collection(db, 'partners')).catch(() => ({ forEach: () => {} })),
+        getDocs(collection(db, 'partner_applications')).catch(() => ({ forEach: () => {} })),
+        getDocs(collection(db, 'users')).catch(() => ({ forEach: () => {} }))
+      ]);
+
+      licSnap.forEach((d: any) => {
+        const data = d.data();
+        if (data.client_email && data.client_email.includes('@')) clientEmails.add(data.client_email.trim().toLowerCase());
+      });
+
+      compSnap.forEach((d: any) => {
+        const data = d.data();
+        if (data.email && data.email.includes('@')) clientEmails.add(data.email.trim().toLowerCase());
+        if (data.responsavelEmail && data.responsavelEmail.includes('@')) clientEmails.add(data.responsavelEmail.trim().toLowerCase());
+      });
+
+      partSnap.forEach((d: any) => {
+        const data = d.data();
+        if (data.email && data.email.includes('@')) partnerEmails.add(data.email.trim().toLowerCase());
+        if (data.contactEmail && data.contactEmail.includes('@')) partnerEmails.add(data.contactEmail.trim().toLowerCase());
+      });
+
+      appSnap.forEach((d: any) => {
+        const data = d.data();
+        if (data.email && data.email.includes('@')) partnerEmails.add(data.email.trim().toLowerCase());
+      });
+
+      userSnap.forEach((d: any) => {
+        const data = d.data();
+        if (data.email && data.email.includes('@')) {
+          if (data.role === 'partner') partnerEmails.add(data.email.trim().toLowerCase());
+          else if (data.role === 'client') clientEmails.add(data.email.trim().toLowerCase());
+        }
+      });
+    } catch (e) {
+      console.warn('Erro ao obter emails do Firestore:', e);
+    }
+
+    if (targetGroup.includes('Parceiros')) {
+      return Array.from(partnerEmails);
+    } else if (targetGroup.includes('Todas as Empresas') || targetGroup.includes('Clientes')) {
+      return Array.from(clientEmails);
+    } else {
+      // Todos (Clientes + Parceiros)
+      return Array.from(new Set([...clientEmails, ...partnerEmails]));
+    }
+  };
+
+  const handleSendTestEmail = async () => {
+    if (!previewTestEmail || !previewTestEmail.includes('@')) {
+      alert('Por favor insira um endereço de e-mail válido para o teste.');
+      return;
+    }
+    if (!titulo || !mensagem) {
+      alert('Preencha o título e o conteúdo antes de enviar o teste.');
+      return;
+    }
+
+    setSendingTest(true);
+    try {
+      const html = generateBroadcastTemplate({
+        title: titulo,
+        body: mensagem,
+        senderTitle: 'Administração Geral KIVORA Cloud ERP'
+      });
+
+      const res = await sendSiteEmail({
+        to: previewTestEmail.trim(),
+        subject: `[TESTE - Comunicado KIVORA] ${titulo}`,
+        html
+      });
+
+      if (res.success) {
+        alert(`E-mail de teste enviado com sucesso para ${previewTestEmail}!`);
+      } else {
+        alert(`Não foi possível enviar o e-mail de teste: ${res.error || 'Verifique as configurações de e-mail.'}`);
+      }
+    } catch (err: any) {
+      alert('Erro ao enviar e-mail de teste: ' + err.message);
+    } finally {
+      setSendingTest(false);
+    }
+  };
+
   const handleCriarComunicado = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!titulo || !mensagem) return;
@@ -82,23 +239,10 @@ export const AdminComunicacao: React.FC = () => {
       }, { merge: true });
 
       // Se o canal for e-mail, dispara para destinatários
+      let emailResultMsg = '';
       if (canal === 'email') {
-        const emailsToSend: string[] = [];
+        const uniqueEmails = await getResolvedEmails(destinatarios);
 
-        // Buscar clientes cadastrados
-        try {
-          const licSnap = await getDocs(collection(db, 'licenses'));
-          licSnap.forEach((d) => {
-            const data = d.data();
-            if (data.client_email && data.client_email.includes('@')) {
-              emailsToSend.push(data.client_email.trim());
-            }
-          });
-        } catch (e) {
-          console.warn('Erro ao obter emails para broadcast:', e);
-        }
-
-        const uniqueEmails = Array.from(new Set(emailsToSend));
         if (uniqueEmails.length > 0) {
           const html = generateBroadcastTemplate({
             title: titulo,
@@ -106,18 +250,26 @@ export const AdminComunicacao: React.FC = () => {
             senderTitle: 'Administração Geral KIVORA Cloud ERP'
           });
 
-          await sendSiteEmail({
+          const res = await sendSiteEmail({
             to: uniqueEmails,
             subject: `[Comunicado Oficial KIVORA] ${titulo}`,
             html,
           });
+
+          if (res.success) {
+            emailResultMsg = `\n\nE-mail disparado para ${uniqueEmails.length} destinatários cadastrados.`;
+          } else {
+            emailResultMsg = `\n\nAviso: O comunicado foi guardado no sistema, mas o envio de e-mails falhou (${res.error}). Verifique Configurações ➔ Serviço de E-mails.`;
+          }
+        } else {
+          emailResultMsg = '\n\nAviso: Nenhum endereço de e-mail válido foi encontrado para o grupo selecionado.';
         }
       }
 
       setModalNovo(false);
       setTitulo('');
       setMensagem('');
-      alert(`Comunicado "${titulo}" publicado e enviado com sucesso!`);
+      alert(`Comunicado "${titulo}" publicado com sucesso!${emailResultMsg}`);
     } catch (err: any) {
       alert('Erro ao enviar comunicado: ' + err.message);
     } finally {
@@ -255,7 +407,7 @@ export const AdminComunicacao: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-700 uppercase">Canal de Transmissão</label>
                   <select
@@ -263,9 +415,9 @@ export const AdminComunicacao: React.FC = () => {
                     onChange={(e) => setCanal(e.target.value as any)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-bold"
                   >
-                    <option value="sistema">Pop-up no Software</option>
+                    <option value="email">E-mail em Massa (Oficial)</option>
+                    <option value="sistema">Pop-up no Software / Portais</option>
                     <option value="whatsapp">WhatsApp Directo</option>
-                    <option value="email">E-mail em Massa</option>
                   </select>
                 </div>
 
@@ -276,21 +428,69 @@ export const AdminComunicacao: React.FC = () => {
                     onChange={(e) => setDestinatarios(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-bold"
                   >
-                    <option value="Todas as Empresas Clientes">Todas as Empresas</option>
-                    <option value="Rede de Parceiros Angola">Apenas Parceiros</option>
-                    <option value="Clientes Plano Business">Apenas Plano Business</option>
+                    <option value="Todas as Empresas Clientes">
+                      Clientes ({recipientsCount.clients} e-mails)
+                    </option>
+                    <option value="Rede de Parceiros Angola">
+                      Parceiros ({recipientsCount.partners} e-mails)
+                    </option>
+                    <option value="Todos (Clientes e Parceiros)">
+                      Todos ({recipientsCount.all} e-mails)
+                    </option>
                   </select>
                 </div>
               </div>
 
+              {canal === 'email' && (
+                <div className="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-4 space-y-3">
+                  <div className="flex items-center justify-between text-xs text-blue-900 font-semibold">
+                    <span className="flex items-center gap-1.5 font-bold">
+                      <Mail className="w-4 h-4 text-blue-600" />
+                      Disparo de E-mail com Template Oficial KIVORA
+                    </span>
+                    <span className="bg-blue-200/60 text-blue-800 text-[11px] font-extrabold px-2 py-0.5 rounded-md">
+                      {destinatarios.includes('Parceiros') && !destinatarios.includes('Todos')
+                        ? `${recipientsCount.partners} destinatários`
+                        : destinatarios.includes('Clientes') && !destinatarios.includes('Todos')
+                        ? `${recipientsCount.clients} destinatários`
+                        : `${recipientsCount.all} destinatários`}
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-blue-700 leading-relaxed">
+                    O comunicado será emitido com o logótipo oficial, tipografia corporativa e remetente configurado em <strong>Configurações ➔ Serviço de E-mails</strong>.
+                  </p>
+
+                  {/* Envio de Teste Prévio */}
+                  <div className="pt-2 border-t border-blue-200/60 flex flex-col sm:flex-row items-center gap-2">
+                    <input
+                      type="email"
+                      value={previewTestEmail}
+                      onChange={(e) => setPreviewTestEmail(e.target.value)}
+                      placeholder="seu-email@kivora.ao (para testar antes)"
+                      className="w-full bg-white border border-blue-200 text-xs px-3 py-2 rounded-xl text-slate-800 focus:outline-none focus:border-blue-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSendTestEmail}
+                      disabled={sendingTest}
+                      className="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-blue-100 text-blue-700 border border-blue-300 transition-colors shrink-0 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      {sendingTest ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                      <span>{sendingTest ? 'A Enviar...' : 'Enviar Teste'}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-700 uppercase">Conteúdo do Comunicado</label>
                 <textarea
-                  rows={4}
+                  rows={5}
                   required
                   value={mensagem}
                   onChange={(e) => setMensagem(e.target.value)}
-                  placeholder="Escreva aqui a mensagem oficial..."
+                  placeholder="Escreva aqui a mensagem oficial a ser comunicada..."
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-medium resize-none"
                 />
               </div>
@@ -299,17 +499,17 @@ export const AdminComunicacao: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setModalNovo(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100"
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={sendingBroadcast}
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white shadow-md shadow-blue-600/20 flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
                 >
-                  {sendingBroadcast ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
-                  <span>{sendingBroadcast ? 'A Disparar...' : 'Disparar Transmissão'}</span>
+                  {sendingBroadcast ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  <span>{sendingBroadcast ? 'A Disparar...' : 'Disparar Comunicado'}</span>
                 </button>
               </div>
             </form>
