@@ -252,7 +252,7 @@ export const sendClientWelcomeEmail = async (params: {
   const html = generateClientCredentialsTemplate(params);
   return sendSiteEmail({
     to: params.email,
-    subject: `🚀 As suas credenciais de acesso ao KIVORA ERP — ${params.companyName}`,
+    subject: `Credenciais de Acesso ao KIVORA ERP — ${params.companyName}`,
     html,
   });
 };
@@ -273,7 +273,7 @@ export const sendLicenseToClientEmail = async (params: {
   const html = generateLicenseDeliveryTemplate(params);
   return sendSiteEmail({
     to: params.clientEmail,
-    subject: `🛡️ A sua Licença Oficial KIVORA ERP — ${params.companyName}`,
+    subject: `Emissão de Licença Oficial KIVORA ERP — ${params.companyName}`,
     html,
   });
 };
@@ -293,7 +293,7 @@ export const sendPartnerNotificationEmail = async (params: {
   const html = generatePartnerNotificationTemplate(params);
   return sendSiteEmail({
     to: params.partnerEmail,
-    subject: `🔔 [Parceiro KIVORA] ${params.title}`,
+    subject: `[Parceiro KIVORA] ${params.title}`,
     html,
   });
 };
@@ -315,7 +315,7 @@ export const sendPartnerCredentialsEmail = async (params: {
   });
   return sendSiteEmail({
     to: params.partnerEmail,
-    subject: `🤝 Credenciais do Portal de Parceiro Oficial KIVORA — ${params.partnerName}`,
+    subject: `Credenciais de Acesso ao Portal do Parceiro — ${params.partnerName}`,
     html,
   });
 };
@@ -336,7 +336,7 @@ export const sendPasswordResetEmail = async (params: {
   });
   return sendSiteEmail({
     to: params.email,
-    subject: '🔐 Recuperação de Palavra-passe — Portal KIVORA',
+    subject: 'Recuperação de Palavra-passe — Portal KIVORA',
     html,
   });
 };
@@ -357,7 +357,7 @@ export const sendBroadcastEmail = async (params: {
   });
   return sendSiteEmail({
     to: params.recipients,
-    subject: `📢 [KIVORA] ${params.title}`,
+    subject: `[KIVORA] ${params.title}`,
     html,
   });
 };
@@ -381,7 +381,7 @@ export const testSiteEmailConnection = async (
 
   return sendSiteEmail({
     to: targetEmail,
-    subject: '🧪 Teste de Conexão de E-mail — KIVORA Cloud ERP',
+    subject: 'Teste de Comunicação do Servidor de E-mails — KIVORA Cloud ERP',
     html,
     configOverride,
   });
@@ -408,7 +408,7 @@ export const sendDemoLeadEmails = async (data: {
       const customerHtml = generateDemoLeadCustomerTemplate(data);
       sendSiteEmail({
         to: data.email.trim(),
-        subject: `📋 Pedido de Demonstração KIVORA ERP — ${data.companyName}`,
+        subject: `Confirmação de Solicitação de Demonstração — ${data.companyName}`,
         html: customerHtml,
       }).catch((e) => console.warn('Aviso no envio de e-mail ao cliente lead:', e));
     }
@@ -417,7 +417,7 @@ export const sendDemoLeadEmails = async (data: {
     const adminHtml = generateDemoLeadAdminAlertTemplate(data);
     sendSiteEmail({
       to: ADMIN_ALERT_EMAIL,
-      subject: `🚨 [NOVO LEAD DEMO] ${data.companyName} (${data.contactName})`,
+      subject: `[Demonstração] ${data.companyName} (${data.contactName})`,
       html: adminHtml,
     }).catch((e) => console.warn('Aviso no envio de alerta de lead:', e));
   } catch (err) {
@@ -449,7 +449,7 @@ export const sendPartnerApplicationEmails = async (data: {
       });
       sendSiteEmail({
         to: data.email.trim(),
-        subject: `🤝 Candidatura de Parceiro KIVORA — Protocolo ${data.protocol}`,
+        subject: `Candidatura a Parceiro KIVORA — Protocolo ${data.protocol}`,
         html: candHtml,
       }).catch((e) => console.warn('Aviso no envio de e-mail de candidatura:', e));
     }
@@ -457,17 +457,21 @@ export const sendPartnerApplicationEmails = async (data: {
     // 2. Enviar alerta à equipa de parceiros KIVORA
     sendSiteEmail({
       to: ADMIN_ALERT_EMAIL,
-      subject: `💼 [NOVO PARCEIRO] Candidatura ${data.protocol} — ${data.empresa} (${data.provincia})`,
+      subject: `[Candidatura Parceiro] ${data.protocol} — ${data.empresa} (${data.provincia})`,
       html: `
-        <h2>Nova Candidatura a Parceiro Certificado KIVORA</h2>
-        <p><strong>Protocolo:</strong> ${data.protocol}</p>
-        <p><strong>Nome:</strong> ${data.nome}</p>
-        <p><strong>Empresa:</strong> ${data.empresa}</p>
-        <p><strong>NIF:</strong> ${data.nif}</p>
-        <p><strong>Província:</strong> ${data.provincia}</p>
-        <p><strong>Telefone:</strong> ${data.telefone}</p>
-        <p><strong>E-mail:</strong> ${data.email}</p>
-        <p><strong>Tipo de Parceria:</strong> ${data.tipoParceria}</p>
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; padding: 20px;">
+          <h2 style="color: #0f172a; margin-top: 0;">Nova Candidatura a Parceiro KIVORA</h2>
+          <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
+            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 160px;">Protocolo:</td><td><strong>${data.protocol}</strong></td></tr>
+            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Responsável:</td><td>${data.nome}</td></tr>
+            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Empresa:</td><td><strong>${data.empresa}</strong></td></tr>
+            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">NIF:</td><td>${data.nif}</td></tr>
+            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Província:</td><td>${data.provincia}</td></tr>
+            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Telefone:</td><td><a href="https://wa.me/${data.telefone.replace(/[^0-9]/g, '')}">${data.telefone}</a></td></tr>
+            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">E-mail:</td><td><a href="mailto:${data.email}">${data.email}</a></td></tr>
+            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Tipo de Parceria:</td><td>${data.tipoParceria}</td></tr>
+          </table>
+        </div>
       `,
     }).catch((e) => console.warn('Aviso no alerta de parceiro:', e));
   } catch (err) {
@@ -492,23 +496,27 @@ export const sendSupportTicketEmails = async (data: {
       const custHtml = generateSupportTicketCustomerTemplate(data);
       sendSiteEmail({
         to: data.email.trim(),
-        subject: `🎧 Suporte KIVORA — Ticket #${data.ticketNumber}`,
+        subject: `Suporte KIVORA — Chamado #${data.ticketNumber}`,
         html: custHtml,
       }).catch((e) => console.warn('Aviso no envio de confirmação de ticket:', e));
     }
 
     sendSiteEmail({
       to: ADMIN_ALERT_EMAIL,
-      subject: `⚠️ [TICKET SUPORTE #${data.ticketNumber}] ${data.assunto} — ${data.nome}`,
+      subject: `[Suporte #${data.ticketNumber}] ${data.assunto} — ${data.nome}`,
       html: `
-        <h2>Novo Ticket de Suporte Aberto no Site</h2>
-        <p><strong>Protocolo:</strong> ${data.ticketNumber}</p>
-        <p><strong>Nome / Empresa:</strong> ${data.nome}</p>
-        <p><strong>Contacto:</strong> ${data.telefone} | ${data.email || 'N/D'}</p>
-        <p><strong>Departamento:</strong> ${data.departamento.toUpperCase()}</p>
-        <p><strong>Assunto:</strong> ${data.assunto}</p>
-        <div style="background: #f1f5f9; padding: 16px; border-radius: 8px; margin-top: 12px;">
-          <strong>Mensagem do Cliente:</strong><br>${data.mensagem.replace(/\n/g, '<br>')}
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; padding: 20px;">
+          <h2 style="color: #0f172a; margin-top: 0;">Novo Chamado de Suporte Registado</h2>
+          <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
+            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 160px;">Protocolo:</td><td><strong>${data.ticketNumber}</strong></td></tr>
+            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Cliente / Empresa:</td><td>${data.nome}</td></tr>
+            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Contacto:</td><td>${data.telefone} | ${data.email || 'N/D'}</td></tr>
+            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Departamento:</td><td>${data.departamento.toUpperCase()}</td></tr>
+            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Assunto:</td><td>${data.assunto}</td></tr>
+          </table>
+          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px; margin-top: 14px; color: #334155;">
+            <strong style="color: #0f172a;">Descrição do Chamado:</strong><br>${data.mensagem.replace(/\n/g, '<br>')}
+          </div>
         </div>
       `,
     }).catch((e) => console.warn('Aviso no alerta de ticket:', e));
@@ -516,4 +524,5 @@ export const sendSupportTicketEmails = async (data: {
     console.warn('Erro ao disparar e-mails de suporte:', err);
   }
 };
+
 

@@ -108,7 +108,7 @@ export const AdminComunicacao: React.FC = () => {
 
           await sendSiteEmail({
             to: uniqueEmails,
-            subject: `📢 [Comunicado Oficial KIVORA] ${titulo}`,
+            subject: `[Comunicado Oficial KIVORA] ${titulo}`,
             html,
           });
         }
