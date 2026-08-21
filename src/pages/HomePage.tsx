@@ -214,8 +214,8 @@ export const HomePage: React.FC<HomePageProps> = ({
       </div>
 
       {/* ========== BARRA DE PESQUISA & CONSULTA RÁPIDA INTERATIVA (INSPIRADA NO REGISTAR.AO) ========== */}
-      <section className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 -mt-8 sm:-mt-10 mb-16">
-        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-2xl shadow-slate-950/10">
+      <section className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 mb-16">
+        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xl shadow-slate-950/5">
           
           <div className="text-center max-w-2xl mx-auto mb-6">
             <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
