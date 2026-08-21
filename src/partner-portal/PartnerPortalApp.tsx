@@ -198,7 +198,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
   // Subscrição em Tempo Real aos Chamados do Parceiro
   useEffect(() => {
-    const unsub = subscribePartnerTickets(partnerCode, session?.email, ({ clientTickets: cTks, adminTickets: aTks }) => {
+    const unsub = subscribePartnerTickets(partnerCode, session?.email || '', ({ clientTickets: cTks, adminTickets: aTks }) => {
       setClientTickets(cTks);
       setAdminTickets(aTks);
       if (selectedTicket) {

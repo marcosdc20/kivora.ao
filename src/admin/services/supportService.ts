@@ -174,7 +174,7 @@ export function subscribeClientTickets(
 /** Subscrição em Tempo Real para Tickets do Parceiro (clientes do parceiro e chamados abertos pelo parceiro) */
 export function subscribePartnerTickets(
   partnerCode: string,
-  onUpdateOrEmail: ((tickets: { clientTickets: SupportTicket[]; adminTickets: SupportTicket[] }) => void) | string,
+  onUpdateOrEmail?: ((tickets: { clientTickets: SupportTicket[]; adminTickets: SupportTicket[] }) => void) | string | null,
   maybeOnUpdate?: (tickets: { clientTickets: SupportTicket[]; adminTickets: SupportTicket[] }) => void
 ) {
   const onUpdate = typeof onUpdateOrEmail === 'function' ? onUpdateOrEmail : maybeOnUpdate;
