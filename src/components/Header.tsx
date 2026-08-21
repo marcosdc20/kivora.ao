@@ -246,12 +246,55 @@ export const Header: React.FC<HeaderProps> = ({
     <header
       ref={navRef}
       className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md transition-all duration-200 border-b print:hidden ${
-        isScrolled ? 'border-slate-200 shadow-sm py-2' : 'border-slate-100 py-2.5 sm:py-3'
+        isScrolled ? 'border-slate-200 shadow-sm py-1.5' : 'border-slate-100 py-2 sm:py-2.5'
       }`}
     >
+      {/* Top Utility Sub-Bar (Inspirada no estilo Registar.ao) */}
+      <div className="hidden md:block bg-slate-50/90 border-b border-slate-200/60 -mt-2 sm:-mt-2.5 mb-1.5 py-1 px-4 text-[11px] text-slate-500 font-medium">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <span className="flex items-center gap-1.5 text-slate-600 font-semibold">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Software Certificado pela AGT • Decreto n.º 71/25</span>
+            </span>
+            <button
+              onClick={() => handleNavClick('noticias')}
+              className="hover:text-blue-600 transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <Newspaper className="w-3 h-3 text-slate-400" />
+              <span>Notícias Fiscais</span>
+            </button>
+            <button
+              onClick={() => handleNavClick('manuais')}
+              className="hover:text-blue-600 transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <BookOpen className="w-3 h-3 text-slate-400" />
+              <span>Base de Conhecimento</span>
+            </button>
+          </div>
+          <div className="flex items-center gap-5">
+            <button
+              onClick={() => handleNavClick('suporte')}
+              className="hover:text-blue-600 transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <HelpCircle className="w-3 h-3 text-slate-400" />
+              <span>Suporte & Chamados</span>
+            </button>
+            <a
+              href={settings.whatsappUrl || 'https://wa.me/244923456789'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-emerald-600 font-bold hover:text-emerald-700 transition-colors flex items-center gap-1"
+            >
+              <span>WhatsApp: {settings.phoneDisplay || '(+244) 923 456 789'}</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Dynamic Announcement Bar from Firebase */}
       {settings.announcementBarEnabled && !dismissAnnouncement && (
-        <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 text-white text-[11px] font-medium py-1.5 px-4 -mt-2.5 sm:-mt-3 mb-2 transition-all flex items-center justify-between border-b border-blue-500/30">
+        <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 text-white text-[11px] font-medium py-1.5 px-4 -mt-1 mb-1.5 transition-all flex items-center justify-between border-b border-blue-500/30">
           <div className="max-w-7xl mx-auto flex-1 flex items-center justify-center gap-2 text-center truncate">
             {settings.announcementBadge && (
               <span className="bg-white/20 text-white font-black text-[9px] uppercase px-2 py-0.5 rounded tracking-wider shrink-0">

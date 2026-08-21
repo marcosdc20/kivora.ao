@@ -186,49 +186,47 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
           {dynamicPlans.map((plan) => (
             <div
               key={plan.id}
-              className={`rounded-3xl p-8 sm:p-10 flex flex-col justify-between transition-all duration-300 relative ${
+              className={`rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 relative bg-white ${
                 plan.highlight
-                  ? 'bg-slate-950 text-white shadow-2xl border-2 border-blue-500/50 scale-[1.02] z-10'
-                  : 'bg-white text-slate-900 border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-slate-300'
+                  ? 'border-2 border-emerald-500 shadow-xl scale-[1.02] z-10'
+                  : 'border border-slate-200/90 shadow-sm hover:shadow-lg hover:border-slate-300'
               }`}
             >
               {plan.highlight && (
-                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full shadow-md">
-                  {plan.highlightBadge || 'Mais Popular em Angola'}
+                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full shadow-md">
+                  {plan.highlightBadge || 'Mais Popular!'}
                 </span>
               )}
 
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div>
-                  <h3 className="text-xl font-black">{plan.name}</h3>
-                  <p className={`text-xs mt-1.5 leading-relaxed ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>
+                  <div className="text-xl font-black text-slate-950 mb-1">{plan.name}</div>
+                  <p className="text-xs text-slate-500 leading-relaxed">
                     {plan.desc}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-slate-100/10">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-sm font-bold text-blue-600">Kz</span>
-                    <span className="text-3xl sm:text-4xl font-black tracking-tight">{plan.price}</span>
-                    <span className={`text-xs font-semibold ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>
-                      {plan.period}
-                    </span>
-                  </div>
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl py-3 px-4 flex items-baseline justify-center gap-1.5">
+                  <span className="text-sm font-bold text-slate-500">Kz</span>
+                  <span className="text-3xl font-black tracking-tight text-slate-950">{plan.price}</span>
+                  <span className="text-xs font-semibold text-slate-500">
+                    {plan.period}
+                  </span>
                 </div>
 
                 <div className="space-y-3 pt-2">
-                  <span className={`text-[11px] font-black uppercase tracking-wider block ${plan.highlight ? 'text-slate-400' : 'text-slate-400'}`}>
-                    Recursos Inclusos:
+                  <span className="text-[11px] font-bold uppercase tracking-wider block text-slate-400">
+                    Funcionalidades Inclusas:
                   </span>
                   <ul className="space-y-2.5">
                     {plan.features.map((feat, fi) => (
-                      <li key={fi} className="flex items-start gap-2.5 text-xs">
-                        <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${plan.highlight ? 'text-emerald-400' : 'text-blue-600'}`} strokeWidth={2} />
-                        <span className={plan.highlight ? 'text-slate-300 font-medium' : 'text-slate-700 font-medium'}>{feat}</span>
+                      <li key={fi} className="flex items-start gap-2.5 text-xs text-slate-700 font-medium">
+                        <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" strokeWidth={2} />
+                        <span>{feat}</span>
                       </li>
                     ))}
                   </ul>
@@ -240,7 +238,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
                   onClick={() => onOpenDemoModal(`Licença ${plan.name}`)}
                   className={`w-full py-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 cursor-pointer ${
                     plan.highlight
-                      ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30'
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20'
                       : 'bg-slate-950 hover:bg-slate-800 text-white'
                   }`}
                 >

@@ -3,7 +3,8 @@ import { HeroCarousel } from '../components/HeroCarousel';
 import {
   CheckCircle2, ArrowRight, Download, Shield, Wifi,
   Zap, Monitor, Laptop, Check, Sparkles,
-  Award, Headphones, Building2, MapPin, TrendingUp
+  Award, Headphones, Building2, MapPin, TrendingUp,
+  Search, ShoppingCart
 } from 'lucide-react';
 import { PageId } from '../components/Header';
 import {
@@ -30,6 +31,16 @@ interface HomePageProps {
   onOpenDemoModal: (subject?: string) => void;
   onNavigatePage: (page: PageId) => void;
 }
+
+// Setores sugeridos para o Quick Finder
+const QUICK_SECTORS = [
+  { id: 'retalho', label: 'Retalho & Lojas', icon: '🛍️', module: 'pos-multicaixa', price: '25.000 Kz / mês', planId: 'mensal' },
+  { id: 'supermercado', label: 'Supermercados & Mercearias', icon: '🛒', module: 'gestao-stock', price: '250.000 Kz / ano', planId: 'anual', popular: true },
+  { id: 'restauracao', label: 'Restauração & Bares', icon: '🍽️', module: 'pos-multicaixa', price: '250.000 Kz / ano', planId: 'anual' },
+  { id: 'farmacia', label: 'Farmácias & Saúde', icon: '💊', module: 'faturacao-agt', price: '250.000 Kz / ano', planId: 'anual' },
+  { id: 'servicos', label: 'Prestação de Serviços', icon: '💼', module: 'faturacao-agt', price: '25.000 Kz / mês', planId: 'mensal' },
+  { id: 'materiais', label: 'Materiais de Construção', icon: '🧱', module: 'gestao-stock', price: '650.000 Kz / perpétuo', planId: 'vitalicio' },
+];
 
 // Contador animado progressivo baseado em IntersectionObserver
 const AnimatedCounter: React.FC<{
@@ -160,6 +171,8 @@ export const HomePage: React.FC<HomePageProps> = ({
   const sectionsRef = useRef<HTMLDivElement>(null);
   const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
   const [partnerLogos, setPartnerLogos] = useState<PartnerBrandLogo[]>([]);
+  const [searchSector, setSearchSector] = useState<string>('');
+  const [activeSector, setActiveSector] = useState(QUICK_SECTORS[0]);
 
   useEffect(() => {
     const unsubSettings = subscribeSystemSettings(setSettings);
@@ -169,6 +182,11 @@ export const HomePage: React.FC<HomePageProps> = ({
       unsubBrands();
     };
   }, []);
+
+  // Filtragem dinâmica do setor pelo texto digitado
+  const filteredSector = searchSector.trim()
+    ? QUICK_SECTORS.find(s => s.label.toLowerCase().includes(searchSector.toLowerCase())) || activeSector
+    : activeSector;
 
   return (
     <div className="bg-white text-slate-900">
@@ -193,6 +211,241 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         </div>
       </div>
+
+      {/* ========== BARRA DE PESQUISA & CONSULTA RÁPIDA INTERATIVA (INSPIRADA NO REGISTAR.AO) ========== */}
+      <section className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 -mt-8 sm:-mt-10 mb-16">
+        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-2xl shadow-slate-950/10">
+          
+          <div className="text-center max-w-2xl mx-auto mb-6">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+              Encontre o software ideal para a sua empresa
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Pesquise pelo ramo de atividade, NIF ou tipo de negócio para recomendação e homologação fiscal imediata.
+            </p>
+          </div>
+
+          {/* Barra de Pesquisa com Input & Botão */}
+          <div className="relative flex flex-col sm:flex-row items-center gap-3 bg-slate-50 border border-slate-200 rounded-2xl p-2 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+            <div className="flex items-center gap-3 flex-1 px-3 w-full">
+              <Search className="w-5 h-5 text-slate-400 shrink-0" />
+              <input
+                type="text"
+                value={searchSector}
+                onChange={(e) => setSearchSector(e.target.value)}
+                placeholder="ex: Supermercado, Restaurante, Farmácia, Loja de Roupas, Consultoria..."
+                className="w-full bg-transparent text-sm font-semibold text-slate-900 placeholder-slate-400 focus:outline-none py-2"
+              />
+            </div>
+            <button
+              onClick={() => onOpenDemoModal(filteredSector.label)}
+              className="w-full sm:w-auto bg-[#15803d] hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl transition-all shadow-md shadow-emerald-700/20 cursor-pointer flex items-center justify-center gap-2 shrink-0"
+            >
+              <span>Pesquisar</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Chips de Seleção Rápida */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Sugestões:</span>
+            {QUICK_SECTORS.map((sector) => {
+              const isSelected = filteredSector.id === sector.id;
+              return (
+                <button
+                  key={sector.id}
+                  onClick={() => {
+                    setActiveSector(sector);
+                    setSearchSector('');
+                  }}
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
+                    isSelected
+                      ? 'bg-blue-50 border-blue-300 text-blue-700 font-bold shadow-sm'
+                      : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  <span>{sector.icon}</span>
+                  <span>{sector.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Cartão de Resultado Imediato (Inspirado no card de domínio disponível com checkmark verde) */}
+          <div className="mt-8 pt-6 border-t border-slate-100">
+            <div className="bg-slate-50/80 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+              
+              <div className="flex items-center gap-3.5 text-center md:text-left">
+                {/* Ícone Checkmark Redondo Verde */}
+                <div className="w-11 h-11 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
+                  <Check className="w-6 h-6 stroke-[3]" />
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                    <span className="text-base sm:text-lg font-black text-slate-950">
+                      kivora.{filteredSector.id}.ao
+                    </span>
+                    <span className="text-xs sm:text-sm font-semibold text-emerald-700">
+                      está homologado e disponível.
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Certificado pela AGT • Emissão de Faturas DS.120 com QR Code e SAF-T AO.
+                  </p>
+                </div>
+              </div>
+
+              {/* Preço e Botão de Ação Direta */}
+              <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
+                <div className="bg-white border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-800 shadow-sm flex items-center gap-1">
+                  <span>{filteredSector.price}</span>
+                </div>
+                <button
+                  onClick={() => onOpenDemoModal(`Adesão: ${filteredSector.label}`)}
+                  className="bg-[#15803d] hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-md shadow-emerald-700/20 cursor-pointer flex items-center gap-1.5"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>Adicionar ao Pedido</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ========== SEÇÃO "MAIS POPULAR!" — GRID MINIMALISTA DE CARTÕES (.co.ao / .edu.ao style) ========== */}
+      <section className="py-10 max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
+              Mais Popular!
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500">
+              Escolha a modalidade de licenciamento ideal para o número de computadores da sua empresa.
+            </p>
+          </div>
+          <button
+            onClick={() => onNavigatePage('planos')}
+            className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
+          >
+            <span>Ver Tabela Completa</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          
+          {/* Card 1: Mensal Standalone */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between hover:border-blue-500/40 hover:shadow-lg transition-all text-center group">
+            <div>
+              <div className="text-xl font-black text-slate-950 mb-1">
+                .mensal.ao
+              </div>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-4">
+                1 Posto Standalone
+              </span>
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-slate-800">
+                25.000,00Kz / mês
+              </div>
+              <ul className="text-left text-xs text-slate-600 space-y-2 mb-6">
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Faturação com QR Code AGT</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> POS e Fecho de Caixa Z</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Exportação SAF-T AO</li>
+              </ul>
+            </div>
+            <button
+              onClick={() => onNavigatePage('planos')}
+              className="w-full bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-800 font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer"
+            >
+              Adicionar
+            </button>
+          </div>
+
+          {/* Card 2: Anual Multi-Postos (Destaque Mais Popular) */}
+          <div className="bg-white rounded-2xl border-2 border-emerald-500 p-6 flex flex-col justify-between shadow-md relative text-center group">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-600 text-white font-black text-[10px] uppercase px-3 py-0.5 rounded-full tracking-wider shadow-sm">
+              Mais Popular!
+            </div>
+            <div>
+              <div className="text-xl font-black text-slate-950 mb-1">
+                .anual.ao
+              </div>
+              <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider block mb-4">
+                3 Postos em Rede LAN
+              </span>
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-emerald-900">
+                250.000,00Kz / ano
+              </div>
+              <ul className="text-left text-xs text-slate-600 space-y-2 mb-6">
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> 3 Caixas / Servidor Local</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Recursos Humanos & IRT 2026</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Suporte VIP & Formação</li>
+              </ul>
+            </div>
+            <button
+              onClick={() => onOpenDemoModal('Licença Anual Multi-Postos')}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
+            >
+              Adicionar
+            </button>
+          </div>
+
+          {/* Card 3: Vitalício Perpétuo */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between hover:border-blue-500/40 hover:shadow-lg transition-all text-center group">
+            <div>
+              <div className="text-xl font-black text-slate-950 mb-1">
+                .vitalicio.ao
+              </div>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-4">
+                5 Postos Perpétuos
+              </span>
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-slate-800">
+                650.000,00Kz / único
+              </div>
+              <ul className="text-left text-xs text-slate-600 space-y-2 mb-6">
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Sem anuidade ou mensalidade</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Todos os módulos desbloqueados</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Instalação e parametrização</li>
+              </ul>
+            </div>
+            <button
+              onClick={() => onOpenDemoModal('Licença Vitalícia Perpétua')}
+              className="w-full bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-800 font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer"
+            >
+              Adicionar
+            </button>
+          </div>
+
+          {/* Card 4: Kit POS Hardware */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between hover:border-blue-500/40 hover:shadow-lg transition-all text-center group">
+            <div>
+              <div className="text-xl font-black text-slate-950 mb-1">
+                .hardware.ao
+              </div>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-4">
+                Kits & Impressoras POS
+              </span>
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-slate-800">
+                Desde 185.000,00Kz
+              </div>
+              <ul className="text-left text-xs text-slate-600 space-y-2 mb-6">
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Impressoras térmicas 80mm</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Leitores 2D e gavetas RJ11</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> 12 meses de garantia local</li>
+              </ul>
+            </div>
+            <button
+              onClick={() => onNavigatePage('loja')}
+              className="w-full bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-800 font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer"
+            >
+              Ver Loja
+            </button>
+          </div>
+
+        </div>
+      </section>
 
       {/* ========== CARROSSEL MARQUEE DE PARCEIROS & CLIENTES (APENAS REGISTADOS NO FIREBASE) ========== */}
       {partnerLogos.length > 0 && (
