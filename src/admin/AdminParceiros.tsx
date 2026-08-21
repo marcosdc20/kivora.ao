@@ -224,8 +224,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     }
   }, [selectedPartner, allDebts]);
 
-  // Combina candidaturas do formulário web (`partner_applications`) com registos pendentes de `partners`
-  // Reconcilia automaticamente parceiros que já estejam ATIVOS e homologados para não aparecerem como pendentes
+  // Combina candidaturas do formulário web (`partner_applications`) com registos da coleção `partners`
   const { allApplicationsList, pendingApplicationsList, approvedApplicationsList } = React.useMemo(() => {
     const all: Array<{
       id: string;
@@ -246,41 +245,17 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       tier?: 'bronze' | 'silver' | 'gold' | 'diamond';
     }> = [];
 
-    // Conjuntos de verificação de parceiros já ATIVOS
-    const activeEmails = new Set(
-      partners.filter(p => p.status === 'active' && p.email).map(p => p.email.toLowerCase().trim())
-    );
-    const activeCodes = new Set(
-      partners.filter(p => p.status === 'active' && p.code).map(p => p.code.toLowerCase().trim())
-    );
-    const activePhones = new Set(
-      partners.filter(p => p.status === 'active' && p.phone).map(p => p.phone.replace(/[^0-9]/g, ''))
-    );
-    const activeNames = new Set(
-      partners.filter(p => p.status === 'active' && p.name).map(p => p.name.toLowerCase().trim())
-    );
+    const processedDocIds = new Set<string>();
 
-    const processedEmails = new Set<string>();
-
-    // 1. Dados de `partner_applications` (site público)
+    // 1. Candidaturas do formulário do site (`partner_applications`)
     applications.forEach(app => {
-      const cleanMail = (app.email || '').toLowerCase().trim();
-      const cleanPhone = (app.telefone || '').replace(/[^0-9]/g, '');
-      const cleanName = (app.empresa_nome || app.empresa || app.nome || '').toLowerCase().trim();
+      processedDocIds.add(app.id);
       const pCode = (app.protocol || `KVRA-PAR-${Math.floor(100 + Math.random() * 900)}`).trim();
+      const status: 'pending' | 'approved' | 'rejected' = 
+        app.status === 'approved' ? 'approved' : 
+        app.status === 'rejected' ? 'rejected' : 'pending';
 
-      // Se já está aprovado no Firestore OU se já existe como parceiro ATIVO em `partners`
-      const isAlreadyActivePartner = 
-        app.status === 'approved' ||
-        (cleanMail && activeEmails.has(cleanMail)) ||
-        (pCode && activeCodes.has(pCode.toLowerCase())) ||
-        (cleanPhone && cleanPhone.length > 6 && activePhones.has(cleanPhone)) ||
-        (cleanName && activeNames.has(cleanName));
-
-      const isRejected = app.status === 'rejected';
-      const finalStatus: 'pending' | 'approved' | 'rejected' = isAlreadyActivePartner ? 'approved' : (isRejected ? 'rejected' : 'pending');
-
-      const candItem = {
+      all.push({
         id: app.id,
         appId: app.id,
         code: pCode,
@@ -293,33 +268,17 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         tipo_parceria: app.tipo_parceria,
         tem_clientes: app.tem_clientes,
         experiencia: app.experiencia,
-        status: finalStatus,
+        status,
         createdAt: app.created_at || Date.now(),
         protocol: app.protocol,
-        tier: 'bronze' as const,
-      };
-
-      processedEmails.add(cleanMail);
-      all.push(candItem);
-
-      // Auto-reconciliação no Firestore: se o parceiro já é ativo, atualiza o status em partner_applications
-      if (isAlreadyActivePartner && app.status !== 'approved' && app.id) {
-        updateDoc(doc(db, 'partner_applications', app.id), { status: 'approved' }).catch(() => {});
-      }
+        tier: 'bronze',
+      });
     });
 
-    // 2. Registos pendentes da coleção `partners` (que não sejam parceiros ativos)
+    // 2. Registos pendentes criados na coleção `partners`
     partners.filter(p => p.status === 'pending').forEach(p => {
-      const cleanMail = (p.email || '').toLowerCase().trim();
-      const cleanPhone = (p.phone || '').replace(/[^0-9]/g, '');
-      const cleanName = (p.name || '').toLowerCase().trim();
-
-      const isAlreadyActive = 
-        (cleanMail && activeEmails.has(cleanMail)) ||
-        (cleanPhone && cleanPhone.length > 6 && activePhones.has(cleanPhone)) ||
-        (cleanName && activeNames.has(cleanName));
-
-      if (!isAlreadyActive && !processedEmails.has(cleanMail)) {
+      const alreadyInApps = applications.some(a => a.protocol === p.code || a.id === p.id);
+      if (!alreadyInApps && !processedDocIds.has(p.id)) {
         all.push({
           id: p.id,
           code: p.code,
@@ -333,6 +292,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         });
       }
     });
+
+    all.sort((a, b) => b.createdAt - a.createdAt);
 
     const pending = all.filter(c => c.status === 'pending');
     const approved = all.filter(c => c.status === 'approved');
