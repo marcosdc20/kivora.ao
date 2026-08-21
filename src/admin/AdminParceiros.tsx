@@ -4,14 +4,13 @@ import {
   DollarSign, Users, CheckCircle2, Loader2, Copy,
   Key, MessageSquare, Search, Ban, RotateCcw,
   Tag, TrendingDown, Wallet, Edit2, Save,
-  ShieldCheck, Sliders, Download, Sparkles, Award, Mail,
-  Phone, Building, MapPin, Trash2, Calendar, FileText
+  ShieldCheck, Sliders, Download, Sparkles, Award, Mail
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
 import { createOrApprovePartnerAccount, setPartnerSuspensionStatus } from './services/authService';
 import { sendPartnerCredentialsEmail } from '../services/siteEmailService';
 import { db } from '../lib/firebase';
-import { collection, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, updateDoc } from 'firebase/firestore';
 import {
   subscribePartnerPricing, savePartnerPricing, subscribeAllDebts, markDebtsPaid,
   subscribePartnerPolicy, savePartnerPolicy,
@@ -71,6 +70,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const [applications, setApplications] = useState<PartnerApplicationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'todos' | 'candidaturas' | 'precos' | 'politicas' | 'extrato_geral'>(initialTab);
+  const [candidaturaFilter, setCandidaturaFilter] = useState<'pendentes' | 'aprovadas' | 'todas'>('pendentes');
   const [search, setSearch] = useState('');
   const [tierFilter, setTierFilter] = useState<string>('todos');
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
@@ -225,8 +225,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   }, [selectedPartner, allDebts]);
 
   // Combina candidaturas do formulário web (`partner_applications`) com registos pendentes de `partners`
-  const pendingApplicationsList = React.useMemo(() => {
-    const list: Array<{
+  // Reconcilia automaticamente parceiros que já estejam ATIVOS e homologados para não aparecerem como pendentes
+  const { allApplicationsList, pendingApplicationsList, approvedApplicationsList } = React.useMemo(() => {
+    const all: Array<{
       id: string;
       appId?: string;
       code: string;
@@ -239,20 +240,47 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       tipo_parceria?: string;
       tem_clientes?: string;
       experiencia?: string;
-      status: string;
+      status: 'pending' | 'approved' | 'rejected';
       createdAt: number;
       protocol?: string;
       tier?: 'bronze' | 'silver' | 'gold' | 'diamond';
     }> = [];
 
+    // Conjuntos de verificação de parceiros já ATIVOS
+    const activeEmails = new Set(
+      partners.filter(p => p.status === 'active' && p.email).map(p => p.email.toLowerCase().trim())
+    );
+    const activeCodes = new Set(
+      partners.filter(p => p.status === 'active' && p.code).map(p => p.code.toLowerCase().trim())
+    );
+    const activePhones = new Set(
+      partners.filter(p => p.status === 'active' && p.phone).map(p => p.phone.replace(/[^0-9]/g, ''))
+    );
+    const activeNames = new Set(
+      partners.filter(p => p.status === 'active' && p.name).map(p => p.name.toLowerCase().trim())
+    );
+
     const processedEmails = new Set<string>();
 
-    // 1. Dados ricos de `partner_applications` (site público)
-    applications.filter(a => a.status === 'pending' || !a.status).forEach(app => {
-      const cleanMail = app.email.toLowerCase().trim();
-      processedEmails.add(cleanMail);
-      const pCode = app.protocol || `KVRA-PAR-${Math.floor(100 + Math.random() * 900)}`;
-      list.push({
+    // 1. Dados de `partner_applications` (site público)
+    applications.forEach(app => {
+      const cleanMail = (app.email || '').toLowerCase().trim();
+      const cleanPhone = (app.telefone || '').replace(/[^0-9]/g, '');
+      const cleanName = (app.empresa_nome || app.empresa || app.nome || '').toLowerCase().trim();
+      const pCode = (app.protocol || `KVRA-PAR-${Math.floor(100 + Math.random() * 900)}`).trim();
+
+      // Se já está aprovado no Firestore OU se já existe como parceiro ATIVO em `partners`
+      const isAlreadyActivePartner = 
+        app.status === 'approved' ||
+        (cleanMail && activeEmails.has(cleanMail)) ||
+        (pCode && activeCodes.has(pCode.toLowerCase())) ||
+        (cleanPhone && cleanPhone.length > 6 && activePhones.has(cleanPhone)) ||
+        (cleanName && activeNames.has(cleanName));
+
+      const isRejected = app.status === 'rejected';
+      const finalStatus: 'pending' | 'approved' | 'rejected' = isAlreadyActivePartner ? 'approved' : (isRejected ? 'rejected' : 'pending');
+
+      const candItem = {
         id: app.id,
         appId: app.id,
         code: pCode,
@@ -265,18 +293,34 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         tipo_parceria: app.tipo_parceria,
         tem_clientes: app.tem_clientes,
         experiencia: app.experiencia,
-        status: 'pending',
+        status: finalStatus,
         createdAt: app.created_at || Date.now(),
         protocol: app.protocol,
-        tier: 'bronze',
-      });
+        tier: 'bronze' as const,
+      };
+
+      processedEmails.add(cleanMail);
+      all.push(candItem);
+
+      // Auto-reconciliação no Firestore: se o parceiro já é ativo, atualiza o status em partner_applications
+      if (isAlreadyActivePartner && app.status !== 'approved' && app.id) {
+        updateDoc(doc(db, 'partner_applications', app.id), { status: 'approved' }).catch(() => {});
+      }
     });
 
-    // 2. Registos pendentes da coleção `partners`
+    // 2. Registos pendentes da coleção `partners` (que não sejam parceiros ativos)
     partners.filter(p => p.status === 'pending').forEach(p => {
-      const cleanMail = p.email.toLowerCase().trim();
-      if (!processedEmails.has(cleanMail)) {
-        list.push({
+      const cleanMail = (p.email || '').toLowerCase().trim();
+      const cleanPhone = (p.phone || '').replace(/[^0-9]/g, '');
+      const cleanName = (p.name || '').toLowerCase().trim();
+
+      const isAlreadyActive = 
+        (cleanMail && activeEmails.has(cleanMail)) ||
+        (cleanPhone && cleanPhone.length > 6 && activePhones.has(cleanPhone)) ||
+        (cleanName && activeNames.has(cleanName));
+
+      if (!isAlreadyActive && !processedEmails.has(cleanMail)) {
+        all.push({
           id: p.id,
           code: p.code,
           name: p.name,
@@ -290,7 +334,10 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       }
     });
 
-    return list;
+    const pending = all.filter(c => c.status === 'pending');
+    const approved = all.filter(c => c.status === 'approved');
+
+    return { allApplicationsList: all, pendingApplicationsList: pending, approvedApplicationsList: approved };
   }, [applications, partners]);
 
   const activePartners = partners.filter(p => p.status === 'active');
@@ -308,13 +355,25 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const getPartnerActiveCreditSlots = (pid: string) =>
     allDebts.filter(d => (d.partner_id === pid || (partners.find(p => p.id === pid)?.code && d.partner_id === partners.find(p => p.id === pid)?.code)) && !d.paid && d.payment_method !== 'wallet').length;
 
-  const filteredPartners = (tab === 'candidaturas' ? pendingPartners : partners).filter((p: any) => {
+  const filteredPartners = partners.filter((p) => {
     const matchesTier = tierFilter === 'todos' || p.tier === tierFilter;
     if (!matchesTier) return false;
     if (!search) return true;
     const s = search.toLowerCase();
-    return p.name.toLowerCase().includes(s) || (p.code && p.code.toLowerCase().includes(s)) ||
+    return p.name.toLowerCase().includes(s) || p.code.toLowerCase().includes(s) ||
       p.email.toLowerCase().includes(s) || p.region.toLowerCase().includes(s);
+  });
+
+  const currentCandidaturasList = 
+    candidaturaFilter === 'pendentes' ? pendingApplicationsList :
+    candidaturaFilter === 'aprovadas' ? approvedApplicationsList :
+    allApplicationsList;
+
+  const filteredCandidaturas = currentCandidaturasList.filter((cand) => {
+    if (!search) return true;
+    const s = search.toLowerCase();
+    return cand.name.toLowerCase().includes(s) || (cand.code && cand.code.toLowerCase().includes(s)) ||
+      cand.email.toLowerCase().includes(s) || (cand.region && cand.region.toLowerCase().includes(s));
   });
 
   const filteredGlobalDebts = allDebts.filter(d => {
@@ -490,7 +549,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     setSavingPolicy(true);
     try {
       await savePartnerPolicy(policyDraft);
-      alert('Políticas de Licenciamento & Quotas guardadas no Firebase com sucesso!');
+      setPolicy(policyDraft);
+      alert('Políticas e quotas de licenciamento guardadas com sucesso no Firebase!');
     } catch (err: any) {
       alert('Erro ao guardar políticas: ' + err.message);
     } finally {
@@ -578,7 +638,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 tab === t.id ? 'bg-slate-950 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'}`}>
               {t.icon}
               <span>{t.label}</span>
-              {t.badge && t.badge > 0 && (
+              {t.badge !== undefined && t.badge > 0 && (
                 <span className="bg-amber-500 text-white text-[10px] px-1.5 rounded-full font-black">{t.badge}</span>
               )}
             </button>
@@ -600,11 +660,10 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               </div>
 
               <div className="flex items-center gap-2 w-full sm:w-auto">
-                <span className="text-xs font-bold text-slate-500">Categoria:</span>
                 <select
                   value={tierFilter}
                   onChange={(e) => setTierFilter(e.target.value)}
-                  className="bg-slate-50 border border-slate-200 text-xs font-bold rounded-xl px-3 py-2 text-slate-700"
+                  className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-blue-500"
                 >
                   <option value="todos">Todos os Níveis</option>
                   <option value="bronze">Bronze (Iniciante)</option>
@@ -618,7 +677,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                  <thead className="bg-slate-50/80 text-slate-600 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
                     <tr>
                       <th className="p-4">Parceiro</th>
                       <th className="p-4">Categoria</th>
@@ -631,105 +690,120 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {loading ? (
-                      <tr><td colSpan={7} className="p-8 text-center text-slate-400">
-                        <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
-                        <span>A carregar parceiros do Firebase...</span>
-                      </td></tr>
+                      <tr>
+                        <td colSpan={7} className="p-8 text-center text-slate-400">
+                          <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
+                          <span>A carregar parceiros do Firebase...</span>
+                        </td>
+                      </tr>
                     ) : filteredPartners.length === 0 ? (
-                      <tr><td colSpan={7} className="p-8 text-center text-slate-400">
-                        <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                        <p className="font-bold text-slate-700">Nenhum parceiro encontrado</p>
-                      </td></tr>
-                    ) : filteredPartners.map((p) => {
-                      const debt = getPartnerPendingDebt(p.id);
-                      const lics = getPartnerLicenseCount(p.id);
-                      const activeSlots = getPartnerActiveCreditSlots(p.id);
-                      const slotsLimit = p.credit_slots_limit || policy.tier_slots[p.tier] || 2;
-                      const isSlotsFull = activeSlots >= slotsLimit;
+                      <tr>
+                        <td colSpan={7} className="p-8 text-center text-slate-400">
+                          Nenhum parceiro encontrado com os filtros selecionados.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredPartners.map((p) => {
+                        const debt = getPartnerPendingDebt(p.id);
+                        const lics = getPartnerLicenseCount(p.id);
+                        const activeSlots = getPartnerActiveCreditSlots(p.id);
+                        const slotsLimit = p.credit_slots_limit || 2;
+                        const isSlotsFull = activeSlots >= slotsLimit;
 
-                      return (
-                        <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                          <td className="p-4">
-                            <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{p.code}</span>
-                            <p className="font-bold text-slate-900 mt-1">{p.name}</p>
-                            <p className="text-slate-400 text-[10px]">{p.email} • {p.phone} • {p.region}</p>
-                          </td>
-                          <td className="p-4">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                              p.tier === 'diamond' ? 'bg-purple-100 text-purple-800 border border-purple-200' :
-                              p.tier === 'gold' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
-                              p.tier === 'silver' ? 'bg-slate-200 text-slate-800 border border-slate-300' :
-                              'bg-amber-50 text-amber-900 border border-amber-200'
-                            }`}>
-                              <Sparkles className="w-3 h-3" />
-                              <span>{p.tier}</span>
-                            </span>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex flex-col">
-                              <span className={`font-mono font-bold text-xs ${isSlotsFull ? 'text-amber-700' : 'text-slate-900'}`}>
-                                {activeSlots} / {slotsLimit} em uso
+                        return (
+                          <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="p-4">
+                              <div className="flex flex-col">
+                                <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded w-fit mb-1 border border-blue-200">
+                                  {p.code}
+                                </span>
+                                <span className="font-bold text-slate-900 text-xs">{p.name}</span>
+                                <span className="text-[11px] text-slate-400">{p.email} • {p.phone} • {p.region}</span>
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                                p.tier === 'diamond' ? 'bg-indigo-100 text-indigo-800 border border-indigo-200' :
+                                p.tier === 'gold' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+                                p.tier === 'silver' ? 'bg-slate-200 text-slate-800 border border-slate-300' :
+                                'bg-amber-50 text-amber-900 border border-amber-200'
+                              }`}>
+                                <Sparkles className="w-3 h-3" />
+                                <span>{p.tier}</span>
                               </span>
-                              <span className="text-[10px] text-slate-400">{lics} licenças emitidas</span>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <span className="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                              {fmt(p.wallet_balance_aoa || 0)} Kz
-                            </span>
-                          </td>
-                          <td className="p-4">
-                            {debt > 0 ? (
-                              <span className="font-mono font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">{fmt(debt)} Kz</span>
-                            ) : (
-                              <span className="text-emerald-600 font-bold text-[11px]">✓ Regularizado</span>
-                            )}
-                          </td>
-                          <td className="p-4">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              p.status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                              p.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                              'bg-red-50 text-red-700 border border-red-200'}`}>
-                              {p.status === 'active' ? 'Ativo' : p.status === 'pending' ? 'Pendente' : 'Suspenso'}
-                            </span>
-                          </td>
-                          <td className="p-4 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                onClick={() => setCertificatesPartnerModal({
-                                  partnerName: p.name,
-                                  partnerCode: p.code,
-                                  tier: p.tier,
-                                  region: p.region,
-                                  email: p.email,
-                                  phone: p.phone,
-                                  createdAt: p.createdAt,
-                                })}
-                                title="Emitir Certificados Oficiais (Visual Software & Kivora)"
-                                className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
-                              >
-                                <Award className="w-3.5 h-3.5" />
-                              </button>
-                              <button onClick={() => copyRefLink(p)} title="Copiar Link Ref"
-                                className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
-                                {copiedCode === p.code ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                              </button>
-                              {p.status !== 'pending' && (
-                                <button onClick={() => handleToggleSuspend(p)}
-                                  title={p.status === 'active' ? 'Suspender' : 'Reativar'}
-                                  className={`p-1.5 rounded-lg transition-colors cursor-pointer ${p.status === 'active' ? 'text-slate-400 hover:text-red-600 hover:bg-red-50' : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'}`}>
-                                  {p.status === 'active' ? <Ban className="w-3.5 h-3.5" /> : <RotateCcw className="w-3.5 h-3.5" />}
-                                </button>
+                            </td>
+                            <td className="p-4">
+                              <div className="flex flex-col">
+                                <span className={`font-mono font-bold text-xs ${isSlotsFull ? 'text-amber-700' : 'text-slate-900'}`}>
+                                  {activeSlots} / {slotsLimit} em uso
+                                </span>
+                                <span className="text-[10px] text-slate-400">{lics} licenças emitidas</span>
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              <span className="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                {fmt(p.wallet_balance_aoa || 0)} Kz
+                              </span>
+                            </td>
+                            <td className="p-4">
+                              {debt > 0 ? (
+                                <span className="font-mono font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">{fmt(debt)} Kz</span>
+                              ) : (
+                                <span className="text-emerald-600 font-bold text-[11px]">✓ Regularizado</span>
                               )}
-                              <button onClick={() => setSelectedPartner(p)} title="Configurar Quotas & Ver Licenças"
-                                className="p-1.5 text-slate-600 hover:text-slate-950 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer">
-                                <Eye className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                            </td>
+                            <td className="p-4">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                p.status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                                p.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                                'bg-red-50 text-red-700 border border-red-200'}`}>
+                                {p.status === 'active' ? 'Ativo' : p.status === 'pending' ? 'Pendente' : 'Suspenso'}
+                              </span>
+                            </td>
+                            <td className="p-4 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  onClick={() => setCertificatesPartnerModal({
+                                    partnerName: p.name,
+                                    partnerCode: p.code,
+                                    tier: p.tier,
+                                    region: p.region,
+                                    email: p.email,
+                                    phone: p.phone,
+                                    createdAt: p.createdAt,
+                                  })}
+                                  title="Emitir Certificados Oficiais (Visual Software & Kivora)"
+                                  className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <Award className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => copyRefLink(p)}
+                                  title="Copiar Link de Afiliado"
+                                  className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  {copiedCode === p.code ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                                </button>
+                                <button
+                                  onClick={() => handleToggleSuspend(p)}
+                                  title={p.status === 'active' ? 'Suspender Parceiro' : 'Reativar Parceiro'}
+                                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  {p.status === 'active' ? <Ban className="w-4 h-4" /> : <RotateCcw className="w-4 h-4" />}
+                                </button>
+                                <button
+                                  onClick={() => setSelectedPartner(p)}
+                                  title="Ver Detalhes & Extrato"
+                                  className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -743,27 +817,65 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               <div>
                 <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                  <span>Candidaturas de Novos Parceiros ({pendingPartners.length})</span>
+                  <span>Candidaturas ao Programa de Parceiros</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Solicitações recebidas através do formulário oficial do site e registos pendentes.
+                  Solicitações recebidas através do formulário oficial do site e histórico de homologações.
                 </p>
+              </div>
+
+              {/* Sub-filtro de Candidaturas */}
+              <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+                <button
+                  onClick={() => setCandidaturaFilter('pendentes')}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                    candidaturaFilter === 'pendentes'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  Pendentes ({pendingApplicationsList.length})
+                </button>
+                <button
+                  onClick={() => setCandidaturaFilter('aprovadas')}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                    candidaturaFilter === 'aprovadas'
+                      ? 'bg-white text-emerald-700 shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  Homologadas ({approvedApplicationsList.length})
+                </button>
+                <button
+                  onClick={() => setCandidaturaFilter('todas')}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                    candidaturaFilter === 'todas'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  Todas ({allApplicationsList.length})
+                </button>
               </div>
             </div>
 
-            {pendingPartners.length === 0 ? (
+            {filteredCandidaturas.length === 0 ? (
               <div className="p-12 text-center text-slate-400 space-y-3">
                 <div className="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-xs">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <p className="font-black text-slate-700 text-sm">Todas as candidaturas foram homologadas!</p>
+                <p className="font-black text-slate-700 text-sm">
+                  {candidaturaFilter === 'pendentes'
+                    ? 'Todas as candidaturas foram homologadas! Não há novos candidatos pendentes.'
+                    : 'Nenhuma candidatura encontrada nesta categoria.'}
+                </p>
                 <p className="text-xs text-slate-400 max-w-sm mx-auto">
                   Novas solicitações de parceria preenchidas no site em <strong>kivora.ao/#parceiros</strong> aparecerão automaticamente aqui em tempo real.
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {pendingPartners.map((cand) => (
+                {filteredCandidaturas.map((cand: any) => (
                   <div
                     key={cand.id}
                     className="p-5 rounded-3xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-emerald-300 hover:shadow-md transition-all space-y-4"
@@ -779,9 +891,20 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                         )}
                       </div>
 
-                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
-                        Pendente
-                      </span>
+                      {cand.status === 'approved' ? (
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0 flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <span>Homologado / Ativo</span>
+                        </span>
+                      ) : cand.status === 'rejected' ? (
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 text-red-800 border border-red-200 shrink-0">
+                          Arquivado
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                          Pendente
+                        </span>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 text-[11px] bg-white p-3 rounded-2xl border border-slate-200/80">
@@ -820,22 +943,28 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                         {new Date(cand.createdAt).toLocaleDateString('pt-AO', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </span>
 
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleRejectPartner(cand)}
-                          className="px-3 py-2 text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
-                        >
-                          Arquivar
-                        </button>
-                        <button
-                          onClick={() => handleApprovePartner(cand)}
-                          disabled={approving === cand.id}
-                          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-                        >
-                          {approving === cand.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-                          <span>Aprovar & Homologar</span>
-                        </button>
-                      </div>
+                      {cand.status === 'pending' ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleRejectPartner(cand)}
+                            className="px-3 py-2 text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
+                          >
+                            Arquivar
+                          </button>
+                          <button
+                            onClick={() => handleApprovePartner(cand)}
+                            disabled={approving === cand.id}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                          >
+                            {approving === cand.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                            <span>Aprovar & Homologar</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+                          Conta de Parceiro Ativa
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}

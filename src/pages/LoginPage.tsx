@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { KIVORA_INFO } from '../data/kivoraData';
 import { Lock, ShieldCheck, ArrowRight, ArrowLeft, Loader2, UserCheck, Sparkles } from 'lucide-react';
-import { loginUser, getStoredSession, KivoraUserSession } from '../admin/services/authService';
+import { loginUser, KivoraUserSession } from '../admin/services/authService';
 
 interface LoginPageProps {
   onBackToHome: () => void;
