@@ -198,7 +198,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
   // Subscrição em Tempo Real aos Chamados do Parceiro
   useEffect(() => {
-    const unsub = subscribePartnerTickets(partnerCode, ({ clientTickets: cTks, adminTickets: aTks }) => {
+    const unsub = subscribePartnerTickets(partnerCode, session?.email, ({ clientTickets: cTks, adminTickets: aTks }) => {
       setClientTickets(cTks);
       setAdminTickets(aTks);
       if (selectedTicket) {
@@ -208,7 +208,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       }
     });
     return () => unsub();
-  }, [partnerCode, selectedTicket]);
+  }, [partnerCode, session?.email, selectedTicket]);
 
   // Subscrição em Tempo Real às Licenças deste Parceiro
   useEffect(() => {
@@ -730,16 +730,38 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
   const handleSendChatMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatReply.trim() || !selectedTicket) return;
+    const replyText = chatReply.trim();
+    if (!replyText || !selectedTicket) return;
+
+    const optMsg = {
+      id: `msg_${Date.now()}`,
+      sender_name: partnerName,
+      sender_role: 'partner' as const,
+      sender_email: session?.email || '',
+      text: replyText,
+      timestamp: Date.now(),
+    };
+
+    setSelectedTicket((prev) =>
+      prev
+        ? {
+            ...prev,
+            messages: [...prev.messages, optMsg],
+            messagesCount: prev.messages.length + 1,
+            status: 'in_progress',
+          }
+        : null
+    );
+
+    setChatReply('');
 
     try {
       await sendTicketMessage(selectedTicket.id, {
         sender_name: partnerName,
         sender_role: 'partner',
         sender_email: session?.email || '',
-        text: chatReply,
+        text: replyText,
       });
-      setChatReply('');
     } catch (err: any) {
       showToast('Erro ao enviar mensagem: ' + err.message);
     }

@@ -61,22 +61,42 @@ export async function createLicense(params: CreateLicenseParams): Promise<Kivora
     status: 'active',
     hardware_id: null,
     created_at: now,
-    expires_at: params.expires_at,
+    expires_at: params.expires_at ?? null,
     price_aoa: params.price_aoa ?? 0,
     notes: params.notes ?? '',
-    partner_id: params.partner_id ?? undefined,
+    partner_id: params.partner_id || undefined,
     activated_at: null,
     extra_seats: params.extra_seats ?? 0,
     is_provisional: params.is_provisional ?? false,
-    provisional_target_plan: params.provisional_target_plan,
+    provisional_target_plan: params.provisional_target_plan || undefined,
   };
 
-  await setDoc(doc(db, 'licenses', key), {
-    ...data,
+  const firestorePayload: Record<string, any> = {
+    id: key,
+    client_email: data.client_email,
+    company_name: data.company_name,
+    nif: data.nif,
+    plan_type: data.plan_type,
+    status: data.status,
+    hardware_id: null,
+    created_at: now,
+    expires_at: params.expires_at ?? null,
+    price_aoa: data.price_aoa,
+    notes: data.notes,
+    partner_id: params.partner_id || '',
+    activated_at: null,
+    extra_seats: data.extra_seats,
+    is_provisional: data.is_provisional,
     max_users: 1 + (params.extra_seats ?? 0),
     _created_at_ts: Timestamp.fromMillis(now),
     _expires_at_ts: params.expires_at ? Timestamp.fromMillis(params.expires_at) : null,
-  });
+  };
+
+  if (params.provisional_target_plan) {
+    firestorePayload.provisional_target_plan = params.provisional_target_plan;
+  }
+
+  await setDoc(doc(db, 'licenses', key), firestorePayload);
 
   return data;
 }

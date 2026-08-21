@@ -192,12 +192,7 @@ service cloud.firestore {
     // 7. CENTRAL DE SUPORTE & TICKETS DE ATENDIMENTO
     // ─────────────────────────────────────────────────────────────
     match /support_tickets/{ticketId} {
-      allow read: if true;
-      allow create: if isValidString(request.resource.data.subject, 2, 250) 
-                    || isValidString(request.resource.data.assunto, 2, 250)
-                    || request.resource.data.clientName is string
-                    || request.resource.data.nome is string;
-      allow update: if true; // Envio e troca de mensagens de chat em tempo real
+      allow read, create, update: if true; // Envio e troca de mensagens de chat em tempo real (Cliente, Parceiro, Admin)
       allow delete: if isAdmin() || isAuthenticated();
     }
     match /support_tickets/{ticketId}/{allSubcollections=**} {

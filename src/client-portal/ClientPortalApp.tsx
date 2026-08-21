@@ -137,17 +137,39 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
   const handleSendChatMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatReply.trim() || !selectedTicket) return;
+    const replyText = chatReply.trim();
+    if (!replyText || !selectedTicket) return;
     setSendingReply(true);
+
+    const optMsg = {
+      id: `msg_${Date.now()}`,
+      sender_name: clientLicense.company_name,
+      sender_role: 'client' as const,
+      sender_email: session?.email || clientLicense.client_email,
+      text: replyText,
+      timestamp: Date.now(),
+    };
+
+    setSelectedTicket((prev) =>
+      prev
+        ? {
+            ...prev,
+            messages: [...prev.messages, optMsg],
+            messagesCount: prev.messages.length + 1,
+            status: 'open',
+          }
+        : null
+    );
+
+    setChatReply('');
 
     try {
       await sendTicketMessage(selectedTicket.id, {
         sender_name: clientLicense.company_name,
         sender_role: 'client',
         sender_email: session?.email || clientLicense.client_email,
-        text: chatReply,
+        text: replyText,
       });
-      setChatReply('');
     } catch (err: any) {
       showToast('Erro ao enviar mensagem: ' + err.message);
     } finally {

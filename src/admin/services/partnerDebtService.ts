@@ -248,13 +248,27 @@ export function subscribePartnerPricing(cb: (plans: PartnerPricingPlan[]) => voi
 }
 
 export async function recordPartnerDebt(entry: Omit<PartnerDebtEntry, 'id'>): Promise<void> {
-  await addDoc(collection(db, 'partner_debts'), {
-    ...entry,
+  const payload: Record<string, any> = {
+    partner_id: entry.partner_id || '',
+    partner_name: entry.partner_name || '',
+    license_id: entry.license_id || '',
+    company_name: entry.company_name || '',
+    plan_type: entry.plan_type || 'monthly',
+    cost_aoa: entry.cost_aoa || 0,
+    client_price_aoa: entry.client_price_aoa || 0,
     paid: entry.paid ?? false,
     paid_at: entry.paid_at ?? null,
     created_at: entry.created_at || Date.now(),
+    payment_method: entry.payment_method || 'credit',
+    is_provisional: entry.is_provisional ?? false,
     _ts: Timestamp.fromMillis(entry.created_at || Date.now()),
-  });
+  };
+
+  if (entry.provisional_target_plan) {
+    payload.provisional_target_plan = entry.provisional_target_plan;
+  }
+
+  await addDoc(collection(db, 'partner_debts'), payload);
 }
 
 /**

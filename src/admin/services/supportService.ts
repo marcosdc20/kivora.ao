@@ -65,31 +65,31 @@ export async function createSupportTicket(data: CreateTicketDTO): Promise<Suppor
 
   const firstMsg: SupportMessage = {
     id: `msg_${now}`,
-    sender_name: data.sender_name,
-    sender_role: data.created_by_role,
-    sender_email: data.contact_email,
-    text: data.initial_message,
+    sender_name: data.sender_name || 'Utilizador',
+    sender_role: data.created_by_role || 'partner',
+    sender_email: data.contact_email || '',
+    text: data.initial_message || 'Chamado aberto.',
     timestamp: now
   };
 
   const newTicket: SupportTicket = {
     id: tkId,
     ticket_number: tkNum,
-    company_name: data.company_name,
+    company_name: data.company_name || 'Parceiro Kivora',
     nif: data.nif || '',
-    contact_email: data.contact_email,
+    contact_email: data.contact_email || '',
     contact_phone: data.contact_phone || '',
-    subject: data.subject,
-    category: data.category,
+    subject: data.subject || 'Chamado de Suporte',
+    category: data.category || 'tecnico',
     priority: data.priority || 'medium',
     status: 'open',
     createdAt: now,
-    remote_code: data.remote_code,
+    remote_code: data.remote_code || '',
     messagesCount: 1,
     partner_id: data.partner_id || '',
     partner_name: data.partner_name || '',
-    target_type: data.target_type,
-    created_by_role: data.created_by_role,
+    target_type: data.target_type || 'admin',
+    created_by_role: data.created_by_role || 'partner',
     messages: [firstMsg]
   };
 
@@ -104,10 +104,10 @@ export async function sendTicketMessage(
 ): Promise<void> {
   const newMsg: SupportMessage = {
     id: `msg_${Date.now()}`,
-    sender_name: message.sender_name,
-    sender_role: message.sender_role,
+    sender_name: message.sender_name || 'Utilizador',
+    sender_role: message.sender_role || 'partner',
     sender_email: message.sender_email || '',
-    text: message.text,
+    text: message.text || '',
     timestamp: Date.now()
   };
 
@@ -155,10 +155,10 @@ export function subscribeClientTickets(
           priority: data.priority || 'medium',
           status: data.status || 'open',
           createdAt: Number(data.createdAt) || Date.now(),
-          remote_code: data.remote_code,
+          remote_code: data.remote_code || '',
           messagesCount: Array.isArray(data.messages) ? data.messages.length : (data.messagesCount || 1),
-          partner_id: data.partner_id,
-          partner_name: data.partner_name,
+          partner_id: data.partner_id || '',
+          partner_name: data.partner_name || '',
           target_type: data.target_type || 'admin',
           created_by_role: data.created_by_role || 'client',
           messages: Array.isArray(data.messages) ? data.messages : [
@@ -174,13 +174,19 @@ export function subscribeClientTickets(
 /** Subscrição em Tempo Real para Tickets do Parceiro (clientes do parceiro e chamados abertos pelo parceiro) */
 export function subscribePartnerTickets(
   partnerCode: string,
-  onUpdate: (tickets: { clientTickets: SupportTicket[]; adminTickets: SupportTicket[] }) => void
+  onUpdateOrEmail: ((tickets: { clientTickets: SupportTicket[]; adminTickets: SupportTicket[] }) => void) | string,
+  maybeOnUpdate?: (tickets: { clientTickets: SupportTicket[]; adminTickets: SupportTicket[] }) => void
 ) {
+  const onUpdate = typeof onUpdateOrEmail === 'function' ? onUpdateOrEmail : maybeOnUpdate;
+  const partnerEmail = typeof onUpdateOrEmail === 'string' ? onUpdateOrEmail : '';
+  if (!onUpdate) return () => {};
+
   const q = query(collection(db, 'support_tickets'), orderBy('createdAt', 'desc'));
   return onSnapshot(q, (snap) => {
     const clientTickets: SupportTicket[] = [];
     const adminTickets: SupportTicket[] = [];
     const pCode = (partnerCode || '').toLowerCase().trim();
+    const pEmail = (partnerEmail || '').toLowerCase().trim();
 
     snap.forEach((d) => {
       const data = d.data() as any;
@@ -196,25 +202,33 @@ export function subscribePartnerTickets(
         priority: data.priority || 'medium',
         status: data.status || 'open',
         createdAt: Number(data.createdAt) || Date.now(),
-        remote_code: data.remote_code,
+        remote_code: data.remote_code || '',
         messagesCount: Array.isArray(data.messages) ? data.messages.length : (data.messagesCount || 1),
-        partner_id: data.partner_id,
-        partner_name: data.partner_name,
+        partner_id: data.partner_id || '',
+        partner_name: data.partner_name || '',
         target_type: data.target_type || 'admin',
         created_by_role: data.created_by_role || 'client',
         messages: Array.isArray(data.messages) ? data.messages : []
       };
 
+      const matchPartner = 
+        (pCode && tk.partner_id?.toLowerCase().includes(pCode)) ||
+        (pCode && tk.contact_email?.toLowerCase().includes(pCode)) ||
+        (pEmail && tk.contact_email?.toLowerCase().includes(pEmail)) ||
+        (pEmail && tk.partner_id?.toLowerCase().includes(pEmail)) ||
+        (pCode && pCode.includes(tk.partner_id?.toLowerCase() || '')) ||
+        (pCode && pCode.includes(tk.contact_email?.toLowerCase() || ''));
+
       // Se foi o parceiro que abriu para o Admin
-      if (tk.created_by_role === 'partner' && (tk.partner_id?.toLowerCase() === pCode || tk.contact_email?.toLowerCase().includes(pCode))) {
+      if (tk.created_by_role === 'partner' && (matchPartner || !pCode)) {
         adminTickets.push(tk);
       }
       // Se é um ticket aberto pelo cliente direcionado para este parceiro
-      else if (tk.partner_id && tk.partner_id.toLowerCase().includes(pCode) && tk.target_type === 'partner') {
+      else if (tk.target_type === 'partner' && matchPartner) {
         clientTickets.push(tk);
       }
-      // Fallback: se não tiver nenhum filtrado especificamente, mostra na lista de clientes se o parceiro for o emissor
-      else if (tk.partner_id && tk.partner_id.toLowerCase().includes(pCode)) {
+      // Fallback: se tiver o ID do parceiro associado
+      else if (matchPartner) {
         clientTickets.push(tk);
       }
     });

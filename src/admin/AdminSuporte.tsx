@@ -206,17 +206,40 @@ export const AdminSuporte: React.FC = () => {
 
   const handleSendAdminMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatReply.trim() || !selectedTicket) return;
+    const replyText = chatReply.trim();
+    if (!replyText || !selectedTicket) return;
 
     setSendingMessage(true);
+
+    const optMsg = {
+      id: `msg_${Date.now()}`,
+      sender_name: 'Engenharia Kivora (Admin)',
+      sender_role: 'admin' as const,
+      sender_email: 'admin@kivora.ao',
+      text: replyText,
+      timestamp: Date.now(),
+    };
+
+    setSelectedTicket((prev) =>
+      prev
+        ? {
+            ...prev,
+            messages: [...prev.messages, optMsg],
+            messagesCount: prev.messages.length + 1,
+            status: 'in_progress',
+          }
+        : null
+    );
+
+    setChatReply('');
+
     try {
       await sendTicketMessage(selectedTicket.id, {
         sender_name: 'Engenharia Kivora (Admin)',
         sender_role: 'admin',
         sender_email: 'admin@kivora.ao',
-        text: chatReply
+        text: replyText,
       });
-      setChatReply('');
     } catch (err: any) {
       alert('Erro ao enviar mensagem: ' + err.message);
     } finally {
