@@ -4,10 +4,11 @@ import {
   DollarSign, Users, CheckCircle2, Loader2, Copy,
   Key, MessageSquare, Search, Ban, RotateCcw,
   Tag, TrendingDown, Wallet, Edit2, Save,
-  ShieldCheck, Sliders, Download, Sparkles, Award
+  ShieldCheck, Sliders, Download, Sparkles, Award, Mail
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
 import { createOrApprovePartnerAccount, setPartnerSuspensionStatus } from './services/authService';
+import { sendPartnerCredentialsEmail } from '../services/siteEmailService';
 import { db } from '../lib/firebase';
 import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import {
@@ -58,6 +59,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     open: boolean; partnerName: string; email: string; password: string; partnerCode: string; phone: string;
   } | null>(null);
   const [copiedCredentials, setCopiedCredentials] = useState(false);
+  const [sendingPartnerEmail, setSendingPartnerEmail] = useState(false);
+  const [partnerEmailSent, setPartnerEmailSent] = useState(false);
   const [certificatesPartnerModal, setCertificatesPartnerModal] = useState<PartnerCertificateData | null>(null);
 
   const [allDebts, setAllDebts] = useState<PartnerDebtEntry[]>([]);
@@ -212,6 +215,17 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         status: 'active', createdAt: Date.now(),
       }, { merge: true });
       await createOrApprovePartnerAccount({ nome: name, email, phone, region, partnerCode: pCode, tier: newPartnerTier });
+      
+      // Envio automático de e-mail de credenciais ao parceiro
+      if (email && email.includes('@')) {
+        sendPartnerCredentialsEmail({
+          partnerEmail: email.toLowerCase().trim(),
+          partnerName: name,
+          partnerCode: pCode,
+          password: pwd,
+        }).catch((err) => console.warn('Aviso no envio de e-mail ao parceiro:', err));
+      }
+
       setShowModal(false); setName(''); setCode(''); setEmail(''); setPhone('');
       setCredentialsModal({ open: true, partnerName: name, email, password: pwd, partnerCode: pCode, phone });
     } catch (err: any) { alert('Erro ao registar parceiro: ' + err.message); }
@@ -227,6 +241,17 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         await setDoc(doc(db, 'partners', p.code), { status: 'active', code: p.code, credit_slots_limit: initialSlots }, { merge: true });
       }
       await createOrApprovePartnerAccount({ nome: p.name, email: p.email, phone: p.phone, region: p.region, partnerCode: p.code });
+      
+      // Envio automático de e-mail de homologação ao parceiro
+      if (p.email && p.email.includes('@')) {
+        sendPartnerCredentialsEmail({
+          partnerEmail: p.email.toLowerCase().trim(),
+          partnerName: p.name,
+          partnerCode: p.code,
+          password: pwd,
+        }).catch((err) => console.warn('Aviso no envio de e-mail ao parceiro:', err));
+      }
+
       setCredentialsModal({ open: true, partnerName: p.name, email: p.email, password: pwd, partnerCode: p.code, phone: p.phone });
     } catch (err: any) { alert('Erro ao aprovar: ' + err.message); }
     finally { setApproving(null); }
@@ -1374,6 +1399,46 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 </a>
               )}
             </div>
+
+            {/* BOTÃO DISPARAR / REENVIAR POR E-MAIL */}
+            <button
+              type="button"
+              onClick={async () => {
+                if (!credentialsModal.email || !credentialsModal.email.includes('@')) {
+                  alert('Este parceiro não tem endereço de e-mail válido.');
+                  return;
+                }
+                setSendingPartnerEmail(true);
+                try {
+                  const res = await sendPartnerCredentialsEmail({
+                    partnerEmail: credentialsModal.email,
+                    partnerName: credentialsModal.partnerName,
+                    partnerCode: credentialsModal.partnerCode,
+                    password: credentialsModal.password,
+                  });
+                  if (res.success) {
+                    setPartnerEmailSent(true);
+                    setTimeout(() => setPartnerEmailSent(false), 4000);
+                    alert(`Credenciais enviadas com sucesso por e-mail para ${credentialsModal.email}!`);
+                  } else {
+                    alert(`Não foi possível enviar o e-mail: ${res.error || 'Verifique as definições em Configurações ➔ Serviço de E-mails.'}`);
+                  }
+                } catch (err: any) {
+                  alert('Erro ao enviar e-mail: ' + err.message);
+                } finally {
+                  setSendingPartnerEmail(false);
+                }
+              }}
+              disabled={sendingPartnerEmail}
+              className={`w-full font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md ${
+                partnerEmailSent 
+                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20' 
+                  : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20'
+              }`}
+            >
+              {sendingPartnerEmail ? <Loader2 className="w-4 h-4 animate-spin" /> : partnerEmailSent ? <CheckCircle2 className="w-4 h-4" /> : <Mail className="w-4 h-4" />}
+              <span>{partnerEmailSent ? 'E-mail Enviado com Sucesso!' : 'Enviar Credenciais por E-mail ao Parceiro'}</span>
+            </button>
 
             <div className="pt-2 border-t border-slate-100 flex gap-2">
               <button

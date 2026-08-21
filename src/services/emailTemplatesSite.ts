@@ -217,6 +217,61 @@ export const generatePartnerNotificationTemplate = (data: {
 };
 
 /**
+ * 3.1 Template: Credenciais de Acesso de Parceiro Homologado
+ */
+export const generatePartnerCredentialsTemplate = (data: {
+  partnerName: string;
+  partnerCode: string;
+  email: string;
+  password?: string;
+  portalUrl?: string;
+}): string => {
+  const portalLink = data.portalUrl || 'https://kivora.ao/#login';
+  const content = `
+    <h2 style="color: #0f172a; margin-top: 0; font-size: 20px;">Parabéns! É agora um Parceiro Oficial KIVORA 🤝</h2>
+    <p>Olá <strong>${data.partnerName}</strong>,</p>
+    <p>A sua candidatura foi homologada com sucesso pela equipa KIVORA ERP. As suas credenciais de acesso ao <strong>Portal do Parceiro</strong> estão disponíveis abaixo:</p>
+    
+    <div class="card-highlight">
+      <h3 style="margin-top: 0; color: #1e40af; font-size: 16px;">🔑 Credenciais de Acesso ao Portal</h3>
+      <table class="table-data">
+        <tr>
+          <td class="label">Parceiro / Razão Social:</td>
+          <td class="val">${data.partnerName}</td>
+        </tr>
+        <tr>
+          <td class="label">Código de Parceiro:</td>
+          <td class="val"><span class="badge badge-primary">${data.partnerCode}</span></td>
+        </tr>
+        <tr>
+          <td class="label">E-mail de Acesso:</td>
+          <td class="val">${data.email}</td>
+        </tr>
+        ${data.password ? `
+        <tr>
+          <td class="label">Palavra-passe Inicial:</td>
+          <td class="val"><code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; color: #0f172a;">${data.password}</code></td>
+        </tr>` : ''}
+      </table>
+    </div>
+
+    <h3 style="color: #0f172a; font-size: 16px;">💼 O que pode fazer no seu portal:</h3>
+    <ul style="padding-left: 20px; color: #334155; font-size: 14px; line-height: 1.8;">
+      <li>Emitir e ativar licenças oficiais instantâneas para os seus clientes.</li>
+      <li>Acompanhar comissões e descontos de atacado (tabela escalonada).</li>
+      <li>Emitir certificados oficiais de homologação técnica.</li>
+      <li>Gerir a sua carteira e pedidos a crédito.</li>
+    </ul>
+
+    <div style="text-align: center; margin-top: 24px;">
+      <a href="${portalLink}" class="btn" style="color: #ffffff;">🔐 Aceder ao Portal do Parceiro</a>
+    </div>
+  `;
+
+  return getEmailBaseLayout('Credenciais do Parceiro Oficial KIVORA', content, 'Recomendamos a alteração da sua palavra-passe no primeiro acesso.');
+};
+
+/**
  * 4. Template: Recuperação de Senha do Portal Web
  */
 export const generateWebPasswordResetTemplate = (data: {

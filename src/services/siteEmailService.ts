@@ -4,6 +4,7 @@ import {
   generateClientCredentialsTemplate,
   generateLicenseDeliveryTemplate,
   generatePartnerNotificationTemplate,
+  generatePartnerCredentialsTemplate,
   generateWebPasswordResetTemplate,
   generateBroadcastTemplate,
   generateSiteTestEmailTemplate,
@@ -128,6 +129,36 @@ export const sendSiteEmail = async (options: {
     ? `${cfg.senderName || 'KIVORA ERP'} <${cfg.senderEmail}>`
     : `${cfg.senderName || 'KIVORA ERP'} <onboarding@resend.dev>`;
 
+  // 1. Tentar primeiro o endpoint de envio seguro (/api/send-email)
+  try {
+    const serverlessRes = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        provider: cfg.provider,
+        apiKey: cfg.apiKey,
+        from: fromAddress,
+        to: recipients,
+        subject: options.subject,
+        html: options.html,
+        text: options.text,
+      }),
+    });
+
+    const data = await serverlessRes.json().catch(() => ({}));
+    if (serverlessRes.ok && (data.success || data.messageId)) {
+      return { success: true, messageId: data.messageId || 'sent' };
+    }
+    if (serverlessRes.status !== 404 && data.error) {
+      return { success: false, error: data.error };
+    }
+  } catch (err: any) {
+    console.warn('Endpoint /api/send-email indisponível, tentando envio direto:', err);
+  }
+
+  // 2. Fallback direto via fetch (para ambientes sem /api/send-email)
   if (cfg.provider === 'resend') {
     try {
       const res = await fetch('https://api.resend.com/emails', {
@@ -154,7 +185,12 @@ export const sendSiteEmail = async (options: {
       }
       return { success: true, messageId: data.id };
     } catch (err: any) {
-      return { success: false, error: err?.message || 'Falha de comunicação com o servidor de e-mail Resend.' };
+      return { 
+        success: false, 
+        error: err?.message === 'Failed to fetch' 
+          ? 'Erro de CORS no navegador: O envio de e-mail precisa passar pelo servidor proxy /api/send-email.' 
+          : (err?.message || 'Falha de comunicação com o servidor de e-mail Resend.') 
+      };
     }
   }
 
@@ -249,6 +285,28 @@ export const sendPartnerNotificationEmail = async (params: {
   return sendSiteEmail({
     to: params.partnerEmail,
     subject: `🔔 [Parceiro KIVORA] ${params.title}`,
+    html,
+  });
+};
+
+/**
+ * 3.1 Enviar Credenciais de Acesso ao Portal do Parceiro
+ */
+export const sendPartnerCredentialsEmail = async (params: {
+  partnerEmail: string;
+  partnerName: string;
+  partnerCode: string;
+  password?: string;
+}): Promise<{ success: boolean; error?: string }> => {
+  const html = generatePartnerCredentialsTemplate({
+    partnerName: params.partnerName,
+    partnerCode: params.partnerCode,
+    email: params.partnerEmail,
+    password: params.password,
+  });
+  return sendSiteEmail({
+    to: params.partnerEmail,
+    subject: `🤝 Credenciais do Portal de Parceiro Oficial KIVORA — ${params.partnerName}`,
     html,
   });
 };

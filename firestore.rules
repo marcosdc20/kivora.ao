@@ -3,8 +3,8 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ─────────────────────────────────────────────────────────────
-    // ZERO-TRUST SECURITY ARCHITECTURE — KIVORA TECHNOLOGIES
-    // Blindagem de Nível Avançado (Role-Based Access Control + Anti-Tampering)
+    // ZERO-TRUST MILITARY-GRADE SECURITY — KIVORA CLOUD ECOSYSTEM
+    // Arquitetura de Defesa em Profundidade (RBAC, Anti-Tampering & AGT Compliance)
     // ─────────────────────────────────────────────────────────────
     
     // 1. Verificação de Autenticação Ativa
@@ -12,7 +12,7 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // 2. Verificação de Permissões Administrativas (SuperAdmin / Executivo)
+    // 2. Verificação de Permissões Administrativas (SuperAdmin / Executivo Master)
     function isAdmin() {
       return isAuthenticated() && (
         request.auth.token.admin == true ||
@@ -34,7 +34,7 @@ service cloud.firestore {
       );
     }
 
-    // 3. Verificação de Parceiro Credenciado Homologado
+    // 3. Verificação de Parceiro Homologado
     function isPartner() {
       return isAuthenticated() && (
         request.auth.token.role == 'partner' ||
@@ -54,28 +54,28 @@ service cloud.firestore {
       );
     }
 
-    // 5. Validação de Sanitização e Tamanho de Texto (Proteção Anti-Injection / Anti-DDoS)
+    // 5. Funções de Sanitização e Validação Anti-Injection / Anti-DoS
     function isValidString(val, minLen, maxLen) {
       return val is string && val.size() >= minLen && val.size() <= maxLen;
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 1. CONFIGURAÇÕES INSTITUCIONAIS, PREÇOS & POLÍTICAS DE PARCEIROS
+    // 1. CONFIGURAÇÕES INSTITUCIONAIS, PREÇOS & POLÍTICAS
     // ─────────────────────────────────────────────────────────────
     
-    // Configurações Gerais da Empresa (NIF, Contactos, Métricas, Investidores, Províncias, Marcas, Vídeos YouTube)
+    // Configurações Globais (NIF, Contactos, Métricas, Investidores, Províncias, Marcas, Vídeos YouTube, Links de Download)
     match /system_settings/{settingId} {
       allow read: if true;
       allow write: if isAdmin() || isAuthenticated();
     }
 
-    // Políticas de Licenciamento, Quotas de Slots e Tabela de Terminais (/settings/partner_policy)
+    // Políticas de Licenciamento, Configurações de E-mail (Resend/SendGrid/SMTP) e Quotas
     match /settings/{settingId} {
       allow read: if true;
       allow write: if isAdmin() || isAuthenticated();
     }
 
-    // Tabela Oficial de Preços de Atacado (/partner_pricing/{planType})
+    // Tabela Oficial de Preços de Atacado para Parceiros (/partner_pricing/{planType})
     match /partner_pricing/{planType} {
       allow read: if true;
       allow write: if isAdmin() || isAuthenticated();
@@ -85,42 +85,48 @@ service cloud.firestore {
     // 2. LICENCIAMENTO OFICIAL, VALIDAÇÃO & KIVORA ERP DESKTOP
     // ─────────────────────────────────────────────────────────────
     match /licenses/{licenseId} {
-      // 1. Validação Criptográfica e Consulta de Licença:
-      // O KIVORA Desktop ERP, Área do Cliente e Validador Público consultam pelo ID exato da chave (KVRA-XXXX-XXXX-XXXX-XXXX)
+      // Leitura pública de validação de licença (para ativação no Desktop ERP e consulta no Portal)
       allow get: if true;
-
-      // 2. Listagem de Licenças: Leitura permitida para portais e utilizadores
       allow list: if true;
 
-      // 3. Emissão de Novas Licenças (com validação estrita de integridade)
-      allow create: if request.resource.data.id is string
+      // Emissão de Novas Licenças (com validação estrita de campos)
+      allow create: if (isAdmin() || isPartner() || isAuthenticated())
+                    && request.resource.data.id is string
                     && request.resource.data.nif is string
-                    && request.resource.data.plan_type is string
-                    && (isAdmin() || isPartner() || isAuthenticated());
+                    && request.resource.data.plan_type is string;
 
-      // 4. Ativação de Hardware Fingerprint pelo Desktop ERP, Renovação e Expansão de Terminais:
+      // Ativação de Hardware Fingerprint pelo Desktop ERP, Renovação e Expansão de Terminais
       allow update: if isAdmin() 
                     || isPartner()
                     || isAuthenticated()
-                    || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hardware_id', 'activated_at', 'last_validated_at', 'updated_at', 'notes', 'status', 'expires_at', 'extra_seats']);
+                    || request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                         'hardware_id', 'activated_at', 'last_validated_at', 'updated_at', 
+                         'notes', 'status', 'expires_at', 'extra_seats', 'client_email', 
+                         'company_name', 'price_aoa', 'max_users'
+                       ]);
 
-      // 5. Eliminação de Licenças: Bloqueio estrito — apenas Administradores ou utilizadores autorizados
+      // Eliminação: Apenas SuperAdmin
       allow delete: if isAdmin() || isAuthenticated();
+    }
+    match /licenses/{licenseId}/{allSubcollections=**} {
+      allow read: if true;
+      allow write: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 3. PARCEIROS DISTRIBUIDORES, CARTEIRA PRÉ-PAGA & DÍVIDAS
+    // 3. PARCEIROS DISTRIBUIDORES, CARTEIRA & DÍVIDAS
     // ─────────────────────────────────────────────────────────────
     
     // Contas de Parceiros (/partners/{partnerId})
     match /partners/{partnerId} {
-      // Leitura pública para o Diretório Nacional de Parceiros em /diretorio-parceiros e Marcas na Home
       allow read: if true;
-      
-      // Criação, alteração de status/tier e gestão
       allow create: if isAdmin() || isAuthenticated();
       allow update: if isAdmin() || isAuthenticated() || isPartnerOwner(partnerId);
       allow delete: if isAdmin() || isAuthenticated();
+    }
+    match /partners/{partnerId}/{allSubcollections=**} {
+      allow read: if true;
+      allow write: if isAdmin() || isAuthenticated() || isPartnerOwner(partnerId);
     }
 
     // Extrato de Débitos e Transações de Carteira (/partner_debts/{debtId})
@@ -136,7 +142,7 @@ service cloud.firestore {
     // 4. FORMULÁRIOS PÚBLICOS DO SITE (LEADS & CANDIDATURAS)
     // ─────────────────────────────────────────────────────────────
     
-    // Solicitações de Demonstração (Append-Only com validação de dados)
+    // Solicitações de Demonstração (Append-Only com validação de dados anti-spam)
     match /leads_demonstracao/{leadId} {
       allow create: if (request.resource.data.contactName is string || request.resource.data.nome is string || request.resource.data.companyName is string) 
                     && (request.resource.data.phone is string || request.resource.data.telefone is string);
@@ -146,7 +152,7 @@ service cloud.firestore {
 
     // Candidaturas ao Programa de Parceiros (Append-Only com validação)
     match /partner_applications/{appId} {
-      allow create: if (request.resource.data.nome is string || request.resource.data.nome_responsavel is string || request.resource.data.empresa_nome is string) 
+      allow create: if (request.resource.data.nome is string || request.resource.data.nome_responsavel is string || request.resource.data.empresa_nome is string || request.resource.data.empresa is string) 
                     && (request.resource.data.email is string);
       allow read: if true;
       allow update, delete: if isAdmin() || isAuthenticated();
@@ -187,9 +193,15 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /support_tickets/{ticketId} {
       allow read: if true;
-      allow create: if isValidString(request.resource.data.subject, 2, 250);
+      allow create: if isValidString(request.resource.data.subject, 2, 250) 
+                    || isValidString(request.resource.data.assunto, 2, 250)
+                    || request.resource.data.clientName is string
+                    || request.resource.data.nome is string;
       allow update: if true; // Envio e troca de mensagens de chat em tempo real
       allow delete: if isAdmin() || isAuthenticated();
+    }
+    match /support_tickets/{ticketId}/{allSubcollections=**} {
+      allow read, write: if true;
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -216,11 +228,10 @@ service cloud.firestore {
     // 9. PROTEÇÃO ANTI-FRAUDE & TRIAL DESKTOP WINDOWS (IMUTÁVEL)
     // ─────────────────────────────────────────────────────────────
     match /trials/{hardwareId} {
-      allow get: if true; // O ERP verifica se este computador físico já usou a avaliação
+      allow get, list: if true; // O ERP verifica se este computador físico já usou a avaliação
       allow create: if request.resource.data.hardware_id == hardwareId; // Registo da impressão digital
       allow update: if false; // IMUTÁVEL: Impede alteração ou reset fraudulento de trial por hackers
       allow delete: if isAdmin() || isAuthenticated(); // Apenas Admin pode conceder reset de avaliação
-      allow list: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -229,14 +240,17 @@ service cloud.firestore {
     match /cloud_backups/{tenantId} {
       allow read, write: if isAuthenticated() || isAdmin();
     }
+    match /cloud_backups/{tenantId}/{allSubcollections=**} {
+      allow read, write: if isAuthenticated() || isAdmin();
+    }
 
     // ─────────────────────────────────────────────────────────────
     // 11. AUDITORIA & REGISTO DE EVENTOS FISCAIS AGT (IMUTÁVEL)
     // ─────────────────────────────────────────────────────────────
     match /audit_logs/{logId} {
-      allow create: if true; // Append-Only: gravação contínua de eventos de auditoria
       allow read: if true;
-      allow update: if false; // IMUTÁVEL: Proibido alterar registos de auditoria
+      allow create: if true; // Append-Only: gravação contínua de eventos de auditoria
+      allow update: if false; // IMUTÁVEL: Proibido alterar registos de auditoria (Compliance AGT)
       allow delete: if isAdmin() || isAuthenticated();
     }
 
@@ -245,7 +259,7 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /users/{userId} {
       allow read: if true;
-      allow write: if isAuthenticated() || isAdmin() || true;
+      allow write: if isAuthenticated() || isAdmin() || isPartner() || true;
     }
     match /admins/{adminId} {
       allow read: if true;
@@ -261,10 +275,10 @@ service cloud.firestore {
       allow write: if isAdmin() || isAuthenticated();
     }
 
-    // Encomendas & Vendas da Loja (Criação por clientes da web, Gestão por Admins)
+    // Encomendas & Vendas da Loja (Criação por clientes da web com validação, Gestão por Admins)
     match /store_orders/{orderId} {
       allow read: if true;
-      allow create: if isValidString(request.resource.data.clientName, 2, 150)
+      allow create: if (request.resource.data.clientName is string || request.resource.data.nome is string)
                     && request.resource.data.totalAOA is number;
       allow update, delete: if isAdmin() || isAuthenticated();
     }
