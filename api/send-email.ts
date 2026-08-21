@@ -1,3 +1,5 @@
+import nodemailer from 'nodemailer';
+
 // Vercel Serverless Function: /api/send-email
 export default async function handler(req: any, res: any) {
   // CORS headers
@@ -25,10 +27,11 @@ export default async function handler(req: any, res: any) {
     } catch {}
   }
 
-  const { provider, apiKey, from, to, subject, html, text } = body || {};
+  const { provider, apiKey, from, to, subject, html, text, smtpHost, smtpPort, smtpUser, smtpPass, senderEmail } = body || {};
 
-  if (!apiKey || typeof apiKey !== 'string' || apiKey.trim().length < 5) {
-    return res.status(400).json({ error: 'Chave de API inválida ou não informada.' });
+  const effectiveKey = (apiKey || smtpPass || '').trim();
+  if (!effectiveKey && provider !== 'smtp') {
+    return res.status(400).json({ error: 'Chave de API ou palavra-passe do e-mail não informada.' });
   }
 
   // 1. Validação estrita de destinatários (Prevenção de Open-Relay / Spam)
@@ -55,23 +58,59 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    // ── PROVEDOR 1: GOOGLE GMAIL OFICIAL OU SMTP DIRETO ─────────────────────────
+    if (provider === 'gmail' || provider === 'smtp') {
+      const host = smtpHost || (provider === 'gmail' ? 'smtp.gmail.com' : 'smtp.gmail.com');
+      const port = Number(smtpPort) || 465;
+      const isSecure = port === 465;
+      const user = (smtpUser || senderEmail || 'kivora.angola@gmail.com').trim();
+      const pass = (smtpPass || apiKey || '').replace(/\s+/g, '');
+
+      const transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure: isSecure,
+        auth: {
+          user,
+          pass,
+        },
+        tls: {
+          rejectUnauthorized: false
+        }
+      });
+
+      const mailOptions = {
+        from: typeof from === 'string' && from.includes('@') ? from : `"KIVORA ERP" <${user}>`,
+        to: recipients.join(', '),
+        subject,
+        html,
+        text,
+        replyTo: user,
+      };
+
+      const info = await transporter.sendMail(mailOptions);
+      return res.status(200).json({ success: true, messageId: info.messageId || `gmail-${Date.now()}` });
+    }
+
+    // ── PROVEDOR 2: SENDGRID API ────────────────────────────────────────────────
     if (provider === 'sendgrid') {
       const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey.trim()}`,
+          'Authorization': `Bearer ${effectiveKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          personalizations: [{ to: (Array.isArray(to) ? to : [to]).map((e: string) => ({ email: e })) }],
+          personalizations: [{ to: recipients.map((e: string) => ({ email: e })) }],
           from: typeof from === 'string' ? { email: from } : from,
+          reply_to: { email: senderEmail || 'kivora.angola@gmail.com' },
           subject,
           content: [{ type: 'text/html', value: html }],
         }),
       });
 
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
+        const errData: any = await response.json().catch(() => ({}));
         return res.status(response.status).json({
           error: errData?.errors?.[0]?.message || `Erro no envio via SendGrid (HTTP ${response.status})`
         });
@@ -80,23 +119,25 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json({ success: true, messageId: `sg-${Date.now()}` });
     }
 
-    // Default: Resend
+    // ── PROVEDOR 3: RESEND API ──────────────────────────────────────────────────
+    const fromResend = typeof from === 'string' ? from : `${from?.name || 'KIVORA ERP'} <${from?.email || 'kivora.angola@gmail.com'}>`;
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey.trim()}`,
+        'Authorization': `Bearer ${effectiveKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: typeof from === 'string' ? from : `${from?.name || 'KIVORA ERP'} <${from?.email || 'onboarding@resend.dev'}>`,
-        to: Array.isArray(to) ? to : [to],
+        from: fromResend,
+        to: recipients,
+        reply_to: senderEmail || 'kivora.angola@gmail.com',
         subject,
         html,
         text,
       }),
     });
 
-    const data = await response.json().catch(() => ({}));
+    const data: any = await response.json().catch(() => ({}));
     if (!response.ok) {
       return res.status(response.status).json({
         error: data.message || `Erro no envio via Resend (HTTP ${response.status})`

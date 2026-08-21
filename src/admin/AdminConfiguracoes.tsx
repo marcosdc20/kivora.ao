@@ -496,15 +496,41 @@ export const AdminConfiguracoes: React.FC = () => {
                     onClick={() => {
                       setEmailConfig(prev => ({
                         ...prev,
+                        provider: 'gmail',
+                        senderEmail: 'kivora.angola@gmail.com',
+                        senderName: 'KIVORA Cloud ERP',
+                        smtpHost: 'smtp.gmail.com',
+                        smtpPort: 465,
+                        smtpUser: 'kivora.angola@gmail.com',
+                      }));
+                      alert('Predefinição Google Gmail (kivora.angola@gmail.com) selecionada. Insira a sua Palavra-passe de Aplicação de 16 caracteres.');
+                    }}
+                    className={`px-3 py-1.5 border rounded-xl text-xs font-bold transition-all shadow-xs ${
+                      emailConfig.provider === 'gmail' 
+                        ? 'bg-blue-600 border-blue-600 text-white shadow-blue-600/20' 
+                        : 'bg-white border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 text-slate-700 hover:text-blue-600'
+                    }`}
+                  >
+                    🚀 Google Gmail Oficial (kivora.angola@gmail.com)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmailConfig(prev => ({
+                        ...prev,
                         provider: 'resend',
-                        senderEmail: prev.senderEmail || 'onboarding@resend.dev',
+                        senderEmail: prev.senderEmail || 'kivora.angola@gmail.com',
                         senderName: prev.senderName || 'KIVORA ERP',
                       }));
-                      alert('Predefinição Resend API selecionada. Insira a sua API Key.');
+                      alert('Predefinição Resend API selecionada.');
                     }}
-                    className="px-3 py-1.5 bg-white border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-xs font-bold text-slate-700 hover:text-blue-600 transition-all shadow-xs"
+                    className={`px-3 py-1.5 border rounded-xl text-xs font-bold transition-all shadow-xs ${
+                      emailConfig.provider === 'resend' 
+                        ? 'bg-blue-600 border-blue-600 text-white shadow-blue-600/20' 
+                        : 'bg-white border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 text-slate-700 hover:text-blue-600'
+                    }`}
                   >
-                    ⚡ Resend API (Recomendado — Grátis)
+                    ⚡ Resend API
                   </button>
                   <button
                     type="button"
@@ -516,7 +542,11 @@ export const AdminConfiguracoes: React.FC = () => {
                       }));
                       alert('Predefinição SendGrid selecionada.');
                     }}
-                    className="px-3 py-1.5 bg-white border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-xs font-bold text-slate-700 hover:text-blue-600 transition-all shadow-xs"
+                    className={`px-3 py-1.5 border rounded-xl text-xs font-bold transition-all shadow-xs ${
+                      emailConfig.provider === 'sendgrid' 
+                        ? 'bg-blue-600 border-blue-600 text-white shadow-blue-600/20' 
+                        : 'bg-white border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 text-slate-700 hover:text-blue-600'
+                    }`}
                   >
                     📨 SendGrid API
                   </button>
@@ -527,26 +557,58 @@ export const AdminConfiguracoes: React.FC = () => {
                 <div className="space-y-1">
                   <label className="font-bold text-slate-700">Provedor Ativo</label>
                   <select
-                    value={emailConfig.provider || 'resend'}
-                    onChange={(e) => setEmailConfig(prev => ({ ...prev, provider: e.target.value as any }))}
+                    value={emailConfig.provider || 'gmail'}
+                    onChange={(e) => {
+                      const newP = e.target.value as any;
+                      setEmailConfig(prev => ({
+                        ...prev,
+                        provider: newP,
+                        senderEmail: newP === 'gmail' ? 'kivora.angola@gmail.com' : prev.senderEmail,
+                        smtpHost: newP === 'gmail' ? 'smtp.gmail.com' : prev.smtpHost,
+                        smtpPort: newP === 'gmail' ? 465 : prev.smtpPort,
+                        smtpUser: newP === 'gmail' ? 'kivora.angola@gmail.com' : prev.smtpUser,
+                      }));
+                    }}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
                   >
-                    <option value="resend">Resend API (Recomendado — Alta Entrega)</option>
+                    <option value="gmail">Google Gmail Oficial (kivora.angola@gmail.com — Recomendado)</option>
+                    <option value="resend">Resend API</option>
                     <option value="sendgrid">SendGrid API</option>
+                    <option value="smtp">Servidor SMTP Personalizado</option>
                   </select>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Chave API (API Key)</label>
+                  <label className="font-bold text-slate-700">
+                    {emailConfig.provider === 'gmail' 
+                      ? 'Palavra-passe de Aplicação Google (16 Letras)' 
+                      : 'Chave API ou Senha'}
+                  </label>
                   <input
                     type="password"
                     required
-                    placeholder={emailConfig.provider === 'sendgrid' ? 'SG.xxxxxxxx...' : 're_xxxxxxxx...'}
-                    value={emailConfig.apiKey || ''}
-                    onChange={(e) => setEmailConfig(prev => ({ ...prev, apiKey: e.target.value }))}
+                    placeholder={
+                      emailConfig.provider === 'gmail' 
+                        ? 'xxxx xxxx xxxx xxxx (16 letras)' 
+                        : emailConfig.provider === 'sendgrid' 
+                          ? 'SG.xxxxxxxx...' 
+                          : 're_xxxxxxxx...'
+                    }
+                    value={emailConfig.apiKey || emailConfig.smtpPass || ''}
+                    onChange={(e) => setEmailConfig(prev => ({ 
+                      ...prev, 
+                      apiKey: e.target.value,
+                      smtpPass: e.target.value 
+                    }))}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-mono text-slate-900 focus:border-blue-600 outline-none"
                   />
-                  <p className="text-[10px] text-slate-400">Obtenha a chave gratuita em resend.com ou sendgrid.com</p>
+                  {emailConfig.provider === 'gmail' ? (
+                    <p className="text-[10px] text-blue-600 font-medium">
+                      🔑 Gere uma senha de app em <strong>myaccount.google.com/apppasswords</strong> na conta <em>kivora.angola@gmail.com</em>
+                    </p>
+                  ) : (
+                    <p className="text-[10px] text-slate-400">Obtenha a chave gratuita em resend.com ou sendgrid.com</p>
+                  )}
                 </div>
 
                 <div className="space-y-1">
@@ -554,13 +616,17 @@ export const AdminConfiguracoes: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="onboarding@resend.dev ou geral@kivora.ao"
-                    value={emailConfig.senderEmail || ''}
-                    onChange={(e) => setEmailConfig(prev => ({ ...prev, senderEmail: e.target.value }))}
+                    placeholder="kivora.angola@gmail.com"
+                    value={emailConfig.senderEmail || 'kivora.angola@gmail.com'}
+                    onChange={(e) => setEmailConfig(prev => ({ 
+                      ...prev, 
+                      senderEmail: e.target.value,
+                      smtpUser: prev.provider === 'gmail' ? e.target.value : prev.smtpUser 
+                    }))}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
                   />
-                  <p className="text-[10px] text-amber-600 font-medium">
-                    💡 No Resend (contas gratuitas sem domínio DNS), use <strong>onboarding@resend.dev</strong>.
+                  <p className="text-[10px] text-emerald-600 font-medium">
+                    ✅ O remetente visível para os clientes será <strong>{emailConfig.senderEmail || 'kivora.angola@gmail.com'}</strong>.
                   </p>
                 </div>
 
@@ -570,7 +636,7 @@ export const AdminConfiguracoes: React.FC = () => {
                     type="text"
                     required
                     placeholder="KIVORA Cloud ERP"
-                    value={emailConfig.senderName || ''}
+                    value={emailConfig.senderName || 'KIVORA Cloud ERP'}
                     onChange={(e) => setEmailConfig(prev => ({ ...prev, senderName: e.target.value }))}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
                   />

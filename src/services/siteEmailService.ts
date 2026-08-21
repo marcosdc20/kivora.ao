@@ -15,7 +15,7 @@ import {
 } from './emailTemplatesSite';
 
 export interface SiteEmailConfig {
-  provider: 'resend' | 'sendgrid' | 'smtp';
+  provider: 'gmail' | 'resend' | 'sendgrid' | 'smtp';
   apiKey?: string;
   senderEmail: string;
   senderName: string;
@@ -30,10 +30,14 @@ export interface SiteEmailConfig {
 export const ADMIN_ALERT_EMAIL = 'kivora.angola@gmail.com';
 
 export const DEFAULT_SITE_EMAIL_CONFIG: SiteEmailConfig = {
-  provider: 'resend',
+  provider: 'gmail',
   apiKey: '',
   senderEmail: 'kivora.angola@gmail.com',
   senderName: 'KIVORA Cloud ERP',
+  smtpHost: 'smtp.gmail.com',
+  smtpPort: 465,
+  smtpUser: 'kivora.angola@gmail.com',
+  smtpPass: '',
   isActive: true,
 };
 
@@ -109,7 +113,7 @@ export const saveSiteEmailConfig = async (config: SiteEmailConfig): Promise<bool
 };
 
 /**
- * Envia um e-mail genérico através do provedor configurado
+ * Envia um e-mail através do provedor configurado (Gmail Oficial, Resend, SendGrid ou SMTP)
  */
 export const sendSiteEmail = async (options: {
   to: string | string[];
@@ -120,16 +124,16 @@ export const sendSiteEmail = async (options: {
 }): Promise<{ success: boolean; messageId?: string; error?: string }> => {
   const cfg = options.configOverride || await getSiteEmailConfig();
 
-  if (!cfg.apiKey && cfg.provider !== 'smtp') {
-    return { success: false, error: 'Chave de API de e-mail não configurada no Painel Admin.' };
+  const appPassword = cfg.apiKey || cfg.smtpPass;
+  if (!appPassword && cfg.provider !== 'resend' && cfg.provider !== 'sendgrid') {
+    return { success: false, error: 'Palavra-passe de aplicação ou credencial de e-mail não configurada no Painel Admin.' };
   }
 
   const recipients = Array.isArray(options.to) ? options.to : [options.to];
-  const fromAddress = cfg.senderEmail && cfg.senderEmail.includes('@') && !cfg.senderEmail.endsWith('@gmail.com')
-    ? `${cfg.senderName || 'KIVORA ERP'} <${cfg.senderEmail}>`
-    : `${cfg.senderName || 'KIVORA ERP'} <onboarding@resend.dev>`;
+  const senderEmail = cfg.senderEmail || 'kivora.angola@gmail.com';
+  const fromAddress = `"${cfg.senderName || 'KIVORA ERP'}" <${senderEmail}>`;
 
-  // 1. Tentar primeiro o endpoint de envio seguro (/api/send-email)
+  // 1. Tentar o endpoint de envio seguro (/api/send-email)
   try {
     const serverlessRes = await fetch('/api/send-email', {
       method: 'POST',
@@ -138,12 +142,17 @@ export const sendSiteEmail = async (options: {
       },
       body: JSON.stringify({
         provider: cfg.provider,
-        apiKey: cfg.apiKey,
+        apiKey: cfg.apiKey || cfg.smtpPass,
+        senderEmail,
         from: fromAddress,
         to: recipients,
         subject: options.subject,
         html: options.html,
         text: options.text,
+        smtpHost: cfg.smtpHost || (cfg.provider === 'gmail' ? 'smtp.gmail.com' : undefined),
+        smtpPort: cfg.smtpPort || (cfg.provider === 'gmail' ? 465 : 587),
+        smtpUser: cfg.smtpUser || senderEmail,
+        smtpPass: cfg.smtpPass || cfg.apiKey,
       }),
     });
 
@@ -155,7 +164,7 @@ export const sendSiteEmail = async (options: {
       return { success: false, error: data.error };
     }
   } catch (err: any) {
-    console.warn('Endpoint /api/send-email indisponível, tentando envio direto:', err);
+    console.warn('Endpoint /api/send-email indisponível, tentando fallback:', err);
   }
 
   // 2. Fallback direto via fetch (para ambientes sem /api/send-email)

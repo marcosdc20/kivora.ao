@@ -1,6 +1,7 @@
 import { defineConfig, Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
+import nodemailer from 'nodemailer';
 
 function devEmailPlugin(): Plugin {
   return {
@@ -31,12 +32,13 @@ function devEmailPlugin(): Plugin {
         req.on('end', async () => {
           try {
             const body = JSON.parse(bodyRaw || '{}');
-            const { provider, apiKey, from, to, subject, html, text } = body;
+            const { provider, apiKey, from, to, subject, html, text, smtpHost, smtpPort, smtpUser, smtpPass, senderEmail } = body;
 
-            if (!apiKey || typeof apiKey !== 'string' || apiKey.trim().length < 5) {
+            const effectiveKey = (apiKey || smtpPass || '').trim();
+            if (!effectiveKey && provider !== 'smtp') {
               res.statusCode = 400;
               res.setHeader('Content-Type', 'application/json');
-              res.end(JSON.stringify({ error: 'Chave de API não configurada ou inválida.' }));
+              res.end(JSON.stringify({ error: 'Chave de API ou palavra-passe do e-mail não configurada.' }));
               return;
             }
 
@@ -65,16 +67,54 @@ function devEmailPlugin(): Plugin {
               return;
             }
 
+            // 1. Google Gmail Oficial ou SMTP
+            if (provider === 'gmail' || provider === 'smtp') {
+              const host = smtpHost || (provider === 'gmail' ? 'smtp.gmail.com' : 'smtp.gmail.com');
+              const port = Number(smtpPort) || 465;
+              const isSecure = port === 465;
+              const user = (smtpUser || senderEmail || 'kivora.angola@gmail.com').trim();
+              const pass = (smtpPass || apiKey || '').replace(/\s+/g, '');
+
+              const transporter = nodemailer.createTransport({
+                host,
+                port,
+                secure: isSecure,
+                auth: {
+                  user,
+                  pass,
+                },
+                tls: {
+                  rejectUnauthorized: false
+                }
+              });
+
+              const info = await transporter.sendMail({
+                from: typeof from === 'string' && from.includes('@') ? from : `"KIVORA ERP" <${user}>`,
+                to: recipients.join(', '),
+                subject,
+                html,
+                text,
+                replyTo: user,
+              });
+
+              res.statusCode = 200;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ success: true, messageId: info.messageId || `gmail-${Date.now()}` }));
+              return;
+            }
+
+            // 2. SendGrid
             if (provider === 'sendgrid') {
               const sgRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
                 method: 'POST',
                 headers: {
-                  'Authorization': `Bearer ${apiKey.trim()}`,
+                  'Authorization': `Bearer ${effectiveKey}`,
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                  personalizations: [{ to: (Array.isArray(to) ? to : [to]).map((e: string) => ({ email: e })) }],
+                  personalizations: [{ to: recipients.map((e: string) => ({ email: e })) }],
                   from: typeof from === 'string' ? { email: from } : from,
+                  reply_to: { email: senderEmail || 'kivora.angola@gmail.com' },
                   subject,
                   content: [{ type: 'text/html', value: html }],
                 }),
@@ -94,20 +134,21 @@ function devEmailPlugin(): Plugin {
               return;
             }
 
-            // Default: Resend API
+            // 3. Resend API
             const fromStr = typeof from === 'string'
               ? from
-              : `${from?.name || 'KIVORA ERP'} <${from?.email || 'onboarding@resend.dev'}>`;
+              : `${from?.name || 'KIVORA ERP'} <${from?.email || 'kivora.angola@gmail.com'}>`;
 
             const resendRes = await fetch('https://api.resend.com/emails', {
               method: 'POST',
               headers: {
-                'Authorization': `Bearer ${apiKey.trim()}`,
+                'Authorization': `Bearer ${effectiveKey}`,
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
                 from: fromStr,
-                to: Array.isArray(to) ? to : [to],
+                to: recipients,
+                reply_to: senderEmail || 'kivora.angola@gmail.com',
                 subject,
                 html,
                 text,
