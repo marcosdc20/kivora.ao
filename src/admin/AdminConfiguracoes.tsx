@@ -4,7 +4,7 @@ import {
   Database, Download, Loader2, Rocket, RotateCcw,
   X, GitBranch, CreditCard, Building2, ExternalLink, Plus, Tag,
   TrendingUp, Award, Briefcase, MapPin, Trash2, Monitor,
-  Bell, Megaphone, Video, Youtube, Mail, Send
+  Bell, Megaphone, Video, Youtube, Mail, Send, CheckCircle2, AlertTriangle
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -511,7 +511,7 @@ export const AdminConfiguracoes: React.FC = () => {
                         : 'bg-white border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 text-slate-700 hover:text-blue-600'
                     }`}
                   >
-                    🚀 Google Gmail Oficial (kivora.angola@gmail.com)
+                    Google Gmail Oficial (kivora.angola@gmail.com)
                   </button>
                   <button
                     type="button"
@@ -530,7 +530,7 @@ export const AdminConfiguracoes: React.FC = () => {
                         : 'bg-white border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 text-slate-700 hover:text-blue-600'
                     }`}
                   >
-                    ⚡ Resend API
+                    Resend API
                   </button>
                   <button
                     type="button"
@@ -548,7 +548,7 @@ export const AdminConfiguracoes: React.FC = () => {
                         : 'bg-white border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 text-slate-700 hover:text-blue-600'
                     }`}
                   >
-                    📨 SendGrid API
+                    SendGrid API
                   </button>
                 </div>
               </div>
@@ -558,42 +558,23 @@ export const AdminConfiguracoes: React.FC = () => {
                   <label className="font-bold text-slate-700">Provedor Ativo</label>
                   <select
                     value={emailConfig.provider || 'gmail'}
-                    onChange={(e) => {
-                      const newP = e.target.value as any;
-                      setEmailConfig(prev => ({
-                        ...prev,
-                        provider: newP,
-                        senderEmail: newP === 'gmail' ? 'kivora.angola@gmail.com' : prev.senderEmail,
-                        smtpHost: newP === 'gmail' ? 'smtp.gmail.com' : prev.smtpHost,
-                        smtpPort: newP === 'gmail' ? 465 : prev.smtpPort,
-                        smtpUser: newP === 'gmail' ? 'kivora.angola@gmail.com' : prev.smtpUser,
-                      }));
-                    }}
+                    onChange={(e) => setEmailConfig(prev => ({ ...prev, provider: e.target.value as any }))}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
                   >
-                    <option value="gmail">Google Gmail Oficial (kivora.angola@gmail.com — Recomendado)</option>
+                    <option value="gmail">Google Gmail Oficial (Recomendado)</option>
                     <option value="resend">Resend API</option>
                     <option value="sendgrid">SendGrid API</option>
-                    <option value="smtp">Servidor SMTP Personalizado</option>
                   </select>
                 </div>
 
                 <div className="space-y-1">
                   <label className="font-bold text-slate-700">
-                    {emailConfig.provider === 'gmail' 
-                      ? 'Palavra-passe de Aplicação Google (16 Letras)' 
-                      : 'Chave API ou Senha'}
+                    {emailConfig.provider === 'gmail' ? 'Palavra-passe de Aplicação (App Password 16 Dígitos)' : 'Chave de API (API Key)'}
                   </label>
                   <input
                     type="password"
                     required
-                    placeholder={
-                      emailConfig.provider === 'gmail' 
-                        ? 'xxxx xxxx xxxx xxxx (16 letras)' 
-                        : emailConfig.provider === 'sendgrid' 
-                          ? 'SG.xxxxxxxx...' 
-                          : 're_xxxxxxxx...'
-                    }
+                    placeholder={emailConfig.provider === 'gmail' ? 'xxxx xxxx xxxx xxxx' : 're_... ou SG....'}
                     value={emailConfig.apiKey || emailConfig.smtpPass || ''}
                     onChange={(e) => setEmailConfig(prev => ({ 
                       ...prev, 
@@ -604,7 +585,7 @@ export const AdminConfiguracoes: React.FC = () => {
                   />
                   {emailConfig.provider === 'gmail' ? (
                     <p className="text-[10px] text-blue-600 font-medium">
-                      🔑 Gere uma senha de app em <strong>myaccount.google.com/apppasswords</strong> na conta <em>kivora.angola@gmail.com</em>
+                      Gere uma senha de app em <strong>myaccount.google.com/apppasswords</strong> na conta <em>kivora.angola@gmail.com</em>
                     </p>
                   ) : (
                     <p className="text-[10px] text-slate-400">Obtenha a chave gratuita em resend.com ou sendgrid.com</p>
@@ -626,7 +607,7 @@ export const AdminConfiguracoes: React.FC = () => {
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
                   />
                   <p className="text-[10px] text-emerald-600 font-medium">
-                    ✅ O remetente visível para os clientes será <strong>{emailConfig.senderEmail || 'kivora.angola@gmail.com'}</strong>.
+                    O remetente visível para os clientes será <strong>{emailConfig.senderEmail || 'kivora.angola@gmail.com'}</strong>.
                   </p>
                 </div>
 
@@ -685,7 +666,7 @@ export const AdminConfiguracoes: React.FC = () => {
                 <div className={`p-4 rounded-2xl border text-xs font-bold flex items-start gap-2.5 animate-fadeIn ${
                   testEmailResult.success ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'
                 }`}>
-                  <span className="text-base">{testEmailResult.success ? '✅' : '❌'}</span>
+                  <span className="text-base">{testEmailResult.success ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <AlertTriangle className="w-4 h-4 text-rose-600" />}</span>
                   <div>
                     <p>{testEmailResult.msg}</p>
                   </div>

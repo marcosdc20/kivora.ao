@@ -118,22 +118,22 @@ export const INSTALLATION_STEPS: InstallationStep[] = [
 // ============================
 export const LOCAL_DB_ARGUMENTS = [
   {
-    title: '🔒 Dados Ficam na Sua Empresa',
+    title: 'Dados Ficam na Sua Empresa',
     description: 'A base de dados é mantida no ambiente físico da sua empresa. Você mantém a posse e privacidade total das suas vendas.',
     icon: 'Database',
   },
   {
-    title: '⚡ Funcionamento Ultra-Rápido',
+    title: 'Funcionamento Ultra-Rápido',
     description: 'Sem tempos de espera de carregamento de páginas web. Abertura instantânea de ecrãs e emissão de recibos em milissegundos.',
     icon: 'Zap',
   },
   {
-    title: '📡 Resiliência sem Depender de Internet',
+    title: 'Resiliência sem Depender de Internet',
     description: 'Realize as operações diárias de caixa, vendas e stock sem interrupções mesmo quando os serviços de telecomunicações falham.',
     icon: 'WifiOff',
   },
   {
-    title: '💾 Copias de Segurança Locais',
+    title: 'Cópias de Segurança Locais',
     description: 'Faça backup automático da sua base de dados para um disco externo, pen drive USB ou servidor da rede local.',
     icon: 'Save',
   },

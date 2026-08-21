@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
-  BookOpen, Search, Sparkles, HelpCircle,
+  BookOpen, Search, HelpCircle,
   ArrowRight, ShieldCheck, Printer
 } from 'lucide-react';
 import { PageId } from '../components/Header';
@@ -268,7 +268,7 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <span className="text-amber-400 font-bold text-xs uppercase tracking-widest flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <BookOpen className="w-3.5 h-3.5" />
                   Vídeo-Aula em Destaque
                 </span>
                 <h3 className="text-xl sm:text-2xl font-black text-white">
@@ -396,7 +396,7 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
                 {/* Dica Profissional */}
                 <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-950 space-y-1.5">
                   <div className="flex items-center gap-2 text-amber-800 font-bold text-xs">
-                    <Sparkles className="w-4 h-4 text-amber-600" />
+                    <ShieldCheck className="w-4 h-4 text-amber-600" />
                     <span>Recomendação de Boas Práticas KIVORA:</span>
                   </div>
                   <p className="text-xs text-amber-900 leading-relaxed">

@@ -196,13 +196,13 @@ export const AdminLoja: React.FC = () => {
     msg += `Atualização sobre o seu pedido *${order.orderNumber}* no valor de *${order.totalAOA.toLocaleString('pt-AO')} Kz*:\n`;
     
     if (order.status === 'paid') {
-      msg += `✅ Confirmamos a receção do seu pagamento! O seu equipamento está a ser preparado para envio para ${order.deliveryProvince}.\n`;
+      msg += `• Confirmamos a receção do seu pagamento! O seu equipamento está a ser preparado para envio para ${order.deliveryProvince}.\n`;
     } else if (order.status === 'shipped') {
-      msg += `🚚 A sua encomenda já está a caminho para ${order.deliveryProvince}! Em breve receberá o contacto do estafeta/transportadora.\n`;
+      msg += `• A sua encomenda já está a caminho para ${order.deliveryProvince}! Em breve receberá o contacto do estafeta/transportadora.\n`;
     } else if (order.status === 'delivered') {
-      msg += `🎉 A sua encomenda foi entregue com sucesso! A equipa da KIVORA agradece a sua preferência.\n`;
+      msg += `• A sua encomenda foi entregue com sucesso! A equipa da KIVORA agradece a sua preferência.\n`;
     } else {
-      msg += `📋 O seu pedido está registado. Em anexo enviamos a Fatura Proforma para pagamento via Transferência Bancária / Multicaixa.\n`;
+      msg += `• O seu pedido está registado. Em anexo enviamos a Fatura Proforma para pagamento via Transferência Bancária / Multicaixa.\n`;
     }
 
     const cleanPhone = order.clientPhone.replace(/\D/g, '');

@@ -5,10 +5,9 @@ import {
   Download, FileText, Send, MessageSquare,
   Building2, Search, AlertCircle, Menu, X,
   RefreshCw, Ban, ShieldCheck, Printer, Calculator,
-  ExternalLink, Lock, Check, Share2, Sparkles,
-  Award, Unlink, UserPlus,
-  Receipt, ArrowRight, PhoneCall, Wallet,
-  CreditCard, Clock, Save
+  ExternalLink, Lock, Check, Share2, Award,
+  Unlink, UserPlus, Receipt, ArrowRight, PhoneCall,
+  Wallet, CreditCard, Clock, Save
 } from 'lucide-react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { CURRENT_RELEASE, KIVORA_INFO } from '../data/kivoraData';
@@ -489,11 +488,11 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     const text = `*KIVORA DESKTOP ERP — Dados de Ativação*\n\n` +
       `Olá *${lic.company_name}*,\n` +
       `A sua licença oficial Kivora foi gerada com sucesso!\n\n` +
-      `🔑 *Chave de Ativação:* \`${lic.id}\`\n` +
-      `📋 *Plano:* ${getPlanLabel(lic.plan_type)}\n` +
-      `📅 *Validade:* ${formatLicenseDate(lic.expires_at)}\n` +
-      `💻 *Terminais Incluídos:* ${1 + (lic.extra_seats || 0)} Computador(es)\n\n` +
-      `📥 *Download do Instalador:* ${window.location.origin}/#download\n\n` +
+      `• *Chave de Ativação:* \`${lic.id}\`\n` +
+      `• *Plano:* ${getPlanLabel(lic.plan_type)}\n` +
+      `• *Validade:* ${formatLicenseDate(lic.expires_at)}\n` +
+      `• *Terminais Incluídos:* ${1 + (lic.extra_seats || 0)} Computador(es)\n\n` +
+      `• *Download do Instalador:* ${window.location.origin}/#download\n\n` +
       `Para ativar: Abra o Kivora ERP no seu PC, aceda a Menu > Licenciamento e cole a chave acima.\n` +
       `Em caso de dúvidas, estamos à sua disposição!`;
 
@@ -917,7 +916,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
           <KivoraLogo variant="light" size="sm" />
           <div className="mt-3 flex items-center justify-between">
             <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-800/50 flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-emerald-400" />
+              <ShieldCheck className="w-3 h-3 text-emerald-400" />
               <span>Portal do Parceiro</span>
             </span>
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Ligado ao Firebase Firestore em Tempo Real" />
@@ -2123,7 +2122,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                             debt.is_provisional ? 'bg-amber-100 text-amber-900 border-amber-300' :
                             'bg-amber-50 text-amber-800 border-amber-200'
                           }`}>
-                            {debt.paid ? '✓ Liquidado à Kivora' : debt.is_provisional ? '⏳ Provisório (7 Dias)' : 'Dívida Pendente'}
+                            {debt.paid ? '✓ Liquidado à Kivora' : debt.is_provisional ? 'Provisório (7 Dias)' : 'Dívida Pendente'}
                           </span>
                           <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
                             {debt.payment_method === 'wallet' ? 'Via Wallet' : debt.payment_method === 'credit' ? 'Linha de Crédito' : 'Provisória'}
@@ -2634,7 +2633,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   <div>
                     <span className="text-slate-400 text-[10px] uppercase font-bold block">Nível de Parceria</span>
                     <span className="font-bold text-emerald-600 flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" />
+                      <Award className="w-3.5 h-3.5" />
                       <span>{partnerAccount?.tier?.toUpperCase() || 'HOMOLOGADO'}</span>
                     </span>
                   </div>

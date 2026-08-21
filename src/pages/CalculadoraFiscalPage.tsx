@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Calculator, Receipt, ArrowRight,
-  Info, Printer, Download, Sparkles
+  Info, Printer, Download
 } from 'lucide-react';
 import { PageId } from '../components/Header';
 
@@ -214,7 +214,7 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
                   </p>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-white" />
+                  <Calculator className="w-6 h-6 text-white" />
                 </div>
               </div>
 

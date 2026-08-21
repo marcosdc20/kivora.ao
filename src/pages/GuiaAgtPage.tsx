@@ -3,7 +3,7 @@ import { PageHero } from '../components/PageHero';
 import {
   CheckCircle2, AlertTriangle,
   Calendar, QrCode, Lock, ArrowRight,
-  Scale, Database, Clock, Sparkles
+  Scale, Database, Clock, ShieldCheck
 } from 'lucide-react';
 import { PageId } from '../components/Header';
 import { YouTubePlayer } from '../components/YouTubePlayer';
@@ -266,7 +266,7 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <span className="text-emerald-400 font-bold text-xs uppercase tracking-widest flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <ShieldCheck className="w-3.5 h-3.5" />
                   Vídeo Jurídico & Fiscal
                 </span>
                 <h3 className="text-xl sm:text-2xl font-black text-white">
@@ -296,7 +296,7 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-b border-slate-800 pb-6">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold mb-2">
-                <Sparkles className="w-3.5 h-3.5" />
+                <ShieldCheck className="w-3.5 h-3.5" />
                 <span>Autoavaliação Fiscal Interativa</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-white">
@@ -357,7 +357,7 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800 text-xs text-slate-400">
             <p>
-              💡 <strong>Dica KIVORA:</strong> Com o KIVORA ERP instalado, a sua empresa cumpre 100% dos requisitos de forma nativa e automática desde o primeiro dia.
+              <strong className="text-white">Recomendação KIVORA:</strong> Com o KIVORA ERP instalado, a sua empresa cumpre 100% dos requisitos de forma nativa e automática desde o primeiro dia.
             </p>
             <button
               onClick={() => onOpenDemoModal('Instalação Certificada AGT')}

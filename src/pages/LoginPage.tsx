@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { KIVORA_INFO } from '../data/kivoraData';
-import { Lock, ShieldCheck, ArrowRight, ArrowLeft, Loader2, UserCheck, Sparkles } from 'lucide-react';
+import { Lock, ShieldCheck, ArrowRight, ArrowLeft, Loader2, UserCheck } from 'lucide-react';
 import { loginUser, KivoraUserSession } from '../admin/services/authService';
 
 interface LoginPageProps {
@@ -85,7 +85,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
 
           {/* Smart routing badge */}
           <div className="p-3 bg-amber-50/60 rounded-2xl border border-amber-200/70 text-[11px] text-amber-900 leading-relaxed flex items-start gap-2.5">
-            <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <span>
               <strong>Identificação Automática:</strong> O sistema reconhece o seu perfil e direciona-o para o respetivo painel.
             </span>

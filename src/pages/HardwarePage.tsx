@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
   Printer, ScanLine, Scale, Monitor,
-  CheckCircle2, ShieldCheck, Download, Sparkles
+  CheckCircle2, ShieldCheck, Download
 } from 'lucide-react';
 import { PageId } from '../components/Header';
 import { useScrollReveal } from '../hooks/useScrollReveal';
@@ -208,7 +208,7 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
           <div data-reveal className="space-y-6">
             <div className="text-center max-w-2xl mx-auto space-y-2">
               <span className="text-blue-600 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
+                <Monitor className="w-3.5 h-3.5" />
                 Guia em Vídeo
               </span>
               <h3 className="text-2xl sm:text-3xl font-black text-slate-950">

@@ -378,7 +378,10 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
                 Ao contrário de softwares baseados na nuvem internacional (que cobram mensalidades em USD e bloqueiam as vendas se a internet fibra falhar), o <strong>KIVORA ERP funciona 100% offline</strong> no computador da sua loja.
               </p>
               <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-blue-200 text-[11px] font-bold text-blue-950">
-                <span>✓ Zero risco de paragem de caixas por quebra de internet</span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Zero risco de paragem de caixas por quebra de internet</span>
+                </span>
                 <span className="text-emerald-700 font-mono">Poupança estimada: ~{realSavingsAoa.toLocaleString('pt-AO')} Kz / ano</span>
               </div>
             </div>

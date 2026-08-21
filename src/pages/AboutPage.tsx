@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
-import { ShieldCheck, Award, Users, CheckCircle, Sparkles, MapPin, Phone, Mail } from 'lucide-react';
+import { ShieldCheck, Award, Users, CheckCircle, MapPin, Phone, Mail, ArrowRight } from 'lucide-react';
 import {
   subscribeSystemSettings, getCachedSystemSettings,
   SystemCompanySettings
@@ -91,7 +91,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
 
           <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200/90 shadow-xs space-y-3">
             <div className="w-10 h-10 rounded-2xl bg-amber-100/60 text-amber-600 flex items-center justify-center font-bold">
-              <Sparkles className="w-5 h-5" />
+              <Award className="w-5 h-5" />
             </div>
             <h3 className="text-lg font-black text-slate-950">Inovação Orientada ao Cliente</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
@@ -157,7 +157,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
             onClick={onOpenDemoModal}
             className="bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs sm:text-sm px-8 py-4 rounded-2xl shadow-lg transition-all flex items-center gap-2 shrink-0 cursor-pointer"
           >
-            <Sparkles className="w-4 h-4 text-blue-600" />
+            <ArrowRight className="w-4 h-4 text-blue-600" />
             <span>Agendar Apresentação</span>
           </button>
         </div>

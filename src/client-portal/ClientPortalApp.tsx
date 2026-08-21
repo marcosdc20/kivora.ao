@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Key, Download, Cloud, FileText,
   Headphones, Building2, LogOut, Monitor, Copy,
   CheckCircle2, ShieldCheck, Loader2, Send, Menu, X,
-  Sparkles, MessageSquare, Receipt, Printer, AlertTriangle, Ban
+  MessageSquare, Receipt, Printer, AlertTriangle, Ban
 } from 'lucide-react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { CURRENT_RELEASE, KIVORA_INFO } from '../data/kivoraData';
@@ -274,7 +274,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
           <KivoraLogo variant="light" size="sm" />
           <div className="mt-3 flex items-center justify-between">
             <span className="text-[10px] font-black uppercase tracking-widest text-blue-400 bg-blue-950/60 px-2.5 py-1 rounded-full border border-blue-800/50 flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-blue-400" />
+              <ShieldCheck className="w-3 h-3 text-blue-400" />
               <span>Área do Cliente</span>
             </span>
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Sincronizado com o Firebase Cloud" />

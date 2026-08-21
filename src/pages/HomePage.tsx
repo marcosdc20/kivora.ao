@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { HeroCarousel } from '../components/HeroCarousel';
 import {
   CheckCircle2, ArrowRight, Download, Shield, Wifi,
-  Zap, Monitor, Laptop, Check, Sparkles,
+  Zap, Monitor, Laptop, Check, ShieldCheck,
   Award, Headphones, Building2, MapPin, TrendingUp,
-  Search, ShoppingCart
+  Search, ShoppingCart, ShoppingBag, Utensils, Pill,
+  Briefcase, Boxes
 } from 'lucide-react';
 import { PageId } from '../components/Header';
 import {
@@ -32,14 +33,14 @@ interface HomePageProps {
   onNavigatePage: (page: PageId) => void;
 }
 
-// Setores sugeridos para o Quick Finder
+// Setores sugeridos para o Quick Finder com Ícones Oficiais Lucide (Sem Emojis)
 const QUICK_SECTORS = [
-  { id: 'retalho', label: 'Retalho & Lojas', icon: '🛍️', module: 'pos-multicaixa', price: '25.000 Kz / mês', planId: 'mensal' },
-  { id: 'supermercado', label: 'Supermercados & Mercearias', icon: '🛒', module: 'gestao-stock', price: '250.000 Kz / ano', planId: 'anual', popular: true },
-  { id: 'restauracao', label: 'Restauração & Bares', icon: '🍽️', module: 'pos-multicaixa', price: '250.000 Kz / ano', planId: 'anual' },
-  { id: 'farmacia', label: 'Farmácias & Saúde', icon: '💊', module: 'faturacao-agt', price: '250.000 Kz / ano', planId: 'anual' },
-  { id: 'servicos', label: 'Prestação de Serviços', icon: '💼', module: 'faturacao-agt', price: '25.000 Kz / mês', planId: 'mensal' },
-  { id: 'materiais', label: 'Materiais de Construção', icon: '🧱', module: 'gestao-stock', price: '650.000 Kz / perpétuo', planId: 'vitalicio' },
+  { id: 'retalho', label: 'Retalho & Lojas', icon: ShoppingBag, module: 'pos-multicaixa', price: '25.000 Kz / mês', planId: 'mensal' },
+  { id: 'supermercado', label: 'Supermercados & Mercearias', icon: ShoppingCart, module: 'gestao-stock', price: '250.000 Kz / ano', planId: 'anual', popular: true },
+  { id: 'restauracao', label: 'Restauração & Bares', icon: Utensils, module: 'pos-multicaixa', price: '250.000 Kz / ano', planId: 'anual' },
+  { id: 'farmacia', label: 'Farmácias & Saúde', icon: Pill, module: 'faturacao-agt', price: '250.000 Kz / ano', planId: 'anual' },
+  { id: 'servicos', label: 'Prestação de Serviços', icon: Briefcase, module: 'faturacao-agt', price: '25.000 Kz / mês', planId: 'mensal' },
+  { id: 'materiais', label: 'Materiais de Construção', icon: Boxes, module: 'gestao-stock', price: '650.000 Kz / perpétuo', planId: 'vitalicio' },
 ];
 
 // Contador animado progressivo baseado em IntersectionObserver
@@ -251,6 +252,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Sugestões:</span>
             {QUICK_SECTORS.map((sector) => {
               const isSelected = filteredSector.id === sector.id;
+              const SectorIcon = sector.icon;
               return (
                 <button
                   key={sector.id}
@@ -258,13 +260,13 @@ export const HomePage: React.FC<HomePageProps> = ({
                     setActiveSector(sector);
                     setSearchSector('');
                   }}
-                  className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`text-xs font-semibold px-3.5 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-2 ${
                     isSelected
                       ? 'bg-blue-50 border-blue-300 text-blue-700 font-bold shadow-sm'
                       : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
-                  <span>{sector.icon}</span>
+                  <SectorIcon className={`w-3.5 h-3.5 ${isSelected ? 'text-blue-600' : 'text-slate-500'}`} />
                   <span>{sector.label}</span>
                 </button>
               );
@@ -876,7 +878,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             {/* Texto */}
             <div data-reveal className="sr-init lg:col-span-6 space-y-4 sm:space-y-6 pb-12 sm:pb-16 lg:pb-20">
               <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold">
-                <Sparkles className="w-3.5 h-3.5" />
+                <ShieldCheck className="w-3.5 h-3.5" />
                 Gestão Moderna & Mobilidade Empresarial
               </div>
 

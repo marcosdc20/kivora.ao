@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, CheckCircle, Send, Building, Phone, Mail, User, ShieldCheck, MessageCircle, Loader2, Sparkles, Monitor } from 'lucide-react';
+import { X, CheckCircle, Send, Building, Phone, Mail, User, ShieldCheck, MessageCircle, Loader2, Monitor } from 'lucide-react';
 import {
   subscribeSystemSettings, getCachedSystemSettings,
   SystemCompanySettings
@@ -129,7 +129,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
             </div>
             <div>
               <div className="inline-flex items-center gap-1.5 text-blue-700 text-xs font-black uppercase tracking-widest bg-blue-50 border border-blue-200 px-3 py-1 rounded-full mb-2">
-                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
                 <span>Demonstração Oficial Kivora ERP</span>
               </div>
               

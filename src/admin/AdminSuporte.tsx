@@ -4,7 +4,7 @@ import {
   Clock, AlertTriangle, CheckCircle2,
   Send, Loader2, MessageSquare, UserCheck,
   Download, MessageCircle, Phone, Building,
-  Sparkles
+  TrendingUp
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
 import { db } from '../lib/firebase';
@@ -345,14 +345,14 @@ export const AdminSuporte: React.FC = () => {
           </button>
 
           <button
-            onClick={() => { setActiveTab('leads'); setSearchQuery(''); }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            onClick={() => setActiveTab('leads')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all cursor-pointer ${
               activeTab === 'leads'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-600 hover:bg-slate-200/60'
             }`}
           >
-            <Sparkles className="w-4 h-4" />
+            <TrendingUp className="w-4 h-4" />
             <span>Pedidos de Demonstração (Site)</span>
             {pendingLeadsCount > 0 ? (
               <span className="ml-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 animate-pulse">
@@ -630,7 +630,7 @@ export const AdminSuporte: React.FC = () => {
                 value={leads.filter(l => l.status === 'em_contacto' || l.status === 'demonstrado').length}
                 sub="Funil Comercial"
                 subColor="green"
-                icon={<Sparkles className="w-4 h-4" />}
+                icon={<TrendingUp className="w-4 h-4" />}
               />
               <StatCard
                 label="Convertidos em Clientes"
@@ -749,7 +749,7 @@ export const AdminSuporte: React.FC = () => {
                     {filteredLeads.length === 0 && (
                       <tr>
                         <td colSpan={7} className="text-center py-12 text-slate-400">
-                          <Sparkles className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                          <Headphones className="w-8 h-8 mx-auto text-slate-300 mb-2" />
                           <p className="font-bold text-xs text-slate-700">Nenhum pedido de demonstração registado.</p>
                           <p className="text-[11px] text-slate-400 mt-0.5">Os pedidos enviados no modal do site aparecerão aqui automaticamente.</p>
                         </td>

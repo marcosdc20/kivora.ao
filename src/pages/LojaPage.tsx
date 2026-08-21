@@ -743,8 +743,9 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
                   </div>
 
                   {/* Selo de Envio */}
-                  <div className="inline-block text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                    ⚡ Entrega Luanda & Províncias
+                  <div className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                    <Truck className="w-3 h-3 text-emerald-600" />
+                    <span>Entrega em Luanda & Províncias</span>
                   </div>
 
                 </div>

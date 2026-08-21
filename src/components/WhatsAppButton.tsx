@@ -48,8 +48,8 @@ const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
     >
       {/* Tooltip */}
       {showTooltip && (
-        <div className="bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl shadow-xl animate-fadeIn max-w-[180px] text-center leading-snug">
-          Fale connosco no WhatsApp! 💬
+        <div className="bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-xl shadow-xl animate-fadeIn max-w-[180px] text-center leading-snug">
+          Fale connosco no WhatsApp
           <div className="absolute -bottom-1.5 right-5 w-3 h-3 bg-slate-900 rotate-45" />
         </div>
       )}

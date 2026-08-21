@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Plus, Search, Key, CheckSquare,
   X, Copy, Ban, RotateCcw, Unlink, Trash2, Clock, CheckCircle2,
-  Loader2, Building2, Monitor, Users, ShieldCheck, Download, Mail
+  Loader2, Building2, Monitor, Users, ShieldCheck, Download, Mail, Lock
 } from 'lucide-react';
 import { AdminTopbar, StatusBadge } from './AdminComponents';
 import { useLicenses, useCompanies } from './hooks/useFirebase';
@@ -264,9 +264,10 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => setModalAuth(true)}
-                className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-sm transition-all"
+                className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-sm transition-all flex items-center gap-1.5"
               >
-                🔐 Iniciar Sessão Firebase
+                <Lock className="w-3.5 h-3.5" />
+                <span>Autenticar Firebase</span>
               </button>
               <button
                 onClick={() => refresh()}

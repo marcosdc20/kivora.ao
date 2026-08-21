@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Sparkles, Youtube, ExternalLink } from 'lucide-react';
+import { Play, Youtube, ExternalLink } from 'lucide-react';
 import { getYouTubeEmbedUrl } from '../services/systemSettingsService';
 
 interface YouTubePlayerProps {
@@ -152,7 +152,7 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
 
             {/* Dica no Canto Inferior */}
             <div className="absolute bottom-4 left-6 z-10 hidden sm:flex items-center gap-2 text-[11px] text-slate-400">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <Play className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
               <span>Clique em qualquer lugar para reproduzir em alta definição</span>
             </div>
 
