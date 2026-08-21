@@ -117,12 +117,12 @@ export const ComparativoPage: React.FC<ComparativoPageProps> = ({ onNavigatePage
         
         {/* Header da Página */}
         <div className="text-center max-w-3xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/80 border border-blue-200 text-blue-900 text-xs font-bold uppercase tracking-wider mb-4">
-            <Zap className="w-3.5 h-3.5 text-[#1d4ed8]" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold uppercase tracking-wider mb-4">
+            <Zap className="w-3.5 h-3.5 text-blue-600" />
             Comparativo de Mercado Transparente
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
-            Por Que o <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1d4ed8] to-blue-600">KIVORA ERP</span> é a Escolha Certa?
+            Por Que o <span className="text-[#1d4ed8]">KIVORA ERP</span> é a Escolha Certa?
           </h1>
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
             Compare o KIVORA com softwares internacionais 100% em nuvem e softwares não homologados. Entenda porque somos a solução ideal para o ambiente de negócios em Angola.
@@ -133,8 +133,7 @@ export const ComparativoPage: React.FC<ComparativoPageProps> = ({ onNavigatePage
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           
           {/* Card Kivora */}
-          <div className="bg-gradient-to-b from-blue-900 to-[#1d4ed8] text-white p-6 sm:p-8 rounded-3xl shadow-xl relative overflow-hidden">
-            <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div className="bg-[#1d4ed8] text-white p-6 sm:p-8 rounded-3xl shadow-xl relative overflow-hidden border border-blue-600">
             <span className="px-3 py-1 bg-white/20 text-white rounded-full text-xs font-bold uppercase tracking-wider mb-4 inline-block">
               Solução Recomendada
             </span>
@@ -144,13 +143,13 @@ export const ComparativoPage: React.FC<ComparativoPageProps> = ({ onNavigatePage
             </p>
             <div className="space-y-2 text-xs font-semibold text-white">
               <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400" /> Fatura 24/7 sem internet
+                <Check className="w-4 h-4 text-emerald-300" /> Fatura 24/7 sem internet
               </div>
               <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400" /> Sem taxas cambiais em dólares
+                <Check className="w-4 h-4 text-emerald-300" /> Sem taxas cambiais em dólares
               </div>
               <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400" /> Suporte presencial nas 18 províncias
+                <Check className="w-4 h-4 text-emerald-300" /> Suporte presencial nas 18 províncias
               </div>
             </div>
           </div>

@@ -145,12 +145,12 @@ export const CasosSucessoPage: React.FC<CasosSucessoPageProps> = ({
         
         {/* Header da Página */}
         <div className="text-center max-w-3xl mx-auto mb-14" data-reveal>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100/80 border border-emerald-200 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-4">
-            <Award className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold uppercase tracking-wider mb-4">
+            <Award className="w-3.5 h-3.5 text-blue-600" />
             Histórias de Sucesso em Angola
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
-            Como Empresas Reais Crescem com o <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1d4ed8] to-blue-600">KIVORA ERP</span>
+            Como Empresas Reais Crescem com o <span className="text-[#1d4ed8]">KIVORA ERP</span>
           </h1>
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
             Conheça as experiências de gestores e proprietários que eliminaram problemas de faturação, filas e paragens por quebra de internet em Angola.

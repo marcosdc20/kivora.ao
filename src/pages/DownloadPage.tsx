@@ -130,24 +130,25 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-10">
         
         {/* Painel Principal de Download (Design Clean & Corporativo) */}
-        <div data-reveal className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-10 space-y-8">
+        <div data-reveal className="card-premium rounded-3xl p-6 sm:p-10 space-y-8">
           
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 border border-blue-200/80 text-blue-800 text-xs font-bold tracking-tight">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-800 text-xs font-bold tracking-tight">
                   <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
                   <span>{activeAgtCert}</span>
                 </span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold font-mono-num">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5" />
                   Versão Estável
                 </span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
-                Kivora ERP Desktop <span className="text-blue-700 font-mono">v{cleanVersion}</span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
+                KIVORA ERP Desktop <span className="text-[#1d4ed8] font-mono-num">v{cleanVersion}</span>
               </h2>
               <p className="text-xs sm:text-sm text-slate-600">
-                Lançamento oficial: <span className="font-semibold text-slate-800">{activeReleaseDate}</span> • Arquitetura 64-bit
+                Lançamento oficial: <span className="font-bold text-slate-900">{activeReleaseDate}</span> • Arquitetura 64-bit Windows
               </p>
             </div>
 
@@ -157,10 +158,10 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
                 href={settings.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-200 transition-colors cursor-pointer"
+                className="btn-premium-secondary inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold cursor-pointer"
               >
-                <GitBranch className="w-3.5 h-3.5 text-slate-600" />
-                <span>Repositório GitHub</span>
+                <GitBranch className="w-3.5 h-3.5 text-slate-700" />
+                <span>Repositório Oficial</span>
                 <ExternalLink className="w-3 h-3 text-slate-400" />
               </a>
             )}
@@ -174,10 +175,10 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
                 <button
                   onClick={handleStartDownload}
                   disabled={downloading}
-                  className="shimmer-button inline-flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 text-white font-bold text-sm sm:text-base px-7 py-3.5 rounded-xl shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+                  className="btn-premium-primary shimmer-button inline-flex items-center justify-center gap-3 disabled:opacity-50 text-sm sm:text-base px-8 py-4 rounded-2xl cursor-pointer"
                 >
-                  <Download className="w-5 h-5" />
-                  <span>{downloading ? 'A preparar download...' : 'Baixar Instalador (.exe)'}</span>
+                  <Download className="w-5 h-5" strokeWidth={2.25} />
+                  <span>{downloading ? 'A preparar download...' : 'Baixar Instalador Oficial (.exe)'}</span>
                 </button>
 
                 {settings.githubUrl && (
@@ -185,54 +186,54 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
                     href={getDirectDownloadUrl(settings.downloadUrl || DEFAULT_SETTINGS.downloadUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs px-4 py-3 rounded-xl border border-slate-200 transition-colors"
+                    className="btn-premium-secondary inline-flex items-center justify-center gap-2 text-xs px-5 py-4 rounded-2xl"
                   >
-                    <span>Download Direto Alternativo</span>
+                    <span>Download Direto</span>
                     <ExternalLink className="w-3 h-3 text-slate-400" />
                   </a>
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-500">
-                <span>Tamanho: <strong className="text-slate-800">{activeFileSize}</strong></span>
+              <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-600">
+                <span>Tamanho: <strong className="text-slate-950 font-mono-num">{activeFileSize}</strong></span>
                 <span>•</span>
-                <span>Plataforma: <strong className="text-slate-800">Windows 10 / 11 (x64)</strong></span>
+                <span>Plataforma: <strong className="text-slate-950">Windows 10 / 11 (x64)</strong></span>
                 <span>•</span>
-                <span>Instalação: <strong className="text-slate-800">Autónoma</strong></span>
+                <span>Instalação: <strong className="text-slate-950">Autónoma & Guiada</strong></span>
               </div>
 
               {downloadComplete && (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-semibold flex items-center gap-2">
+                <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-900 text-xs font-semibold flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Download iniciado com sucesso. Execute o ficheiro descarregado para iniciar a instalação.</span>
+                  <span>Download iniciado com sucesso. Execute o instalador descarregado para configurar o sistema.</span>
                 </div>
               )}
             </div>
 
             {/* Cartão de Chave de Demonstração */}
-            <div className="bg-slate-50 border border-slate-200/90 rounded-xl p-4 space-y-2.5">
+            <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
                   <Key className="w-3.5 h-3.5 text-blue-600" />
-                  Chave de Demonstração
+                  Chave de Avaliação
                 </span>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">15 Dias</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-mono-num">15 Dias VIP</span>
               </div>
               <div className="flex items-center gap-2">
-                <code className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-900 flex-1 truncate select-all">
+                <code className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono-num font-bold text-slate-950 flex-1 truncate select-all">
                   {activeDemoKey}
                 </code>
                 <button
                   onClick={handleCopyKey}
-                  className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shrink-0 cursor-pointer"
+                  className="px-3 py-2 bg-slate-950 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition-colors flex items-center gap-1 shrink-0 cursor-pointer"
                   title="Copiar chave de demonstração"
                 >
                   {copiedKey ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copiedKey ? 'Copiada' : 'Copiar'}</span>
                 </button>
               </div>
-              <p className="text-[10px] text-slate-500 leading-tight">
-                Utilize esta chave para testar todas as funcionalidades do sistema no seu computador.
+              <p className="text-[11px] text-slate-500 leading-snug">
+                Utilize esta chave para testar todos os módulos do KIVORA sem limites durante o período de demonstração.
               </p>
             </div>
 

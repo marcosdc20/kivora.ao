@@ -72,54 +72,56 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
         </div>
 
         {/* Grade de 4 Benefícios Chave */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
             { title: 'Preços de Atacado & Margem Livre', desc: 'Preços especiais de custo com liberdade total para definir o preço final ao cliente e maximizar a sua rentabilidade.' },
             { title: 'Portal do Parceiro & Licenciamento a Crédito', desc: 'Painel completo para ativação 24/7 com quota operacional pré-autorizada sem burocracia.' },
             { title: 'Suporte Técnico Prioritário Nível 2', desc: 'Linha direta com os engenheiros da Kivora para apoio em implementações fiscais e redes locais.' },
             { title: 'Formação & Kits de Marketing', desc: 'Acesso a manuais, apresentações comerciais e material promocional oficial para a sua equipa.' },
           ].map((b, i) => (
-            <div key={i} data-reveal className="sr-init border border-slate-200 rounded-2xl p-6 sm:p-7 hover:border-blue-500/40 hover:shadow-lg transition-all bg-white group" style={{ transitionDelay: `${i * 80}ms` }}>
-              <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                <CheckCircle2 className="w-5 h-5" strokeWidth={2} />
+            <div key={i} data-reveal className="sr-init card-premium rounded-3xl p-7 flex flex-col justify-between group" style={{ transitionDelay: `${i * 80}ms` }}>
+              <div>
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                  <CheckCircle2 className="w-5 h-5" strokeWidth={2.25} />
+                </div>
+                <h3 className="text-base font-extrabold text-slate-950 mb-1.5 group-hover:text-blue-600 transition-colors">{b.title}</h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{b.desc}</p>
               </div>
-              <h3 className="text-base font-black text-slate-950 mb-1.5 group-hover:text-blue-600 transition-colors">{b.title}</h3>
-              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">{b.desc}</p>
             </div>
           ))}
         </div>
 
         {/* Destaque dos 2 Documentos Oficiais */}
-        <div data-reveal className="sr-init p-6 sm:p-8 bg-slate-50 rounded-3xl border border-slate-200 space-y-6">
+        <div data-reveal className="sr-init p-6 sm:p-8 bg-slate-50 rounded-3xl border border-slate-200/90 space-y-6">
           <div className="flex items-center gap-3 border-b border-slate-200/80 pb-4">
-            <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center font-black">
+            <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center font-black">
               <Award className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-black text-slate-900">
+              <h3 className="text-base sm:text-lg font-black text-slate-950">
                 2 Documentos Oficiais Recebidos na Homologação
               </h3>
-              <p className="text-xs text-slate-500">Documentação séria com selo de autenticidade para apresentar aos seus clientes empresariais:</p>
+              <p className="text-xs text-slate-600">Documentação séria com selo de autenticidade para apresentar aos seus clientes empresariais:</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-2">
-              <div className="flex items-center gap-2 text-slate-900 font-bold">
+              <div className="flex items-center gap-2 text-slate-950 font-bold">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>1. Certificado de Parceria — {settings.company}</span>
               </div>
-              <p className="text-slate-500 leading-relaxed text-[11px]">
+              <p className="text-slate-600 leading-relaxed text-[11px]">
                 Atesta formalmente o credenciamento e homologação técnica da sua empresa como canal credenciado em território nacional.
               </p>
             </div>
 
             <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-2">
-              <div className="flex items-center gap-2 text-slate-900 font-bold">
-                <FileText className="w-4 h-4 text-amber-600 shrink-0" />
+              <div className="flex items-center gap-2 text-slate-950 font-bold">
+                <FileText className="w-4 h-4 text-blue-600 shrink-0" />
                 <span>2. Certificado de Revendedor — {settings.fullName}</span>
               </div>
-              <p className="text-slate-500 leading-relaxed text-[11px]">
+              <p className="text-slate-600 leading-relaxed text-[11px]">
                 Outorga de autorização da {settings.company} para distribuição, instalação e comercialização do software ({settings.agtCertificate}).
               </p>
             </div>
@@ -129,7 +131,7 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200/80 text-xs">
             <div className="flex items-center gap-2 text-slate-700">
               <CreditCard className="w-4 h-4 text-emerald-600" />
-              <span>Taxa única de homologação e credenciamento: <strong className="text-slate-950 font-mono font-black">{fmt(policy.partner_membership_fee_aoa ?? 25000)} Kz</strong></span>
+              <span>Taxa única de homologação e credenciamento: <strong className="text-slate-950 font-mono-num font-black">{fmt(policy.partner_membership_fee_aoa ?? 25000)} Kz</strong></span>
             </div>
             <span className="text-[11px] text-slate-500">Liquidação após análise da candidatura</span>
           </div>
@@ -139,13 +141,13 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
         {settings.videoParceirosUrl && (
           <div data-reveal className="sr-init space-y-6 pt-6">
             <div className="text-center max-w-2xl mx-auto space-y-2">
-              <span className="text-purple-600 font-bold text-xs uppercase tracking-widest">
+              <span className="text-blue-600 font-bold text-xs uppercase tracking-widest">
                 Apresentação Comercial
               </span>
               <h3 className="text-2xl sm:text-3xl font-black text-slate-950">
                 {settings.videoParceirosTitle || 'Como Funciona o Programa de Canais & Distribuição'}
               </h3>
-              <p className="text-xs sm:text-sm text-slate-500">
+              <p className="text-xs sm:text-sm text-slate-600">
                 {settings.videoParceirosDesc || 'Entenda em detalhe o modelo de negócio, margens de revenda até 50% e suporte direto aos parceiros.'}
               </p>
             </div>
@@ -156,7 +158,7 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
                 title={settings.videoParceirosTitle}
                 subtitle={settings.videoParceirosDesc}
                 badge="Vídeo para Parceiros"
-                accentColor="purple"
+                accentColor="blue"
                 aspectRatio="video"
               />
             </div>
@@ -165,16 +167,16 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
       </section>
 
       {/* Formulário / CTA */}
-      <section className="bg-slate-950 py-20 px-6 sm:px-10 lg:px-16">
+      <section className="bg-slate-950 py-20 px-6 sm:px-10 lg:px-16 border-t border-slate-800">
         <div data-reveal className="sr-init max-w-3xl mx-auto text-center text-white space-y-6">
           <Users className="w-10 h-10 text-blue-400 mx-auto" strokeWidth={1.5} />
-          <h2 className="text-3xl font-black">Candidate-se ao Programa de Parceiros</h2>
-          <p className="text-slate-400 text-sm leading-relaxed max-w-lg mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">Candidate-se ao Programa de Parceiros</h2>
+          <p className="text-slate-300 text-sm leading-relaxed max-w-lg mx-auto">
             Aceda à página exclusiva de candidatura com todos os requisitos oficiais e formulário de credenciamento.
           </p>
           <button
             onClick={handleGoCandidatura}
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm px-8 py-4 rounded-2xl shadow-lg shadow-blue-600/30 transition-all hover:-translate-y-0.5 cursor-pointer"
+            className="btn-premium-primary inline-flex items-center gap-2 text-sm px-8 py-4 rounded-2xl cursor-pointer"
           >
             <span>Enviar Candidatura Oficial</span>
             <ArrowRight className="w-4 h-4" strokeWidth={2} />

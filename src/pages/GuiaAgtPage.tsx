@@ -220,25 +220,25 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
             {regimesIva.map((regime, index) => (
               <div
                 key={index}
-                className="rounded-2xl p-6 sm:p-7 border border-slate-200 bg-white shadow-xs flex flex-col justify-between space-y-6 transition-all hover:shadow-lg hover:border-blue-500/40 group"
+                className="card-premium rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group"
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className={`text-[11px] font-black uppercase px-2.5 py-1 rounded-full border ${regime.badge}`}>
+                    <span className={`text-[11px] font-black font-mono-num uppercase px-3 py-1 rounded-full border ${regime.badge}`}>
                       {regime.taxa}
                     </span>
                     <span className="text-xs text-slate-400 font-bold">Código do IVA</span>
                   </div>
 
                   <h3 className="text-lg font-black text-slate-950 group-hover:text-blue-600 transition-colors">{regime.nome}</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">{regime.enquadramento}</p>
+                  <p className="text-xs text-slate-600 leading-relaxed">{regime.enquadramento}</p>
 
-                  <div className="pt-2 border-t border-slate-100 space-y-2">
-                    <p className="text-[11px] font-bold text-slate-900 uppercase tracking-wider">Obrigações Operacionais:</p>
-                    <ul className="space-y-1.5 text-xs text-slate-600">
+                  <div className="pt-3 border-t border-slate-100 space-y-2">
+                    <p className="text-[11px] font-bold text-slate-950 uppercase tracking-wider">Obrigações Operacionais:</p>
+                    <ul className="space-y-2 text-xs text-slate-700">
                       {regime.obrigacoes.map((obrigacao, idx) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                        <li key={idx} className="flex items-start gap-2 font-medium">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" strokeWidth={2.25} />
                           <span>{obrigacao}</span>
                         </li>
                       ))}
@@ -249,7 +249,7 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
                 <div className="pt-4 border-t border-slate-100">
                   <button
                     onClick={() => onNavigatePage('calculadora-fiscal')}
-                    className="w-full text-xs font-bold text-slate-800 hover:text-blue-600 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-50 hover:bg-blue-50 transition-colors cursor-pointer"
+                    className="btn-premium-secondary w-full text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <span>Simular Valores na Calculadora</span>
                     <ArrowRight className="w-3.5 h-3.5" />

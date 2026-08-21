@@ -128,12 +128,12 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
       <div className="relative z-10 w-full pt-20 sm:pt-28 pb-16 sm:pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 w-full">
           
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             
             {/* Coluna Esquerda: Textos Originais do Slide */}
             <div
               key={`text-${current}`}
-              className={`lg:col-span-6 transition-all duration-500 text-left ${
+              className={`lg:col-span-7 transition-all duration-500 text-left ${
                 animating
                   ? direction === 'next'
                     ? 'opacity-0 translate-y-6'
@@ -141,18 +141,19 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                   : 'opacity-100 translate-y-0'
               }`}
             >
-              {/* Tag / Tagline */}
-              <span className="inline-block mb-3 sm:mb-4 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-blue-400 border border-blue-500/40 bg-blue-500/10 px-3 py-1 rounded-full backdrop-blur-xs">
-                {slide.tagline}
-              </span>
+              {/* Tag / Tagline com badge pulsante live */}
+              <div className="inline-flex items-center gap-2 mb-4 sm:mb-5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-blue-300 border border-blue-400/30 bg-blue-950/70 px-3.5 py-1.5 rounded-full backdrop-blur-md shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>{slide.tagline}</span>
+              </div>
 
-              {/* Headline Responsivo */}
-              <h1 className="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-[1.12] sm:leading-[1.08] tracking-tight mb-3 sm:mb-4 whitespace-pre-line drop-shadow-lg break-words">
+              {/* Headline Responsivo com Tipografia Editorial */}
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[54px] font-extrabold text-white leading-[1.12] sm:leading-[1.08] tracking-tight mb-4 whitespace-pre-line drop-shadow-md">
                 {slide.headline}
               </h1>
 
               {/* Subtítulo */}
-              <p className="text-xs sm:text-base lg:text-lg text-white/85 leading-relaxed mb-6 sm:mb-8 max-w-lg font-normal">
+              <p className="text-sm sm:text-base lg:text-lg text-slate-200 leading-relaxed mb-6 sm:mb-8 max-w-xl font-normal">
                 {slide.sub}
               </p>
 
@@ -161,35 +162,51 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                 {slide.cta.action === 'download' ? (
                   <button
                     onClick={() => onNavigatePage('download')}
-                    className="shimmer-button inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold text-xs sm:text-sm px-6 sm:px-7 py-3 sm:py-3.5 rounded-2xl shadow-xl shadow-blue-600/30 transition-all hover:-translate-y-0.5 cursor-pointer"
+                    className="shimmer-button inline-flex items-center justify-center gap-2 bg-[#1d4ed8] hover:bg-blue-600 active:bg-blue-800 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-2xl shadow-xl shadow-blue-900/40 transition-all hover:-translate-y-0.5 cursor-pointer border border-blue-400/30"
                   >
-                    <Download className="w-4 h-4" strokeWidth={2} />
+                    <Download className="w-4 h-4" strokeWidth={2.25} />
                     <span>{slide.cta.label}</span>
                   </button>
                 ) : (
                   <button
                     onClick={() => onOpenDemoModal()}
-                    className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 active:bg-slate-200 text-slate-900 font-bold text-xs sm:text-sm px-6 sm:px-7 py-3 sm:py-3.5 rounded-2xl shadow-xl transition-all hover:-translate-y-0.5 cursor-pointer"
+                    className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 active:bg-slate-200 text-slate-950 font-bold text-xs sm:text-sm px-7 py-3.5 rounded-2xl shadow-xl transition-all hover:-translate-y-0.5 cursor-pointer border border-slate-200"
                   >
                     <span>{slide.cta.label}</span>
-                    <ArrowRight className="w-4 h-4" strokeWidth={2} />
+                    <ArrowRight className="w-4 h-4" strokeWidth={2.25} />
                   </button>
                 )}
 
                 <button
-                  onClick={() => onNavigatePage('download')}
-                  className="text-white/85 hover:text-white text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center sm:justify-start gap-1.5 py-2 cursor-pointer"
+                  onClick={() => onNavigatePage('funcionalidades')}
+                  className="bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 px-5 py-3.5 rounded-2xl cursor-pointer backdrop-blur-xs"
                 >
-                  <span>Ver funcionalidades</span>
+                  <span>Conhecer Módulos</span>
                   <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
                 </button>
+              </div>
+
+              {/* Destaques Rápidos de Confiança */}
+              <div className="pt-6 sm:pt-8 border-t border-white/15 mt-6 sm:mt-8 grid grid-cols-3 gap-3 text-left">
+                <div>
+                  <p className="text-xs sm:text-sm font-black text-white font-mono-num">0 Minutos</p>
+                  <p className="text-[11px] text-slate-300">Paragem sem Internet</p>
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm font-black text-emerald-400 font-mono-num">100% Legal</p>
+                  <p className="text-[11px] text-slate-300">Decreto 71/25 AGT</p>
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm font-black text-white font-mono-num">18 Províncias</p>
+                  <p className="text-[11px] text-slate-300">Apoio Presencial</p>
+                </div>
               </div>
             </div>
 
             {/* Coluna Direita: Imagem do Equipamento Responsiva */}
             <div
               key={`device-${current}`}
-              className={`lg:col-span-6 flex items-center justify-center transition-all duration-600 ${
+              className={`lg:col-span-5 flex items-center justify-center transition-all duration-600 ${
                 animating
                   ? direction === 'next'
                     ? 'opacity-0 scale-95'
@@ -203,7 +220,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                   alt={slide.deviceAlt}
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-auto max-h-[220px] sm:max-h-[380px] lg:max-h-[520px] xl:max-h-[580px] object-contain select-none pointer-events-none drop-shadow-md"
+                  className="w-full h-auto max-h-[220px] sm:max-h-[380px] lg:max-h-[480px] xl:max-h-[540px] object-contain select-none pointer-events-none drop-shadow-2xl"
                 />
               </div>
             </div>

@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Menu, X, Download, User, ChevronDown,
   FileCheck, ShoppingCart, Boxes, Users,
-  ShieldCheck, Server, Utensils, Pill,
+  ShieldCheck, Utensils, Pill,
   Briefcase, Calculator, Key, CreditCard,
   Award, BookOpen, Newspaper,
   Building2, ChevronRight, HelpCircle,
-  ShoppingBag, Printer, ScanLine, Monitor,
-  MapPin, TrendingUp, ArrowRight
+  ShoppingBag, Printer,
+  MapPin, ArrowRight
 } from 'lucide-react';
 import { KivoraLogo } from './KivoraLogo';
 import { subscribeSystemSettings, DEFAULT_SETTINGS, SystemCompanySettings } from '../services/systemSettingsService';
@@ -138,97 +138,70 @@ export const Header: React.FC<HeaderProps> = ({
 
   const navGroups: NavGroup[] = [
     {
-      id: 'modulos',
-      name: 'Módulos',
+      id: 'produtos',
+      name: 'Produtos & Módulos',
       mainPage: 'funcionalidades',
       items: [
-        { name: 'Faturação Eletrónica AGT', desc: 'Motor fiscal DS.120 com assinatura RSA e QR Code', page: 'faturacao', icon: <FileCheck className="w-4 h-4" /> },
-        { name: 'Ponto de Venda (POS)', desc: 'Faturação ágil de balcão, talões e fecho Z', page: 'pos', icon: <ShoppingCart className="w-4 h-4" /> },
-        { name: 'Stock & Armazéns', desc: 'Inventário, controlo de lotes e multidepósito', page: 'stock', icon: <Boxes className="w-4 h-4" /> },
-        { name: 'Recursos Humanos & IRT', desc: 'Processamento salarial e mapas fiscais 2026', page: 'rh', icon: <Users className="w-4 h-4" /> },
-        { name: 'Contabilidade & SAF-T AO', desc: 'Plano Geral PGC e ficheiro mensal auditado', page: 'contabilidade', icon: <ShieldCheck className="w-4 h-4" /> },
+        { name: 'Faturação Eletrónica AGT', desc: 'Motor fiscal DS.120 com assinatura RSA e QR Code', page: 'faturacao', icon: <FileCheck className="w-4 h-4" />, badge: 'Oficial' },
+        { name: 'Ponto de Venda (POS)', desc: 'Faturação ágil de balcão, talões térmicos e fecho Z', page: 'pos', icon: <ShoppingCart className="w-4 h-4" /> },
+        { name: 'Stock & Armazéns', desc: 'Inventário, controlo de lotes, validades e multidepósito', page: 'stock', icon: <Boxes className="w-4 h-4" /> },
+        { name: 'Recursos Humanos & IRT', desc: 'Processamento salarial, INSS 3%/8% e tabelas IRT 2026', page: 'rh', icon: <Users className="w-4 h-4" /> },
+        { name: 'Contabilidade & SAF-T AO', desc: 'Plano Geral PGC e ficheiro mensal auditado pela AGT', page: 'contabilidade', icon: <ShieldCheck className="w-4 h-4" /> },
+        { name: 'Hardware & Periféricos', desc: 'Impressoras térmicas 80mm, leitores 2D e terminais touch', page: 'hardware', icon: <Printer className="w-4 h-4" /> },
       ],
-      footerLink: { label: 'Explorar todos os 5 módulos principais', page: 'funcionalidades' }
+      footerLink: { label: 'Explorar todas as funcionalidades do sistema', page: 'funcionalidades' }
     },
     {
-      id: 'solucoes',
-      name: 'Soluções',
-      mainPage: 'solucoes',
+      id: 'setores',
+      name: 'Setores',
+      mainPage: 'setores',
       items: [
-        { name: 'Retalho & Supermercados', desc: 'Caixas rápidos, pesagem e código de barras', page: 'retalho', icon: <ShoppingCart className="w-4 h-4" /> },
+        { name: 'Retalho & Supermercados', desc: 'Caixas rápidos, pesagem direta e código de barras', page: 'retalho', icon: <ShoppingCart className="w-4 h-4" /> },
         { name: 'Restauração & Bares', desc: 'Gestão de mesas, pedidos e impressão em cozinha', page: 'restauracao', icon: <Utensils className="w-4 h-4" /> },
-        { name: 'Farmácias & Saúde', desc: 'Controlo de validades, lotes e receituário', page: 'farmacia', icon: <Pill className="w-4 h-4" /> },
-        { name: 'Prestação de Serviços', desc: 'Faturas-proforma, avenças e orçamentos', page: 'servicos', icon: <Briefcase className="w-4 h-4" /> },
-        { name: 'Casos de Sucesso em Angola', desc: 'Empresas reais que faturam com Kivora', page: 'casos-sucesso', icon: <Award className="w-4 h-4" />, badge: 'Clientes' },
-        { name: 'Arquitetura Local (LAN)', desc: 'Funcionamento 100% offline e em rede interna', page: 'solucoes', icon: <Server className="w-4 h-4" /> },
+        { name: 'Farmácias & Saúde', desc: 'Controlo de validades, lotes e substâncias ativas', page: 'farmacia', icon: <Pill className="w-4 h-4" /> },
+        { name: 'Prestação de Serviços', desc: 'Faturas-proforma, retenção 6.5% e orçamentos', page: 'servicos', icon: <Briefcase className="w-4 h-4" /> },
       ],
-      footerLink: { label: 'Ver visão geral de todos os setores', page: 'setores' }
+      footerLink: { label: 'Ver visão geral de todos os setores de negócio', page: 'setores' }
     },
     {
       id: 'planos',
-      name: 'Preços',
+      name: 'Preços & Planos',
       mainPage: 'planos',
       items: [
-        { name: 'Planos & Tabela de Preços', desc: 'Licenciamento transparente em Kwanzas', page: 'planos', icon: <CreditCard className="w-4 h-4" /> },
-        { name: 'Simulador de Postos LAN', desc: 'Calcule o custo exato de terminais adicionais', page: 'planos', icon: <Calculator className="w-4 h-4" /> },
-        { name: 'Comparativo vs Nuvem / Dólar', desc: 'Poupança real sem custos em moeda estrangeira', page: 'comparativo', icon: <Boxes className="w-4 h-4" />, badge: 'Análise' },
-      ]
+        { name: 'Planos & Tabela de Preços', desc: 'Licenciamento transparente e fixado em Kwanzas', page: 'planos', icon: <CreditCard className="w-4 h-4" />, badge: 'Em Kwanzas' },
+        { name: 'Simulador de Postos LAN & ROI', desc: 'Calcule terminais adicionais e poupança anual', page: 'simulador-roi', icon: <Calculator className="w-4 h-4" /> },
+        { name: 'Comparativo vs Nuvem / Dólar', desc: 'Análise de custos reais sem risco cambial', page: 'comparativo', icon: <Boxes className="w-4 h-4" /> },
+        { name: 'Loja Oficial de Equipamentos', desc: 'Hardware homologado com 12 meses de garantia', page: 'loja', icon: <ShoppingBag className="w-4 h-4" /> },
+      ],
+      footerLink: { label: 'Consultar tabela completa de licenciamento', page: 'planos' }
     },
     {
-      id: 'ferramentas',
-      name: 'Ferramentas',
-      mainPage: 'calculadora-fiscal',
+      id: 'conformidade',
+      name: 'Conformidade & AGT',
+      mainPage: 'guia-agt',
       items: [
-        { name: 'Simulador de Poupança (ROI)', desc: 'Calcule a redução de perdas e poupança anual', page: 'simulador-roi', icon: <TrendingUp className="w-4 h-4" />, badge: 'Simulador' },
-        { name: 'Calculadora Fiscal IRT & IVA', desc: 'Simulador gratuito de salários e retenções', page: 'calculadora-fiscal', icon: <Calculator className="w-4 h-4" />, badge: 'Grátis' },
-        { name: 'Validar Licença Oficial AGT', desc: 'Verificação instantânea de autenticidade', page: 'validar-licenca', icon: <Key className="w-4 h-4" /> },
-        { name: 'Hardware & Impressoras', desc: 'Kits e periféricos compatíveis com Kivora', page: 'hardware', icon: <Server className="w-4 h-4" /> },
-      ]
+        { name: 'Guia Oficial de Conformidade AGT', desc: 'Decreto 71/25, prazos de SAF-T e auditoria', page: 'guia-agt', icon: <FileCheck className="w-4 h-4" />, badge: 'Decreto 71/25' },
+        { name: 'Calculadora Fiscal IRT & IVA', desc: 'Simulador gratuito de salários e retenções fiscais', page: 'calculadora-fiscal', icon: <Calculator className="w-4 h-4" />, badge: 'Grátis' },
+        { name: 'Validador Oficial de Licença', desc: 'Verificação instantânea de autenticidade AGT', page: 'validar-licenca', icon: <Key className="w-4 h-4" /> },
+        { name: 'Central de Manuais & Tutoriais', desc: 'Guias práticos para caixas, gerentes e equipas de TI', page: 'manuais', icon: <BookOpen className="w-4 h-4" /> },
+        { name: 'Notícias & Legislação Tributária', desc: 'Atualizações fiscais e decretos em Angola', page: 'noticias', icon: <Newspaper className="w-4 h-4" /> },
+      ],
+      footerLink: { label: 'Aceder ao Guia Completo de Regras AGT', page: 'guia-agt' }
     },
     {
-      id: 'loja',
-      name: 'Loja',
-      mainPage: 'loja',
+      id: 'empresa',
+      name: 'Empresa & Parceiros',
+      mainPage: 'sobre',
       items: [
-        { name: 'Loja Oficial de Equipamentos', desc: 'Hardware homologado com garantia em Luanda', page: 'loja', icon: <ShoppingBag className="w-4 h-4" />, badge: 'Oficial' },
-        { name: 'Kits Completos de Caixa POS', desc: 'Computador, impressora, scanner e gaveta', page: 'loja', icon: <Boxes className="w-4 h-4" /> },
-        { name: 'Impressoras Térmicas 80mm', desc: 'Alta velocidade e corte automático de papel', page: 'loja', icon: <Printer className="w-4 h-4" /> },
-        { name: 'Leitores de Código & QR', desc: 'Leitura rápida de artigos e faturas', page: 'loja', icon: <ScanLine className="w-4 h-4" /> },
-        { name: 'Terminais Touch POS', desc: 'Monitores táteis industriais de alta resistência', page: 'loja', icon: <Monitor className="w-4 h-4" /> },
-      ]
-    },
-    {
-      id: 'parceiros',
-      name: 'Parceiros',
-      mainPage: 'parceiros',
-      items: [
-        { name: 'Programa de Distribuidores', desc: 'Preços de atacado e margem livre de revenda', page: 'parceiros', icon: <Award className="w-4 h-4" /> },
-        { name: 'Diretório Nacional de Técnicos', desc: 'Consulte os parceiros certificados em Angola', page: 'diretorio-parceiros', icon: <Building2 className="w-4 h-4" /> },
-        { name: '18 Províncias de Angola', desc: 'Cobertura nacional e postos de assistência', page: 'provincias', icon: <MapPin className="w-4 h-4" />, badge: 'Nacional' },
-        { name: 'Candidatura de Parceiro', desc: 'Submeta a sua proposta de credenciamento', page: 'candidatura-parceiro', icon: <FileCheck className="w-4 h-4" /> },
-      ]
-    },
-    {
-      id: 'recursos',
-      name: 'Recursos',
-      mainPage: 'recursos',
-      items: [
-        { name: 'Guia de Conformidade AGT', desc: 'Decreto 71/25, prazos de SAF-T e checklist', page: 'guia-agt', icon: <FileCheck className="w-4 h-4" />, badge: 'Oficial' },
-        { name: 'Central de Manuais & Tutoriais', desc: 'Guias práticos para caixas, gerentes e TI', page: 'manuais', icon: <BookOpen className="w-4 h-4" />, badge: 'Passo a Passo' },
-        { name: 'Centro de Cibersegurança', desc: 'Criptografia local e proteção de dados', page: 'seguranca', icon: <ShieldCheck className="w-4 h-4" /> },
-        { name: 'Notícias do Setor Fiscal', desc: 'Decretos presidenciais e novidades tributárias', page: 'noticias', icon: <Newspaper className="w-4 h-4" /> },
-        { name: 'Centro de Downloads', desc: 'Baixe o executável oficial para Windows 64-bit', page: 'download', icon: <Download className="w-4 h-4" /> },
-      ]
-    },
-    {
-      id: 'suporte',
-      name: 'Suporte',
-      mainPage: 'suporte',
-      items: [
-        { name: 'Central de Atendimento & FAQ', desc: 'Apoio técnico presencial e remoto em Luanda', page: 'suporte', icon: <HelpCircle className="w-4 h-4" /> },
-        { name: 'Relações com Investidores', desc: 'Governança corporativa, solidez e crescimento', page: 'investidores', icon: <TrendingUp className="w-4 h-4" /> },
-        { name: 'Sobre a Visual Software', desc: 'Empresa detentora e criadora do Kivora', page: 'sobre', icon: <Building2 className="w-4 h-4" /> },
-      ]
+        { name: 'Sobre a Kivora & Visual Software', desc: 'Empresa angolana de tecnologia e inovação', page: 'sobre', icon: <Building2 className="w-4 h-4" /> },
+        { name: 'Casos de Sucesso em Angola', desc: 'Empresas reais que confiam na nossa tecnologia', page: 'casos-sucesso', icon: <Award className="w-4 h-4" />, badge: 'Clientes' },
+        { name: 'Centro de Cibersegurança', desc: 'Criptografia RSA-2048 e base local cifrada', page: 'seguranca', icon: <ShieldCheck className="w-4 h-4" /> },
+        { name: 'Presença nas 18 Províncias', desc: 'Cobertura nacional e assistência presencial', page: 'provincias', icon: <MapPin className="w-4 h-4" /> },
+        { name: 'Programa de Revendedores', desc: 'Margens de atacado e portal exclusivo 24/7', page: 'parceiros', icon: <Award className="w-4 h-4" /> },
+        { name: 'Diretório Nacional de Técnicos', desc: 'Consulte consultores certificados em Angola', page: 'diretorio-parceiros', icon: <Building2 className="w-4 h-4" /> },
+        { name: 'Central de Suporte & Contactos', desc: 'Apoio técnico presencial e remoto em Luanda', page: 'suporte', icon: <HelpCircle className="w-4 h-4" /> },
+      ],
+      footerLink: { label: 'Conhecer a história da Visual Software', page: 'sobre' }
     }
   ];
 
@@ -395,7 +368,7 @@ export const Header: React.FC<HeaderProps> = ({
                   {isOpen && group.items && (
                     <div 
                       className={`absolute top-full mt-2 w-[320px] sm:w-[360px] bg-white rounded-2xl shadow-2xl shadow-slate-950/25 border border-slate-200 p-2 z-[100] animate-fadeIn ${
-                        ['loja', 'parceiros', 'recursos', 'suporte'].includes(group.id)
+                        ['conformidade', 'empresa', 'planos'].includes(group.id)
                           ? 'right-0'
                           : 'left-0'
                       }`}
@@ -457,18 +430,18 @@ export const Header: React.FC<HeaderProps> = ({
                 if (onOpenLogin) onOpenLogin();
                 else if (onNavigatePage) onNavigatePage('login');
               }}
-              className="whitespace-nowrap bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm hover:shadow shadow-amber-500/20 cursor-pointer"
+              className="whitespace-nowrap bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 border border-slate-200 text-xs font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
-              <User className="w-3.5 h-3.5 text-white" strokeWidth={2} />
-              <span>Iniciar sessão</span>
+              <User className="w-3.5 h-3.5 text-slate-700" strokeWidth={2} />
+              <span>Portal / Entrar</span>
             </button>
 
             <button
               onClick={() => handleNavClick('download')}
-              className="whitespace-nowrap bg-[#1d4ed8] hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm hover:shadow shadow-blue-500/20 cursor-pointer"
+              className="whitespace-nowrap bg-[#1d4ed8] hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm hover:shadow shadow-blue-500/20 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Baixar</span>
+              <span>Baixar KIVORA</span>
             </button>
           </div>
 
@@ -479,9 +452,9 @@ export const Header: React.FC<HeaderProps> = ({
                 if (onOpenLogin) onOpenLogin();
                 else if (onNavigatePage) onNavigatePage('login');
               }}
-              className="bg-amber-500 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1"
+              className="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1"
             >
-              <User className="w-3.5 h-3.5" />
+              <User className="w-3.5 h-3.5 text-slate-700" />
               <span className="text-[11px]">Entrar</span>
             </button>
 
@@ -558,7 +531,7 @@ export const Header: React.FC<HeaderProps> = ({
             );
           })}
 
-          <div className="pt-2 space-y-2">
+          <div className="pt-3 space-y-2 border-t border-slate-100 mt-2">
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => {
@@ -566,10 +539,10 @@ export const Header: React.FC<HeaderProps> = ({
                   if (onOpenLogin) onOpenLogin();
                   else if (onNavigatePage) onNavigatePage('login');
                 }}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-center py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm"
+                className="w-full bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 border border-slate-200 font-bold text-center py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs"
               >
-                <User className="w-3.5 h-3.5 text-white" strokeWidth={2} />
-                <span>Iniciar sessão</span>
+                <User className="w-3.5 h-3.5 text-slate-700" strokeWidth={2} />
+                <span>Portal / Entrar</span>
               </button>
 
               <button
@@ -577,9 +550,9 @@ export const Header: React.FC<HeaderProps> = ({
                   setMobileMenuOpen(false);
                   if (onNavigatePage) onNavigatePage('download');
                 }}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-center py-2.5 rounded-xl text-xs flex items-center justify-center gap-1 shadow-sm"
+                className="w-full bg-[#1d4ed8] hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-center py-2.5 rounded-xl text-xs flex items-center justify-center gap-1 shadow-sm shadow-blue-500/20"
               >
-                <Download className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <Download className="w-3.5 h-3.5" strokeWidth={2} />
                 <span>Baixar KIVORA</span>
               </button>
             </div>

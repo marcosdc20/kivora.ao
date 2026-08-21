@@ -52,7 +52,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 relative selection:bg-amber-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 relative selection:bg-blue-600 selection:text-white">
       
       <div className="w-full max-w-xl relative z-10 space-y-4">
         
@@ -60,32 +60,32 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
         <div className="flex items-center justify-between">
           <button
             onClick={onBackToHome}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white px-3.5 py-2 rounded-xl border border-slate-200 transition-all shadow-sm cursor-pointer"
+            className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-slate-950 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-xs transition-all cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4 text-amber-500" />
+            <ArrowLeft className="w-4 h-4 text-blue-600" />
             <span>Voltar ao Site</span>
           </button>
         </div>
 
         {/* Card Form */}
-        <div className="bg-white border border-slate-200/90 rounded-3xl shadow-xl shadow-slate-900/5 p-8 sm:p-10 space-y-6">
+        <div className="card-premium rounded-3xl p-8 sm:p-10 space-y-6">
           
           {/* Header with official logo without duplicate "KIVORA" text */}
           <div className="text-center space-y-2">
             <div className="flex justify-center mb-1">
               <KivoraLogo variant="dark" size="lg" useOfficialImage={true} />
             </div>
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-2xl font-black text-slate-950 tracking-tight">
               Iniciar Sessão
             </h2>
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-xs text-slate-600 font-medium">
               Acesso seguro para Administradores, Parceiros e Empresas Clientes.
             </p>
           </div>
 
           {/* Smart routing badge */}
-          <div className="p-3 bg-amber-50/60 rounded-2xl border border-amber-200/70 text-[11px] text-amber-900 leading-relaxed flex items-start gap-2.5">
-            <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <div className="p-3.5 bg-blue-50/80 rounded-2xl border border-blue-200/80 text-[11px] text-blue-950 leading-relaxed flex items-start gap-2.5">
+            <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
             <span>
               <strong>Identificação Automática:</strong> O sistema reconhece o seu perfil e direciona-o para o respetivo painel.
             </span>
@@ -106,7 +106,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
                   placeholder="Ex: seuemail@empresa.ao ou NIF"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none font-medium transition-all"
+                  className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none font-medium transition-all"
                 />
               </div>
             </div>
@@ -123,7 +123,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
                   placeholder="••••••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none font-medium transition-all"
+                  className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none font-medium transition-all"
                 />
               </div>
             </div>
@@ -137,7 +137,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-amber-500/20 transition-all text-xs flex items-center justify-center gap-2 disabled:bg-slate-300 cursor-pointer mt-2"
+              className="btn-premium-primary w-full py-4 rounded-xl text-xs flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer mt-2"
             >
               {loading ? (
                 <>
@@ -146,7 +146,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
                 </>
               ) : (
                 <>
-                  <ShieldCheck className="w-4 h-4 text-amber-100" />
+                  <ShieldCheck className="w-4 h-4 text-blue-100" />
                   <span>Entrar no Portal</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
@@ -158,7 +158,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
           {/* Support Footnote */}
           <div className="text-center text-[11px] text-slate-500 pt-3 border-t border-slate-100">
             <p>Precisa de suporte ou recuperação de acesso?</p>
-            <a href={`mailto:${KIVORA_INFO.supportEmail}`} className="text-amber-600 font-bold hover:underline block mt-0.5">
+            <a href={`mailto:${KIVORA_INFO.supportEmail}`} className="text-blue-600 font-bold hover:underline block mt-0.5">
               Contactar Suporte Técnico
             </a>
           </div>

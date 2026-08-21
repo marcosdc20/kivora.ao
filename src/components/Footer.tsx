@@ -28,16 +28,16 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
   return (
     <footer className="bg-slate-950 text-slate-300 border-t border-slate-800 text-xs print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-10">
 
           {/* Col 1: Brand & Official AGT Cert */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="sm:col-span-2 lg:col-span-1 space-y-4">
             <div className="flex items-center">
               <KivoraLogo variant="light" size="md" useOfficialImage={true} />
             </div>
 
-            <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
-              {settings.fullName}. Software certificado para emissão local de documentos fiscais e conformidade integral com o Decreto Presidencial n.º 71/25 da República de Angola.
+            <p className="text-slate-400 text-xs leading-relaxed">
+              {settings.fullName}. Software executivo de faturação eletrónica certificado pela AGT em Angola (Decreto Presidencial n.º 71/25).
             </p>
 
             <div className="flex items-center gap-2 p-3 bg-slate-900 rounded-xl border border-slate-800 text-slate-300 w-fit">
@@ -46,12 +46,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
             </div>
           </div>
 
-          {/* Col 2: Software & Ferramentas */}
+          {/* Col 2: Produtos & Módulos */}
           <div className="space-y-3">
             <h4 className="font-extrabold text-white uppercase tracking-wider text-[11px]">
-              Software & Ferramentas
+              Produtos & Módulos
             </h4>
-            <ul className="space-y-2">
+            <ul className="space-y-2 text-slate-400">
               <li>
                 <a
                   href="#faturacao"
@@ -67,7 +67,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
                   onClick={(e) => handleLinkClick(e, 'pos')}
                   className="hover:text-white transition-colors"
                 >
-                  Ponto de Venda (POS) Local
+                  Ponto de Venda (POS) Caixa
                 </a>
               </li>
               <li>
@@ -76,7 +76,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
                   onClick={(e) => handleLinkClick(e, 'stock')}
                   className="hover:text-white transition-colors"
                 >
-                  Stock & Armazéns
+                  Gestão de Stocks & Armazém
                 </a>
               </li>
               <li>
@@ -90,82 +90,82 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
               </li>
               <li>
                 <a
-                  href="#loja"
-                  onClick={(e) => handleLinkClick(e, 'loja')}
-                  className="hover:text-white text-amber-400 font-bold transition-colors"
+                  href="#contabilidade"
+                  onClick={(e) => handleLinkClick(e, 'contabilidade')}
+                  className="hover:text-white transition-colors"
                 >
-                  Loja Oficial de Equipamentos & Kits
+                  Contabilidade & SAF-T AO
                 </a>
               </li>
               <li>
                 <a
-                  href="#calculadora-fiscal"
-                  onClick={(e) => handleLinkClick(e, 'calculadora-fiscal')}
-                  className="hover:text-white text-emerald-400 font-semibold transition-colors"
+                  href="#hardware"
+                  onClick={(e) => handleLinkClick(e, 'hardware')}
+                  className="hover:text-white transition-colors"
                 >
-                  Calculadora Fiscal IRT & IVA
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#comparativo"
-                  onClick={(e) => handleLinkClick(e, 'comparativo')}
-                  className="hover:text-white text-blue-400 font-semibold transition-colors"
-                >
-                  Comparativo vs Nuvem / Dólar
+                  Hardware & Impressoras 80mm
                 </a>
               </li>
               <li>
                 <a
                   href="#download"
                   onClick={(e) => handleLinkClick(e, 'download')}
-                  className="text-blue-400 font-bold hover:text-blue-300 transition-colors flex items-center gap-1"
+                  className="text-blue-400 font-bold hover:text-blue-300 transition-colors flex items-center gap-1 mt-1"
                 >
                   <Download className="w-3.5 h-3.5" strokeWidth={1.75} />
-                  <span>Baixar KIVORA Setup</span>
+                  <span>Baixar Instalador Windows</span>
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Col 3: Empresa, Parceiros & Segurança */}
+          {/* Col 3: Setores & Soluções */}
           <div className="space-y-3">
             <h4 className="font-extrabold text-white uppercase tracking-wider text-[11px]">
-              Soluções & Confiança
+              Setores & Casos Reais
             </h4>
-            <ul className="space-y-2">
+            <ul className="space-y-2 text-slate-400">
               <li>
                 <a
-                  href="#guia-agt"
-                  onClick={(e) => handleLinkClick(e, 'guia-agt')}
-                  className="hover:text-white text-emerald-400 font-bold transition-colors"
+                  href="#retalho"
+                  onClick={(e) => handleLinkClick(e, 'retalho')}
+                  className="hover:text-white transition-colors"
                 >
-                  Guia Oficial AGT & Decreto 71/25
+                  Retalho & Supermercados
                 </a>
               </li>
               <li>
                 <a
-                  href="#manuais"
-                  onClick={(e) => handleLinkClick(e, 'manuais')}
-                  className="hover:text-white text-blue-400 font-bold transition-colors"
+                  href="#restauracao"
+                  onClick={(e) => handleLinkClick(e, 'restauracao')}
+                  className="hover:text-white transition-colors"
                 >
-                  Central de Manuais & Tutoriais
+                  Restauração & Bares
                 </a>
               </li>
               <li>
                 <a
-                  href="#simulador-roi"
-                  onClick={(e) => handleLinkClick(e, 'simulador-roi')}
-                  className="hover:text-white text-amber-400 font-bold transition-colors"
+                  href="#farmacia"
+                  onClick={(e) => handleLinkClick(e, 'farmacia')}
+                  className="hover:text-white transition-colors"
                 >
-                  Simulador de Poupança (ROI)
+                  Farmácias & Saúde
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#servicos"
+                  onClick={(e) => handleLinkClick(e, 'servicos')}
+                  className="hover:text-white transition-colors"
+                >
+                  Prestação de Serviços
                 </a>
               </li>
               <li>
                 <a
                   href="#casos-sucesso"
                   onClick={(e) => handleLinkClick(e, 'casos-sucesso')}
-                  className="hover:text-white text-emerald-300 font-medium transition-colors"
+                  className="hover:text-white text-emerald-400 font-medium transition-colors"
                 >
                   Casos de Sucesso em Angola
                 </a>
@@ -174,36 +174,118 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
                 <a
                   href="#seguranca"
                   onClick={(e) => handleLinkClick(e, 'seguranca')}
-                  className="hover:text-white text-indigo-300 font-medium transition-colors"
+                  className="hover:text-white transition-colors"
                 >
                   Centro de Cibersegurança
                 </a>
               </li>
               <li>
                 <a
-                  href="#hardware"
-                  onClick={(e) => handleLinkClick(e, 'hardware')}
-                  className="hover:text-white text-amber-400 font-semibold transition-colors"
+                  href="#sobre"
+                  onClick={(e) => handleLinkClick(e, 'sobre')}
+                  className="hover:text-white transition-colors"
                 >
-                  Hardware & Impressoras
+                  Sobre a Visual Software
                 </a>
               </li>
+            </ul>
+          </div>
+
+          {/* Col 4: Preços & Recursos Fiscais */}
+          <div className="space-y-3">
+            <h4 className="font-extrabold text-white uppercase tracking-wider text-[11px]">
+              Preços & Fisco AGT
+            </h4>
+            <ul className="space-y-2 text-slate-400">
               <li>
                 <a
                   href="#planos"
                   onClick={(e) => handleLinkClick(e, 'planos')}
-                  className="hover:text-white transition-colors"
+                  className="hover:text-white font-semibold text-slate-200 transition-colors"
                 >
-                  Licenças e Preços (Simulador)
+                  Licenças e Preços em Kwanzas
                 </a>
               </li>
               <li>
                 <a
+                  href="#simulador-roi"
+                  onClick={(e) => handleLinkClick(e, 'simulador-roi')}
+                  className="hover:text-white transition-colors"
+                >
+                  Simulador de Poupança (ROI)
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#comparativo"
+                  onClick={(e) => handleLinkClick(e, 'comparativo')}
+                  className="hover:text-white transition-colors"
+                >
+                  Comparativo vs Nuvem / Dólar
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#guia-agt"
+                  onClick={(e) => handleLinkClick(e, 'guia-agt')}
+                  className="hover:text-white text-emerald-400 font-medium transition-colors"
+                >
+                  Guia Oficial Decreto 71/25
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#calculadora-fiscal"
+                  onClick={(e) => handleLinkClick(e, 'calculadora-fiscal')}
+                  className="hover:text-white transition-colors"
+                >
+                  Calculadora Fiscal IRT & IVA
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#manuais"
+                  onClick={(e) => handleLinkClick(e, 'manuais')}
+                  className="hover:text-white transition-colors"
+                >
+                  Central de Manuais & Tutoriais
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#validar-licenca"
+                  onClick={(e) => handleLinkClick(e, 'validar-licenca')}
+                  className="hover:text-white text-emerald-400 font-semibold transition-colors flex items-center gap-1"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Validar Licença Oficial</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Col 5: Atendimento & Rede Nacional */}
+          <div className="space-y-3">
+            <h4 className="font-extrabold text-white uppercase tracking-wider text-[11px]">
+              Rede Nacional & Contactos
+            </h4>
+            <ul className="space-y-2 text-slate-400">
+              <li>
+                <a
                   href="#diretorio-parceiros"
                   onClick={(e) => handleLinkClick(e, 'diretorio-parceiros')}
-                  className="hover:text-white text-blue-300 font-medium transition-colors"
+                  className="hover:text-white transition-colors"
                 >
-                  Diretório Nacional de Parceiros
+                  Diretório de Técnicos & Parceiros
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#provincias"
+                  onClick={(e) => handleLinkClick(e, 'provincias')}
+                  className="hover:text-white transition-colors"
+                >
+                  Presença nas 18 Províncias
                 </a>
               </li>
               <li>
@@ -212,31 +294,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
                   onClick={(e) => handleLinkClick(e, 'parceiros')}
                   className="hover:text-white transition-colors"
                 >
-                  Programa de Revendedores
+                  Programa de Revenda Homologado
                 </a>
               </li>
-              <li>
-                <a
-                  href="#validar-licenca"
-                  onClick={(e) => handleLinkClick(e, 'validar-licenca')}
-                  className="hover:text-white text-emerald-400 font-bold transition-colors flex items-center gap-1.5"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Validar Licença AGT</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 4: Contacto em Angola */}
-          <div className="space-y-3">
-            <h4 className="font-extrabold text-white uppercase tracking-wider text-[11px]">
-              Atendimento em Angola
-            </h4>
-            <ul className="space-y-2 text-slate-400">
-              <li className="flex items-center gap-2">
+              <li className="pt-2 border-t border-slate-900 flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5 text-blue-400 shrink-0" strokeWidth={1.75} />
-                <a href={settings.whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:text-blue-400 font-medium transition-colors">
+                <a href={settings.whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:text-blue-400 font-semibold transition-colors">
                   {settings.phoneDisplay}
                 </a>
               </li>

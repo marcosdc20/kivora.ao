@@ -32,46 +32,46 @@ export const NoticiasPage: React.FC<NoticiasPageProps> = ({ onSelectPost }) => {
           {KIVORA_NEWS.map((post) => (
             <div
               key={post.id}
-              className="bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col group cursor-pointer"
+              className="card-premium rounded-3xl overflow-hidden flex flex-col group cursor-pointer"
               onClick={() => onSelectPost(post)}
             >
-              <div className="h-52 bg-slate-100 overflow-hidden relative">
+              <div className="h-56 bg-slate-100 overflow-hidden relative">
                 <img
                   src={post.image}
                   alt={post.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <span className="absolute top-3 left-3 bg-slate-900 text-white text-[10px] font-bold uppercase px-2.5 py-0.5 rounded">
+                <span className="absolute top-3.5 left-3.5 bg-slate-950/90 backdrop-blur-xs text-white text-[10px] font-bold uppercase px-3 py-1 rounded-lg border border-white/10">
                   {post.category}
                 </span>
               </div>
 
-              <div className="p-6 space-y-3 flex-grow">
-                <div className="flex items-center gap-3 text-[11px] text-slate-500 font-medium">
-                  <span className="flex items-center gap-1">
+              <div className="p-7 space-y-3 flex-grow">
+                <div className="flex items-center gap-3 text-[11px] text-slate-500 font-medium font-mono-num">
+                  <span className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-blue-600" />
                     <span>{post.date}</span>
                   </span>
                   <span>•</span>
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-slate-400" />
                     <span>{post.readTime}</span>
                   </span>
                 </div>
 
-                <h3 className="text-lg font-extrabold text-slate-900 group-hover:text-blue-600 transition-colors leading-snug">
+                <h3 className="text-xl font-extrabold text-slate-950 group-hover:text-blue-600 transition-colors leading-snug">
                   {post.title}
                 </h3>
 
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   {post.excerpt}
                 </p>
               </div>
 
-              <div className="p-6 pt-0 flex items-center justify-between text-xs">
-                <span className="font-semibold text-slate-400">Por {post.author}</span>
-                <span className="font-bold text-blue-600 flex items-center gap-1">
-                  <span>Ler Artigo</span>
+              <div className="p-7 pt-0 flex items-center justify-between text-xs border-t border-slate-100 mt-2">
+                <span className="font-semibold text-slate-500">Por {post.author}</span>
+                <span className="font-bold text-blue-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  <span>Ler Artigo Completo</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </div>

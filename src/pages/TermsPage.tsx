@@ -13,42 +13,42 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onBack }) => {
         
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 mb-6"
+          className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 shadow-xs transition-all mb-6 cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Voltar à Página Principal</span>
         </button>
 
-        <div className="bg-white p-8 md:p-12 rounded-3xl border border-slate-200 shadow-sm space-y-8">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-amber-100 text-amber-700 rounded-xl">
+        <div className="card-premium p-8 md:p-12 rounded-3xl space-y-8">
+          <div className="flex items-center gap-3.5 border-b border-slate-100 pb-6">
+            <div className="p-3 bg-blue-50 text-blue-700 rounded-2xl border border-blue-100">
               <FileText className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-3xl font-black text-slate-900">Termos e Condições de Licenciamento</h1>
-              <p className="text-xs text-slate-500">Kivora ERP • Visual Software Angola</p>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-950">Termos e Condições de Licenciamento</h1>
+              <p className="text-xs text-slate-500 font-semibold">KIVORA ERP • Kivora Tecnologias, Lda. • Luanda, Angola</p>
             </div>
           </div>
 
-          <div className="space-y-6 text-xs md:text-sm text-slate-700 leading-relaxed">
-            <h3 className="text-base font-extrabold text-slate-900">1. Licenciamento e Uso do Software</h3>
+          <div className="space-y-6 text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <h3 className="text-base font-extrabold text-slate-950">1. Licenciamento e Uso do Software</h3>
             <p>
-              O Kivora ERP é um software de gestão empresarial e faturação certificado pela AGT sob o número de validação XXX/AGT/2026. A utilização da plataforma é concedida mediante subscrição (Cloud) ou aquisição de licença de uso (Desktop Local).
+              O KIVORA ERP é um software de gestão empresarial e faturação certificado pela Administração Geral Tributária (AGT) sob a certificação n.º 384/AGT/2024 e em conformidade com o Decreto Presidencial n.º 71/25. A utilização da plataforma é concedida mediante subscrição de planos ou aquisição de licença perpétua para execução local (Desktop Offline).
             </p>
 
-            <h3 className="text-base font-extrabold text-slate-900">2. Responsabilidade sobre Dados Fiscais</h3>
+            <h3 className="text-base font-extrabold text-slate-950">2. Responsabilidade sobre Dados Fiscais</h3>
             <p>
-              O utilizador é responsável pela exatidão dos dados inseridos no sistema (NIFs, preços, alíquotas de impostos e artigos). O Kivora garante a integridade da numeração sequencial das séries, o cálculo automático das retenções e a geração da assinatura digital RS256.
+              O utilizador é responsável pela exatidão dos dados inseridos no sistema (NIFs, preços, alíquotas de impostos e artigos). O KIVORA garante a integridade da numeração sequencial das séries, o cálculo automático das retenções na fonte e a geração da assinatura digital com algoritmo RSA/SHA e QR Code em todos os documentos.
             </p>
 
-            <h3 className="text-base font-extrabold text-slate-900">3. Modo de Contingência</h3>
+            <h3 className="text-base font-extrabold text-slate-950">3. Modo de Contingência Offline</h3>
             <p>
-              Em caso de indisponibilidade técnica da internet ou dos serviços da AGT, o Kivora disponibiliza o mecanismo legal de contingência por até 45 dias corridos, efetuando o reenvio automático assim que o sinal for restabelecido.
+              Em caso de indisponibilidade técnica da internet ou dos serviços externos, o KIVORA opera 100% offline em rede local (LAN), armazenando de forma segura e auditável todas as transações fiscais.
             </p>
 
-            <h3 className="text-base font-extrabold text-slate-900">4. Suporte Técnico e Atualizações</h3>
+            <h3 className="text-base font-extrabold text-slate-950">4. Suporte Técnico e Atualizações</h3>
             <p>
-              Todas as subscrições ativas incluem suporte técnico através da equipa em Luanda ({KIVORA_INFO.phoneDisplay}) e atualizações fiscais automáticas sem custos adicionais em caso de alteração da legislação pela AGT.
+              Todas as licenças e subscrições incluem suporte técnico especializado através da equipa em Luanda ({KIVORA_INFO.phoneDisplay}) e atualizações fiscais homologadas sem custos adicionais sempre que a AGT publicar novas diretrizes normativas.
             </p>
           </div>
         </div>

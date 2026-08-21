@@ -153,14 +153,14 @@ interface StepProps {
 const Step: React.FC<StepProps> = ({ num, title, desc, delay = 0 }) => (
   <div
     data-reveal
-    className="sr-init flex flex-col items-center text-center"
+    className="sr-init flex flex-col items-center text-center group"
     style={{ transitionDelay: `${delay}ms` }}
   >
-    <div className="w-14 h-14 flex items-center justify-center rounded-2xl bg-slate-950 text-white font-black text-xl mb-4">
+    <div className="w-14 h-14 flex items-center justify-center rounded-2xl bg-slate-950 text-white font-mono-num font-black text-lg mb-4 shadow-sm group-hover:scale-105 group-hover:bg-[#1d4ed8] transition-all duration-300">
       {num}
     </div>
-    <h4 className="text-sm font-bold text-slate-900 mb-1">{title}</h4>
-    <p className="text-xs text-slate-500 leading-relaxed max-w-[150px]">{desc}</p>
+    <h4 className="text-sm font-extrabold text-slate-950 mb-1">{title}</h4>
+    <p className="text-xs text-slate-600 leading-relaxed max-w-[160px]">{desc}</p>
   </div>
 );
 
@@ -213,16 +213,20 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </div>
 
-      {/* ========== BARRA DE PESQUISA & CONSULTA RÁPIDA INTERATIVA (INSPIRADA NO REGISTAR.AO) ========== */}
+      {/* ========== LOCALIZADOR INTELIGENTE DE SOLUÇÕES FISCAIS POR SETOR ========== */}
       <section className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 mb-16">
         <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xl shadow-slate-950/5">
           
           <div className="text-center max-w-2xl mx-auto mb-6">
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
-              Encontre o software ideal para a sua empresa
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold mb-3">
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+              <span>Homologação AGT por Ramo de Atividade</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
+              Encontre a Solução KIVORA Ideal para a Sua Empresa
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Pesquise pelo ramo de atividade, NIF ou tipo de negócio para recomendação e homologação fiscal imediata.
+            <p className="text-xs sm:text-sm text-slate-600 mt-1">
+              Descubra os módulos específicos, periféricos recomendados e conformidade legal para o seu setor em Angola.
             </p>
           </div>
 
@@ -240,16 +244,16 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
             <button
               onClick={() => onOpenDemoModal(filteredSector.label)}
-              className="w-full sm:w-auto bg-[#15803d] hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl transition-all shadow-md shadow-emerald-700/20 cursor-pointer flex items-center justify-center gap-2 shrink-0"
+              className="w-full sm:w-auto bg-[#1d4ed8] hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl transition-all shadow-md shadow-blue-600/20 cursor-pointer flex items-center justify-center gap-2 shrink-0"
             >
-              <span>Pesquisar</span>
+              <span>Simular Implementação</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
 
           {/* Chips de Seleção Rápida */}
           <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Sugestões:</span>
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Setores Populares:</span>
             {QUICK_SECTORS.map((sector) => {
               const isSelected = filteredSector.id === sector.id;
               const SectorIcon = sector.icon;
@@ -262,8 +266,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                   }}
                   className={`text-xs font-semibold px-3.5 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-2 ${
                     isSelected
-                      ? 'bg-blue-50 border-blue-300 text-blue-700 font-bold shadow-sm'
-                      : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                      ? 'bg-blue-50 border-blue-300 text-blue-700 font-bold shadow-xs'
+                      : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
                   <SectorIcon className={`w-3.5 h-3.5 ${isSelected ? 'text-blue-600' : 'text-slate-500'}`} />
@@ -273,41 +277,40 @@ export const HomePage: React.FC<HomePageProps> = ({
             })}
           </div>
 
-          {/* Cartão de Resultado Imediato (Inspirado no card de domínio disponível com checkmark verde) */}
+          {/* Cartão de Resultado Imediato */}
           <div className="mt-8 pt-6 border-t border-slate-100">
-            <div className="bg-slate-50/80 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
               
               <div className="flex items-center gap-3.5 text-center md:text-left">
-                {/* Ícone Checkmark Redondo Verde */}
-                <div className="w-11 h-11 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
-                  <Check className="w-6 h-6 stroke-[3]" />
+                <div className="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center justify-center shrink-0">
+                  <Check className="w-6 h-6 stroke-[2.5]" />
                 </div>
                 <div>
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                    <span className="text-base sm:text-lg font-black text-slate-950">
-                      kivora.{filteredSector.id}.ao
+                    <span className="text-base sm:text-lg font-extrabold text-slate-950">
+                      KIVORA ERP para {filteredSector.label}
                     </span>
-                    <span className="text-xs sm:text-sm font-semibold text-emerald-700">
-                      está homologado e disponível.
+                    <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
+                      100% Homologado AGT
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Certificado pela AGT • Emissão de Faturas DS.120 com QR Code e SAF-T AO.
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    Certificação DS.120 com QR Code, assinatura digital RS256, rede local e SAF-T AO mensal auditado.
                   </p>
                 </div>
               </div>
 
               {/* Preço e Botão de Ação Direta */}
               <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
-                <div className="bg-white border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-800 shadow-sm flex items-center gap-1">
+                <div className="bg-white border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-900 shadow-xs flex items-center gap-1">
                   <span>{filteredSector.price}</span>
                 </div>
                 <button
                   onClick={() => onOpenDemoModal(`Adesão: ${filteredSector.label}`)}
-                  className="bg-[#15803d] hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-md shadow-emerald-700/20 cursor-pointer flex items-center gap-1.5"
+                  className="bg-[#1d4ed8] hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-md shadow-blue-600/20 cursor-pointer flex items-center gap-1.5"
                 >
                   <ShoppingCart className="w-4 h-4" />
-                  <span>Adicionar ao Pedido</span>
+                  <span>Solicitar Proposta</span>
                 </button>
               </div>
 
@@ -317,15 +320,15 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
-      {/* ========== SEÇÃO "MAIS POPULAR!" — GRID MINIMALISTA DE CARTÕES (.co.ao / .edu.ao style) ========== */}
+      {/* ========== SEÇÃO DE PLANOS & MODALIDADES EM DESTAQUE ========== */}
       <section className="py-10 max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
-              Mais Popular!
+              Planos e Licenciamento em Kwanzas
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500">
-              Escolha a modalidade de licenciamento ideal para o número de computadores da sua empresa.
+            <p className="text-xs sm:text-sm text-slate-600">
+              Escolha a modalidade ideal para o número de postos de trabalho e caixas da sua empresa.
             </p>
           </div>
           <button
@@ -340,109 +343,109 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           
           {/* Card 1: Mensal Standalone */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between hover:border-blue-500/40 hover:shadow-lg transition-all text-center group">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between hover:border-blue-400 hover:shadow-md transition-all text-center group">
             <div>
-              <div className="text-xl font-black text-slate-950 mb-1">
-                .mensal.ao
-              </div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-4">
-                1 Posto Standalone
+              <h4 className="text-lg font-black text-slate-950 mb-1">
+                Mensal Standalone
+              </h4>
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-4">
+                1 Posto de Trabalho
               </span>
-              <div className="bg-slate-50 border border-slate-200/80 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-slate-800">
-                25.000,00Kz / mês
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-slate-900">
+                25.000,00 Kz / mês
               </div>
               <ul className="text-left text-xs text-slate-600 space-y-2 mb-6">
                 <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Faturação com QR Code AGT</li>
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> POS e Fecho de Caixa Z</li>
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Exportação SAF-T AO</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> POS e Fecho de Caixa com Relatório Z</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Exportação SAF-T AO mensal</li>
               </ul>
             </div>
             <button
               onClick={() => onNavigatePage('planos')}
-              className="w-full bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-800 font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer"
+              className="w-full bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold text-xs py-2.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
             >
-              Adicionar
+              Consultar Plano
             </button>
           </div>
 
           {/* Card 2: Anual Multi-Postos (Destaque Mais Popular) */}
-          <div className="bg-white rounded-2xl border-2 border-emerald-500 p-6 flex flex-col justify-between shadow-md relative text-center group">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-600 text-white font-black text-[10px] uppercase px-3 py-0.5 rounded-full tracking-wider shadow-sm">
-              Mais Popular!
+          <div className="bg-white rounded-2xl border-2 border-blue-600 p-6 flex flex-col justify-between shadow-md relative text-center group">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-black text-[10px] uppercase px-3 py-0.5 rounded-full tracking-wider shadow-xs">
+              Recomendado
             </div>
             <div>
-              <div className="text-xl font-black text-slate-950 mb-1">
-                .anual.ao
-              </div>
-              <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider block mb-4">
+              <h4 className="text-lg font-black text-slate-950 mb-1">
+                Anual Multi-Postos
+              </h4>
+              <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider block mb-4">
                 3 Postos em Rede LAN
               </span>
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-emerald-900">
-                250.000,00Kz / ano
+              <div className="bg-blue-50 border border-blue-200 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-blue-900">
+                250.000,00 Kz / ano
               </div>
-              <ul className="text-left text-xs text-slate-600 space-y-2 mb-6">
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> 3 Caixas / Servidor Local</li>
+              <ul className="text-left text-xs text-slate-700 space-y-2 mb-6 font-medium">
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> 3 Caixas / Servidor Local LAN</li>
                 <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Recursos Humanos & IRT 2026</li>
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Suporte VIP & Formação</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Suporte VIP & Formação Inicial</li>
               </ul>
             </div>
             <button
               onClick={() => onOpenDemoModal('Licença Anual Multi-Postos')}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
+              className="w-full bg-[#1d4ed8] hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-md shadow-blue-600/20 cursor-pointer"
             >
-              Adicionar
+              Aderir ao Plano Anual
             </button>
           </div>
 
           {/* Card 3: Vitalício Perpétuo */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between hover:border-blue-500/40 hover:shadow-lg transition-all text-center group">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between hover:border-blue-400 hover:shadow-md transition-all text-center group">
             <div>
-              <div className="text-xl font-black text-slate-950 mb-1">
-                .vitalicio.ao
-              </div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-4">
+              <h4 className="text-lg font-black text-slate-950 mb-1">
+                Vitalício Perpétuo
+              </h4>
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-4">
                 5 Postos Perpétuos
               </span>
-              <div className="bg-slate-50 border border-slate-200/80 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-slate-800">
-                650.000,00Kz / único
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-slate-900">
+                650.000,00 Kz / único
               </div>
               <ul className="text-left text-xs text-slate-600 space-y-2 mb-6">
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Sem anuidade ou mensalidade</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Sem anuidade ou mensalidades</li>
                 <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Todos os módulos desbloqueados</li>
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Instalação e parametrização</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Instalação e parametrização assistida</li>
               </ul>
             </div>
             <button
               onClick={() => onOpenDemoModal('Licença Vitalícia Perpétua')}
-              className="w-full bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-800 font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer"
+              className="w-full bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold text-xs py-2.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
             >
-              Adicionar
+              Consultar Vitalício
             </button>
           </div>
 
           {/* Card 4: Kit POS Hardware */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between hover:border-blue-500/40 hover:shadow-lg transition-all text-center group">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between hover:border-blue-400 hover:shadow-md transition-all text-center group">
             <div>
-              <div className="text-xl font-black text-slate-950 mb-1">
-                .hardware.ao
-              </div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-4">
-                Kits & Impressoras POS
+              <h4 className="text-lg font-black text-slate-950 mb-1">
+                Kits de Hardware POS
+              </h4>
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-4">
+                Periféricos Homologados
               </span>
-              <div className="bg-slate-50 border border-slate-200/80 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-slate-800">
-                Desde 185.000,00Kz
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl py-2 px-3 mb-4 text-xs font-bold text-slate-900">
+                Desde 185.000,00 Kz
               </div>
               <ul className="text-left text-xs text-slate-600 space-y-2 mb-6">
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Impressoras térmicas 80mm</li>
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Leitores 2D e gavetas RJ11</li>
-                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> 12 meses de garantia local</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Impressoras térmicas 80mm com corte</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Leitores 2D e gavetas metálicas RJ11</li>
+                <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> 12 meses de garantia oficial em Luanda</li>
               </ul>
             </div>
             <button
               onClick={() => onNavigatePage('loja')}
-              className="w-full bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-800 font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer"
+              className="w-full bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold text-xs py-2.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
             >
-              Ver Loja
+              Ver Equipamentos
             </button>
           </div>
 
@@ -532,7 +535,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mx-auto mb-3">
                 <Building2 className="w-6 h-6" />
               </div>
-              <div className="text-4xl sm:text-5xl font-black text-white">
+              <div className="text-4xl sm:text-5xl font-black text-white font-mono-num tracking-tight">
                 <AnimatedCounter end={settings.statCompaniesCount || 850} prefix="+" />
               </div>
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Empresas & Lojas Ativas</h4>
@@ -544,7 +547,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto mb-3">
                 <Monitor className="w-6 h-6" />
               </div>
-              <div className="text-4xl sm:text-5xl font-black text-emerald-400">
+              <div className="text-4xl sm:text-5xl font-black text-emerald-400 font-mono-num tracking-tight">
                 <AnimatedCounter end={settings.statTerminalsCount || 2400} prefix="+" />
               </div>
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Terminais POS Instalados</h4>
@@ -556,7 +559,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto mb-3">
                 <Shield className="w-6 h-6" />
               </div>
-              <div className="text-4xl sm:text-5xl font-black text-amber-400">
+              <div className="text-4xl sm:text-5xl font-black text-amber-400 font-mono-num tracking-tight">
                 {settings.statInvoicesCount || '+14.5M'}
               </div>
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Faturas com QR Code AGT</h4>
@@ -568,7 +571,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto mb-3">
                 <MapPin className="w-6 h-6" />
               </div>
-              <div className="text-4xl sm:text-5xl font-black text-indigo-400">
+              <div className="text-4xl sm:text-5xl font-black text-indigo-400 font-mono-num tracking-tight">
                 <AnimatedCounter end={settings.statProvincesCount || 18} suffix="/18" />
               </div>
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Cobertura Territorial</h4>
@@ -918,8 +921,6 @@ export const HomePage: React.FC<HomePageProps> = ({
             {/* Imagem em Destaque Ancorada na Base */}
             <div data-reveal className="sr-init sr-right lg:col-span-6 flex items-end justify-center self-end">
               <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl relative flex items-end justify-center">
-                {/* Glow de realce suave */}
-                <div className="absolute inset-0 bg-gradient-to-t from-blue-100/40 via-blue-50/20 to-transparent rounded-full filter blur-2xl -z-10 transform translate-y-8" />
                 <img
                   src={empresariaTabletImg}
                   alt="Jovem Empresária com Tablet KIVORA ERP"
@@ -940,8 +941,6 @@ export const HomePage: React.FC<HomePageProps> = ({
             {/* Imagem em Destaque Ancorada na Base na Esquerda */}
             <div data-reveal className="sr-init sr-left lg:col-span-6 flex items-end justify-center self-end order-2 lg:order-1">
               <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl relative flex items-end justify-center">
-                {/* Glow azul para destaque volumétrico */}
-                <div className="absolute inset-0 bg-gradient-to-t from-blue-600/20 via-blue-500/10 to-transparent rounded-full filter blur-3xl -z-10 transform translate-y-10" />
                 <img
                   src={empresarioBoasVindasImg}
                   alt="Consultor KIVORA ERP"
@@ -998,8 +997,8 @@ export const HomePage: React.FC<HomePageProps> = ({
             
             {/* Texto */}
             <div data-reveal className="sr-init lg:col-span-6 space-y-4 sm:space-y-6 pb-12 sm:pb-16 lg:pb-20">
-              <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">
-                <Award className="w-3.5 h-3.5" />
+              <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold">
+                <Award className="w-3.5 h-3.5 text-blue-600" />
                 Canais de Distribuição & Revenda
               </div>
 
@@ -1013,11 +1012,11 @@ export const HomePage: React.FC<HomePageProps> = ({
 
               <div className="space-y-2.5 sm:space-y-3 pt-2">
                 <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-800">
-                  <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
                   <span>Portal exclusivo com emissão instantânea de licenças 24/7</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-800">
-                  <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
                   <span>Certificado oficial de revenda e kit comercial completo</span>
                 </div>
               </div>
@@ -1025,7 +1024,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="pt-3 sm:pt-4 flex items-center gap-4">
                 <button
                   onClick={() => onNavigatePage('parceiros')}
-                  className="inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-slate-950 font-black text-xs sm:text-sm px-6 sm:px-7 py-3 sm:py-3.5 rounded-2xl shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-0.5 cursor-pointer w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 bg-[#1d4ed8] hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs sm:text-sm px-6 sm:px-7 py-3 sm:py-3.5 rounded-2xl shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5 cursor-pointer w-full sm:w-auto"
                 >
                   <span>Conhecer Programa de Parceiros</span>
                   <ArrowRight className="w-4 h-4" />
@@ -1036,8 +1035,6 @@ export const HomePage: React.FC<HomePageProps> = ({
             {/* Imagem em Destaque Ancorada na Base */}
             <div data-reveal className="sr-init sr-right lg:col-span-6 flex items-end justify-center self-end">
               <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl relative flex items-end justify-center">
-                {/* Glow âmbar suave */}
-                <div className="absolute inset-0 bg-gradient-to-t from-amber-100/40 via-amber-50/20 to-transparent rounded-full filter blur-2xl -z-10 transform translate-y-8" />
                 <img
                   src={parceirosImg}
                   alt="Parceiros KIVORA ERP em Angola"

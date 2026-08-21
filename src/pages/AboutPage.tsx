@@ -144,7 +144,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
         </div>
 
         {/* CTA Banner */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
+        <div className="bg-[#1d4ed8] rounded-3xl p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
           <div className="space-y-2 text-center md:text-left">
             <h3 className="text-2xl sm:text-3xl font-black">
               Quer conhecer o KIVORA de perto?

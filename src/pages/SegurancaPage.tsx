@@ -21,12 +21,12 @@ export const SegurancaPage: React.FC<SegurancaPageProps> = ({ onNavigatePage }) 
         
         {/* Header da Página */}
         <div className="text-center max-w-3xl mx-auto mb-16" data-reveal>
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/80 border border-blue-200 text-blue-900 text-xs font-bold uppercase tracking-wider mb-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold uppercase tracking-wider mb-4">
             <Lock className="w-3.5 h-3.5 text-[#1d4ed8]" />
             Cibersegurança & Conformidade Fiscal
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
-            Arquitetura de Segurança de <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1d4ed8] to-indigo-600">Nível Militar</span>
+            Arquitetura de Segurança de <span className="text-[#1d4ed8]">Nível Empresarial</span>
           </h1>
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
             Como o KIVORA ERP protege os dados financeiros, fiscais e operacionais da sua empresa contra intrusões, vazamentos e adulteração.

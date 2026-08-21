@@ -185,13 +185,13 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
             {/* Grande Destaque do Valor em Kwanzas */}
             <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 text-center space-y-2">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Poupança Direta Anual (AOA)
+                Poupança Direta Estimada (AOA)
               </span>
-              <div className="text-3xl sm:text-4xl font-black text-emerald-400 tracking-tight">
+              <div className="text-3xl sm:text-4xl font-black text-emerald-400 tracking-tight font-mono-num">
                 {formatAOA(resultados.poupancaTotalAnualAOA)}
               </div>
               <p className="text-[11px] text-slate-400 font-medium">
-                Equivalente a <strong>{formatAOA(Math.round(resultados.poupancaTotalAnualAOA / 12))}</strong> poupados por mês
+                Equivalente a <strong className="text-white font-mono-num">{formatAOA(Math.round(resultados.poupancaTotalAnualAOA / 12))}</strong> poupados por mês
               </p>
             </div>
 
@@ -203,7 +203,7 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
                   <Clock className="w-4 h-4" />
                   <span>Tempo Recuperado</span>
                 </div>
-                <div className="text-xl font-black text-white">
+                <div className="text-xl font-black text-white font-mono-num">
                   {resultados.horasPoupadasMes}h / mês
                 </div>
                 <p className="text-[10px] text-slate-400">
@@ -212,11 +212,11 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
               </div>
 
               <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 space-y-1">
-                <div className="flex items-center gap-2 text-amber-400 text-xs font-bold">
+                <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold">
                   <ShieldCheck className="w-4 h-4" />
                   <span>Controlo de Quebras</span>
                 </div>
-                <div className="text-xl font-black text-white">
+                <div className="text-xl font-black text-white font-mono-num">
                   {formatAOA(resultados.poupancaStockMensal)} / mês
                 </div>
                 <p className="text-[10px] text-slate-400">
@@ -227,7 +227,7 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
             </div>
 
             {/* Blindagem AGT */}
-            <div className="p-4 rounded-2xl bg-blue-950/40 border border-blue-500/30 flex items-start gap-3">
+            <div className="p-4 rounded-2xl bg-blue-950/50 border border-blue-500/40 flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
               <div className="text-xs text-slate-300">
                 <strong className="text-white block mb-0.5">Zero Risco de Multas da AGT:</strong>
@@ -239,7 +239,7 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
             <div className="pt-2 space-y-2.5">
               <button
                 onClick={() => onOpenDemoModal(`Estudo de ROI: ${setores.find((s) => s.id === setor)?.nome}`)}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm py-3.5 px-6 rounded-2xl transition-all shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 cursor-pointer"
+                className="btn-premium-primary w-full text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Agendar Demonstração VIP & Implementação</span>
                 <ArrowRight className="w-4 h-4" />
@@ -247,7 +247,7 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
 
               <button
                 onClick={() => onNavigatePage('planos')}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs py-2.5 px-4 rounded-xl transition-all border border-slate-800 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white font-bold text-xs py-3 px-4 rounded-xl transition-all border border-white/15 flex items-center justify-center gap-2 cursor-pointer backdrop-blur-xs"
               >
                 <span>Consultar Tabela de Preços de Licenças</span>
                 <ArrowRight className="w-3.5 h-3.5" />

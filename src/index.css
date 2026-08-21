@@ -11,7 +11,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #0f172a;
     background-color: #ffffff;
     -webkit-font-smoothing: antialiased;
@@ -22,16 +22,19 @@
   body {
     @apply text-slate-900 bg-white overflow-x-hidden;
     text-rendering: optimizeLegibility;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
   ::selection {
-    background-color: #2563eb;
+    background-color: #1d4ed8;
     color: #ffffff;
   }
 
-  /* Reset de headings para melhor tipografia */
+  /* Reset de headings com tipografia editorial corporativa */
   h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     letter-spacing: -0.025em;
+    color: #0f172a;
   }
 }
 
@@ -220,10 +223,67 @@
 }
 
 /* ================================================================
-   UTILITÁRIOS GLOBAIS
+   UTILITÁRIOS & CLASSES DE DESIGN PREMIUM
    ================================================================ */
 .text-balance {
   text-wrap: balance;
+}
+
+/* Números tabulares executivos em JetBrains Mono */
+.font-mono-num {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Cartão Premium com micro-borda e elevação suave */
+.card-premium {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 4px 14px -2px rgba(15, 23, 42, 0.04);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s;
+}
+
+.card-premium:hover {
+  transform: translateY(-2px);
+  border-color: rgba(148, 163, 184, 0.6);
+  box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 10px -2px rgba(15, 23, 42, 0.03);
+}
+
+/* Botão Primário Premium */
+.btn-premium-primary {
+  background-color: #1d4ed8;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), 0 2px 8px -1px rgba(29, 78, 216, 0.25);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-premium-primary:hover {
+  background-color: #1e40af;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.3), 0 6px 20px -2px rgba(29, 78, 216, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-premium-primary:active {
+  transform: translateY(0);
+  background-color: #172554;
+}
+
+/* Botão Secundário Premium */
+.btn-premium-secondary {
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-premium-secondary:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
 
 /* Animação sutil de flutuação — para elementos decorativos */
@@ -244,9 +304,9 @@
   animation: pulseDot 2.5s ease-in-out infinite;
 }
 
-/* Gradiente de texto (decorativo) */
+/* Gradiente de texto corporativo sutil */
 .text-gradient {
-  background: linear-gradient(135deg, #2563eb, #06b6d4);
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -394,7 +454,7 @@
   }
 }
 
-/* ── WhatsApp Tooltip fadeIn ── */
+/* ── FadeInUp com translação suave para tooltips e badges ── */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -406,10 +466,6 @@
   }
 }
 
-.animate-fadeIn {
+.animate-fadeInUp {
   animation: fadeInUp 0.25s ease-out forwards;
 }
-
-
-
-

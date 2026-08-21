@@ -677,7 +677,7 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
         </div>
 
         {/* Grelha de Produtos Estilo E-Commerce Autêntico */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 mb-16">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-16">
           {filteredProducts.map((prod) => (
             <div
               key={prod.id}
@@ -685,57 +685,57 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
                 setSelectedProduct(prod);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-lg hover:border-slate-300 transition-all duration-200 overflow-hidden flex flex-col justify-between group cursor-pointer"
+              className="card-premium rounded-2xl overflow-hidden flex flex-col justify-between group cursor-pointer"
             >
               <div>
                 
                 {/* Imagem do Produto em Fundo Branco Limpo */}
-                <div className="aspect-square bg-white p-4 relative overflow-hidden flex items-center justify-center border-b border-slate-100">
+                <div className="aspect-square bg-white p-5 relative overflow-hidden flex items-center justify-center border-b border-slate-100">
                   <img
                     src={prod.image}
                     alt={prod.name}
-                    className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-200"
+                    className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
                     onError={(e: any) => { e.target.src = '/imagens/pos_bundle_kit.jpg'; }}
                   />
                   {prod.discountPercent && (
-                    <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-rose-600 text-white font-bold text-[10px] rounded">
+                    <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-rose-600 text-white font-bold text-[10px] rounded-md shadow-xs">
                       -{prod.discountPercent}%
                     </span>
                   )}
                   {prod.badge && !prod.discountPercent && (
-                    <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-white font-bold text-[10px] rounded">
+                    <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-blue-600 text-white font-bold text-[10px] rounded-md shadow-xs">
                       {prod.badge}
                     </span>
                   )}
                 </div>
 
                 {/* Dados do Produto */}
-                <div className="p-3.5">
+                <div className="p-4">
                   
                   {/* Preço em Kwanzas */}
                   <div className="flex items-baseline gap-1 mb-1">
-                    <span className="text-xs font-bold text-slate-700">Kz</span>
-                    <span className="text-lg sm:text-xl font-black text-slate-900">
+                    <span className="text-xs font-bold text-slate-500">Kz</span>
+                    <span className="text-lg sm:text-xl font-black text-slate-950 font-mono-num">
                       {prod.priceAOA.toLocaleString('pt-AO')}
                     </span>
                   </div>
 
                   {/* Preço Original Riscado */}
                   {prod.originalPriceAOA && (
-                    <p className="text-[11px] text-slate-400 line-through -mt-1 mb-1.5">
+                    <p className="text-[11px] text-slate-400 line-through -mt-1 mb-1.5 font-mono-num">
                       {prod.originalPriceAOA.toLocaleString('pt-AO')} Kz
                     </p>
                   )}
 
                   {/* Nome do Produto (2 linhas) */}
-                  <h3 className="text-xs sm:text-sm font-medium text-slate-800 line-clamp-2 mb-2 leading-snug group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 mb-2 leading-snug group-hover:text-blue-600 transition-colors">
                     {prod.name}
                   </h3>
 
                   {/* Avaliação e Vendas */}
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mb-2">
-                    <span className="flex items-center text-amber-500 font-bold">
-                      <Star className="w-3 h-3 fill-amber-400 mr-0.5" />
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mb-2.5 font-mono-num">
+                    <span className="flex items-center text-amber-600 font-bold">
+                      <Star className="w-3 h-3 fill-amber-400 mr-0.5 text-amber-500" />
                       {prod.rating}
                     </span>
                     <span>•</span>
@@ -743,9 +743,9 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
                   </div>
 
                   {/* Selo de Envio */}
-                  <div className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                  <div className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-md">
                     <Truck className="w-3 h-3 text-emerald-600" />
-                    <span>Entrega em Luanda & Províncias</span>
+                    <span>Entrega Imediata</span>
                   </div>
 
                 </div>

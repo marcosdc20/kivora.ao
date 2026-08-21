@@ -74,12 +74,12 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
         
         {/* Header da Página */}
         <div className="text-center max-w-3xl mx-auto mb-12 print:hidden">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100/80 border border-emerald-200 text-emerald-900 text-xs font-bold uppercase tracking-wider mb-4">
-            <Calculator className="w-3.5 h-3.5 text-emerald-600" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold uppercase tracking-wider mb-4">
+            <Calculator className="w-3.5 h-3.5 text-blue-600" />
             Ferramenta Fiscal Gratuita para Angola
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
-            Calculadora Fiscal de <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1d4ed8] to-emerald-600">IRT & IVA Angola</span>
+            Calculadora Fiscal de <span className="text-[#1d4ed8]">IRT & IVA Angola</span>
           </h1>
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
             Simule salários líquidos, retenções de IRT, contribuições para o INSS e cálculo de IVA comercial segundo a legislação fiscal da AGT em vigor.
@@ -87,13 +87,13 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
         </div>
 
         {/* Abas de Seleção (IRT vs IVA) */}
-        <div className="flex items-center justify-center gap-3 mb-10 print:hidden">
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-10 print:hidden">
           <button
             onClick={() => setActiveTab('irt')}
-            className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all flex items-center gap-2 ${
+            className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'irt'
-                ? 'bg-[#1d4ed8] text-white shadow-lg shadow-blue-500/20'
-                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                ? 'bg-[#1d4ed8] text-white shadow-md shadow-blue-600/20'
+                : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-50'
             }`}
           >
             <Receipt className="w-4 h-4" />
@@ -101,10 +101,10 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
           </button>
           <button
             onClick={() => setActiveTab('iva')}
-            className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all flex items-center gap-2 ${
+            className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'iva'
-                ? 'bg-[#1d4ed8] text-white shadow-lg shadow-blue-500/20'
-                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                ? 'bg-[#1d4ed8] text-white shadow-md shadow-blue-600/20'
+                : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-50'
             }`}
           >
             <Calculator className="w-4 h-4" />
@@ -204,7 +204,7 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
               </div>
 
               {/* Destaque do Salário Líquido */}
-              <div className="bg-gradient-to-br from-[#1d4ed8] to-blue-700 text-white p-6 rounded-2xl mb-6 shadow-lg shadow-blue-500/20 flex items-center justify-between">
+              <div className="bg-[#1d4ed8] text-white p-6 rounded-2xl mb-6 shadow-md shadow-blue-900/10 flex items-center justify-between">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-blue-100 mb-1">
                     Salário Líquido a Receber pelo Trabalhador
@@ -346,7 +346,7 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
               </div>
 
               {/* Total da Fatura com IVA */}
-              <div className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-6 rounded-2xl mb-6 shadow-lg shadow-emerald-500/20 flex items-center justify-between">
+              <div className="bg-[#15803d] text-white p-6 rounded-2xl mb-6 shadow-md shadow-emerald-900/10 flex items-center justify-between">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-emerald-100 mb-1">
                     Valor Total da Fatura Emitida (Com IVA)

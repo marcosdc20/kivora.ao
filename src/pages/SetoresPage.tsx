@@ -195,14 +195,14 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
             <div className="pt-3 flex flex-wrap gap-3">
               <button
                 onClick={() => onOpenDemoModal(currentSector.name)}
-                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl shadow-lg shadow-blue-600/25 transition-all hover:-translate-y-0.5 cursor-pointer"
+                className="btn-premium-primary inline-flex items-center gap-2 text-xs sm:text-sm px-7 py-3.5 rounded-2xl cursor-pointer"
               >
                 <span>{currentSector.ctaText}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button
                 onClick={() => onNavigatePage('download')}
-                className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm px-6 py-3.5 rounded-xl transition-all cursor-pointer"
+                className="btn-premium-secondary inline-flex items-center gap-2 text-xs sm:text-sm px-6 py-3.5 rounded-2xl cursor-pointer"
               >
                 <Download className="w-4 h-4" />
                 <span>Baixar Instalador</span>
@@ -219,7 +219,7 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
               />
               <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-slate-950/85 backdrop-blur-md border border-white/10 text-white flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-black uppercase text-blue-400">100% Homologado AGT</span>
+                  <span className="text-[10px] font-black uppercase text-blue-400 font-mono-num">100% Homologado AGT</span>
                   <p className="text-xs font-bold text-slate-200">Decreto Presidencial n.º 71/25</p>
                 </div>
                 <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0" />
@@ -239,8 +239,8 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
             {currentSector.features.map((feat, idx) => (
-              <div key={idx} data-reveal data-delay={((idx % 3) + 1) * 100} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-start gap-3">
-                <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" strokeWidth={2} />
+              <div key={idx} data-reveal data-delay={((idx % 3) + 1) * 100} className="card-premium p-5 rounded-2xl flex items-start gap-3">
+                <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" strokeWidth={2.25} />
                 <span className="text-xs text-slate-700 font-medium leading-relaxed">{feat}</span>
               </div>
             ))}
@@ -250,26 +250,26 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
       </section>
 
       {/* CTA Final */}
-      <section className="bg-slate-950 py-20 px-6 sm:px-10 lg:px-16 text-white text-center" data-reveal>
+      <section className="bg-slate-950 py-20 px-6 sm:px-10 lg:px-16 text-white text-center border-t border-slate-800" data-reveal>
         <div className="max-w-3xl mx-auto space-y-5">
           <Monitor className="w-10 h-10 text-blue-400 mx-auto" strokeWidth={1.75} />
-          <h2 className="text-3xl sm:text-4xl font-black">
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
             Pronto para testar o KIVORA na sua empresa?
           </h2>
-          <p className="text-slate-400 text-sm leading-relaxed max-w-lg mx-auto">
+          <p className="text-slate-300 text-sm leading-relaxed max-w-lg mx-auto">
             Instalação local rápida em menos de 2 minutos. Comece hoje mesmo a emitir documentos fiscais certificados pela AGT.
           </p>
           <div className="flex flex-wrap justify-center gap-4 pt-2">
             <button
               onClick={() => onOpenDemoModal(`Apresentação: ${currentSector.name}`)}
-              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm px-8 py-4 rounded-2xl shadow-xl shadow-blue-600/30 transition-all hover:-translate-y-0.5 cursor-pointer"
+              className="btn-premium-primary inline-flex items-center gap-2 text-sm px-8 py-4 rounded-2xl cursor-pointer"
             >
               <span>Agendar Apresentação Gratuita</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <button
               onClick={() => onNavigatePage('solucoes')}
-              className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-slate-200 font-bold text-sm px-7 py-4 rounded-2xl border border-slate-800 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 text-slate-200 font-bold text-sm px-7 py-4 rounded-2xl border border-white/20 transition-all cursor-pointer backdrop-blur-xs"
             >
               <span>Ver Arquitetura de Rede</span>
             </button>

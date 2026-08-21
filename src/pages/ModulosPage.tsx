@@ -100,16 +100,17 @@ export const ModulosPage: React.FC<ModulosPageProps> = ({ onSelectModule, onOpen
               <div
                 key={mod.id}
                 data-reveal
-                className="sr-init bg-white border border-slate-200 rounded-2xl p-6 flex flex-col justify-between hover:border-blue-500/40 hover:shadow-lg transition-all group cursor-pointer"
+                className="sr-init card-premium rounded-3xl p-6 sm:p-7 flex flex-col justify-between group cursor-pointer"
                 style={{ transitionDelay: `${Math.min(i, 5) * 70}ms` }}
                 onClick={() => onSelectModule(mod)}
               >
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200/60 px-2.5 py-0.5 rounded-md">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200/80 px-2.5 py-1 rounded-lg">
                       {mod.badge || 'Módulo'}
                     </span>
-                    <span className="text-[11px] font-mono text-slate-400">
+                    <span className="text-[11px] font-mono-num font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-md flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       Homologado AGT
                     </span>
                   </div>
@@ -117,24 +118,26 @@ export const ModulosPage: React.FC<ModulosPageProps> = ({ onSelectModule, onOpen
                   <h3 className="text-lg font-black text-slate-950 group-hover:text-blue-600 transition-colors leading-tight mb-2">
                     {mod.title}
                   </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed mb-4">{mod.shortDesc}</p>
+                  <p className="text-xs text-slate-600 leading-relaxed mb-4">{mod.shortDesc}</p>
 
-                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <div className="space-y-2.5 pt-3 border-t border-slate-100">
                     {mod.features.slice(0, 3).map((feat, fi) => (
-                      <div key={fi} className="flex items-start gap-2 text-xs text-slate-600">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" strokeWidth={2} />
+                      <div key={fi} className="flex items-start gap-2 text-xs text-slate-700 font-medium">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" strokeWidth={2.25} />
                         <span>{feat}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="pt-4 mt-4 flex items-center justify-between border-t border-slate-100">
+                <div className="pt-4 mt-5 flex items-center justify-between border-t border-slate-100">
                   <span className="text-xs font-bold text-blue-600 group-hover:text-blue-700 transition-colors flex items-center gap-1">
                     Ver ficha técnica
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" strokeWidth={2} />
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" strokeWidth={2} />
                   </span>
-                  <span className="text-[11px] font-semibold text-slate-400">100% Offline</span>
+                  <span className="text-[11px] font-bold font-mono-num text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                    100% Offline LAN
+                  </span>
                 </div>
               </div>
             ))}
@@ -142,18 +145,23 @@ export const ModulosPage: React.FC<ModulosPageProps> = ({ onSelectModule, onOpen
         )}
       </section>
 
-      {/* CTA */}
-      <section className="bg-slate-950 py-20 px-6 sm:px-10 lg:px-16">
+      {/* CTA Premium */}
+      <section className="bg-slate-950 py-20 px-6 sm:px-10 lg:px-16 border-t border-slate-800">
         <div data-reveal className="sr-init max-w-3xl mx-auto text-center text-white space-y-5">
-          <h2 className="text-3xl font-black">Precisa de uma solução personalizada?</h2>
-          <p className="text-slate-400 text-sm leading-relaxed max-w-lg mx-auto">
-            O KIVORA pode ser configurado para retalho, restauração, farmácia, supermercado ou prestação de serviços.
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold">
+            Implementação Assistida
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+            Precisa de uma solução personalizada para o seu negócio?
+          </h2>
+          <p className="text-slate-300 text-sm leading-relaxed max-w-xl mx-auto">
+            O KIVORA adapta-se com precisão ao seu ramo de atividade: retalho, restauração, farmácias, supermercados ou prestação de serviços em Angola.
           </p>
           <button
             onClick={() => onOpenDemoModal('Solução Personalizada')}
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm px-7 py-3.5 rounded-2xl transition-all hover:-translate-y-0.5 shadow-lg shadow-blue-600/30"
+            className="btn-premium-primary inline-flex items-center gap-2 text-sm px-8 py-4 rounded-2xl cursor-pointer"
           >
-            <span>Falar com Consultor</span>
+            <span>Falar com Consultor Especialista</span>
             <ArrowRight className="w-4 h-4" strokeWidth={2} />
           </button>
         </div>
