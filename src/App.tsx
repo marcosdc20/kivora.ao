@@ -332,34 +332,7 @@ export function App() {
     if (canonicalTag) canonicalTag.setAttribute('href', `https://kivora.ao${meta.path}`);
   }, [activePage, selectedModule, selectedNewsPost]);
 
-  // Inicialização do Lenis Smooth Scrolling respeitando acessibilidade
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
-
-    let lenisInstance: any = null;
-    import('lenis').then(({ default: Lenis }) => {
-      lenisInstance = new Lenis({
-        duration: 1.0,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        orientation: 'vertical',
-        smoothWheel: true,
-        wheelMultiplier: 0.9,
-      });
-
-      function raf(time: number) {
-        lenisInstance?.raf(time);
-        requestAnimationFrame(raf);
-      }
-      requestAnimationFrame(raf);
-    }).catch(() => {});
-
-    return () => {
-      if (lenisInstance) {
-        lenisInstance.destroy();
-      }
-    };
-  }, []);
+  // Scroll nativo com aceleração por hardware GPU e suporte a inércia de touchpad (120Hz/60Hz)
 
   useEffect(() => {
     const loader = document.getElementById('initial-loader');
