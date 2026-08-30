@@ -284,7 +284,14 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 15. ZERO-TRUST: FECHO PADRÃO DE SEGURANÇA (Default Deny)
+    // 15. HEALTHCHECK & MEDIÇÃO DE LATÊNCIA EM TEMPO REAL
+    // ─────────────────────────────────────────────────────────────
+    match /_ping_healthcheck/{pingId} {
+      allow read, write: if true;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 16. ZERO-TRUST: FECHO PADRÃO DE SEGURANÇA (Default Deny)
     // ─────────────────────────────────────────────────────────────
     // Bloqueia qualquer coleção ou rota não expressamente permitida acima
     match /{document=**} {
@@ -292,3 +299,4 @@ service cloud.firestore {
     }
   }
 }
+

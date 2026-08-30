@@ -15,6 +15,7 @@ import { AdminAuditoria } from './AdminAuditoria';
 import { AdminPlanos } from './AdminPlanos';
 import { AdminConfiguracoes } from './AdminConfiguracoes';
 import { AdminLoja } from './AdminLoja';
+import { AdminFirebaseMonitor } from './AdminFirebaseMonitor';
 import { AdminSection } from './types';
 import { Empresa } from './types';
 import { ArrowLeft, Lock, Menu } from 'lucide-react';
@@ -222,6 +223,9 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
 
       case 'configuracoes':
         return <AdminConfiguracoes />;
+
+      case 'firebase-monitor':
+        return <AdminFirebaseMonitor />;
 
       default:
         return <AdminDashboard />;

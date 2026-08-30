@@ -4,7 +4,7 @@ import {
   CreditCard, Package, HeadphonesIcon, BarChart3,
   Bell, Users, ScrollText, Settings, ChevronDown,
   ChevronRight, LogOut, Shield, X, Menu, ShoppingBag,
-  Award, ExternalLink
+  Award, ExternalLink, Activity
 } from 'lucide-react';
 import { AdminSection } from './types';
 
@@ -105,6 +105,13 @@ const NAV_GROUPS: NavGroup[] = [
     groupTitle: 'Sistema & Definições',
     items: [
       { id: 'utilizadores', label: 'Utilizadores Admin', icon: <Users className="w-4 h-4" strokeWidth={1.75} /> },
+      {
+        id: 'firebase-monitor',
+        label: 'Monitorização Firebase & Cloud',
+        icon: <Activity className="w-4 h-4 text-emerald-400" strokeWidth={1.75} />,
+        badge: 'Live',
+        badgeColor: 'emerald'
+      },
       { id: 'configuracoes', label: 'Definições do Sistema', icon: <Settings className="w-4 h-4" strokeWidth={1.75} /> },
     ]
   },

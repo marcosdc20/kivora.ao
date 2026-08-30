@@ -290,5 +290,6 @@ export type AdminSection =
   | 'comunicacao'
   | 'utilizadores'
   | 'auditoria'
+  | 'firebase-monitor'
   | 'configuracoes';
 
