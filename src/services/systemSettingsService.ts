@@ -149,6 +149,13 @@ export interface SystemCompanySettings {
   agtDecretoRef?: string;
   saftSubmissionDeadlineDay?: number;
 
+  // Assistência por Videochamada Tarifada por Minuto
+  videoCallPricePerMinute?: number;
+  videoCallEnabled?: boolean;
+  videoCallMinPackageMinutes?: number;
+  videoCallFreeMinutesOnboarding?: number;
+  videoCallPackages?: VideoCallPackage[];
+
   whatsappUrl: string;
   facebookUrl: string;
   instagramUrl: string;
@@ -158,6 +165,15 @@ export interface SystemCompanySettings {
   ibanBfa: string;
   ibanTitular: string;
   updatedAt?: number;
+}
+
+export interface VideoCallPackage {
+  id: string;
+  minutes: number;
+  label: string;
+  badge?: string;
+  discountPercent: number;
+  popular?: boolean;
 }
 
 /**
@@ -254,6 +270,41 @@ export const DEFAULT_INVESTOR_SETTINGS: InvestorSettings = {
   auditedBy: 'Auditoria Fiscal Independente & Homologação AGT n.º 384/2024',
   contactEmail: 'investidores@kivora.ao',
 };
+
+export const DEFAULT_VIDEO_PACKAGES: VideoCallPackage[] = [
+  {
+    id: 'pkg-20',
+    minutes: 20,
+    label: 'Pacote Rápido (20 min)',
+    badge: 'RESOLUÇÃO DIRETA',
+    discountPercent: 0,
+    popular: false,
+  },
+  {
+    id: 'pkg-30',
+    minutes: 30,
+    label: 'Pacote Padrão (30 min)',
+    badge: 'MAIS ESCOLHIDO',
+    discountPercent: 5,
+    popular: true,
+  },
+  {
+    id: 'pkg-60',
+    minutes: 60,
+    label: 'Pacote Avançado (60 min)',
+    badge: 'FORMAÇÃO & BD',
+    discountPercent: 10,
+    popular: false,
+  },
+  {
+    id: 'pkg-120',
+    minutes: 120,
+    label: 'Pacote Empresarial (120 min)',
+    badge: 'CONSULTORIA COMPLETA',
+    discountPercent: 15,
+    popular: false,
+  },
+];
 
 export const DEFAULT_SETTINGS: SystemCompanySettings = {
   name: KIVORA_INFO.name,
@@ -366,6 +417,13 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   videoHardwareUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
   videoHardwareTitle: 'Instalação Rápida de Impressoras Térmicas 80mm',
   videoHardwareDesc: 'Configuração plug-and-play de impressoras ESC/POS USB, gavetas elétricas RJ11 e leitores 2D.',
+
+  // Assistência por Videochamada Tarifada por Minuto
+  videoCallPricePerMinute: 300, // 300 Kz / minuto por padrão
+  videoCallEnabled: true,
+  videoCallMinPackageMinutes: 10,
+  videoCallFreeMinutesOnboarding: 15,
+  videoCallPackages: DEFAULT_VIDEO_PACKAGES,
 
   whatsappUrl: KIVORA_INFO.whatsapp,
   facebookUrl: KIVORA_INFO.facebook,

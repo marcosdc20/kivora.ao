@@ -13,7 +13,8 @@ import {
   SystemCompanySettings, DEFAULT_SETTINGS,
   subscribeSystemSettings, saveSystemSettings,
   getDirectDownloadUrl, PartnerBrandLogo, InvestorSettings,
-  DEFAULT_PROVINCES, DEFAULT_INVESTOR_SETTINGS
+  DEFAULT_PROVINCES, DEFAULT_INVESTOR_SETTINGS,
+  VideoCallPackage, DEFAULT_VIDEO_PACKAGES
 } from '../services/systemSettingsService';
 import {
   SiteEmailConfig, DEFAULT_SITE_EMAIL_CONFIG,
@@ -80,7 +81,7 @@ const INITIAL_RELEASES: UpdateRelease[] = [
   }
 ];
 
-type ConfigTab = 'geral' | 'emails' | 'precos' | 'videos' | 'notificacoes' | 'comunicados' | 'metricas' | 'marcas' | 'investidores' | 'provincias' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups';
+type ConfigTab = 'geral' | 'emails' | 'precos' | 'videochamada' | 'videos' | 'notificacoes' | 'comunicados' | 'metricas' | 'marcas' | 'investidores' | 'provincias' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups';
 
 export const AdminConfiguracoes: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ConfigTab>('geral');
@@ -363,6 +364,7 @@ export const AdminConfiguracoes: React.FC = () => {
             { id: 'geral', label: 'Geral & Empresa', icon: <Building2 className="w-4 h-4" /> },
             { id: 'emails', label: 'Serviço de E-mails & API', icon: <Mail className="w-4 h-4" /> },
             { id: 'precos', label: 'Planos & Preços', icon: <Tag className="w-4 h-4" /> },
+            { id: 'videochamada', label: 'Videochamada & Tarifas/Min', icon: <Video className="w-4 h-4" /> },
             { id: 'videos', label: 'Vídeos YouTube', icon: <Video className="w-4 h-4" /> },
             { id: 'notificacoes', label: 'Notificações & Webhook', icon: <Bell className="w-4 h-4" /> },
             { id: 'comunicados', label: 'Avisos & Comunicados', icon: <Megaphone className="w-4 h-4" /> },
@@ -1017,6 +1019,232 @@ export const AdminConfiguracoes: React.FC = () => {
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Planos & Preços</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* TAB: VIDEOCHAMADA & TARIFAS POR MINUTO */}
+        {activeTab === 'videochamada' && (
+          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-8">
+            <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <Video className="w-5 h-5 text-blue-600" />
+                  <span>Assistência por Videochamada & Tarifação por Minuto</span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Configure o valor por minuto em Kwanzas (Kz), minutos de cortesia de boas-vindas e pacotes oficiais de minutos para clientes e parceiros.
+                </p>
+              </div>
+            </div>
+
+            {/* Dica de Operação */}
+            <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200/80 text-xs text-blue-900 flex items-start gap-3">
+              <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-bold text-slate-900">Como funciona o Sistema de Tarifação por Minuto:</p>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  O cliente ou parceiro escolhe um pacote de minutos (ex: 20m, 30m, 60m ou personalizado) e paga o valor equivalente em Kwanzas. Durante a chamada, o sistema calcula o tempo consumido segundo a segundo. Quando o saldo de minutos se esgota, a videochamada bloqueia automaticamente até nova recarga.
+                </p>
+              </div>
+            </div>
+
+            {/* Parâmetros Globais */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <label className="font-bold text-slate-700 block">Preço Oficial por Minuto (Kz)</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="50"
+                    step="10"
+                    value={settings.videoCallPricePerMinute ?? 300}
+                    onChange={(e) => handleChange('videoCallPricePerMinute', parseInt(e.target.value) || 0)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-mono font-bold text-blue-600 text-sm focus:border-blue-600 outline-none"
+                    placeholder="300"
+                  />
+                  <span className="absolute right-3 top-2 text-xs font-bold text-slate-400 font-mono">Kz / min</span>
+                </div>
+                <p className="text-[10px] text-slate-400">Valor base cobrado por cada 60 segundos de assistência.</p>
+              </div>
+
+              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <label className="font-bold text-slate-700 block">Minutos de Cortesia Inicial</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0"
+                    max="120"
+                    value={settings.videoCallFreeMinutesOnboarding ?? 15}
+                    onChange={(e) => handleChange('videoCallFreeMinutesOnboarding', parseInt(e.target.value) || 0)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-mono font-bold text-emerald-600 text-sm focus:border-blue-600 outline-none"
+                    placeholder="15"
+                  />
+                  <span className="absolute right-3 top-2 text-xs font-bold text-slate-400 font-mono">minutos</span>
+                </div>
+                <p className="text-[10px] text-slate-400">Crédito grátis oferecido no primeiro registo do cliente.</p>
+              </div>
+
+              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <label className="font-bold text-slate-700 block">Mínimo Compra Personalizada</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="5"
+                    max="60"
+                    value={settings.videoCallMinPackageMinutes ?? 10}
+                    onChange={(e) => handleChange('videoCallMinPackageMinutes', parseInt(e.target.value) || 10)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-mono font-bold text-slate-800 text-sm focus:border-blue-600 outline-none"
+                    placeholder="10"
+                  />
+                  <span className="absolute right-3 top-2 text-xs font-bold text-slate-400 font-mono">minutos</span>
+                </div>
+                <p className="text-[10px] text-slate-400">Quantidade mínima permitida no slider personalizado.</p>
+              </div>
+
+              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                <div>
+                  <label className="font-bold text-slate-700 block">Estado do Módulo</label>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Ativar ou pausar a tarifação por minuto no portal.</p>
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer mt-2">
+                  <input
+                    type="checkbox"
+                    checked={settings.videoCallEnabled ?? true}
+                    onChange={(e) => handleChange('videoCallEnabled', e.target.checked)}
+                    className="w-4 h-4 text-blue-600 rounded"
+                  />
+                  <span className="font-bold text-xs text-slate-800">
+                    {settings.videoCallEnabled ?? true ? 'Ativo & Tarifado' : 'Pausado (Acesso Livre)'}
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {/* Gestão de Pacotes de Minutos */}
+            <div className="space-y-4 pt-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                    Pacotes Oficiais de Minutos Sugeridos
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    Configuração dos cartões exibidos no modal de compra rápida com descontos automáticos.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const current = settings.videoCallPackages || DEFAULT_VIDEO_PACKAGES;
+                    const newPkg: VideoCallPackage = {
+                      id: `pkg-${Date.now()}`,
+                      minutes: 45,
+                      label: 'Pacote Especial (45 min)',
+                      badge: 'OFERTA',
+                      discountPercent: 8,
+                      popular: false,
+                    };
+                    handleChange('videoCallPackages', [...current, newPkg]);
+                  }}
+                  className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Adicionar Pacote</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {(settings.videoCallPackages || DEFAULT_VIDEO_PACKAGES).map((pkg, idx) => {
+                  const unitPrice = settings.videoCallPricePerMinute ?? 300;
+                  const rawCost = pkg.minutes * unitPrice;
+                  const finalCost = rawCost - Math.round(rawCost * ((pkg.discountPercent || 0) / 100));
+
+                  return (
+                    <div key={pkg.id || idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 relative text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono font-black text-blue-700 text-base">{pkg.minutes} minutos</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const current = settings.videoCallPackages || DEFAULT_VIDEO_PACKAGES;
+                            handleChange('videoCallPackages', current.filter((_, i) => i !== idx));
+                          }}
+                          className="text-slate-400 hover:text-red-600 p-1 rounded transition-colors"
+                          title="Remover pacote"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">Rótulo / Nome</label>
+                        <input
+                          type="text"
+                          value={pkg.label}
+                          onChange={(e) => {
+                            const current = [...(settings.videoCallPackages || DEFAULT_VIDEO_PACKAGES)];
+                            current[idx] = { ...current[idx], label: e.target.value };
+                            handleChange('videoCallPackages', current);
+                          }}
+                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:border-blue-600 outline-none"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Desconto (%)</label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="50"
+                            value={pkg.discountPercent || 0}
+                            onChange={(e) => {
+                              const current = [...(settings.videoCallPackages || DEFAULT_VIDEO_PACKAGES)];
+                              current[idx] = { ...current[idx], discountPercent: parseInt(e.target.value) || 0 };
+                              handleChange('videoCallPackages', current);
+                            }}
+                            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-emerald-600 focus:border-blue-600 outline-none"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Badge / Tag</label>
+                          <input
+                            type="text"
+                            value={pkg.badge || ''}
+                            onChange={(e) => {
+                              const current = [...(settings.videoCallPackages || DEFAULT_VIDEO_PACKAGES)];
+                              current[idx] = { ...current[idx], badge: e.target.value };
+                              handleChange('videoCallPackages', current);
+                            }}
+                            placeholder="Ex: POPULAR"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] font-bold focus:border-blue-600 outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px]">
+                        <span className="text-slate-500">Valor Final:</span>
+                        <span className="font-mono font-bold text-slate-900">
+                          {new Intl.NumberFormat('pt-AO').format(finalCost)} Kz
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Guardar Definições de Videochamada</span>
               </button>
             </div>
           </form>

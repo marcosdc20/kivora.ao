@@ -10,6 +10,12 @@ import { KivoraLogo } from '../components/KivoraLogo';
 import { CURRENT_RELEASE, KIVORA_INFO } from '../data/kivoraData';
 import { InvoicePrintModal } from '../components/InvoicePrintModal';
 import { VideoConferenceModal } from '../components/VideoConferenceModal';
+import { VideoMinutesPurchaseModal } from '../components/VideoMinutesPurchaseModal';
+import {
+  VideoSupportAccount,
+  getOrCreateVideoSupportAccount,
+  subscribeVideoSupportAccount
+} from '../services/videoSupportService';
 import { getStoredSession, clearStoredSession, KivoraUserSession } from '../admin/services/authService';
 import { useLicenses } from '../admin/hooks/useFirebase';
 import { formatLicenseDate, getPlanLabel } from '../admin/services/licenseService';
@@ -41,8 +47,10 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<KivoraLicense | null>(null);
 
-  // Modal de Videochamada de Assistência Remota
+  // Modal de Videochamada & Gestão de Minutos de Assistência
   const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [purchaseMinutesModalOpen, setPurchaseMinutesModalOpen] = useState(false);
+  const [videoAccount, setVideoAccount] = useState<VideoSupportAccount | null>(null);
 
   // Tickets do Cliente em Tempo Real via supportService
   const [myTickets, setMyTickets] = useState<SupportTicket[]>([]);
@@ -83,7 +91,18 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
     is_provisional: false,
   };
 
-  // Subscrição em Tempo Real aos tickets do cliente
+  // Subscrição em Tempo Real aos tickets e minutos de vídeo do cliente
+  useEffect(() => {
+    const nifOrEmail = clientLicense.nif !== 'Não Registado' ? clientLicense.nif : clientLicense.client_email;
+    if (!nifOrEmail) return;
+
+    // Carregar conta de minutos de vídeo
+    getOrCreateVideoSupportAccount(nifOrEmail, clientLicense.company_name, 'cliente', clientLicense.client_email, clientLicense.nif).then(acc => setVideoAccount(acc));
+    const unsubVideo = subscribeVideoSupportAccount(nifOrEmail, (acc) => setVideoAccount(acc));
+
+    return () => unsubVideo();
+  }, [clientLicense.nif, clientLicense.client_email, clientLicense.company_name]);
+
   useEffect(() => {
     const nifOrEmail = clientLicense.nif !== 'Não Registado' ? clientLicense.nif : clientLicense.client_email;
     if (!nifOrEmail) return;
@@ -796,50 +815,74 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
             </div>
           )}
 
-          {/* SECTION: SUPORTE TÉCNICO */}
+          {/* SECTION: SUPORTE */}
           {activeSection === 'suporte' && (
             <div className="space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="text-lg font-black text-slate-900">Central de Assistência Técnica</h2>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Converse diretamente com os engenheiros de suporte da Kivora ou com o seu parceiro credenciado.
+                    Converse diretamente com os engenheiros de suporte da Kivora ou solicite apoio remoto com partilha de ecrã.
                   </p>
                 </div>
 
-                {/* Botão de Destaque: Videochamada de Apoio Remoto */}
-                <button
-                  onClick={() => setVideoModalOpen(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-2xl flex items-center gap-2 shadow-md shadow-blue-600/20 transition-all cursor-pointer hover:scale-[1.02]"
-                >
-                  <Video className="w-4 h-4" />
-                  <span>Iniciar Videochamada com Técnico</span>
-                </button>
+                <div className="flex items-center gap-2.5">
+                  <button
+                    onClick={() => setPurchaseMinutesModalOpen(true)}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-2xl flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                  >
+                    <span>+ Recarregar Minutos</span>
+                  </button>
+
+                  <button
+                    onClick={() => setVideoModalOpen(true)}
+                    className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-2xl flex items-center gap-2 shadow-md shadow-blue-600/20 transition-all cursor-pointer hover:scale-[1.02]"
+                  >
+                    <Video className="w-4 h-4" />
+                    <span>Iniciar Videochamada</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Banner Rápido de Assistência por Vídeo */}
-              <div className="p-4 bg-gradient-to-r from-blue-900 to-slate-900 text-white rounded-3xl border border-blue-800/60 flex flex-wrap items-center justify-between gap-4 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 shrink-0">
-                    <Video className="w-5 h-5" />
+              {/* CARD DE SALDO DE MINUTOS DE VIDEOCHAMADA */}
+              <div className="p-5 bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 text-white rounded-3xl border border-blue-900/60 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-lg">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-blue-600/30 border border-blue-400/30 flex items-center justify-center text-blue-400 shrink-0 shadow-inner">
+                    <Video className="w-7 h-7" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <span>Assistência Remota em Direto (Google Meet / Jitsi HD)</span>
-                      <span className="bg-emerald-500/20 text-emerald-300 text-[10px] px-2 py-0.5 rounded-full font-bold">Grátis</span>
-                    </h4>
-                    <p className="text-[11px] text-slate-300 mt-0.5">
-                      Partilhe o seu ecrã para resolver dúvidas fiscais ou de hardware sem necessidade de deslocação física.
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-base font-black tracking-tight text-white">Assistência Remota em Direto</h3>
+                      <span className="bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase font-mono">
+                        Tarifa: {getCachedSystemSettings().videoCallPricePerMinute || 300} Kz / min
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-300 mt-1 max-w-xl leading-relaxed">
+                      Diagnóstico avançado de base de dados, configuração de impressoras fiscais e formação de operadores com partilha de ecrã HD.
                     </p>
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setVideoModalOpen(true)}
-                  className="bg-white hover:bg-slate-100 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
-                >
-                  Abrir Sala de Vídeo
-                </button>
+                <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/10 pt-3 md:pt-0">
+                  <div className="text-left md:text-right">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
+                      Saldo Disponível
+                    </span>
+                    <span className="font-mono text-xl font-black text-emerald-400">
+                      {Math.floor((videoAccount?.remainingSeconds || 0) / 60)} min {((videoAccount?.remainingSeconds || 0) % 60)}s
+                    </span>
+                    <span className="text-[10px] text-slate-400 block mt-0.5">
+                      Gasto: {videoAccount?.totalMinutesSpent || 0} min no histórico
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => setPurchaseMinutesModalOpen(true)}
+                    className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-md shadow-blue-600/20 whitespace-nowrap"
+                  >
+                    Recarregar Minutos
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -1104,6 +1147,18 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
         userName={clientLicense.company_name}
         userRole="cliente"
         companyName={clientLicense.company_name}
+        entityId={clientLicense.nif !== 'Não Registado' ? clientLicense.nif : clientLicense.client_email}
+      />
+
+      {/* Modal de Compra de Minutos de Vídeo */}
+      <VideoMinutesPurchaseModal
+        isOpen={purchaseMinutesModalOpen}
+        onClose={() => setPurchaseMinutesModalOpen(false)}
+        account={videoAccount}
+        entityType="cliente"
+        onSuccess={(updatedAcc) => {
+          setVideoAccount(updatedAcc);
+        }}
       />
     </div>
   );

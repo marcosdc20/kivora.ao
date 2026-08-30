@@ -13,6 +13,12 @@ import { KivoraLogo } from '../components/KivoraLogo';
 import { CURRENT_RELEASE, KIVORA_INFO } from '../data/kivoraData';
 import { InvoicePrintModal } from '../components/InvoicePrintModal';
 import { VideoConferenceModal } from '../components/VideoConferenceModal';
+import { VideoMinutesPurchaseModal } from '../components/VideoMinutesPurchaseModal';
+import {
+  VideoSupportAccount,
+  getOrCreateVideoSupportAccount,
+  subscribeVideoSupportAccount
+} from '../services/videoSupportService';
 import {
   getStoredSession, clearStoredSession, KivoraUserSession,
   changeUserPassword
@@ -71,7 +77,6 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const [partnerAccount, setPartnerAccount] = useState<PartnerAccount | null>(null);
   const [policy, setPolicy] = useState<PartnerLicensingPolicy>(DEFAULT_PARTNER_POLICY);
   const [showOfficialCertificatesModal, setShowOfficialCertificatesModal] = useState(false);
-  const [showVideoModal, setShowVideoModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -151,7 +156,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     setTimeout(() => setPartnerBrandingSaved(false), 3000);
   };
 
-  // Estados de Suporte do Parceiro
+  // Estados de Suporte do Parceiro & Videochamadas
   const [supportTab, setSupportTab] = useState<'clientes' | 'admin'>('clientes');
   const [clientTickets, setClientTickets] = useState<SupportTicket[]>([]);
   const [adminTickets, setAdminTickets] = useState<SupportTicket[]>([]);
@@ -162,6 +167,11 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const [adminTicketCategory, setAdminTicketCategory] = useState<'faturacao' | 'tecnico' | 'licenciamento' | 'multiloja'>('licenciamento');
   const [adminTicketMessage, setAdminTicketMessage] = useState('');
   const [submittingAdminTicket, setSubmittingAdminTicket] = useState(false);
+
+  // Videochamada & Saldo de Minutos do Parceiro
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [showPurchaseMinutesModal, setShowPurchaseMinutesModal] = useState(false);
+  const [videoAccount, setVideoAccount] = useState<VideoSupportAccount | null>(null);
 
   // Subscrição em Tempo Real aos Preços de Atacado
   useEffect(() => {
@@ -187,6 +197,14 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     });
     return () => unsub();
   }, [partnerCode]);
+
+  // Subscrição em Tempo Real à Conta de Minutos de Vídeo do Parceiro
+  useEffect(() => {
+    if (!partnerCode) return;
+    getOrCreateVideoSupportAccount(partnerCode, partnerName, 'parceiro', session?.email || '', (partnerAccount as any)?.nif || '').then(acc => setVideoAccount(acc));
+    const unsub = subscribeVideoSupportAccount(partnerCode, (acc) => setVideoAccount(acc));
+    return () => unsub();
+  }, [partnerCode, partnerName, session?.email, partnerAccount]);
 
   // Subscrição em Tempo Real às Dívidas deste Parceiro
   useEffect(() => {
@@ -2419,17 +2437,73 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <div>
                   <h2 className="text-lg font-black text-slate-900">Central de Suporte & Atendimento</h2>
                   <p className="text-xs text-slate-500">
-                    Atenda os chamados dos seus clientes ou solicite apoio direto à administração central da Kivora.
+                    Atenda os chamados dos seus clientes ou solicite apoio direto via videochamada à administração central da Kivora.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    onClick={() => setShowPurchaseMinutesModal(true)}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                  >
+                    <span>+ Recarregar Minutos</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowVideoModal(true)}
+                    className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+                  >
+                    <Video className="w-4 h-4" />
+                    <span>Abrir Videochamada</span>
+                  </button>
+
                   <button
                     onClick={() => setShowAdminTicketModal(true)}
-                    className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                    className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Falar com o Admin (Kivora Central)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Banner de Saldo de Minutos de Vídeo para Parceiros */}
+              <div className="p-5 bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-950 text-white rounded-3xl border border-emerald-900/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-lg">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-600/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
+                    <Video className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-base font-black tracking-tight text-white">Assistência Remota em Direto (Google Meet / Jitsi)</h3>
+                      <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase font-mono">
+                        Tarifa Parceiro
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-300 mt-1 max-w-xl leading-relaxed">
+                      Apoio avançado de engenharia nível 2, auditoria de bases de dados e diagnóstico de sincronização multiloja em direto.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/10 pt-3 md:pt-0">
+                  <div className="text-left md:text-right">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
+                      Saldo do Canal
+                    </span>
+                    <span className="font-mono text-xl font-black text-emerald-400">
+                      {Math.floor((videoAccount?.remainingSeconds || 0) / 60)} min {((videoAccount?.remainingSeconds || 0) % 60)}s
+                    </span>
+                    <span className="text-[10px] text-slate-400 block mt-0.5">
+                      Gasto: {videoAccount?.totalMinutesSpent || 0} min utilizados
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => setShowPurchaseMinutesModal(true)}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-md shadow-emerald-600/20 whitespace-nowrap"
+                  >
+                    Recarregar (Wallet / Multicaixa)
                   </button>
                 </div>
               </div>
@@ -3466,6 +3540,26 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         userName={partnerName}
         userRole="parceiro"
         companyName={partnerName}
+        entityId={partnerCode}
+        partnerWalletBalance={walletBalance}
+        onDebitPartnerWallet={async (amount) => {
+          return await deductPartnerWallet(partnerCode, amount);
+        }}
+      />
+
+      {/* Modal de Compra de Minutos de Vídeo para Parceiros */}
+      <VideoMinutesPurchaseModal
+        isOpen={showPurchaseMinutesModal}
+        onClose={() => setShowPurchaseMinutesModal(false)}
+        account={videoAccount}
+        entityType="parceiro"
+        partnerWalletBalance={walletBalance}
+        onDebitPartnerWallet={async (amount) => {
+          return await deductPartnerWallet(partnerCode, amount);
+        }}
+        onSuccess={(updatedAcc) => {
+          setVideoAccount(updatedAcc);
+        }}
       />
 
     </div>
