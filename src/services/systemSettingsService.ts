@@ -271,7 +271,7 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   supportHours: 'Segunda a Sábado: 08h00 – 19h00',
   supportHoursSunday: 'Domingos e Feriados: Plantão para Urgências',
   address: KIVORA_INFO.address,
-  agtCertificate: 'Certificação AGT n.º 384/AGT/2024',
+  agtCertificate: 'Certificação AGT N.º FE/440/AGT/2026',
   githubUrl: 'https://github.com/marcosdc20/kivora-setup-vers-o',
   downloadUrl: 'https://github.com/marcosdc20/kivora-setup-vers-o/raw/main/KIVORA_1.1.0_x64-setup.exe',
   releaseVersion: '1.1.0',

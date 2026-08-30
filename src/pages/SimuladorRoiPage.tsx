@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
-  Calculator, TrendingUp, Clock, ShieldCheck,
+  Calculator, TrendingUp, ShieldCheck,
   ArrowRight
 } from 'lucide-react';
+import { CountUp } from '../components/CountUp';
 import { PageId } from '../components/Header';
 
 import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
@@ -35,19 +36,25 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
     // Poupança em horas por mês (redução de 75% no tempo de fechos manuais)
     const horasPoupadasMes = Math.round(horasFechoSemana * 4 * 0.75);
     const horasPoupadasAno = horasPoupadasMes * 12;
+    const valorHoraTrabalhoAOA = 2500;
+    const poupancaTempoMensal = horasPoupadasMes * valorHoraTrabalhoAOA;
+    const valorHorasAnual = horasPoupadasAno * valorHoraTrabalhoAOA;
 
     // Recuperação de perdas/desvios de stock estimados
     const poupancaStockMensal = Math.round(faturacaoMensal * setorAtivo.fatorQuebra * 0.6); // 60% das quebras eliminadas
     const poupancaStockAnual = poupancaStockMensal * 12;
 
+    // Redução estimada de erros operacionais
+    const poupancaErrosMensal = Math.round(faturacaoMensal * 0.005);
+
     // Poupança total anual em Kwanzas
-    const valorHoraTrabalhoAOA = 2500; // Valor médio estimado da hora de trabalho de gerência/caixa em Angola
-    const valorHorasAnual = horasPoupadasAno * valorHoraTrabalhoAOA;
-    const poupancaTotalAnualAOA = poupancaStockAnual + valorHorasAnual;
+    const poupancaTotalAnualAOA = poupancaStockAnual + valorHorasAnual + (poupancaErrosMensal * 12);
 
     return {
       horasPoupadasMes,
       horasPoupadasAno,
+      poupancaTempoMensal,
+      poupancaErrosMensal,
       poupancaStockMensal,
       poupancaStockAnual,
       poupancaTotalAnualAOA,
@@ -166,13 +173,14 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-600"
               />
             </div>
-
           </div>
 
           {/* Resultados Financeiros do ROI (Direita) */}
-          <div className="lg:col-span-6 bg-slate-950 text-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-slate-800 space-y-8 sticky top-24">
+          <div className="lg:col-span-6 bg-mesh-dark text-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-slate-800 space-y-8 sticky top-24 relative overflow-hidden">
+            <div className="orb orb-blue w-64 h-64 -top-16 -left-16 opacity-30" />
+            <div className="orb orb-green w-48 h-48 -bottom-12 -right-12 opacity-25" />
             
-            <div className="space-y-1 border-b border-slate-800 pb-4">
+            <div className="space-y-1 border-b border-white/10 pb-4 relative z-10">
               <div className="flex items-center gap-2 text-emerald-400 text-xs font-black uppercase tracking-wider">
                 <TrendingUp className="w-4 h-4" />
                 <span>Impacto Financeiro Estimado</span>
@@ -183,52 +191,55 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
             </div>
 
             {/* Grande Destaque do Valor em Kwanzas */}
-            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 text-center space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <div className="bg-white/8 backdrop-blur-md rounded-2xl p-6 border border-white/15 text-center space-y-2 relative z-10 shadow-inner">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
                 Poupança Direta Estimada (AOA)
               </span>
-              <div className="text-3xl sm:text-4xl font-black text-emerald-400 tracking-tight font-mono-num">
-                {formatAOA(resultados.poupancaTotalAnualAOA)}
+              <div className="text-3xl sm:text-4xl font-black text-emerald-400 tracking-tight font-mono-num drop-shadow-sm">
+                <CountUp end={resultados.poupancaTotalAnualAOA} suffix=" Kz" type="counter" duration={0.8} />
               </div>
-              <p className="text-[11px] text-slate-400 font-medium">
-                Equivalente a <strong className="text-white font-mono-num">{formatAOA(Math.round(resultados.poupancaTotalAnualAOA / 12))}</strong> poupados por mês
+              <p className="text-xs text-slate-300 font-medium">
+                Equivalente a <strong className="text-white font-mono-num"><CountUp end={Math.round(resultados.poupancaTotalAnualAOA / 12)} suffix=" Kz" type="counter" duration={0.8} /></strong> poupados por mês
               </p>
             </div>
 
-            {/* Decomposição dos Benefícios */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* 3 Blocos de Impacto */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 relative z-10">
               
-              <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 space-y-1">
-                <div className="flex items-center gap-2 text-blue-400 text-xs font-bold">
-                  <Clock className="w-4 h-4" />
-                  <span>Tempo Recuperado</span>
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1 hover:bg-white/10 transition-all">
+                <div className="text-[10px] font-bold uppercase text-slate-300">Tempo Fecho</div>
+                <div className="text-sm font-black text-white font-mono-num">
+                  {formatAOA(resultados.poupancaTempoMensal)} / mês
                 </div>
-                <div className="text-xl font-black text-white font-mono-num">
-                  {resultados.horasPoupadasMes}h / mês
-                </div>
-                <p className="text-[10px] text-slate-400">
-                  {resultados.horasPoupadasAno} horas a menos em conferências manuais e reconciliações.
+                <p className="text-[10px] text-slate-300">
+                  {resultados.horasPoupadasMes}h libertadas por mês da gerência.
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 space-y-1">
-                <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>Controlo de Quebras</span>
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1 hover:bg-white/10 transition-all">
+                <div className="text-[10px] font-bold uppercase text-slate-300">Erros Faturação</div>
+                <div className="text-sm font-black text-white font-mono-num">
+                  {formatAOA(resultados.poupancaErrosMensal)} / mês
                 </div>
-                <div className="text-xl font-black text-white font-mono-num">
+                <p className="text-[10px] text-slate-300">
+                  Eliminação de falhas manuais e descontos errados.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1 hover:bg-white/10 transition-all">
+                <div className="text-[10px] font-bold uppercase text-slate-300">Quebras Stock</div>
+                <div className="text-sm font-black text-white font-mono-num">
                   {formatAOA(resultados.poupancaStockMensal)} / mês
                 </div>
-                <p className="text-[10px] text-slate-400">
+                <p className="text-[10px] text-slate-300">
                   Redução imediata de extravios e quebras com auditoria cega de caixa.
                 </p>
               </div>
-
             </div>
 
             {/* Blindagem AGT */}
-            <div className="p-4 rounded-2xl bg-blue-950/50 border border-blue-500/40 flex items-start gap-3">
-              <ShieldCheck className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-2xl bg-blue-500/15 border border-blue-400/30 flex items-start gap-3 relative z-10">
+              <ShieldCheck className="w-5 h-5 text-blue-300 shrink-0 mt-0.5" />
               <div className="text-xs text-slate-300">
                 <strong className="text-white block mb-0.5">Zero Risco de Multas da AGT:</strong>
                 Garante 100% de conformidade com o Decreto 71/25 e evita coimas fiscais que podem ascender a milhões de Kwanzas.
@@ -236,10 +247,10 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
             </div>
 
             {/* CTA Final */}
-            <div className="pt-2 space-y-2.5">
+            <div className="pt-2 space-y-2.5 relative z-10">
               <button
                 onClick={() => onOpenDemoModal(`Estudo de ROI: ${setores.find((s) => s.id === setor)?.nome}`)}
-                className="btn-premium-primary w-full text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-orange-600/40 transition-all cursor-pointer hover:-translate-y-1 shimmer-button"
               >
                 <span>Agendar Demonstração VIP & Implementação</span>
                 <ArrowRight className="w-4 h-4" />
@@ -247,7 +258,7 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
 
               <button
                 onClick={() => onNavigatePage('planos')}
-                className="w-full bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white font-bold text-xs py-3 px-4 rounded-xl transition-all border border-white/15 flex items-center justify-center gap-2 cursor-pointer backdrop-blur-xs"
+                className="w-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs py-3 px-4 rounded-xl transition-all border border-white/20 hover:border-white/40 flex items-center justify-center gap-2 cursor-pointer backdrop-blur-xs hover:-translate-y-0.5"
               >
                 <span>Consultar Tabela de Preços de Licenças</span>
                 <ArrowRight className="w-3.5 h-3.5" />

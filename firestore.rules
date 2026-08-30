@@ -53,19 +53,19 @@ service cloud.firestore {
     // Configurações Globais (NIF, Contactos, Métricas, Investidores, Províncias, Marcas, Vídeos YouTube, Links de Download)
     match /system_settings/{settingId} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin();
     }
 
     // Políticas de Licenciamento, Configurações de E-mail (Resend/SendGrid/SMTP) e Quotas
     match /settings/{settingId} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin();
     }
 
     // Tabela Oficial de Preços de Atacado para Parceiros (/partner_pricing/{planType})
     match /partner_pricing/{planType} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -93,11 +93,11 @@ service cloud.firestore {
                        ]);
 
       // Eliminação: Apenas SuperAdmin
-      allow delete: if isAdmin() || isAuthenticated();
+      allow delete: if isAdmin();
     }
     match /licenses/{licenseId}/{allSubcollections=**} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin() || isPartner();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -106,31 +106,40 @@ service cloud.firestore {
     
     // Contas de Parceiros (/partners/{partnerId})
     match /partners/{partnerId} {
-      allow read, create, update: if true;
-      allow delete: if isAdmin() || isAuthenticated();
+      allow read: if true;
+      allow create: if isAdmin() || (isAuthenticated() && request.auth.uid == partnerId);
+      allow update: if isAdmin() || (isAuthenticated() && (request.auth.uid == partnerId || isPartner()));
+      allow delete: if isAdmin();
     }
     match /partners/{partnerId}/{allSubcollections=**} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAdmin() || (isAuthenticated() && request.auth.uid == partnerId);
     }
 
     // Extrato de Débitos e Transações de Carteira (/partner_debts/{debtId})
     match /partner_debts/{debtId} {
-      allow read, create, update: if true;
-      allow delete: if isAdmin() || isAuthenticated();
+      allow read: if true;
+      allow create: if isAdmin() || isPartner() || isAuthenticated();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 4. FORMULÁRIOS PÚBLICOS DO SITE (LEADS & CANDIDATURAS)
     // ─────────────────────────────────────────────────────────────
     
-    // Solicitações de Demonstração (Append-Only com leitura pública para admin)
+    // Solicitações de Demonstração (Validação estrita de lead)
     match /leads_demonstracao/{leadId} {
-      allow read, create, update, delete: if true;
+      allow read: if true;
+      allow create: if request.resource.data.name is string || request.resource.data.nome is string;
+      allow update, delete: if isAdmin() || isAuthenticated();
     }
 
-    // Candidaturas ao Programa de Parceiros (Criação pública e gestão no Admin)
+    // Candidaturas ao Programa de Parceiros (Criação com validação e gestão no Admin)
     match /partner_applications/{appId} {
-      allow read, create, update, delete: if true;
+      allow read: if true;
+      allow create: if request.resource.data.companyName is string || request.resource.data.empresa is string || request.resource.data.nome is string;
+      allow update, delete: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -138,21 +147,21 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /companies/{companyId} {
       allow read: if true;
-      allow create, update: if isAuthenticated() || isAdmin() || isPartner() || true;
-      allow delete: if isAdmin() || isAuthenticated();
+      allow create, update: if isAdmin() || isPartner() || isAuthenticated();
+      allow delete: if isAdmin();
     }
     match /empresas/{empresaId} {
       allow read: if true;
-      allow create, update: if isAuthenticated() || isAdmin() || isPartner() || true;
-      allow delete: if isAdmin() || isAuthenticated();
+      allow create, update: if isAdmin() || isPartner() || isAuthenticated();
+      allow delete: if isAdmin();
     }
     match /installations/{installationId} {
       allow read: if true;
-      allow write: if isAuthenticated() || isAdmin() || isPartner() || true;
+      allow write: if isAdmin() || isPartner() || isAuthenticated();
     }
     match /branches/{branchId} {
       allow read: if true;
-      allow write: if isAuthenticated() || isAdmin() || isPartner() || true;
+      allow write: if isAdmin() || isPartner() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -160,15 +169,18 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /subscription_invoices/{invoiceId} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin() || isPartner();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 7. CENTRAL DE SUPORTE & TICKETS DE ATENDIMENTO
     // ─────────────────────────────────────────────────────────────
     match /support_tickets/{ticketId} {
-      allow read, create, update: if true; // Envio e troca de mensagens de chat em tempo real (Cliente, Parceiro, Admin)
-      allow delete: if isAdmin() || isAuthenticated();
+      allow read: if true;
+      allow create: if (request.resource.data.clientEmail is string || request.resource.data.email is string || request.resource.data.clientName is string)
+                    && (request.resource.data.subject is string || request.resource.data.assunto is string);
+      allow update: if true; // Permite troca de mensagens de chat em tempo real
+      allow delete: if isAdmin();
     }
     match /support_tickets/{ticketId}/{allSubcollections=**} {
       allow read, write: if true;
@@ -179,19 +191,19 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /announcements/{announcementId} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin();
     }
     match /updates/{updateId} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin();
     }
     match /news_posts/{postId} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin();
     }
     match /noticias/{noticiaId} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -201,7 +213,7 @@ service cloud.firestore {
       allow get, list: if true; // O ERP verifica se este computador físico já usou a avaliação
       allow create: if request.resource.data.hardware_id == hardwareId; // Registo da impressão digital
       allow update: if false; // IMUTÁVEL: Impede alteração ou reset fraudulento de trial por hackers
-      allow delete: if isAdmin() || isAuthenticated(); // Apenas Admin pode conceder reset de avaliação
+      allow delete: if isAdmin(); // Apenas SuperAdmin pode conceder reset de avaliação
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -221,7 +233,7 @@ service cloud.firestore {
       allow read: if true;
       allow create: if true; // Append-Only: gravação contínua de eventos de auditoria
       allow update: if false; // IMUTÁVEL: Proibido alterar registos de auditoria (Compliance AGT)
-      allow delete: if isAdmin() || isAuthenticated();
+      allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -229,7 +241,9 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /users/{userId} {
       allow read: if true;
-      allow write: if isAuthenticated() || isAdmin() || isPartner() || true;
+      allow create: if isAuthenticated() || isAdmin();
+      allow update: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
+      allow delete: if isAdmin();
     }
     match /admins/{adminId} {
       allow read: if true;
@@ -242,7 +256,7 @@ service cloud.firestore {
     // Catálogo de Produtos e Serviços da Loja (Leitura Pública, Gestão Admin)
     match /store_products/{productId} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin();
     }
 
     // Encomendas & Vendas da Loja (Criação por clientes da web com validação, Gestão por Admins)
@@ -250,13 +264,13 @@ service cloud.firestore {
       allow read: if true;
       allow create: if (request.resource.data.clientName is string || request.resource.data.nome is string)
                     && request.resource.data.totalAOA is number;
-      allow update, delete: if isAdmin() || isAuthenticated();
+      allow update, delete: if isAdmin();
     }
 
     // Taxas de Deslocação / Entrega por Província (Leitura Pública, Gestão Admin)
     match /store_delivery_rates/{rateId} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────

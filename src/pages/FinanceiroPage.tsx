@@ -152,19 +152,20 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
 
       {/* Banner de Validador de Licença */}
       <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 -mt-8 relative z-20">
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
-          <div className="flex items-center gap-3.5 text-center sm:text-left">
-            <div className="w-10 h-10 rounded-2xl bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center shrink-0">
-              <Key className="w-5 h-5" />
+        <div className="bg-mesh-dark border border-slate-800 rounded-3xl p-5 sm:p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl relative overflow-hidden">
+          <div className="orb orb-blue w-48 h-48 -top-12 -left-12 opacity-30" />
+          <div className="flex items-center gap-3.5 text-center sm:text-left relative z-10">
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-300 border border-blue-400/30 flex items-center justify-center shrink-0 shadow-inner">
+              <Key className="w-6 h-6" />
             </div>
             <div>
-              <strong className="text-sm font-bold block">Já possui uma Chave de Licença KIVORA?</strong>
-              <span className="text-xs text-slate-400">Consulte a autenticidade fiscal, postos autorizados e validade no validador oficial.</span>
+              <strong className="text-sm font-bold block text-white">Já possui uma Chave de Licença KIVORA?</strong>
+              <span className="text-xs text-slate-300">Consulte a autenticidade fiscal, postos autorizados e validade no validador oficial.</span>
             </div>
           </div>
           <button
             onClick={() => onNavigatePage && onNavigatePage('validar-licenca')}
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg shadow-blue-600/30 transition-all shrink-0 cursor-pointer relative z-10 shimmer-button hover:-translate-y-0.5"
           >
             <ShieldCheck className="w-4 h-4" />
             <span>Validar Licença Online</span>
@@ -187,67 +188,75 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
-          {dynamicPlans.map((plan) => (
-            <div
-              key={plan.id}
-              className={`rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 relative bg-white ${
-                plan.highlight
-                  ? 'border-2 border-emerald-500 shadow-xl scale-[1.02] z-10'
-                  : 'border border-slate-200/90 shadow-sm hover:shadow-lg hover:border-slate-300'
-              }`}
-            >
-              {plan.highlight && (
-                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full shadow-md">
-                  {plan.highlightBadge || 'Mais Popular!'}
-                </span>
-              )}
+          {dynamicPlans.map((plan) => {
+            const planGradients: Record<string, string> = {
+              mensal: 'from-blue-50/60 via-white to-white card-glow-blue',
+              anual: 'from-emerald-50/80 via-white to-white card-glow-green border-2 border-emerald-500 shadow-2xl scale-[1.03] z-10',
+              vitalicio: 'from-purple-50/60 via-white to-white card-glow-purple',
+            };
+            const planBg = planGradients[plan.id] || 'from-slate-50 via-white to-white';
+            return (
+              <div
+                key={plan.id}
+                className={`bg-gradient-to-br ${planBg} rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${
+                  !plan.highlight ? 'border border-slate-200/90 shadow-sm hover:shadow-xl hover:-translate-y-1' : ''
+                }`}
+              >
+                {plan.highlight && (
+                  <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest px-5 py-1 rounded-b-xl shadow-md">
+                    {plan.highlightBadge || 'Mais Popular!'}
+                  </span>
+                )}
 
-              <div className="space-y-5">
-                <div>
-                  <div className="text-xl font-black text-slate-950 mb-1">{plan.name}</div>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    {plan.desc}
-                  </p>
+                <div className="space-y-5 pt-2">
+                  <div>
+                    <div className="text-xl font-black text-slate-950 mb-1">{plan.name}</div>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      {plan.desc}
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-50/80 border border-slate-200/80 rounded-2xl py-3 px-4 flex items-baseline justify-center gap-1.5 shadow-inner">
+                    <span className="text-sm font-bold text-slate-500">Kz</span>
+                    <span className="text-3xl font-black tracking-tight text-slate-950 font-mono-num">{plan.price}</span>
+                    <span className="text-xs font-semibold text-slate-500">
+                      {plan.period}
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <span className="text-[11px] font-bold uppercase tracking-wider block text-slate-400">
+                      Funcionalidades Inclusas:
+                    </span>
+                    <ul className="space-y-2.5">
+                      {plan.features.map((feat, fi) => (
+                        <li key={fi} className="flex items-start gap-2.5 text-xs text-slate-700 font-medium">
+                          <div className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" strokeWidth={2.5} />
+                          </div>
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl py-3 px-4 flex items-baseline justify-center gap-1.5">
-                  <span className="text-sm font-bold text-slate-500">Kz</span>
-                  <span className="text-3xl font-black tracking-tight text-slate-950">{plan.price}</span>
-                  <span className="text-xs font-semibold text-slate-500">
-                    {plan.period}
-                  </span>
-                </div>
-
-                <div className="space-y-3 pt-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider block text-slate-400">
-                    Funcionalidades Inclusas:
-                  </span>
-                  <ul className="space-y-2.5">
-                    {plan.features.map((feat, fi) => (
-                      <li key={fi} className="flex items-start gap-2.5 text-xs text-slate-700 font-medium">
-                        <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" strokeWidth={2} />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="pt-8">
+                  <button
+                    onClick={() => onOpenDemoModal(`Licença ${plan.name}`)}
+                    className={`w-full py-4 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:-translate-y-1 cursor-pointer ${
+                      plan.highlight
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-600/30 shimmer-button'
+                        : 'bg-slate-950 hover:bg-blue-600 text-white shadow-md'
+                    }`}
+                  >
+                    <span>{plan.ctaText}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-
-              <div className="pt-8">
-                <button
-                  onClick={() => onOpenDemoModal(`Licença ${plan.name}`)}
-                  className={`w-full py-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 cursor-pointer ${
-                    plan.highlight
-                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20'
-                      : 'bg-slate-950 hover:bg-slate-800 text-white'
-                  }`}
-                >
-                  <span>{plan.ctaText}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 

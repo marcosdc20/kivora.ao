@@ -3,7 +3,8 @@ import {
   LayoutDashboard, Building2, Key, Monitor, Handshake,
   CreditCard, Package, HeadphonesIcon, BarChart3,
   Bell, Users, ScrollText, Settings, ChevronDown,
-  ChevronRight, LogOut, Shield, X, Menu, ShoppingBag
+  ChevronRight, LogOut, Shield, X, Menu, ShoppingBag,
+  Award, ExternalLink
 } from 'lucide-react';
 import { AdminSection } from './types';
 
@@ -11,6 +12,9 @@ interface SidebarProps {
   activeSection: AdminSection;
   onNavigate: (section: AdminSection) => void;
   onClose?: () => void;
+  onLogout?: () => void;
+  onExitAdmin?: () => void;
+  userEmail?: string;
   collapsed?: boolean;
 }
 
@@ -23,66 +27,107 @@ interface NavItem {
   badgeColor?: string;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" strokeWidth={1.75} /> },
+interface NavGroup {
+  groupTitle: string;
+  items: NavItem[];
+}
+
+const NAV_GROUPS: NavGroup[] = [
   {
-    id: 'empresas', label: 'Empresas', icon: <Building2 className="w-4 h-4" strokeWidth={1.75} />,
-    children: [
-      { id: 'empresas', label: 'Todas as empresas' },
-      { id: 'empresa-detalhe', label: 'Activas' },
+    groupTitle: 'Visão Geral & Controlo',
+    items: [
+      { id: 'dashboard', label: 'Dashboard Executivo', icon: <LayoutDashboard className="w-4 h-4" strokeWidth={1.75} /> },
+      { id: 'relatorios', label: 'Relatórios & Vendas', icon: <BarChart3 className="w-4 h-4" strokeWidth={1.75} /> },
+      { id: 'auditoria', label: 'Auditoria & Logs', icon: <ScrollText className="w-4 h-4" strokeWidth={1.75} /> },
     ]
   },
   {
-    id: 'licencas', label: 'Licenças', icon: <Key className="w-4 h-4" strokeWidth={1.75} />,
-    children: [
-      { id: 'licencas', label: 'Todas as licenças' },
-      { id: 'licenca-criar', label: 'Criar licença' },
+    groupTitle: 'Gestão Comercial & AGT',
+    items: [
+      {
+        id: 'licencas', label: 'Licenças de Software', icon: <Key className="w-4 h-4" strokeWidth={1.75} />,
+        children: [
+          { id: 'licencas', label: 'Todas as Licenças' },
+          { id: 'licenca-criar', label: '+ Emitir Nova Licença' },
+        ]
+      },
+      {
+        id: 'empresas', label: 'Empresas Clientes', icon: <Building2 className="w-4 h-4" strokeWidth={1.75} />,
+        children: [
+          { id: 'empresas', label: 'Base de Empresas' },
+          { id: 'empresa-detalhe', label: 'Empresas Ativas' },
+        ]
+      },
+      {
+        id: 'instalacoes', label: 'Postos & Caixas LAN', icon: <Monitor className="w-4 h-4" strokeWidth={1.75} />,
+        children: [
+          { id: 'instalacoes', label: 'Computadores e POS' },
+        ]
+      },
+      { id: 'planos', label: 'Planos & Produtos', icon: <Package className="w-4 h-4" strokeWidth={1.75} /> },
+      { id: 'pagamentos', label: 'Pagamentos & Faturas', icon: <CreditCard className="w-4 h-4" strokeWidth={1.75} /> },
     ]
   },
   {
-    id: 'instalacoes', label: 'Instalações', icon: <Monitor className="w-4 h-4" strokeWidth={1.75} />,
-    children: [
-      { id: 'instalacoes', label: 'Computadores' },
+    groupTitle: 'Rede de Canais & Loja POS',
+    items: [
+      {
+        id: 'parceiros', label: 'Rede de Parceiros', icon: <Handshake className="w-4 h-4" strokeWidth={1.75} />,
+        children: [
+          { id: 'parceiros', label: 'Todos os Parceiros' },
+          { id: 'parceiros-candidaturas', label: 'Candidaturas (25k)' },
+        ]
+      },
+      {
+        id: 'parceiros-candidaturas',
+        label: 'Candidaturas & Homologação',
+        icon: <Award className="w-4 h-4 text-amber-400" strokeWidth={1.75} />,
+        badge: '25.000 Kz',
+        badgeColor: 'amber'
+      },
+      {
+        id: 'loja',
+        label: 'Loja Hardware & Pedidos',
+        icon: <ShoppingBag className="w-4 h-4 text-emerald-400" strokeWidth={1.75} />,
+        badge: 'Loja POS',
+        badgeColor: 'emerald'
+      },
     ]
   },
   {
-    id: 'loja',
-    label: 'Loja & Vendas',
-    icon: <ShoppingBag className="w-4 h-4 text-amber-400" strokeWidth={1.75} />,
-    badge: 'Novo',
-    badgeColor: 'amber'
-  },
-  {
-    id: 'parceiros', label: 'Parceiros', icon: <Handshake className="w-4 h-4" strokeWidth={1.75} />,
-    children: [
-      { id: 'parceiros', label: 'Todos os parceiros' },
-      { id: 'parceiros-candidaturas', label: 'Candidaturas' },
+    groupTitle: 'Atendimento & Mensagens',
+    items: [
+      { id: 'suporte', label: 'Central de Suporte & SLA', icon: <HeadphonesIcon className="w-4 h-4" strokeWidth={1.75} /> },
+      { id: 'comunicacao', label: 'Comunicação & Avisos', icon: <Bell className="w-4 h-4" strokeWidth={1.75} /> },
     ]
   },
   {
-    id: 'pagamentos', label: 'Pagamentos', icon: <CreditCard className="w-4 h-4" strokeWidth={1.75} />
+    groupTitle: 'Sistema & Definições',
+    items: [
+      { id: 'utilizadores', label: 'Utilizadores Admin', icon: <Users className="w-4 h-4" strokeWidth={1.75} /> },
+      { id: 'configuracoes', label: 'Definições do Sistema', icon: <Settings className="w-4 h-4" strokeWidth={1.75} /> },
+    ]
   },
-  { id: 'planos', label: 'Produtos / Planos', icon: <Package className="w-4 h-4" strokeWidth={1.75} /> },
-  {
-    id: 'suporte', label: 'Suporte', icon: <HeadphonesIcon className="w-4 h-4" strokeWidth={1.75} />
-  },
-  { id: 'relatorios', label: 'Relatórios', icon: <BarChart3 className="w-4 h-4" strokeWidth={1.75} /> },
-  { id: 'comunicacao', label: 'Comunicação', icon: <Bell className="w-4 h-4" strokeWidth={1.75} /> },
-  { id: 'utilizadores', label: 'Utilizadores Admin', icon: <Users className="w-4 h-4" strokeWidth={1.75} /> },
-  { id: 'auditoria', label: 'Auditoria', icon: <ScrollText className="w-4 h-4" strokeWidth={1.75} /> },
-  { id: 'configuracoes', label: 'Configurações', icon: <Settings className="w-4 h-4" strokeWidth={1.75} /> },
 ];
 
 const BADGE_COLORS: Record<string, string> = {
   amber: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+  emerald: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
   blue: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
   orange: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
   red: 'bg-red-500/20 text-red-300 border-red-500/30',
 };
 
-export const AdminSidebar: React.FC<SidebarProps> = ({ activeSection, onNavigate, onClose }) => {
+export const AdminSidebar: React.FC<SidebarProps> = ({
+  activeSection,
+  onNavigate,
+  onClose,
+  onLogout,
+  onExitAdmin,
+  userEmail = 'admin@kivora.ao'
+}) => {
   const [expanded, setExpanded] = React.useState<Set<string>>(
-    new Set(['empresas', 'licencas', 'parceiros'])
+    new Set(['licencas', 'empresas', 'parceiros'])
   );
 
   const toggle = (id: string) => {
@@ -95,112 +140,160 @@ export const AdminSidebar: React.FC<SidebarProps> = ({ activeSection, onNavigate
   };
 
   return (
-    <aside className="w-64 h-full flex flex-col bg-slate-950 border-r border-slate-800 overflow-y-auto flex-shrink-0">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-5 border-b border-slate-800">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
-            <Shield className="w-4 h-4 text-white" strokeWidth={2} />
+    <aside className="w-68 h-full flex flex-col bg-slate-950 border-r border-slate-800/80 overflow-y-auto flex-shrink-0 select-none">
+      {/* Header Corporativo Executivo */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80 bg-slate-950/60 sticky top-0 z-10 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-md shadow-blue-600/30 border border-blue-400/30">
+            <Shield className="w-5 h-5 text-white" strokeWidth={2} />
           </div>
           <div>
-            <span className="text-white font-black text-sm tracking-tight">KIVORA</span>
-            <span className="text-slate-500 text-[10px] block font-medium uppercase tracking-widest -mt-0.5">Admin Panel</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-white font-black text-sm tracking-tight">KIVORA SOFT</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Cloud Ativa" />
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-blue-400 text-[10px] font-bold tracking-wider uppercase">Painel Executivo</span>
+              <span className="text-slate-600 text-[9px] font-mono">v2.4</span>
+            </div>
           </div>
         </div>
         {onClose && (
-          <button onClick={onClose} className="lg:hidden text-slate-500 hover:text-white">
+          <button
+            onClick={onClose}
+            className="lg:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+          >
             <X className="w-5 h-5" />
           </button>
         )}
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 py-4 px-3 space-y-0.5">
-        {NAV_ITEMS.map((item) => {
-          const isActive = activeSection === item.id || (item.children?.some(c => c.id === activeSection));
-          const isExpanded = expanded.has(item.id);
+      {/* Navegação Categorizada em Grupos */}
+      <nav className="flex-1 py-3 px-3 space-y-4">
+        {NAV_GROUPS.map((group, gIdx) => (
+          <div key={gIdx} className="space-y-1">
+            <div className="px-3 pt-2 pb-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                {group.groupTitle}
+              </span>
+            </div>
 
-          if (item.children) {
-            return (
-              <div key={item.id}>
-                <button
-                  onClick={() => toggle(item.id)}
-                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
-                    isActive ? 'bg-blue-600/15 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <span className="flex items-center gap-2.5">
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </span>
-                  <span className="flex items-center gap-2">
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const isDirectActive = activeSection === item.id;
+                const isChildActive = item.children?.some(c => c.id === activeSection);
+                const isActive = isDirectActive || isChildActive;
+                const isExpanded = expanded.has(item.id);
+
+                if (item.children) {
+                  return (
+                    <div key={item.id} className="space-y-0.5">
+                      <button
+                        onClick={() => toggle(item.id)}
+                        className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                          isActive
+                            ? 'bg-blue-600/15 text-blue-300 font-bold border-l-2 border-blue-500 pl-2.5'
+                            : 'text-slate-300 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2.5 min-w-0">
+                          <span className={isActive ? 'text-blue-400' : 'text-slate-400'}>
+                            {item.icon}
+                          </span>
+                          <span className="truncate">{item.label}</span>
+                        </span>
+                        <span className="flex items-center gap-1.5 shrink-0">
+                          {item.badge && (
+                            <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full border ${BADGE_COLORS[item.badgeColor || 'blue']}`}>
+                              {item.badge}
+                            </span>
+                          )}
+                          {isExpanded
+                            ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" strokeWidth={2} />
+                            : <ChevronRight className="w-3.5 h-3.5 text-slate-400" strokeWidth={2} />
+                          }
+                        </span>
+                      </button>
+
+                      {isExpanded && (
+                        <div className="ml-3.5 border-l border-slate-800/80 pl-2.5 space-y-0.5 pt-0.5">
+                          {item.children.map((child) => (
+                            <button
+                              key={child.id}
+                              onClick={() => onNavigate(child.id)}
+                              className={`w-full text-left text-xs px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                                activeSection === child.id
+                                  ? 'bg-blue-600 text-white font-bold shadow-xs shadow-blue-600/30'
+                                  : 'text-slate-400 hover:text-slate-100 hover:bg-white/5 font-medium'
+                              }`}
+                            >
+                              {child.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onNavigate(item.id)}
+                    className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-blue-600/15 text-blue-300 font-bold border-l-2 border-blue-500 pl-2.5'
+                        : 'text-slate-300 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2.5 min-w-0">
+                      <span className={isActive ? 'text-blue-400' : 'text-slate-400'}>
+                        {item.icon}
+                      </span>
+                      <span className="truncate">{item.label}</span>
+                    </span>
                     {item.badge && (
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${BADGE_COLORS[item.badgeColor || 'blue']}`}>
+                      <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full border shrink-0 ${BADGE_COLORS[item.badgeColor || 'blue']}`}>
                         {item.badge}
                       </span>
                     )}
-                    {isExpanded
-                      ? <ChevronDown className="w-3.5 h-3.5 opacity-60" strokeWidth={2} />
-                      : <ChevronRight className="w-3.5 h-3.5 opacity-60" strokeWidth={2} />
-                    }
-                  </span>
-                </button>
-                {isExpanded && (
-                  <div className="ml-4 mt-0.5 border-l border-slate-800 pl-3 space-y-0.5">
-                    {item.children.map((child) => (
-                      <button
-                        key={child.id}
-                        onClick={() => onNavigate(child.id)}
-                        className={`w-full text-left text-xs px-3 py-2 rounded-lg transition-colors ${
-                          activeSection === child.id
-                            ? 'text-white font-bold'
-                            : 'text-slate-500 hover:text-slate-200'
-                        }`}
-                      >
-                        {child.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          }
-
-          return (
-            <button
-              key={item.id}
-              onClick={() => onNavigate(item.id)}
-              className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
-                isActive ? 'bg-blue-600/15 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <span className="flex items-center gap-2.5">
-                {item.icon}
-                <span>{item.label}</span>
-              </span>
-              {item.badge && (
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${BADGE_COLORS[item.badgeColor || 'blue']}`}>
-                  {item.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-slate-800">
-        <div className="flex items-center gap-3 px-2 py-2">
-          <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center text-white font-bold text-xs">
+      {/* Footer com Perfil do Utilizador & Acesso Rápido */}
+      <div className="p-3 border-t border-slate-800/80 bg-slate-950/90 space-y-2">
+        {onExitAdmin && (
+          <button
+            onClick={onExitAdmin}
+            className="w-full flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-[11px] font-bold py-2 rounded-xl border border-slate-800 transition-all cursor-pointer"
+          >
+            <ExternalLink className="w-3.5 h-3.5 text-blue-400" />
+            <span>Ver Site Público</span>
+          </button>
+        )}
+
+        <div className="flex items-center gap-2.5 p-2 bg-slate-900/60 rounded-xl border border-slate-800/60">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-700 to-slate-800 text-white font-black text-xs flex items-center justify-center border border-slate-700">
             VS
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white text-xs font-bold truncate">Visual Software</p>
-            <p className="text-slate-500 text-[10px] truncate">admin@kivora.ao</p>
+            <p className="text-slate-400 text-[10px] truncate font-mono">{userEmail}</p>
           </div>
-          <button className="text-slate-600 hover:text-red-400 transition-colors" title="Sair">
-            <LogOut className="w-4 h-4" strokeWidth={1.75} />
-          </button>
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="text-slate-400 hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
+              title="Terminar Sessão"
+            >
+              <LogOut className="w-4 h-4" strokeWidth={1.75} />
+            </button>
+          )}
         </div>
       </div>
     </aside>

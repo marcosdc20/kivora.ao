@@ -119,8 +119,9 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
       <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-24 space-y-12">
         
         {/* Filtros & Pesquisa */}
-        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="bg-mesh border border-slate-200/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm relative overflow-hidden">
+          <div className="orb orb-blue w-48 h-48 -top-12 -right-12 opacity-20" />
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between relative z-10">
             {/* Search Input */}
             <div className="relative flex-1 w-full">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
@@ -129,7 +130,7 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
                 placeholder="Pesquise por nome, província, cidade ou especialidade (ex: Farmácia, POS, Rede)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 shadow-xs"
               />
             </div>
 
@@ -139,7 +140,7 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
               <select
                 value={selectedProvincia}
                 onChange={(e) => setSelectedProvincia(e.target.value)}
-                className="w-full md:w-56 bg-white border border-slate-200 text-xs sm:text-sm font-bold rounded-2xl px-3.5 py-2.5 text-slate-800 focus:outline-none focus:border-blue-500"
+                className="w-full md:w-56 bg-white border border-slate-200 text-xs sm:text-sm font-bold rounded-2xl px-3.5 py-2.5 text-slate-800 focus:outline-none focus:border-blue-500 shadow-xs cursor-pointer"
               >
                 {PROVINCIAS_ANGOLA.map((prov) => (
                   <option key={prov} value={prov}>{prov}</option>
@@ -153,7 +154,7 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
               <select
                 value={selectedTier}
                 onChange={(e) => setSelectedTier(e.target.value)}
-                className="w-full md:w-48 bg-white border border-slate-200 text-xs sm:text-sm font-bold rounded-2xl px-3.5 py-2.5 text-slate-800 focus:outline-none focus:border-blue-500"
+                className="w-full md:w-48 bg-white border border-slate-200 text-xs sm:text-sm font-bold rounded-2xl px-3.5 py-2.5 text-slate-800 focus:outline-none focus:border-blue-500 shadow-xs cursor-pointer"
               >
                 <option value="todos">Todos os Níveis</option>
                 <option value="diamond">Diamond Partner</option>
@@ -164,11 +165,11 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-200">
-            <span>A mostrar <strong>{filteredPartners.length}</strong> parceiro(s) homologado(s)</span>
+          <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-200/80 relative z-10">
+            <span>A mostrar <strong>{filteredPartners.length}</strong> parceiro(s) credenciado(s)</span>
             <button
               onClick={() => onNavigatePage('candidatura-parceiro')}
-              className="text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer"
+              className="text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer hover:translate-x-0.5 transition-all"
             >
               <span>Quer ser parceiro na sua região? Candidate-se</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -185,7 +186,7 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
             <div className="space-y-1 max-w-md mx-auto">
               <h3 className="text-base font-black text-slate-900">Nenhum parceiro encontrado nesta região</h3>
               <p className="text-xs text-slate-500">
-                Seja o primeiro distribuidor homologado da sua província e comece a fornecer o KIVORA ERP.
+                Seja o distribuidor credenciado da sua província e comece a fornecer o KIVORA ERP.
               </p>
             </div>
             <button
@@ -220,7 +221,7 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
 
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                     <ShieldCheck className="w-3 h-3" />
-                    <span>Homologado</span>
+                    <span>Credenciado</span>
                   </span>
                 </div>
 
@@ -285,22 +286,24 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
         )}
 
         {/* Banner CTA para Candidatura */}
-        <div className="bg-slate-950 text-white rounded-3xl p-8 sm:p-12 border border-slate-800 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="space-y-2 text-center md:text-left">
-            <span className="text-xs font-black uppercase tracking-widest text-amber-400">
+        <div className="bg-mesh-dark text-white rounded-3xl p-8 sm:p-12 border border-slate-800 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+          <div className="orb orb-blue w-80 h-80 -top-20 -left-20 opacity-30" />
+          <div className="orb orb-orange w-56 h-56 -bottom-16 -right-16 opacity-25" />
+          <div className="space-y-2 text-center md:text-left relative z-10">
+            <span className="text-xs font-bold uppercase tracking-wider text-white bg-white/15 px-3.5 py-1 rounded-full border border-white/25">
               Expansão Nacional de Canais
             </span>
-            <h3 className="text-2xl sm:text-3xl font-black">
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               É técnico de TI ou tem uma empresa de informática?
             </h3>
-            <p className="text-slate-400 text-xs sm:text-sm max-w-xl leading-relaxed">
-              Junte-se à rede nacional da Visual Software, receba os 2 certificados oficiais de homologação e passe a faturar com margens de atacado na sua província.
+            <p className="text-slate-300 text-xs sm:text-sm max-w-xl leading-relaxed font-normal">
+              Junte-se à rede nacional da Visual Software, receba os certificados oficiais de parceiro credenciado e passe a faturar com margens vantajosas na sua província.
             </p>
           </div>
 
           <button
             onClick={() => onNavigatePage('candidatura-parceiro')}
-            className="bg-blue-600 hover:bg-blue-500 text-white font-black text-xs sm:text-sm px-8 py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/30 shrink-0 cursor-pointer flex items-center gap-2"
+            className="bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-xs sm:text-sm px-8 py-4 rounded-2xl transition-all shadow-xl shadow-orange-600/40 shrink-0 cursor-pointer flex items-center gap-2 hover:-translate-y-1 shimmer-button relative z-10"
           >
             <span>Submeter Candidatura</span>
             <ArrowRight className="w-4 h-4" />

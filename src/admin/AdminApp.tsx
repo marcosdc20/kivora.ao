@@ -223,6 +223,12 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
     }
   };
 
+  const handleLogout = async () => {
+    await logoutUser();
+    setAuthenticated(false);
+    setSession(null);
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* Desktop Sidebar */}
@@ -230,6 +236,9 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
         <AdminSidebar
           activeSection={activeSection}
           onNavigate={navigate}
+          onLogout={handleLogout}
+          onExitAdmin={onExitAdmin}
+          userEmail={session?.email || 'admin@kivora.ao'}
         />
       </div>
 
@@ -245,6 +254,9 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
               activeSection={activeSection}
               onNavigate={navigate}
               onClose={() => setMobileSidebarOpen(false)}
+              onLogout={handleLogout}
+              onExitAdmin={onExitAdmin}
+              userEmail={session?.email || 'admin@kivora.ao'}
             />
           </div>
         </div>

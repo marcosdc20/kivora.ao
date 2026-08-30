@@ -1,8 +1,8 @@
 /**
  * useScrollReveal — Hook leve de scroll reveal via IntersectionObserver + CSS
  * 
- * Usa apenas CSS transitions sem framer-motion para ser ultra-leve.
  * Aplica as classes 'revealed' aos elementos com [data-reveal] quando entram no viewport.
+ * Elementos acima da dobra revelam-se imediatamente; elementos abaixo animam ao rolar.
  * 
  * @param containerRef - ref do contentor de página (ou null para usar document)
  * @param deps - dependências adicionais para re-executar (ex: dados carregados)
@@ -14,26 +14,43 @@ export function useScrollReveal(
   deps: unknown[] = []
 ) {
   useEffect(() => {
-    const root = containerRef?.current ?? document;
-    const elements = (root as Element | Document).querySelectorAll('[data-reveal]');
+    let observer: IntersectionObserver | null = null;
 
-    if (!elements.length) return;
+    const timer = setTimeout(() => {
+      const root = containerRef?.current ?? document;
+      const elements = (root as Element | Document).querySelectorAll('[data-reveal]');
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('revealed');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
-    );
+      if (!elements.length) return;
 
-    elements.forEach((el) => observer.observe(el));
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('revealed');
+              observer?.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.08, rootMargin: '0px 0px -30px 0px' }
+      );
 
-    return () => observer.disconnect();
+      elements.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        // Se já está visível no topo, revela logo
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          el.classList.add('revealed');
+        } else {
+          observer?.observe(el);
+        }
+      });
+    }, 50);
+
+    return () => {
+      clearTimeout(timer);
+      if (observer) {
+        observer.disconnect();
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, ...deps]);
 }

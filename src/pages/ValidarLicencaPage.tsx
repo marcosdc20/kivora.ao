@@ -110,15 +110,16 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
         </div>
 
         {/* Search Box — Oculto na Impressão */}
-        <div className="print-hide bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-5">
-          <div className="text-center max-w-xl mx-auto">
-            <h1 className="text-2xl font-black text-slate-950">Validar Licença Kivora ERP</h1>
-            <p className="text-xs text-slate-500 mt-1">
+        <div className="print-hide bg-mesh rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-5 relative overflow-hidden">
+          <div className="orb orb-blue w-48 h-48 -top-12 -right-12 opacity-25" />
+          <div className="text-center max-w-xl mx-auto relative z-10">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-950">Validar Licença Kivora ERP</h1>
+            <p className="text-xs text-slate-600 mt-1">
               Introduza a chave de ativação ou número de série para verificar a autenticidade fiscal e emitir o certificado oficial.
             </p>
           </div>
 
-          <form onSubmit={handleFormSubmit} className="flex flex-col sm:flex-row gap-3 bg-slate-50 border border-slate-200 rounded-2xl p-2 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+          <form onSubmit={handleFormSubmit} className="flex flex-col sm:flex-row gap-3 bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl p-2 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 shadow-sm transition-all relative z-10">
             <div className="relative flex-1 flex items-center px-3">
               <Key className="w-4 h-4 text-slate-400 shrink-0" />
               <input
@@ -133,7 +134,7 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
             <button
               type="submit"
               disabled={loading || !searchKey.trim()}
-              className="btn-premium-primary disabled:opacity-50 text-xs sm:text-sm px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer shrink-0"
+              className="bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold disabled:opacity-50 text-xs sm:text-sm px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer shrink-0 shadow-lg shadow-orange-600/30 transition-all hover:-translate-y-0.5 shimmer-button"
             >
               {loading ? <span className="animate-spin">⏳</span> : <Search className="w-4 h-4" />}
               <span>{loading ? 'A verificar...' : 'Verificar Licença'}</span>
@@ -143,9 +144,9 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
 
         {/* Estado Inicial: Explicação com Desktop */}
         {!searched && (
-          <div className="print-hide card-premium rounded-3xl p-6 sm:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-            <div className="md:col-span-7 space-y-3">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
+          <div className="print-hide bg-gradient-to-br from-blue-50/70 via-white to-white rounded-3xl p-6 sm:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 items-center border border-slate-200/90 shadow-sm relative overflow-hidden card-glow-blue">
+            <div className="md:col-span-7 space-y-3 relative z-10">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100/60 text-blue-700 text-xs font-bold border border-blue-200">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 Segurança Anti-Fraude & AGT
               </div>
@@ -156,8 +157,8 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
                 As licenças do KIVORA ERP são vinculadas com segurança aos computadores da sua empresa. Aqui pode consultar o estado fiscal, a validade e emitir o Certificado Oficial de Conformidade.
               </p>
             </div>
-            <div className="md:col-span-5 flex justify-center">
-              <div className="w-full max-w-[240px] aspect-[4/3] bg-slate-50 rounded-2xl p-3 border border-slate-100 flex items-center justify-center overflow-hidden">
+            <div className="md:col-span-5 flex justify-center relative z-10">
+              <div className="w-full max-w-[240px] aspect-[4/3] bg-white rounded-2xl p-3 border border-slate-200/80 shadow-md flex items-center justify-center overflow-hidden">
                 <img
                   src={desktopImg}
                   alt="Computador Desktop Kivora"
@@ -197,7 +198,7 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer border border-slate-800"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-md shadow-blue-600/20 transition-all cursor-pointer border border-blue-600"
               >
                 <Printer className="w-4 h-4" />
                 <span>Imprimir / Guardar PDF</span>
@@ -228,7 +229,7 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
                     Kivora Tecnologias, Lda.
                   </span>
                   <p className="text-[11px] text-slate-700 font-bold">
-                    Software Certificado pela AGT n.º 384/AGT/2024 • Dec. Presidencial n.º 71/25
+                    Software Certificado pela AGT n.º FE/440/AGT/2026 • Dec. Presidencial n.º 71/25
                   </p>
                   <p className="text-[10px] text-slate-500">
                     NIF: 5417088920 • Luanda, República de Angola

@@ -4,7 +4,8 @@ import {
   DollarSign, Users, CheckCircle2, Loader2, Copy,
   Key, MessageSquare, Search, Ban, RotateCcw,
   Tag, TrendingDown, Wallet, Edit2, Save,
-  ShieldCheck, Sliders, Download, Award, Mail
+  ShieldCheck, Sliders, Download, Award, Mail,
+  FileText, ExternalLink
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
 import { createOrApprovePartnerAccount, setPartnerSuspensionStatus } from './services/authService';
@@ -35,6 +36,9 @@ export interface Partner {
   tier: 'bronze' | 'silver' | 'gold' | 'diamond';
   status: 'active' | 'pending' | 'suspended';
   createdAt: number;
+  nif?: string;
+  payment_proof_url?: string;
+  payment_proof_name?: string;
 }
 
 interface AdminParceirosProps {
@@ -57,12 +61,18 @@ export interface PartnerApplicationItem {
   provincia?: string;
   municipio?: string;
   region?: string;
+  sede_completa?: string;
   tipo_parceria?: string;
   tem_clientes?: string;
   experiencia?: string;
   status: 'pending' | 'approved' | 'rejected';
   created_at: number;
   protocol?: string;
+  payment_proof_url?: string;
+  payment_proof_name?: string;
+  payment_proof_size?: string;
+  payment_proof_type?: string;
+  fee_amount_aoa?: number;
 }
 
 export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'todos' }) => {
@@ -84,6 +94,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const [sendingPartnerEmail, setSendingPartnerEmail] = useState(false);
   const [partnerEmailSent, setPartnerEmailSent] = useState(false);
   const [certificatesPartnerModal, setCertificatesPartnerModal] = useState<PartnerCertificateData | null>(null);
+  const [viewProofModal, setViewProofModal] = useState<{ open: boolean; item: any } | null>(null);
 
   const [allDebts, setAllDebts] = useState<PartnerDebtEntry[]>([]);
   const [partnerDebts, setPartnerDebts] = useState<PartnerDebtEntry[]>([]);
@@ -178,13 +189,19 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             telefone: d.telefone || d.phone || '',
             provincia: d.provincia || 'Luanda',
             municipio: d.municipio || '',
-            region: d.provincia ? `${d.provincia}${d.municipio ? ` (${d.municipio})` : ''}` : (d.region || 'Luanda'),
+            region: d.sede_completa || (d.provincia ? `${d.provincia}${d.municipio ? ` (${d.municipio})` : ''}` : (d.region || 'Luanda')),
+            sede_completa: d.sede_completa || '',
             tipo_parceria: d.tipo_parceria || d.tipoParceria || 'Distribuidor Autorizado',
             tem_clientes: d.tem_clientes,
             experiencia: d.experiencia,
             status: d.status || 'pending',
             created_at: Number(d.created_at) || Number(d.createdAt) || Date.now(),
             protocol: d.protocol || d.id,
+            payment_proof_url: d.payment_proof_url || d.comprovativo_base64 || d.comprovativo_url || '',
+            payment_proof_name: d.payment_proof_name || d.comprovativo_nome || 'comprovativo_transferencia',
+            payment_proof_size: d.payment_proof_size || d.comprovativo_tamanho || '',
+            payment_proof_type: d.payment_proof_type || d.comprovativo_tipo || '',
+            fee_amount_aoa: d.fee_amount_aoa || 25000,
           });
         });
         list.sort((a, b) => b.created_at - a.created_at);
@@ -235,6 +252,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       email: string;
       phone: string;
       region: string;
+      sede_completa?: string;
       nif?: string;
       tipo_parceria?: string;
       tem_clientes?: string;
@@ -243,6 +261,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       createdAt: number;
       protocol?: string;
       tier?: 'bronze' | 'silver' | 'gold' | 'diamond';
+      payment_proof_url?: string;
+      payment_proof_name?: string;
+      payment_proof_size?: string;
+      payment_proof_type?: string;
+      fee_amount_aoa?: number;
     }> = [];
 
     const processedDocIds = new Set<string>();
@@ -263,7 +286,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         responsible: app.nome,
         email: app.email,
         phone: app.telefone,
-        region: app.region || `${app.provincia || 'Luanda'}${app.municipio ? ` (${app.municipio})` : ''}`,
+        region: app.sede_completa || app.region || `${app.provincia || 'Luanda'}${app.municipio ? ` (${app.municipio})` : ''}`,
+        sede_completa: app.sede_completa,
         nif: app.nif,
         tipo_parceria: app.tipo_parceria,
         tem_clientes: app.tem_clientes,
@@ -272,6 +296,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         createdAt: app.created_at || Date.now(),
         protocol: app.protocol,
         tier: 'bronze',
+        payment_proof_url: app.payment_proof_url,
+        payment_proof_name: app.payment_proof_name,
+        payment_proof_size: app.payment_proof_size,
+        payment_proof_type: app.payment_proof_type,
+        fee_amount_aoa: app.fee_amount_aoa || 25000,
       });
     });
 
@@ -286,9 +315,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
           email: p.email,
           phone: p.phone,
           region: p.region,
+          nif: p.nif,
           status: 'pending',
           createdAt: p.createdAt,
           tier: p.tier,
+          payment_proof_url: p.payment_proof_url,
+          payment_proof_name: p.payment_proof_name,
         });
       }
     });
@@ -380,7 +412,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const handleApprovePartner = async (cand: any) => {
     setApproving(cand.id);
     const pwd = `kivora${Math.floor(1000 + Math.random() * 9000)}`;
-    const pCode = (cand.code || `KVRA-PAR-${Math.floor(100 + Math.random() * 900)}`).toUpperCase().trim();
+    const pCode = (cand.code || `KVR-PR-2026-${Math.floor(100 + Math.random() * 900)}`).toUpperCase().trim();
     const initialSlots = policy.tier_slots['bronze'] || 2;
     try {
       // 1. Grava na coleção `partners` com status 'active'
@@ -391,14 +423,16 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         responsible: cand.responsible || cand.name,
         email: cand.email.toLowerCase().trim(),
         phone: cand.phone,
-        region: cand.region,
+        region: cand.sede_completa || cand.region || 'Luanda, Angola',
         nif: cand.nif || '',
         tier: 'bronze',
         credit_slots_limit: initialSlots,
         debt_aoa: 0,
-        total_paid_aoa: 0,
+        total_paid_aoa: cand.fee_amount_aoa || 25000,
         total_sales: 0,
         status: 'active',
+        payment_proof_url: cand.payment_proof_url || '',
+        payment_proof_name: cand.payment_proof_name || '',
         createdAt: cand.createdAt || Date.now(),
         approvedAt: Date.now(),
       }, { merge: true });
@@ -421,7 +455,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         nome: cand.name,
         email: cand.email,
         phone: cand.phone,
-        region: cand.region,
+        region: cand.sede_completa || cand.region || 'Luanda, Angola',
         partnerCode: pCode,
       });
 
@@ -898,6 +932,31 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                         {cand.experiencia && <p><strong>Experiência:</strong> {cand.experiencia}</p>}
                       </div>
                     )}
+
+                    {/* Botão de Visualização do Comprovativo Bancário (25.000 Kz) */}
+                    <div className="pt-1">
+                      {cand.payment_proof_url ? (
+                        <button
+                          type="button"
+                          onClick={() => setViewProofModal({ open: true, item: cand })}
+                          className="w-full bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-between transition-all cursor-pointer shadow-xs"
+                        >
+                          <span className="flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-blue-600 shrink-0" />
+                            <span>Comprovativo Bancário (25.000 Kz)</span>
+                          </span>
+                          <span className="text-[10px] bg-blue-200/80 text-blue-950 font-mono px-2 py-0.5 rounded-md font-bold flex items-center gap-1">
+                            <span>Ver Anexo</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </span>
+                        </button>
+                      ) : (
+                        <div className="text-[11px] text-slate-500 bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 flex items-center justify-between">
+                          <span>Taxa de Homologação: <strong>25.000 Kz</strong></span>
+                          <span className="text-[10px] text-slate-400 font-medium">Sem anexo digital</span>
+                        </div>
+                      )}
+                    </div>
 
                     <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 gap-2">
                       <span className="text-[10px] text-slate-400 font-medium">
@@ -1817,6 +1876,132 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 Fechar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Render do Modal de Visualização do Comprovativo de Pagamento */}
+      {viewProofModal && viewProofModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+            
+            {/* Header do Modal */}
+            <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Comprovativo de Transferência Bancária</h3>
+                  <p className="text-xs text-slate-400">Taxa Única de Homologação e Certificação (25.000 Kz)</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setViewProofModal(null)}
+                className="p-1.5 text-slate-400 hover:text-white rounded-xl transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Metadados da Candidatura */}
+            <div className="p-4 bg-slate-50 border-b border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Empresa / Parceiro:</span>
+                <strong className="text-slate-900 truncate block">{viewProofModal.item.name}</strong>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">NIF:</span>
+                <strong className="text-slate-900 font-mono block">{viewProofModal.item.nif || 'Não informado'}</strong>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Montante:</span>
+                <strong className="text-emerald-700 font-mono block">25.000,00 Kz</strong>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Protocolo:</span>
+                <strong className="text-blue-700 font-mono block">{viewProofModal.item.protocol || viewProofModal.item.code}</strong>
+              </div>
+            </div>
+
+            {/* Visualizador do Comprovativo */}
+            <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center bg-slate-100 min-h-[300px]">
+              {viewProofModal.item.payment_proof_url ? (
+                viewProofModal.item.payment_proof_type === 'application/pdf' || viewProofModal.item.payment_proof_url.startsWith('data:application/pdf') ? (
+                  <div className="w-full h-80 flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200 p-6 text-center space-y-4 shadow-sm">
+                    <FileText className="w-16 h-16 text-rose-500 mx-auto" />
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900">{viewProofModal.item.payment_proof_name || 'Comprovativo_Pagamento.pdf'}</h4>
+                      <p className="text-xs text-slate-500 mt-1">Documento em formato PDF ({viewProofModal.item.payment_proof_size || 'Documento Oficial'})</p>
+                    </div>
+                    <a
+                      href={viewProofModal.item.payment_proof_url}
+                      download={viewProofModal.item.payment_proof_name || 'Comprovativo_Parceiro_25000Kz.pdf'}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition-all cursor-pointer"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Abrir / Descarregar PDF</span>
+                    </a>
+                  </div>
+                ) : (
+                  <div className="max-w-full max-h-[500px] flex items-center justify-center">
+                    <img
+                      src={viewProofModal.item.payment_proof_url}
+                      alt="Comprovativo de Transferência Bancária"
+                      className="max-h-[460px] w-auto object-contain rounded-2xl shadow-md border border-slate-200"
+                    />
+                  </div>
+                )
+              ) : (
+                <div className="text-center py-12 text-slate-400 space-y-2">
+                  <FileText className="w-12 h-12 mx-auto text-slate-300" />
+                  <p className="text-sm font-medium text-slate-600">Nenhum ficheiro anexado a este registo.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Rodapé do Modal */}
+            <div className="px-6 py-4 bg-white border-t border-slate-200 flex items-center justify-between gap-3">
+              {viewProofModal.item.payment_proof_url ? (
+                <a
+                  href={viewProofModal.item.payment_proof_url}
+                  download={viewProofModal.item.payment_proof_name || `Comprovativo_${viewProofModal.item.name}.png`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition-all cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Descarregar Ficheiro</span>
+                </a>
+              ) : <div />}
+              
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setViewProofModal(null)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 rounded-xl transition-colors cursor-pointer"
+                >
+                  Fechar
+                </button>
+                {viewProofModal.item.status === 'pending' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const item = viewProofModal.item;
+                      setViewProofModal(null);
+                      handleApprovePartner(item);
+                    }}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Aprovar & Emitir Credencial</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
           </div>
         </div>
       )}

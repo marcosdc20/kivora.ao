@@ -25,25 +25,26 @@ export const AreaParceiroPage: React.FC<AreaParceiroPageProps> = ({ onNavigatePa
     <div className="min-h-screen bg-slate-50 text-slate-900 pt-28 pb-20 selection:bg-blue-600 selection:text-white">
       
       {/* Header Banner */}
-      <section className="bg-white border-b border-slate-200 py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <section className="bg-mesh border-b border-slate-200/80 py-10 relative overflow-hidden shadow-xs">
+        <div className="orb orb-blue w-48 h-48 -top-12 -right-12 opacity-20" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
           <div className="space-y-1 text-center md:text-left">
-            <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Portal de Parceiros & Revendedores</span>
-            <h1 className="text-2xl font-extrabold text-slate-900">{partnerInfo.partnerName}</h1>
-            <p className="text-xs text-slate-500">Código de Revendedor: {partnerInfo.code}</p>
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-3 py-0.5 rounded-full uppercase tracking-wider">Portal de Parceiros & Revendedores</span>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-950 mt-1">{partnerInfo.partnerName}</h1>
+            <p className="text-xs text-slate-500 font-mono font-bold">Código de Revendedor: {partnerInfo.code}</p>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => alert('Modalidade de registo de novo cliente iniciada.')}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-sm"
+              className="bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-orange-600/30 transition-all hover:-translate-y-0.5 cursor-pointer shimmer-button"
             >
               <Plus className="w-4 h-4" />
               <span>Registar Novo Cliente</span>
             </button>
             <button
               onClick={() => onNavigatePage('login')}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5"
+              className="bg-white hover:bg-slate-100 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 border border-slate-200 shadow-2xs transition-all cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5 text-slate-400" />
               <span>Sair</span>
@@ -57,22 +58,22 @@ export const AreaParceiroPage: React.FC<AreaParceiroPageProps> = ({ onNavigatePa
         
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-            <span className="text-xs font-bold text-slate-400 uppercase">Clientes Ativos</span>
-            <strong className="text-3xl font-black text-slate-900 block">{partnerInfo.totalClients} Empresas</strong>
-            <span className="text-[11px] text-emerald-600 font-semibold block">+3 empresas este mês</span>
+          <div className="bg-gradient-to-br from-blue-50/70 via-white to-white p-7 rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all space-y-2 card-glow-blue">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Clientes Ativos</span>
+            <strong className="text-3xl sm:text-4xl font-black text-slate-950 block font-mono-num">{partnerInfo.totalClients} Empresas</strong>
+            <span className="text-xs text-emerald-700 font-bold block">+3 empresas este mês</span>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-            <span className="text-xs font-bold text-slate-400 uppercase">Comissões Acumuladas</span>
-            <strong className="text-3xl font-black text-blue-600 block">{partnerInfo.totalCommissions}</strong>
-            <span className="text-[11px] text-slate-500 block">Total histórico liquidado</span>
+          <div className="bg-gradient-to-br from-indigo-50/70 via-white to-white p-7 rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all space-y-2 card-glow-purple">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Comissões Acumuladas</span>
+            <strong className="text-3xl sm:text-4xl font-black text-blue-600 block font-mono-num">{partnerInfo.totalCommissions}</strong>
+            <span className="text-xs text-slate-500 font-medium block">Total histórico liquidado</span>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-            <span className="text-xs font-bold text-slate-400 uppercase">Comissões a Receber</span>
-            <strong className="text-3xl font-black text-emerald-600 block">{partnerInfo.pendingCommissions}</strong>
-            <span className="text-[11px] text-slate-500 block">Processamento dia 25</span>
+          <div className="bg-gradient-to-br from-emerald-50/70 via-white to-white p-7 rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all space-y-2 card-glow-green">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Comissões a Receber</span>
+            <strong className="text-3xl sm:text-4xl font-black text-emerald-600 block font-mono-num">{partnerInfo.pendingCommissions}</strong>
+            <span className="text-xs text-slate-500 font-medium block">Processamento dia 25</span>
           </div>
         </div>
 

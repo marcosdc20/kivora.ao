@@ -143,7 +143,7 @@ export const InvoicePrintModal: React.FC<InvoicePrintModalProps> = ({
                       <td className="p-3.5 space-y-0.5">
                         <p className="font-bold text-slate-950">Licenciamento Kivora Desktop ERP ({getPlanLabel(license.plan_type)})</p>
                         <p className="text-[10px] text-slate-500">
-                          Módulo de Faturação Certificada AGT (384/AGT/2024), Base de Dados Local SQLite e Sincronização Cloud.
+                          Módulo de Faturação Certificada AGT (FE/440/AGT/2026), Base de Dados Local e Sincronização Cloud.
                         </p>
                       </td>
                       <td className="p-3.5 text-center font-bold">1</td>
@@ -202,7 +202,7 @@ export const InvoicePrintModal: React.FC<InvoicePrintModalProps> = ({
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0" />
                 <span className="text-[11px] font-medium text-slate-600">
-                  Processado por Software Certificado pela AGT n.º 384/AGT/2024 • Kivora Desktop ERP
+                  Processado por Software Certificado pela AGT n.º FE/440/AGT/2026 • Kivora Desktop ERP
                 </span>
               </div>
               <div className="text-right font-mono text-[10px] text-slate-500 font-bold">

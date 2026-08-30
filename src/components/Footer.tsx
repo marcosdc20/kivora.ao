@@ -36,13 +36,13 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
               <KivoraLogo variant="light" size="md" useOfficialImage={true} />
             </div>
 
-            <p className="text-slate-400 text-xs leading-relaxed">
-              {settings.fullName}. Software executivo de faturação eletrónica certificado pela AGT em Angola (Decreto Presidencial n.º 71/25).
+            <p className="text-slate-300 text-xs leading-relaxed">
+              {settings.fullName}. Software executivo de faturação eletrónica certificado pela AGT em Angola ao abrigo do Decreto Presidencial n.º 71/25.
             </p>
 
-            <div className="flex items-center gap-2 p-3 bg-slate-900 rounded-xl border border-slate-800 text-slate-300 w-fit">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" strokeWidth={1.75} />
-              <span className="text-[11px] font-semibold">{settings.agtCertificate}</span>
+            <div className="flex items-center gap-2 p-3 bg-slate-900 rounded-xl border border-slate-800 text-slate-200 w-fit">
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" strokeWidth={2} />
+              <span className="text-[11px] font-bold font-mono text-emerald-400">Certificação AGT: FE/440/AGT/2026</span>
             </div>
           </div>
 
@@ -294,7 +294,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
                   onClick={(e) => handleLinkClick(e, 'parceiros')}
                   className="hover:text-white transition-colors"
                 >
-                  Programa de Revenda Homologado
+                  Programa de Parceiros & Revenda
                 </a>
               </li>
               <li className="pt-2 border-t border-slate-900 flex items-center gap-2">
@@ -319,22 +319,22 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-10 mt-10 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500 text-[11px]">
+        <div className="pt-10 mt-10 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400 text-[11px]">
           <p>
-            © {currentYear} {settings.company}. Todos os direitos reservados.
+            © {currentYear} {settings.company}. Todos os direitos reservados. Certificação AGT N.º FE/440/AGT/2026.
           </p>
           <div className="flex items-center gap-6">
             <a
               href="#privacidade"
               onClick={(e) => handleLinkClick(e, 'privacidade')}
-              className="hover:text-slate-300 transition-colors"
+              className="hover:text-white transition-colors"
             >
-              Privacidade de Dados
+              Privacidade (Lei n.º 22/11)
             </a>
             <a
               href="#termos"
               onClick={(e) => handleLinkClick(e, 'termos')}
-              className="hover:text-slate-300 transition-colors"
+              className="hover:text-white transition-colors"
             >
               Termos de Licenciamento
             </a>

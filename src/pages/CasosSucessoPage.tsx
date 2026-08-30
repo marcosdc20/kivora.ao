@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { PageId } from '../components/Header';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+import { CountUp } from '../components/CountUp';
+import { AnimatedText } from '../components/AnimatedText';
 
 import tabletImg from '../assets/kivora/jovem-empresaria-com-tablet.png';
 import supermercadoImg from '../assets/kivora/supermercado-kivora.jpg';
@@ -150,7 +152,7 @@ export const CasosSucessoPage: React.FC<CasosSucessoPageProps> = ({
             Histórias de Sucesso em Angola
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
-            Como Empresas Reais Crescem com o <span className="text-[#1d4ed8]">KIVORA ERP</span>
+            <AnimatedText text="Como Empresas Reais Crescem com o KIVORA ERP" el="span" mode="letter-stagger" highlightWords={['KIVORA', 'ERP']} highlightClass="text-blue-600 font-black" />
           </h1>
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
             Conheça as experiências de gestores e proprietários que eliminaram problemas de faturação, filas e paragens por quebra de internet em Angola.
@@ -159,42 +161,51 @@ export const CasosSucessoPage: React.FC<CasosSucessoPageProps> = ({
 
         {/* Métricas Globais em Destaque */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-16">
-          <div data-reveal data-delay="100" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 text-[#1d4ed8] flex items-center justify-center mx-auto mb-3">
+          <div data-reveal data-delay="100" className="bg-gradient-to-br from-blue-50/60 via-white to-white p-6 rounded-3xl border border-slate-200/90 shadow-sm text-center hover:shadow-xl hover:-translate-y-1 hover:border-blue-400 transition-all duration-300 card-glow-blue">
+            <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-3 shadow-xs">
               <Clock className="w-6 h-6" />
             </div>
-            <p className="text-3xl font-extrabold text-slate-900 mb-1">99.9%</p>
+            <p className="text-3xl font-extrabold text-slate-900 mb-1 font-mono-num">
+              <CountUp end={99.9} decimals={1} suffix="%" type="counter" duration={1.8} />
+            </p>
             <p className="text-xs sm:text-sm text-slate-600 font-medium">Disponibilidade Operacional (Offline-First)</p>
           </div>
 
-          <div data-reveal data-delay="200" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
+          <div data-reveal data-delay="200" className="bg-gradient-to-br from-emerald-50/60 via-white to-white p-6 rounded-3xl border border-slate-200/90 shadow-sm text-center hover:shadow-xl hover:-translate-y-1 hover:border-emerald-400 transition-all duration-300 card-glow-green">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-3 shadow-xs">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <p className="text-3xl font-extrabold text-slate-900 mb-1">100%</p>
+            <p className="text-3xl font-extrabold text-slate-900 mb-1 font-mono-num">
+              <CountUp end={100} suffix="%" type="counter" duration={1.8} />
+            </p>
             <p className="text-xs sm:text-sm text-slate-600 font-medium">Conformidade AGT (Dec. Pres. 71/25)</p>
           </div>
 
-          <div data-reveal data-delay="300" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-3">
+          <div data-reveal data-delay="300" className="bg-gradient-to-br from-amber-50/60 via-white to-white p-6 rounded-3xl border border-slate-200/90 shadow-sm text-center hover:shadow-xl hover:-translate-y-1 hover:border-amber-400 transition-all duration-300 card-glow-amber">
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3 shadow-xs">
               <TrendingUp className="w-6 h-6" />
             </div>
-            <p className="text-3xl font-extrabold text-slate-900 mb-1">&gt; 35%</p>
+            <p className="text-3xl font-extrabold text-slate-900 mb-1 font-mono-num">
+              <CountUp end={35} prefix="> " suffix="%" type="odometer" duration={1.8} />
+            </p>
             <p className="text-xs sm:text-sm text-slate-600 font-medium">Aumento Médio na Velocidade de Caixa</p>
           </div>
 
-          <div data-reveal data-delay="400" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mx-auto mb-3">
+          <div data-reveal data-delay="400" className="bg-gradient-to-br from-purple-50/60 via-white to-white p-6 rounded-3xl border border-slate-200/90 shadow-sm text-center hover:shadow-xl hover:-translate-y-1 hover:border-purple-400 transition-all duration-300 card-glow-purple">
+            <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center mx-auto mb-3 shadow-xs">
               <Building2 className="w-6 h-6" />
             </div>
-            <p className="text-3xl font-extrabold text-slate-900 mb-1">18 Províncias</p>
+            <p className="text-3xl font-extrabold text-slate-900 mb-1 font-mono-num">
+              <CountUp end={18} suffix=" Províncias" type="odometer" duration={1.5} />
+            </p>
             <p className="text-xs sm:text-sm text-slate-600 font-medium">Suporte e Distribuição em Todo o País</p>
           </div>
         </div>
 
         {/* ========== BANNER DE DESTAQUE EXECUTIVO EM ÁREA BRANCA ========== */}
-        <div data-reveal className="bg-white text-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-lg mb-16 overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div data-reveal className="bg-mesh text-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-xl mb-16 overflow-hidden relative">
+          <div className="absolute -top-12 -left-12 w-48 h-48 orb orb-blue opacity-25" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
             <div className="lg:col-span-7 space-y-4">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
                 <Star className="w-3.5 h-3.5 fill-emerald-500 text-emerald-600" />
@@ -204,7 +215,7 @@ export const CasosSucessoPage: React.FC<CasosSucessoPageProps> = ({
                 "Com o KIVORA ERP, tenho controlo total dos 5 postos da minha loja em tempo real."
               </h2>
               <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
-                Gestão simplificada de stock, relatórios de fecho de caixa sem discrepâncias e emissão de faturas homologadas pela AGT sem depender da instabilidade da internet.
+                Gestão simplificada de stock, relatórios de fecho de caixa sem discrepâncias e emissão de faturas certificadas pela AGT sem depender da instabilidade da internet.
               </p>
               <div className="pt-2 flex items-center gap-3">
                 <div>
@@ -219,7 +230,11 @@ export const CasosSucessoPage: React.FC<CasosSucessoPageProps> = ({
                 <img
                   src={tabletImg}
                   alt="Gestora com Tablet KIVORA"
-                  className="w-full h-auto max-h-[420px] object-contain"
+                  className="w-full h-auto max-h-[420px] object-contain filter drop-shadow-xl"
+                  style={{
+                    maskImage: 'linear-gradient(to bottom, black 82%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 82%, transparent 100%)',
+                  }}
                 />
               </div>
             </div>
@@ -352,28 +367,32 @@ export const CasosSucessoPage: React.FC<CasosSucessoPageProps> = ({
         </div>
 
         {/* Banner de Chamada para Ação */}
-        <div className="bg-gradient-to-br from-[#1d4ed8] via-blue-700 to-indigo-900 rounded-3xl p-8 sm:p-12 text-white text-center shadow-xl shadow-blue-900/20">
-          <h2 className="text-2xl sm:text-4xl font-black mb-4">
-            Pronto para Transformar a Gestão da sua Empresa em Angola?
-          </h2>
-          <p className="text-blue-100 text-sm sm:text-base max-w-2xl mx-auto mb-8">
-            Junte-se a centenas de empresas que garantem 100% de conformidade com a AGT sem depender da internet.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <button
-              onClick={() => onNavigatePage('download')}
-              className="px-6 py-3.5 bg-white text-[#1d4ed8] rounded-xl font-bold text-sm shadow-lg hover:bg-blue-50 transition-all flex items-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              Experimentar Grátis por 15 Dias
-            </button>
-            <button
-              onClick={() => onNavigatePage('planos')}
-              className="px-6 py-3.5 bg-blue-800/80 border border-blue-400/40 text-white rounded-xl font-bold text-sm hover:bg-blue-800 transition-all flex items-center gap-2"
-            >
-              Ver Tabela de Preços & Postos
-              <ArrowRight className="w-4 h-4" />
-            </button>
+        <div className="bg-mesh-dark rounded-3xl p-8 sm:p-12 text-white text-center shadow-2xl relative overflow-hidden border border-slate-800">
+          <div className="orb orb-blue w-80 h-80 -top-20 -left-20 opacity-30" />
+          <div className="orb orb-orange w-48 h-48 -bottom-10 right-10 opacity-25" />
+          <div className="relative z-10 max-w-2xl mx-auto space-y-6">
+            <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
+              Pronto para Transformar a Gestão da sua Empresa em Angola?
+            </h2>
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+              Junte-se a centenas de empresas que garantem 100% de conformidade com a AGT sem depender da internet.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+              <button
+                onClick={() => onNavigatePage('download')}
+                className="px-8 py-4 bg-[#FF6500] hover:bg-[#EB5B00] text-white rounded-2xl font-bold text-sm shadow-xl shadow-orange-600/40 transition-all flex items-center gap-2 hover:-translate-y-1 shimmer-button cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                Experimentar Grátis por 15 Dias
+              </button>
+              <button
+                onClick={() => onNavigatePage('planos')}
+                className="px-7 py-4 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-white rounded-2xl font-bold text-sm transition-all flex items-center gap-2 hover:-translate-y-1 cursor-pointer"
+              >
+                Ver Tabela de Preços & Postos
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 

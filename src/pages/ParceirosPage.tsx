@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
-import { ArrowRight, CheckCircle2, Users, Award, ShieldCheck, FileText, CreditCard } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Users, Award, ShieldCheck, CreditCard } from 'lucide-react';
 import {
   subscribePartnerPolicy, DEFAULT_PARTNER_POLICY,
   PartnerLicensingPolicy
@@ -13,17 +13,7 @@ import { YouTubePlayer } from '../components/YouTubePlayer';
 
 import executivosImg from '../assets/kivora/executivos-kivora.jpg';
 
-function useScrollReveal() {
-  useEffect(() => {
-    const els = document.querySelectorAll('[data-reveal]');
-    const obs = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('sr-visible'); obs.unobserve(e.target); } }),
-      { threshold: 0.1 }
-    );
-    els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
-}
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 const fmt = (n: number) => n.toLocaleString('pt-AO');
 
@@ -74,15 +64,16 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
         {/* Grade de 4 Benefícios Chave */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
-            { title: 'Preços de Atacado & Margem Livre', desc: 'Preços especiais de custo com liberdade total para definir o preço final ao cliente e maximizar a sua rentabilidade.' },
-            { title: 'Portal do Parceiro & Licenciamento a Crédito', desc: 'Painel completo para ativação 24/7 com quota operacional pré-autorizada sem burocracia.' },
-            { title: 'Suporte Técnico Prioritário Nível 2', desc: 'Linha direta com os engenheiros da Kivora para apoio em implementações fiscais e redes locais.' },
-            { title: 'Formação & Kits de Marketing', desc: 'Acesso a manuais, apresentações comerciais e material promocional oficial para a sua equipa.' },
+            { title: 'Preços de Atacado & Margem de 30% a 50%', desc: 'Preços especiais de revenda com margens atrativas e liberdade total para definir o preço dos seus serviços de instalação e formação ao cliente.', from: 'from-blue-50/70', border: 'hover:border-blue-400 card-glow-blue', iconColor: 'bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white', wm: <CreditCard className="icon-watermark wm-blue w-32 h-32" strokeWidth={1.25} /> },
+            { title: 'Portal do Parceiro & Licenciamento Autónomo', desc: 'Painel completo para ativação de licenças 24/7 com emissão imediata e controlo de clientes da sua carteira.', from: 'from-emerald-50/70', border: 'hover:border-emerald-400 card-glow-green', iconColor: 'bg-emerald-100 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white', wm: <ShieldCheck className="icon-watermark wm-emerald w-32 h-32" strokeWidth={1.25} /> },
+            { title: 'Suporte Técnico Prioritário Nível 2', desc: 'Linha direta com os engenheiros de desenvolvimento da Kivora para apoio em implementações fiscais complexas e redes locais LAN.', from: 'from-purple-50/70', border: 'hover:border-purple-400 card-glow-purple', iconColor: 'bg-purple-100 text-purple-600 group-hover:bg-purple-600 group-hover:text-white', wm: <Users className="icon-watermark wm-purple w-32 h-32" strokeWidth={1.25} /> },
+            { title: 'Kit Oficial: Licença NFR & Formação', desc: 'Acesso a licença NFR para demonstrações comerciais em clientes, apresentações comerciais e material promocional oficial.', from: 'from-amber-50/70', border: 'hover:border-amber-400 card-glow-amber', iconColor: 'bg-amber-100 text-amber-600 group-hover:bg-amber-600 group-hover:text-white', wm: <Award className="icon-watermark wm-amber w-32 h-32" strokeWidth={1.25} /> },
           ].map((b, i) => (
-            <div key={i} data-reveal className="sr-init card-premium rounded-3xl p-7 flex flex-col justify-between group" style={{ transitionDelay: `${i * 80}ms` }}>
-              <div>
-                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
-                  <CheckCircle2 className="w-5 h-5" strokeWidth={2.25} />
+            <div key={i} data-reveal className={`sr-init bg-gradient-to-br ${b.from} via-white to-white border border-slate-200/90 rounded-3xl p-7 flex flex-col justify-between group hover:shadow-xl hover:-translate-y-1 ${b.border} transition-all duration-300 relative overflow-hidden`} style={{ transitionDelay: `${i * 80}ms` }}>
+              {b.wm}
+              <div className="relative z-10">
+                <div className={`w-12 h-12 rounded-2xl ${b.iconColor} flex items-center justify-center mb-4 transition-all duration-300 shadow-sm`}>
+                  <CheckCircle2 className="w-6 h-6" strokeWidth={2.25} />
                 </div>
                 <h3 className="text-base font-extrabold text-slate-950 mb-1.5 group-hover:text-blue-600 transition-colors">{b.title}</h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{b.desc}</p>
@@ -92,43 +83,37 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
         </div>
 
         {/* Destaque dos 2 Documentos Oficiais */}
-        <div data-reveal className="sr-init p-6 sm:p-8 bg-slate-50 rounded-3xl border border-slate-200/90 space-y-6">
-          <div className="flex items-center gap-3 border-b border-slate-200/80 pb-4">
-            <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center font-black">
-              <Award className="w-5 h-5" />
+        <div data-reveal className="sr-init p-6 sm:p-8 bg-mesh rounded-3xl border border-slate-200/80 space-y-6 relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-44 h-44 orb orb-orange opacity-20" />
+          <div className="flex items-center gap-3 border-b border-slate-200/80 pb-4 relative z-10">
+            <div className="w-12 h-12 rounded-2xl bg-orange-100 text-[#FF6500] flex items-center justify-center font-bold shadow-sm">
+              <Award className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-black text-slate-950">
-                2 Documentos Oficiais Recebidos na Homologação
+              <h3 className="text-base sm:text-lg font-bold text-slate-950">
+                Documento Oficial Recebido na Homologação
               </h3>
-              <p className="text-xs text-slate-600">Documentação séria com selo de autenticidade para apresentar aos seus clientes empresariais:</p>
+              <p className="text-xs text-slate-600">Documentação jurídica séria com selo de autenticidade para apresentar aos seus clientes empresariais:</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-2">
-              <div className="flex items-center gap-2 text-slate-950 font-bold">
-                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>1. Certificado de Parceria — {settings.company}</span>
+          <div className="p-6 bg-white rounded-2xl border border-slate-200/90 shadow-sm space-y-3 relative z-10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-slate-950 font-bold text-sm">
+                <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+                <span>Comprovativo de Parceiro Revendedor Credenciado KIVORA SOFT</span>
               </div>
-              <p className="text-slate-600 leading-relaxed text-[11px]">
-                Atesta formalmente o credenciamento e homologação técnica da sua empresa como canal credenciado em território nacional.
-              </p>
+              <span className="text-[10px] font-bold uppercase text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full self-start">
+                Certificação Oficial
+              </span>
             </div>
-
-            <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-2">
-              <div className="flex items-center gap-2 text-slate-950 font-bold">
-                <FileText className="w-4 h-4 text-blue-600 shrink-0" />
-                <span>2. Certificado de Revendedor — {settings.fullName}</span>
-              </div>
-              <p className="text-slate-600 leading-relaxed text-[11px]">
-                Outorga de autorização da {settings.company} para distribuição, instalação e comercialização do software ({settings.agtCertificate}).
-              </p>
-            </div>
+            <p className="text-slate-600 leading-relaxed text-xs">
+              Emitido pela <strong>Visual Software, Lda.</strong> (NIF 5002863944), outorgando plenos poderes para comercialização, promoção e revenda autorizada do software de faturação eletrónica certificado pela AGT ao abrigo do Decreto Presidencial n.º 71/25.
+            </p>
           </div>
 
           {/* Taxa de Homologação */}
-          <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200/80 text-xs">
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200/80 text-xs relative z-10">
             <div className="flex items-center gap-2 text-slate-700">
               <CreditCard className="w-4 h-4 text-emerald-600" />
               <span>Taxa única de homologação e credenciamento: <strong className="text-slate-950 font-mono-num font-black">{fmt(policy.partner_membership_fee_aoa ?? 25000)} Kz</strong></span>
@@ -167,20 +152,26 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
       </section>
 
       {/* Formulário / CTA */}
-      <section className="bg-slate-950 py-20 px-6 sm:px-10 lg:px-16 border-t border-slate-800">
-        <div data-reveal className="sr-init max-w-3xl mx-auto text-center text-white space-y-6">
-          <Users className="w-10 h-10 text-blue-400 mx-auto" strokeWidth={1.5} />
-          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">Candidate-se ao Programa de Parceiros</h2>
-          <p className="text-slate-300 text-sm leading-relaxed max-w-lg mx-auto">
+      <section className="bg-mesh-dark py-20 px-6 sm:px-10 lg:px-16 border-t border-slate-800 text-white relative overflow-hidden">
+        <div className="orb orb-blue w-80 h-80 -top-20 -left-20 opacity-30" />
+        <div className="orb orb-orange w-48 h-48 -bottom-10 right-10 opacity-25" />
+        <div data-reveal className="sr-init max-w-3xl mx-auto text-center text-white space-y-6 relative z-10">
+          <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mx-auto shadow-inner">
+            <Users className="w-8 h-8 text-blue-300" strokeWidth={1.5} />
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">Candidate-se ao Programa de Parceiros</h2>
+          <p className="text-slate-300 text-sm leading-relaxed max-w-lg mx-auto font-normal">
             Aceda à página exclusiva de candidatura com todos os requisitos oficiais e formulário de credenciamento.
           </p>
-          <button
-            onClick={handleGoCandidatura}
-            className="btn-premium-primary inline-flex items-center gap-2 text-sm px-8 py-4 rounded-2xl cursor-pointer"
-          >
-            <span>Enviar Candidatura Oficial</span>
-            <ArrowRight className="w-4 h-4" strokeWidth={2} />
-          </button>
+          <div>
+            <button
+              onClick={handleGoCandidatura}
+              className="inline-flex items-center gap-2 bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-sm px-8 py-4 rounded-2xl shadow-xl shadow-orange-600/40 transition-all hover:-translate-y-1 cursor-pointer shimmer-button"
+            >
+              <span>Enviar Candidatura Oficial</span>
+              <ArrowRight className="w-4 h-4" strokeWidth={2} />
+            </button>
+          </div>
         </div>
       </section>
 

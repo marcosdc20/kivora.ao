@@ -31,24 +31,24 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onBack }) => {
           </div>
 
           <div className="space-y-6 text-xs sm:text-sm text-slate-700 leading-relaxed">
-            <h3 className="text-base font-extrabold text-slate-950">1. Licenciamento e Uso do Software</h3>
+            <h2 className="text-base font-extrabold text-slate-950">1. Licenciamento e Uso do Software</h2>
             <p>
-              O KIVORA ERP é um software de gestão empresarial e faturação certificado pela Administração Geral Tributária (AGT) sob a certificação n.º 384/AGT/2024 e em conformidade com o Decreto Presidencial n.º 71/25. A utilização da plataforma é concedida mediante subscrição de planos ou aquisição de licença perpétua para execução local (Desktop Offline).
+              O KIVORA ERP é um software executivo de gestão empresarial e faturação eletrónica certificado pela Administração Geral Tributária (AGT) com o número de homologação oficial <strong>FE/440/AGT/2026</strong> ao abrigo do <strong>Decreto Presidencial n.º 71/25</strong> e Regime Jurídico das Faturas. A utilização da plataforma é concedida mediante subscrição de planos ou aquisição de licença vitalícia para execução local (Desktop Offline-First).
             </p>
 
-            <h3 className="text-base font-extrabold text-slate-950">2. Responsabilidade sobre Dados Fiscais</h3>
+            <h2 className="text-base font-extrabold text-slate-950">2. Responsabilidade sobre Dados Fiscais e Comerciais</h2>
             <p>
-              O utilizador é responsável pela exatidão dos dados inseridos no sistema (NIFs, preços, alíquotas de impostos e artigos). O KIVORA garante a integridade da numeração sequencial das séries, o cálculo automático das retenções na fonte e a geração da assinatura digital com algoritmo RSA/SHA e QR Code em todos os documentos.
+              O utilizador é responsável pela exatidão dos dados inseridos no sistema (NIFs de clientes, preços de venda, alíquotas de IVA e artigos). O KIVORA garante a inviolabilidade da numeração sequencial das séries, o cálculo automático de retenções na fonte, a exportação do ficheiro SAF-T AO auditado e a geração da assinatura digital RS256 com QR Code fiscal em todos os documentos.
             </p>
 
-            <h3 className="text-base font-extrabold text-slate-950">3. Modo de Contingência Offline</h3>
+            <h2 className="text-base font-extrabold text-slate-950">3. Operação Offline-First & Soberania Local</h2>
             <p>
-              Em caso de indisponibilidade técnica da internet ou dos serviços externos, o KIVORA opera 100% offline em rede local (LAN), armazenando de forma segura e auditável todas as transações fiscais.
+              Em caso de indisponibilidade ou corte na ligação à internet, o KIVORA ERP opera 100% offline em posto individual ou em rede local (LAN) multi-caixas, armazenando de forma blindada todas as transações fiscais e stocks sem perda de produtividade.
             </p>
 
-            <h3 className="text-base font-extrabold text-slate-950">4. Suporte Técnico e Atualizações</h3>
+            <h2 className="text-base font-extrabold text-slate-950">4. Suporte Técnico e Atualizações Normativas</h2>
             <p>
-              Todas as licenças e subscrições incluem suporte técnico especializado através da equipa em Luanda ({KIVORA_INFO.phoneDisplay}) e atualizações fiscais homologadas sem custos adicionais sempre que a AGT publicar novas diretrizes normativas.
+              Todas as licenças e subscrições ativas incluem suporte técnico especializado através da equipa em Luanda ({KIVORA_INFO.phoneDisplay}) e atualizações de conformidade legal sem custos adicionais sempre que a AGT publicar novas portarias normativas.
             </p>
           </div>
         </div>

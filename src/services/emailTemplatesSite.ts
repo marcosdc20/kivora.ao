@@ -200,7 +200,7 @@ const getEmailBaseLayout = (title: string, contentHtml: string, footerNote?: str
       <!-- HEADER -->
       <tr>
         <td class="header">
-          <a href="https://kivora.ao" target="_blank" style="text-decoration: none;">
+          <a href="https://kivora.ao" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
             <img src="${LOGO_URL}" alt="KIVORA ERP" width="140" border="0" style="display: block; margin: 0 auto 12px auto; max-width: 140px; height: auto;" />
           </a>
           <p class="header-tagline">Sistema de Gestão Empresarial Certificado pela AGT</p>

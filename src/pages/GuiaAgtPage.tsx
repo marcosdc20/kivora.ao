@@ -7,12 +7,15 @@ import {
 } from 'lucide-react';
 import { PageId } from '../components/Header';
 import { YouTubePlayer } from '../components/YouTubePlayer';
+import { CountUp } from '../components/CountUp';
+import { AnimatedText } from '../components/AnimatedText';
 import {
   subscribeSystemSettings, getCachedSystemSettings,
   SystemCompanySettings
 } from '../services/systemSettingsService';
 
 import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
+import { LiveFiscalReceipt } from '../components/LiveFiscalReceipt';
 
 interface GuiaAgtPageProps {
   onOpenDemoModal: (subject?: string) => void;
@@ -168,8 +171,9 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
             </div>
           </div>
 
-          <div className="lg:col-span-5 bg-slate-950 text-white rounded-3xl p-8 shadow-2xl border border-slate-800 space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div className="lg:col-span-5 bg-mesh-dark text-white rounded-3xl p-8 shadow-2xl border border-slate-800 space-y-6 relative overflow-hidden">
+            <div className="orb orb-orange w-40 h-40 -top-10 -right-10 opacity-25" />
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4 relative z-10">
               <h3 className="font-black text-base text-white flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-400" />
                 <span>Riscos de Não Conformidade</span>
@@ -179,10 +183,10 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
               </span>
             </div>
 
-            <ul className="space-y-3.5 text-xs text-slate-300">
+            <ul className="space-y-3.5 text-xs text-slate-300 relative z-10">
               <li className="flex items-start gap-2.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mt-1.5 shrink-0"></span>
-                <span><strong>Coimas e Multas Tributárias:</strong> Aplicação de pesadas sanções financeiras pela AGT por emissão em programas não homologados.</span>
+                <span><strong>Coimas e Multas Tributárias:</strong> Aplicação de pesadas sanções financeiras pela AGT por emissão em programas não certificados.</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mt-1.5 shrink-0"></span>
@@ -194,14 +198,34 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
               </li>
             </ul>
 
-            <div className="pt-2 border-t border-slate-800">
+            <div className="pt-2 border-t border-slate-800 relative z-10">
               <button
                 onClick={() => onOpenDemoModal('Auditoria Fiscal AGT')}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-md shadow-blue-600/30 cursor-pointer text-center"
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-md shadow-blue-600/30 cursor-pointer text-center shimmer-button"
               >
                 Solicitar Validação Gratuita do Sistema Atual
               </button>
             </div>
+          </div>
+        </section>
+
+        {/* 1.1 Demonstrador Interativo de Faturação Eletrónica AGT */}
+        <section className="bg-gradient-to-br from-slate-50 via-blue-50/20 to-slate-50 p-8 sm:p-12 rounded-3xl border border-slate-200/90 shadow-sm space-y-8">
+          <div className="text-center max-w-2xl mx-auto space-y-2.5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Simulação Prática em Tempo Real</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-950">
+              Demonstrador de Faturação Eletrónica com QR Code e Hash AGT
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              Experimente abaixo o motor fiscal do KIVORA ERP. Alterne entre setores comerciais e veja o cálculo de IVA, o QR Code de autenticação e a assinatura inviolável em ação.
+            </p>
+          </div>
+
+          <div className="flex justify-center items-center">
+            <LiveFiscalReceipt />
           </div>
         </section>
 
@@ -217,46 +241,61 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {regimesIva.map((regime, index) => (
-              <div
-                key={index}
-                className="card-premium rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className={`text-[11px] font-black font-mono-num uppercase px-3 py-1 rounded-full border ${regime.badge}`}>
-                      {regime.taxa}
-                    </span>
-                    <span className="text-xs text-slate-400 font-bold">Código do IVA</span>
+            {regimesIva.map((regime, index) => {
+              const bgGradients = [
+                'from-blue-50/70 hover:border-blue-400 card-glow-blue',
+                'from-amber-50/70 hover:border-amber-400 card-glow-amber',
+                'from-emerald-50/70 hover:border-emerald-400 card-glow-green',
+              ];
+              const icons = [
+                <Scale className="icon-watermark wm-blue w-32 h-32" strokeWidth={1.25} />,
+                <ShieldCheck className="icon-watermark wm-amber w-32 h-32" strokeWidth={1.25} />,
+                <Lock className="icon-watermark wm-emerald w-32 h-32" strokeWidth={1.25} />,
+              ];
+              return (
+                <div
+                  key={index}
+                  className={`bg-gradient-to-br ${bgGradients[index % 3]} via-white to-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden`}
+                >
+                  {icons[index % 3]}
+                  <div className="space-y-4 relative z-10">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[11px] font-black font-mono-num uppercase px-3 py-1 rounded-full border shadow-xs ${regime.badge}`}>
+                        {regime.taxa}
+                      </span>
+                      <span className="text-xs text-slate-400 font-bold">Código do IVA</span>
+                    </div>
+
+                    <h3 className="text-lg font-black text-slate-950 group-hover:text-blue-600 transition-colors">{regime.nome}</h3>
+                    <p className="text-xs text-slate-600 leading-relaxed">{regime.enquadramento}</p>
+
+                    <div className="pt-3 border-t border-slate-100 space-y-2">
+                      <p className="text-[11px] font-bold text-slate-950 uppercase tracking-wider">Obrigações Operacionais:</p>
+                      <ul className="space-y-2 text-xs text-slate-700">
+                        {regime.obrigacoes.map((obrigacao, idx) => (
+                          <li key={idx} className="flex items-start gap-2 font-medium">
+                            <div className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                              <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" strokeWidth={2.5} />
+                            </div>
+                            <span>{obrigacao}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
 
-                  <h3 className="text-lg font-black text-slate-950 group-hover:text-blue-600 transition-colors">{regime.nome}</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">{regime.enquadramento}</p>
-
-                  <div className="pt-3 border-t border-slate-100 space-y-2">
-                    <p className="text-[11px] font-bold text-slate-950 uppercase tracking-wider">Obrigações Operacionais:</p>
-                    <ul className="space-y-2 text-xs text-slate-700">
-                      {regime.obrigacoes.map((obrigacao, idx) => (
-                        <li key={idx} className="flex items-start gap-2 font-medium">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" strokeWidth={2.25} />
-                          <span>{obrigacao}</span>
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="pt-4 border-t border-slate-100 relative z-10">
+                    <button
+                      onClick={() => onNavigatePage('calculadora-fiscal')}
+                      className="w-full text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-800 font-bold transition-all"
+                    >
+                      <span>Simular Valores na Calculadora</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
-
-                <div className="pt-4 border-t border-slate-100">
-                  <button
-                    onClick={() => onNavigatePage('calculadora-fiscal')}
-                    className="btn-premium-secondary w-full text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <span>Simular Valores na Calculadora</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
@@ -292,27 +331,29 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
         )}
 
         {/* 3. Checklist Interativo de Conformidade */}
-        <section className="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 shadow-2xl border border-slate-800 space-y-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-b border-slate-800 pb-6">
+        <section className="bg-mesh-dark text-white rounded-3xl p-8 sm:p-12 shadow-2xl border border-slate-800 space-y-8 relative overflow-hidden">
+          <div className="orb orb-blue w-72 h-72 -top-20 -left-20 opacity-30" />
+          <div className="orb orb-green w-56 h-56 -bottom-16 -right-16 opacity-25" />
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-b border-slate-800/80 pb-6 relative z-10">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold mb-2">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 <span>Autoavaliação Fiscal Interativa</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-white">
-                Checklist de Prontidão para Auditoria da AGT
+                <AnimatedText text="Checklist de Prontidão para Auditoria da AGT" el="span" mode="letter-stagger" className="text-white" />
               </h2>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1">
+              <p className="text-xs sm:text-sm text-slate-300 mt-1">
                 Verifique se o seu sistema e a sua empresa cumprem os 6 requisitos essenciais exigidos pela fiscalização.
               </p>
             </div>
 
-            <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 text-center min-w-[160px]">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+            <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-w-[160px] shadow-lg">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block mb-1">
                 Índice de Conformidade
               </span>
-              <div className="text-3xl font-black text-emerald-400">
-                {progressPercent}%
+              <div className="text-3xl font-black text-emerald-400 font-mono-num">
+                <CountUp end={progressPercent} suffix="%" type="odometer" duration={0.8} />
               </div>
               <span className="text-[11px] text-slate-300 font-medium">
                 {completedCount} de {checklist.length} requisitos
@@ -320,7 +361,7 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
             {checklist.map((item) => {
               const isChecked = !!checkedItems[item.id];
               return (
@@ -329,15 +370,15 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
                   onClick={() => toggleCheck(item.id)}
                   className={`p-5 rounded-2xl border transition-all cursor-pointer flex items-start gap-4 select-none ${
                     isChecked
-                      ? 'bg-emerald-950/40 border-emerald-500/50 shadow-md shadow-emerald-950/30'
-                      : 'bg-slate-800/50 border-slate-700/60 hover:border-slate-600'
+                      ? 'bg-emerald-950/60 border-emerald-500/60 shadow-lg shadow-emerald-950/40 -translate-y-0.5'
+                      : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10'
                   }`}
                 >
                   <div
                     className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-all ${
                       isChecked
-                        ? 'bg-emerald-500 text-white font-bold'
-                        : 'border-2 border-slate-500 bg-slate-700'
+                        ? 'bg-emerald-500 text-white font-bold shadow-md shadow-emerald-500/40'
+                        : 'border-2 border-slate-400 bg-slate-800'
                     }`}
                   >
                     {isChecked && <CheckCircle2 className="w-4 h-4" />}
@@ -346,7 +387,7 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
                     <h4 className={`text-sm font-bold ${isChecked ? 'text-emerald-300' : 'text-white'}`}>
                       {item.titulo}
                     </h4>
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                    <p className="text-xs text-slate-300 mt-1 leading-relaxed">
                       {item.desc}
                     </p>
                   </div>
@@ -355,13 +396,13 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
             })}
           </div>
 
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800 text-xs text-slate-400">
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800/80 text-xs text-slate-300 relative z-10">
             <p>
               <strong className="text-white">Recomendação KIVORA:</strong> Com o KIVORA ERP instalado, a sua empresa cumpre 100% dos requisitos de forma nativa e automática desde o primeiro dia.
             </p>
             <button
               onClick={() => onOpenDemoModal('Instalação Certificada AGT')}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3 px-6 rounded-xl transition-all shrink-0 cursor-pointer"
+              className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3 px-6 rounded-xl transition-all shrink-0 cursor-pointer shadow-lg shadow-blue-600/30 shimmer-button"
             >
               Garantir Conformidade com KIVORA ERP
             </button>
@@ -380,41 +421,44 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200 space-y-4">
-              <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-black">
-                <Calendar className="w-5 h-5" />
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-50/60 via-white to-white border border-slate-200/90 shadow-sm space-y-4 relative overflow-hidden group hover:border-blue-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 card-glow-blue">
+              <Calendar className="icon-watermark wm-blue w-32 h-32" strokeWidth={1.25} />
+              <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-black relative z-10 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                <Calendar className="w-6 h-6" />
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1 relative z-10">
                 <span className="text-xs font-black text-blue-600 uppercase tracking-widest">Até ao Dia 15 do Mês</span>
                 <h3 className="text-base font-black text-slate-950">Envio do Ficheiro SAF-T AO</h3>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed relative z-10">
                 Extração e submissão do ficheiro XML das faturas emitidas no mês anterior através do Portal do Contribuinte da AGT.
               </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200 space-y-4">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-black">
-                <Clock className="w-5 h-5" />
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-50/60 via-white to-white border border-slate-200/90 shadow-sm space-y-4 relative overflow-hidden group hover:border-emerald-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 card-glow-green">
+              <Clock className="icon-watermark wm-emerald w-32 h-32" strokeWidth={1.25} />
+              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-black relative z-10 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                <Clock className="w-6 h-6" />
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1 relative z-10">
                 <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">Último Dia do Mês</span>
                 <h3 className="text-base font-black text-slate-950">Pagamento do IVA & Retenções</h3>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed relative z-10">
                 Liquidação do imposto apurado e entrega das retenções na fonte de clientes e prestadores de serviços.
               </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200 space-y-4">
-              <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center font-black">
-                <Database className="w-5 h-5" />
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-50/60 via-white to-white border border-slate-200/90 shadow-sm space-y-4 relative overflow-hidden group hover:border-amber-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 card-glow-amber">
+              <Database className="icon-watermark wm-amber w-32 h-32" strokeWidth={1.25} />
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center font-black relative z-10 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                <Database className="w-6 h-6" />
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1 relative z-10">
                 <span className="text-xs font-black text-amber-600 uppercase tracking-widest">Diariamente</span>
                 <h3 className="text-base font-black text-slate-950">Fecho de Caixa & Backup</h3>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed relative z-10">
                 Emissão do relatório diário Z-Report e cópia de segurança física dos dados fiscais gravados no computador.
               </p>
             </div>

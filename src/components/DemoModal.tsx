@@ -37,6 +37,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
     interestedModule: initialModule || 'Kivora Gestão Comercial & POS',
     installationMode: 'Posto Único (Caixa Local)',
     notes: '',
+    hp_field: '', // Honeypot field for bot trapping
   });
 
   useEffect(() => {
@@ -55,9 +56,29 @@ export const DemoModal: React.FC<DemoModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+
+    // Anti-spam honeypot verification
+    if (formData.hp_field) {
+      setTimeout(() => {
+        setSubmitting(false);
+        setSubmitted(true);
+      }, 400);
+      return;
+    }
+
     try {
       await addDoc(collection(db, 'leads_demonstracao'), {
-        ...formData,
+        companyName: formData.companyName,
+        nif: formData.nif,
+        contactName: formData.contactName,
+        phone: formData.phone,
+        email: formData.email,
+        businessSector: formData.businessSector,
+        storesCount: formData.storesCount,
+        interestedModule: formData.interestedModule,
+        installationMode: formData.installationMode,
+        notes: formData.notes,
+        createdAt: new Date().toISOString(),
         created_at: Date.now(),
         status: 'pendente',
         source: 'site_modal_demonstracao',
@@ -113,7 +134,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
         <div className="bg-white p-6 sm:p-8 text-slate-900 relative border-b border-slate-200">
           <button
             onClick={onClose}
-            aria-label="Fechar"
+            aria-label="Fechar janela de demonstração"
             className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer z-10"
           >
             <X className="w-5 h-5" />
@@ -123,7 +144,9 @@ export const DemoModal: React.FC<DemoModalProps> = ({
             <div className="w-16 h-16 rounded-full overflow-hidden border border-slate-200 shrink-0 hidden sm:block bg-slate-50">
               <img
                 src={welcomeImg}
-                alt="Consultor Kivora"
+                alt="Consultor Kivora ERP"
+                width="64"
+                height="64"
                 className="w-full h-full object-contain"
               />
             </div>
@@ -186,15 +209,29 @@ export const DemoModal: React.FC<DemoModalProps> = ({
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               
+              {/* Campo Honeypot Invisível para Captura de Bots */}
+              <input
+                type="text"
+                name="hp_field"
+                id="demo_hp_field"
+                value={formData.hp_field}
+                onChange={(e) => setFormData({ ...formData, hp_field: e.target.value })}
+                style={{ display: 'none', position: 'absolute', left: '-9999px' }}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+              />
+              
               {/* Linha 1: Empresa & NIF */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                  <label htmlFor="demo_companyName" className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                     Nome da Empresa / Negócio *
                   </label>
                   <div className="relative">
                     <Building className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                     <input
+                      id="demo_companyName"
                       type="text"
                       required
                       placeholder="Ex: Comercial Luanda Lda"
@@ -206,12 +243,13 @@ export const DemoModal: React.FC<DemoModalProps> = ({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                  <label htmlFor="demo_nif" className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                     NIF da Empresa (Opcional)
                   </label>
                   <div className="relative">
                     <ShieldCheck className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                     <input
+                      id="demo_nif"
                       type="text"
                       placeholder="Ex: 5412345678"
                       value={formData.nif}
@@ -225,12 +263,13 @@ export const DemoModal: React.FC<DemoModalProps> = ({
               {/* Linha 2: Responsável & Telefone */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                  <label htmlFor="demo_contactName" className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                     Seu Nome *
                   </label>
                   <div className="relative">
                     <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                     <input
+                      id="demo_contactName"
                       type="text"
                       required
                       placeholder="Nome completo do responsável"
@@ -242,12 +281,13 @@ export const DemoModal: React.FC<DemoModalProps> = ({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                  <label htmlFor="demo_phone" className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                     Telefone / WhatsApp *
                   </label>
                   <div className="relative">
                     <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                     <input
+                      id="demo_phone"
                       type="tel"
                       required
                       placeholder="+244 9XX XXX XXX"
@@ -262,12 +302,13 @@ export const DemoModal: React.FC<DemoModalProps> = ({
               {/* Linha 3: Email Corporativo & Ramo */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                  <label htmlFor="demo_email" className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                     Email Corporativo *
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                     <input
+                      id="demo_email"
                       type="email"
                       required
                       placeholder="seuemail@empresa.ao"
@@ -279,10 +320,11 @@ export const DemoModal: React.FC<DemoModalProps> = ({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                  <label htmlFor="demo_businessSector" className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                     Ramo de Atividade
                   </label>
                   <select
+                    id="demo_businessSector"
                     value={formData.businessSector}
                     onChange={(e) => setFormData({ ...formData, businessSector: e.target.value })}
                     className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all cursor-pointer"
@@ -300,11 +342,12 @@ export const DemoModal: React.FC<DemoModalProps> = ({
 
               {/* Linha 4: Modalidade de Instalação */}
               <div className="space-y-1.5">
-                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                <label htmlFor="demo_installationMode" className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                   <Monitor className="w-3.5 h-3.5 text-blue-600" />
                   <span>Modalidade de Instalação Preferida</span>
                 </label>
                 <select
+                  id="demo_installationMode"
                   value={formData.installationMode}
                   onChange={(e) => setFormData({ ...formData, installationMode: e.target.value })}
                   className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all cursor-pointer"
@@ -317,10 +360,11 @@ export const DemoModal: React.FC<DemoModalProps> = ({
 
               {/* Linha 5: Mensagem */}
               <div className="space-y-1.5">
-                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                <label htmlFor="demo_notes" className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                   Mensagem ou Requisitos Específicos (Opcional)
                 </label>
                 <textarea
+                  id="demo_notes"
                   rows={2}
                   placeholder="Ex: Gostaria de saber mais sobre a integração com a AGT e migração de dados..."
                   value={formData.notes}

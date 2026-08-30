@@ -64,7 +64,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const [activeSection, setActiveSection] = useState<PartnerSection>('dashboard');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const partnerCode = session?.partnerCode || session?.email || 'PARCEIRO-KIVORA';
-  const partnerName = session?.nome || 'Parceiro Homologado Kivora';
+  const partnerName = session?.nome || 'Parceiro Credenciado Kivora';
 
   // Conta de Parceiro (Wallet & Limite de Crédito)
   const [partnerAccount, setPartnerAccount] = useState<PartnerAccount | null>(null);
@@ -878,7 +878,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
             <a
               href={waUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 rounded-xl shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <MessageSquare className="w-4 h-4" />
@@ -1654,7 +1654,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                             <a
                               href={`https://wa.me/244${c.phone.replace(/[^0-9]/g, '')}`}
                               target="_blank"
-                              rel="noreferrer"
+                              rel="noopener noreferrer"
                               className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-xl border border-emerald-200 flex items-center gap-1 cursor-pointer"
                             >
                               <PhoneCall className="w-3.5 h-3.5" />
@@ -2314,7 +2314,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       <a
                         href={CURRENT_RELEASE.downloadUrl}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
                       >
                         <Download className="w-4 h-4" />
@@ -2346,7 +2346,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                 {/* Materiais Comerciais */}
                 <div className="space-y-3 pt-4 border-t border-slate-100">
-                  <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider">Materiais Comerciais & Homologação AGT</h3>
+                  <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider">Materiais Comerciais & Certificação AGT</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {[
                       { titulo: 'Apresentação Comercial PDF', desc: 'Slides prontos para reuniões com clientes e demonstração.', tam: '4.2 MB' },
@@ -2382,7 +2382,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         key={i}
                         href={tool.url}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         className="p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200 flex items-center justify-between transition-colors"
                       >
                         <div>
@@ -2767,95 +2767,78 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
                   <div>
                     <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-800 text-[10px] font-black uppercase px-3 py-1 rounded-full border border-blue-200">
-                      <Award className="w-3.5 h-3.5 text-blue-600" />
-                      <span>Documentos Institucionais & Credenciação Oficial</span>
+                      <Award className="w-3.5 h-3.5 text-[#FF6500]" />
+                      <span>Documentação Institucional & Credenciação Oficial</span>
                     </div>
                     <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-2">
-                      Certificados Oficiais da Rede de Distribuição
+                      Comprovativo Oficial de Parceiro Revendedor
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                      Aceda e imprima os seus certificados oficiais emitidos pela <strong>VISUAL SOFTWARE</strong> com validade perante clientes e instituições de Angola.
+                      Aceda e imprima o seu comprovativo oficial de revenda credenciada emitido pela <strong>VISUAL SOFTWARE, LDA.</strong> com validade perante clientes e instituições de Angola.
                     </p>
                   </div>
 
                   <button
                     onClick={() => setShowOfficialCertificatesModal(true)}
-                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-5 py-3 rounded-2xl flex items-center gap-2 shadow-md transition-all cursor-pointer shrink-0"
+                    className="bg-[#FF6500] hover:bg-[#EB5B00] active:bg-[#C94A00] text-white font-bold text-xs px-5 py-3 rounded-2xl flex items-center gap-2 shadow-md transition-all cursor-pointer shrink-0"
                   >
                     <Printer className="w-4 h-4" />
                     <span>Visualizar & Imprimir (A4)</span>
                   </button>
                 </div>
 
-                {/* Grade dos 2 Documentos */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Card Documento 1: Visual Software */}
-                  <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4 flex flex-col justify-between hover:border-slate-300 transition-all">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="w-9 h-9 bg-slate-950 text-white font-black text-xs rounded-xl flex items-center justify-center">
-                          VS
-                        </span>
-                        <span className="text-[10px] font-black uppercase text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
-                          ● HOMOLOGADO
-                        </span>
+                {/* Card do Documento Oficial Único */}
+                <div className="bg-slate-50 rounded-2xl border-2 border-slate-200 p-6 sm:p-8 space-y-5 hover:border-slate-300 transition-all">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-[#FF6500] shrink-0">
+                        <Award className="w-6 h-6" />
                       </div>
                       <div>
-                        <h3 className="font-black text-slate-950 text-base">
-                          1. Certificado de Parceria Comercial
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-bold text-[#FF6500] uppercase tracking-wider">
+                            Certificação Oficial de Parceiro
+                          </span>
+                          <span className="text-[10px] font-black uppercase text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                            ● HOMOLOGADO
+                          </span>
+                        </div>
+                        <h3 className="font-extrabold text-slate-950 text-lg sm:text-xl">
+                          COMPROVATIVO DE PARCEIRO REVENDEDOR
                         </h3>
-                        <p className="text-xs text-slate-500 mt-1">
-                          Atestado oficial de membro credenciado e homologado da rede de canais da <strong>VISUAL SOFTWARE</strong> em Angola.
+                        <p className="text-xs font-bold text-[#1D4ED8] uppercase">
+                          CREDENCIADO KIVORA SOFT
                         </p>
-                      </div>
-                      <div className="space-y-1 text-[11px] text-slate-600 bg-white p-3 rounded-xl border border-slate-200 font-medium">
-                        <p><strong>Entidade:</strong> {partnerName}</p>
-                        <p><strong>Código:</strong> <span className="font-mono text-emerald-700 font-bold">{partnerCode}</span></p>
-                        <p><strong>Categoria:</strong> <span className="font-bold uppercase text-blue-700">{(partnerAccount?.tier || 'bronze')} Partner</span></p>
                       </div>
                     </div>
 
                     <button
                       onClick={() => setShowOfficialCertificatesModal(true)}
-                      className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                      className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm self-start sm:self-center shrink-0"
                     >
-                      <ShieldCheck className="w-4 h-4 text-blue-300" />
-                      <span>Ver Certificado Visual Software</span>
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <span>Abrir Comprovativo Oficial</span>
                     </button>
                   </div>
 
-                  {/* Card Documento 2: Kivora ERP */}
-                  <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4 flex flex-col justify-between hover:border-slate-300 transition-all">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <img src="/imagens/logo_sem_fundo.png" alt="Kivora Logo" className="h-7 w-auto object-contain" />
-                        <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
-                          AGT 384/2024
-                        </span>
-                      </div>
-                      <div>
-                        <h3 className="font-black text-slate-950 text-base">
-                          2. Autorização de Revenda Kivora ERP
-                        </h3>
-                        <p className="text-xs text-slate-500 mt-1">
-                          Outorga concedida pela Visual Software para comercialização, instalação de postos e emissão de licenças do software Kivora ERP.
-                        </p>
-                      </div>
-                      <div className="space-y-1 text-[11px] text-slate-600 bg-white p-3 rounded-xl border border-slate-200 font-medium">
-                        <p><strong>Software:</strong> Kivora ERP v2.4</p>
-                        <p><strong>Certificação Fiscal:</strong> <span className="font-mono font-bold text-amber-700">384/AGT/2024</span></p>
-                        <p><strong>Concessão:</strong> Distribuição & Suporte Autorizado</p>
-                      </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div className="bg-white p-3.5 rounded-xl border border-slate-200">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase">Entidade Titular</p>
+                      <p className="font-bold text-slate-900 mt-0.5 truncate">{partnerName}</p>
                     </div>
-
-                    <button
-                      onClick={() => setShowOfficialCertificatesModal(true)}
-                      className="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-                    >
-                      <FileText className="w-4 h-4 text-amber-200" />
-                      <span>Ver Autorização de Revenda</span>
-                    </button>
+                    <div className="bg-white p-3.5 rounded-xl border border-slate-200">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase">N.º de Credencial</p>
+                      <p className="font-mono font-bold text-[#FF6500] mt-0.5">{partnerCode}</p>
+                    </div>
+                    <div className="bg-white p-3.5 rounded-xl border border-slate-200">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase">Homologação de Software</p>
+                      <p className="font-bold text-slate-900 mt-0.5">FE/440/AGT/2026</p>
+                    </div>
                   </div>
+
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Este documento certifica que a entidade acima identificada é Parceiro Revendedor oficialmente credenciado pela Visual Software, encontrando-se devidamente autorizado a comercializar, promover e revender o software <strong>KIVORA SOFT</strong> nos termos do Contrato de Parceria de Revenda.
+                  </p>
                 </div>
               </div>
             </div>

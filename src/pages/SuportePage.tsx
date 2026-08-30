@@ -26,6 +26,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
   const [departamento, setDepartamento] = useState<'faturacao' | 'tecnico' | 'licenciamento' | 'multiloja'>('tecnico');
   const [assunto, setAssunto] = useState(initialSubject || '');
   const [mensagem, setMensagem] = useState('');
+  const [hpField, setHpField] = useState('');
   
   const [submitting, setSubmitting] = useState(false);
   const [ticketProtocol, setTicketProtocol] = useState<string | null>(null);
@@ -40,6 +41,15 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
     if (!nome || !telefone || !mensagem) return;
 
     setSubmitting(true);
+
+    // Bot trap
+    if (hpField) {
+      setTimeout(() => {
+        setSubmitting(false);
+        setTicketProtocol(`TICK-AO-${Date.now().toString().slice(-6)}`);
+      }, 400);
+      return;
+    }
     try {
       const newTicket = await createSupportTicket({
         company_name: nome,
@@ -144,8 +154,9 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* Card 1: WhatsApp */}
-          <div className="card-premium rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group">
-            <div className="space-y-4">
+          <div className="bg-gradient-to-br from-emerald-50/60 via-white to-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-emerald-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden card-glow-green">
+            <MessageCircle className="icon-watermark wm-emerald w-32 h-32" strokeWidth={1.25} />
+            <div className="space-y-4 relative z-10">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
                   <MessageCircle className="w-6 h-6" />
@@ -175,7 +186,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
+              className="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-600/20 cursor-pointer relative z-10 shine-hover"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Falar no WhatsApp Agora</span>
@@ -183,8 +194,9 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
           </div>
 
           {/* Card 2: Telefone Central */}
-          <div className="card-premium rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group">
-            <div className="space-y-4">
+          <div className="bg-gradient-to-br from-blue-50/60 via-white to-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-blue-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden card-glow-blue">
+            <Phone className="icon-watermark wm-blue w-32 h-32" strokeWidth={1.25} />
+            <div className="space-y-4 relative z-10">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
                   <Phone className="w-6 h-6" />
@@ -211,7 +223,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
 
             <a
               href={`tel:${settings.phoneRaw || '244923456789'}`}
-              className="bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer border border-slate-800"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-600/25 cursor-pointer relative z-10 shine-hover"
             >
               <Phone className="w-4 h-4" />
               <span>Ligar para a Central</span>
@@ -219,18 +231,19 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
           </div>
 
           {/* Card 3: Email Suporte */}
-          <div className="card-premium rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group">
-            <div className="space-y-4">
+          <div className="bg-gradient-to-br from-purple-50/60 via-white to-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-purple-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden card-glow-purple">
+            <Mail className="icon-watermark wm-purple w-32 h-32" strokeWidth={1.25} />
+            <div className="space-y-4 relative z-10">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 border border-purple-100 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
                   <Mail className="w-6 h-6" />
                 </div>
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200/80">
                   Logs & Ficheiros
                 </span>
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-950 group-hover:text-blue-600 transition-colors">Email de Suporte Técnico & Fiscal</h3>
+                <h3 className="text-base font-black text-slate-950 group-hover:text-purple-600 transition-colors">Email de Suporte Técnico & Fiscal</h3>
                 <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
                   Envio de ficheiros de log, cópias de segurança, relatórios e esclarecimento de regras fiscais.
                 </p>
@@ -239,14 +252,14 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                 {settings.supportEmail || 'suporte@kivora.ao'}
               </div>
               <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                <Building2 className="w-3.5 h-3.5 text-purple-600 shrink-0" />
                 <span className="truncate">{settings.address || 'Luanda, Angola'}</span>
               </div>
             </div>
 
             <a
               href={`mailto:${settings.supportEmail || 'suporte@kivora.ao'}`}
-              className="btn-premium-secondary font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer"
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-purple-600/25 cursor-pointer relative z-10 shine-hover"
             >
               <Mail className="w-4 h-4" />
               <span>Enviar Mensagem por Email</span>
@@ -256,16 +269,17 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
         </div>
 
         {/* Formulário Interativo de Abertura de Ticket com Protocolo */}
-        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 sm:p-12 space-y-8">
-          <div className="max-w-2xl mx-auto text-center space-y-2">
-            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-blue-600 bg-blue-100/60 px-3.5 py-1 rounded-full">
+        <div className="bg-mesh border border-slate-200/80 rounded-3xl p-8 sm:p-12 space-y-8 relative overflow-hidden">
+          <div className="absolute -top-16 -right-16 w-48 h-48 orb orb-blue" />
+          <div className="max-w-2xl mx-auto text-center space-y-2 relative z-10">
+            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-blue-700 bg-blue-100 px-3.5 py-1.5 rounded-full border border-blue-200">
               <Headphones className="w-3.5 h-3.5" />
               <span>Abertura de Chamado Técnico</span>
             </div>
             <h3 className="text-2xl sm:text-3xl font-black text-slate-950">
               Precisa de Intervenção Técnica ou Formação?
             </h3>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            <p className="text-sm text-slate-600 leading-relaxed">
               Preencha o formulário para gerar o seu número de protocolo e ser atendido por um engenheiro de suporte.
             </p>
           </div>
@@ -298,10 +312,24 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
             </div>
           ) : (
             <form onSubmit={handleSubmitTicket} className="max-w-3xl mx-auto space-y-6 bg-white p-6 sm:p-10 rounded-3xl border border-slate-200/90 shadow-sm">
+              {/* Honeypot Invisível anti-spam */}
+              <input
+                type="text"
+                name="hp_field"
+                id="sup_hp_field"
+                value={hpField}
+                onChange={(e) => setHpField(e.target.value)}
+                style={{ display: 'none', position: 'absolute', left: '-9999px' }}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+              />
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Nome do Solicitante / Responsável *</label>
+                  <label htmlFor="sup_nome" className="text-xs font-bold text-slate-700">Nome do Solicitante / Responsável *</label>
                   <input
+                    id="sup_nome"
                     type="text"
                     required
                     placeholder="Ex: João Baptista"
@@ -312,8 +340,9 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Telefone / WhatsApp *</label>
+                  <label htmlFor="sup_telefone" className="text-xs font-bold text-slate-700">Telefone / WhatsApp *</label>
                   <input
+                    id="sup_telefone"
                     type="tel"
                     required
                     placeholder="Ex: +244 923 000 000"
@@ -324,8 +353,9 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Email Corporativo</label>
+                  <label htmlFor="sup_email" className="text-xs font-bold text-slate-700">Email Corporativo</label>
                   <input
+                    id="sup_email"
                     type="email"
                     placeholder="Ex: geral@empresa.ao"
                     value={email}
@@ -335,8 +365,9 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">NIF da Empresa Licenciada</label>
+                  <label htmlFor="sup_nif" className="text-xs font-bold text-slate-700">NIF da Empresa Licenciada</label>
                   <input
+                    id="sup_nif"
                     type="text"
                     placeholder="Ex: 5417088920"
                     value={nif}
@@ -348,8 +379,9 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Departamento / Área</label>
+                  <label htmlFor="sup_departamento" className="text-xs font-bold text-slate-700">Departamento / Área</label>
                   <select
+                    id="sup_departamento"
                     value={departamento}
                     onChange={(e) => setDepartamento(e.target.value as any)}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-500"
@@ -362,8 +394,9 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Assunto Principal *</label>
+                  <label htmlFor="sup_assunto" className="text-xs font-bold text-slate-700">Assunto Principal *</label>
                   <input
+                    id="sup_assunto"
                     type="text"
                     required
                     placeholder="Ex: Dúvida na exportação do SAF-T mensal"
@@ -375,8 +408,9 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">Descrição Detalhada do Pedido ou Ocorrência *</label>
+                <label htmlFor="sup_mensagem" className="text-xs font-bold text-slate-700">Descrição Detalhada do Pedido ou Ocorrência *</label>
                 <textarea
+                  id="sup_mensagem"
                   required
                   rows={4}
                   placeholder="Descreva o que necessita, mensagem de erro que surgiu ou a data pretendida para formação..."

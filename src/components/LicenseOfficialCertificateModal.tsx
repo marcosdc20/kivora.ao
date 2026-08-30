@@ -100,7 +100,7 @@ export const LicenseOfficialCertificateModal: React.FC<LicenseOfficialCertificat
                     Kivora Tecnologias, Lda.
                   </span>
                   <p className="text-[11px] text-slate-700 font-bold">
-                    Software Certificado pela AGT n.º 384/AGT/2024 • Dec. Presidencial n.º 71/25
+                    Software Certificado pela AGT n.º FE/440/AGT/2026 • Dec. Presidencial n.º 71/25
                   </p>
                   <p className="text-[10px] text-slate-500">
                     NIF: 5417088920 • Luanda, República de Angola

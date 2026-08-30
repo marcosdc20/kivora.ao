@@ -174,32 +174,33 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
       {/* Hero Showcase */}
       <PageHero
         image={posImg}
-        tag="Hardware Homologado"
-        title="Equipamentos 100% Compatíveis com KIVORA ERP"
-        sub="Testamos e homologamos impressoras de talões, leitores de código de barras, gavetas e balanças para garantir um checkout rápido e sem falhas."
+        tag="Periféricos & Equipamentos"
+        title="Equipamentos Compatíveis com KIVORA ERP"
+        sub="Configuração direta de impressoras de talões, leitores de código de barras, gavetas e balanças para garantir um checkout rápido e sem falhas."
       />
 
       {/* Main Container */}
       <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-24 space-y-16">
         
         {/* Banner de Garantia Plug & Play */}
-        <div data-reveal className="bg-slate-950 text-white rounded-3xl p-8 sm:p-10 border border-slate-800 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
-              <ShieldCheck className="w-4 h-4" />
+        <div data-reveal className="bg-mesh-dark text-white rounded-3xl p-8 sm:p-10 border border-slate-800 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <div className="orb orb-blue w-64 h-64 -top-16 -left-16 opacity-30" />
+          <div className="space-y-2 relative z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold uppercase tracking-wider">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span>Garantia de Compatibilidade Plug & Play</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black">Já tem equipamentos na sua loja?</h2>
-            <p className="text-slate-400 text-xs sm:text-sm max-w-xl leading-relaxed">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">Já tem equipamentos na sua loja?</h2>
+            <p className="text-slate-300 text-xs sm:text-sm max-w-xl leading-relaxed font-normal">
               O Kivora ERP suporta os drivers padrão do Windows (ESC/POS, OPOS e COM Serial), sendo compatível com <strong>mais de 95% dos periféricos de ponto de venda</strong> existentes em Angola.
             </p>
           </div>
 
           <button
             onClick={() => onOpenDemoModal('Dúvida sobre Hardware')}
-            className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-2xl transition-all shadow-lg shadow-blue-600/30 shrink-0 cursor-pointer"
+            className="bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-2xl transition-all shadow-xl shadow-orange-600/30 shrink-0 cursor-pointer relative z-10 shimmer-button hover:-translate-y-1"
           >
-            Consultar Compatibilidade Grátis
+            Falar com Técnico
           </button>
         </div>
 
@@ -243,7 +244,7 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
                   onClick={() => setActiveCat(cat.id)}
                   className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-slate-950 text-white shadow-md font-bold'
+                      ? 'bg-blue-600 text-white shadow-md font-bold'
                       : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
@@ -275,16 +276,16 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
                   key={idx}
                   data-reveal
                   data-delay={((idx % 3) + 1) * 100}
-                  className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7 shadow-xs hover:shadow-lg hover:border-blue-500/40 transition-all flex flex-col justify-between space-y-6 group"
+                  className="bg-gradient-to-br from-blue-50/50 via-white to-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 shadow-sm hover:shadow-xl hover:border-blue-400 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between space-y-6 group card-glow-blue relative overflow-hidden"
                 >
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 bg-slate-100 px-3 py-1 rounded-md">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-800 bg-slate-100 border border-slate-200/80 px-3 py-1 rounded-md">
                         {model.brand}
                       </span>
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
                         <CheckCircle2 className="w-3 h-3" />
-                        <span>Homologado</span>
+                        <span>Compatível</span>
                       </span>
                     </div>
 
@@ -298,7 +299,9 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
                       <ul className="space-y-1.5 text-xs text-slate-600">
                         {model.specs.map((spec, sIdx) => (
                           <li key={sIdx} className="flex items-start gap-2">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" strokeWidth={2} />
+                            <div className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                              <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" strokeWidth={2.5} />
+                            </div>
                             <span>{spec}</span>
                           </li>
                         ))}
@@ -316,8 +319,9 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
         </div>
 
         {/* Guia de Ligação & Dicas Técnicas */}
-        <div data-reveal className="bg-slate-50 border border-slate-200 rounded-3xl p-8 sm:p-12 space-y-8">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
+        <div data-reveal className="bg-mesh border border-slate-200/80 rounded-3xl p-8 sm:p-12 space-y-8 relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-44 h-44 orb orb-blue opacity-20" />
+          <div className="text-center max-w-2xl mx-auto space-y-2 relative z-10">
             <h3 className="text-xl sm:text-2xl font-black text-slate-950">
               Como configurar os seus periféricos no KIVORA
             </h3>
@@ -326,25 +330,25 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs">
-            <div data-reveal data-delay="100" className="bg-white p-5 rounded-2xl border border-slate-200 space-y-2">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">1</div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs relative z-10">
+            <div data-reveal data-delay="100" className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm space-y-2 hover:shadow-md hover:-translate-y-1 transition-all">
+              <div className="w-8 h-8 rounded-xl bg-blue-600 text-white shadow-md shadow-blue-600/30 flex items-center justify-center font-bold">1</div>
               <h4 className="font-black text-slate-950 text-sm">Ligue o Periférico</h4>
               <p className="text-slate-600 leading-relaxed">
                 Conecte a impressora ou leitor à porta USB do computador e instale o driver oficial do fabricante para Windows.
               </p>
             </div>
 
-            <div data-reveal data-delay="200" className="bg-white p-5 rounded-2xl border border-slate-200 space-y-2">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">2</div>
+            <div data-reveal data-delay="200" className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm space-y-2 hover:shadow-md hover:-translate-y-1 transition-all">
+              <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white shadow-md shadow-emerald-600/30 flex items-center justify-center font-bold">2</div>
               <h4 className="font-black text-slate-950 text-sm">Selecione no KIVORA</h4>
               <p className="text-slate-600 leading-relaxed">
                 Aceda a <em>Configurações &gt; Periféricos &amp; Impressão</em> e selecione a impressora para talões de balcão (58mm/80mm) ou faturas A4.
               </p>
             </div>
 
-            <div data-reveal data-delay="300" className="bg-white p-5 rounded-2xl border border-slate-200 space-y-2">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">3</div>
+            <div data-reveal data-delay="300" className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm space-y-2 hover:shadow-md hover:-translate-y-1 transition-all">
+              <div className="w-8 h-8 rounded-xl bg-orange-500 text-white shadow-md shadow-orange-500/30 flex items-center justify-center font-bold">3</div>
               <h4 className="font-black text-slate-950 text-sm">Teste de Emissão</h4>
               <p className="text-slate-600 leading-relaxed">
                 Clique no botão <strong>"Imprimir Talão de Teste"</strong> para verificar o corte de papel e a abertura automática da gaveta RJ11.
@@ -354,27 +358,29 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
         </div>
 
         {/* CTA para Download ou Apoio */}
-        <div data-reveal className="bg-[#1d4ed8] rounded-3xl p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
-          <div className="space-y-2 text-center md:text-left">
-            <h3 className="text-2xl sm:text-3xl font-black">
+        <div data-reveal className="bg-mesh-dark text-white rounded-3xl p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl relative overflow-hidden border border-slate-800">
+          <div className="orb orb-blue w-72 h-72 -top-20 -left-20 opacity-30" />
+          <div className="orb orb-orange w-48 h-48 -bottom-10 right-10 opacity-25" />
+          <div className="space-y-2 text-center md:text-left relative z-10">
+            <h3 className="text-2xl sm:text-3xl font-black text-white">
               Pronto para configurar o seu posto de venda?
             </h3>
-            <p className="text-blue-100 text-xs sm:text-sm max-w-xl">
+            <p className="text-slate-300 text-xs sm:text-sm max-w-xl">
               Descarregue o KIVORA ERP e teste a impressão e os leitores no seu próprio computador gratuitamente.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 relative z-10">
             <button
               onClick={() => onNavigatePage('download')}
-              className="bg-white text-blue-900 hover:bg-blue-50 font-black text-xs sm:text-sm px-6 py-3.5 rounded-2xl transition-all shadow-lg cursor-pointer flex items-center gap-2"
+              className="bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-2xl transition-all shadow-xl shadow-orange-600/30 cursor-pointer flex items-center gap-2 hover:-translate-y-1 shimmer-button"
             >
               <Download className="w-4 h-4" />
               <span>Baixar KIVORA Setup</span>
             </button>
             <button
               onClick={() => onNavigatePage('planos')}
-              className="bg-blue-800 hover:bg-blue-900 text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-2xl transition-all border border-blue-400/30 cursor-pointer"
+              className="bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-2xl transition-all border border-white/20 hover:border-white/40 cursor-pointer hover:-translate-y-1"
             >
               <span>Ver Planos de Licença</span>
             </button>

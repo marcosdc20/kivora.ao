@@ -25,30 +25,39 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onBack }) 
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-950">Política de Privacidade</h1>
-              <p className="text-xs text-slate-500 font-semibold">KIVORA ERP • Kivora Tecnologias, Lda. • Luanda, Angola</p>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-950">Política de Privacidade & Protecção de Dados</h1>
+              <p className="text-xs text-slate-500 font-semibold">KIVORA ERP • Em conformidade com a Lei n.º 22/11 da República de Angola • Luanda, Angola</p>
             </div>
           </div>
 
           <div className="space-y-6 text-xs sm:text-sm text-slate-700 leading-relaxed">
-            <h3 className="text-base font-extrabold text-slate-950">1. Proteção de Dados Fiscais e Comerciais</h3>
+            <div className="p-4 bg-blue-50/70 rounded-2xl border border-blue-200/60 text-xs text-blue-950 font-medium">
+              A presente Política de Privacidade regula o tratamento de dados pelo <strong>KIVORA ERP</strong> em estrito cumprimento da <strong>Lei n.º 22/11, de 27 de Junho (Lei da Protecção de Dados Pessoais da República de Angola)</strong> e das normas da Agência de Protecção de Dados (APD), bem como do <strong>Decreto Presidencial n.º 71/25</strong> e Certificação AGT n.º <strong>FE/440/AGT/2026</strong>.
+            </div>
+
+            <h2 className="text-base font-extrabold text-slate-950">1. Princípio da Soberania dos Dados & Armazenamento Local (Offline-First)</h2>
             <p>
-              A <strong>Kivora Tecnologias, Lda.</strong>, detentora da plataforma <strong>KIVORA ERP</strong>, compromete-se a proteger a privacidade e a confidencialidade dos dados das empresas clientes. Todas as informações comerciais, cadastros de clientes, faturação e dados de vencimentos são armazenados com encriptação e segurança de alto padrão.
+              O KIVORA ERP opera prioritariamente em regime desktop local. Os bancos de dados operacionais, cadastros de clientes e fechos de caixa residem diretamente na infraestrutura física do cliente (computador ou servidor local LAN). A <strong>Visual Software / Kivora Tecnologias, Lda.</strong> não possui acesso não autorizado nem efetua cópias remotas dos seus dados comerciais e fiscais.
             </p>
 
-            <h3 className="text-base font-extrabold text-slate-950">2. Encriptação de Chaves Privadas do Contribuinte</h3>
+            <h2 className="text-base font-extrabold text-slate-950">2. Tratamento de Dados e Finalidades (Lei n.º 22/11)</h2>
             <p>
-              Em estrita conformidade com as diretrizes da AGT para a faturação eletrónica, as chaves privadas do contribuinte fornecidas para a assinatura digital de documentos (algoritmo RSA/SHA) são armazenadas encriptadas e nunca são expostas em texto simples após a gravação no sistema.
+              Os dados recolhidos através do website (pedidos de demonstração, candidaturas a parceiros e chamados de suporte) destinam-se exclusivamente à prestação de serviços comerciais, emissão de faturas, credenciamento técnico e suporte ao utilizador. É expressamente vedada a cedência, partilha ou comercialização de dados pessoais a terceiros não autorizados.
             </p>
 
-            <h3 className="text-base font-extrabold text-slate-950">3. Comunicação Segura com a AGT</h3>
+            <h2 className="text-base font-extrabold text-slate-950">3. Segurança Criptográfica & Chaves Privadas RSA</h2>
             <p>
-              O envio de dados de faturação e submissão do SAF-T AO ocorre exclusivamente através de canais seguros com autenticação autorizada, visando o cumprimento das obrigações fiscais legais decorrentes da legislação angolana.
+              Em conformidade com as regras de certificação da AGT, os pares de chaves criptográficas (algoritmo RSA/SHA) utilizados na assinatura digital dos documentos fiscais são armazenados de forma blindada no seu computador. As senhas de utilizador são processadas com hashing irreversível.
             </p>
 
-            <h3 className="text-base font-extrabold text-slate-950">4. Contacto de Proteção de Dados</h3>
+            <h2 className="text-base font-extrabold text-slate-950">4. Direitos dos Titulares dos Dados</h2>
             <p>
-              Para esclarecimentos sobre o tratamento dos seus dados no KIVORA ERP, contacte o nosso encarregado de proteção através do email <strong>{KIVORA_INFO.supportEmail}</strong>.
+              Nos termos dos artigos da Lei n.º 22/11, é assegurado a qualquer titular o direito de acesso, confirmação, retificação, atualização e eliminação dos seus dados pessoais constantes nos nossos registos de contacto e suporte.
+            </p>
+
+            <h2 className="text-base font-extrabold text-slate-950">5. Contacto do Responsável pelo Tratamento</h2>
+            <p>
+              Para exercer qualquer dos seus direitos ou solicitar esclarecimentos adicionais, poderá contactar a nossa equipa de conformidade através do e-mail <strong>{KIVORA_INFO.supportEmail}</strong> ou na nossa sede em Luanda, Angola.
             </p>
           </div>
         </div>

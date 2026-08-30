@@ -47,10 +47,10 @@ const COMPARISON_DATA: ComparisonFeature[] = [
   {
     category: 'Conformidade Fiscal AGT',
     feature: 'Certificação AGT (Decreto Pres. 71/25)',
-    description: 'Homologação oficial das finanças com assinatura RS256 e QR Code.',
-    kivora: { supported: true, text: '100% Certificado & Homologado' },
+    description: 'Certificação oficial com assinatura RS256 e QR Code impresso.',
+    kivora: { supported: true, text: 'Certificado Oficial AGT' },
     cloudSoftware: { supported: true, text: 'Geralmente certificado' },
-    pirateSoftware: { supported: false, text: 'ILEGAL (Multas de milhões de Kz)' },
+    pirateSoftware: { supported: false, text: 'ILEGAL (Risco de Multas Fiscais)' },
   },
   {
     category: 'Conformidade Fiscal AGT',
@@ -133,67 +133,97 @@ export const ComparativoPage: React.FC<ComparativoPageProps> = ({ onNavigatePage
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           
           {/* Card Kivora */}
-          <div className="bg-[#1d4ed8] text-white p-6 sm:p-8 rounded-3xl shadow-xl relative overflow-hidden border border-blue-600">
-            <span className="px-3 py-1 bg-white/20 text-white rounded-full text-xs font-bold uppercase tracking-wider mb-4 inline-block">
-              Solução Recomendada
-            </span>
-            <h3 className="text-2xl font-black mb-2">KIVORA ERP</h3>
-            <p className="text-blue-100 text-xs sm:text-sm mb-6 leading-relaxed">
-              Base de dados local segura, não trava sem internet, preços em Kwanzas e certificação AGT vitalícia.
-            </p>
-            <div className="space-y-2 text-xs font-semibold text-white">
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-300" /> Fatura 24/7 sem internet
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-300" /> Sem taxas cambiais em dólares
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-300" /> Suporte presencial nas 18 províncias
+          <div className="bg-mesh-dark text-white p-6 sm:p-8 rounded-3xl shadow-2xl relative overflow-hidden border border-blue-500/40">
+            <div className="orb orb-blue w-64 h-64 -top-16 -left-16 opacity-30" />
+            <div className="relative z-10">
+              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full text-xs font-bold uppercase tracking-wider mb-4 inline-block">
+                Solução Recomendada
+              </span>
+              <h3 className="text-2xl font-black mb-2 text-white">KIVORA ERP</h3>
+              <p className="text-slate-300 text-xs sm:text-sm mb-6 leading-relaxed">
+                Base de dados local segura, não trava sem internet, preços em Kwanzas e certificação AGT vitalícia.
+              </p>
+              <div className="space-y-2.5 text-xs font-semibold text-white">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0">
+                    <Check className="w-3.5 h-3.5" />
+                  </div>
+                  <span>Fatura 24/7 sem internet</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0">
+                    <Check className="w-3.5 h-3.5" />
+                  </div>
+                  <span>Sem taxas cambiais em dólares</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0">
+                    <Check className="w-3.5 h-3.5" />
+                  </div>
+                  <span>Suporte presencial nas 18 províncias</span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Card Cloud Estrangeiro */}
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm text-slate-800">
-            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-bold uppercase tracking-wider mb-4 inline-block">
+          <div className="bg-gradient-to-br from-slate-50 via-white to-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-sm text-slate-800 hover:shadow-lg transition-all">
+            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-bold uppercase tracking-wider mb-4 inline-block border border-slate-200">
               Softwares 100% Nuvem (SaaS)
             </span>
             <h3 className="text-2xl font-black mb-2 text-slate-900">Nuvem Estrangeira</h3>
             <p className="text-slate-500 text-xs sm:text-sm mb-6 leading-relaxed">
               Dependem 100% de ligação à internet fibra e cobram mensalidades em USD/EUR por cada terminal.
             </p>
-            <div className="space-y-2 text-xs font-medium text-slate-600">
+            <div className="space-y-2.5 text-xs font-medium text-slate-600">
               <div className="flex items-center gap-2 text-rose-600">
-                <X className="w-4 h-4" /> Trava quando a internet falha
+                <div className="w-5 h-5 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                  <X className="w-3.5 h-3.5" />
+                </div>
+                <span>Trava quando a internet falha</span>
               </div>
               <div className="flex items-center gap-2 text-rose-600">
-                <X className="w-4 h-4" /> Mensalidades caras indexadas ao dólar
+                <div className="w-5 h-5 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                  <X className="w-3.5 h-3.5" />
+                </div>
+                <span>Mensalidades caras indexadas ao dólar</span>
               </div>
               <div className="flex items-center gap-2 text-amber-600">
-                <AlertTriangle className="w-4 h-4" /> Suporte remoto lento por fuso horário
+                <div className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                </div>
+                <span>Suporte remoto lento por fuso horário</span>
               </div>
             </div>
           </div>
 
           {/* Card Software Pirata */}
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-rose-200/80 shadow-sm text-slate-800 bg-rose-50/20">
-            <span className="px-3 py-1 bg-rose-100 text-rose-800 rounded-full text-xs font-bold uppercase tracking-wider mb-4 inline-block">
-              Softwares Não Homologados
+          <div className="bg-gradient-to-br from-rose-50/40 via-white to-white p-6 sm:p-8 rounded-3xl border border-rose-200/80 shadow-sm text-slate-800 hover:shadow-lg transition-all">
+            <span className="px-3 py-1 bg-rose-100 text-rose-800 border border-rose-200 rounded-full text-xs font-bold uppercase tracking-wider mb-4 inline-block">
+              Softwares Não Certificados
             </span>
             <h3 className="text-2xl font-black mb-2 text-slate-900">Cópias / Piratas</h3>
             <p className="text-slate-500 text-xs sm:text-sm mb-6 leading-relaxed">
-              Programas crackeados ou sem homologação oficial pela AGT. Alto risco jurídico e técnico.
+              Programas crackeados ou sem certificação oficial pela AGT. Alto risco jurídico e técnico.
             </p>
-            <div className="space-y-2 text-xs font-medium text-slate-600">
+            <div className="space-y-2.5 text-xs font-medium text-slate-600">
               <div className="flex items-center gap-2 text-rose-600 font-bold">
-                <X className="w-4 h-4" /> Multas pesadas da AGT (milhões Kz)
+                <div className="w-5 h-5 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                  <X className="w-3.5 h-3.5" />
+                </div>
+                <span>Multas pesadas da AGT (milhões Kz)</span>
               </div>
               <div className="flex items-center gap-2 text-rose-600">
-                <X className="w-4 h-4" /> Risco de corrupção total de dados
+                <div className="w-5 h-5 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                  <X className="w-3.5 h-3.5" />
+                </div>
+                <span>Risco de corrupção total de dados</span>
               </div>
               <div className="flex items-center gap-2 text-rose-600">
-                <X className="w-4 h-4" /> Zero suporte e sem atualizações
+                <div className="w-5 h-5 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                  <X className="w-3.5 h-3.5" />
+                </div>
+                <span>Zero suporte e sem atualizações</span>
               </div>
             </div>
           </div>
@@ -233,7 +263,7 @@ export const ComparativoPage: React.FC<ComparativoPageProps> = ({ onNavigatePage
                     SaaS em Nuvem
                   </th>
                   <th className="p-4 sm:p-6 text-xs sm:text-sm font-bold text-slate-700 w-1/5 text-center">
-                    Não Homologado
+                    Não Certificado
                   </th>
                 </tr>
               </thead>
@@ -309,25 +339,30 @@ export const ComparativoPage: React.FC<ComparativoPageProps> = ({ onNavigatePage
         </div>
 
         {/* Seção de FAQ Rápido sobre Migração */}
-        <div className="bg-white p-8 sm:p-12 rounded-3xl border border-slate-200 mb-16 shadow-sm">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-8 text-center">
+        <div className="bg-mesh p-8 sm:p-12 rounded-3xl border border-slate-200/80 mb-16 shadow-sm relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-44 h-44 orb orb-blue opacity-20" />
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-8 text-center relative z-10">
             Dúvidas Comuns sobre Migrar para o KIVORA
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200/80">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+            <div className="p-6 bg-white rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md hover:border-blue-400 transition-all">
               <h3 className="font-bold text-slate-900 text-base mb-2 flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-[#1d4ed8]" />
-                Como funciona a migração dos meus artigos e clientes?
+                <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                  <HelpCircle className="w-5 h-5" />
+                </div>
+                <span>Como funciona a migração dos meus artigos e clientes?</span>
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 O KIVORA possui importador automático através de ficheiros Excel / CSV. Os nossos técnicos parceiros ajudam a importar todos os seus produtos, preços, stocks iniciais e clientes em menos de 1 hora.
               </p>
             </div>
 
-            <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200/80">
+            <div className="p-6 bg-white rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md hover:border-blue-400 transition-all">
               <h3 className="font-bold text-slate-900 text-base mb-2 flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-[#1d4ed8]" />
-                Preciso comprar computadores novos?
+                <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                  <HelpCircle className="w-5 h-5" />
+                </div>
+                <span>Preciso comprar computadores novos?</span>
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 Não. O KIVORA é extremamente leve e foi otimizado para rodar em computadores comuns com Windows 10 ou 11 (a partir de 4GB de RAM), aproveitando as impressoras e leitores que já possui.
@@ -337,28 +372,32 @@ export const ComparativoPage: React.FC<ComparativoPageProps> = ({ onNavigatePage
         </div>
 
         {/* CTA */}
-        <div className="bg-gradient-to-r from-blue-900 to-[#1d4ed8] text-white p-8 sm:p-12 rounded-3xl text-center shadow-xl">
-          <h2 className="text-2xl sm:text-4xl font-extrabold mb-4">
-            Faça a Escolha Segura para a sua Empresa
-          </h2>
-          <p className="text-blue-100 text-sm sm:text-base max-w-2xl mx-auto mb-8">
-            Economize em taxas cambiais e garanta uma operação sem paragens com o software de faturação certificado pela AGT.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <button
-              onClick={() => onNavigatePage('download')}
-              className="px-6 py-3.5 bg-white text-[#1d4ed8] rounded-xl font-bold text-sm shadow-lg hover:bg-blue-50 transition-all flex items-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              Testar Gratuitamente por 15 Dias
-            </button>
-            <button
-              onClick={() => onNavigatePage('planos')}
-              className="px-6 py-3.5 bg-blue-800/80 border border-blue-400/40 text-white rounded-xl font-bold text-sm hover:bg-blue-800 transition-all flex items-center gap-2"
-            >
-              <Calculator className="w-4 h-4" />
-              Simular Preços & Postos LAN
-            </button>
+        <div className="bg-mesh-dark rounded-3xl p-8 sm:p-12 text-white text-center shadow-2xl relative overflow-hidden border border-slate-800">
+          <div className="orb orb-blue w-80 h-80 -top-20 -left-20 opacity-30" />
+          <div className="orb orb-orange w-48 h-48 -bottom-10 right-10 opacity-25" />
+          <div className="relative z-10 max-w-2xl mx-auto space-y-6">
+            <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
+              Faça a Escolha Segura para a sua Empresa
+            </h2>
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+              Economize em taxas cambiais e garanta uma operação sem paragens com o software de faturação certificado pela AGT.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+              <button
+                onClick={() => onNavigatePage('download')}
+                className="px-8 py-4 bg-[#FF6500] hover:bg-[#EB5B00] text-white rounded-2xl font-bold text-sm shadow-xl shadow-orange-600/40 transition-all flex items-center gap-2 hover:-translate-y-1 shimmer-button cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                Testar Gratuitamente por 15 Dias
+              </button>
+              <button
+                onClick={() => onNavigatePage('planos')}
+                className="px-7 py-4 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-white rounded-2xl font-bold text-sm transition-all flex items-center gap-2 hover:-translate-y-1 cursor-pointer"
+              >
+                <Calculator className="w-4 h-4" />
+                Simular Preços & Postos LAN
+              </button>
+            </div>
           </div>
         </div>
 

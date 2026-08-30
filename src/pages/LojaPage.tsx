@@ -80,7 +80,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
       { label: 'Impressora', value: 'Térmica 80mm USB/Rede, Corte Automático, 250 mm/s' },
       { label: 'Leitor', value: 'Imager 1D/2D QR Code com suporte automático' },
       { label: 'Gaveta', value: 'Aço pesado, 5 notas / 8 moedas, abertura RJ11' },
-      { label: 'Software', value: 'Compatível com KIVORA ERP (Homologado AGT)' },
+      { label: 'Software', value: 'Compatível com KIVORA ERP' },
     ],
     inStock: true,
     stockLocation: 'Armazém Luanda (Pronto para entrega)',
@@ -657,22 +657,37 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
       {/* ─── CONTEÚDO PRINCIPAL: GRELHA DE PRODUTOS ─────────────────────── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         
+        {/* Título Principal da Loja */}
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+            Loja de Equipamentos POS & Periféricos
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-600 mt-1">
+            Equipamentos comerciais e periféricos para o KIVORA ERP com garantia oficial em Angola.
+          </p>
+        </div>
+
         {/* Banner Informativo de Entrega */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
-          <div className="flex items-center gap-2">
-            <Truck className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span><strong>Entrega Rápida em Luanda</strong> em até 24h e envio diário para as outras 17 províncias de Angola.</span>
+        <div className="bg-mesh rounded-3xl border border-slate-200/80 p-5 sm:p-6 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-700 shadow-sm relative overflow-hidden">
+          <div className="orb orb-blue w-36 h-36 -top-8 -left-8 opacity-20" />
+          <div className="flex items-center gap-3 relative z-10">
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs font-bold">
+              <Truck className="w-5 h-5" />
+            </div>
+            <span><strong>Entrega Rápida em Luanda</strong> em até 24h e envio expresso para todas as províncias de Angola.</span>
           </div>
-          <div className="flex items-center gap-2 text-slate-500 shrink-0">
-            <ShieldCheck className="w-4 h-4 text-blue-600" />
-            <span>Todos os equipamentos com <strong>12 Meses de Garantia</strong>.</span>
+          <div className="flex items-center gap-3 relative z-10 text-slate-600 shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 shadow-xs font-bold">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <span>Equipamentos 100% Homologados com <strong>12 Meses de Garantia Oficial</strong>.</span>
           </div>
         </div>
 
         {/* Quantidade de Itens Encontrados */}
         <div className="flex items-center justify-between mb-4">
           <p className="text-xs text-slate-500">
-            Mostrando <strong>{filteredProducts.length}</strong> produtos homologados
+            Mostrando <strong>{filteredProducts.length}</strong> produtos em catálogo
           </p>
         </div>
 
@@ -685,32 +700,32 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
                 setSelectedProduct(prod);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="card-premium rounded-2xl overflow-hidden flex flex-col justify-between group cursor-pointer"
+              className="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-blue-400 overflow-hidden flex flex-col justify-between group cursor-pointer transition-all duration-300 card-glow-blue"
             >
               <div>
                 
                 {/* Imagem do Produto em Fundo Branco Limpo */}
-                <div className="aspect-square bg-white p-5 relative overflow-hidden flex items-center justify-center border-b border-slate-100">
+                <div className="aspect-square bg-slate-50/50 p-6 relative overflow-hidden flex items-center justify-center border-b border-slate-100">
                   <img
                     src={prod.image}
                     alt={prod.name}
-                    className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    className="max-h-full max-w-full object-contain group-hover:scale-108 transition-transform duration-500"
                     onError={(e: any) => { e.target.src = '/imagens/pos_bundle_kit.jpg'; }}
                   />
                   {prod.discountPercent && (
-                    <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-rose-600 text-white font-bold text-[10px] rounded-md shadow-xs">
+                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-rose-600 text-white font-bold text-[10px] rounded-lg shadow-sm">
                       -{prod.discountPercent}%
                     </span>
                   )}
                   {prod.badge && !prod.discountPercent && (
-                    <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-blue-600 text-white font-bold text-[10px] rounded-md shadow-xs">
+                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-blue-600 text-white font-bold text-[10px] rounded-lg shadow-sm">
                       {prod.badge}
                     </span>
                   )}
                 </div>
 
                 {/* Dados do Produto */}
-                <div className="p-4">
+                <div className="p-5">
                   
                   {/* Preço em Kwanzas */}
                   <div className="flex items-baseline gap-1 mb-1">
@@ -735,7 +750,7 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
                   {/* Avaliação e Vendas */}
                   <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mb-2.5 font-mono-num">
                     <span className="flex items-center text-amber-600 font-bold">
-                      <Star className="w-3 h-3 fill-amber-400 mr-0.5 text-amber-500" />
+                      <Star className="w-3.5 h-3.5 fill-amber-400 mr-0.5 text-amber-500" />
                       {prod.rating}
                     </span>
                     <span>•</span>
@@ -743,7 +758,7 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
                   </div>
 
                   {/* Selo de Envio */}
-                  <div className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-md">
+                  <div className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-md">
                     <Truck className="w-3 h-3 text-emerald-600" />
                     <span>Entrega Imediata</span>
                   </div>
@@ -753,14 +768,14 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
               </div>
 
               {/* Botão de Ver Detalhes */}
-              <div className="p-3.5 pt-0">
+              <div className="p-4 pt-0">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedProduct(prod);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="w-full py-2 bg-slate-50 hover:bg-[#1d4ed8] hover:text-white text-slate-700 rounded-lg font-bold text-xs border border-slate-200 hover:border-transparent transition-all cursor-pointer"
+                  className="w-full py-2.5 bg-slate-50 hover:bg-blue-600 hover:text-white text-slate-800 rounded-xl font-bold text-xs border border-slate-200 hover:border-transparent transition-all cursor-pointer shadow-2xs"
                 >
                   Ver Detalhes do Produto
                 </button>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { KivoraModule } from '../types/kivora';
 import { ArrowLeft, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { LiveFiscalReceipt } from '../components/LiveFiscalReceipt';
 
 interface ModuloDetailPageProps {
   module: KivoraModule;
@@ -13,25 +14,28 @@ export const ModuloDetailPage: React.FC<ModuloDetailPageProps> = ({
   onBack,
   onOpenDemoModal,
 }) => {
+  const isFaturacao = module.id === 'faturacao-agt';
+
   return (
     <div className="min-h-screen bg-white text-slate-900 pt-28 pb-20 selection:bg-blue-600 selection:text-white page-transition-enter">
       
       {/* Header Banner */}
-      <section className="bg-slate-50 border-b border-slate-200/80 py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+      <section className="bg-mesh border-b border-slate-200/80 py-14 relative overflow-hidden shadow-xs">
+        <div className="orb orb-blue w-48 h-48 -top-12 -right-12 opacity-20" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 relative z-10">
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white px-3.5 py-1.5 rounded-lg border border-slate-200 shadow-sm transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-2xs transition-all cursor-pointer hover:-translate-x-0.5"
           >
             <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
             <span>Voltar aos Módulos</span>
           </button>
 
           <div className="space-y-2">
-            <span className="text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3 py-0.5 rounded border border-blue-200/70">
+            <span className="text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-100/70 px-3.5 py-1 rounded-full border border-blue-200/70 inline-block">
               {module.badge || 'Módulo KIVORA ERP'}
             </span>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-950 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-950 tracking-tight">
               {module.title}
             </h1>
             <p className="text-slate-600 text-sm sm:text-base max-w-3xl leading-relaxed">
@@ -44,7 +48,7 @@ export const ModuloDetailPage: React.FC<ModuloDetailPageProps> = ({
       {/* Main Details Content */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
         
-        {/* Overview & Screenshot Preview */}
+        {/* Overview & Screenshot / Live Demonstrator Preview */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           <div className="lg:col-span-6 space-y-6">
@@ -70,21 +74,25 @@ export const ModuloDetailPage: React.FC<ModuloDetailPageProps> = ({
             <div className="pt-2 flex flex-wrap gap-3">
               <button
                 onClick={() => onOpenDemoModal(module.title)}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-md transition-all"
+                className="bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-xs sm:text-sm px-8 py-4 rounded-2xl shadow-xl shadow-orange-600/30 transition-all cursor-pointer hover:-translate-y-1 shimmer-button"
               >
                 Solicitar Demonstração Deste Módulo
               </button>
             </div>
           </div>
 
-          <div className="lg:col-span-6">
-            <div className="p-3 bg-slate-100 rounded-3xl border border-slate-200 shadow-xl">
-              <img
-                src={module.image}
-                alt={module.title}
-                className="w-full h-auto rounded-2xl object-cover"
-              />
-            </div>
+          <div className="lg:col-span-6 flex justify-center items-center">
+            {isFaturacao ? (
+              <LiveFiscalReceipt />
+            ) : (
+              <div className="w-full p-3 bg-slate-100/80 rounded-3xl border border-slate-200/90 shadow-2xl">
+                <img
+                  src={module.image}
+                  alt={module.title}
+                  className="w-full h-auto rounded-2xl object-cover"
+                />
+              </div>
+            )}
           </div>
 
         </div>
@@ -93,7 +101,7 @@ export const ModuloDetailPage: React.FC<ModuloDetailPageProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* Features */}
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <div className="bg-gradient-to-br from-blue-50/70 via-white to-white p-8 rounded-3xl border border-slate-200/90 shadow-sm space-y-4 card-glow-blue">
             <h3 className="text-lg font-extrabold text-slate-950">
               Recursos e Funcionalidades Técnicas
             </h3>
@@ -108,7 +116,7 @@ export const ModuloDetailPage: React.FC<ModuloDetailPageProps> = ({
           </div>
 
           {/* Benefits */}
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <div className="bg-gradient-to-br from-emerald-50/70 via-white to-white p-8 rounded-3xl border border-slate-200/90 shadow-sm space-y-4 card-glow-green">
             <h3 className="text-lg font-extrabold text-slate-950">
               Ganhos para a Operação da Sua Empresa
             </h3>

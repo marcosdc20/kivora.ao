@@ -236,7 +236,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
             <a
               href={waUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 rounded-xl shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <MessageSquare className="w-4 h-4" />
@@ -665,7 +665,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                   <a
                     href={getDirectDownloadUrl(getCachedSystemSettings().downloadUrl || CURRENT_RELEASE.downloadUrl)}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 transition-all cursor-pointer"
                   >
                     <Download className="w-4 h-4" />

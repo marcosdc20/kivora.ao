@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight, Download } from 'lucide-react';
+import { CountUp } from './CountUp';
+import { ScrollDownIndicator } from './ScrollDownIndicator';
 
 import laptopImg from '../assets/kivora/pc-laptop-kivora.png';
 import posImg from '../assets/kivora/pc-pos-kivora.png';
@@ -30,7 +32,7 @@ const SLIDES: SlideProps[] = [
     image: executivosImg,
     tagline: 'Faturação Eletrónica Certificada AGT',
     headline: 'Emita faturas legais\nem Angola, sem papel,\nsem complicações.',
-    sub: 'Conformidade total com DS.120, QR Code e assinatura digital RS256 homologados pela AGT.',
+    sub: 'Conformidade total com o Decreto 71/25, QR Code impresso e assinatura digital RSA-SHA256.',
     cta: { label: 'Baixar KIVORA Grátis', action: 'download' },
     align: 'left',
     overlay: 'from-black/90 via-black/65 to-black/30',
@@ -147,8 +149,8 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                 <span>{slide.tagline}</span>
               </div>
 
-              {/* Headline Responsivo com Tipografia Editorial */}
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[54px] font-extrabold text-white leading-[1.12] sm:leading-[1.08] tracking-tight mb-4 whitespace-pre-line drop-shadow-md">
+              {/* Headline Responsivo com Tipografia Editorial e Quebras Nativas */}
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[54px] font-extrabold text-white leading-[1.14] sm:leading-[1.08] tracking-tight mb-4 drop-shadow-md whitespace-pre-line">
                 {slide.headline}
               </h1>
 
@@ -162,7 +164,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                 {slide.cta.action === 'download' ? (
                   <button
                     onClick={() => onNavigatePage('download')}
-                    className="shimmer-button inline-flex items-center justify-center gap-2 bg-[#1d4ed8] hover:bg-blue-600 active:bg-blue-800 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-2xl shadow-xl shadow-blue-900/40 transition-all hover:-translate-y-0.5 cursor-pointer border border-blue-400/30"
+                    className="shimmer-button inline-flex items-center justify-center gap-2 bg-[#FF6500] hover:bg-[#EB5B00] active:bg-[#C94A00] text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-2xl shadow-xl shadow-orange-950/40 transition-all hover:-translate-y-0.5 cursor-pointer"
                   >
                     <Download className="w-4 h-4" strokeWidth={2.25} />
                     <span>{slide.cta.label}</span>
@@ -186,18 +188,24 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                 </button>
               </div>
 
-              {/* Destaques Rápidos de Confiança */}
+              {/* Destaques Rápidos de Confiança com Animações de Contagem */}
               <div className="pt-6 sm:pt-8 border-t border-white/15 mt-6 sm:mt-8 grid grid-cols-3 gap-3 text-left">
                 <div>
-                  <p className="text-xs sm:text-sm font-black text-white font-mono-num">0 Minutos</p>
+                  <p className="text-xs sm:text-sm font-black text-white font-mono-num">
+                    <CountUp end={0} suffix=" Minutos" duration={1.2} type="odometer" />
+                  </p>
                   <p className="text-[11px] text-slate-300">Paragem sem Internet</p>
                 </div>
                 <div>
-                  <p className="text-xs sm:text-sm font-black text-emerald-400 font-mono-num">100% Legal</p>
+                  <p className="text-xs sm:text-sm font-black text-emerald-400 font-mono-num">
+                    <CountUp end={100} suffix="% Legal" duration={1.8} type="counter" />
+                  </p>
                   <p className="text-[11px] text-slate-300">Decreto 71/25 AGT</p>
                 </div>
                 <div>
-                  <p className="text-xs sm:text-sm font-black text-white font-mono-num">18 Províncias</p>
+                  <p className="text-xs sm:text-sm font-black text-white font-mono-num">
+                    <CountUp end={18} suffix=" Províncias" duration={1.5} type="odometer" />
+                  </p>
                   <p className="text-[11px] text-slate-300">Apoio Presencial</p>
                 </div>
               </div>
@@ -218,8 +226,10 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                 <img
                   src={slide.deviceImage}
                   alt={slide.deviceAlt}
-                  loading="lazy"
+                  loading={current === 0 ? 'eager' : 'lazy'}
                   decoding="async"
+                  width="700"
+                  height="480"
                   className="w-full h-auto max-h-[220px] sm:max-h-[380px] lg:max-h-[480px] xl:max-h-[540px] object-contain select-none pointer-events-none drop-shadow-2xl"
                 />
               </div>
@@ -247,8 +257,13 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
         <ChevronRight className="w-5 h-5" strokeWidth={2} />
       </button>
 
+      {/* ─── INDICADOR ANIMADO DE SCROLL ROLANDO PARA BAIXO ─── */}
+      <div className="hidden md:flex absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+        <ScrollDownIndicator targetId="modulos-principais" label="Explorar Recursos" variant="glass" />
+      </div>
+
       {/* ─── DOTS DE NAVEGAÇÃO INFERIORES ────────────────────────────────── */}
-      <div className="absolute bottom-8 left-0 right-0 flex justify-center items-center gap-3 z-20">
+      <div className="absolute bottom-6 sm:bottom-8 left-6 sm:left-12 flex justify-start items-center gap-2.5 z-20">
         {SLIDES.map((_, i) => (
           <button
             key={i}
@@ -256,7 +271,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
             aria-label={`Ir para slide ${i + 1}`}
             className={`transition-all duration-300 rounded-full cursor-pointer ${
               i === current
-                ? 'w-8 h-2 bg-white'
+                ? 'w-8 h-2 bg-white shadow-md'
                 : 'w-2 h-2 bg-white/40 hover:bg-white/70'
             }`}
           />
@@ -264,7 +279,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
       </div>
 
       {/* Contador de Slides */}
-      <div className="absolute bottom-8 right-8 sm:right-12 z-20 text-white/50 text-xs font-mono tracking-widest">
+      <div className="absolute bottom-6 sm:bottom-8 right-6 sm:right-12 z-20 text-white/70 text-xs font-mono tracking-widest bg-black/20 px-3 py-1 rounded-full border border-white/10 backdrop-blur-xs">
         {String(current + 1).padStart(2, '0')} / {String(SLIDES.length).padStart(2, '0')}
       </div>
 

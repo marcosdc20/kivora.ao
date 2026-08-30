@@ -75,45 +75,46 @@ export const ProvinciasPage: React.FC<ProvinciasPageProps> = ({
 
         {/* 1. Resumo Executivo Nacional */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div data-reveal data-delay="100" className="card-premium p-7 rounded-3xl text-center">
-            <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
-              <Building2 className="w-6 h-6" />
+          <div data-reveal data-delay="100" className="bg-gradient-to-br from-blue-50/70 via-white to-white p-8 rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all text-center card-glow-blue">
+            <div className="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <Building2 className="w-7 h-7" />
             </div>
-            <p className="text-3xl font-black text-slate-950 mb-1 font-mono-num">{settings.statCompaniesCount || totalClients || 850}+</p>
+            <p className="text-3xl sm:text-4xl font-black text-slate-950 mb-1 font-mono-num">{settings.statCompaniesCount || totalClients || 850}+</p>
             <p className="text-xs text-slate-600 font-bold uppercase tracking-wider">Empresas & Postos Faturando</p>
           </div>
 
-          <div data-reveal data-delay="200" className="card-premium p-7 rounded-3xl text-center">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
-              <Award className="w-6 h-6" />
+          <div data-reveal data-delay="200" className="bg-gradient-to-br from-emerald-50/70 via-white to-white p-8 rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all text-center card-glow-green">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <Award className="w-7 h-7" />
             </div>
-            <p className="text-3xl font-black text-slate-950 mb-1 font-mono-num">{totalPartners || 45}+</p>
+            <p className="text-3xl sm:text-4xl font-black text-slate-950 mb-1 font-mono-num">{totalPartners || 45}+</p>
             <p className="text-xs text-slate-600 font-bold uppercase tracking-wider">Técnicos & Distribuidores Certificados</p>
           </div>
 
-          <div data-reveal data-delay="300" className="card-premium p-7 rounded-3xl text-center">
-            <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-800 flex items-center justify-center mx-auto mb-3">
-              <MapPin className="w-6 h-6" />
+          <div data-reveal data-delay="300" className="bg-gradient-to-br from-purple-50/70 via-white to-white p-8 rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all text-center card-glow-purple">
+            <div className="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <MapPin className="w-7 h-7" />
             </div>
-            <p className="text-3xl font-black text-slate-950 mb-1 font-mono-num">18 de 18</p>
+            <p className="text-3xl sm:text-4xl font-black text-slate-950 mb-1 font-mono-num">18 de 18</p>
             <p className="text-xs text-slate-600 font-bold uppercase tracking-wider">Províncias com Suporte Presencial</p>
           </div>
         </section>
 
         {/* 2. Barra de Busca e Filtros */}
-        <section data-reveal className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-          <div className="relative w-full sm:w-80">
+        <section data-reveal className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-3xl bg-mesh border border-slate-200/80 shadow-sm relative overflow-hidden">
+          <div className="orb orb-blue w-36 h-36 -top-8 -right-8 opacity-20" />
+          <div className="relative w-full sm:w-80 relative z-10">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Pesquisar por província ou cidade..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white border border-slate-200 pl-10 pr-4 py-2.5 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-white border border-slate-200 pl-10 pr-4 py-2.5 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xs"
             />
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto relative z-10">
             {[
               { id: 'todos', label: 'Todas as Províncias' },
               { id: 'ativo', label: 'Com Canais Ativos' },
@@ -122,10 +123,10 @@ export const ProvinciasPage: React.FC<ProvinciasPageProps> = ({
               <button
                 key={tab.id}
                 onClick={() => setFilterStatus(tab.id as any)}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                   filterStatus === tab.id
-                    ? 'bg-slate-950 text-white shadow-sm font-bold'
-                    : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 -translate-y-0.5'
+                    : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
                 }`}
               >
                 {tab.label}
@@ -199,28 +200,30 @@ export const ProvinciasPage: React.FC<ProvinciasPageProps> = ({
         </section>
 
         {/* 4. Chamada para Novos Parceiros Provinciais */}
-        <section data-reveal className="bg-slate-950 text-white rounded-3xl p-8 sm:p-12 border border-slate-800 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-8">
-          <div className="space-y-3 text-center lg:text-left max-w-xl">
-            <span className="text-blue-400 font-bold text-xs uppercase tracking-widest">Oportunidade de Negócio</span>
-            <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+        <section data-reveal className="bg-mesh-dark text-white rounded-3xl p-8 sm:p-12 border border-slate-800 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
+          <div className="orb orb-blue w-80 h-80 -top-20 -left-20 opacity-30" />
+          <div className="orb orb-orange w-56 h-56 -bottom-16 -right-16 opacity-25" />
+          <div className="space-y-3 text-center lg:text-left max-w-xl relative z-10">
+            <span className="text-white font-bold text-xs uppercase tracking-widest bg-white/15 px-3.5 py-1 rounded-full border border-white/25">Oportunidade de Negócio</span>
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               É Técnico ou Empresa de TI na Sua Província?
             </h3>
-            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed font-normal">
               Torne-se o distribuidor oficial do KIVORA ERP na sua região. Lucros com margem livre em hardware e licenças, formação técnica direta da Kivora Tecnologias e credenciamento oficial.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 shrink-0 w-full lg:w-auto">
+          <div className="flex flex-col sm:flex-row gap-3 shrink-0 w-full lg:w-auto relative z-10">
             <button
               onClick={() => onNavigatePage('candidatura-parceiro')}
-              className="btn-premium-primary px-7 py-4 rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-xs sm:text-sm px-8 py-4 rounded-2xl shadow-xl shadow-orange-600/40 transition-all hover:-translate-y-1 cursor-pointer shimmer-button"
             >
               <Award className="w-4 h-4" />
               <span>Candidatura de Parceiro Provincial</span>
             </button>
             <button
               onClick={() => onNavigatePage('diretorio-parceiros')}
-              className="btn-premium-secondary px-6 py-4 rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm px-7 py-4 rounded-2xl border border-white/20 hover:border-white/40 transition-all cursor-pointer"
             >
               <span>Ver Diretório Nacional</span>
             </button>

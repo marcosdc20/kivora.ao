@@ -139,7 +139,7 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
 
       {/* Tabs de Seleção de Setor */}
       <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 -mt-8 relative z-20" data-reveal>
-        <div className="bg-white p-2 sm:p-3 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xl flex flex-wrap gap-2 justify-center">
+        <div className="bg-white/95 backdrop-blur-md p-2 sm:p-3 rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-2xl shadow-slate-900/10 flex flex-wrap gap-2 justify-center">
           {SECTORS.map((sec) => {
             const isActive = sec.id === activeSectorId;
             return (
@@ -148,11 +148,11 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
                 onClick={() => setActiveSectorId(sec.id)}
                 className={`flex items-center gap-2.5 px-4 sm:px-6 py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-slate-950 text-white shadow-lg shadow-slate-950/20'
-                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-950'
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 -translate-y-0.5'
+                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-950 border border-transparent hover:border-slate-200'
                 }`}
               >
-                <span className={isActive ? 'text-blue-400' : 'text-slate-500'}>
+                <span className={isActive ? 'text-white' : 'text-blue-600'}>
                   {sec.icon}
                 </span>
                 <span>{sec.name}</span>
@@ -180,12 +180,15 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               {currentSector.highlights.map((hl, i) => (
-                <div key={i} data-reveal data-delay={(i + 1) * 100} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
-                  <strong className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                    <Zap className="w-4 h-4 text-blue-600 shrink-0" />
+                <div key={i} data-reveal data-delay={(i + 1) * 100} className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/60 via-white to-white border border-slate-200/90 shadow-sm space-y-1 relative overflow-hidden group hover:border-blue-400 hover:shadow-md transition-all">
+                  <Zap className="icon-watermark wm-blue w-20 h-20" strokeWidth={1.25} />
+                  <strong className="text-xs font-bold text-slate-900 flex items-center gap-1.5 relative z-10">
+                    <div className="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                      <Zap className="w-3.5 h-3.5" />
+                    </div>
                     <span>{hl.title}</span>
                   </strong>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-slate-600 leading-relaxed relative z-10">
                     {hl.desc}
                   </p>
                 </div>
@@ -195,16 +198,16 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
             <div className="pt-3 flex flex-wrap gap-3">
               <button
                 onClick={() => onOpenDemoModal(currentSector.name)}
-                className="btn-premium-primary inline-flex items-center gap-2 text-xs sm:text-sm px-7 py-3.5 rounded-2xl cursor-pointer"
+                className="inline-flex items-center gap-2 bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-2xl shadow-xl shadow-orange-600/30 transition-all hover:-translate-y-1 cursor-pointer shimmer-button"
               >
                 <span>{currentSector.ctaText}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button
                 onClick={() => onNavigatePage('download')}
-                className="btn-premium-secondary inline-flex items-center gap-2 text-xs sm:text-sm px-6 py-3.5 rounded-2xl cursor-pointer"
+                className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm px-6 py-3.5 rounded-2xl transition-all cursor-pointer border border-slate-200 hover:border-slate-300"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-4 h-4 text-blue-600" />
                 <span>Baixar Instalador</span>
               </button>
             </div>
@@ -217,9 +220,9 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
                 alt={currentSector.name}
                 className="w-full h-auto max-h-[420px] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-102"
               />
-              <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-slate-950/85 backdrop-blur-md border border-white/10 text-white flex items-center justify-between">
+              <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-white/10 text-white flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-black uppercase text-blue-400 font-mono-num">100% Homologado AGT</span>
+                  <span className="text-[10px] font-black uppercase text-blue-400 font-mono-num">Certificação Oficial AGT</span>
                   <p className="text-xs font-bold text-slate-200">Decreto Presidencial n.º 71/25</p>
                 </div>
                 <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0" />
@@ -229,18 +232,21 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
         </div>
 
         {/* Grelha de Funcionalidades Técnicas */}
-        <div className="bg-slate-50 border border-slate-200/90 rounded-3xl p-8 sm:p-12 space-y-6" data-reveal>
-          <div className="space-y-2">
-            <span className="text-blue-600 text-xs font-black uppercase tracking-widest">Recursos Inclusos</span>
+        <div className="bg-mesh border border-slate-200/80 rounded-3xl p-8 sm:p-12 space-y-6 relative overflow-hidden" data-reveal>
+          <div className="absolute -top-10 -right-10 w-44 h-44 orb orb-blue opacity-20" />
+          <div className="space-y-2 relative z-10">
+            <span className="text-blue-600 text-xs font-black uppercase tracking-widest bg-blue-100/60 px-3 py-1 rounded-full border border-blue-200">Recursos Inclusos</span>
             <h3 className="text-2xl font-black text-slate-950">
               Funcionalidades Essenciais para {currentSector.name}
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2 relative z-10">
             {currentSector.features.map((feat, idx) => (
-              <div key={idx} data-reveal data-delay={((idx % 3) + 1) * 100} className="card-premium p-5 rounded-2xl flex items-start gap-3">
-                <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" strokeWidth={2.25} />
+              <div key={idx} data-reveal data-delay={((idx % 3) + 1) * 100} className="bg-gradient-to-br from-blue-50/40 via-white to-white border border-slate-200/90 shadow-sm p-5 rounded-2xl flex items-start gap-3 hover:shadow-md hover:-translate-y-1 hover:border-blue-400 transition-all duration-300 group">
+                <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-emerald-600 transition-colors">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 group-hover:text-white transition-colors" strokeWidth={2.5} />
+                </div>
                 <span className="text-xs text-slate-700 font-medium leading-relaxed">{feat}</span>
               </div>
             ))}
@@ -250,26 +256,30 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
       </section>
 
       {/* CTA Final */}
-      <section className="bg-slate-950 py-20 px-6 sm:px-10 lg:px-16 text-white text-center border-t border-slate-800" data-reveal>
-        <div className="max-w-3xl mx-auto space-y-5">
-          <Monitor className="w-10 h-10 text-blue-400 mx-auto" strokeWidth={1.75} />
-          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+      <section className="bg-mesh-dark py-20 px-6 sm:px-10 lg:px-16 text-white text-center border-t border-slate-800 relative overflow-hidden" data-reveal>
+        <div className="orb orb-blue w-80 h-80 -top-20 -left-20" />
+        <div className="orb orb-orange w-48 h-48 -bottom-10 right-10" />
+        <div className="max-w-3xl mx-auto space-y-5 relative z-10">
+          <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mx-auto shadow-inner">
+            <Monitor className="w-8 h-8 text-blue-300" strokeWidth={1.75} />
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
             Pronto para testar o KIVORA na sua empresa?
           </h2>
-          <p className="text-slate-300 text-sm leading-relaxed max-w-lg mx-auto">
+          <p className="text-slate-300 text-sm leading-relaxed max-w-lg mx-auto font-normal">
             Instalação local rápida em menos de 2 minutos. Comece hoje mesmo a emitir documentos fiscais certificados pela AGT.
           </p>
           <div className="flex flex-wrap justify-center gap-4 pt-2">
             <button
               onClick={() => onOpenDemoModal(`Apresentação: ${currentSector.name}`)}
-              className="btn-premium-primary inline-flex items-center gap-2 text-sm px-8 py-4 rounded-2xl cursor-pointer"
+              className="inline-flex items-center gap-2 bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-sm px-8 py-4 rounded-2xl shadow-xl shadow-orange-600/40 transition-all hover:-translate-y-1 cursor-pointer shimmer-button"
             >
               <span>Agendar Apresentação Gratuita</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <button
               onClick={() => onNavigatePage('solucoes')}
-              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 text-slate-200 font-bold text-sm px-7 py-4 rounded-2xl border border-white/20 transition-all cursor-pointer backdrop-blur-xs"
+              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold text-sm px-7 py-4 rounded-2xl border border-white/20 hover:border-white/40 transition-all cursor-pointer backdrop-blur-xs"
             >
               <span>Ver Arquitetura de Rede</span>
             </button>

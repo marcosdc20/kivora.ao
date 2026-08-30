@@ -1,5 +1,31 @@
 import nodemailer from 'nodemailer';
 
+// In-memory rate limiting map (IP -> timestamps[])
+const rateLimitMap = new Map<string, number[]>();
+
+function isRateLimited(clientIp: string, maxRequests = 5, windowMs = 60000): boolean {
+  const now = Date.now();
+  const timestamps = (rateLimitMap.get(clientIp) || []).filter((t) => now - t < windowMs);
+  
+  if (timestamps.length >= maxRequests) {
+    return true;
+  }
+  
+  timestamps.push(now);
+  rateLimitMap.set(clientIp, timestamps);
+
+  // Periodic cleanup if map grows
+  if (rateLimitMap.size > 1000) {
+    for (const [ip, list] of rateLimitMap.entries()) {
+      const active = list.filter((t) => now - t < windowMs);
+      if (active.length === 0) rateLimitMap.delete(ip);
+      else rateLimitMap.set(ip, active);
+    }
+  }
+
+  return false;
+}
+
 // Vercel Serverless Function: /api/send-email
 export default async function handler(req: any, res: any) {
   // CORS headers
@@ -20,6 +46,13 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
+  const clientIp = (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '127.0.0.1').toString().split(',')[0].trim();
+
+  // 1. Rate Limiting Protection (Anti-DDoS / Anti-Brute-Force)
+  if (isRateLimited(clientIp, 8, 60000)) {
+    return res.status(429).json({ error: 'Demasiadas tentativas de envio. Por favor, aguarde um minuto e tente novamente.' });
+  }
+
   let body = req.body;
   if (typeof body === 'string') {
     try {
@@ -27,14 +60,19 @@ export default async function handler(req: any, res: any) {
     } catch {}
   }
 
-  const { provider, apiKey, from, to, subject, html, text, smtpHost, smtpPort, smtpUser, smtpPass, senderEmail } = body || {};
+  const { provider, apiKey, from, to, subject, html, text, smtpHost, smtpPort, smtpUser, smtpPass, senderEmail, hp_field, website_url, _gotcha } = body || {};
+
+  // 2. Honeypot Anti-Bot Filter (Se preenchido por um bot invisível, responder com sucesso simulado sem disparar SMTP)
+  if (hp_field || website_url || _gotcha) {
+    return res.status(200).json({ success: true, messageId: `filtered-${Date.now()}` });
+  }
 
   const effectiveKey = (apiKey || smtpPass || '').trim();
   if (!effectiveKey && provider !== 'smtp') {
     return res.status(400).json({ error: 'Chave de API ou palavra-passe do e-mail não informada.' });
   }
 
-  // 1. Validação estrita de destinatários (Prevenção de Open-Relay / Spam)
+  // 3. Validação estrita de destinatários (Prevenção de Open-Relay / Spam)
   const recipients: string[] = Array.isArray(to) ? to : (typeof to === 'string' ? [to] : []);
   if (recipients.length === 0 || recipients.length > 50) {
     return res.status(400).json({ error: 'Lista de destinatários inválida (máximo 50 por envio).' });
@@ -47,7 +85,7 @@ export default async function handler(req: any, res: any) {
     }
   }
 
-  // 2. Validação de Assunto e Tamanho do Conteúdo
+  // 4. Validação de Assunto e Tamanho do Conteúdo
   if (!subject || typeof subject !== 'string' || subject.length > 300) {
     return res.status(400).json({ error: 'Assunto do e-mail inválido ou excede 300 caracteres.' });
   }

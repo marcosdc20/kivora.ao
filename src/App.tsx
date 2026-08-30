@@ -1,46 +1,60 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { subscribeSystemSettings, getCachedSystemSettings, SystemCompanySettings } from './services/systemSettingsService';
 import WhatsAppButton from './components/WhatsAppButton';
 import { CookieBanner } from './components/CookieBanner';
 import { Header, PageId } from './components/Header';
 import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
-import { ModulosPage } from './pages/ModulosPage';
-import { ModuloDetailPage } from './pages/ModuloDetailPage';
-import { SolucoesPage } from './pages/SolucoesPage';
-import { SetoresPage } from './pages/SetoresPage';
-import { DownloadPage } from './pages/DownloadPage';
-import { ParceirosPage } from './pages/ParceirosPage';
-import { RecursosPage } from './pages/RecursosPage';
-import { FinanceiroPage } from './pages/FinanceiroPage';
-import { SuportePage } from './pages/SuportePage';
-import { AboutPage } from './pages/AboutPage';
-import { NoticiasPage } from './pages/NoticiasPage';
-import { NoticiaDetailPage } from './pages/NoticiaDetailPage';
-import { LoginPage } from './pages/LoginPage';
-import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
-import { TermsPage } from './pages/TermsPage';
-import { HardwarePage } from './pages/HardwarePage';
-import { DiretorioParceirosPage } from './pages/DiretorioParceirosPage';
-import { CandidaturaParceiroPage } from './pages/CandidaturaParceiroPage';
-import { ValidarLicencaPage } from './pages/ValidarLicencaPage';
-import { CasosSucessoPage } from './pages/CasosSucessoPage';
-import { SegurancaPage } from './pages/SegurancaPage';
-import { ComparativoPage } from './pages/ComparativoPage';
-import { CalculadoraFiscalPage } from './pages/CalculadoraFiscalPage';
-import { LojaPage } from './pages/LojaPage';
-import { InvestidoresPage } from './pages/InvestidoresPage';
-import { ProvinciasPage } from './pages/ProvinciasPage';
-import { GuiaAgtPage } from './pages/GuiaAgtPage';
-import { ManuaisPage } from './pages/ManuaisPage';
-import { SimuladorRoiPage } from './pages/SimuladorRoiPage';
 import { DemoModal } from './components/DemoModal';
-import { AdminApp } from './admin/AdminApp';
-import { ClientPortalApp } from './client-portal/ClientPortalApp';
-import { PartnerPortalApp } from './partner-portal/PartnerPortalApp';
 import { KIVORA_MODULES } from './data/kivoraData';
 import { KivoraModule, NewsPost } from './types/kivora';
 import { getStoredSession } from './admin/services/authService';
+import { useScrollReveal } from './hooks/useScrollReveal';
+
+// Lazy loading for subpages & portals to minimize initial bundle size
+const ModulosPage = lazy(() => import('./pages/ModulosPage').then(m => ({ default: m.ModulosPage })));
+const ModuloDetailPage = lazy(() => import('./pages/ModuloDetailPage').then(m => ({ default: m.ModuloDetailPage })));
+const SolucoesPage = lazy(() => import('./pages/SolucoesPage').then(m => ({ default: m.SolucoesPage })));
+const SetoresPage = lazy(() => import('./pages/SetoresPage').then(m => ({ default: m.SetoresPage })));
+const DownloadPage = lazy(() => import('./pages/DownloadPage').then(m => ({ default: m.DownloadPage })));
+const ParceirosPage = lazy(() => import('./pages/ParceirosPage').then(m => ({ default: m.ParceirosPage })));
+const RecursosPage = lazy(() => import('./pages/RecursosPage').then(m => ({ default: m.RecursosPage })));
+const FinanceiroPage = lazy(() => import('./pages/FinanceiroPage').then(m => ({ default: m.FinanceiroPage })));
+const SuportePage = lazy(() => import('./pages/SuportePage').then(m => ({ default: m.SuportePage })));
+const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })));
+const NoticiasPage = lazy(() => import('./pages/NoticiasPage').then(m => ({ default: m.NoticiasPage })));
+const NoticiaDetailPage = lazy(() => import('./pages/NoticiaDetailPage').then(m => ({ default: m.NoticiaDetailPage })));
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
+const TermsPage = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })));
+const HardwarePage = lazy(() => import('./pages/HardwarePage').then(m => ({ default: m.HardwarePage })));
+const DiretorioParceirosPage = lazy(() => import('./pages/DiretorioParceirosPage').then(m => ({ default: m.DiretorioParceirosPage })));
+const CandidaturaParceiroPage = lazy(() => import('./pages/CandidaturaParceiroPage').then(m => ({ default: m.CandidaturaParceiroPage })));
+const ValidarLicencaPage = lazy(() => import('./pages/ValidarLicencaPage').then(m => ({ default: m.ValidarLicencaPage })));
+const CasosSucessoPage = lazy(() => import('./pages/CasosSucessoPage').then(m => ({ default: m.CasosSucessoPage })));
+const SegurancaPage = lazy(() => import('./pages/SegurancaPage').then(m => ({ default: m.SegurancaPage })));
+const ComparativoPage = lazy(() => import('./pages/ComparativoPage').then(m => ({ default: m.ComparativoPage })));
+const CalculadoraFiscalPage = lazy(() => import('./pages/CalculadoraFiscalPage').then(m => ({ default: m.CalculadoraFiscalPage })));
+const LojaPage = lazy(() => import('./pages/LojaPage').then(m => ({ default: m.LojaPage })));
+const InvestidoresPage = lazy(() => import('./pages/InvestidoresPage').then(m => ({ default: m.InvestidoresPage })));
+const ProvinciasPage = lazy(() => import('./pages/ProvinciasPage').then(m => ({ default: m.ProvinciasPage })));
+const GuiaAgtPage = lazy(() => import('./pages/GuiaAgtPage').then(m => ({ default: m.GuiaAgtPage })));
+const ManuaisPage = lazy(() => import('./pages/ManuaisPage').then(m => ({ default: m.ManuaisPage })));
+const SimuladorRoiPage = lazy(() => import('./pages/SimuladorRoiPage').then(m => ({ default: m.SimuladorRoiPage })));
+
+// Portais
+const AdminApp = lazy(() => import('./admin/AdminApp').then(m => ({ default: m.AdminApp })));
+const ClientPortalApp = lazy(() => import('./client-portal/ClientPortalApp').then(m => ({ default: m.ClientPortalApp })));
+const PartnerPortalApp = lazy(() => import('./partner-portal/PartnerPortalApp').then(m => ({ default: m.PartnerPortalApp })));
+
+// Loading Component
+const PageLoadingFallback = () => (
+  <div role="status" aria-live="polite" className="min-h-[50vh] flex flex-col items-center justify-center p-8 text-center">
+    <div className="w-10 h-10 border-4 border-slate-200 border-t-[#FF6500] rounded-full animate-spin mb-3" />
+    <p className="text-slate-600 font-medium text-xs">A carregar o KIVORA ERP...</p>
+    <span className="sr-only">A carregar conteúdo</span>
+  </div>
+);
 
 const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: string }> = {
   home: {
@@ -60,7 +74,7 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
   },
   'modulo-detalhe': {
     title: 'Módulo Kivora ERP | Software de Gestão Angola',
-    desc: 'Detalhes operacionais e fiscais do módulo KIVORA ERP homologado para empresas em Angola.',
+    desc: 'Detalhes operacionais e fiscais do módulo KIVORA ERP para empresas em Angola.',
     path: '/modulos',
   },
   faturacao: {
@@ -79,22 +93,22 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     path: '/modulos',
   },
   rh: {
-    title: 'Processamento Salarial & IRT 2026 | KIVORA Recursos Humanos',
+    title: 'Processamento Salarial & IRT | KIVORA Recursos Humanos',
     desc: 'Cálculo automatizado de remunerações, horas extras, subsídios, INSS 3%/8% e tabelas de IRT Angola.',
     path: '/modulos',
   },
   contabilidade: {
     title: 'Contabilidade & Relatórios Financeiros | KIVORA ERP',
-    desc: 'Balanços, demonstrações de resultados, fluxo de caixa e mapa de impostos homologados em Angola.',
+    desc: 'Balanços, demonstrações de resultados, fluxo de caixa e mapa de impostos em conformidade com a lei.',
     path: '/modulos',
   },
   solucoes: {
-    title: 'Soluções de Gestão Empresarial por Setor de Atividade | KIVORA',
+    title: 'Soluções de Gestão Empresarial por Setor | KIVORA',
     desc: 'Soluções sob medida para Retalho, Restauração, Supermercados, Farmácias, Clínicas, Oficinas e Prestadores de Serviços em Angola.',
     path: '/solucoes',
   },
   setores: {
-    title: 'Setores de Atividade Homologados | KIVORA ERP Angola',
+    title: 'Setores de Atividade | KIVORA ERP Angola',
     desc: 'Descubra como o KIVORA ERP atende as necessidades operacionais e fiscais específicas do seu setor de negócio.',
     path: '/setores',
   },
@@ -119,8 +133,8 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     path: '/setores',
   },
   hardware: {
-    title: 'Hardware & Periféricos Homologados em Angola | Impressoras, Scanners e Terminais POS - KIVORA',
-    desc: 'Catálogo de impressoras térmicas de 58mm/80mm, leitores de código de barras 1D/2D, terminais touch POS e balanças homologadas em Angola.',
+    title: 'Hardware & Periféricos para Ponto de Venda | Impressoras, Scanners e Terminais POS - KIVORA',
+    desc: 'Catálogo de impressoras térmicas de 58mm/80mm, leitores de código de barras 1D/2D, terminais touch POS e balanças comerciais.',
     path: '/hardware',
   },
   'diretorio-parceiros': {
@@ -170,11 +184,11 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
   },
   parceiros: {
     title: 'Programa de Parceiros & Revendedores Autorizados | KIVORA ERP Angola',
-    desc: 'Torne-se um parceiro homologado KIVORA. Margens de até 60%, suporte nível 2 direto e carteira de crédito flexível.',
+    desc: 'Torne-se um parceiro credenciado KIVORA. Margens de até 60%, suporte nível 2 direto e carteira de crédito flexível.',
     path: '/parceiros',
   },
   'candidatura-parceiro': {
-    title: 'Candidatura ao Programa de Parceiros Homologados | KIVORA',
+    title: 'Candidatura ao Programa de Parceiros e Revenda | KIVORA',
     desc: 'Submeta a sua candidatura online e comece a distribuir o software de faturação líder em Angola.',
     path: '/candidatura-parceiro',
   },
@@ -259,7 +273,7 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     path: '/area-cliente',
   },
   'area-parceiro': {
-    title: 'Portal do Parceiro Homologado | KIVORA ERP',
+    title: 'Portal do Parceiro Credenciado | KIVORA ERP',
     desc: 'Emissão de licenças, gestão de clientes, carteira pré-paga e comissões.',
     path: '/area-parceiro',
   },
@@ -279,6 +293,9 @@ export function App() {
     const unsub = subscribeSystemSettings(setAppSettings);
     return unsub;
   }, []);
+
+  // Ativação global de Scroll Reveal em todas as páginas
+  useScrollReveal(undefined, [activePage, selectedModule, selectedNewsPost]);
 
   // ─── Sincronização Dinâmica de SEO & Metadados ──────────────────────────────
   useEffect(() => {
@@ -314,6 +331,35 @@ export function App() {
     const canonicalTag = document.querySelector('link[rel="canonical"]');
     if (canonicalTag) canonicalTag.setAttribute('href', `https://kivora.ao${meta.path}`);
   }, [activePage, selectedModule, selectedNewsPost]);
+
+  // Inicialização do Lenis Smooth Scrolling respeitando acessibilidade
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    let lenisInstance: any = null;
+    import('lenis').then(({ default: Lenis }) => {
+      lenisInstance = new Lenis({
+        duration: 1.0,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        orientation: 'vertical',
+        smoothWheel: true,
+        wheelMultiplier: 0.9,
+      });
+
+      function raf(time: number) {
+        lenisInstance?.raf(time);
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+    }).catch(() => {});
+
+    return () => {
+      if (lenisInstance) {
+        lenisInstance.destroy();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const loader = document.getElementById('initial-loader');
@@ -355,57 +401,79 @@ export function App() {
   if (activePage === 'admin') {
     if (!currentSession || currentSession.role !== 'admin') {
       return (
-        <LoginPage
-          onBackToHome={() => handleNavigatePage('home')}
-          onNavigatePage={handleNavigatePage}
-        />
+        <Suspense fallback={<PageLoadingFallback />}>
+          <LoginPage
+            onBackToHome={() => handleNavigatePage('home')}
+            onNavigatePage={handleNavigatePage}
+          />
+        </Suspense>
       );
     }
     return (
-      <AdminApp onExitAdmin={() => handleNavigatePage('home')} />
+      <Suspense fallback={<PageLoadingFallback />}>
+        <AdminApp onExitAdmin={() => handleNavigatePage('home')} />
+      </Suspense>
     );
   }
 
   if (activePage === 'area-cliente') {
     if (!currentSession || currentSession.role !== 'cliente') {
       return (
-        <LoginPage
-          onBackToHome={() => handleNavigatePage('home')}
-          onNavigatePage={handleNavigatePage}
-        />
+        <Suspense fallback={<PageLoadingFallback />}>
+          <LoginPage
+            onBackToHome={() => handleNavigatePage('home')}
+            onNavigatePage={handleNavigatePage}
+          />
+        </Suspense>
       );
     }
     return (
-      <ClientPortalApp onLogout={() => handleNavigatePage('home')} />
+      <Suspense fallback={<PageLoadingFallback />}>
+        <ClientPortalApp onLogout={() => handleNavigatePage('home')} />
+      </Suspense>
     );
   }
 
   if (activePage === 'area-parceiro') {
     if (!currentSession || currentSession.role !== 'parceiro') {
       return (
-        <LoginPage
-          onBackToHome={() => handleNavigatePage('home')}
-          onNavigatePage={handleNavigatePage}
-        />
+        <Suspense fallback={<PageLoadingFallback />}>
+          <LoginPage
+            onBackToHome={() => handleNavigatePage('home')}
+            onNavigatePage={handleNavigatePage}
+          />
+        </Suspense>
       );
     }
     return (
-      <PartnerPortalApp onLogout={() => handleNavigatePage('home')} />
+      <Suspense fallback={<PageLoadingFallback />}>
+        <PartnerPortalApp onLogout={() => handleNavigatePage('home')} />
+      </Suspense>
     );
   }
 
   if (activePage === 'login') {
     return (
-      <LoginPage
-        onBackToHome={() => handleNavigatePage('home')}
-        onNavigatePage={handleNavigatePage}
-      />
+      <Suspense fallback={<PageLoadingFallback />}>
+        <LoginPage
+          onBackToHome={() => handleNavigatePage('home')}
+          onNavigatePage={handleNavigatePage}
+        />
+      </Suspense>
     );
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-white selection:bg-[#2563EB] selection:text-white relative font-sans">
       
+      {/* Link Acessível de Salto para Conteúdo Principal (WCAG 2.1 AA) */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[99999] focus:px-4 focus:py-2.5 focus:bg-[#0B192C] focus:text-white focus:font-semibold focus:rounded-lg focus:shadow-2xl focus:outline-none focus:ring-2 focus:ring-[#FF6500]"
+      >
+        Saltar para o conteúdo principal
+      </a>
+
       {/* Header Fixo com Suporte Multi-Página e Mega Menu */}
       <Header
         activePage={activePage}
@@ -414,7 +482,8 @@ export function App() {
       />
 
       {/* Roteamento de Conteúdo de Páginas Kivora Desktop ERP */}
-      <main className="flex-grow">
+      <main id="main-content" className="flex-grow">
+        <Suspense fallback={<PageLoadingFallback />}>
         {activePage === 'home' && (
           <HomePage
             onSelectModule={handleSelectModule}
@@ -670,6 +739,7 @@ export function App() {
             onNavigatePage={handleNavigatePage}
           />
         )}
+        </Suspense>
       </main>
 
       {/* Footer Global */}

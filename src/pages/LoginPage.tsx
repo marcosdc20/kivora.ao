@@ -75,9 +75,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
             <div className="flex justify-center mb-1">
               <KivoraLogo variant="dark" size="lg" useOfficialImage={true} />
             </div>
-            <h2 className="text-2xl font-black text-slate-950 tracking-tight">
-              Iniciar Sessão
-            </h2>
+            <h1 className="text-2xl font-black text-slate-950 tracking-tight">
+              Iniciar Sessão no Portal Kivora
+            </h1>
             <p className="text-xs text-slate-600 font-medium">
               Acesso seguro para Administradores, Parceiros e Empresas Clientes.
             </p>

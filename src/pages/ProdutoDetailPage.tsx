@@ -200,19 +200,20 @@ export const ProdutoDetailPage: React.FC<ProdutoDetailPageProps> = ({
                 </div>
 
                 {/* Bloco de Preço Realista Estilo E-Commerce */}
-                <div className="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-5">
-                  <div className="flex items-baseline gap-2 mb-1">
+                <div className="bg-mesh p-5 sm:p-6 rounded-2xl border border-slate-200/90 mb-5 relative overflow-hidden shadow-xs">
+                  <div className="orb orb-blue w-28 h-28 -top-6 -right-6 opacity-20" />
+                  <div className="flex items-baseline gap-2 mb-1 relative z-10">
                     <span className="text-xs font-bold text-slate-700">Kz</span>
-                    <span className="text-3xl font-black text-slate-900">
+                    <span className="text-3xl sm:text-4xl font-black text-slate-950 font-mono-num">
                       {product.priceAOA.toLocaleString('pt-AO')}
                     </span>
                     {product.originalPriceAOA && (
-                      <span className="text-sm text-slate-400 line-through ml-2">
+                      <span className="text-sm text-slate-400 line-through ml-2 font-mono-num">
                         {product.originalPriceAOA.toLocaleString('pt-AO')} Kz
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-600 relative z-10">
                     Fatura com IVA dedutível emitida pela Visual Software (Homologada AGT).
                   </p>
                 </div>
@@ -223,14 +224,14 @@ export const ProdutoDetailPage: React.FC<ProdutoDetailPageProps> = ({
                 </p>
 
                 {/* Localização do Stock & Entrega */}
-                <div className="space-y-2 bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/80 mb-5 text-xs text-slate-700">
+                <div className="space-y-2 bg-slate-50/80 p-4 rounded-2xl border border-slate-200/80 mb-5 text-xs text-slate-700">
                   <div className="flex items-center gap-2 text-emerald-800 font-semibold">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>Disponibilidade: {product.stockLocation}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Truck className="w-4 h-4 text-slate-500 shrink-0" />
-                    <span><strong>Luanda:</strong> Entrega em 24h úteis | <strong>Outras Províncias:</strong> Despacho via transportadora</span>
+                    <span><strong>Luanda:</strong> Entrega em 24h úteis | <strong>Outras Províncias:</strong> Despacho expresso via transportadora</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
@@ -241,23 +242,23 @@ export const ProdutoDetailPage: React.FC<ProdutoDetailPageProps> = ({
                 {/* Seletor de Quantidade */}
                 <div className="flex items-center gap-3 mb-6">
                   <span className="text-xs font-bold text-slate-700">Quantidade:</span>
-                  <div className="flex items-center bg-slate-100 rounded-lg p-0.5 border border-slate-300">
+                  <div className="flex items-center bg-slate-100 rounded-xl p-0.5 border border-slate-300">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-7 h-7 rounded bg-white font-bold text-slate-700 hover:bg-slate-200 flex items-center justify-center cursor-pointer"
+                      className="w-8 h-8 rounded-lg bg-white font-bold text-slate-700 hover:bg-slate-200 flex items-center justify-center cursor-pointer shadow-2xs"
                     >
                       -
                     </button>
-                    <span className="w-10 text-center font-bold text-slate-900 text-xs">{quantity}</span>
+                    <span className="w-10 text-center font-bold text-slate-900 text-xs font-mono-num">{quantity}</span>
                     <button
                       onClick={() => setQuantity(quantity + 1)}
-                      className="w-7 h-7 rounded bg-white font-bold text-slate-700 hover:bg-slate-200 flex items-center justify-center cursor-pointer"
+                      className="w-8 h-8 rounded-lg bg-white font-bold text-slate-700 hover:bg-slate-200 flex items-center justify-center cursor-pointer shadow-2xs"
                     >
                       +
                     </button>
                   </div>
                   <span className="text-xs text-slate-500">
-                    Subtotal: <strong>{(product.priceAOA * quantity).toLocaleString('pt-AO')} Kz</strong>
+                    Subtotal: <strong className="text-slate-900 font-mono-num">{(product.priceAOA * quantity).toLocaleString('pt-AO')} Kz</strong>
                   </span>
                 </div>
 
@@ -268,7 +269,7 @@ export const ProdutoDetailPage: React.FC<ProdutoDetailPageProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     onClick={handleDirectBuyWhatsApp}
-                    className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-0.5"
                   >
                     <Send className="w-4 h-4" />
                     Comprar Agora (WhatsApp)
@@ -276,7 +277,7 @@ export const ProdutoDetailPage: React.FC<ProdutoDetailPageProps> = ({
 
                   <button
                     onClick={() => onAddToCart(product, quantity)}
-                    className="w-full py-3.5 bg-[#1d4ed8] hover:bg-blue-700 text-white rounded-xl font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-4 bg-[#FF6500] hover:bg-[#EB5B00] text-white rounded-2xl font-bold text-xs sm:text-sm shadow-xl shadow-orange-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-1 shimmer-button"
                   >
                     <ShoppingBag className="w-4 h-4" />
                     Adicionar à Cotação

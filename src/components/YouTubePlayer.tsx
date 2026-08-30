@@ -40,11 +40,17 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
       badge: 'bg-emerald-600 text-white',
       border: 'border-emerald-500/20',
     },
+    orange: {
+      glow: 'from-orange-600/20 via-amber-500/10 to-transparent',
+      btn: 'bg-[#FF6500] hover:bg-[#EB5B00] text-white shadow-orange-600/40',
+      badge: 'bg-[#FF6500] text-white',
+      border: 'border-orange-500/20',
+    },
     purple: {
-      glow: 'from-purple-600/20 via-pink-500/10 to-transparent',
-      btn: 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-600/40',
-      badge: 'bg-purple-600 text-white',
-      border: 'border-purple-500/20',
+      glow: 'from-blue-600/20 via-blue-500/10 to-transparent',
+      btn: 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/40',
+      badge: 'bg-blue-600 text-white',
+      border: 'border-blue-500/20',
     },
     amber: {
       glow: 'from-amber-600/20 via-orange-500/10 to-transparent',
@@ -110,7 +116,7 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
               <a
                 href={videoUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
                 className="bg-black/40 hover:bg-black/60 text-white/80 hover:text-white p-2 rounded-full backdrop-blur-md transition-all text-xs flex items-center gap-1 border border-white/10"
                 title="Abrir no YouTube"

@@ -7,28 +7,43 @@ export default {
   theme: {
     extend: {
       colors: {
+        kivora: {
+          // Paleta Primária Oficial KIVORA
+          navy: '#0A192F',
+          'navy-deep': '#060E1A',
+          'navy-surface': '#0F224A',
+          blue: '#1746A2',
+          'blue-hover': '#1E40AF',
+          cobalt: '#2563EB',
+          sky: '#38BDF8',
+          // Laranja Oficial de Ação (CTA) do Logótipo
+          orange: '#FF6500',
+          'orange-hover': '#EB5B00',
+          'orange-subtle': '#FFF7ED',
+          // Verde de Conformidade Fiscal AGT
+          emerald: '#059669',
+          'emerald-light': '#10B981',
+          'emerald-subtle': '#ECFDF5',
+          // Superfícies e Linhas
+          canvas: '#F8FAFC',
+          card: '#FFFFFF',
+          border: '#E2E8F0',
+          'border-subtle': '#F1F5F9',
+          muted: '#64748B',
+          dark: '#0F172A',
+        },
         brand: {
-          // Kivora Primary Palette (Azul Royal & Marinho)
           navy: '#0A192F',
           'navy-dark': '#071120',
-          blue: '#2563EB',
+          blue: '#1746A2',
           'blue-dark': '#1E40AF',
           'blue-hover': '#1D4ED8',
           'blue-light': '#EFF6FF',
-          cyan: '#00B4D8',
-          // Kivora Secondary Accent Palette (Laranja Âmbar / Dourado)
-          amber: '#F59E0B',
-          'amber-dark': '#D97706',
-          'amber-light': '#FEF3C7',
-          // Mapeamento retrocompatível para componentes existentes
-          green: '#2563EB',
-          'green-dark': '#1E40AF',
-          'green-hover': '#1D4ED8',
-          'green-light': '#EFF6FF',
-          yellow: '#F59E0B',
-          'yellow-dark': '#D97706',
-          gold: '#F59E0B',
-          'gold-dark': '#D97706',
+          orange: '#FF6500',
+          'orange-hover': '#EB5B00',
+          green: '#059669',
+          'green-dark': '#047857',
+          emerald: '#059669',
           dark: '#0A192F',
           body: '#475569',
           bg: '#F8FAFC',
@@ -36,12 +51,15 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+        display: ['"Cabinet Grotesk"', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        sans: ['"Satoshi"', '"Inter"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        mono: ['"JetBrains Mono"', '"IBM Plex Mono"', 'monospace'],
       },
       boxShadow: {
-        'card': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-        'card-hover': '0 12px 30px -4px rgba(0, 0, 0, 0.1)',
-        'header': '0 2px 10px rgba(0, 0, 0, 0.04)',
+        'clean': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04)',
+        'card-hover': '0 12px 30px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04)',
+        'receipt': '0 25px 50px -12px rgba(10, 25, 47, 0.25)',
+        'header': '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
       }
     },
   },

@@ -90,25 +90,25 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
         <div className="flex flex-wrap items-center justify-center gap-3 mb-10 print:hidden">
           <button
             onClick={() => setActiveTab('irt')}
-            className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-6 py-3.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'irt'
-                ? 'bg-[#1d4ed8] text-white shadow-md shadow-blue-600/20'
-                : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-50'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 -translate-y-0.5'
+                : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-50 hover:border-slate-300'
             }`}
           >
             <Receipt className="w-4 h-4" />
-            Simulador de Salário Líquido & IRT 2026
+            <span>Simulador de Salário Líquido & IRT 2026</span>
           </button>
           <button
             onClick={() => setActiveTab('iva')}
-            className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-6 py-3.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'iva'
-                ? 'bg-[#1d4ed8] text-white shadow-md shadow-blue-600/20'
-                : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-50'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 -translate-y-0.5'
+                : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-50 hover:border-slate-300'
             }`}
           >
             <Calculator className="w-4 h-4" />
-            Simulador de IVA & Retenção 6.5%
+            <span>Simulador de IVA & Retenção 6.5%</span>
           </button>
         </div>
 
@@ -339,24 +339,25 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
                 </div>
                 <button
                   onClick={handlePrint}
-                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 print:hidden"
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 print:hidden cursor-pointer"
                 >
                   <Printer className="w-4 h-4" /> Imprimir
                 </button>
               </div>
 
               {/* Total da Fatura com IVA */}
-              <div className="bg-[#15803d] text-white p-6 rounded-2xl mb-6 shadow-md shadow-emerald-900/10 flex items-center justify-between">
-                <div>
+              <div className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-6 rounded-3xl mb-6 shadow-xl shadow-emerald-900/15 flex items-center justify-between relative overflow-hidden">
+                <div className="orb orb-green w-36 h-36 -top-10 -right-10 opacity-30" />
+                <div className="relative z-10">
                   <p className="text-xs font-bold uppercase tracking-wider text-emerald-100 mb-1">
                     Valor Total da Fatura Emitida (Com IVA)
                   </p>
-                  <p className="text-3xl sm:text-4xl font-black">
+                  <p className="text-3xl sm:text-4xl font-black font-mono-num">
                     {Math.round(valorComIVA).toLocaleString('pt-AO')} <span className="text-xl font-bold">Kz</span>
                   </p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                  <Receipt className="w-6 h-6 text-white" />
+                <div className="w-14 h-14 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center relative z-10 shadow-inner">
+                  <Receipt className="w-7 h-7 text-white" />
                 </div>
               </div>
 
@@ -364,24 +365,24 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between py-2 border-b border-slate-100">
                   <span className="text-slate-600 font-medium">Incidência / Valor Base</span>
-                  <span className="font-bold text-slate-900">{valorOperacao.toLocaleString('pt-AO')} Kz</span>
+                  <span className="font-bold text-slate-900 font-mono-num">{valorOperacao.toLocaleString('pt-AO')} Kz</span>
                 </div>
 
                 <div className="flex justify-between py-2 border-b border-slate-100 text-emerald-700 font-medium">
                   <span>Imposto sobre o Valor Acrescentado (IVA {taxaIva}%)</span>
-                  <span className="font-bold">+ {Math.round(montanteIVA).toLocaleString('pt-AO')} Kz</span>
+                  <span className="font-bold font-mono-num">+ {Math.round(montanteIVA).toLocaleString('pt-AO')} Kz</span>
                 </div>
 
                 {aplicarRetencao65 && (
                   <div className="flex justify-between py-2 border-b border-slate-100 text-rose-600 font-medium">
                     <span>Retenção na Fonte (6.5% sobre o valor base)</span>
-                    <span className="font-bold">- {Math.round(montanteRetencao).toLocaleString('pt-AO')} Kz</span>
+                    <span className="font-bold font-mono-num">- {Math.round(montanteRetencao).toLocaleString('pt-AO')} Kz</span>
                   </div>
                 )}
 
-                <div className="flex justify-between py-3 bg-slate-900 text-white px-4 rounded-xl font-bold text-sm sm:text-base">
+                <div className="flex justify-between py-3 bg-slate-900 text-white px-4 rounded-xl font-bold text-sm sm:text-base shadow-sm">
                   <span>Valor Líquido Efetivo a Receber no Caixa/Banco</span>
-                  <span className="text-emerald-400">{Math.round(valorLiquidoAReceber).toLocaleString('pt-AO')} Kz</span>
+                  <span className="text-emerald-400 font-mono-num">{Math.round(valorLiquidoAReceber).toLocaleString('pt-AO')} Kz</span>
                 </div>
               </div>
 
@@ -392,7 +393,7 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
                 </p>
                 <button
                   onClick={() => onNavigatePage('download')}
-                  className="px-4 py-2.5 bg-[#1d4ed8] text-white rounded-xl font-bold text-xs hover:bg-blue-700 transition-all flex items-center gap-1.5"
+                  className="px-5 py-3 bg-[#FF6500] hover:bg-[#EB5B00] text-white rounded-xl font-bold text-xs shadow-md shadow-orange-600/30 transition-all flex items-center gap-1.5 cursor-pointer shimmer-button hover:-translate-y-0.5"
                 >
                   <ArrowRight className="w-3.5 h-3.5" />
                   Conhecer Módulo de Faturação
