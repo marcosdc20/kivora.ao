@@ -147,9 +147,9 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <aside className="portal-scroll-container w-68 h-full flex flex-col bg-slate-950 border-r border-slate-800/80 overflow-y-auto flex-shrink-0 select-none">
-      {/* Header Corporativo Executivo */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80 bg-slate-950/60 sticky top-0 z-10 backdrop-blur-sm">
+    <aside className="w-68 h-full flex flex-col bg-slate-950 border-r border-slate-800/80 flex-shrink-0 select-none overflow-hidden">
+      {/* Header Corporativo Executivo Fixo */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80 bg-slate-950 flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-md shadow-blue-600/30 border border-blue-400/30">
             <Shield className="w-5 h-5 text-white" strokeWidth={2} />
@@ -175,8 +175,8 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* Navegação Categorizada em Grupos */}
-      <nav className="flex-1 py-3 px-3 space-y-4">
+      {/* Navegação Categorizada com Scroll Nativo Independente */}
+      <nav className="flex-1 py-3 px-3 space-y-4 overflow-y-auto overscroll-contain">
         {NAV_GROUPS.map((group, gIdx) => (
           <div key={gIdx} className="space-y-1">
             <div className="px-3 pt-2 pb-1">
@@ -273,7 +273,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       </nav>
 
       {/* Footer com Perfil do Utilizador & Acesso Rápido */}
-      <div className="p-3 border-t border-slate-800/80 bg-slate-950/90 space-y-2">
+      <div className="p-3 border-t border-slate-800/80 bg-slate-950 flex-shrink-0 space-y-2">
         {onExitAdmin && (
           <button
             onClick={onExitAdmin}
