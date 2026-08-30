@@ -269,6 +269,16 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
   const ibanOficial = policy.membership_bank_info?.iban || 'AO06 0040 0000 1234 5678 9012 3';
   const bancoOficial = policy.membership_bank_info?.bank || 'Banco Angolano de Investimentos (BAI)';
 
+  const handleDownloadPdf = () => {
+    const link = document.createElement('a');
+    link.href = '/documentos/Regulamento_Programa_Parceiros_KIVORA.pdf';
+    link.download = 'Regulamento_Programa_Parceiros_KIVORA.pdf';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pt-24 pb-24 selection:bg-blue-600 selection:text-white">
       
@@ -307,8 +317,8 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
-              onClick={() => setShowConditionsModal(true)}
-              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer"
+              onClick={handleDownloadPdf}
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer hover:shadow-md active:scale-95"
             >
               <Download className="w-4 h-4" />
               <span>Baixar Condições em PDF</span>
@@ -675,8 +685,8 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
             <div className="pt-1">
               <button
                 type="button"
-                onClick={() => setShowConditionsModal(true)}
-                className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer"
+                onClick={handleDownloadPdf}
+                className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer shadow-xs active:scale-95"
               >
                 <Download className="w-3.5 h-3.5 text-blue-400" />
                 <span>Descarregar PDF das Condições Oficiais</span>

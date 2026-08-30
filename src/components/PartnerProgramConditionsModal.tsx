@@ -16,6 +16,16 @@ export const PartnerProgramConditionsModal: React.FC<PartnerProgramConditionsMod
     window.print();
   };
 
+  const handleDownloadPdf = () => {
+    const link = document.createElement('a');
+    link.href = '/documentos/Regulamento_Programa_Parceiros_KIVORA.pdf';
+    link.download = 'Regulamento_Programa_Parceiros_KIVORA.pdf';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="modal-overlay fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-6 overflow-y-auto print:static print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible">
       <div className="modal-sheet bg-white rounded-3xl max-w-4xl w-full shadow-2xl border border-slate-200 flex flex-col max-h-[96vh] overflow-hidden animate-fadeIn print:border-none print:shadow-none print:rounded-none print:bg-transparent print:max-h-none print:overflow-visible print:w-full print:max-w-none">
@@ -39,11 +49,19 @@ export const PartnerProgramConditionsModal: React.FC<PartnerProgramConditionsMod
 
           <div className="flex items-center gap-2 self-end sm:self-auto">
             <button
-              onClick={handlePrint}
+              onClick={handleDownloadPdf}
               className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition-all cursor-pointer"
             >
+              <Download className="w-4 h-4" />
+              <span>Baixar Ficheiro PDF</span>
+            </button>
+            <button
+              onClick={handlePrint}
+              className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3.5 py-2 rounded-xl border border-slate-700 transition-all cursor-pointer"
+              title="Imprimir documento em papel A4"
+            >
               <Printer className="w-4 h-4" />
-              <span>Imprimir / Salvar PDF (A4)</span>
+              <span>Imprimir</span>
             </button>
             <button
               onClick={onClose}

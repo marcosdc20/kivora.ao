@@ -43,6 +43,16 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
     }
   };
 
+  const handleDownloadPdf = () => {
+    const link = document.createElement('a');
+    link.href = '/documentos/Regulamento_Programa_Parceiros_KIVORA.pdf';
+    link.download = 'Regulamento_Programa_Parceiros_KIVORA.pdf';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="min-h-screen bg-white text-slate-900 page-enter">
 
@@ -123,8 +133,8 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
             
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
-                onClick={() => setShowConditionsModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+                onClick={handleDownloadPdf}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer shadow-xs active:scale-95"
               >
                 <Download className="w-3.5 h-3.5 text-blue-400" />
                 <span>Baixar Regulamento (PDF)</span>
@@ -183,8 +193,8 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
               <ArrowRight className="w-4 h-4" strokeWidth={2} />
             </button>
             <button
-              onClick={() => setShowConditionsModal(true)}
-              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold text-sm px-6 py-4 rounded-2xl border border-white/20 transition-all cursor-pointer"
+              onClick={handleDownloadPdf}
+              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold text-sm px-6 py-4 rounded-2xl border border-white/20 transition-all cursor-pointer active:scale-95"
             >
               <Download className="w-4 h-4" />
               <span>Baixar Condições em PDF</span>
