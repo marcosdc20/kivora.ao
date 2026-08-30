@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
-import { ArrowRight, CheckCircle2, Users, Award, ShieldCheck, CreditCard } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Users, Award, ShieldCheck, CreditCard, Download } from 'lucide-react';
 import {
   subscribePartnerPolicy, DEFAULT_PARTNER_POLICY,
   PartnerLicensingPolicy
@@ -10,6 +10,7 @@ import {
   SystemCompanySettings
 } from '../services/systemSettingsService';
 import { YouTubePlayer } from '../components/YouTubePlayer';
+import { PartnerProgramConditionsModal } from '../components/PartnerProgramConditionsModal';
 
 import executivosImg from '../assets/kivora/executivos-kivora.jpg';
 
@@ -25,6 +26,7 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
   useScrollReveal();
   const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
   const [policy, setPolicy] = useState<PartnerLicensingPolicy>(DEFAULT_PARTNER_POLICY);
+  const [showConditionsModal, setShowConditionsModal] = useState(false);
 
   useEffect(() => {
     const unsubSettings = subscribeSystemSettings(setSettings);
@@ -112,13 +114,22 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
             </p>
           </div>
 
-          {/* Taxa de Homologação */}
-          <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200/80 text-xs relative z-10">
+          {/* Taxa de Homologação e Botões Oficiais */}
+          <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200/80 text-xs relative z-10">
             <div className="flex items-center gap-2 text-slate-700">
               <CreditCard className="w-4 h-4 text-emerald-600" />
-              <span>Taxa única de homologação e credenciamento: <strong className="text-slate-950 font-mono-num font-black">{fmt(policy.partner_membership_fee_aoa ?? 25000)} Kz</strong></span>
+              <span>Taxa única de adesão e credenciamento: <strong className="text-slate-950 font-mono-num font-black">{fmt(policy.partner_membership_fee_aoa ?? 25000)} Kz</strong></span>
             </div>
-            <span className="text-[11px] text-slate-500">Liquidação após análise da candidatura</span>
+            
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                onClick={() => setShowConditionsModal(true)}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+              >
+                <Download className="w-3.5 h-3.5 text-blue-400" />
+                <span>Baixar Regulamento (PDF)</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -163,7 +174,7 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
           <p className="text-slate-300 text-sm leading-relaxed max-w-lg mx-auto font-normal">
             Aceda à página exclusiva de candidatura com todos os requisitos oficiais e formulário de credenciamento.
           </p>
-          <div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
               onClick={handleGoCandidatura}
               className="inline-flex items-center gap-2 bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-sm px-8 py-4 rounded-2xl shadow-xl shadow-orange-600/40 transition-all hover:-translate-y-1 cursor-pointer shimmer-button"
@@ -171,9 +182,21 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
               <span>Enviar Candidatura Oficial</span>
               <ArrowRight className="w-4 h-4" strokeWidth={2} />
             </button>
+            <button
+              onClick={() => setShowConditionsModal(true)}
+              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold text-sm px-6 py-4 rounded-2xl border border-white/20 transition-all cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              <span>Baixar Condições em PDF</span>
+            </button>
           </div>
         </div>
       </section>
+
+      {/* Modal Oficial de Condições em PDF */}
+      {showConditionsModal && (
+        <PartnerProgramConditionsModal onClose={() => setShowConditionsModal(false)} />
+      )}
 
     </div>
   );

@@ -4,7 +4,7 @@ import {
   Award, MessageSquare,
   ChevronRight, UploadCloud, FileText, Trash2,
   Paperclip, AlertCircle, Copy, Check, Building2, MapPin,
-  CreditCard, User
+  CreditCard, User, Download, Eye, Info
 } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { collection, addDoc, setDoc, doc } from 'firebase/firestore';
@@ -18,6 +18,7 @@ import {
 } from '../services/systemSettingsService';
 import { triggerKivoraConfetti } from '../utils/confetti';
 import { sendPartnerApplicationEmails } from '../services/siteEmailService';
+import { PartnerProgramConditionsModal } from '../components/PartnerProgramConditionsModal';
 
 interface CandidaturaParceiroPageProps {
   onBack: () => void;
@@ -32,8 +33,11 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
 }) => {
   const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
   const [policy, setPolicy] = useState<PartnerLicensingPolicy>(DEFAULT_PARTNER_POLICY);
+  const [showConditionsModal, setShowConditionsModal] = useState(false);
+  const [conditionsTab, setConditionsTab] = useState<'empresa' | 'singular' | 'comuns' | 'etapas'>('empresa');
   
   // Form State
+  const [tipoCandidato, setTipoCandidato] = useState<'empresa' | 'singular'>('empresa');
   const [nome, setNome] = useState('');
   const [cargo, setCargo] = useState('');
   const [empresa, setEmpresa] = useState('');
@@ -45,6 +49,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
   const [tipoParceria, setTipoParceria] = useState('revenda_instalacao');
   const [experiencia, setExperiencia] = useState('');
   const [temClientesAtuais, setTemClientesAtuais] = useState('sim');
+  const [concordaTermos, setConcordaTermos] = useState(true);
   const [hpField, setHpField] = useState('');
   
   // Comprovativo de Transferência Bancária (25.000 Kz)
@@ -268,7 +273,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pt-24 pb-24 selection:bg-blue-600 selection:text-white">
       
       {/* Top Header & Breadcrumb */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 pb-6">
         <div className="flex items-center justify-between gap-4 mb-6">
           <button
             onClick={onBack}
@@ -281,55 +286,320 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
           <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-400">
             <span>Parcerias</span>
             <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-slate-900 font-semibold">Candidatura Oficial</span>
+            <span className="text-slate-900 font-semibold">Candidatura Oficial & Condições</span>
           </div>
         </div>
 
-        <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 bg-blue-50/80 border border-blue-200/60 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
-            <ShieldCheck className="w-4 h-4 text-blue-600" />
-            <span>Credenciamento Oficial KIVORA SOFT</span>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 bg-blue-50/80 border border-blue-200/60 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+              <ShieldCheck className="w-4 h-4 text-blue-600" />
+              <span>Credenciamento Oficial KIVORA SOFT • Visual Software, Lda.</span>
+            </div>
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+              Candidatura de Parceiro Revendedor
+            </h1>
+            <p className="text-slate-600 text-xs sm:text-sm leading-relaxed max-w-2xl">
+              Consulte as <strong>condições oficiais</strong>, descarregue o <strong>regulamento em PDF</strong> e submeta a sua candidatura para integrar a rede de canais autorizados da <strong>Visual Software, Lda.</strong>
+            </p>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
-            Candidatura de Parceiro & Revenda
-          </h1>
-          <p className="text-slate-600 text-sm leading-relaxed max-w-2xl">
-            Junte-se à rede de canais autorizados da <strong>A Visual Software, Lda.</strong> Aceda a margens de revenda, emissão autónoma de licenças e suporte técnico prioritário.
-          </p>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowConditionsModal(true)}
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              <span>Baixar Condições em PDF</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowConditionsModal(true)}
+              className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-200 shadow-xs transition-all cursor-pointer"
+            >
+              <Eye className="w-4 h-4 text-slate-500" />
+              <span>Ver Regulamento</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Main Grid */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* PAINEL DE CONDIÇÕES & REGULAMENTO DA PARCERIA */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-8">
+        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
+          
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
+                Documentação & Requisitos Oficiais
+              </span>
+              <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-1">
+                Condições de Acesso ao Programa de Parceria
+              </h2>
+            </div>
+
+            {/* Abas de Navegação de Requisitos */}
+            <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 rounded-2xl border border-slate-200 text-xs">
+              <button
+                type="button"
+                onClick={() => setConditionsTab('empresa')}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  conditionsTab === 'empresa'
+                    ? 'bg-white text-blue-600 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Building2 className="w-3.5 h-3.5" />
+                <span>Empresa (Colectiva)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setConditionsTab('singular')}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  conditionsTab === 'singular'
+                    ? 'bg-white text-blue-600 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <User className="w-3.5 h-3.5" />
+                <span>Pessoa Singular</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setConditionsTab('comuns')}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  conditionsTab === 'comuns'
+                    ? 'bg-white text-blue-600 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Requisitos Comuns</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setConditionsTab('etapas')}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  conditionsTab === 'etapas'
+                    ? 'bg-white text-blue-600 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>4 Etapas da Parceria</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Conteúdo da Aba Ativa */}
+          <div className="text-xs sm:text-xs">
+            {conditionsTab === 'empresa' && (
+              <div className="space-y-4 animate-fadeIn">
+                <div className="flex items-center gap-2 text-blue-900 font-bold text-sm">
+                  <Building2 className="w-4 h-4 text-blue-600" />
+                  <span>Documentos Exigidos se for Empresa (Pessoa Colectiva):</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-700">
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-black text-[11px] flex items-center justify-center shrink-0">1</span>
+                    <div>
+                      <strong className="text-slate-900 block">Certidão de Registo Comercial</strong>
+                      <span className="text-slate-500 text-[11px]">Actualizada, emitida há menos de 180 dias.</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-black text-[11px] flex items-center justify-center shrink-0">2</span>
+                    <div>
+                      <strong className="text-slate-900 block">Alvará Comercial Válido</strong>
+                      <span className="text-slate-500 text-[11px]">Correspondente à actividade de comércio/prestação de serviços.</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-black text-[11px] flex items-center justify-center shrink-0">3</span>
+                    <div>
+                      <strong className="text-slate-900 block">Cartão de Contribuinte / NIF</strong>
+                      <span className="text-slate-500 text-[11px]">Documento fiscal de identificação da empresa.</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-black text-[11px] flex items-center justify-center shrink-0">4</span>
+                    <div>
+                      <strong className="text-slate-900 block">Pacto Social / Estatutos</strong>
+                      <span className="text-slate-500 text-[11px]">Estatutos da sociedade publicados em Diário da República ou escritura.</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-black text-[11px] flex items-center justify-center shrink-0">5</span>
+                    <div>
+                      <strong className="text-slate-900 block">Cópia do BI do(s) Sócio(s)-Gerente(s)</strong>
+                      <span className="text-slate-500 text-[11px]">Identificação do representante legal com poderes para vincular.</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-black text-[11px] flex items-center justify-center shrink-0">6</span>
+                    <div>
+                      <strong className="text-slate-900 block">Comprovativo de Morada da Sede</strong>
+                      <span className="text-slate-500 text-[11px]">Contrato de arrendamento ou título de propriedade do espaço físico.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-blue-50/80 rounded-2xl border border-blue-200/70 text-blue-950 flex items-start gap-2.5">
+                  <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                  <p className="text-[11px] leading-relaxed">
+                    <strong>Enquadramento Legal (Decreto Presidencial n.º 172/23):</strong> Algumas actividades de baixo risco encontram-se isentas de Alvará Comercial prévio, bastando o cadastro comercial na plataforma do GUE — a exigência deste documento será confirmada caso a caso pela direção da Visual Software.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {conditionsTab === 'singular' && (
+              <div className="space-y-4 animate-fadeIn">
+                <div className="flex items-center gap-2 text-blue-900 font-bold text-sm">
+                  <User className="w-4 h-4 text-blue-600" />
+                  <span>Documentos Exigidos se for Pessoa Singular (a título individual):</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-700">
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+                    <strong className="text-slate-900 block">1. Cópia do Bilhete de Identidade</strong>
+                    <span className="text-slate-500 text-[11px]">BI válido em território angolano.</span>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+                    <strong className="text-slate-900 block">2. NIF Pessoal</strong>
+                    <span className="text-slate-500 text-[11px]">Corresponde ao BI (ou cartão fiscal para estrangeiros).</span>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+                    <strong className="text-slate-900 block">3. Atestado de Residência</strong>
+                    <span className="text-slate-500 text-[11px]">Comprovativo de morada actualizado.</span>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+                    <strong className="text-slate-900 block">4. Licenciamento Individual</strong>
+                    <span className="text-slate-500 text-[11px]">Alvará ou licença em nome individual (quando aplicável).</span>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+                    <strong className="text-slate-900 block">5. Experiência Comprovada</strong>
+                    <span className="text-slate-500 text-[11px]">CV ou declaração de experiência em TI/Vendas/Comercial.</span>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+                    <strong className="text-slate-900 block">6. 2 Fotografias Tipo Passe</strong>
+                    <span className="text-slate-500 text-[11px]">Fotografias recentes para registo do credenciamento.</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {conditionsTab === 'comuns' && (
+              <div className="space-y-4 animate-fadeIn">
+                <div className="flex items-center gap-2 text-blue-900 font-bold text-sm">
+                  <ShieldCheck className="w-4 h-4 text-blue-600" />
+                  <span>Requisitos e Compromissos Comuns a Ambos os Casos:</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-700">
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1.5">
+                    <strong className="text-slate-900 font-bold text-xs block">Formação Inicial KIVORA</strong>
+                    <p className="text-slate-600 text-[11px] leading-relaxed">
+                      Disponibilidade para uma breve formação técnica e comercial sobre as funcionalidades do KIVORA SOFT e a operação no Portal do Parceiro.
+                    </p>
+                  </div>
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1.5">
+                    <strong className="text-slate-900 font-bold text-xs block">Ética & Boa Representação</strong>
+                    <p className="text-slate-600 text-[11px] leading-relaxed">
+                      Compromisso rigoroso com a ética comercial, integridade fiscal perante a AGT e boa representação da marca junto dos clientes finais.
+                    </p>
+                  </div>
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1.5">
+                    <strong className="text-slate-900 font-bold text-xs block">Contrato de Parceria</strong>
+                    <p className="text-slate-600 text-[11px] leading-relaxed">
+                      Aceitação e assinatura do Contrato Oficial de Parceria de Revenda estabelecido pela Visual Software, Lda.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {conditionsTab === 'etapas' && (
+              <div className="space-y-4 animate-fadeIn">
+                <div className="flex items-center gap-2 text-blue-900 font-bold text-sm">
+                  <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                  <span>Como Funciona na Prática (O Processo em 4 Etapas):</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-slate-700">
+                  <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-200/70 space-y-1">
+                    <span className="font-mono font-black text-blue-600 text-xs uppercase">Etapa 1</span>
+                    <h4 className="font-bold text-slate-900 text-xs">Adesão & Taxa</h4>
+                    <p className="text-slate-600 text-[11px]">
+                      Preenche o formulário e efectua o pagamento único de adesão (25.000 Kz).
+                    </p>
+                  </div>
+                  <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-200/70 space-y-1">
+                    <span className="font-mono font-black text-blue-600 text-xs uppercase">Etapa 2</span>
+                    <h4 className="font-bold text-slate-900 text-xs">Assinatura de Contrato</h4>
+                    <p className="text-slate-600 text-[11px]">
+                      Assina o Contrato de Parceria de Revenda com a Visual Software formalizando a colaboração.
+                    </p>
+                  </div>
+                  <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-200/70 space-y-1">
+                    <span className="font-mono font-black text-blue-600 text-xs uppercase">Etapa 3</span>
+                    <h4 className="font-bold text-slate-900 text-xs">Activação do Acesso</h4>
+                    <p className="text-slate-600 text-[11px]">
+                      Recebe as credenciais do Portal do Parceiro e o Comprovativo de Parceiro Credenciado.
+                    </p>
+                  </div>
+                  <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-200/70 space-y-1">
+                    <span className="font-mono font-black text-blue-600 text-xs uppercase">Etapa 4</span>
+                    <h4 className="font-bold text-slate-900 text-xs">Emissão & Venda</h4>
+                    <p className="text-slate-600 text-[11px]">
+                      Emite licenças directamente no Portal para os seus clientes, lucrando com as margens de revenda.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+        </div>
+      </div>
+
+      {/* Main Grid: Dados Bancários & Formulário */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* COLUNA ESQUERDA: Resumo Institucional & Dados Bancários */}
+        {/* COLUNA ESQUERDA: Benefícios & Dados Bancários */}
         <aside className="lg:col-span-5 space-y-5">
           
-          {/* Card: O que está incluído */}
+          {/* Card: O que ganha como Parceiro */}
           <div className="bg-gradient-to-br from-blue-50/70 via-white to-white rounded-3xl border border-slate-200/90 p-6 shadow-sm space-y-4 card-glow-blue">
             <div className="flex items-center gap-2.5 text-slate-900 font-bold text-sm">
               <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
                 <Award className="w-5 h-5" />
               </div>
-              <span>Benefícios do Credenciamento</span>
+              <span>O que ganha como Parceiro KIVORA</span>
             </div>
 
-            <div className="space-y-3 text-xs text-slate-600">
+            <div className="space-y-2.5 text-xs text-slate-600">
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>Margens Comerciais:</strong> Descontos progressivos na compra de licenças de software e equipamentos POS.</span>
+                <span><strong>Comprovativo Oficial:</strong> Certificado de Parceiro Revendedor Credenciado pela Visual Software.</span>
               </div>
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>Portal do Parceiro:</strong> Gestão autónoma de clientes, faturas proforma e ativação de licenças em minutos.</span>
+                <span><strong>Acesso Autónomo:</strong> Emissão imediata de licenças para os seus clientes 24h por dia no Portal.</span>
               </div>
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>Certificado Oficial:</strong> Emissão do documento de Parceiro Revendedor pela Visual Software, Lda.</span>
+                <span><strong>Preços de Atacado:</strong> Margens lucrativas de revenda em software e hardware POS.</span>
               </div>
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>Suporte de Engenharia:</strong> Acesso direto à equipa técnica para apoio em instalações complexas.</span>
+                <span><strong>Suporte de Engenharia:</strong> Apoio técnico dedicado da equipa de desenvolvimento.</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span><strong>Material Promocional:</strong> Apoio comercial e kit de marketing oficial para divulgação.</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span><strong>Cobertura Nacional:</strong> Liberdade total para atender clientes em qualquer província de Angola.</span>
               </div>
             </div>
           </div>
@@ -342,10 +612,10 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                 <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
                   <CreditCard className="w-5 h-5" />
                 </div>
-                <span>Taxa de Registo</span>
+                <span>Valor Único de Adesão</span>
               </div>
               <span className="text-xs font-bold text-blue-700 bg-blue-100/70 border border-blue-200 px-3 py-1 rounded-full">
-                Taxa Única
+                Taxa de Adesão
               </span>
             </div>
 
@@ -356,7 +626,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                 </span>
               </div>
               <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                Valor único de processamento administrativo, verificação de conformidade e emissão do certificado oficial.
+                Pagamento único no acto de adesão. Dá acesso à activação da conta no Portal do Parceiro, emissão do Comprovativo Oficial de Credenciamento e pacote inicial de apoio comercial.
               </p>
             </div>
 
@@ -377,7 +647,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
               
               <div className="pt-2 border-t border-slate-200/80">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-slate-500 text-[11px] font-semibold">IBAN:</span>
+                  <span className="text-slate-500 text-[11px] font-semibold">IBAN Oficial:</span>
                   <button
                     type="button"
                     onClick={() => handleCopyIban(ibanOficial)}
@@ -402,6 +672,17 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
               </div>
             </div>
 
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setShowConditionsModal(true)}
+                className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5 text-blue-400" />
+                <span>Descarregar PDF das Condições Oficiais</span>
+              </button>
+            </div>
+
           </div>
 
         </aside>
@@ -419,11 +700,11 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                 
                 <div className="space-y-2">
                   <span className="text-[11px] uppercase tracking-wider font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                    Candidatura Submetida
+                    Candidatura Submetida com Sucesso
                   </span>
                   <h2 className="text-2xl font-black text-slate-900">Proposta em Análise</h2>
                   <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
-                    A sua proposta foi registada com sucesso. A direção comercial da <strong>Visual Software, Lda.</strong> procederá à validação do comprovativo bancário e envio das credenciais.
+                    A sua proposta e o comprovativo de 25.000 Kz foram registados no sistema. A direção comercial da <strong>Visual Software, Lda.</strong> validará a documentação para emissão do seu Comprovativo e credenciais de acesso ao Portal do Parceiro.
                   </p>
                 </div>
 
@@ -433,8 +714,14 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                     <strong className="text-blue-600 font-mono font-bold text-sm">{submittedProtocol}</strong>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-500 font-medium">Empresa / Parceiro:</span>
+                    <span className="text-slate-500 font-medium">Entidade:</span>
                     <strong className="text-slate-900 font-semibold">{empresa || nome}</strong>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 font-medium">Tipo:</span>
+                    <strong className="text-slate-900 font-semibold">
+                      {tipoCandidato === 'empresa' ? 'Empresa (Pessoa Colectiva)' : 'Pessoa Singular'}
+                    </strong>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-slate-500 font-medium">NIF:</span>
@@ -502,10 +789,10 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
 
                 <div className="border-b border-slate-100 pb-3">
                   <h2 className="text-base font-bold text-slate-900">
-                    Formulário de Inscrição
+                    Formulário de Inscrição Oficial
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Preencha os dados da sua entidade para validação cadastral e emissão do certificado.
+                    Preencha os dados abaixo e anexe o comprovativo da taxa única de adesão (25.000 Kz).
                   </p>
                 </div>
 
@@ -516,23 +803,63 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                   </div>
                 )}
 
+                {/* 0. Tipo de Candidato */}
+                <div className="space-y-2">
+                  <label className="font-bold text-slate-800 block">Tipo de Candidatura *</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setTipoCandidato('empresa')}
+                      className={`p-3 rounded-2xl border text-left flex items-center gap-2.5 transition-all cursor-pointer ${
+                        tipoCandidato === 'empresa'
+                          ? 'border-blue-600 bg-blue-50/50 text-blue-900 font-bold shadow-xs'
+                          : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      <Building2 className={`w-4 h-4 ${tipoCandidato === 'empresa' ? 'text-blue-600' : 'text-slate-400'}`} />
+                      <div>
+                        <span className="block text-xs font-bold">Empresa</span>
+                        <span className="block text-[10px] text-slate-500">Pessoa Colectiva</span>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setTipoCandidato('singular')}
+                      className={`p-3 rounded-2xl border text-left flex items-center gap-2.5 transition-all cursor-pointer ${
+                        tipoCandidato === 'singular'
+                          ? 'border-blue-600 bg-blue-50/50 text-blue-900 font-bold shadow-xs'
+                          : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      <User className={`w-4 h-4 ${tipoCandidato === 'singular' ? 'text-blue-600' : 'text-slate-400'}`} />
+                      <div>
+                        <span className="block text-xs font-bold">Pessoa Singular</span>
+                        <span className="block text-[10px] text-slate-500">Profissional Individual</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
                 {/* 1. Dados da Entidade */}
-                <div className="space-y-4">
+                <div className="space-y-4 pt-1">
                   <h3 className="text-xs font-bold text-slate-900 flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-blue-600" />
-                    <span>1. Dados da Entidade Revendedora</span>
+                    <span>
+                      {tipoCandidato === 'empresa' ? '1. Dados da Empresa' : '1. Dados do Profissional'}
+                    </span>
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div className="space-y-1.5">
                       <label htmlFor="cand_empresa" className="font-semibold text-slate-700">
-                        Nome da Empresa / Parceiro *
+                        {tipoCandidato === 'empresa' ? 'Nome Comercial da Empresa *' : 'Nome Comercial ou Pessoal *'}
                       </label>
                       <input
                         id="cand_empresa"
                         type="text"
                         required
-                        placeholder="Ex: Luanda Informática, Lda"
+                        placeholder={tipoCandidato === 'empresa' ? 'Ex: Luanda Informática, Lda' : 'Ex: João Manuel / JM Solutions'}
                         value={empresa}
                         onChange={(e) => setEmpresa(e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-medium focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
@@ -541,13 +868,13 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
 
                     <div className="space-y-1.5">
                       <label htmlFor="cand_nif" className="font-semibold text-slate-700">
-                        NIF da Empresa ou Titular *
+                        {tipoCandidato === 'empresa' ? 'NIF da Empresa *' : 'NIF / Nº do Bilhete de Identidade *'}
                       </label>
                       <input
                         id="cand_nif"
                         type="text"
                         required
-                        placeholder="Ex: 5001234567"
+                        placeholder={tipoCandidato === 'empresa' ? 'Ex: 5001234567' : 'Ex: 004123456LA042'}
                         value={nif}
                         onChange={(e) => setNif(e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-mono font-medium focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 outline-none uppercase transition-all"
@@ -560,12 +887,12 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                 <div className="space-y-4 pt-2">
                   <h3 className="text-xs font-bold text-slate-900 flex items-center gap-2">
                     <User className="w-4 h-4 text-blue-600" />
-                    <span>2. Responsável & Contactos</span>
+                    <span>2. Responsável & Contactos Directos</span>
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div className="space-y-1.5">
-                      <label htmlFor="cand_nome" className="font-semibold text-slate-700">Nome do Responsável *</label>
+                      <label htmlFor="cand_nome" className="font-semibold text-slate-700">Nome do Representante / Titular *</label>
                       <input
                         id="cand_nome"
                         type="text"
@@ -582,7 +909,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                       <input
                         id="cand_cargo"
                         type="text"
-                        placeholder="Ex: Diretor Técnico / Gerente"
+                        placeholder={tipoCandidato === 'empresa' ? 'Ex: Sócio-Gerente / Diretor Comercial' : 'Ex: Técnico de TI / Consultor'}
                         value={cargo}
                         onChange={(e) => setCargo(e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-medium focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
@@ -592,7 +919,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div className="space-y-1.5">
-                      <label htmlFor="cand_email" className="font-semibold text-slate-700">Email de Contacto *</label>
+                      <label htmlFor="cand_email" className="font-semibold text-slate-700">Email Oficial de Contacto *</label>
                       <input
                         id="cand_email"
                         type="email"
@@ -605,7 +932,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                     </div>
 
                     <div className="space-y-1.5">
-                      <label htmlFor="cand_telefone" className="font-semibold text-slate-700">Telemóvel / WhatsApp *</label>
+                      <label htmlFor="cand_telefone" className="font-semibold text-slate-700">Telemóvel / WhatsApp Directo *</label>
                       <input
                         id="cand_telefone"
                         type="tel"
@@ -623,12 +950,12 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                 <div className="space-y-4 pt-2">
                   <h3 className="text-xs font-bold text-slate-900 flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-blue-600" />
-                    <span>3. Localização da Sede</span>
+                    <span>3. Localização & Sede</span>
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div className="space-y-1.5">
-                      <label htmlFor="cand_provincia" className="font-semibold text-slate-700">Província *</label>
+                      <label htmlFor="cand_provincia" className="font-semibold text-slate-700">Província Principal *</label>
                       <select
                         id="cand_provincia"
                         value={provincia}
@@ -657,12 +984,12 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                     </div>
 
                     <div className="space-y-1.5">
-                      <label htmlFor="cand_municipio" className="font-semibold text-slate-700">Município / Bairro *</label>
+                      <label htmlFor="cand_municipio" className="font-semibold text-slate-700">Município / Bairro / Endereço *</label>
                       <input
                         id="cand_municipio"
                         type="text"
                         required
-                        placeholder="Ex: Talatona, Viana, Belas..."
+                        placeholder="Ex: Talatona, Viana, Belas, Maianga..."
                         value={municipio}
                         onChange={(e) => setMunicipio(e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-medium focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
@@ -676,7 +1003,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                   <h3 className="text-xs font-bold text-slate-900 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <FileText className="w-4 h-4 text-blue-600" />
-                      <span>4. Comprovativo da Taxa de Registo (25.000 Kz) *</span>
+                      <span>4. Comprovativo da Taxa de Adesão (25.000 Kz) *</span>
                     </div>
                     <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full font-bold border border-amber-200">
                       Obrigatório
@@ -717,7 +1044,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                       />
                       <UploadCloud className="w-8 h-8 text-slate-400 mb-2" />
                       <span className="text-xs font-semibold text-slate-800">
-                        Clique para selecionar o comprovativo bancário
+                        Clique para selecionar o comprovativo bancário da taxa de 25.000 Kz
                       </span>
                       <span className="text-[10px] text-slate-400 mt-1">
                         Formatos aceites: Imagens (PNG, JPG, WEBP) ou PDF (até 5 MB)
@@ -768,12 +1095,12 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
 
                   <div className="space-y-1.5">
                     <label htmlFor="cand_experiencia" className="font-semibold text-slate-700 block">
-                      Observações / Experiência Prévia (Opcional)
+                      Observações / Experiência Prévia em TI ou Vendas (Opcional)
                     </label>
                     <textarea
                       id="cand_experiencia"
                       rows={2}
-                      placeholder="Breve resumo da atividade da sua empresa..."
+                      placeholder="Breve resumo da sua experiência comercial ou técnica..."
                       value={experiencia}
                       onChange={(e) => setExperiencia(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-900 font-medium focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all resize-none"
@@ -781,18 +1108,33 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                   </div>
                 </div>
 
-                {/* Declaração */}
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-2.5 text-[11px] text-slate-600">
-                  <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                  <p>
-                    Declaro a veracidade dos dados apresentados para emissão do Certificado Oficial de Parceiro Revendedor da Visual Software, Lda.
-                  </p>
+                {/* Declaração e Termos de Parceria */}
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-[11px] text-slate-700">
+                  <div className="flex items-start gap-2.5">
+                    <input
+                      id="concorda_termos"
+                      type="checkbox"
+                      checked={concordaTermos}
+                      onChange={(e) => setConcordaTermos(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer"
+                    />
+                    <label htmlFor="concorda_termos" className="cursor-pointer select-none leading-relaxed">
+                      Declaro a veracidade dos dados apresentados e aceito as <strong>Condições e Regulamento do Programa de Parceria da Visual Software, Lda.</strong>{' '}
+                      <button
+                        type="button"
+                        onClick={() => setShowConditionsModal(true)}
+                        className="text-blue-600 hover:text-blue-700 font-bold underline inline-flex items-center gap-0.5 ml-1"
+                      >
+                        (Consultar Regulamento Completo em PDF)
+                      </button>
+                    </label>
+                  </div>
                 </div>
 
                 {/* Botão de Envio */}
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || !concordaTermos}
                   className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-sm py-3.5 rounded-2xl shadow-md shadow-blue-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   {submitting ? (
@@ -815,7 +1157,13 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
 
       </div>
 
+      {/* MODAL OFICIAL DE REGULAMENTO & CONDIÇÕES EM PDF */}
+      {showConditionsModal && (
+        <PartnerProgramConditionsModal onClose={() => setShowConditionsModal(false)} />
+      )}
+
     </div>
   );
 };
+
 
