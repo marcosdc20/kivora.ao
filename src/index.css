@@ -54,17 +54,11 @@
 }
 
 /* ================================================================
-   PERFORMANCE & GPU OPTIMIZATIONS
+   PERFORMANCE & GPU ACCELERATION
    ================================================================ */
-.cv-auto {
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 700px;
-}
-
 .gpu-accelerate {
   transform: translateZ(0);
   backface-visibility: hidden;
-  perspective: 1000px;
 }
 
 /* ================================================================
@@ -73,9 +67,8 @@
 
 [data-reveal], .sr-init {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
+  transform: translateY(20px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 [data-reveal][data-reveal-dir="left"] {

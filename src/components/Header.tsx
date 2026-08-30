@@ -85,8 +85,8 @@ export const Header: React.FC<HeaderProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileExpandedGroup, setMobileExpandedGroup] = useState<string | null>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const navRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [settings, setSettings] = useState<SystemCompanySettings>(DEFAULT_SETTINGS);
@@ -98,11 +98,21 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (totalHeight > 0) {
-        setScrollProgress((window.scrollY / totalHeight) * 100);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrolled = window.scrollY > 20;
+          setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
+          
+          if (progressBarRef.current) {
+            const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0;
+            progressBarRef.current.style.width = `${progress}%`;
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
@@ -311,11 +321,12 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       )}
 
-      {/* Scroll Progress Bar */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-transparent">
+      {/* Scroll Progress Bar - Native Direct DOM Update */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-transparent pointer-events-none">
         <div
-          className="h-full bg-blue-600 transition-all duration-75 ease-out"
-          style={{ width: `${scrollProgress}%` }}
+          ref={progressBarRef}
+          className="h-full bg-blue-600 will-change-transform"
+          style={{ width: '0%' }}
         />
       </div>
 

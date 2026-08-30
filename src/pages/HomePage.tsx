@@ -444,7 +444,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* ========== HARDWARE & EQUIPAMENTOS POS ========== */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto cv-auto">
+      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div data-reveal className="sr-init text-center max-w-2xl mx-auto mb-16 space-y-3">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider">
             <span>Equipamentos POS</span>
@@ -598,7 +598,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* ========== TABELA DE PREÇOS & PLANOS EM KWANZAS ========== */}
-      <section className="py-24 bg-mesh border-y border-slate-200/80 relative overflow-hidden cv-auto">
+      <section className="py-24 bg-mesh border-y border-slate-200/80 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div data-reveal className="sr-init text-center max-w-2xl mx-auto mb-16 space-y-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold uppercase tracking-wider">
@@ -729,7 +729,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* ========== APOIO AO CLIENTE & CONSULTORIA EM ANGOLA ========== */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto cv-auto">
+      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           <div data-reveal className="sr-init lg:col-span-6 space-y-6">

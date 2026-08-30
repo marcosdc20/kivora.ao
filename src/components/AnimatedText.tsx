@@ -69,15 +69,13 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
     const letterVariants: Variants = {
       hidden: {
         opacity: 0,
-        y: 12,
-        filter: 'blur(3px)',
+        y: 10,
       },
       visible: {
         opacity: 1,
         y: 0,
-        filter: 'blur(0px)',
         transition: {
-          duration: 0.5,
+          duration: 0.4,
           ease: [0.16, 1, 0.3, 1],
         },
       },
