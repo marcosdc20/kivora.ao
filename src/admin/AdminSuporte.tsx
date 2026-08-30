@@ -4,7 +4,7 @@ import {
   Clock, AlertTriangle, CheckCircle2,
   Send, Loader2, MessageSquare, UserCheck,
   Download, MessageCircle, Phone, Building,
-  TrendingUp
+  TrendingUp, Video
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
 import { db } from '../lib/firebase';
@@ -12,6 +12,7 @@ import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase
 import {
   SupportTicket, createSupportTicket, sendTicketMessage, updateTicketStatus
 } from './services/supportService';
+import { VideoConferenceModal } from '../components/VideoConferenceModal';
 
 export interface DemoLead {
   id: string;
@@ -40,6 +41,9 @@ export const AdminSuporte: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
+
+  // Videochamada de Apoio Remoto
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
 
   // Form State Novo Ticket
   const [company, setCompany] = useState('');
@@ -529,8 +533,18 @@ export const AdminSuporte: React.FC = () => {
                           </p>
                         </div>
 
-                        {/* Status Select */}
+                        {/* Status Select & Videochamada */}
                         <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setVideoModalOpen(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                            title="Iniciar sessão de videochamada e partilha de ecrã com o cliente"
+                          >
+                            <Video className="w-3.5 h-3.5" />
+                            <span>Entrar em Vídeo</span>
+                          </button>
+
                           <select
                             value={selectedTicket.status}
                             onChange={(e) => handleStatusChange(selectedTicket.id, e.target.value as any)}
@@ -874,6 +888,16 @@ export const AdminSuporte: React.FC = () => {
         </div>
       )}
 
+      {/* Modal de Videochamada de Assistência Remota */}
+      <VideoConferenceModal
+        isOpen={videoModalOpen}
+        onClose={() => setVideoModalOpen(false)}
+        roomName={selectedTicket ? selectedTicket.id : undefined}
+        ticketNumber={selectedTicket?.ticket_number}
+        userName="Engenharia de Suporte Kivora"
+        userRole="admin"
+        companyName={selectedTicket?.company_name || 'Kivora Support'}
+      />
     </div>
   );
 };

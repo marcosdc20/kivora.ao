@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { PageHero } from '../components/PageHero';
 import {
   Mail, Phone, MessageCircle, Send, CheckCircle2,
-  Clock, Loader2, Headphones, Building2
+  Clock, Loader2, Headphones, Building2, Video,
+  Monitor
 } from 'lucide-react';
 import {
   subscribeSystemSettings, getCachedSystemSettings,
@@ -10,6 +11,7 @@ import {
 } from '../services/systemSettingsService';
 import { createSupportTicket } from '../admin/services/supportService';
 import { sendSupportTicketEmails } from '../services/siteEmailService';
+import { VideoConferenceModal } from '../components/VideoConferenceModal';
 
 import welcomeImg from '../assets/kivora/jovem-empresario-dado-boas-vindas.png';
 
@@ -30,6 +32,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
   
   const [submitting, setSubmitting] = useState(false);
   const [ticketProtocol, setTicketProtocol] = useState<string | null>(null);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
 
   useEffect(() => {
     const unsub = subscribeSystemSettings(setSettings);
@@ -151,7 +154,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
       <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-20 space-y-16">
         
         {/* Canais Diretos de Contacto Corporativos */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           
           {/* Card 1: WhatsApp */}
           <div className="bg-gradient-to-br from-emerald-50/60 via-white to-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-emerald-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden card-glow-green">
@@ -193,20 +196,57 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
             </a>
           </div>
 
-          {/* Card 2: Telefone Central */}
-          <div className="bg-gradient-to-br from-blue-50/60 via-white to-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-blue-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden card-glow-blue">
-            <Phone className="icon-watermark wm-blue w-32 h-32" strokeWidth={1.25} />
+          {/* Card 2: Videochamada & Partilha de Ecrã */}
+          <div className="bg-gradient-to-br from-sky-50/60 via-white to-white border border-blue-300 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-blue-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden card-glow-blue">
+            <Video className="icon-watermark wm-sky w-32 h-32" strokeWidth={1.25} />
             <div className="space-y-4 relative z-10">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                  <Video className="w-6 h-6" />
+                </div>
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200/80">
+                  Google Meet / Jitsi HD
+                </span>
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-950 group-hover:text-blue-600 transition-colors">Videochamada & Ecrã</h3>
+                <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                  Assistência remota em direto para diagnóstico visual no seu computador de caixa sem custos.
+                </p>
+              </div>
+              <div className="text-xs font-mono-num font-bold text-slate-950 pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-blue-600 font-bold">100% Gratuito</span>
+                <span className="text-[11px] font-sans font-medium text-slate-400">Sem Registo</span>
+              </div>
+              <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                <Monitor className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                <span>Partilha de ecrã e áudio HD</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setVideoModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-600/25 cursor-pointer relative z-10 shine-hover"
+            >
+              <Video className="w-4 h-4" />
+              <span>Abrir Videochamada</span>
+            </button>
+          </div>
+
+          {/* Card 3: Telefone Central */}
+          <div className="bg-gradient-to-br from-indigo-50/60 via-white to-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-indigo-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden card-glow-indigo">
+            <Phone className="icon-watermark wm-indigo w-32 h-32" strokeWidth={1.25} />
+            <div className="space-y-4 relative z-10">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
                   <Phone className="w-6 h-6" />
                 </div>
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/80">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
                   Voz & Central
                 </span>
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-950 group-hover:text-blue-600 transition-colors">Atendimento Telefónico Central</h3>
+                <h3 className="text-base font-black text-slate-950 group-hover:text-indigo-600 transition-colors">Atendimento Telefónico</h3>
                 <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
                   Linha de suporte telefónico dedicada a operadores, caixas, gerentes e contabilistas.
                 </p>
@@ -216,21 +256,21 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                 <span className="text-[11px] font-sans font-medium text-slate-400">Luanda / Nacional</span>
               </div>
               <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                <Clock className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
                 <span>{settings.supportHoursSunday || 'Atendimento Comercial & Suporte Remoto'}</span>
               </div>
             </div>
 
             <a
               href={`tel:${settings.phoneRaw || '244923456789'}`}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-600/25 cursor-pointer relative z-10 shine-hover"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-600/25 cursor-pointer relative z-10 shine-hover"
             >
               <Phone className="w-4 h-4" />
               <span>Ligar para a Central</span>
             </a>
           </div>
 
-          {/* Card 3: Email Suporte */}
+          {/* Card 4: Email Suporte */}
           <div className="bg-gradient-to-br from-purple-50/60 via-white to-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-purple-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden card-glow-purple">
             <Mail className="icon-watermark wm-purple w-32 h-32" strokeWidth={1.25} />
             <div className="space-y-4 relative z-10">
@@ -243,7 +283,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                 </span>
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-950 group-hover:text-purple-600 transition-colors">Email de Suporte Técnico & Fiscal</h3>
+                <h3 className="text-base font-black text-slate-950 group-hover:text-purple-600 transition-colors">Email & Faturação</h3>
                 <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
                   Envio de ficheiros de log, cópias de segurança, relatórios e esclarecimento de regras fiscais.
                 </p>
@@ -262,7 +302,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
               className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-purple-600/25 cursor-pointer relative z-10 shine-hover"
             >
               <Mail className="w-4 h-4" />
-              <span>Enviar Mensagem por Email</span>
+              <span>Enviar por Email</span>
             </a>
           </div>
 
@@ -462,6 +502,17 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
         </div>
 
       </section>
+
+      {/* Modal de Videochamada de Assistência Remota */}
+      <VideoConferenceModal
+        isOpen={videoModalOpen}
+        onClose={() => setVideoModalOpen(false)}
+        roomName={ticketProtocol ? `kivora-suporte-${ticketProtocol.toLowerCase().replace(/[^a-z0-9]/g, '-')}` : undefined}
+        ticketNumber={ticketProtocol || undefined}
+        userName={nome || 'Cliente Kivora'}
+        userRole="cliente"
+        companyName={nome || 'Empresa Cliente'}
+      />
 
     </div>
   );

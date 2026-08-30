@@ -7,11 +7,12 @@ import {
   RefreshCw, Ban, ShieldCheck, Printer, Calculator,
   ExternalLink, Lock, Check, Share2, Award,
   Unlink, UserPlus, Receipt, ArrowRight, PhoneCall,
-  Wallet, CreditCard, Clock, Save
+  Wallet, CreditCard, Clock, Save, Video
 } from 'lucide-react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { CURRENT_RELEASE, KIVORA_INFO } from '../data/kivoraData';
 import { InvoicePrintModal } from '../components/InvoicePrintModal';
+import { VideoConferenceModal } from '../components/VideoConferenceModal';
 import {
   getStoredSession, clearStoredSession, KivoraUserSession,
   changeUserPassword
@@ -70,6 +71,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const [partnerAccount, setPartnerAccount] = useState<PartnerAccount | null>(null);
   const [policy, setPolicy] = useState<PartnerLicensingPolicy>(DEFAULT_PARTNER_POLICY);
   const [showOfficialCertificatesModal, setShowOfficialCertificatesModal] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -1123,6 +1125,15 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               <Wallet className="w-3.5 h-3.5 text-emerald-600" />
               <span>Wallet: {fmt(walletBalance)} Kz</span>
               <span className="text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded font-black">+ Recarga</span>
+            </button>
+
+            <button
+              onClick={() => setShowVideoModal(true)}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl text-xs font-bold text-blue-800 transition-colors cursor-pointer"
+              title="Entrar em videochamada de suporte com a equipa Kivora"
+            >
+              <Video className="w-3.5 h-3.5 text-blue-600" />
+              <span>Apoio em Vídeo</span>
             </button>
 
             <button
@@ -3446,6 +3457,16 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
           onClose={() => setShowOfficialCertificatesModal(false)}
         />
       )}
+
+      {/* Modal de Videochamada de Apoio Remoto para Parceiros */}
+      <VideoConferenceModal
+        isOpen={showVideoModal}
+        onClose={() => setShowVideoModal(false)}
+        roomName={`kivora-parceiro-${partnerCode.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+        userName={partnerName}
+        userRole="parceiro"
+        companyName={partnerName}
+      />
 
     </div>
   );

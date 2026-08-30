@@ -3,11 +3,13 @@ import {
   LayoutDashboard, Key, Download, Cloud, FileText,
   Headphones, Building2, LogOut, Monitor, Copy,
   CheckCircle2, ShieldCheck, Loader2, Send, Menu, X,
-  MessageSquare, Receipt, Printer, AlertTriangle, Ban
+  MessageSquare, Receipt, Printer, AlertTriangle, Ban,
+  Video
 } from 'lucide-react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { CURRENT_RELEASE, KIVORA_INFO } from '../data/kivoraData';
 import { InvoicePrintModal } from '../components/InvoicePrintModal';
+import { VideoConferenceModal } from '../components/VideoConferenceModal';
 import { getStoredSession, clearStoredSession, KivoraUserSession } from '../admin/services/authService';
 import { useLicenses } from '../admin/hooks/useFirebase';
 import { formatLicenseDate, getPlanLabel } from '../admin/services/licenseService';
@@ -38,6 +40,9 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
   // Modal de Fatura / Recibo
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<KivoraLicense | null>(null);
+
+  // Modal de Videochamada de Assistência Remota
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
 
   // Tickets do Cliente em Tempo Real via supportService
   const [myTickets, setMyTickets] = useState<SupportTicket[]>([]);
@@ -794,11 +799,47 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
           {/* SECTION: SUPORTE TÉCNICO */}
           {activeSection === 'suporte' && (
             <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-black text-slate-900">Central de Assistência Técnica</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Converse diretamente com os engenheiros de suporte da Kivora ou com o seu parceiro credenciado.
-                </p>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-black text-slate-900">Central de Assistência Técnica</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Converse diretamente com os engenheiros de suporte da Kivora ou com o seu parceiro credenciado.
+                  </p>
+                </div>
+
+                {/* Botão de Destaque: Videochamada de Apoio Remoto */}
+                <button
+                  onClick={() => setVideoModalOpen(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-2xl flex items-center gap-2 shadow-md shadow-blue-600/20 transition-all cursor-pointer hover:scale-[1.02]"
+                >
+                  <Video className="w-4 h-4" />
+                  <span>Iniciar Videochamada com Técnico</span>
+                </button>
+              </div>
+
+              {/* Banner Rápido de Assistência por Vídeo */}
+              <div className="p-4 bg-gradient-to-r from-blue-900 to-slate-900 text-white rounded-3xl border border-blue-800/60 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 shrink-0">
+                    <Video className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <span>Assistência Remota em Direto (Google Meet / Jitsi HD)</span>
+                      <span className="bg-emerald-500/20 text-emerald-300 text-[10px] px-2 py-0.5 rounded-full font-bold">Grátis</span>
+                    </h4>
+                    <p className="text-[11px] text-slate-300 mt-0.5">
+                      Partilhe o seu ecrã para resolver dúvidas fiscais ou de hardware sem necessidade de deslocação física.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setVideoModalOpen(true)}
+                  className="bg-white hover:bg-slate-100 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+                >
+                  Abrir Sala de Vídeo
+                </button>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -926,7 +967,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                 <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col h-[560px] overflow-hidden">
                   {selectedTicket ? (
                     <>
-                      <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                      <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between flex-wrap gap-2">
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-mono text-xs font-black text-slate-900">{selectedTicket.ticket_number}</span>
@@ -938,13 +979,23 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                           </p>
                         </div>
 
-                        <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                          selectedTicket.status === 'resolved' ? 'bg-emerald-100 text-emerald-800' :
-                          selectedTicket.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                          'bg-amber-100 text-amber-800'
-                        }`}>
-                          {selectedTicket.status === 'resolved' ? 'Resolvido' : selectedTicket.status === 'in_progress' ? 'Em Atendimento' : 'Aberto'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setVideoModalOpen(true)}
+                            className="bg-blue-600/10 hover:bg-blue-600/20 text-blue-600 border border-blue-200 text-[11px] font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <Video className="w-3.5 h-3.5" />
+                            <span>Entrar em Vídeo</span>
+                          </button>
+
+                          <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
+                            selectedTicket.status === 'resolved' ? 'bg-emerald-100 text-emerald-800' :
+                            selectedTicket.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                            'bg-amber-100 text-amber-800'
+                          }`}>
+                            {selectedTicket.status === 'resolved' ? 'Resolvido' : selectedTicket.status === 'in_progress' ? 'Em Atendimento' : 'Aberto'}
+                          </span>
+                        </div>
                       </div>
 
                       {/* Thread de Mensagens */}
@@ -1035,13 +1086,25 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
         </main>
       </div>
 
-      {/* Modal de Impressão de Fatura / Recibo A4 */}
-      <InvoicePrintModal
-        isOpen={invoiceModalOpen}
-        onClose={() => setInvoiceModalOpen(false)}
-        license={selectedInvoice}
-      />
+      {/* Modal de Impressão de Fatura */}
+      {selectedInvoice && (
+        <InvoicePrintModal
+          isOpen={invoiceModalOpen}
+          onClose={() => setInvoiceModalOpen(false)}
+          license={selectedInvoice}
+        />
+      )}
 
+      {/* Modal de Videochamada de Assistência Remota */}
+      <VideoConferenceModal
+        isOpen={videoModalOpen}
+        onClose={() => setVideoModalOpen(false)}
+        roomName={selectedTicket ? selectedTicket.id : undefined}
+        ticketNumber={selectedTicket?.ticket_number}
+        userName={clientLicense.company_name}
+        userRole="cliente"
+        companyName={clientLicense.company_name}
+      />
     </div>
   );
 };
