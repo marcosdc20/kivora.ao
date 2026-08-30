@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { usePortalTrackpadScroll } from '../hooks/usePortalTrackpadScroll';
 import {
   LayoutDashboard, Users, Key, DollarSign, Package,
   Headphones, LogOut, Plus, Copy, CheckCircle2,
@@ -78,6 +79,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const [policy, setPolicy] = useState<PartnerLicensingPolicy>(DEFAULT_PARTNER_POLICY);
   const [showOfficialCertificatesModal, setShowOfficialCertificatesModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Hook de Rolagem de Touchpad / 2 Dedos
+  const mainScrollRef = useRef<HTMLElement | null>(null);
+  usePortalTrackpadScroll(mainScrollRef);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -1165,7 +1170,11 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         </header>
 
         {/* Content Scrollable */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 p-4 sm:p-6 lg:p-8 space-y-6 focus:outline-none">
+        <main
+          ref={mainScrollRef}
+          tabIndex={0}
+          className="portal-scroll-container flex-1 overflow-y-auto overflow-x-hidden min-h-0 p-4 sm:p-6 lg:p-8 space-y-6 focus:outline-none"
+        >
 
           {/* SECTION: DASHBOARD */}
           {activeSection === 'dashboard' && (

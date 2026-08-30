@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { usePortalTrackpadScroll } from '../hooks/usePortalTrackpadScroll';
 import {
   LayoutDashboard, Key, Download, Cloud, FileText,
   Headphones, Building2, LogOut, Monitor, Copy,
@@ -42,6 +43,10 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Hook de Rolagem de Touchpad / 2 Dedos
+  const mainScrollRef = useRef<HTMLElement | null>(null);
+  usePortalTrackpadScroll(mainScrollRef);
 
   // Modal de Fatura / Recibo
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
@@ -459,7 +464,11 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
         </header>
 
         {/* Dynamic Content */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 p-4 sm:p-6 lg:p-8 space-y-6 focus:outline-none">
+        <main
+          ref={mainScrollRef}
+          tabIndex={0}
+          className="portal-scroll-container flex-1 overflow-y-auto overflow-x-hidden min-h-0 p-4 sm:p-6 lg:p-8 space-y-6 focus:outline-none"
+        >
 
           {/* SECTION: DASHBOARD */}
           {activeSection === 'dashboard' && (

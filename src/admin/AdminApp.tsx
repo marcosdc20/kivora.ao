@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { usePortalTrackpadScroll } from '../hooks/usePortalTrackpadScroll';
 import { AdminSidebar } from './AdminComponents';
 import { AdminDashboard } from './AdminDashboard';
 import { AdminEmpresas, AdminEmpresaDetalhe } from './AdminEmpresas';
@@ -128,6 +129,10 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
   const [activeSection, setActiveSection] = useState<AdminSection>('licencas');
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // Hook de Rolagem de Touchpad / 2 Dedos
+  const mainScrollRef = useRef<HTMLElement | null>(null);
+  usePortalTrackpadScroll(mainScrollRef);
 
   if (!authenticated) {
     return (
@@ -303,7 +308,11 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
         </div>
 
         {/* Section Main Scroll Container */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 w-full min-w-0 bg-slate-50 focus:outline-none">
+        <main
+          ref={mainScrollRef}
+          tabIndex={0}
+          className="portal-scroll-container flex-1 overflow-y-auto overflow-x-hidden min-h-0 w-full min-w-0 bg-slate-50 focus:outline-none"
+        >
           {renderSection()}
         </main>
       </div>

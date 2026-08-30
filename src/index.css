@@ -17,6 +17,9 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     letter-spacing: -0.011em;
+    height: 100%;
+    min-height: 100%;
+    touch-action: pan-y;
   }
 
   body {
@@ -25,6 +28,15 @@
     font-family: 'Satoshi', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 0.9375rem; /* 15px */
     line-height: 1.6;
+    height: 100%;
+    min-height: 100%;
+    touch-action: pan-y;
+  }
+
+  #root {
+    height: 100%;
+    min-height: 100%;
+    touch-action: pan-y;
   }
 
   ::selection {
@@ -878,10 +890,38 @@
   box-shadow: 0 16px 40px -8px rgba(15,23,42,0.12);
 }
 
-/* ── Stats fade-in animation ── */
-@keyframes statsFadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
 .stats-item { animation: statsFadeIn 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* ================================================================
+   TOUCHPAD & TRACKPAD GESTURE / TWO-FINGER SCROLL OPTIMIZATIONS
+   ================================================================ */
+.portal-scroll-container {
+  touch-action: pan-y !important;
+  overscroll-behavior-y: contain !important;
+  overscroll-behavior-x: none !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-gutter: stable;
+  scroll-behavior: smooth;
+}
+
+/* Garante que elementos filhos no painel não bloqueiem o arraste de 2 dedos no touchpad */
+.portal-scroll-container * {
+  touch-action: pan-y;
+}
+
+/* Scrollbar fluida para o painel */
+.portal-scroll-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.portal-scroll-container::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.5);
+}
+.portal-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 9999px;
+}
+.portal-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.8);
+}
 

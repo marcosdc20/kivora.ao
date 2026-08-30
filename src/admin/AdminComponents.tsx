@@ -140,7 +140,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <aside className="w-68 h-full flex flex-col bg-slate-950 border-r border-slate-800/80 overflow-y-auto flex-shrink-0 select-none">
+    <aside className="portal-scroll-container w-68 h-full flex flex-col bg-slate-950 border-r border-slate-800/80 overflow-y-auto flex-shrink-0 select-none">
       {/* Header Corporativo Executivo */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80 bg-slate-950/60 sticky top-0 z-10 backdrop-blur-sm">
         <div className="flex items-center gap-3">
