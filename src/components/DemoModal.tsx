@@ -69,9 +69,13 @@ export const DemoModal: React.FC<DemoModalProps> = ({
     try {
       await addDoc(collection(db, 'leads_demonstracao'), {
         companyName: formData.companyName,
+        empresa: formData.companyName,
         nif: formData.nif,
         contactName: formData.contactName,
+        name: formData.contactName,
+        nome: formData.contactName,
         phone: formData.phone,
+        telefone: formData.phone,
         email: formData.email,
         businessSector: formData.businessSector,
         storesCount: formData.storesCount,

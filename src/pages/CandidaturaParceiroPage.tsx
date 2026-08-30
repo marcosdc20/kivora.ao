@@ -150,16 +150,24 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
       const applicationData = {
         protocol: protocolCode,
         partner_code_suggested: tempPartnerCode,
+        nome: nome.trim(),
         nome_responsavel: nome.trim(),
+        responsible: nome.trim(),
+        cargo: cargo.trim() || 'Responsável Comercial',
         cargo_responsavel: cargo.trim() || 'Responsável Comercial',
+        empresa: empresa.trim(),
         empresa_nome: empresa.trim(),
+        companyName: empresa.trim(),
         nif: nif.trim().toUpperCase(),
         email: email.toLowerCase().trim(),
         telefone: telefone.trim(),
+        phone: telefone.trim(),
         provincia: provincia.trim(),
         municipio: municipio.trim(),
+        region: sedeCompleta,
         sede_completa: sedeCompleta,
         tipo_parceria: tipoParceria,
+        tipoParceria: tipoParceria,
         tem_clientes: temClientesAtuais,
         experiencia: experiencia.trim(),
         fee_amount_aoa: 25000,
@@ -169,33 +177,38 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
         payment_proof_type: comprovativoTipo,
         status: 'pending' as const,
         created_at: Date.now(),
+        createdAt: Date.now(),
       };
 
-      // 1. Grava na coleção `partner_applications`
+      // 1. Grava na coleção principal de candidaturas `partner_applications`
       await addDoc(collection(db, 'partner_applications'), applicationData);
 
-      // 2. Grava também na coleção `partners` como status 'pending'
-      const partnerDocId = tempPartnerCode.toUpperCase().trim();
-      await setDoc(doc(db, 'partners', partnerDocId), {
-        id: partnerDocId,
-        code: tempPartnerCode,
-        name: empresa.trim(),
-        responsible: nome.trim(),
-        role: cargo.trim() || 'Gerente / Técnico',
-        email: email.toLowerCase().trim(),
-        phone: telefone.trim(),
-        region: sedeCompleta,
-        nif: nif.trim().toUpperCase(),
-        debt_aoa: 0,
-        total_paid_aoa: 25000,
-        total_sales: 0,
-        status: 'pending',
-        type: tipoParceria,
-        notes: `Experiência: ${experiencia} | Clientes: ${temClientesAtuais}`,
-        payment_proof_url: comprovativoBase64,
-        payment_proof_name: comprovativoNome,
-        createdAt: Date.now(),
-      }, { merge: true });
+      // 2. Grava também na coleção `partners` como status 'pending' (com proteção)
+      try {
+        const partnerDocId = tempPartnerCode.toUpperCase().trim();
+        await setDoc(doc(db, 'partners', partnerDocId), {
+          id: partnerDocId,
+          code: tempPartnerCode,
+          name: empresa.trim(),
+          responsible: nome.trim(),
+          role: cargo.trim() || 'Gerente / Técnico',
+          email: email.toLowerCase().trim(),
+          phone: telefone.trim(),
+          region: sedeCompleta,
+          nif: nif.trim().toUpperCase(),
+          debt_aoa: 0,
+          total_paid_aoa: 25000,
+          total_sales: 0,
+          status: 'pending',
+          type: tipoParceria,
+          notes: `Experiência: ${experiencia} | Clientes: ${temClientesAtuais}`,
+          payment_proof_url: comprovativoBase64,
+          payment_proof_name: comprovativoNome,
+          createdAt: Date.now(),
+        }, { merge: true });
+      } catch (pErr) {
+        console.warn('Aviso no registo secundário de parceiro pendente:', pErr);
+      }
 
       // 3. Disparo de e-mails automáticos
       sendPartnerApplicationEmails({

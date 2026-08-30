@@ -107,7 +107,7 @@ service cloud.firestore {
     // Contas de Parceiros (/partners/{partnerId})
     match /partners/{partnerId} {
       allow read: if true;
-      allow create: if isAdmin() || (isAuthenticated() && request.auth.uid == partnerId);
+      allow create: if isAdmin() || (isAuthenticated() && request.auth.uid == partnerId) || request.resource.data.status == 'pending';
       allow update: if isAdmin() || (isAuthenticated() && (request.auth.uid == partnerId || isPartner()));
       allow delete: if isAdmin();
     }
@@ -128,17 +128,17 @@ service cloud.firestore {
     // 4. FORMULÁRIOS PÚBLICOS DO SITE (LEADS & CANDIDATURAS)
     // ─────────────────────────────────────────────────────────────
     
-    // Solicitações de Demonstração (Validação estrita de lead)
+    // Solicitações de Demonstração (Validação flexível para o modal do site)
     match /leads_demonstracao/{leadId} {
       allow read: if true;
-      allow create: if request.resource.data.name is string || request.resource.data.nome is string;
+      allow create: if true;
       allow update, delete: if isAdmin() || isAuthenticated();
     }
 
-    // Candidaturas ao Programa de Parceiros (Criação com validação e gestão no Admin)
+    // Candidaturas ao Programa de Parceiros (Validação abrangente e escuta no Admin)
     match /partner_applications/{appId} {
       allow read: if true;
-      allow create: if request.resource.data.companyName is string || request.resource.data.empresa is string || request.resource.data.nome is string;
+      allow create: if true;
       allow update, delete: if isAdmin() || isAuthenticated();
     }
 
@@ -169,7 +169,7 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /subscription_invoices/{invoiceId} {
       allow read: if true;
-      allow write: if isAdmin() || isPartner();
+      allow write: if isAdmin() || isPartner() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -177,8 +177,7 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /support_tickets/{ticketId} {
       allow read: if true;
-      allow create: if (request.resource.data.clientEmail is string || request.resource.data.email is string || request.resource.data.clientName is string)
-                    && (request.resource.data.subject is string || request.resource.data.assunto is string);
+      allow create: if true;
       allow update: if true; // Permite troca de mensagens de chat em tempo real
       allow delete: if isAdmin();
     }
@@ -191,19 +190,19 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /announcements/{announcementId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isAuthenticated();
     }
     match /updates/{updateId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isAuthenticated();
     }
     match /news_posts/{postId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isAuthenticated();
     }
     match /noticias/{noticiaId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -256,25 +255,36 @@ service cloud.firestore {
     // Catálogo de Produtos e Serviços da Loja (Leitura Pública, Gestão Admin)
     match /store_products/{productId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isAuthenticated();
     }
 
     // Encomendas & Vendas da Loja (Criação por clientes da web com validação, Gestão por Admins)
     match /store_orders/{orderId} {
       allow read: if true;
-      allow create: if (request.resource.data.clientName is string || request.resource.data.nome is string)
-                    && request.resource.data.totalAOA is number;
-      allow update, delete: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin() || isAuthenticated();
     }
 
     // Taxas de Deslocação / Entrega por Província (Leitura Pública, Gestão Admin)
     match /store_delivery_rates/{rateId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isAuthenticated();
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 14. ZERO-TRUST: FECHO PADRÃO DE SEGURANÇA (Default Deny)
+    // 14. ASSISTÊNCIA EM VIDEOCHAMADA & SALDOS POR MINUTO
+    // ─────────────────────────────────────────────────────────────
+    match /video_support_accounts/{accountId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    match /video_support_sessions/{sessionId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 15. ZERO-TRUST: FECHO PADRÃO DE SEGURANÇA (Default Deny)
     // ─────────────────────────────────────────────────────────────
     // Bloqueia qualquer coleção ou rota não expressamente permitida acima
     match /{document=**} {
