@@ -319,19 +319,25 @@ interface TopbarProps {
 
 export const AdminTopbar: React.FC<TopbarProps> = ({ title, subtitle, onMenuToggle, actions }) => {
   return (
-    <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 bg-white border-b border-slate-200/80 flex-shrink-0 w-full">
-      <div className="flex items-center gap-3">
-        {onMenuToggle && (
-          <button onClick={onMenuToggle} className="lg:hidden text-slate-500 hover:text-slate-900">
-            <Menu className="w-5 h-5" />
-          </button>
-        )}
-        <div>
-          <h1 className="text-lg font-black text-slate-950 tracking-tight">{title}</h1>
-          {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
+    <div className="bg-white border-b border-slate-200/90 px-4 sm:px-6 lg:px-8 py-5 flex-shrink-0 w-full transition-all">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          {onMenuToggle && (
+            <button
+              onClick={onMenuToggle}
+              className="lg:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+              title="Abrir Menu Lateral"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
+          <div className="space-y-0.5">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">{title}</h1>
+            {subtitle && <p className="text-xs sm:text-sm text-slate-500 font-medium">{subtitle}</p>}
+          </div>
         </div>
+        {actions && <div className="flex items-center gap-2.5 flex-wrap">{actions}</div>}
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
   );
 };
@@ -387,15 +393,17 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, sub, subColor 
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-slate-300 hover:shadow-sm transition-all">
-      <div className="flex items-start justify-between mb-3">
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</p>
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${iconBg}`}>
-          {icon}
+    <div className="bg-white rounded-2xl border border-slate-200/90 p-5 hover:border-slate-300 hover:shadow-xs transition-all flex flex-col justify-between">
+      <div>
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">{label}</p>
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
+            {icon}
+          </div>
         </div>
+        <p className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight font-mono">{value}</p>
       </div>
-      <p className="text-2xl font-black text-slate-950 tracking-tight">{value}</p>
-      {sub && <p className={`text-xs mt-1 font-semibold ${subColors[subColor]}`}>{sub}</p>}
+      {sub && <p className={`text-xs mt-2 font-semibold ${subColors[subColor]}`}>{sub}</p>}
     </div>
   );
 };

@@ -18,7 +18,7 @@ import { AdminLoja } from './AdminLoja';
 import { AdminFirebaseMonitor } from './AdminFirebaseMonitor';
 import { AdminSection } from './types';
 import { Empresa } from './types';
-import { ArrowLeft, Lock, Menu } from 'lucide-react';
+import { ArrowLeft, Lock, Menu, LogOut } from 'lucide-react';
 
 import { getStoredSession, loginUser, logoutUser, KivoraUserSession } from './services/authService';
 
@@ -117,6 +117,27 @@ const AdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
 // ======================================================
 // MAIN ADMIN APP
 // ======================================================
+const SECTION_METAS: Record<AdminSection, { title: string; category: string }> = {
+  'dashboard': { title: 'Dashboard Executivo', category: 'Visão Geral' },
+  'empresas': { title: 'Empresas & Clientes', category: 'Operações' },
+  'empresa-detalhe': { title: 'Ficha da Empresa', category: 'Operações' },
+  'licencas': { title: 'Licenças de Software', category: 'Licenciamento' },
+  'licenca-criar': { title: 'Emitir Nova Licença', category: 'Licenciamento' },
+  'instalacoes': { title: 'Instalações & Versões', category: 'Software' },
+  'loja': { title: 'Loja Hardware & POS', category: 'Comercial' },
+  'parceiros': { title: 'Rede de Parceiros', category: 'Canais de Venda' },
+  'parceiros-candidaturas': { title: 'Candidaturas a Parceiro', category: 'Canais de Venda' },
+  'pagamentos': { title: 'Faturas & Pagamentos', category: 'Financeiro' },
+  'planos': { title: 'Planos & Preços', category: 'Financeiro' },
+  'suporte': { title: 'Central de Suporte & SLA', category: 'Atendimento' },
+  'relatorios': { title: 'Relatórios & Métricas', category: 'Business Intelligence' },
+  'comunicacao': { title: 'Comunicação & Avisos', category: 'Atendimento' },
+  'utilizadores': { title: 'Utilizadores Administrativos', category: 'Segurança' },
+  'auditoria': { title: 'Auditoria & Logs AGT', category: 'Conformidade Fiscal' },
+  'firebase-monitor': { title: 'Monitorização Firebase & Cloud', category: 'Infraestrutura' },
+  'configuracoes': { title: 'Definições do Sistema', category: 'Definições' },
+};
+
 interface AdminAppProps {
   onExitAdmin: () => void;
 }
@@ -127,7 +148,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
     const s = getStoredSession();
     return s?.role === 'admin';
   });
-  const [activeSection, setActiveSection] = useState<AdminSection>('licencas');
+  const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -135,29 +156,25 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
   const mainScrollRef = useRef<HTMLElement | null>(null);
   usePortalTrackpadScroll(mainScrollRef);
 
-  if (!authenticated) {
-    return (
-      <div>
-        <button
-          onClick={onExitAdmin}
-          className="fixed top-4 left-4 z-50 flex items-center gap-1.5 text-slate-400 hover:text-white text-xs font-semibold bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-xl transition-all shadow-md"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2} />
-          Voltar ao Site
-        </button>
-        <AdminLogin onLogin={(sess) => {
-          setSession(sess);
-          setAuthenticated(true);
-        }} />
-      </div>
-    );
-  }
+  React.useEffect(() => {
+    const s = getStoredSession();
+    if (s && s.role === 'admin') {
+      setSession(s);
+      setAuthenticated(true);
+    }
+  }, []);
 
-  const navigate = (section: AdminSection) => {
+  const navigate = (section: AdminSection, extra?: any) => {
+    if (section === 'empresa-detalhe' && extra) {
+      setSelectedEmpresa(extra);
+    }
     setActiveSection(section);
     setMobileSidebarOpen(false);
-    if (section !== 'empresa-detalhe') setSelectedEmpresa(null);
   };
+
+  if (!authenticated) {
+    return <AdminLogin onLogin={(s) => { setSession(s); setAuthenticated(true); }} />;
+  }
 
   const renderSection = () => {
     switch (activeSection) {
@@ -228,7 +245,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
         return <AdminFirebaseMonitor />;
 
       default:
-        return <AdminDashboard />;
+        return <AdminDashboard onNavigate={navigate} />;
     }
   };
 
@@ -273,43 +290,70 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden w-full min-w-0 bg-slate-50">
-        {/* Back to site & Session Header */}
-        <div className="flex items-center justify-between bg-slate-950 px-3 sm:px-4 py-2 shrink-0 border-b border-slate-800">
-          <div className="flex items-center gap-2">
+        {/* Modern Unified SaaS Topbar Header */}
+        <header className="h-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/90 flex items-center justify-between shrink-0 shadow-2xs z-20 sticky top-0">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              className="lg:hidden flex items-center justify-center p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer"
+              className="lg:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer shrink-0"
               title="Abrir Menu Lateral"
             >
-              <Menu className="w-4 h-4" />
+              <Menu className="w-5 h-5" />
             </button>
-            <button
-              onClick={onExitAdmin}
-              className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-[11px] font-semibold transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-3 h-3" strokeWidth={2} />
-              <span className="hidden sm:inline">Voltar ao Site Público</span>
-              <span className="sm:hidden">Site</span>
-            </button>
+
+            {/* Breadcrumb Navigation */}
+            <div className="flex items-center gap-2 text-xs truncate">
+              <span className="text-slate-400 font-semibold hidden md:inline">Kivora ERP</span>
+              <span className="text-slate-300 hidden md:inline">/</span>
+              <span className="text-slate-500 font-medium hidden sm:inline">{SECTION_METAS[activeSection]?.category || 'Administração'}</span>
+              <span className="text-slate-300 hidden sm:inline">/</span>
+              <span className="text-slate-900 font-black truncate">{SECTION_METAS[activeSection]?.title || 'Painel'}</span>
+            </div>
+
+            {/* AGT Certification Live Pill */}
+            <div className="hidden xl:flex items-center gap-1.5 ml-2 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Validação Fiscal AGT 2026</span>
+            </div>
           </div>
-          
-          <div className="flex items-center gap-2 sm:gap-3">
-            <span className="text-slate-400 text-[10px] sm:text-[11px] truncate max-w-[130px] sm:max-w-[220px]">
-              {session?.email || 'admin@kivora.ao'}
-            </span>
-            <button
-              onClick={async () => {
-                await logoutUser();
-                setAuthenticated(false);
-                setSession(null);
-              }}
-              className="text-red-400 hover:text-red-300 text-[10px] sm:text-[11px] font-medium cursor-pointer"
-            >
-              Terminar Sessão
-            </button>
-            <span className="text-slate-600 text-[10px] font-mono border-l border-slate-800 pl-2 sm:pl-3 hidden md:inline">KIVORA ADMIN</span>
+
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Voltar ao Site Público */}
+            {onExitAdmin && (
+              <button
+                onClick={onExitAdmin}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all border border-slate-200/80 cursor-pointer shadow-2xs"
+                title="Acessar o site público Kivora"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Ver Site Público</span>
+                <span className="sm:hidden">Site</span>
+              </button>
+            )}
+
+            {/* User Profile Pill & Logout */}
+            <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xs flex items-center justify-center shadow-xs">
+                {session?.email ? session.email.slice(0, 2).toUpperCase() : 'AD'}
+              </div>
+
+              <div className="hidden md:flex flex-col text-left leading-tight">
+                <span className="text-xs font-bold text-slate-800 truncate max-w-[150px]">
+                  {session?.email || 'admin@kivora.ao'}
+                </span>
+                <span className="text-[10px] font-bold text-blue-600">SuperAdmin</span>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer ml-1"
+                title="Terminar Sessão Segura"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-        </div>
+        </header>
 
         {/* Section Main Scroll Container */}
         <main
