@@ -302,7 +302,7 @@ export const AdminSuporte: React.FC = () => {
   const convertedLeadsCount = leads.filter(l => l.status === 'convertido').length;
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50 flex flex-col w-full min-w-0 font-sans">
+    <div className="w-full min-w-0 flex flex-col font-sans pb-12">
       <AdminTopbar
         title="Central de Suporte, Apoio & Leads de Demonstração"
         subtitle="Gerenciamento unificado de tickets de clientes, suporte a parceiros e pedidos de demonstração recebidos do site."

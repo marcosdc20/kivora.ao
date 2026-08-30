@@ -579,7 +579,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50 font-sans">
+    <div className="w-full min-w-0 flex flex-col font-sans pb-12">
       <AdminTopbar
         title="Rede de Parceiros & Políticas de Licenciamento"
         subtitle="Gestão de quotas de crédito, faturamento de atacado, carteiras pré-pagas e homologações"

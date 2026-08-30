@@ -230,7 +230,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div className="flex h-screen h-[100dvh] overflow-hidden bg-slate-50 text-slate-900" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex h-full flex-shrink-0">
         <AdminSidebar
@@ -263,7 +263,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden w-full min-w-0 bg-slate-50">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden w-full min-w-0 bg-slate-50">
         {/* Back to site & Session Header */}
         <div className="flex items-center justify-between bg-slate-950 px-3 sm:px-4 py-2 shrink-0 border-b border-slate-800">
           <div className="flex items-center gap-2">
@@ -302,10 +302,10 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
           </div>
         </div>
 
-        {/* Section */}
-        <div className="flex-1 overflow-y-auto flex flex-col min-w-0 bg-slate-50">
+        {/* Section Main Scroll Container */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 w-full min-w-0 bg-slate-50 focus:outline-none">
           {renderSection()}
-        </div>
+        </main>
       </div>
     </div>
   );

@@ -46,7 +46,7 @@ export const AdminInstalacoes: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50">
+    <div className="w-full min-w-0 flex flex-col font-sans pb-12">
       <AdminTopbar
         title="Instalações & Equipamentos Ativos"
         subtitle={`${installations.length} computadores vinculados com Hardware ID no Firebase`}

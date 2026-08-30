@@ -217,7 +217,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50">
+    <div className="w-full min-w-0 flex flex-col font-sans pb-12">
       <AdminTopbar
         title="Gestão de Licenças (Firebase Cloud)"
         subtitle="Emissão, aumento de terminais e controlo em tempo real de licenças do software Kivora ERP"
@@ -801,7 +801,7 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
 
   if (createdLicense) {
     return (
-      <div className="flex-1 overflow-y-auto bg-slate-50">
+      <div className="w-full min-w-0 flex flex-col font-sans pb-12">
         <AdminTopbar title="Licença Emitida no Firebase" />
         <div className="p-6 max-w-xl mx-auto pt-10 text-center space-y-6 animate-fadeIn">
           <div className="w-16 h-16 bg-emerald-100 rounded-3xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
@@ -868,7 +868,7 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50">
+    <div className="w-full min-w-0 flex flex-col font-sans pb-12">
       <AdminTopbar
         title="Emitir Nova Licença Kivora"
         subtitle="Geração de chave oficial KVRA e sincronização direta no Firebase Firestore"

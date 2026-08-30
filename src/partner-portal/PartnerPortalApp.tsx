@@ -902,7 +902,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 font-sans selection:bg-emerald-600 selection:text-white">
+    <div className="flex h-screen h-[100dvh] overflow-hidden bg-slate-50 font-sans selection:bg-emerald-600 selection:text-white">
 
       {/* Toast Flutuante de Feedback */}
       {toastMessage && (
@@ -1080,7 +1080,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden w-full">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden w-full">
 
         {/* Top Header */}
         <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between shrink-0 shadow-xs">
@@ -1147,7 +1147,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         </header>
 
         {/* Content Scrollable */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 p-4 sm:p-6 lg:p-8 space-y-6 focus:outline-none">
 
           {/* SECTION: DASHBOARD */}
           {activeSection === 'dashboard' && (

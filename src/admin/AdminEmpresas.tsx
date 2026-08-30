@@ -111,7 +111,7 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50">
+    <div className="w-full min-w-0 flex flex-col font-sans pb-12">
       <AdminTopbar
         title="Gestão de Empresas & Clientes"
         subtitle={`${mappedEmpresas.length} empresas registadas no Firebase Firestore`}
@@ -396,7 +396,7 @@ export const AdminEmpresaDetalhe: React.FC<EmpresaDetalheProps> = ({ empresa, on
   }
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50">
+    <div className="w-full min-w-0 flex flex-col font-sans pb-12">
       <AdminTopbar
         title={empresa.nome}
         subtitle={`NIF: ${empresa.nif} • ${empresa.provincia}`}

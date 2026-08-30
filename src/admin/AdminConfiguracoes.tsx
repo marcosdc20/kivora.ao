@@ -339,7 +339,7 @@ export const AdminConfiguracoes: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50 font-sans pb-12">
+    <div className="w-full min-w-0 flex flex-col font-sans pb-12">
       <AdminTopbar
         title="Configurações do Sistema & Empresa"
         subtitle="Gerencie manualmente números de contacto, links de download, GitHub, IBANs e dados da AGT"

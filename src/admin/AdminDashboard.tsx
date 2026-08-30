@@ -126,7 +126,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
   }
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50 flex flex-col w-full min-w-0 font-sans">
+    <div className="w-full min-w-0 flex flex-col font-sans pb-12">
       <AdminTopbar
         title="Painel de Gestão & Controlo"
         subtitle="Métricas em tempo real de licenças, clientes, parceiros e faturamento"

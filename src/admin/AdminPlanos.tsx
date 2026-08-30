@@ -156,7 +156,7 @@ export const AdminPlanos: React.FC = () => {
   const totalTenants = modules.reduce((acc, m) => acc + m.active_tenants, 0);
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50">
+    <div className="w-full min-w-0 flex flex-col font-sans pb-12">
       <AdminTopbar
         title="Catálogo Oficial de Módulos & Produtos Kivora ERP"
         subtitle="Configuração de pacotes, módulos setoriais e preços oficiais em Kwanzas (Kz)"
