@@ -79,13 +79,60 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
     setTimeout(() => setCopiedIban(false), 2000);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const compressImage = (file: File): Promise<{ base64: string; sizeFormatted: string }> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 1280;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            const raw = e.target?.result as string;
+            resolve({ base64: raw, sizeFormatted: `${Math.round(file.size / 1024)} KB` });
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+          const approxBytes = Math.round((compressedBase64.length * 3) / 4);
+          const sizeStr = approxBytes > 1024 * 1024
+            ? `${(approxBytes / (1024 * 1024)).toFixed(1)} MB`
+            : `${Math.round(approxBytes / 1024)} KB`;
+
+          resolve({ base64: compressedBase64, sizeFormatted: sizeStr });
+        };
+        img.onerror = () => reject(new Error('Erro ao processar imagem'));
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Erro ao ler ficheiro'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setComprovativoError(null);
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      setComprovativoError('O ficheiro é demasiado grande. O tamanho máximo permitido é 5 MB.');
+    if (file.size > 10 * 1024 * 1024) {
+      setComprovativoError('O ficheiro original é demasiado grande (> 10 MB).');
       return;
     }
 
@@ -95,24 +142,37 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
       return;
     }
 
-    const sizeFormatted = file.size > 1024 * 1024
-      ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
-      : `${Math.round(file.size / 1024)} KB`;
-
-    setComprovativoNome(file.name);
-    setComprovativoTamanho(sizeFormatted);
-    setComprovativoTipo(file.type);
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setComprovativoBase64(reader.result);
+    if (file.type === 'application/pdf') {
+      if (file.size > 750 * 1024) {
+        setComprovativoError('O documento PDF selecionado excede 750 KB. Por favor comprima o PDF ou utilize uma foto do comprovativo.');
+        return;
       }
-    };
-    reader.onerror = () => {
-      setComprovativoError('Erro ao carregar o ficheiro. Tente novamente.');
-    };
-    reader.readAsDataURL(file);
+      const sizeFormatted = `${Math.round(file.size / 1024)} KB`;
+      setComprovativoNome(file.name);
+      setComprovativoTamanho(sizeFormatted);
+      setComprovativoTipo(file.type);
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setComprovativoBase64(reader.result);
+        }
+      };
+      reader.onerror = () => {
+        setComprovativoError('Erro ao carregar o ficheiro. Tente novamente.');
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setComprovativoNome(file.name);
+      setComprovativoTipo('image/jpeg');
+      try {
+        const { base64, sizeFormatted } = await compressImage(file);
+        setComprovativoBase64(base64);
+        setComprovativoTamanho(sizeFormatted);
+      } catch {
+        setComprovativoError('Erro ao processar imagem do comprovativo. Tente novamente.');
+      }
+    }
   };
 
   const handleRemoveFile = () => {
@@ -155,7 +215,9 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
       const applicationData = {
         protocol: protocolCode,
         partner_code_suggested: tempPartnerCode,
+        name: empresa.trim() || nome.trim(),
         nome: nome.trim(),
+        contact_name: nome.trim(),
         nome_responsavel: nome.trim(),
         responsible: nome.trim(),
         cargo: cargo.trim() || 'Responsável Comercial',
@@ -188,7 +250,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
       // 1. Grava na coleção principal de candidaturas `partner_applications`
       await addDoc(collection(db, 'partner_applications'), applicationData);
 
-      // 3. Disparo de e-mails automáticos
+      // 2. Disparo de e-mails automáticos
       sendPartnerApplicationEmails({
         nome: nome.trim(),
         empresa: empresa.trim(),
@@ -200,7 +262,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
         tipoParceria,
       }).catch((err) => console.warn('Erro ao enviar e-mails de candidatura:', err));
 
-      // 4. Disparo opcional de webhook externo
+      // 3. Disparo opcional de webhook externo
       if (settings.webhookUrl && settings.webhookUrl.startsWith('http')) {
         fetch(settings.webhookUrl, {
           method: 'POST',
@@ -221,13 +283,11 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
         // ignore
       }
     } catch (err: any) {
-      console.error('Erro ao submeter candidatura:', err);
-      setSubmittedProtocol(protocolCode);
-      try {
-        triggerKivoraConfetti();
-      } catch {
-        // ignore
-      }
+      console.error('Erro ao submeter candidatura no Firebase:', err);
+      setError(
+        'Não foi possível registar a candidatura no sistema. Por favor tente novamente ou contacte o suporte Kivora pelo WhatsApp oficial. Motivo: ' +
+          (err?.message || 'Falha de comunicação')
+      );
     } finally {
       setSubmitting(false);
     }

@@ -247,6 +247,7 @@ export interface StoreOrder {
   id: string;
   orderNumber: string;
   clientName: string;
+  customerName?: string;
   clientNif: string;
   clientPhone: string;
   clientEmail?: string;

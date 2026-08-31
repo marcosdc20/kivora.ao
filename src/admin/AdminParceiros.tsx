@@ -80,6 +80,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const [applications, setApplications] = useState<PartnerApplicationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'todos' | 'candidaturas' | 'precos' | 'politicas' | 'extrato_geral'>(initialTab);
+
+  useEffect(() => {
+    if (initialTab) {
+      setTab(initialTab);
+    }
+  }, [initialTab]);
   const [candidaturaFilter, setCandidaturaFilter] = useState<'pendentes' | 'aprovadas' | 'todas'>('pendentes');
   const [search, setSearch] = useState('');
   const [tierFilter, setTierFilter] = useState<string>('todos');

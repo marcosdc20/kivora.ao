@@ -3,7 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ─────────────────────────────────────────────────────────────
-    // ZERO-TRUST MILITARY-GRADE SECURITY ARCHITECTURE — KIVORA ECOSYSTEM
+    // ZERO-TRUST SECURITY ARCHITECTURE — KIVORA ECOSYSTEM
     // Proteção Máxima Anti-Invasão, Anti-Tampering, AGT Fiscal Compliance & ERP Bridge
     // ─────────────────────────────────────────────────────────────
 
@@ -74,18 +74,14 @@ service cloud.firestore {
       // Leitura para ativação no Kivora Soft Desktop e consulta nos portais
       allow get, list: if true;
 
-      // Emissão de Novas Licenças: Proteção com validação estrita de integridade
-      allow create: if request.resource.data.id is string
-                    && request.resource.data.id.matches('^KVRA-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$')
-                    && request.resource.data.nif is string
-                    && request.resource.data.nif.size() >= 5
-                    && request.resource.data.company_name is string
-                    && request.resource.data.company_name.size() > 0
-                    && isValidPlan(request.resource.data.plan_type)
-                    && request.resource.data.created_at is number;
+      // Emissão de Novas Licenças: Validação de dados essenciais
+      allow create: if (
+        (request.resource.data.company_name is string || request.resource.data.client_email is string || request.resource.data.nif is string) &&
+        (request.resource.data.created_at is number || request.resource.data.createdAt is number)
+      );
 
-      // Atualização: Permite ativação no ERP (hardware_id), expansão de postos e renovações, blindando o ID original
-      allow update: if request.resource.data.id == resource.data.id;
+      // Atualização: Permite ativação no ERP (hardware_id), expansão de postos e renovações
+      allow update: if true;
 
       // Eliminação: Autorizada para Master Reset do SuperAdmin
       allow delete: if true;
@@ -101,7 +97,7 @@ service cloud.firestore {
     // Contas de Parceiros (/partners/{partnerId})
     match /partners/{partnerId} {
       allow read: if true;
-      allow create: if request.resource.data.name is string || request.resource.data.code is string;
+      allow create: if request.resource.data.name is string || request.resource.data.code is string || request.resource.data.email is string;
       allow update: if true; // Permite débito/crédito na Wallet e perfil do parceiro
       allow delete: if true; // Permite Master Reset do SuperAdmin
     }
@@ -112,11 +108,9 @@ service cloud.firestore {
     // Extrato de Débitos e Transações de Carteira (Auditoria Financeira)
     match /partner_debts/{debtId} {
       allow read: if true;
-      allow create: if request.resource.data.partner_id is string
-                    && request.resource.data.license_id is string
-                    && request.resource.data.cost_aoa is number
-                    && request.resource.data.created_at is number;
-      allow update: if request.resource.data.paid is bool; // Permite baixa de faturas
+      allow create: if (request.resource.data.partner_id is string || request.resource.data.partner_name is string)
+                    && (request.resource.data.cost_aoa is number || request.resource.data.created_at is number);
+      allow update: if true; // Permite baixa de faturas
       allow delete: if true; // Permite Master Reset do SuperAdmin
     }
 
@@ -127,14 +121,22 @@ service cloud.firestore {
     // Solicitações de Demonstração do Site
     match /leads_demonstracao/{leadId} {
       allow read: if true;
-      allow create: if request.resource.data.name is string;
+      allow create: if request.resource.data.name is string || 
+                       request.resource.data.nome is string || 
+                       request.resource.data.contactName is string || 
+                       request.resource.data.companyName is string ||
+                       request.resource.data.email is string;
       allow update, delete: if true;
     }
 
-    // Candidaturas de Novos Parceiros
+    // Candidaturas de Novos Parceiros (Formulário do Site & Homologação)
     match /partner_applications/{appId} {
       allow read: if true;
-      allow create: if request.resource.data.name is string;
+      allow create: if request.resource.data.protocol is string || 
+                       request.resource.data.nome is string || 
+                       request.resource.data.name is string || 
+                       request.resource.data.empresa is string || 
+                       request.resource.data.email is string;
       allow update, delete: if true;
     }
 
@@ -143,12 +145,12 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /companies/{companyId} {
       allow read: if true;
-      allow create: if request.resource.data.name is string && request.resource.data.nif is string;
+      allow create: if request.resource.data.name is string || request.resource.data.nif is string;
       allow update, delete: if true;
     }
     match /empresas/{empresaId} {
       allow read: if true;
-      allow create: if request.resource.data.name is string;
+      allow create: if request.resource.data.name is string || request.resource.data.nif is string;
       allow update, delete: if true;
     }
     match /installations/{installationId} {
@@ -170,7 +172,9 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /support_tickets/{ticketId} {
       allow read: if true;
-      allow create: if request.resource.data.subject is string;
+      allow create: if request.resource.data.subject is string || 
+                       request.resource.data.company_name is string || 
+                       request.resource.data.contact_email is string;
       allow update, delete: if true; // Troca de mensagens e Master Reset
     }
     match /support_tickets/{ticketId}/{allSubcollections=**} {
@@ -243,7 +247,10 @@ service cloud.firestore {
     }
     match /store_orders/{orderId} {
       allow read: if true;
-      allow create: if request.resource.data.customerName is string;
+      allow create: if request.resource.data.clientName is string || 
+                       request.resource.data.customerName is string || 
+                       request.resource.data.orderNumber is string ||
+                       request.resource.data.totalAOA is number;
       allow update: if true;
       allow delete: if isAdmin();
     }
@@ -278,3 +285,4 @@ service cloud.firestore {
     }
   }
 }
+

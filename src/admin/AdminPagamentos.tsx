@@ -10,6 +10,7 @@ import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import {
   subscribeAllDebts, markDebtsPaid, PartnerDebtEntry
 } from './services/partnerDebtService';
+import { generateLicenseKey } from './services/licenseService';
 
 export interface SubscriptionInvoice {
   id: string;
@@ -141,7 +142,8 @@ export const AdminPagamentos: React.FC = () => {
     e.preventDefault();
     if (!companyName || !amount) return;
 
-    const newInvId = `inv_${Date.now()}`;
+    const licenseKey = generateLicenseKey();
+    const newInvId = licenseKey;
     const newInv: SubscriptionInvoice = {
       id: newInvId,
       invoice_number: `FT-2026/${String(invoices.length + 1).padStart(4, '0')}`,
@@ -157,6 +159,7 @@ export const AdminPagamentos: React.FC = () => {
 
     try {
       await setDoc(doc(db, 'licenses', newInvId), {
+        id: licenseKey,
         company_name: companyName,
         nif: companyNif || '5400000000',
         plan_type: 'annual',
@@ -164,6 +167,7 @@ export const AdminPagamentos: React.FC = () => {
         status: status === 'paid' ? 'active' : 'pending',
         created_at: Date.now(),
         expires_at: Date.now() + 365 * 86400000,
+        notes: `Fatura ${newInv.invoice_number} emitida via Admin`,
       }, { merge: true });
 
       setInvoices([newInv, ...invoices]);

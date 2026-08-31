@@ -183,6 +183,8 @@ export async function createStoreOrder(orderData: Omit<StoreOrder, 'id' | 'order
 
     const newOrder: StoreOrder = {
       ...orderData,
+      clientName: (orderData as any).clientName || (orderData as any).customerName || 'Cliente da Loja',
+      customerName: (orderData as any).customerName || (orderData as any).clientName || 'Cliente da Loja',
       id,
       orderNumber,
       createdAt: timestamp,
