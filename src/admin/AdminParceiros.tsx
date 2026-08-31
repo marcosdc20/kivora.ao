@@ -5,13 +5,13 @@ import {
   Key, MessageSquare, Search, Ban, RotateCcw,
   Tag, TrendingDown, Wallet, Edit2, Save,
   ShieldCheck, Sliders, Download, Award, Mail,
-  FileText, ExternalLink
+  FileText, ExternalLink, Trash2
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
 import { createOrApprovePartnerAccount, setPartnerSuspensionStatus } from './services/authService';
 import { sendPartnerCredentialsEmail } from '../services/siteEmailService';
 import { db } from '../lib/firebase';
-import { collection, onSnapshot, doc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import {
   subscribePartnerPricing, savePartnerPricing, subscribeAllDebts, markDebtsPaid,
   subscribePartnerPolicy, savePartnerPolicy,
@@ -52,6 +52,8 @@ const fmt = (n: number) => n.toLocaleString('pt-AO');
 export interface PartnerApplicationItem {
   id: string;
   nome: string;
+  name?: string;
+  responsible?: string;
   cargo_responsavel?: string;
   empresa_nome?: string;
   empresa?: string;
@@ -114,6 +116,14 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const [topUpAmount, setTopUpAmount] = useState<number>(0);
   const [savingFinancials, setSavingFinancials] = useState(false);
 
+  // Edição Direta do Perfil do Parceiro
+  const [editPartnerName, setEditPartnerName] = useState('');
+  const [editPartnerEmail, setEditPartnerEmail] = useState('');
+  const [editPartnerPhone, setEditPartnerPhone] = useState('');
+  const [editPartnerRegion, setEditPartnerRegion] = useState('');
+  const [editPartnerNif, setEditPartnerNif] = useState('');
+  const [savingPartnerProfile, setSavingPartnerProfile] = useState(false);
+
   const [pricingPlans, setPricingPlans] = useState<PartnerPricingPlan[]>(DEFAULT_PARTNER_PRICING);
   const [editingPricing, setEditingPricing] = useState(false);
   const [pricingDraft, setPricingDraft] = useState<PartnerPricingPlan[]>(DEFAULT_PARTNER_PRICING);
@@ -144,13 +154,15 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
           const tier = (d.tier as any) || 'bronze';
           const defaultSlots = policy.tier_slots[tier as keyof typeof policy.tier_slots] || 2;
 
+          const pName = d.name || d.empresa || d.empresa_nome || d.company_name || d.companyName || d.responsible || d.nome || d.nome_responsavel || d.partner_name || d.client_name;
+
           const item: Partner = {
             id: docSnap.id,
             code: pCode,
-            name: d.name || d.responsible || d.nome_responsavel || 'Parceiro Sem Nome',
+            name: pName || (pCode ? `Parceiro (${pCode})` : 'Parceiro Credenciado'),
             email: d.email || '',
             phone: d.phone || d.telefone || '',
-            region: d.region || d.provincia || 'Luanda',
+            region: d.region || d.provincia || d.sede_completa || 'Luanda, Angola',
             debt_aoa: Number(d.debt_aoa) || 0,
             total_paid_aoa: Number(d.total_paid_aoa) || 0,
             total_sales: Number(d.total_sales) || 0,
@@ -160,6 +172,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             tier,
             status: d.status || 'pending',
             createdAt: Number(d.createdAt) || Number(d.created_at) || Date.now(),
+            nif: d.nif || '',
+            payment_proof_url: d.payment_proof_url || '',
           };
 
           if (!existing) {
@@ -258,17 +272,77 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       setSelectedDebtIds([]);
       setEditTier(selectedPartner.tier || 'bronze');
       setEditCreditSlots(selectedPartner.credit_slots_limit || 2);
+      setEditPartnerName(selectedPartner.name || '');
+      setEditPartnerEmail(selectedPartner.email || '');
+      setEditPartnerPhone(selectedPartner.phone || '');
+      setEditPartnerRegion(selectedPartner.region || 'Luanda, Angola');
+      setEditPartnerNif(selectedPartner.nif || '');
     }
   }, [selectedPartner, allDebts]);
+
+  // Lista de parceiros enriquecida cruzando dados de candidaturas e dívidas para garantir nomes reais
+  const resolvedPartners = React.useMemo(() => {
+    return partners.map(p => {
+      let finalName = p.name;
+      let finalEmail = p.email;
+      let finalPhone = p.phone;
+      let finalRegion = p.region;
+      let finalNif = p.nif;
+
+      const pCode = (p.code || p.id).toUpperCase().trim();
+      const pEmail = (p.email || '').toLowerCase().trim();
+
+      // Procura candidatura correspondente por protocolo, id ou email
+      const matchedApp = applications.find(a => 
+        (a.protocol && a.protocol.toUpperCase().trim() === pCode) ||
+        (a.id && a.id === p.id) ||
+        (pEmail && a.email && a.email.toLowerCase().trim() === pEmail)
+      );
+
+      if (matchedApp) {
+        if (!finalName || finalName === 'Parceiro Sem Nome' || finalName.startsWith('Parceiro (')) {
+          finalName = matchedApp.empresa_nome || matchedApp.empresa || matchedApp.nome || matchedApp.responsible || `Parceiro (${pCode})`;
+        }
+        if (!finalEmail) finalEmail = matchedApp.email;
+        if (!finalPhone) finalPhone = matchedApp.telefone;
+        if (!finalRegion || finalRegion === 'Luanda') finalRegion = matchedApp.sede_completa || matchedApp.region || 'Luanda, Angola';
+        if (!finalNif) finalNif = matchedApp.nif;
+      }
+
+      // Procura em dívidas/licenças emitidas caso ainda não tenha nome
+      if (!finalName || finalName === 'Parceiro Sem Nome' || finalName.startsWith('Parceiro (')) {
+        const matchedDebt = allDebts.find(d => 
+          (d.partner_id && d.partner_id.toUpperCase().trim() === pCode) &&
+          (d.partner_name && d.partner_name !== 'Parceiro Sem Nome')
+        );
+        if (matchedDebt && matchedDebt.partner_name && matchedDebt.partner_name !== 'Parceiro Sem Nome') {
+          finalName = matchedDebt.partner_name;
+        }
+      }
+
+      if (!finalName || finalName === 'Parceiro Sem Nome') {
+        finalName = p.code ? `Parceiro (${p.code})` : 'Parceiro Credenciado';
+      }
+
+      return {
+        ...p,
+        name: finalName,
+        email: finalEmail,
+        phone: finalPhone,
+        region: finalRegion,
+        nif: finalNif,
+      };
+    });
+  }, [partners, applications, allDebts]);
 
   // Combina e deduplica candidaturas do formulário web (`partner_applications`) com registos da coleção `partners`
   const { allApplicationsList, pendingApplicationsList, approvedApplicationsList } = React.useMemo(() => {
     const map = new Map<string, any>();
 
     // Conjunto de parceiros que já estão ATIVOS
-    const activeEmails = new Set(partners.filter(p => p.status === 'active').map(p => (p.email || '').toLowerCase().trim()).filter(Boolean));
-    const activeNifs = new Set(partners.filter(p => p.status === 'active').map(p => (p.nif || '').toLowerCase().trim()).filter(Boolean));
-    const activeCodes = new Set(partners.filter(p => p.status === 'active').map(p => (p.code || '').toLowerCase().trim()).filter(Boolean));
+    const activeEmails = new Set(resolvedPartners.filter(p => p.status === 'active').map(p => (p.email || '').toLowerCase().trim()).filter(Boolean));
+    const activeNifs = new Set(resolvedPartners.filter(p => p.status === 'active').map(p => (p.nif || '').toLowerCase().trim()).filter(Boolean));
+    const activeCodes = new Set(resolvedPartners.filter(p => p.status === 'active').map(p => (p.code || '').toLowerCase().trim()).filter(Boolean));
 
     // 1. Processa candidaturas da coleção `partner_applications`
     applications.forEach(app => {
@@ -327,7 +401,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     });
 
     // 2. Registos pendentes da coleção `partners` (apenas se não existirem em `partner_applications`)
-    partners.filter(p => p.status === 'pending').forEach(p => {
+    resolvedPartners.filter(p => p.status === 'pending').forEach(p => {
       const email = (p.email || '').toLowerCase().trim();
       const nif = (p.nif || '').toLowerCase().trim();
       const code = (p.code || p.id || '').toLowerCase().trim();
@@ -365,24 +439,24 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     const approved = all.filter(c => c.status === 'approved');
 
     return { allApplicationsList: all, pendingApplicationsList: pending, approvedApplicationsList: approved };
-  }, [applications, partners]);
+  }, [applications, resolvedPartners]);
 
-  const activePartners = partners.filter(p => p.status === 'active');
+  const activePartners = resolvedPartners.filter(p => p.status === 'active');
   const pendingPartners = pendingApplicationsList;
   const totalDebtAoa = allDebts.filter(d => !d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
   const totalReceivedAoa = allDebts.filter(d => d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
   const totalProvisionalDebts = allDebts.filter(d => d.is_provisional && !d.paid).length;
 
   const getPartnerPendingDebt = (pid: string) =>
-    allDebts.filter(d => (d.partner_id === pid || (partners.find(p => p.id === pid)?.code && d.partner_id === partners.find(p => p.id === pid)?.code)) && !d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
+    allDebts.filter(d => (d.partner_id === pid || (resolvedPartners.find(p => p.id === pid)?.code && d.partner_id === resolvedPartners.find(p => p.id === pid)?.code)) && !d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
   
   const getPartnerLicenseCount = (pid: string) =>
-    allDebts.filter(d => d.partner_id === pid || (partners.find(p => p.id === pid)?.code && d.partner_id === partners.find(p => p.id === pid)?.code)).length;
+    allDebts.filter(d => d.partner_id === pid || (resolvedPartners.find(p => p.id === pid)?.code && d.partner_id === resolvedPartners.find(p => p.id === pid)?.code)).length;
   
   const getPartnerActiveCreditSlots = (pid: string) =>
-    allDebts.filter(d => (d.partner_id === pid || (partners.find(p => p.id === pid)?.code && d.partner_id === partners.find(p => p.id === pid)?.code)) && !d.paid && d.payment_method !== 'wallet').length;
+    allDebts.filter(d => (d.partner_id === pid || (resolvedPartners.find(p => p.id === pid)?.code && d.partner_id === resolvedPartners.find(p => p.id === pid)?.code)) && !d.paid && d.payment_method !== 'wallet').length;
 
-  const filteredPartners = partners.filter((p) => {
+  const filteredPartners = resolvedPartners.filter((p) => {
     const matchesTier = tierFilter === 'todos' || p.tier === tierFilter;
     if (!matchesTier) return false;
     if (!search) return true;
@@ -546,6 +620,72 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       await setPartnerSuspensionStatus(p.id, p.code, p.email, ns);
       alert(`Parceiro ${p.name} ${ns === 'suspended' ? 'suspenso' : 'reativado'} com sucesso em todas as coleções!`);
     } catch (err: any) { alert('Erro: ' + err.message); }
+  };
+
+  const handleDeletePartner = async (partner: Partner) => {
+    const confirmDelete = window.confirm(`Tem a certeza que deseja eliminar o parceiro "${partner.name}" (${partner.code})? Esta ação apagará o registo do parceiro.`);
+    if (!confirmDelete) return;
+
+    try {
+      await deleteDoc(doc(db, 'partners', partner.id));
+      if (partner.code && partner.code !== partner.id) {
+        await deleteDoc(doc(db, 'partners', partner.code)).catch(() => {});
+      }
+      setSelectedPartner(null);
+      alert(`Parceiro "${partner.name}" eliminado com sucesso.`);
+    } catch (e: any) {
+      alert('Erro ao eliminar parceiro: ' + e.message);
+    }
+  };
+
+  const handleSavePartnerProfile = async () => {
+    if (!selectedPartner) return;
+    if (!editPartnerName.trim()) {
+      alert('Por favor insira o nome do parceiro ou da empresa.');
+      return;
+    }
+
+    setSavingPartnerProfile(true);
+    try {
+      const updatePayload = {
+        name: editPartnerName.trim(),
+        responsible: editPartnerName.trim(),
+        email: editPartnerEmail.trim().toLowerCase(),
+        phone: editPartnerPhone.trim(),
+        region: editPartnerRegion.trim() || 'Luanda, Angola',
+        nif: editPartnerNif.trim().toUpperCase(),
+      };
+
+      await setDoc(doc(db, 'partners', selectedPartner.id), updatePayload, { merge: true });
+      if (selectedPartner.code && selectedPartner.code !== selectedPartner.id) {
+        await setDoc(doc(db, 'partners', selectedPartner.code), updatePayload, { merge: true }).catch(() => {});
+      }
+
+      // Sincroniza candidatura correspondente caso exista
+      const matchingApp = applications.find(a => a.protocol === selectedPartner.code || a.id === selectedPartner.id);
+      if (matchingApp) {
+        await setDoc(doc(db, 'partner_applications', matchingApp.id), {
+          name: editPartnerName.trim(),
+          empresa: editPartnerName.trim(),
+          empresa_nome: editPartnerName.trim(),
+          nome: editPartnerName.trim(),
+          email: editPartnerEmail.trim().toLowerCase(),
+          telefone: editPartnerPhone.trim(),
+          provincia: editPartnerRegion.trim(),
+        }, { merge: true }).catch(() => {});
+      }
+
+      setSelectedPartner({
+        ...selectedPartner,
+        ...updatePayload,
+      });
+
+      alert('Dados do parceiro atualizados com sucesso no Firebase!');
+    } catch (e: any) {
+      alert('Erro ao guardar dados do parceiro: ' + e.message);
+    } finally {
+      setSavingPartnerProfile(false);
+    }
   };
 
   const handleMarkPaid = async (debtIds: string[]) => {
@@ -747,7 +887,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                                   {p.code}
                                 </span>
                                 <span className="font-bold text-slate-900 text-xs">{p.name}</span>
-                                <span className="text-[11px] text-slate-400">{p.email} • {p.phone} • {p.region}</span>
+                                <span className="text-[11px] text-slate-400">
+                                  {[p.email, p.phone, p.region].filter(Boolean).join(' • ') || 'Luanda, Angola'}
+                                </span>
                               </div>
                             </td>
                             <td className="p-4">
@@ -822,10 +964,17 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                                 </button>
                                 <button
                                   onClick={() => setSelectedPartner(p)}
-                                  title="Ver Detalhes & Extrato"
+                                  title="Ver Detalhes, Extrato & Editar Perfil"
                                   className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                                 >
                                   <Eye className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeletePartner(p)}
+                                  title="Eliminar Parceiro do Sistema"
+                                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="w-4 h-4" />
                                 </button>
                               </div>
                             </td>
@@ -1570,6 +1719,86 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               <button onClick={() => setSelectedPartner(null)} className="text-slate-400 hover:text-slate-900 cursor-pointer"><X className="w-5 h-5" /></button>
             </div>
 
+            {/* 1. Edição de Dados Cadastrais do Parceiro */}
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 shrink-0 text-xs">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                <span className="font-bold text-slate-800 uppercase text-[10px] flex items-center gap-1.5">
+                  <Edit2 className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Dados Cadastrais & Identificação do Parceiro</span>
+                </span>
+                <span className="font-mono text-[10px] text-slate-500 font-bold">Código: {selectedPartner.code}</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Nome da Empresa / Parceiro</label>
+                  <input
+                    type="text"
+                    value={editPartnerName}
+                    onChange={(e) => setEditPartnerName(e.target.value)}
+                    placeholder="Ex: Luanda Softwares, Lda."
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Email do Parceiro</label>
+                  <input
+                    type="email"
+                    value={editPartnerEmail}
+                    onChange={(e) => setEditPartnerEmail(e.target.value)}
+                    placeholder="parceiro@email.com"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Telefone / WhatsApp</label>
+                  <input
+                    type="text"
+                    value={editPartnerPhone}
+                    onChange={(e) => setEditPartnerPhone(e.target.value)}
+                    placeholder="Ex: +244 923 000 000"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Região / Sede</label>
+                  <input
+                    type="text"
+                    value={editPartnerRegion}
+                    onChange={(e) => setEditPartnerRegion(e.target.value)}
+                    placeholder="Ex: Luanda, Angola"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-slate-200">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-slate-500 font-mono">NIF:</span>
+                  <input
+                    type="text"
+                    value={editPartnerNif}
+                    onChange={(e) => setEditPartnerNif(e.target.value.toUpperCase())}
+                    placeholder="NIF da Empresa"
+                    className="w-36 bg-white border border-slate-300 rounded-lg px-2 py-1 text-[11px] font-mono font-bold uppercase"
+                  />
+                </div>
+
+                <button
+                  onClick={handleSavePartnerProfile}
+                  disabled={savingPartnerProfile}
+                  className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  {savingPartnerProfile ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  <span>Guardar Dados do Parceiro</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 2. Configuração de Quotas & Saldo */}
             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4 shrink-0 text-xs">
               <div className="flex items-center justify-between border-b border-slate-200 pb-2">
                 <span className="font-bold text-slate-800 uppercase text-[10px] flex items-center gap-1.5">
@@ -1717,21 +1946,31 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-slate-100 shrink-0 gap-2">
-              <button
-                onClick={() => setCertificatesPartnerModal({
-                  partnerName: selectedPartner.name,
-                  partnerCode: selectedPartner.code,
-                  tier: selectedPartner.tier,
-                  region: selectedPartner.region,
-                  email: selectedPartner.email,
-                  phone: selectedPartner.phone,
-                  createdAt: selectedPartner.createdAt,
-                })}
-                className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
-              >
-                <Award className="w-4 h-4 text-amber-200" />
-                <span>Ver Certificados Oficiais (Visual & Kivora)</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCertificatesPartnerModal({
+                    partnerName: selectedPartner.name,
+                    partnerCode: selectedPartner.code,
+                    tier: selectedPartner.tier,
+                    region: selectedPartner.region,
+                    email: selectedPartner.email,
+                    phone: selectedPartner.phone,
+                    createdAt: selectedPartner.createdAt,
+                  })}
+                  className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
+                >
+                  <Award className="w-4 h-4 text-amber-200" />
+                  <span>Ver Certificados Oficiais</span>
+                </button>
+
+                <button
+                  onClick={() => handleDeletePartner(selectedPartner)}
+                  className="bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs px-3 py-2 rounded-xl flex items-center gap-1 border border-rose-200 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Eliminar Parceiro</span>
+                </button>
+              </div>
 
               <button onClick={() => setSelectedPartner(null)} className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer">
                 Fechar
