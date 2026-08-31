@@ -5,8 +5,8 @@
  */
 
 import {
-  collection, doc, setDoc, addDoc, updateDoc,
-  onSnapshot, query, where, orderBy, getDocs, getDoc,
+  collection, doc, setDoc, updateDoc,
+  onSnapshot, getDocs, getDoc,
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -248,10 +248,11 @@ export function subscribePartnerPricing(cb: (plans: PartnerPricingPlan[]) => voi
 }
 
 export async function recordPartnerDebt(entry: Omit<PartnerDebtEntry, 'id'>): Promise<void> {
+  const docId = entry.license_id || `debt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
   const payload: Record<string, any> = {
     partner_id: entry.partner_id || '',
     partner_name: entry.partner_name || '',
-    license_id: entry.license_id || '',
+    license_id: entry.license_id || docId,
     company_name: entry.company_name || '',
     plan_type: entry.plan_type || 'monthly',
     cost_aoa: entry.cost_aoa || 0,
@@ -268,7 +269,7 @@ export async function recordPartnerDebt(entry: Omit<PartnerDebtEntry, 'id'>): Pr
     payload.provisional_target_plan = entry.provisional_target_plan;
   }
 
-  await addDoc(collection(db, 'partner_debts'), payload);
+  await setDoc(doc(db, 'partner_debts', docId), payload, { merge: true });
 }
 
 /**
@@ -320,47 +321,126 @@ export function getOldestUnpaidDebtDays(debts: PartnerDebtEntry[]): number {
   return Math.floor((Date.now() - oldest) / 86_400_000);
 }
 
-export function subscribePartnerDebts(partnerId: string, cb: (debts: PartnerDebtEntry[]) => void): () => void {
+/**
+ * Reconcilia licenças emitidas pelo parceiro que porventura ainda não tenham registo em partner_debts
+ */
+export async function reconcilePartnerDebtsWithLicenses(
+  partnerCode: string,
+  partnerName: string,
+  licenses: Array<{
+    id: string;
+    partner_id?: string;
+    company_name: string;
+    plan_type: PlanType;
+    created_at: number;
+    extra_seats?: number;
+    notes?: string;
+    price_aoa?: number;
+    is_provisional?: boolean;
+  }>,
+  existingDebts: PartnerDebtEntry[],
+  policy: PartnerLicensingPolicy = DEFAULT_PARTNER_POLICY,
+  pricingPlans: PartnerPricingPlan[] = DEFAULT_PARTNER_PRICING,
+  tier: 'bronze' | 'silver' | 'gold' | 'diamond' = 'bronze'
+): Promise<void> {
+  const clean = (partnerCode || '').trim().toLowerCase();
+  if (!clean) return;
+
+  const existingLicenseIds = new Set(existingDebts.map((d) => (d.license_id || d.id).toLowerCase()));
+
+  for (const lic of licenses) {
+    const licPartnerId = (lic.partner_id || '').trim().toLowerCase();
+    const licMatches = licPartnerId === clean || (lic.notes && lic.notes.toLowerCase().includes(clean));
+
+    if (licMatches && !existingLicenseIds.has(lic.id.toLowerCase())) {
+      const baseCost = pricingPlans.find((p) => p.plan_type === lic.plan_type)?.cost_aoa ?? 120000;
+      const seatCost = getPartnerSeatCost(tier, policy);
+      const totalCost = baseCost + (lic.extra_seats || 0) * seatCost;
+      const isPaidViaWallet = Boolean(lic.notes && lic.notes.toLowerCase().includes('carteira pré-paga'));
+
+      await recordPartnerDebt({
+        partner_id: partnerCode,
+        partner_name: partnerName,
+        license_id: lic.id,
+        company_name: lic.company_name,
+        plan_type: lic.plan_type,
+        cost_aoa: totalCost,
+        client_price_aoa: lic.price_aoa || Math.round(totalCost * 1.8),
+        created_at: lic.created_at || Date.now(),
+        paid: isPaidViaWallet,
+        paid_at: isPaidViaWallet ? (lic.created_at || Date.now()) : null,
+        payment_method: isPaidViaWallet ? 'wallet' : 'credit',
+        is_provisional: lic.is_provisional ?? false,
+      }).catch((err) => console.warn('Erro ao reconciliar débito de licença:', err));
+    }
+  }
+}
+
+export function subscribePartnerDebts(
+  partnerId: string,
+  cb: (debts: PartnerDebtEntry[]) => void
+): () => void {
   try {
-    const q = query(collection(db, 'partner_debts'), where('partner_id', '==', partnerId), orderBy('created_at', 'desc'));
-    return onSnapshot(q, (snap) => {
+    const clean = (partnerId || '').trim().toLowerCase();
+    return onSnapshot(collection(db, 'partner_debts'), (snap) => {
       const debts: PartnerDebtEntry[] = [];
       snap.forEach((d) => {
         const data = d.data();
-        debts.push({
-          id: d.id,
-          partner_id: data.partner_id,
-          partner_name: data.partner_name || '',
-          license_id: data.license_id,
-          company_name: data.company_name || '',
-          plan_type: data.plan_type as PlanType,
-          cost_aoa: Number(data.cost_aoa) || 0,
-          client_price_aoa: Number(data.client_price_aoa) || 0,
-          created_at: Number(data.created_at) || Date.now(),
-          paid: Boolean(data.paid),
-          paid_at: data.paid_at ? Number(data.paid_at) : null,
-          payment_method: data.payment_method || (data.paid ? 'wallet' : 'credit'),
-          is_provisional: Boolean(data.is_provisional),
-          provisional_target_plan: data.provisional_target_plan as PlanType | undefined,
-        });
+        const pId = (data.partner_id || '').trim().toLowerCase();
+        const pCode = (data.partner_code || '').trim().toLowerCase();
+        const pName = (data.partner_name || '').trim().toLowerCase();
+        const licId = (data.license_id || d.id || '').trim().toLowerCase();
+
+        if (
+          !clean ||
+          pId === clean ||
+          pCode === clean ||
+          licId === clean ||
+          (pName && pName.includes(clean)) ||
+          (clean && pId.includes(clean))
+        ) {
+          debts.push({
+            id: d.id,
+            partner_id: data.partner_id || partnerId,
+            partner_name: data.partner_name || '',
+            license_id: data.license_id || d.id,
+            company_name: data.company_name || '',
+            plan_type: data.plan_type as PlanType,
+            cost_aoa: Number(data.cost_aoa) || 0,
+            client_price_aoa: Number(data.client_price_aoa) || 0,
+            created_at: Number(data.created_at) || Date.now(),
+            paid: Boolean(data.paid),
+            paid_at: data.paid_at ? Number(data.paid_at) : null,
+            payment_method: data.payment_method || (data.paid ? 'wallet' : 'credit'),
+            is_provisional: Boolean(data.is_provisional),
+            provisional_target_plan: data.provisional_target_plan as PlanType | undefined,
+          });
+        }
       });
+      debts.sort((a, b) => b.created_at - a.created_at);
       cb(debts);
-    }, () => cb([]));
-  } catch { cb([]); return () => {}; }
+    }, (err) => {
+      console.warn('Erro ao escutar partner_debts:', err);
+      cb([]);
+    });
+  } catch (e) {
+    console.warn(e);
+    cb([]);
+    return () => {};
+  }
 }
 
 export function subscribeAllDebts(cb: (debts: PartnerDebtEntry[]) => void): () => void {
   try {
-    const q = query(collection(db, 'partner_debts'), orderBy('created_at', 'desc'));
-    return onSnapshot(q, (snap) => {
+    return onSnapshot(collection(db, 'partner_debts'), (snap) => {
       const debts: PartnerDebtEntry[] = [];
       snap.forEach((d) => {
         const data = d.data();
         debts.push({
           id: d.id,
-          partner_id: data.partner_id,
+          partner_id: data.partner_id || '',
           partner_name: data.partner_name || '',
-          license_id: data.license_id,
+          license_id: data.license_id || d.id,
           company_name: data.company_name || '',
           plan_type: data.plan_type as PlanType,
           cost_aoa: Number(data.cost_aoa) || 0,
@@ -373,9 +453,16 @@ export function subscribeAllDebts(cb: (debts: PartnerDebtEntry[]) => void): () =
           provisional_target_plan: data.provisional_target_plan as PlanType | undefined,
         });
       });
+      debts.sort((a, b) => b.created_at - a.created_at);
       cb(debts);
-    }, () => cb([]));
-  } catch { cb([]); return () => {}; }
+    }, (err) => {
+      console.warn('Erro subscribeAllDebts:', err);
+      cb([]);
+    });
+  } catch {
+    cb([]);
+    return () => {};
+  }
 }
 
 /**
@@ -386,26 +473,40 @@ export function subscribePartnerAccount(
   cb: (account: PartnerAccount | null) => void
 ): () => void {
   try {
-    const pRef = doc(db, 'partners', partnerCode);
-    return onSnapshot(pRef, (snap) => {
-      if (snap.exists()) {
-        const d = snap.data();
-        const tier = (d.tier as any) || 'bronze';
+    const clean = (partnerCode || '').trim().toLowerCase();
+    return onSnapshot(collection(db, 'partners'), (snap) => {
+      let matchedDoc: any = null;
+      let matchedId = partnerCode;
+
+      snap.forEach((docSnap) => {
+        const d = docSnap.data();
+        const dId = docSnap.id.trim().toLowerCase();
+        const dCode = (d.code || '').trim().toLowerCase();
+        const dEmail = (d.email || '').trim().toLowerCase();
+
+        if (dId === clean || dCode === clean || (clean.includes('@') && dEmail === clean)) {
+          matchedDoc = d;
+          matchedId = docSnap.id;
+        }
+      });
+
+      if (matchedDoc) {
+        const tier = (matchedDoc.tier as any) || 'bronze';
         const defaultSlots = TIER_DEFAULT_SLOTS[tier as keyof typeof TIER_DEFAULT_SLOTS] || 2;
         
         cb({
-          id: snap.id,
-          code: d.code || partnerCode,
-          name: d.name || d.responsible || 'Parceiro Kivora',
-          email: d.email || '',
-          phone: d.phone || '',
-          region: d.region || 'Luanda',
-          credit_slots_limit: Number(d.credit_slots_limit) || defaultSlots,
-          credit_limit_aoa: Number(d.credit_limit_aoa) || 250000,
-          wallet_balance_aoa: Number(d.wallet_balance_aoa) || 0,
+          id: matchedId,
+          code: matchedDoc.code || matchedId,
+          name: matchedDoc.name || matchedDoc.responsible || 'Parceiro Kivora',
+          email: matchedDoc.email || '',
+          phone: matchedDoc.phone || '',
+          region: matchedDoc.region || 'Luanda',
+          credit_slots_limit: Number(matchedDoc.credit_slots_limit) || defaultSlots,
+          credit_limit_aoa: Number(matchedDoc.credit_limit_aoa) || 250000,
+          wallet_balance_aoa: Number(matchedDoc.wallet_balance_aoa) || 0,
           tier,
-          status: d.status || 'active',
-          overdue_days_limit: Number(d.overdue_days_limit) || 15,
+          status: matchedDoc.status || 'active',
+          overdue_days_limit: Number(matchedDoc.overdue_days_limit) || 15,
         });
       } else {
         cb(null);

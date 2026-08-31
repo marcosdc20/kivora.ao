@@ -234,7 +234,21 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
   useEffect(() => {
     if (selectedPartner) {
-      setPartnerDebts(allDebts.filter(d => d.partner_id === selectedPartner.id || d.partner_id === selectedPartner.code));
+      const cleanId = selectedPartner.id.trim().toLowerCase();
+      const cleanCode = (selectedPartner.code || '').trim().toLowerCase();
+      const cleanEmail = (selectedPartner.email || '').trim().toLowerCase();
+      const cleanName = (selectedPartner.name || '').trim().toLowerCase();
+
+      setPartnerDebts(allDebts.filter(d => {
+        const pId = (d.partner_id || '').trim().toLowerCase();
+        const pName = (d.partner_name || '').trim().toLowerCase();
+        return (
+          pId === cleanId ||
+          pId === cleanCode ||
+          (cleanEmail && pId === cleanEmail) ||
+          (cleanName && pName.includes(cleanName))
+        );
+      }));
       setSelectedDebtIds([]);
       setEditTier(selectedPartner.tier || 'bronze');
       setEditCreditSlots(selectedPartner.credit_slots_limit || 2);

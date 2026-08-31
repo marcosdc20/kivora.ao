@@ -37,7 +37,7 @@ import {
 import {
   subscribePartnerPricing, subscribePartnerDebts, recordPartnerDebt,
   subscribePartnerAccount, deductPartnerWallet, getActiveCreditSlots,
-  hasOverdueDebts, getOldestUnpaidDebtDays,
+  hasOverdueDebts, getOldestUnpaidDebtDays, reconcilePartnerDebtsWithLicenses,
   subscribePartnerPolicy, DEFAULT_PARTNER_POLICY,
   DEFAULT_PARTNER_PRICING, PartnerPricingPlan, PartnerDebtEntry, PartnerAccount, PartnerLicensingPolicy,
   getPartnerSeatCost
@@ -220,6 +220,54 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     return () => unsub();
   }, [partnerCode]);
 
+  // Reconciliação automática em background de licenças emitidas sem débito correspondente
+  useEffect(() => {
+    if (!partnerCode || myPartnerLicenses.length === 0) return;
+    reconcilePartnerDebtsWithLicenses(
+      partnerCode,
+      partnerName,
+      myPartnerLicenses,
+      partnerDebts,
+      policy,
+      pricingPlans,
+      partnerAccount?.tier || 'bronze'
+    );
+  }, [partnerCode, partnerName, myPartnerLicenses, partnerDebts, policy, pricingPlans, partnerAccount?.tier]);
+
+  // Lista Efetiva de Débitos (Garante coerência de slots e extrato mesmo antes da gravação assíncrona)
+  const effectiveDebts = React.useMemo(() => {
+    const list = [...partnerDebts];
+    const existingLicIds = new Set(list.map((d) => (d.license_id || d.id).toLowerCase()));
+
+    myPartnerLicenses.forEach((lic) => {
+      if (!existingLicIds.has(lic.id.toLowerCase())) {
+        const baseCost = pricingPlans.find((p) => p.plan_type === lic.plan_type)?.cost_aoa ?? 120000;
+        const seatCost = getPartnerSeatCost(partnerAccount?.tier || 'bronze', policy);
+        const totalCost = baseCost + (lic.extra_seats || 0) * seatCost;
+        const isPaidViaWallet = Boolean(lic.notes && lic.notes.toLowerCase().includes('carteira pré-paga'));
+
+        list.push({
+          id: lic.id,
+          partner_id: partnerCode,
+          partner_name: partnerName,
+          license_id: lic.id,
+          company_name: lic.company_name,
+          plan_type: lic.plan_type,
+          cost_aoa: totalCost,
+          client_price_aoa: lic.price_aoa || Math.round(totalCost * 1.8),
+          created_at: lic.created_at || Date.now(),
+          paid: isPaidViaWallet,
+          paid_at: isPaidViaWallet ? (lic.created_at || Date.now()) : null,
+          payment_method: isPaidViaWallet ? 'wallet' : 'credit',
+          is_provisional: lic.is_provisional ?? false,
+        });
+      }
+    });
+
+    list.sort((a, b) => b.created_at - a.created_at);
+    return list;
+  }, [partnerDebts, myPartnerLicenses, pricingPlans, partnerAccount?.tier, policy, partnerCode, partnerName]);
+
   // Subscrição em Tempo Real aos Chamados do Parceiro
   useEffect(() => {
     const unsub = subscribePartnerTickets(partnerCode, session?.email || '', ({ clientTickets: cTks, adminTickets: aTks }) => {
@@ -299,15 +347,15 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
   const walletBalance = partnerAccount?.wallet_balance_aoa || 0;
   const creditSlotsLimit = partnerAccount?.credit_slots_limit || policy.tier_slots[partnerAccount?.tier || 'bronze'] || 2;
-  const activeSlotsInUse = getActiveCreditSlots(partnerDebts);
+  const activeSlotsInUse = getActiveCreditSlots(effectiveDebts);
   const availableCreditSlots = Math.max(0, creditSlotsLimit - activeSlotsInUse);
   const overdueDaysLimit = partnerAccount?.overdue_days_limit || policy.overdue_tolerance_days || 15;
-  const isOverdue = hasOverdueDebts(partnerDebts, overdueDaysLimit);
-  const oldestDebtDays = getOldestUnpaidDebtDays(partnerDebts);
+  const isOverdue = hasOverdueDebts(effectiveDebts, overdueDaysLimit);
+  const oldestDebtDays = getOldestUnpaidDebtDays(effectiveDebts);
 
-  const totalPendingDebt = partnerDebts.filter((d) => !d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
-  const totalPaidToKivora = partnerDebts.filter((d) => d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
-  const totalPartnerProfit = partnerDebts.reduce(
+  const totalPendingDebt = effectiveDebts.filter((d) => !d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
+  const totalPaidToKivora = effectiveDebts.filter((d) => d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
+  const totalPartnerProfit = effectiveDebts.reduce(
     (acc, d) => acc + Math.max(0, (d.client_price_aoa || 0) - d.cost_aoa),
     0
   );
@@ -2142,7 +2190,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               </div>
 
               {/* Tabela de Lançamentos de Dívida */}
-              {partnerDebts.length === 0 ? (
+              {effectiveDebts.length === 0 ? (
                 <div className="p-12 text-center text-slate-400 space-y-2 border border-dashed border-slate-200 rounded-2xl">
                   <DollarSign className="w-10 h-10 mx-auto text-slate-300" />
                   <p className="font-bold text-slate-700 text-sm">Nenhum registo financeiro ainda</p>
@@ -2150,7 +2198,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs">
-                  {partnerDebts.map((debt) => (
+                  {effectiveDebts.map((debt) => (
                     <div key={debt.id} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition-colors">
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
