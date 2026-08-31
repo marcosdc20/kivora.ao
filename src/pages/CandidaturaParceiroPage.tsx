@@ -7,7 +7,7 @@ import {
   CreditCard, User, Download, Eye, Info
 } from 'lucide-react';
 import { db } from '../lib/firebase';
-import { collection, addDoc, setDoc, doc } from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 import {
   subscribePartnerPolicy, DEFAULT_PARTNER_POLICY,
   PartnerLicensingPolicy
@@ -187,33 +187,6 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
 
       // 1. Grava na coleção principal de candidaturas `partner_applications`
       await addDoc(collection(db, 'partner_applications'), applicationData);
-
-      // 2. Grava também na coleção `partners` como status 'pending' (com proteção)
-      try {
-        const partnerDocId = tempPartnerCode.toUpperCase().trim();
-        await setDoc(doc(db, 'partners', partnerDocId), {
-          id: partnerDocId,
-          code: tempPartnerCode,
-          name: empresa.trim(),
-          responsible: nome.trim(),
-          role: cargo.trim() || 'Gerente / Técnico',
-          email: email.toLowerCase().trim(),
-          phone: telefone.trim(),
-          region: sedeCompleta,
-          nif: nif.trim().toUpperCase(),
-          debt_aoa: 0,
-          total_paid_aoa: 25000,
-          total_sales: 0,
-          status: 'pending',
-          type: tipoParceria,
-          notes: `Experiência: ${experiencia} | Clientes: ${temClientesAtuais}`,
-          payment_proof_url: comprovativoBase64,
-          payment_proof_name: comprovativoNome,
-          createdAt: Date.now(),
-        }, { merge: true });
-      } catch (pErr) {
-        console.warn('Aviso no registo secundário de parceiro pendente:', pErr);
-      }
 
       // 3. Disparo de e-mails automáticos
       sendPartnerApplicationEmails({

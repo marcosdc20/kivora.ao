@@ -255,44 +255,35 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     }
   }, [selectedPartner, allDebts]);
 
-  // Combina candidaturas do formulário web (`partner_applications`) com registos da coleção `partners`
+  // Combina e deduplica candidaturas do formulário web (`partner_applications`) com registos da coleção `partners`
   const { allApplicationsList, pendingApplicationsList, approvedApplicationsList } = React.useMemo(() => {
-    const all: Array<{
-      id: string;
-      appId?: string;
-      code: string;
-      name: string;
-      responsible?: string;
-      email: string;
-      phone: string;
-      region: string;
-      sede_completa?: string;
-      nif?: string;
-      tipo_parceria?: string;
-      tem_clientes?: string;
-      experiencia?: string;
-      status: 'pending' | 'approved' | 'rejected';
-      createdAt: number;
-      protocol?: string;
-      tier?: 'bronze' | 'silver' | 'gold' | 'diamond';
-      payment_proof_url?: string;
-      payment_proof_name?: string;
-      payment_proof_size?: string;
-      payment_proof_type?: string;
-      fee_amount_aoa?: number;
-    }> = [];
+    const map = new Map<string, any>();
 
-    const processedDocIds = new Set<string>();
+    // Conjunto de parceiros que já estão ATIVOS
+    const activeEmails = new Set(partners.filter(p => p.status === 'active').map(p => (p.email || '').toLowerCase().trim()).filter(Boolean));
+    const activeNifs = new Set(partners.filter(p => p.status === 'active').map(p => (p.nif || '').toLowerCase().trim()).filter(Boolean));
+    const activeCodes = new Set(partners.filter(p => p.status === 'active').map(p => (p.code || '').toLowerCase().trim()).filter(Boolean));
 
-    // 1. Candidaturas do formulário do site (`partner_applications`)
+    // 1. Processa candidaturas da coleção `partner_applications`
     applications.forEach(app => {
-      processedDocIds.add(app.id);
-      const pCode = (app.protocol || `KVRA-PAR-${Math.floor(100 + Math.random() * 900)}`).trim();
-      const status: 'pending' | 'approved' | 'rejected' = 
-        app.status === 'approved' ? 'approved' : 
+      const email = (app.email || '').toLowerCase().trim();
+      const nif = (app.nif || '').toLowerCase().trim();
+      const protocol = (app.protocol || app.id || '').toLowerCase().trim();
+
+      const dedupeKey = email || (nif ? `nif_${nif}` : `prot_${protocol}`);
+
+      const isAlreadyActive =
+        (email && activeEmails.has(email)) ||
+        (nif && activeNifs.has(nif)) ||
+        (protocol && activeCodes.has(protocol));
+
+      const status: 'pending' | 'approved' | 'rejected' =
+        app.status === 'approved' || isAlreadyActive ? 'approved' :
         app.status === 'rejected' ? 'rejected' : 'pending';
 
-      all.push({
+      const pCode = (app.protocol || `KVRA-PAR-${Math.floor(100 + Math.random() * 900)}`).trim();
+
+      const item = {
         id: app.id,
         appId: app.id,
         code: pCode,
@@ -315,14 +306,36 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         payment_proof_size: app.payment_proof_size,
         payment_proof_type: app.payment_proof_type,
         fee_amount_aoa: app.fee_amount_aoa || 25000,
-      });
+      };
+
+      const existing = map.get(dedupeKey);
+      if (!existing) {
+        map.set(dedupeKey, item);
+      } else {
+        if (existing.status === 'pending' && item.status === 'approved') {
+          map.set(dedupeKey, item);
+        } else if (item.payment_proof_url && !existing.payment_proof_url) {
+          map.set(dedupeKey, item);
+        }
+      }
     });
 
-    // 2. Registos pendentes criados na coleção `partners`
+    // 2. Registos pendentes da coleção `partners` (apenas se não existirem em `partner_applications`)
     partners.filter(p => p.status === 'pending').forEach(p => {
-      const alreadyInApps = applications.some(a => a.protocol === p.code || a.id === p.id);
-      if (!alreadyInApps && !processedDocIds.has(p.id)) {
-        all.push({
+      const email = (p.email || '').toLowerCase().trim();
+      const nif = (p.nif || '').toLowerCase().trim();
+      const code = (p.code || p.id || '').toLowerCase().trim();
+      const dedupeKey = email || (nif ? `nif_${nif}` : `code_${code}`);
+
+      const isAlreadyActive =
+        (email && activeEmails.has(email)) ||
+        (nif && activeNifs.has(nif)) ||
+        (code && activeCodes.has(code));
+
+      if (isAlreadyActive) return;
+
+      if (!map.has(dedupeKey)) {
+        map.set(dedupeKey, {
           id: p.id,
           code: p.code,
           name: p.name,
@@ -339,6 +352,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       }
     });
 
+    const all = Array.from(map.values());
     all.sort((a, b) => b.createdAt - a.createdAt);
 
     const pending = all.filter(c => c.status === 'pending');
