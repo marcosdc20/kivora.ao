@@ -21,6 +21,10 @@ import {
   subscribeSiteEmailConfig, saveSiteEmailConfig,
   testSiteEmailConnection
 } from '../services/siteEmailService';
+import {
+  PURGE_TARGETS, createPrePurgeBackup, executePurge
+} from './services/databasePurgeService';
+import { getStoredSession } from './services/authService';
 
 export interface UpdateRelease {
   id: string;
@@ -81,12 +85,23 @@ const INITIAL_RELEASES: UpdateRelease[] = [
   }
 ];
 
-type ConfigTab = 'geral' | 'emails' | 'precos' | 'videochamada' | 'videos' | 'notificacoes' | 'comunicados' | 'metricas' | 'marcas' | 'investidores' | 'provincias' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups';
+type ConfigTab = 'geral' | 'emails' | 'precos' | 'videochamada' | 'videos' | 'notificacoes' | 'comunicados' | 'metricas' | 'marcas' | 'investidores' | 'provincias' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups' | 'zona-perigo';
 
 export const AdminConfiguracoes: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ConfigTab>('geral');
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  // Master Reset / Purge State
+  const [selectedPurgeTargets, setSelectedPurgeTargets] = useState<string[]>(PURGE_TARGETS.map(t => t.id));
+  const [purgeConfirmationPhrase, setPurgeConfirmationPhrase] = useState('');
+  const [purgeAdminPassword, setPurgeAdminPassword] = useState('');
+  const [purgeConsentChecked, setPurgeConsentChecked] = useState(false);
+  const [isPurging, setIsPurging] = useState(false);
+  const [purgeProgressText, setPurgeProgressText] = useState('');
+  const [purgeProgressPercent, setPurgeProgressPercent] = useState(0);
+  const [purgeReport, setPurgeReport] = useState<{ totalDeleted: number; deletedCounts: Record<string, number>; backupFilename: string } | null>(null);
+  const [purgeError, setPurgeError] = useState<string | null>(null);
 
   // System Settings State
   const [settings, setSettings] = useState<SystemCompanySettings>(DEFAULT_SETTINGS);
@@ -339,6 +354,87 @@ export const AdminConfiguracoes: React.FC = () => {
     }
   };
 
+  const handleTogglePurgeTarget = (id: string) => {
+    setSelectedPurgeTargets(prev =>
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllPurgeTargets = () => {
+    if (selectedPurgeTargets.length === PURGE_TARGETS.length) {
+      setSelectedPurgeTargets([]);
+    } else {
+      setSelectedPurgeTargets(PURGE_TARGETS.map(t => t.id));
+    }
+  };
+
+  const handleExecuteMasterReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPurgeError(null);
+
+    const session = getStoredSession();
+    if (!session || session.role !== 'admin') {
+      setPurgeError('Acesso Negado: Apenas utilizadores com perfil de Administrador Master têm permissão para aceder à Zona de Perigo.');
+      return;
+    }
+
+    if (purgeConfirmationPhrase.trim() !== 'CONFIRMO LIMPAR DADOS KIVORA') {
+      setPurgeError('Frase de confirmação incorreta. Digite exatamente: CONFIRMO LIMPAR DADOS KIVORA');
+      return;
+    }
+
+    if (!purgeAdminPassword || purgeAdminPassword.length < 3) {
+      setPurgeError('Por favor insira a sua palavra-passe de Administrador para autorizar a limpeza.');
+      return;
+    }
+
+    if (!purgeConsentChecked) {
+      setPurgeError('É obrigatório marcar a caixa de consentimento e responsabilidade antes de avançar.');
+      return;
+    }
+
+    if (selectedPurgeTargets.length === 0) {
+      setPurgeError('Selecione pelo menos uma coleção para limpar.');
+      return;
+    }
+
+    const selectedTargetObjs = PURGE_TARGETS.filter(t => selectedPurgeTargets.includes(t.id));
+    const targetCollectionNames = selectedTargetObjs.map(t => t.collectionName);
+
+    setIsPurging(true);
+    setPurgeProgressText('A gerar cópia de segurança (backup) antes da limpeza...');
+    setPurgeProgressPercent(5);
+
+    try {
+      // 1. Gera e descarrega automaticamente o backup de segurança
+      const backupFilename = await createPrePurgeBackup(targetCollectionNames);
+      setPurgeProgressText('Backup descarregado com sucesso! A iniciar remoção cirúrgica...');
+      setPurgeProgressPercent(20);
+
+      // 2. Executa a limpeza cirúrgica
+      const result = await executePurge(selectedPurgeTargets, (step, pct) => {
+        setPurgeProgressText(step);
+        setPurgeProgressPercent(pct);
+      });
+
+      setPurgeReport({
+        totalDeleted: result.totalDeleted,
+        deletedCounts: result.deletedCounts,
+        backupFilename,
+      });
+
+      setPurgeConfirmationPhrase('');
+      setPurgeAdminPassword('');
+      setPurgeConsentChecked(false);
+      alert(`Master Reset Concluído com Sucesso! Foram eliminados ${result.totalDeleted} documentos operacionais. O sistema está limpo para ser utilizado do zero.`);
+    } catch (err: any) {
+      console.error('Erro no Master Reset:', err);
+      setPurgeError('Erro durante a execução do Master Reset: ' + (err?.message || 'Falha na comunicação com o banco de dados.'));
+    } finally {
+      setIsPurging(false);
+    }
+  };
+
   return (
     <div className="w-full min-w-0 flex flex-col font-sans pb-12">
       <AdminTopbar
@@ -378,6 +474,7 @@ export const AdminConfiguracoes: React.FC = () => {
             { id: 'agt', label: 'Certificação AGT & Fiscal', icon: <ShieldCheck className="w-4 h-4" /> },
             { id: 'updates', label: 'Atualizações OTA', icon: <Rocket className="w-4 h-4" /> },
             { id: 'backups', label: 'Backups Nuvem', icon: <Database className="w-4 h-4" /> },
+            { id: 'zona-perigo', label: '⚠️ Zona de Perigo & Master Reset', icon: <AlertTriangle className="w-4 h-4 text-red-500" /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -2703,6 +2800,237 @@ export const AdminConfiguracoes: React.FC = () => {
                 <p className="font-bold text-emerald-600">✓ Sincronização Contínua no Firebase Firestore</p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* TAB 8: ZONA DE PERIGO & MASTER RESET */}
+        {activeTab === 'zona-perigo' && (
+          <div className="bg-white rounded-3xl border border-red-200 p-6 sm:p-8 shadow-sm space-y-6 animate-fadeIn">
+            
+            {/* Header de Alerta Máximo */}
+            <div className="p-5 rounded-2xl bg-gradient-to-r from-red-950 via-slate-950 to-red-950 text-white border border-red-800/60 shadow-lg space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400 shrink-0">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-base font-black text-white uppercase tracking-wider">
+                      Zona de Perigo & Master Reset (SuperAdmin)
+                    </h3>
+                    <span className="bg-red-500/20 text-red-300 border border-red-400/40 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase">
+                      Acesso Restrito
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-300 mt-0.5">
+                    Permite limpar cirurgicamente dados de teste para iniciar a operação oficial do zero com segurança total.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quadro de Dados Protegidos (NUNCA SÃO APAGADOS) */}
+            <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 space-y-2">
+              <div className="flex items-center gap-2 text-emerald-900 font-black text-xs uppercase tracking-wider">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>Dados do Núcleo do Sistema Preservados (100% Protegidos contra Limpeza)</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-[11px] text-emerald-800 pt-1">
+                <div className="flex items-center gap-1.5 font-medium">
+                  <span className="text-emerald-600 font-bold">✓</span> Contas de Administrador (`users`)
+                </div>
+                <div className="flex items-center gap-1.5 font-medium">
+                  <span className="text-emerald-600 font-bold">✓</span> Configurações da Empresa & IBANs (`system_settings`)
+                </div>
+                <div className="flex items-center gap-1.5 font-medium">
+                  <span className="text-emerald-600 font-bold">✓</span> Políticas & Quotas de Parceiro (`settings`)
+                </div>
+                <div className="flex items-center gap-1.5 font-medium">
+                  <span className="text-emerald-600 font-bold">✓</span> Tabela Oficial de Preços de Atacado (`partner_pricing`)
+                </div>
+                <div className="flex items-center gap-1.5 font-medium">
+                  <span className="text-emerald-600 font-bold">✓</span> Logs de Auditoria Fiscal AGT (`audit_logs`)
+                </div>
+                <div className="flex items-center gap-1.5 font-medium">
+                  <span className="text-emerald-600 font-bold">✓</span> Backup Automático em JSON antes de apagar
+                </div>
+              </div>
+            </div>
+
+            {/* Relatório de Limpeza Concluída */}
+            {purgeReport && (
+              <div className="p-5 rounded-2xl bg-slate-900 text-white border border-slate-800 space-y-3 animate-fadeIn">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    <strong className="text-sm font-black text-emerald-400">Master Reset Executado com Sucesso!</strong>
+                  </div>
+                  <span className="font-mono text-xs text-slate-400">Total Removido: {purgeReport.totalDeleted} documentos</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                  {Object.entries(purgeReport.deletedCounts).map(([name, count]) => (
+                    <div key={name} className="p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/50">
+                      <span className="text-[10px] text-slate-400 block">{name}</span>
+                      <strong className="font-mono text-white text-sm">{count} apagados</strong>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[11px] text-emerald-300 font-mono pt-1">
+                  📦 Cópia de segurança gerada: {purgeReport.backupFilename}
+                </p>
+              </div>
+            )}
+
+            {/* Formulário de Seleção e Confirmação */}
+            <form onSubmit={handleExecuteMasterReset} className="space-y-6">
+              
+              {/* Seleção Granular de Coleções */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h4 className="font-black text-slate-900 text-xs uppercase tracking-wider">
+                    Selecione os Dados Operacionais que Deseja Limpar:
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={handleSelectAllPurgeTargets}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer"
+                  >
+                    {selectedPurgeTargets.length === PURGE_TARGETS.length ? 'Desmarcar Todos' : 'Selecionar Todos'}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {PURGE_TARGETS.map((target) => {
+                    const isChecked = selectedPurgeTargets.includes(target.id);
+                    return (
+                      <label
+                        key={target.id}
+                        onClick={() => handleTogglePurgeTarget(target.id)}
+                        className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 select-none ${
+                          isChecked
+                            ? 'bg-red-50/70 border-red-200 shadow-xs'
+                            : 'bg-slate-50 border-slate-200 opacity-60 hover:opacity-100'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {}}
+                          className="mt-0.5 w-4 h-4 accent-red-600 rounded cursor-pointer"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <strong className="text-xs font-black text-slate-900 block">{target.name}</strong>
+                            <span className="text-[9px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
+                              /{target.collectionName}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">{target.description}</p>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Protocolo de Confirmação & Segurança */}
+              <div className="p-5 rounded-2xl bg-red-50/50 border border-red-200 space-y-4 text-xs">
+                <h4 className="font-black text-red-900 uppercase tracking-wider flex items-center gap-1.5 text-xs">
+                  <AlertTriangle className="w-4 h-4 text-red-600" />
+                  <span>Protocolo de Confirmação Obrigatório</span>
+                </h4>
+
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 block">
+                      1. Digite a frase de confirmação exata: <span className="font-mono text-red-600 font-black select-all">CONFIRMO LIMPAR DADOS KIVORA</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="CONFIRMO LIMPAR DADOS KIVORA"
+                      value={purgeConfirmationPhrase}
+                      onChange={(e) => setPurgeConfirmationPhrase(e.target.value)}
+                      className="w-full bg-white border border-red-300 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:border-red-600 outline-none uppercase"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 block">
+                      2. Palavra-passe de Administrador Master:
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={purgeAdminPassword}
+                      onChange={(e) => setPurgeAdminPassword(e.target.value)}
+                      className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-red-600 outline-none"
+                    />
+                  </div>
+
+                  <label className="flex items-start gap-2 pt-1 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={purgeConsentChecked}
+                      onChange={(e) => setPurgeConsentChecked(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 accent-red-600 rounded cursor-pointer"
+                    />
+                    <span className="text-[11px] text-slate-700 leading-relaxed font-medium">
+                      Estou ciente de que esta ação apagará as <strong>{selectedPurgeTargets.length}</strong> coleções operacionais selecionadas para que o sistema possa ser utilizado do zero. Um arquivo de backup JSON será descarregado automaticamente no meu computador antes da exclusão.
+                    </span>
+                  </label>
+                </div>
+
+                {purgeError && (
+                  <div className="p-3 bg-red-100 border border-red-300 rounded-xl text-red-700 text-xs font-bold flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    <span>{purgeError}</span>
+                  </div>
+                )}
+
+                {isPurging && (
+                  <div className="p-4 bg-white rounded-xl border border-red-200 space-y-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-red-600" />
+                        <span>{purgeProgressText}</span>
+                      </span>
+                      <span className="font-mono text-red-600">{purgeProgressPercent}%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-red-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${purgeProgressPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-2 flex items-center justify-end">
+                  <button
+                    type="submit"
+                    disabled={isPurging || selectedPurgeTargets.length === 0 || !purgeConsentChecked || purgeConfirmationPhrase.trim() !== 'CONFIRMO LIMPAR DADOS KIVORA'}
+                    className="bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-black text-xs px-6 py-3 rounded-xl shadow-lg shadow-red-600/30 flex items-center gap-2 transition-all cursor-pointer hover:-translate-y-0.5"
+                  >
+                    {isPurging ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>A Executar Master Reset...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="w-4 h-4" />
+                        <span>Executar Master Reset ({selectedPurgeTargets.length} Selecionadas)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+              </div>
+
+            </form>
+
           </div>
         )}
 
