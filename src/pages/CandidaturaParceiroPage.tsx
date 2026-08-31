@@ -190,11 +190,6 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
       return;
     }
 
-    if (!comprovativoBase64) {
-      setError('É obrigatório anexar o comprovativo da transferência bancária da taxa de 25.000 Kz.');
-      return;
-    }
-
     setSubmitting(true);
     setError(null);
 
@@ -1046,10 +1041,10 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                   <h3 className="text-xs font-bold text-slate-900 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <FileText className="w-4 h-4 text-blue-600" />
-                      <span>4. Comprovativo da Taxa de Adesão (25.000 Kz) *</span>
+                      <span>4. Comprovativo da Taxa de Adesão (25.000 Kz) (Opcional)</span>
                     </div>
-                    <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full font-bold border border-amber-200">
-                      Obrigatório
+                    <span className="text-[10px] text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full font-bold border border-blue-200">
+                      Opcional
                     </span>
                   </h3>
 
@@ -1087,10 +1082,10 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                       />
                       <UploadCloud className="w-8 h-8 text-slate-400 mb-2" />
                       <span className="text-xs font-semibold text-slate-800">
-                        Clique para selecionar o comprovativo bancário da taxa de 25.000 Kz
+                        Clique para anexar o comprovativo bancário (opcional)
                       </span>
                       <span className="text-[10px] text-slate-400 mt-1">
-                        Formatos aceites: Imagens (PNG, JPG, WEBP) ou PDF (até 5 MB)
+                        Formatos aceites: Imagens (PNG, JPG, WEBP) ou PDF. Pode anexar agora ou enviar posteriormente ao suporte comercial.
                       </span>
                     </label>
                   )}

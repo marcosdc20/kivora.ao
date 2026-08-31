@@ -688,6 +688,42 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     }
   };
 
+  const handleDeleteProof = async (item: any) => {
+    const candidateName = item.name || item.empresa || 'este registo';
+    const confirmDelete = window.confirm(`Tem a certeza que deseja apagar o ficheiro de comprovativo de "${candidateName}"?\n\nEsta ação irá libertar espaço de armazenamento no Firebase mantendo a candidatura e o parceiro ativos.`);
+    if (!confirmDelete) return;
+
+    try {
+      const emptyProofPayload = {
+        payment_proof_url: '',
+        payment_proof_name: '',
+        payment_proof_size: '',
+        payment_proof_type: '',
+      };
+
+      const appId = item.appId || item.id;
+      if (appId) {
+        await updateDoc(doc(db, 'partner_applications', appId), emptyProofPayload).catch(() => {});
+      }
+
+      const pCode = item.protocol || item.code;
+      if (pCode) {
+        await updateDoc(doc(db, 'partners', pCode), emptyProofPayload).catch(() => {});
+      }
+      if (item.id) {
+        await updateDoc(doc(db, 'partners', item.id), emptyProofPayload).catch(() => {});
+      }
+
+      if (viewProofModal && viewProofModal.open) {
+        setViewProofModal(null);
+      }
+
+      alert(`Comprovativo de "${candidateName}" apagado com sucesso! Espaço libertado no Firebase.`);
+    } catch (err: any) {
+      alert('Erro ao apagar comprovativo: ' + err.message);
+    }
+  };
+
   const handleMarkPaid = async (debtIds: string[]) => {
     if (!debtIds.length) return;
     setMarkingPaid(true);
@@ -1116,27 +1152,37 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                       </div>
                     )}
 
-                    {/* Botão de Visualização do Comprovativo Bancário (25.000 Kz) */}
+                    {/* Botão de Visualização / Exclusão do Comprovativo Bancário */}
                     <div className="pt-1">
                       {cand.payment_proof_url ? (
-                        <button
-                          type="button"
-                          onClick={() => setViewProofModal({ open: true, item: cand })}
-                          className="w-full bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-between transition-all cursor-pointer shadow-xs"
-                        >
-                          <span className="flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-blue-600 shrink-0" />
-                            <span>Comprovativo Bancário (25.000 Kz)</span>
-                          </span>
-                          <span className="text-[10px] bg-blue-200/80 text-blue-950 font-mono px-2 py-0.5 rounded-md font-bold flex items-center gap-1">
-                            <span>Ver Anexo</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setViewProofModal({ open: true, item: cand })}
+                            className="flex-1 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-between transition-all cursor-pointer shadow-xs"
+                          >
+                            <span className="flex items-center gap-2">
+                              <FileText className="w-4 h-4 text-blue-600 shrink-0" />
+                              <span>Comprovativo Bancário (25.000 Kz)</span>
+                            </span>
+                            <span className="text-[10px] bg-blue-200/80 text-blue-950 font-mono px-2 py-0.5 rounded-md font-bold flex items-center gap-1">
+                              <span>Ver Anexo</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProof(cand)}
+                            title="Apagar anexo para libertar espaço no Firebase"
+                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-xl transition-all cursor-pointer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       ) : (
                         <div className="text-[11px] text-slate-500 bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 flex items-center justify-between">
                           <span>Taxa de Homologação: <strong>25.000 Kz</strong></span>
-                          <span className="text-[10px] text-slate-400 font-medium">Sem anexo digital</span>
+                          <span className="text-[10px] text-slate-400 font-medium">Sem anexo digital (Opcional)</span>
                         </div>
                       )}
                     </div>
@@ -1775,6 +1821,47 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 </div>
               </div>
 
+              {/* Comprovativo Bancário do Parceiro (se houver) */}
+              {(() => {
+                const matchingAppForProof = applications.find(a => 
+                  (a.protocol && a.protocol === selectedPartner.code) ||
+                  (a.id && a.id === selectedPartner.id) ||
+                  (selectedPartner.email && a.email && a.email.toLowerCase() === selectedPartner.email.toLowerCase())
+                );
+                const proofUrl = matchingAppForProof?.payment_proof_url || (selectedPartner as any).payment_proof_url;
+                if (!proofUrl) return null;
+
+                return (
+                  <div className="flex items-center justify-between p-2.5 bg-blue-50/70 border border-blue-200 rounded-xl text-xs">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-blue-600 shrink-0" />
+                      <div>
+                        <span className="font-bold text-slate-800 text-[11px] block">Comprovativo de Taxa (25.000 Kz)</span>
+                        <span className="text-[10px] text-slate-500 font-mono">Ficheiro guardado no Firebase</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setViewProofModal({ open: true, item: matchingAppForProof || selectedPartner })}
+                        className="text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-white border border-blue-200 px-2.5 py-1 rounded-lg cursor-pointer shadow-2xs"
+                      >
+                        Ver Anexo
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteProof(matchingAppForProof || selectedPartner)}
+                        className="text-[11px] font-bold text-rose-700 hover:text-rose-900 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg cursor-pointer flex items-center gap-1"
+                        title="Apagar ficheiro para libertar espaço"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>Apagar</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div className="flex items-center justify-between pt-2 border-t border-slate-200">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-slate-500 font-mono">NIF:</span>
@@ -2236,19 +2323,33 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             </div>
 
             {/* Rodapé do Modal */}
-            <div className="px-6 py-4 bg-white border-t border-slate-200 flex items-center justify-between gap-3">
-              {viewProofModal.item.payment_proof_url ? (
-                <a
-                  href={viewProofModal.item.payment_proof_url}
-                  download={viewProofModal.item.payment_proof_name || `Comprovativo_${viewProofModal.item.name}.png`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition-all cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Descarregar Ficheiro</span>
-                </a>
-              ) : <div />}
+            <div className="px-6 py-4 bg-white border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                {viewProofModal.item.payment_proof_url ? (
+                  <>
+                    <a
+                      href={viewProofModal.item.payment_proof_url}
+                      download={viewProofModal.item.payment_proof_name || `Comprovativo_${viewProofModal.item.name}.png`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition-all cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Descarregar</span>
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteProof(viewProofModal.item)}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3.5 py-2 rounded-xl transition-all cursor-pointer"
+                      title="Apagar este anexo para poupar espaço no Firebase"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Apagar Anexo (Libertar Espaço)</span>
+                    </button>
+                  </>
+                ) : <div />}
+              </div>
               
               <div className="flex items-center gap-2">
                 <button
