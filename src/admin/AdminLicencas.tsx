@@ -770,15 +770,15 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
         });
       }
 
-      // Cria conta de acesso do cliente no Firebase
-      await createClientAccount({
+      // Cria conta de acesso do cliente no Firebase com senha temporária automática
+      const { tempPassword } = await createClientAccount({
         email: email || `${companyNif}@kivora.ao`,
         name: companyName,
         nif: companyNif,
         licenseKey: lic.id,
       });
 
-      // Dispara envio automático de e-mail de boas-vindas com credenciais
+      // Dispara envio automático de e-mail de boas-vindas com credenciais de acesso ao portal
       if (email && email.includes('@')) {
         sendClientWelcomeEmail({
           companyName,
@@ -787,6 +787,7 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
           email,
           licenseKey: lic.id,
           planName: getPlanLabel(plan),
+          tempPassword, // senha temporária gerada automaticamente
         }).catch(err => console.warn('Erro envio automatico de email:', err));
       }
 

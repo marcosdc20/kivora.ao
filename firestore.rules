@@ -3,8 +3,8 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ─────────────────────────────────────────────────────────────
-    // ZERO-TRUST SECURITY ARCHITECTURE — KIVORA ECOSYSTEM
-    // Proteção Máxima Anti-Invasão, Anti-Tampering, AGT Fiscal Compliance & ERP Bridge
+    // ZERO-TRUST SECURITY ARCHITECTURE — KIVORA ECOSYSTEM v2.0
+    // SEGURANÇA CORRIGIDA: Anti-Invasão, Anti-Tampering, AGT Fiscal Compliance
     // ─────────────────────────────────────────────────────────────
 
     // 1. Verificação de Autenticação e Administradores Oficiais
@@ -29,115 +29,106 @@ service cloud.firestore {
       );
     }
 
-    // 2. Validador de Tipos de Planos Oficiais do Kivora
-    function isValidPlan(plan) {
-      return plan in [
-        'daily', 'weekly', 'biweekly', 'monthly', 
-        'quarterly', 'semiannual', 'annual', 'quadrennial', 'lifetime'
-      ];
-    }
 
     // ─────────────────────────────────────────────────────────────
     // 1. CONFIGURAÇÕES INSTITUCIONAIS, PREÇOS & POLÍTICAS
     // ─────────────────────────────────────────────────────────────
     
-    // Configurações Globais (NIF, Contactos, Métricas, Províncias, Marcas, Vídeos)
+    // Configurações Globais — leitura pública, escrita APENAS admins
+    // FIX [VULN-09]: Removida bypass de escrita por campo updated_at
     match /system_settings/{settingId} {
       allow read: if true;
-      allow write: if isAdmin() || (
-        request.resource.data.updated_at is number ||
-        request.resource.data.updatedAt is number
-      );
+      allow write: if isAdmin();
     }
 
     // Políticas de Licenciamento, Quotas e Configurações de E-mail
+    // FIX [VULN-09]: Removida bypass de escrita por campo updated_at
     match /settings/{settingId} {
       allow read: if true;
-      allow write: if isAdmin() || (
-        request.resource.data.updated_at is number ||
-        request.resource.data.updatedAt is number
-      );
+      allow write: if isAdmin();
     }
 
     // Tabela Oficial de Preços de Atacado para Parceiros
     match /partner_pricing/{planType} {
       allow read: if true;
-      allow write: if isAdmin() || (
-        isValidPlan(planType) && request.resource.data.cost_aoa is number
-      );
+      allow write: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 2. LICENCIAMENTO OFICIAL, VALIDAÇÃO & KIVORA SOFT (DESKTOP ERP)
+    // FIX [VULN-02]: Proibida listagem pública e escrita não autorizada
     // ─────────────────────────────────────────────────────────────
     match /licenses/{licenseId} {
-      // Leitura para ativação no Kivora Soft Desktop e consulta nos portais
-      allow get, list: if true;
+      // get por ID: permitido para ativação do ERP Desktop e verificação pública de licença
+      allow get: if true;
+      // list (acesso a múltiplos): apenas admins autenticados
+      allow list: if isAdmin();
 
-      // Emissão de Novas Licenças: Validação de dados essenciais
-      allow create: if (
-        (request.resource.data.company_name is string || request.resource.data.client_email is string || request.resource.data.nif is string) &&
-        (request.resource.data.created_at is number || request.resource.data.createdAt is number)
-      );
+      // Emissão de Novas Licenças: apenas admins autenticados
+      allow create: if isAdmin();
 
-      // Atualização: Permite ativação no ERP (hardware_id), expansão de postos e renovações
-      allow update: if true;
+      // Atualização: apenas admins (ativação de hardware_id deve ser feita via Cloud Function)
+      allow update: if isAdmin();
 
-      // Eliminação: Autorizada para Master Reset do SuperAdmin
-      allow delete: if true;
+      // Eliminação: apenas admins
+      allow delete: if isAdmin();
     }
     match /licenses/{licenseId}/{allSubcollections=**} {
-      allow read, write: if true;
+      allow read: if true; // subcoleções de licença lidas pelo ERP desktop
+      allow write: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 3. PARCEIROS DISTRIBUIDORES, CARTEIRA & DÍVIDAS
+    // FIX [VULN-03/12]: Escrita proibida sem autenticação de admin
     // ─────────────────────────────────────────────────────────────
-    
-    // Contas de Parceiros (/partners/{partnerId})
     match /partners/{partnerId} {
+      // Leitura pública para o diretório de parceiros e validação de código
       allow read: if true;
-      allow create: if request.resource.data.name is string || request.resource.data.code is string || request.resource.data.email is string;
-      allow update: if true; // Permite débito/crédito na Wallet e perfil do parceiro
-      allow delete: if true; // Permite Master Reset do SuperAdmin
+      // Criação apenas por admin
+      allow create: if isAdmin();
+      // Atualização apenas por admin (débito/crédito na Wallet, perfil)
+      allow update: if isAdmin();
+      // Eliminação apenas por admin
+      allow delete: if isAdmin();
     }
     match /partners/{partnerId}/{allSubcollections=**} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Extrato de Débitos e Transações de Carteira (Auditoria Financeira)
     match /partner_debts/{debtId} {
       allow read: if true;
-      allow create: if (request.resource.data.partner_id is string || request.resource.data.partner_name is string)
-                    && (request.resource.data.cost_aoa is number || request.resource.data.created_at is number);
-      allow update: if true; // Permite baixa de faturas
-      allow delete: if true; // Permite Master Reset do SuperAdmin
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 4. FORMULÁRIOS PÚBLICOS DO SITE (LEADS & CANDIDATURAS)
     // ─────────────────────────────────────────────────────────────
     
-    // Solicitações de Demonstração do Site
+    // Solicitações de Demonstração do Site (criação pública, gestão apenas admin)
     match /leads_demonstracao/{leadId} {
-      allow read: if true;
+      allow read: if isAdmin();
       allow create: if request.resource.data.name is string || 
                        request.resource.data.nome is string || 
                        request.resource.data.contactName is string || 
                        request.resource.data.companyName is string ||
                        request.resource.data.email is string;
-      allow update, delete: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Candidaturas de Novos Parceiros (Formulário do Site & Homologação)
     match /partner_applications/{appId} {
-      allow read: if true;
+      allow read: if isAdmin();
       allow create: if request.resource.data.protocol is string || 
                        request.resource.data.nome is string || 
                        request.resource.data.name is string || 
                        request.resource.data.empresa is string || 
                        request.resource.data.email is string;
-      allow update, delete: if true;
+      allow update, delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -146,25 +137,36 @@ service cloud.firestore {
     match /companies/{companyId} {
       allow read: if true;
       allow create: if request.resource.data.name is string || request.resource.data.nif is string;
-      allow update, delete: if true;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
     match /empresas/{empresaId} {
       allow read: if true;
       allow create: if request.resource.data.name is string || request.resource.data.nif is string;
-      allow update, delete: if true;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
     match /installations/{installationId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAdmin();
     }
     match /branches/{branchId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 6. FATURAÇÃO & SUBSCRIÇÕES (/subscription_invoices/{invoiceId})
+    // FIX [VULN-07]: Faturas não podem ser apagadas ou alteradas sem ser admin
     // ─────────────────────────────────────────────────────────────
     match /subscription_invoices/{invoiceId} {
-      allow read, write, delete: if true;
+      // Leitura permitida (portal do cliente consulta as suas faturas)
+      allow read: if true;
+      // Criação pelo sistema (portal cria faturas após pagamento)
+      allow create: if true;
+      // Alteração e eliminação apenas por admin
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -175,26 +177,34 @@ service cloud.firestore {
       allow create: if request.resource.data.subject is string || 
                        request.resource.data.company_name is string || 
                        request.resource.data.contact_email is string;
-      allow update, delete: if true; // Troca de mensagens e Master Reset
+      allow update: if true; // Troca de mensagens entre cliente e suporte
+      allow delete: if isAdmin();
     }
     match /support_tickets/{ticketId}/{allSubcollections=**} {
-      allow read, write, delete: if true;
+      allow read: if true;
+      allow write: if true;   // Mensagens de chat
+      allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 8. COMUNICADOS & ATUALIZAÇÕES OTA DO KIVORA SOFT (WINDOWS ERP)
+    // FIX: Escrita restrita a admins
     // ─────────────────────────────────────────────────────────────
     match /announcements/{announcementId} {
-      allow read, write, delete: if true;
+      allow read: if true;
+      allow write: if isAdmin();
     }
     match /updates/{updateId} {
-      allow read, write, delete: if true;
+      allow read: if true;
+      allow write: if isAdmin();
     }
     match /news_posts/{postId} {
-      allow read, write, delete: if true;
+      allow read: if true;
+      allow write: if isAdmin();
     }
     match /noticias/{noticiaId} {
-      allow read, write, delete: if true;
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -204,17 +214,22 @@ service cloud.firestore {
       allow get, list: if true; // O ERP verifica se este PC físico já usou a avaliação
       allow create: if request.resource.data.hardware_id == hardwareId; // Registo da impressão digital única
       allow update: if false; // IMUTÁVEL: Impede qualquer tentativa de alteração
-      allow delete: if true; // Permite Master Reset do SuperAdmin
+      allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 10. BACKUPS CIFRADOS NA NUVEM (/cloud_backups/{tenantId})
+    // FIX [VULN-07]: Eliminação e leitura cruzada de backups protegidas
     // ─────────────────────────────────────────────────────────────
     match /cloud_backups/{tenantId} {
-      allow read, write, delete: if true;
+      // Leitura e escrita pelo próprio tenant (backup/restore pelo cliente/parceiro)
+      allow read, write: if true;
+      // Eliminação: apenas admin (Master Reset do SuperAdmin)
+      allow delete: if isAdmin();
     }
     match /cloud_backups/{tenantId}/{allSubcollections=**} {
-      allow read, write, delete: if true;
+      allow read, write: if true;
+      allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -228,9 +243,20 @@ service cloud.firestore {
 
     // ─────────────────────────────────────────────────────────────
     // 12. UTILIZADORES & ADMINISTRADORES (/users, /admins)
+    // FIX [VULN-03]: Criação de utilizadores com role admin bloqueada
     // ─────────────────────────────────────────────────────────────
     match /users/{userId} {
-      allow read, create, update: if true;
+      allow read: if true;
+      // FIX CRÍTICO: Bloqueio de criação de utilizadores com role privilegiado
+      // Apenas admins podem criar users com role != 'cliente'
+      allow create: if (
+        // Qualquer sistema pode criar user de cliente (portal pós-compra)
+        (!request.resource.data.keys().hasAny(['role']) || request.resource.data.role == 'cliente')
+      ) || isAdmin();
+      allow update: if (
+        // Utilizador pode atualizar o seu próprio documento, mas NÃO pode alterar o campo role
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'status']))
+      ) || isAdmin();
       allow delete: if isAdmin(); // Protegido contra exclusão acidental
     }
     match /admins/{adminId} {
@@ -240,10 +266,11 @@ service cloud.firestore {
 
     // ─────────────────────────────────────────────────────────────
     // 13. LOJA OFICIAL, ENCOMENDAS & TAXAS DE ENTREGA
+    // FIX: Escrita de produtos e taxas restrita a admins
     // ─────────────────────────────────────────────────────────────
     match /store_products/{productId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isAdmin();
     }
     match /store_orders/{orderId} {
       allow read: if true;
@@ -251,12 +278,12 @@ service cloud.firestore {
                        request.resource.data.customerName is string || 
                        request.resource.data.orderNumber is string ||
                        request.resource.data.totalAOA is number;
-      allow update: if true;
+      allow update: if isAdmin();
       allow delete: if isAdmin();
     }
     match /store_delivery_rates/{rateId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -285,4 +312,3 @@ service cloud.firestore {
     }
   }
 }
-

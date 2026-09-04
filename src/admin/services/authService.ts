@@ -60,11 +60,63 @@ export async function logoutUser(): Promise<void> {
   }
 }
 
+// ─── Rate Limiting Anti-Força-Bruta ──────────────────────────────────────────
+
+const RATE_LIMIT_KEY = 'kivora_auth_attempts';
+const MAX_ATTEMPTS = 7;
+const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutos
+
+function checkRateLimit(identifier: string): { blocked: boolean; minutesLeft?: number } {
+  try {
+    const raw = localStorage.getItem(RATE_LIMIT_KEY);
+    const store: Record<string, { count: number; lastAttempt: number }> = raw ? JSON.parse(raw) : {};
+    const entry = store[identifier];
+    if (!entry) return { blocked: false };
+    const elapsed = Date.now() - entry.lastAttempt;
+    if (elapsed > LOCKOUT_MS) {
+      delete store[identifier];
+      localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(store));
+      return { blocked: false };
+    }
+    if (entry.count >= MAX_ATTEMPTS) {
+      const minutesLeft = Math.ceil((LOCKOUT_MS - elapsed) / 60000);
+      return { blocked: true, minutesLeft };
+    }
+    return { blocked: false };
+  } catch {
+    return { blocked: false };
+  }
+}
+
+function recordFailedAttempt(identifier: string): void {
+  try {
+    const raw = localStorage.getItem(RATE_LIMIT_KEY);
+    const store: Record<string, { count: number; lastAttempt: number }> = raw ? JSON.parse(raw) : {};
+    const entry = store[identifier] || { count: 0, lastAttempt: 0 };
+    store[identifier] = { count: entry.count + 1, lastAttempt: Date.now() };
+    localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(store));
+  } catch {
+    // ignore
+  }
+}
+
+function clearRateLimit(identifier: string): void {
+  try {
+    const raw = localStorage.getItem(RATE_LIMIT_KEY);
+    const store: Record<string, { count: number; lastAttempt: number }> = raw ? JSON.parse(raw) : {};
+    delete store[identifier];
+    localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(store));
+  } catch {
+    // ignore
+  }
+}
+
 // ─── Login Inteligente ────────────────────────────────────────────────────────
 
 /**
  * Autentica o utilizador por Email, NIF ou Código de Parceiro
  * Identifica automaticamente se é Admin, Parceiro ou Cliente
+ * SEGURANÇA: Verificação obrigatória de senha em todas as vias de login.
  */
 export async function loginUser(
   identifier: string,
@@ -72,6 +124,20 @@ export async function loginUser(
 ): Promise<{ success: boolean; session?: KivoraUserSession; error?: string }> {
   const cleanId = identifier.trim().toLowerCase();
   const cleanPass = pass.trim();
+
+  // Verificar rate limiting antes de qualquer consulta
+  const rateCheck = checkRateLimit(cleanId);
+  if (rateCheck.blocked) {
+    return {
+      success: false,
+      error: `Demasiadas tentativas falhadas. Conta temporariamente bloqueada. Tente novamente em ${rateCheck.minutesLeft} minuto(s).`,
+    };
+  }
+
+  // Rejeitar senha vazia imediatamente
+  if (!cleanPass) {
+    return { success: false, error: 'A palavra-passe é obrigatória.' };
+  }
 
   // 1. Autenticação via Firebase Auth (se for e-mail)
   if (cleanId.includes('@')) {
@@ -140,7 +206,17 @@ export async function loginUser(
 
     if (!snapUsers.empty) {
       const u = snapUsers.docs[0].data();
-      if (u.password && u.password !== cleanPass) {
+
+      // SEGURANÇA [VULN-01/FIX]: Senha obrigatória — bloqueia acesso se não houver senha definida
+      if (!u.password) {
+        recordFailedAttempt(cleanId);
+        return {
+          success: false,
+          error: 'Esta conta ainda não tem palavra-passe definida. Contacte o administrador Kivora para ativar o seu acesso.',
+        };
+      }
+      if (u.password !== cleanPass) {
+        recordFailedAttempt(cleanId);
         return { success: false, error: 'Palavra-passe incorreta.' };
       }
 
@@ -170,6 +246,7 @@ export async function loginUser(
         return { success: false, error: 'A sua conta ainda aguarda aprovação pelo Administrador Kivora.' };
       }
 
+      clearRateLimit(cleanId);
       const session: KivoraUserSession = {
         id: snapUsers.docs[0].id,
         email: u.email,
@@ -198,7 +275,17 @@ export async function loginUser(
 
     if (matchedPartner) {
       const p = matchedPartner.data();
-      if (p.password && p.password !== cleanPass) {
+
+      // SEGURANÇA [VULN-05/FIX]: Senha SEMPRE obrigatória para parceiros
+      if (!p.password) {
+        recordFailedAttempt(cleanId);
+        return {
+          success: false,
+          error: 'A sua conta de parceiro ainda não tem palavra-passe definida. Contacte a equipa Kivora para ativar o seu acesso.',
+        };
+      }
+      if (p.password !== cleanPass) {
+        recordFailedAttempt(cleanId);
         return { success: false, error: 'Palavra-passe incorreta.' };
       }
       if (p.status === 'pending') {
@@ -211,6 +298,7 @@ export async function loginUser(
         };
       }
 
+      clearRateLimit(cleanId);
       const session: KivoraUserSession = {
         id: matchedPartner.id,
         email: p.email || cleanId,
@@ -237,6 +325,21 @@ export async function loginUser(
 
     if (matchedLicense) {
       const lic = matchedLicense.data();
+
+      // SEGURANÇA [VULN-01/FIX]: Senha SEMPRE obrigatória — nunca conceder acesso sem autenticação
+      if (!lic.password) {
+        recordFailedAttempt(cleanId);
+        return {
+          success: false,
+          error: 'A sua conta de cliente ainda não tem palavra-passe definida. Por favor contacte o seu revendedor Kivora ou o suporte para ativar o acesso ao portal.',
+        };
+      }
+      if (lic.password !== cleanPass) {
+        recordFailedAttempt(cleanId);
+        return { success: false, error: 'Palavra-passe incorreta.' };
+      }
+
+      clearRateLimit(cleanId);
       const session: KivoraUserSession = {
         id: matchedLicense.id,
         email: lic.client_email || cleanId,
@@ -251,6 +354,7 @@ export async function loginUser(
       return { success: true, session };
     }
 
+    recordFailedAttempt(cleanId);
     return { success: false, error: 'Nenhuma conta encontrada com estes dados de acesso.' };
   } catch (err: any) {
     console.error('Erro na consulta do Firebase auth:', err);
@@ -258,17 +362,48 @@ export async function loginUser(
   }
 }
 
-// ─── Criação Automática de Credenciais ─────────────────────────────────────────
+// ─── Criação Automática de Credenciais ──────────────────────────────────────────────
+
+/**
+ * Gera uma palavra-passe temporária segura de 10 caracteres
+ * Formato: 2 maiúsculas + 4 minúsculas + 2 dígitos + 2 especiais
+ */
+export function generateTempPassword(): string {
+  const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const lower = 'abcdefghjkmnpqrstuvwxyz';
+  const digits = '23456789';
+  const special = '@#!$';
+  const all = upper + lower + digits + special;
+  const rand = (chars: string) => chars[Math.floor(Math.random() * chars.length)];
+  const password = [
+    rand(upper), rand(upper),
+    rand(lower), rand(lower), rand(lower), rand(lower),
+    rand(digits), rand(digits),
+    rand(special),
+    ...Array.from({ length: 1 }, () => rand(all)),
+  ];
+  // Baralhar
+  for (let i = password.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [password[i], password[j]] = [password[j], password[i]];
+  }
+  return password.join('');
+}
 
 /**
  * Cria ou atualiza conta de acesso do cliente no Firebase
+ * SEGURANÇA: A senha é obrigatória. Se não fornecida, gera uma temporária.
+ * Retorna a senha gerada (em texto claro) para ser enviada por email.
+ * NOTA: Migrar para Firebase Auth + bcrypt numa versão futura.
  */
 export async function createClientAccount(params: {
   email: string;
   name: string;
   nif: string;
   licenseKey?: string;
-}): Promise<void> {
+  password?: string; // senha inicial; se omitida, gera automática
+}): Promise<{ tempPassword: string }> {
+  const tempPassword = params.password || generateTempPassword();
   const userId = (params.email || params.nif).toLowerCase().replace(/[^a-z0-9]/g, '_');
   await setDoc(doc(db, 'users', userId), {
     email: params.email.toLowerCase(),
@@ -277,7 +412,29 @@ export async function createClientAccount(params: {
     role: 'cliente',
     status: 'active',
     licenseKey: params.licenseKey || null,
+    password: tempPassword, // NOTA: migrar para hash bcrypt em versão futura
+    passwordSetAt: Date.now(),
     createdAt: Date.now(),
+  }, { merge: true });
+
+  // Também guarda na coleção licenses para suporte ao login por email de licença
+  if (params.licenseKey) {
+    await setDoc(doc(db, 'licenses', params.licenseKey), {
+      password: tempPassword,
+      passwordSetAt: Date.now(),
+    }, { merge: true });
+  }
+
+  return { tempPassword };
+}
+
+/**
+ * Define a palavra-passe para um documento de licença especificamente
+ */
+export async function setClientPassword(licenseKey: string, password: string): Promise<void> {
+  await setDoc(doc(db, 'licenses', licenseKey), {
+    password: password,
+    passwordSetAt: Date.now(),
   }, { merge: true });
 }
 
