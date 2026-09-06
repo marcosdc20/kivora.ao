@@ -4,6 +4,7 @@ import { AdminTopbar, StatCard } from './AdminComponents';
 import { AdminUser } from './types';
 import { db } from '../lib/firebase';
 import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
+import { notify } from '../services/notificationService';
 
 const NIVEL_BADGES: Record<string, { label: string; color: string }> = {
   super_admin: { label: 'Super Admin', color: 'bg-purple-50 text-purple-700 border-purple-200' },
@@ -94,9 +95,9 @@ export const AdminUtilizadores: React.FC = () => {
       setNome('');
       setEmail('');
       setFuncao('');
-      alert(`Administrador ${nome} registado com sucesso no Firebase!`);
+      notify.success(`Administrador ${nome} registado com sucesso no Firebase!`);
     } catch (err: any) {
-      alert('Erro ao registar administrador no Firebase: ' + err.message);
+      notify.error('Erro ao registar administrador no Firebase: ' + err.message);
     }
   };
 

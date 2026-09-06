@@ -18,6 +18,7 @@ import {
   PartnerLicensingPolicy, getAdminSeatCost
 } from './services/partnerDebtService';
 import { sendLicenseToClientEmail, sendClientWelcomeEmail } from '../services/siteEmailService';
+import { notify, confirmDialog, alertDialog } from '../services/notificationService';
 import type { KivoraLicense, PlanType } from './types';
 
 // ============================
@@ -80,14 +81,23 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
   };
 
   const handleSendLicenseEmail = async (lic: KivoraLicense) => {
-    let targetEmail = lic.client_email;
+    const targetEmail = lic.client_email;
     if (!targetEmail) {
-      const emailInput = prompt(`Esta licença não tem e-mail associado. Insira o e-mail do cliente ${lic.company_name}:`);
-      if (!emailInput) return;
-      targetEmail = emailInput.trim();
+      alertDialog({
+        title: 'E-mail em Falta',
+        message: `Esta licença (${lic.company_name}) não possui e-mail associado. Edite os dados do cliente para associar um e-mail.`,
+        type: 'warning',
+      });
+      return;
     }
 
-    if (!confirm(`Enviar a chave de licença oficial por e-mail para ${targetEmail}?`)) return;
+    const confirmed = await confirmDialog({
+      title: 'Enviar Licença por E-mail',
+      message: `Deseja enviar a chave de licença oficial por e-mail para ${targetEmail}?`,
+      confirmText: 'Enviar Agora',
+      cancelText: 'Cancelar',
+    });
+    if (!confirmed) return;
 
     setActionLoading(lic.id);
     try {
@@ -103,24 +113,35 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
       });
 
       if (res.success) {
-        alert(`Licença enviada com sucesso para ${targetEmail}!`);
+        notify.success(`Licença enviada com sucesso para ${targetEmail}!`);
       } else {
-        alert(`Não foi possível enviar o e-mail: ${res.error}\n\nVerifique se o serviço de e-mails está configurado em Configurações ➔ Serviço de E-mails.`);
+        alertDialog({
+          title: 'Aviso de Envio',
+          message: `Não foi possível enviar o e-mail: ${res.error}\n\nVerifique as credenciais em Configurações ➔ Serviço de E-mails.`,
+          type: 'warning',
+        });
       }
     } catch (err: any) {
-      alert('Erro ao enviar e-mail: ' + err.message);
+      notify.error('Erro ao enviar e-mail: ' + err.message);
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleRevoke = async (key: string) => {
-    if (!confirm(`Tem certeza que deseja revogar a licença ${key}?`)) return;
+    const confirmed = await confirmDialog({
+      title: 'Revogar Licença',
+      message: `Tem certeza que deseja revogar a licença ${key}? Ela será imediatamente bloqueada no Kivora ERP.`,
+      confirmText: 'Sim, Revogar',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
     setActionLoading(key);
     try {
       await revokeLicense(key);
+      notify.success('Licença revogada com sucesso.');
     } catch (e: any) {
-      alert('Erro ao revogar licença: ' + e.message);
+      notify.error('Erro ao revogar licença: ' + e.message);
     } finally {
       setActionLoading(null);
     }
@@ -130,33 +151,46 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
     setActionLoading(key);
     try {
       await reactivateLicense(key);
+      notify.success('Licença reativada com sucesso!');
     } catch (e: any) {
-      alert('Erro ao reativar licença: ' + e.message);
+      notify.error('Erro ao reativar licença: ' + e.message);
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleReleaseDevice = async (key: string) => {
-    if (!confirm(`Desvincular o computador atual desta licença (${key})? O cliente poderá ativar num PC novo.`)) return;
+    const confirmed = await confirmDialog({
+      title: 'Desvincular Dispositivo',
+      message: `Desvincular o computador atual desta licença (${key})? O cliente poderá ativar num PC novo.`,
+      confirmText: 'Desvincular Agora',
+    });
+    if (!confirmed) return;
     setActionLoading(key);
     try {
       await releaseLicenseFromDevice(key);
-      alert('Dispositivo desvinculado com sucesso!');
+      notify.success('Dispositivo desvinculado com sucesso!');
     } catch (e: any) {
-      alert('Erro ao desvincular dispositivo: ' + e.message);
+      notify.error('Erro ao desvincular dispositivo: ' + e.message);
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleDelete = async (key: string) => {
-    if (!confirm(`APAGAR PERMANENTEMENTE a licença ${key} do Firebase?`)) return;
+    const confirmed = await confirmDialog({
+      title: 'Apagar Licença Definitivamente',
+      message: `Deseja APAGAR PERMANENTEMENTE a licença ${key} do Firebase? Esta operação não pode ser revertida.`,
+      confirmText: 'Apagar Permanentemente',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
     setActionLoading(key);
     try {
       await deleteLicense(key);
+      notify.success('Licença excluída com sucesso do Firebase.');
     } catch (e: any) {
-      alert('Erro ao apagar licença: ' + e.message);
+      notify.error('Erro ao apagar licença: ' + e.message);
     } finally {
       setActionLoading(null);
     }
@@ -169,8 +203,9 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
     try {
       await extendLicenseExpiry(extendModalKey, extendDays);
       setExtendModalKey(null);
+      notify.success(`Validade da licença estendida em ${extendDays} dias com sucesso!`);
     } catch (e: any) {
-      alert('Erro ao estender validade: ' + e.message);
+      notify.error('Erro ao estender validade: ' + e.message);
     } finally {
       setActionLoading(null);
     }
@@ -188,9 +223,9 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
     try {
       await updateLicenseSeats(seatsModalLic.id, newExtraSeats);
       setSeatsModalLic(null);
-      alert(`Terminais atualizados com sucesso! A licença agora possui ${1 + newExtraSeats} postos de trabalho.`);
+      notify.success(`Terminais atualizados com sucesso! A licença agora possui ${1 + newExtraSeats} postos de trabalho.`);
     } catch (err: any) {
-      alert('Erro ao atualizar postos/terminais no Firebase: ' + err.message);
+      notify.error('Erro ao atualizar postos/terminais no Firebase: ' + err.message);
     } finally {
       setActionLoading(null);
     }
@@ -420,10 +455,15 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                           {lic.is_provisional && (
                             <button
                               onClick={async () => {
-                                if (confirm(`Promover a licença ${lic.id} para definitiva (${lic.provisional_target_plan || lic.plan_type})?`)) {
+                                const confirmed = await confirmDialog({
+                                  title: 'Promover Licença Provisória',
+                                  message: `Deseja promover a licença ${lic.id} para definitiva (${lic.provisional_target_plan || lic.plan_type})? A regularização do crédito será confirmada.`,
+                                  confirmText: 'Promover para Definitiva',
+                                });
+                                if (confirmed) {
                                   await promoteProvisionalLicenseToDefinitive(lic.id, lic.provisional_target_plan || lic.plan_type);
                                   refresh();
-                                  alert('Licença promovida a definitiva com sucesso!');
+                                  notify.success('Licença promovida a definitiva com sucesso!');
                                 }
                               }}
                               className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
@@ -740,7 +780,7 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!companyName || !companyNif) {
-      alert('Por favor informe o Nome da Empresa e o NIF.');
+      notify.warning('Por favor informe o Nome da Empresa e o NIF.');
       return;
     }
 
@@ -792,9 +832,10 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
       }
 
       setCreatedLicense(lic);
+      notify.success('Licença emitida e gravada no Firebase com sucesso!');
     } catch (err: any) {
       console.error('Erro ao gerar licença no Firebase:', err);
-      alert('Erro ao gravar no Firebase: ' + err.message);
+      notify.error('Erro ao gravar no Firebase: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -816,7 +857,10 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
             <p className="text-slate-400 text-[10px] uppercase tracking-widest font-bold">Chave de Licença Oficial</p>
             <p className="font-mono text-2xl font-black text-blue-400 tracking-widest select-all">{createdLicense.id}</p>
             <button
-              onClick={() => navigator.clipboard.writeText(createdLicense.id)}
+              onClick={() => {
+                navigator.clipboard.writeText(createdLicense.id);
+                notify.success('Chave de licença copiada para a área de transferência!');
+              }}
               className="text-slate-400 hover:text-white text-xs font-bold flex items-center gap-1.5 mx-auto transition-colors bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl"
             >
               <Copy className="w-3.5 h-3.5" strokeWidth={2} />
@@ -843,10 +887,14 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
                     licenseKey: createdLicense.id,
                     planName: getPlanLabel(createdLicense.plan_type),
                   });
-                  if (res.success) alert(`Credenciais e Licença enviadas com sucesso para ${createdLicense.client_email}!`);
-                  else alert(`Não foi possível enviar o e-mail: ${res.error}`);
+                  if (res.success) notify.success(`Credenciais e Licença enviadas com sucesso para ${createdLicense.client_email}!`);
+                  else notify.error(`Não foi possível enviar o e-mail: ${res.error}`);
                 } else {
-                  alert('Esta licença não tem e-mail de cliente associado.');
+                  alertDialog({
+                    title: 'E-mail Ausente',
+                    message: 'Esta licença não tem e-mail de cliente associado para envio automático.',
+                    type: 'warning',
+                  });
                 }
               }}
               className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 rounded-2xl shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 cursor-pointer transition-all"

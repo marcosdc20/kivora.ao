@@ -18,6 +18,7 @@ import {
   initializeDefaultDeliveryRates
 } from './services/storeService';
 import { STORE_PRODUCTS } from '../pages/LojaPage';
+import { notify, confirmDialog } from '../services/notificationService';
 
 export const AdminLoja: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'produtos' | 'encomendas' | 'taxas'>('produtos');
@@ -118,7 +119,7 @@ export const AdminLoja: React.FC = () => {
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct || !editingProduct.name || !editingProduct.priceAOA) {
-      alert('Por favor, preencha os campos obrigatórios.');
+      notify.warning('Por favor, preencha os campos obrigatórios.');
       return;
     }
 
@@ -137,19 +138,28 @@ export const AdminLoja: React.FC = () => {
     if (res.success) {
       setIsProductModalOpen(false);
       setEditingProduct(null);
+      notify.success('Produto guardado na loja oficial com sucesso!');
       await loadData();
     } else {
-      alert('Erro ao gravar produto: ' + res.error);
+      notify.error('Erro ao gravar produto: ' + res.error);
     }
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (!window.confirm('Tem a certeza que deseja eliminar este produto?')) return;
+    const confirmed = await confirmDialog({
+      title: 'Eliminar Produto',
+      message: 'Tem a certeza que deseja eliminar este produto da loja oficial?',
+      confirmText: 'Sim, Eliminar',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
+
     const res = await deleteStoreProduct(id);
     if (res.success) {
+      notify.success('Produto eliminado com sucesso.');
       await loadData();
     } else {
-      alert('Erro ao eliminar produto.');
+      notify.error('Erro ao eliminar produto.');
     }
   };
 

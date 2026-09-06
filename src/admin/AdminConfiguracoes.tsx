@@ -4,7 +4,8 @@ import {
   Database, Download, Loader2, Rocket, RotateCcw,
   X, GitBranch, CreditCard, Building2, ExternalLink, Plus, Tag,
   TrendingUp, Award, Briefcase, MapPin, Trash2, Monitor,
-  Bell, Megaphone, Video, Youtube, Mail, Send, CheckCircle2, AlertTriangle
+  Bell, Megaphone, Video, Youtube, Mail, Send, CheckCircle2, AlertTriangle,
+  Bot, Sparkles, Eye, EyeOff, Key
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -21,6 +22,12 @@ import {
   subscribeSiteEmailConfig, saveSiteEmailConfig,
   testSiteEmailConnection
 } from '../services/siteEmailService';
+import {
+  AIAssistantConfig, DEFAULT_AI_CONFIG, AIAssistantProvider,
+  subscribeAIAssistantConfig, saveAIAssistantConfig,
+  testAIConnection, detectAIProvider
+} from '../services/aiAssistantService';
+import { notify, confirmDialog, alertDialog } from '../services/notificationService';
 import {
   PURGE_TARGETS, createPrePurgeBackup, executePurge
 } from './services/databasePurgeService';
@@ -85,12 +92,24 @@ const INITIAL_RELEASES: UpdateRelease[] = [
   }
 ];
 
-type ConfigTab = 'geral' | 'emails' | 'precos' | 'videochamada' | 'videos' | 'notificacoes' | 'comunicados' | 'metricas' | 'marcas' | 'investidores' | 'provincias' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups' | 'zona-perigo';
+type ConfigTab = 'geral' | 'ia-assistente' | 'emails' | 'precos' | 'videochamada' | 'videos' | 'notificacoes' | 'comunicados' | 'metricas' | 'marcas' | 'investidores' | 'provincias' | 'contactos' | 'links' | 'bancos' | 'agt' | 'updates' | 'backups' | 'zona-perigo';
 
 export const AdminConfiguracoes: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ConfigTab>('geral');
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  // AI Assistant Config State
+  const [aiConfig, setAiConfig] = useState<AIAssistantConfig>(DEFAULT_AI_CONFIG);
+  const [savingAI, setSavingAI] = useState(false);
+  const [testingAI, setTestingAI] = useState(false);
+  const [testAIResult, setTestAIResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [showAIKey, setShowAIKey] = useState(false);
+
+  useEffect(() => {
+    const unsub = subscribeAIAssistantConfig((cfg) => setAiConfig(cfg));
+    return () => unsub();
+  }, []);
 
   // Master Reset / Purge State
   const [selectedPurgeTargets, setSelectedPurgeTargets] = useState<string[]>(PURGE_TARGETS.map(t => t.id));
@@ -219,8 +238,9 @@ export const AdminConfiguracoes: React.FC = () => {
       await saveSystemSettings(settings);
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 4000);
+      notify.success('Configurações gerais guardadas com sucesso no Firebase!');
     } catch (err: any) {
-      alert('Erro ao guardar configurações: ' + err.message);
+      notify.error('Erro ao guardar configurações: ' + err.message);
     } finally {
       setSaving(false);
     }
@@ -277,10 +297,10 @@ export const AdminConfiguracoes: React.FC = () => {
       setLastBackup(now);
       localStorage.setItem('kivora_last_backup_date', now);
 
-      alert('Backup completo da nuvem Firebase exportado com sucesso em JSON!');
+      notify.success('Backup completo da nuvem Firebase exportado com sucesso em JSON!');
     } catch (error: any) {
       console.error('Erro ao fazer backup:', error);
-      alert('Erro ao exportar dados: ' + error.message);
+      notify.error('Erro ao exportar dados: ' + error.message);
     } finally {
       setIsExporting(false);
     }
@@ -293,9 +313,9 @@ export const AdminConfiguracoes: React.FC = () => {
       await saveSiteEmailConfig(emailConfig);
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 4000);
-      alert('Configurações do Serviço de E-mail guardadas no Firebase com sucesso!');
+      notify.success('Configurações do Serviço de E-mail guardadas no Firebase com sucesso!');
     } catch (err: any) {
-      alert('Erro ao guardar configurações de e-mail: ' + (err?.message || 'Tente novamente.'));
+      notify.error('Erro ao guardar configurações de e-mail: ' + (err?.message || 'Tente novamente.'));
     } finally {
       setSavingEmail(false);
     }
@@ -304,7 +324,7 @@ export const AdminConfiguracoes: React.FC = () => {
   const handleTestEmailSend = async () => {
     const target = testEmailAddress.trim() || emailConfig.senderEmail;
     if (!target) {
-      alert('Por favor insira um endereço de e-mail de destino para o teste.');
+      notify.warning('Por favor insira um endereço de e-mail de destino para o teste.');
       return;
     }
 
@@ -344,13 +364,61 @@ export const AdminConfiguracoes: React.FC = () => {
     setShowUpdateModal(false);
     setNewVersion('');
     setNewChangelog('');
-    alert(`Versão v${newVersion} publicada no canal ${newChannel.toUpperCase()}! Rollout para ${newRollout}% dos terminais.`);
+    notify.success(`Versão v${newVersion} publicada no canal ${newChannel.toUpperCase()}! Rollout para ${newRollout}% dos terminais.`);
   };
 
-  const handleRollback = (rel: UpdateRelease) => {
-    if (confirm(`Deseja acionar o ROLLBACK de emergência para a versão v${rel.version}? Todos os terminais reverterão para a versão estável anterior.`)) {
+  const handleRollback = async (rel: UpdateRelease) => {
+    const confirmed = await confirmDialog({
+      title: 'Rollback de Emergência',
+      message: `Deseja acionar o ROLLBACK de emergência para a versão v${rel.version}? Todos os terminais reverterão para a versão estável anterior.`,
+      confirmText: 'Acionar Rollback',
+      variant: 'danger',
+    });
+    if (confirmed) {
       setReleases(releases.map(r => r.id === rel.id ? { ...r, status: 'rollback', rolloutPercentage: 0 } : r));
-      alert(`Rollback acionado para a versão v${rel.version}!`);
+      notify.warning(`Rollback acionado para a versão v${rel.version}!`);
+    }
+  };
+
+  const handleAIKeyChange = (newKey: string) => {
+    const detected = detectAIProvider(newKey);
+    setAiConfig((prev) => ({
+      ...prev,
+      apiKey: newKey,
+      provider: detected.provider,
+      model: prev.provider !== detected.provider ? detected.defaultModel : prev.model,
+    }));
+  };
+
+  const handleSaveAIConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingAI(true);
+    try {
+      await saveAIAssistantConfig(aiConfig);
+      notify.success('Configurações do Assistente IA guardadas com sucesso no Firebase!');
+    } catch (err: any) {
+      notify.error('Erro ao guardar configurações de IA: ' + (err?.message || err));
+    } finally {
+      setSavingAI(false);
+    }
+  };
+
+  const handleTestAI = async () => {
+    setTestingAI(true);
+    setTestAIResult(null);
+    try {
+      const res = await testAIConnection(aiConfig);
+      setTestAIResult(res);
+      if (res.success) {
+        notify.success('Conexão com a IA estabelecida com sucesso!');
+      } else {
+        notify.warning('Falha no teste: ' + res.message);
+      }
+    } catch (err: any) {
+      setTestAIResult({ success: false, message: err?.message || 'Erro de conexão' });
+      notify.error('Erro ao testar IA: ' + err.message);
+    } finally {
+      setTestingAI(false);
     }
   };
 
@@ -426,7 +494,11 @@ export const AdminConfiguracoes: React.FC = () => {
       setPurgeConfirmationPhrase('');
       setPurgeAdminPassword('');
       setPurgeConsentChecked(false);
-      alert(`Master Reset Concluído com Sucesso! Foram eliminados ${result.totalDeleted} documentos operacionais. O sistema está limpo para ser utilizado do zero.`);
+      alertDialog({
+        title: 'Master Reset Concluído',
+        message: `Foram eliminados ${result.totalDeleted} documentos operacionais do Firebase. O sistema está limpo e pronto para ser utilizado do zero.`,
+        type: 'info',
+      });
     } catch (err: any) {
       console.error('Erro no Master Reset:', err);
       setPurgeError('Erro durante a execução do Master Reset: ' + (err?.message || 'Falha na comunicação com o banco de dados.'));
@@ -458,6 +530,7 @@ export const AdminConfiguracoes: React.FC = () => {
         <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
           {[
             { id: 'geral', label: 'Geral & Empresa', icon: <Building2 className="w-4 h-4" /> },
+            { id: 'ia-assistente', label: 'IA & Assistente Virtual', icon: <Bot className="w-4 h-4 text-orange-500" /> },
             { id: 'emails', label: 'Serviço de E-mails & API', icon: <Mail className="w-4 h-4" /> },
             { id: 'precos', label: 'Planos & Preços', icon: <Tag className="w-4 h-4" /> },
             { id: 'videochamada', label: 'Videochamada & Tarifas/Min', icon: <Video className="w-4 h-4" /> },
@@ -571,6 +644,241 @@ export const AdminConfiguracoes: React.FC = () => {
           </form>
         )}
 
+        {/* TAB: IA & ASSISTENTE VIRTUAL DO SITE */}
+        {activeTab === 'ia-assistente' && (
+          <div className="space-y-6">
+            <form onSubmit={handleSaveAIConfig} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+              <div className="border-b border-slate-100 pb-4 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#FF6500] to-amber-400 text-white flex items-center justify-center shadow-xs">
+                      <Bot className="w-4 h-4" />
+                    </div>
+                    <h3 className="text-base font-black text-slate-900">Assistente Virtual de IA (Website 24/7)</h3>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Configure a chave de API de qualquer provedor de IA para atender visitantes com conhecimento certificado sobre o KIVORA ERP.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 text-xs font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>Sincronizado no Firestore</span>
+                </div>
+              </div>
+
+              {/* Status do Assistente & Toggle Ativação */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
+                <div>
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Ativação do Bot no Site Público</h4>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Quando ativo, o botão flutuante inteligente surge no canto inferior direito do site oficial para responder a visitantes.
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={aiConfig.enabled !== false}
+                    onChange={(e) => setAiConfig((prev) => ({ ...prev, enabled: e.target.checked }))}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                </label>
+              </div>
+
+              {/* Campo de Chave API com Auto-Detecção */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <Key className="w-3.5 h-3.5 text-blue-600" />
+                    Chave API de IA (Qualquer Provedor)
+                  </label>
+                  <span className="text-[11px] font-bold text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-lg">
+                    Auto-Detecção Ativa
+                  </span>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type={showAIKey ? 'text' : 'password'}
+                    value={aiConfig.apiKey}
+                    onChange={(e) => handleAIKeyChange(e.target.value)}
+                    placeholder="Cole aqui a sua chave (ex: AIzaSy..., sk-proj-..., gsk_..., sk-or-..., sk-ant-...)"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none pr-24 transition-all"
+                  />
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowAIKey((prev) => !prev)}
+                      className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-200/60 transition-colors cursor-pointer"
+                      title={showAIKey ? 'Ocultar chave' : 'Mostrar chave'}
+                    >
+                      {showAIKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Banner de Provedor Detectado */}
+                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                  <span className="text-slate-500 font-medium">Provedor Reconhecido:</span>
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold capitalize bg-slate-900 text-white shadow-xs">
+                    {aiConfig.provider}
+                  </span>
+                  <span className="text-slate-400 text-[11px]">
+                    (Pode também alterar manualmente abaixo caso deseje outro endpoint)
+                  </span>
+                </div>
+              </div>
+
+              {/* Seleção de Provedor & Modelo */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 uppercase">Provedor Selecionado</label>
+                  <select
+                    value={aiConfig.provider}
+                    onChange={(e) => {
+                      const p = e.target.value as AIAssistantProvider;
+                      const defaults: Record<AIAssistantProvider, string> = {
+                        gemini: 'gemini-1.5-flash',
+                        openai: 'gpt-4o-mini',
+                        groq: 'llama-3.3-70b-versatile',
+                        openrouter: 'google/gemini-2.0-flash-exp:free',
+                        anthropic: 'claude-3-5-haiku-20241022',
+                        custom: 'gpt-4o-mini',
+                      };
+                      setAiConfig((prev) => ({ ...prev, provider: p, model: defaults[p] }));
+                    }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:bg-white focus:border-blue-600 outline-none cursor-pointer"
+                  >
+                    <option value="gemini">Google Gemini (Recomendado / Mais Rápido)</option>
+                    <option value="openai">OpenAI (ChatGPT / GPT-4o-mini)</option>
+                    <option value="groq">Groq (Llama 3.3 70B - Velocidade Extrema)</option>
+                    <option value="openrouter">OpenRouter (Multi-Modelos Unificados)</option>
+                    <option value="anthropic">Anthropic (Claude 3.5)</option>
+                    <option value="custom">Endpoint Customizado / Próprio</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 uppercase">Modelo de IA</label>
+                  <input
+                    type="text"
+                    value={aiConfig.model}
+                    onChange={(e) => setAiConfig((prev) => ({ ...prev, model: e.target.value }))}
+                    placeholder="Ex: gemini-1.5-flash, gpt-4o-mini, llama-3.3-70b-versatile"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 uppercase">Temperatura / Criatividade</label>
+                  <div className="flex items-center gap-3 pt-1">
+                    <input
+                      type="range"
+                      min="0.1"
+                      max="1.0"
+                      step="0.1"
+                      value={aiConfig.temperature ?? 0.7}
+                      onChange={(e) => setAiConfig((prev) => ({ ...prev, temperature: parseFloat(e.target.value) }))}
+                      className="flex-1 accent-blue-600 cursor-pointer"
+                    />
+                    <span className="font-mono font-bold text-xs text-slate-800 w-8 text-right">
+                      {aiConfig.temperature ?? 0.7}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Endpoint Customizado (se provider === 'custom') */}
+              {aiConfig.provider === 'custom' && (
+                <div className="space-y-1.5 p-4 rounded-2xl bg-amber-50 border border-amber-200">
+                  <label className="text-xs font-bold text-amber-900 uppercase">URL do Endpoint Customizado (OpenAI Compatível)</label>
+                  <input
+                    type="text"
+                    value={aiConfig.customEndpoint || ''}
+                    onChange={(e) => setAiConfig((prev) => ({ ...prev, customEndpoint: e.target.value }))}
+                    placeholder="https://meu-servidor-ai.com/v1/chat/completions"
+                    className="w-full bg-white border border-amber-300 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-slate-900 focus:border-blue-600 outline-none"
+                  />
+                </div>
+              )}
+
+              {/* Mensagem de Boas-Vindas */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase">Mensagem Inicial de Boas-Vindas aos Visitantes</label>
+                <textarea
+                  rows={2}
+                  value={aiConfig.welcomeMessage || ''}
+                  onChange={(e) => setAiConfig((prev) => ({ ...prev, welcomeMessage: e.target.value }))}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:bg-white focus:border-blue-600 outline-none leading-relaxed"
+                  placeholder="Mensagem que o assistente exibe ao abrir a janela de chat..."
+                />
+              </div>
+
+              {/* Base de Conhecimento e Prompt de Sistema */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-700 uppercase">
+                    Base de Conhecimento Kivora & Prompt do Sistema (Grounded)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setAiConfig((prev) => ({ ...prev, systemPrompt: DEFAULT_AI_CONFIG.systemPrompt }))}
+                    className="text-[11px] font-bold text-blue-600 hover:text-blue-700 cursor-pointer"
+                  >
+                    Restaurar Conhecimento Padrão
+                  </button>
+                </div>
+                <textarea
+                  rows={6}
+                  value={aiConfig.systemPrompt || ''}
+                  onChange={(e) => setAiConfig((prev) => ({ ...prev, systemPrompt: e.target.value }))}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs font-mono font-medium text-slate-800 focus:bg-white focus:border-blue-600 outline-none leading-relaxed"
+                  placeholder="Instruções de sistema e base factual..."
+                />
+                <p className="text-[11px] text-slate-400">
+                  Inclui a certificação AGT (Decreto 71/25), funcionamento 100% offline, tabela de preços (25k/130k/250k/1.5M), licenças a crédito para parceiros e contactos.
+                </p>
+              </div>
+
+              {/* Feedback do Teste de Conexão */}
+              {testAIResult && (
+                <div
+                  className={`p-4 rounded-2xl border text-xs font-bold leading-relaxed animate-fadeIn ${
+                    testAIResult.success
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      : 'bg-rose-50 text-rose-800 border-rose-200'
+                  }`}
+                >
+                  {testAIResult.success ? '✓ ' : '✕ '}
+                  {testAIResult.message}
+                </div>
+              )}
+
+              {/* Ações */}
+              <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={handleTestAI}
+                  disabled={testingAI || !aiConfig.apiKey}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-5 py-2.5 rounded-xl border border-slate-200 transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {testingAI ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-orange-500" />}
+                  <span>Testar Conexão com a IA</span>
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={savingAI}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer transition-all"
+                >
+                  {savingAI ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>Guardar Configurações de IA</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
         {/* TAB: SERVIÇO DE E-MAILS & NOTIFICAÇÕES (PORTAIS, CLIENTES & PARCEIROS) */}
         {activeTab === 'emails' && (
           <div className="space-y-6">
@@ -602,7 +910,7 @@ export const AdminConfiguracoes: React.FC = () => {
                         smtpPort: 465,
                         smtpUser: 'kivora.angola@gmail.com',
                       }));
-                      alert('Predefinição Google Gmail (kivora.angola@gmail.com) selecionada. Insira a sua Palavra-passe de Aplicação de 16 caracteres.');
+                      notify.info('Predefinição Google Gmail selecionada. Insira a sua Palavra-passe de Aplicação de 16 caracteres.');
                     }}
                     className={`px-3 py-1.5 border rounded-xl text-xs font-bold transition-all shadow-xs ${
                       emailConfig.provider === 'gmail' 
@@ -621,7 +929,7 @@ export const AdminConfiguracoes: React.FC = () => {
                         senderEmail: prev.senderEmail || 'kivora.angola@gmail.com',
                         senderName: prev.senderName || 'KIVORA ERP',
                       }));
-                      alert('Predefinição Resend API selecionada.');
+                      notify.info('Predefinição Resend API selecionada.');
                     }}
                     className={`px-3 py-1.5 border rounded-xl text-xs font-bold transition-all shadow-xs ${
                       emailConfig.provider === 'resend' 
@@ -639,7 +947,7 @@ export const AdminConfiguracoes: React.FC = () => {
                         provider: 'sendgrid',
                         senderName: prev.senderName || 'KIVORA ERP',
                       }));
-                      alert('Predefinição SendGrid selecionada.');
+                      notify.info('Predefinição SendGrid selecionada.');
                     }}
                     className={`px-3 py-1.5 border rounded-xl text-xs font-bold transition-all shadow-xs ${
                       emailConfig.provider === 'sendgrid' 

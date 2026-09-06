@@ -7,6 +7,7 @@ import { AdminTopbar, StatusBadge } from './AdminComponents';
 import { useCompanies, useLicenses } from './hooks/useFirebase';
 import { FirebaseAuthModal } from './components/FirebaseAuthModal';
 import { Empresa } from './types';
+import { notify, confirmDialog } from '../services/notificationService';
 
 // ============================
 // EMPRESAS LIST — Sincronizado Firebase
@@ -94,19 +95,28 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
       setEmail('');
       setPhone('');
       setAddress('');
+      notify.success(`Empresa ${nome} registada com sucesso no Firebase!`);
     } catch (err: any) {
-      alert('Erro ao criar empresa no Firebase: ' + err.message);
+      notify.error('Erro ao criar empresa no Firebase: ' + err.message);
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDeleteCompany = async (id: string, name: string) => {
-    if (!confirm(`Tem certeza que deseja apagar a empresa "${name}" do Firebase?`)) return;
+    const confirmed = await confirmDialog({
+      title: 'Apagar Empresa',
+      message: `Tem certeza que deseja apagar a empresa "${name}" do Firebase?`,
+      confirmText: 'Sim, Apagar',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
+
     try {
       await deleteCompany(id);
+      notify.success(`Empresa "${name}" apagada com sucesso.`);
     } catch (err: any) {
-      alert('Erro ao apagar empresa: ' + err.message);
+      notify.error('Erro ao apagar empresa: ' + err.message);
     }
   };
 

@@ -12,6 +12,7 @@ import {
   SupportTicket, createSupportTicket, sendTicketMessage, subscribeClientTickets
 } from '../admin/services/supportService';
 import { KivoraLicense } from '../admin/types';
+import { notify } from '../services/notificationService';
 
 interface AreaClientePageProps {
   onNavigatePage: (page: any) => void;
@@ -146,9 +147,9 @@ export const AreaClientePage: React.FC<AreaClientePageProps> = ({ onNavigatePage
       setTicketSubject('');
       setTicketMessage('');
       setSelectedTicket(newTk);
-      alert(`Chamado de suporte #${newTk.ticket_number} enviado com sucesso via Firebase!`);
+      notify.success(`Chamado de suporte #${newTk.ticket_number} enviado com sucesso via Firebase!`);
     } catch (err: any) {
-      alert('Erro ao criar ticket: ' + err.message);
+      notify.error('Erro ao criar ticket: ' + err.message);
     } finally {
       setSubmittingTicket(false);
     }
@@ -167,7 +168,7 @@ export const AreaClientePage: React.FC<AreaClientePageProps> = ({ onNavigatePage
       });
       setChatReply('');
     } catch (err: any) {
-      alert('Erro ao enviar mensagem: ' + err.message);
+      notify.error('Erro ao enviar mensagem: ' + err.message);
     }
   };
 
@@ -627,7 +628,7 @@ export const AreaClientePage: React.FC<AreaClientePageProps> = ({ onNavigatePage
                     {new Intl.NumberFormat('pt-AO').format(clientLicense?.price_aoa || 250000)} Kz
                   </strong>
                   <button
-                    onClick={() => alert('Download do recibo oficial da fatura gerado com sucesso.')}
+                    onClick={() => notify.info('Download do recibo oficial da fatura iniciado com sucesso.')}
                     className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 mt-1 cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
@@ -670,7 +671,7 @@ export const AreaClientePage: React.FC<AreaClientePageProps> = ({ onNavigatePage
                 </div>
                 <p className="text-slate-500 text-xs">Guia passo a passo de operação fiscal, emissão de faturas e fecho de caixa.</p>
                 <button
-                  onClick={() => alert('Download do manual iniciado com sucesso.')}
+                  onClick={() => notify.info('Download do manual de utilizador iniciado.')}
                   className="w-full bg-white hover:bg-slate-100 text-slate-800 font-bold text-xs py-2.5 rounded-xl border border-slate-200 flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                 >
                   <Download className="w-4 h-4" />

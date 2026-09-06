@@ -16,6 +16,7 @@ import laptopImg from '../assets/kivora/pc-laptop-kivora.png';
 
 import { triggerKivoraConfetti } from '../utils/confetti';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+import { notify, alertDialog } from '../services/notificationService';
 
 interface DownloadPageProps {
   onOpenDemoModal: (subject?: string) => void;
@@ -80,8 +81,13 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        notify.success('Download do instalador oficial Kivora ERP iniciado!');
       } else {
-        alert('O link de download direto ainda não foi configurado no painel administrativo.');
+        alertDialog({
+          title: 'Download Indisponível',
+          message: 'O link de download direto ainda não foi configurado no painel administrativo. Por favor, solicite a instalação à equipa de suporte ou parceiro oficial.',
+          type: 'info',
+        });
       }
     }, 400);
   };

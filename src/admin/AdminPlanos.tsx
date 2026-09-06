@@ -4,6 +4,7 @@ import {
   X, Check, Users, Layers
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
+import { notify } from '../services/notificationService';
 
 export interface ProductModule {
   id: string;
@@ -150,7 +151,7 @@ export const AdminPlanos: React.FC = () => {
     setName('');
     setCode('');
     setFeatureText('');
-    alert(`Módulo ${newMod.name} adicionado ao catálogo oficial com sucesso!`);
+    notify.success(`Módulo ${newMod.name} adicionado ao catálogo oficial com sucesso!`);
   };
 
   const totalTenants = modules.reduce((acc, m) => acc + m.active_tenants, 0);
@@ -254,8 +255,8 @@ export const AdminPlanos: React.FC = () => {
                   {mod.active_tenants} empresa(s) utilizam
                 </span>
                 <button
-                  onClick={() => alert(`Configurações avançadas do módulo ${mod.name} abertas.`)}
-                  className="text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1"
+                  onClick={() => notify.info(`Módulo ${mod.name} pronto e sincronizado.`)}
+                  className="text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer"
                 >
                   <span>Configurar</span>
                   <ArrowRight className="w-3.5 h-3.5" />

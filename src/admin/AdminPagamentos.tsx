@@ -11,6 +11,7 @@ import {
   subscribeAllDebts, markDebtsPaid, PartnerDebtEntry
 } from './services/partnerDebtService';
 import { generateLicenseKey } from './services/licenseService';
+import { notify, confirmDialog } from '../services/notificationService';
 
 export interface SubscriptionInvoice {
   id: string;
@@ -174,9 +175,9 @@ export const AdminPagamentos: React.FC = () => {
       setShowModal(false);
       setCompanyName('');
       setCompanyNif('');
-      alert(`Fatura ${newInv.invoice_number} registada com sucesso no Firebase!`);
+      notify.success(`Fatura ${newInv.invoice_number} registada com sucesso no Firebase!`);
     } catch (err: any) {
-      alert('Erro ao registar fatura no Firebase: ' + err.message);
+      notify.error('Erro ao registar fatura no Firebase: ' + err.message);
     }
   };
 
@@ -189,21 +190,29 @@ export const AdminPagamentos: React.FC = () => {
       setInvoices(invoices.map(inv =>
         inv.id === id ? { ...inv, status: 'paid', payment_method: 'Transferência Bancária (IBAN)' } : inv
       ));
+      notify.success('Fatura marcada como paga com sucesso!');
     } catch (err: any) {
-      alert('Erro ao atualizar estado da fatura: ' + err.message);
+      notify.error('Erro ao atualizar estado da fatura: ' + err.message);
     }
   };
 
   const handleMarkPartnerDebtsPaid = async () => {
     if (selectedDebtIds.length === 0) return;
+    const confirmed = await confirmDialog({
+      title: 'Liquidar Dívidas Selecionadas',
+      message: `Deseja marcar como pagas as ${selectedDebtIds.length} dívida(s) de parceiro selecionadas? Os slots de crédito dos parceiros serão liberados imediatamente.`,
+      confirmText: 'Liquidar Agora',
+    });
+    if (!confirmed) return;
+
     setMarkingDebts(true);
     try {
       await markDebtsPaid(selectedDebtIds);
       const paidAmount = partnerDebts.filter(d => selectedDebtIds.includes(d.id)).reduce((acc, d) => acc + d.cost_aoa, 0);
       setSelectedDebtIds([]);
-      alert(`Pagamento de ${fmt(paidAmount)} Kz liquidado com sucesso para ${selectedDebtIds.length} licença(s) de parceiro!`);
+      notify.success(`Pagamento de ${fmt(paidAmount)} Kz liquidado com sucesso para ${selectedDebtIds.length} licença(s) de parceiro!`);
     } catch (err: any) {
-      alert('Erro ao liquidar dívidas: ' + err.message);
+      notify.error('Erro ao liquidar dívidas: ' + err.message);
     } finally {
       setMarkingDebts(false);
     }
@@ -470,7 +479,7 @@ export const AdminPagamentos: React.FC = () => {
                               </button>
                             )}
                             <button
-                              onClick={() => alert(`A transferir cópia da fatura ${inv.invoice_number}...`)}
+                              onClick={() => notify.info(`A transferir cópia da fatura ${inv.invoice_number}...`)}
                               className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                               title="Descarregar PDF"
                             >

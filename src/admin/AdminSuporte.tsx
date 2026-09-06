@@ -22,6 +22,7 @@ import {
   grantBonusMinutes
 } from '../services/videoSupportService';
 import { getCachedSystemSettings } from '../services/systemSettingsService';
+import { notify } from '../services/notificationService';
 
 export interface DemoLead {
   id: string;
@@ -176,8 +177,9 @@ export const AdminSuporte: React.FC = () => {
   const handleUpdateLeadStatus = async (leadId: string, newStatus: DemoLead['status']) => {
     try {
       await updateDoc(doc(db, 'leads_demonstracao', leadId), { status: newStatus });
+      notify.success('Estado do lead atualizado!');
     } catch (err: any) {
-      alert('Erro ao atualizar status do lead: ' + err.message);
+      notify.error('Erro ao atualizar status do lead: ' + err.message);
     }
   };
 
@@ -233,9 +235,9 @@ export const AdminSuporte: React.FC = () => {
       setRemoteCode('');
       setInitialMsg('');
       setSelectedTicket(created);
-      alert(`Ticket #${created.ticket_number} registado com sucesso no Firebase!`);
+      notify.success(`Ticket #${created.ticket_number} registado com sucesso no Firebase!`);
     } catch (err: any) {
-      alert('Erro ao criar ticket no Firebase: ' + err.message);
+      notify.error('Erro ao criar ticket no Firebase: ' + err.message);
     }
   };
 
@@ -276,7 +278,7 @@ export const AdminSuporte: React.FC = () => {
         text: replyText,
       });
     } catch (err: any) {
-      alert('Erro ao enviar mensagem: ' + err.message);
+      notify.error('Erro ao enviar mensagem: ' + err.message);
     } finally {
       setSendingMessage(false);
     }
@@ -285,8 +287,9 @@ export const AdminSuporte: React.FC = () => {
   const handleStatusChange = async (ticketId: string, newStatus: 'open' | 'in_progress' | 'resolved' | 'closed') => {
     try {
       await updateTicketStatus(ticketId, newStatus);
+      notify.success('Estado do chamado atualizado com sucesso!');
     } catch (err: any) {
-      alert('Erro ao atualizar status: ' + err.message);
+      notify.error('Erro ao atualizar status: ' + err.message);
     }
   };
 
@@ -1164,11 +1167,11 @@ export const AdminSuporte: React.FC = () => {
                     minutes: bonusMinutes,
                     reason: bonusReason,
                   });
-                  alert(`✓ ${bonusMinutes} minutos creditados com sucesso para ${selectedAccountForBonus.entityName}!`);
+                  notify.success(`✓ ${bonusMinutes} minutos creditados com sucesso para ${selectedAccountForBonus.entityName}!`);
                   setBonusModalOpen(false);
                   loadVideoData();
                 } catch (err: any) {
-                  alert('Erro ao bonificar: ' + err.message);
+                  notify.error('Erro ao bonificar: ' + err.message);
                 } finally {
                   setGrantingBonus(false);
                 }

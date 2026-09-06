@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, LogOut } from 'lucide-react';
+import { notify } from '../services/notificationService';
 
 interface AreaParceiroPageProps {
   onNavigatePage: (page: any) => void;
@@ -36,7 +37,7 @@ export const AreaParceiroPage: React.FC<AreaParceiroPageProps> = ({ onNavigatePa
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => alert('Modalidade de registo de novo cliente iniciada.')}
+              onClick={() => notify.info('Aceda ao Portal de Parceiros oficial para emitir licenças.')}
               className="bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-orange-600/30 transition-all hover:-translate-y-0.5 cursor-pointer shimmer-button"
             >
               <Plus className="w-4 h-4" />
@@ -105,8 +106,8 @@ export const AreaParceiroPage: React.FC<AreaParceiroPageProps> = ({ onNavigatePa
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
               <h3 className="text-base font-extrabold text-slate-900">Lista de Empresas Registadas</h3>
               <button
-                onClick={() => alert('Novo registo de cliente')}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg"
+                onClick={() => notify.info('Abra o Portal do Parceiro para registar nova empresa.')}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer"
               >
                 + Registar Empresa
               </button>
@@ -168,8 +169,8 @@ export const AreaParceiroPage: React.FC<AreaParceiroPageProps> = ({ onNavigatePa
               </div>
 
               <button
-                onClick={() => alert('Chave de licença emitida com sucesso!')}
-                className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl text-xs"
+                onClick={() => notify.success('Chave de licença emitida com sucesso!')}
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl text-xs cursor-pointer transition-colors"
               >
                 Gerar Chave de Licença
               </button>

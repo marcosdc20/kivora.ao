@@ -6,6 +6,7 @@ import { db } from '../lib/firebase';
 import { collection, onSnapshot, doc, setDoc, getDocs } from 'firebase/firestore';
 import { sendSiteEmail } from '../services/siteEmailService';
 import { generateBroadcastTemplate } from '../services/emailTemplatesSite';
+import { notify, confirmDialog, alertDialog } from '../services/notificationService';
 
 export const AdminComunicacao: React.FC = () => {
   const [comunicados, setComunicados] = useState<ComunicadoAdmin[]>([]);
@@ -186,11 +187,11 @@ export const AdminComunicacao: React.FC = () => {
 
   const handleSendTestEmail = async () => {
     if (!previewTestEmail || !previewTestEmail.includes('@')) {
-      alert('Por favor insira um endereço de e-mail válido para o teste.');
+      notify.warning('Por favor insira um endereço de e-mail válido para o teste.');
       return;
     }
     if (!titulo || !mensagem) {
-      alert('Preencha o título e o conteúdo antes de enviar o teste.');
+      notify.warning('Preencha o título e o conteúdo antes de enviar o teste.');
       return;
     }
 
@@ -209,12 +210,16 @@ export const AdminComunicacao: React.FC = () => {
       });
 
       if (res.success) {
-        alert(`E-mail de teste enviado com sucesso para ${previewTestEmail}!`);
+        notify.success(`E-mail de teste enviado com sucesso para ${previewTestEmail}!`);
       } else {
-        alert(`Não foi possível enviar o e-mail de teste: ${res.error || 'Verifique as configurações de e-mail.'}`);
+        alertDialog({
+          title: 'Falha no Teste',
+          message: `Não foi possível enviar o e-mail de teste: ${res.error || 'Verifique as configurações de e-mail em Configurações.'}`,
+          type: 'warning',
+        });
       }
     } catch (err: any) {
-      alert('Erro ao enviar e-mail de teste: ' + err.message);
+      notify.error('Erro ao enviar e-mail de teste: ' + err.message);
     } finally {
       setSendingTest(false);
     }
@@ -269,23 +274,31 @@ export const AdminComunicacao: React.FC = () => {
       setModalNovo(false);
       setTitulo('');
       setMensagem('');
-      alert(`Comunicado "${titulo}" publicado com sucesso!${emailResultMsg}`);
+      notify.success(`Comunicado "${titulo}" publicado com sucesso!${emailResultMsg}`);
     } catch (err: any) {
-      alert('Erro ao enviar comunicado: ' + err.message);
+      notify.error('Erro ao enviar comunicado: ' + err.message);
     } finally {
       setSendingBroadcast(false);
     }
   };
 
   const handleResendEmail = async (com: ComunicadoAdmin) => {
-    const confirmSend = window.confirm(`Deseja disparar este comunicado por e-mail agora para "${com.destinatarios}"?`);
+    const confirmSend = await confirmDialog({
+      title: 'Disparo de E-mails',
+      message: `Deseja disparar este comunicado por e-mail agora para "${com.destinatarios}"?`,
+      confirmText: 'Disparar E-mails',
+    });
     if (!confirmSend) return;
 
     setSendingBroadcast(true);
     try {
       const uniqueEmails = await getResolvedEmails(com.destinatarios);
       if (uniqueEmails.length === 0) {
-        alert('Nenhum endereço de e-mail encontrado para o grupo selecionado.');
+        alertDialog({
+          title: 'Destinatários Não Encontrados',
+          message: 'Nenhum endereço de e-mail encontrado para o grupo selecionado.',
+          type: 'warning',
+        });
         return;
       }
 
@@ -307,12 +320,16 @@ export const AdminComunicacao: React.FC = () => {
           estado: 'enviado',
           lastEmailSentAt: new Date().toISOString()
         }, { merge: true });
-        alert(`Comunicado disparado com sucesso por e-mail para ${uniqueEmails.length} destinatários (${uniqueEmails.join(', ')})!`);
+        notify.success(`Comunicado disparado com sucesso por e-mail para ${uniqueEmails.length} destinatários!`);
       } else {
-        alert(`Não foi possível enviar o e-mail: ${res.error || 'Verifique o serviço de e-mails em Configurações.'}`);
+        alertDialog({
+          title: 'Erro de Disparo',
+          message: `Não foi possível enviar o e-mail: ${res.error || 'Verifique o serviço de e-mails em Configurações.'}`,
+          type: 'warning',
+        });
       }
     } catch (err: any) {
-      alert('Erro ao disparar e-mail: ' + err.message);
+      notify.error('Erro ao disparar e-mail: ' + err.message);
     } finally {
       setSendingBroadcast(false);
     }

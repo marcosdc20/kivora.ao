@@ -10,6 +10,8 @@ import { KIVORA_MODULES } from './data/kivoraData';
 import { KivoraModule, NewsPost } from './types/kivora';
 import { getStoredSession } from './admin/services/authService';
 import { useScrollReveal } from './hooks/useScrollReveal';
+import { NotificationContainer } from './components/ui/NotificationContainer';
+import { KivoraAssistantBot } from './components/KivoraAssistantBot';
 
 // Lazy loading for subpages & portals to minimize initial bundle size
 const ModulosPage = lazy(() => import('./pages/ModulosPage').then(m => ({ default: m.ModulosPage })));
@@ -371,9 +373,11 @@ export function App() {
   // ─── Portais Executivos de Ecrã Completo com Guarda de Autenticação ─────────
   const currentSession = getStoredSession();
 
+  let portalContent: React.ReactNode = null;
+
   if (activePage === 'admin') {
     if (!currentSession || currentSession.role !== 'admin') {
-      return (
+      portalContent = (
         <Suspense fallback={<PageLoadingFallback />}>
           <LoginPage
             onBackToHome={() => handleNavigatePage('home')}
@@ -381,17 +385,16 @@ export function App() {
           />
         </Suspense>
       );
+    } else {
+      portalContent = (
+        <Suspense fallback={<PageLoadingFallback />}>
+          <AdminApp onExitAdmin={() => handleNavigatePage('home')} />
+        </Suspense>
+      );
     }
-    return (
-      <Suspense fallback={<PageLoadingFallback />}>
-        <AdminApp onExitAdmin={() => handleNavigatePage('home')} />
-      </Suspense>
-    );
-  }
-
-  if (activePage === 'area-cliente') {
+  } else if (activePage === 'area-cliente') {
     if (!currentSession || currentSession.role !== 'cliente') {
-      return (
+      portalContent = (
         <Suspense fallback={<PageLoadingFallback />}>
           <LoginPage
             onBackToHome={() => handleNavigatePage('home')}
@@ -399,17 +402,16 @@ export function App() {
           />
         </Suspense>
       );
+    } else {
+      portalContent = (
+        <Suspense fallback={<PageLoadingFallback />}>
+          <ClientPortalApp onLogout={() => handleNavigatePage('home')} />
+        </Suspense>
+      );
     }
-    return (
-      <Suspense fallback={<PageLoadingFallback />}>
-        <ClientPortalApp onLogout={() => handleNavigatePage('home')} />
-      </Suspense>
-    );
-  }
-
-  if (activePage === 'area-parceiro') {
+  } else if (activePage === 'area-parceiro') {
     if (!currentSession || currentSession.role !== 'parceiro') {
-      return (
+      portalContent = (
         <Suspense fallback={<PageLoadingFallback />}>
           <LoginPage
             onBackToHome={() => handleNavigatePage('home')}
@@ -417,22 +419,30 @@ export function App() {
           />
         </Suspense>
       );
+    } else {
+      portalContent = (
+        <Suspense fallback={<PageLoadingFallback />}>
+          <PartnerPortalApp onLogout={() => handleNavigatePage('home')} />
+        </Suspense>
+      );
     }
-    return (
-      <Suspense fallback={<PageLoadingFallback />}>
-        <PartnerPortalApp onLogout={() => handleNavigatePage('home')} />
-      </Suspense>
-    );
-  }
-
-  if (activePage === 'login') {
-    return (
+  } else if (activePage === 'login') {
+    portalContent = (
       <Suspense fallback={<PageLoadingFallback />}>
         <LoginPage
           onBackToHome={() => handleNavigatePage('home')}
           onNavigatePage={handleNavigatePage}
         />
       </Suspense>
+    );
+  }
+
+  if (portalContent) {
+    return (
+      <>
+        {portalContent}
+        <NotificationContainer />
+      </>
     );
   }
 
@@ -737,6 +747,15 @@ export function App() {
           onNavigatePrivacy={() => handleNavigatePage('privacidade')}
         />
       )}
+
+      {/* Bot Assistente Virtual de IA Oficial (atendimento 24/7 a visitantes) */}
+      <KivoraAssistantBot
+        onNavigatePage={handleNavigatePage}
+        onOpenDemoModal={handleOpenDemoModal}
+      />
+
+      {/* Sistema Global de Notificações In-App (Toasts e Modais) */}
+      <NotificationContainer />
 
     </div>
   );

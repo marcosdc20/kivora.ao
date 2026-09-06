@@ -19,6 +19,7 @@ import {
 } from './services/partnerDebtService';
 import type { PartnerPricingPlan, PartnerDebtEntry, PartnerLicensingPolicy } from './services/partnerDebtService';
 import { PartnerOfficialCertificatesModal, PartnerCertificateData } from '../components/PartnerOfficialCertificatesModal';
+import { notify, confirmDialog } from '../services/notificationService';
 
 export interface Partner {
   id: string;
@@ -525,7 +526,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
       setShowModal(false); setName(''); setCode(''); setEmail(''); setPhone('');
       setCredentialsModal({ open: true, partnerName: name, email, password: pwd, partnerCode: pCode, phone });
-    } catch (err: any) { alert('Erro ao registar parceiro: ' + err.message); }
+    } catch (err: any) { notify.error('Erro ao registar parceiro: ' + err.message); }
   };
 
   const handleApprovePartner = async (cand: any) => {
@@ -533,64 +534,53 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     const pwd = `kivora${Math.floor(1000 + Math.random() * 9000)}`;
     const pCode = (cand.code || `KVR-PR-2026-${Math.floor(100 + Math.random() * 900)}`).toUpperCase().trim();
     const initialSlots = policy.tier_slots['bronze'] || 2;
+
     try {
-      // 1. Grava na coleção `partners` com status 'active' e credenciais persistidas
-      await setDoc(doc(db, 'partners', pCode), {
-        id: pCode,
-        code: pCode,
+      await setDoc(doc(db, 'partners', cand.id), {
         name: cand.name,
-        responsible: cand.responsible || cand.name,
-        email: cand.email.toLowerCase().trim(),
+        email: cand.email,
         phone: cand.phone,
-        region: cand.sede_completa || cand.region || 'Luanda, Angola',
-        nif: cand.nif || '',
-        tier: 'bronze',
-        credit_slots_limit: initialSlots,
-        debt_aoa: 0,
-        total_paid_aoa: cand.fee_amount_aoa || 25000,
-        total_sales: 0,
+        region: cand.region,
         status: 'active',
+        tier: 'bronze',
+        code: pCode,
         password: pwd,
         mustChangePassword: true,
-        payment_proof_url: cand.payment_proof_url || '',
-        payment_proof_name: cand.payment_proof_name || '',
-        createdAt: cand.createdAt || Date.now(),
-        approvedAt: Date.now(),
+        credit_slots_limit: initialSlots,
+        credit_limit_aoa: 250000,
+        approved_at: Date.now(),
+        updated_at: Date.now(),
       }, { merge: true });
 
-      if (cand.id && cand.id !== pCode) {
-        await setDoc(doc(db, 'partners', cand.id), {
-          status: 'active',
-          code: pCode,
-          password: pwd,
-          mustChangePassword: true,
-        }, { merge: true });
-      }
-
-      // 2. Se for candidatura de `partner_applications`, marca como aprovada
       if (cand.appId) {
         await updateDoc(doc(db, 'partner_applications', cand.appId), {
           status: 'approved',
-          partner_code: pCode,
           approved_at: Date.now(),
         }).catch(() => {});
       }
 
-      // 3. Cria utilizador no portal com credenciais completas
       await createOrApprovePartnerAccount({
-        nome: cand.name,
         email: cand.email,
-        phone: cand.phone,
-        region: cand.sede_completa || cand.region || 'Luanda, Angola',
+        nome: cand.name,
         partnerCode: pCode,
+        phone: cand.phone,
+        region: cand.region || 'Luanda, Angola',
+        tier: 'bronze',
         password: pwd,
         mustChangePassword: true,
       });
 
-      // 4. Envio de e-mail de homologação oficial via Google Gmail (kivora.angola@gmail.com)
+      setPartners((prev) =>
+        prev.map((p) =>
+          p.id === cand.id
+            ? { ...p, status: 'active', tier: 'bronze', code: pCode, password: pwd, credit_slots_limit: initialSlots }
+            : p
+        )
+      );
+
       if (cand.email && cand.email.includes('@')) {
-        sendPartnerCredentialsEmail({
-          partnerEmail: cand.email.toLowerCase().trim(),
+        await sendPartnerCredentialsEmail({
+          partnerEmail: cand.email,
           partnerName: cand.name,
           partnerCode: pCode,
           password: pwd,
@@ -606,14 +596,21 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         phone: cand.phone,
       });
     } catch (err: any) {
-      alert('Erro ao aprovar parceiro: ' + err.message);
+      notify.error('Erro ao aprovar parceiro: ' + err.message);
     } finally {
       setApproving(null);
     }
   };
 
   const handleRejectPartner = async (cand: any) => {
-    if (!confirm(`Tem a certeza que deseja rejeitar a candidatura de ${cand.name}?`)) return;
+    const ok = await confirmDialog({
+      title: 'Rejeitar Candidatura',
+      message: `Tem a certeza que deseja rejeitar a candidatura de ${cand.name}?`,
+      confirmText: 'Rejeitar',
+      variant: 'danger',
+    });
+    if (!ok) return;
+
     try {
       if (cand.appId) {
         await updateDoc(doc(db, 'partner_applications', cand.appId), {
@@ -627,23 +624,35 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
           rejected_at: Date.now(),
         }).catch(() => {});
       }
-      alert('Candidatura arquivada com sucesso.');
+      notify.success('Candidatura arquivada com sucesso.');
     } catch (err: any) {
-      alert('Erro ao rejeitar: ' + err.message);
+      notify.error('Erro ao rejeitar: ' + err.message);
     }
   };
 
   const handleToggleSuspend = async (p: Partner) => {
     const ns = p.status === 'active' ? 'suspended' : 'active';
-    if (!confirm(`${ns === 'suspended' ? 'Suspender' : 'Reativar'} ${p.name}?`)) return;
+    const ok = await confirmDialog({
+      title: ns === 'suspended' ? 'Suspender Parceiro' : 'Reativar Parceiro',
+      message: `Deseja ${ns === 'suspended' ? 'suspender' : 'reativar'} o parceiro ${p.name}?`,
+      confirmText: ns === 'suspended' ? 'Suspender' : 'Reativar',
+      variant: ns === 'suspended' ? 'warning' : 'emerald',
+    });
+    if (!ok) return;
+
     try {
       await setPartnerSuspensionStatus(p.id, p.code, p.email, ns);
-      alert(`Parceiro ${p.name} ${ns === 'suspended' ? 'suspenso' : 'reativado'} com sucesso em todas as coleções!`);
-    } catch (err: any) { alert('Erro: ' + err.message); }
+      notify.success(`Parceiro ${p.name} ${ns === 'suspended' ? 'suspenso' : 'reativado'} com sucesso em todas as coleções!`);
+    } catch (err: any) { notify.error('Erro: ' + err.message); }
   };
 
   const handleDeletePartner = async (partner: Partner) => {
-    const confirmDelete = window.confirm(`Tem a certeza que deseja eliminar o parceiro "${partner.name}" (${partner.code})? Esta ação apagará o registo do parceiro.`);
+    const confirmDelete = await confirmDialog({
+      title: 'Eliminar Parceiro',
+      message: `Tem a certeza que deseja eliminar o parceiro "${partner.name}" (${partner.code})?\n\nEsta ação apagará permanentemente o registo do parceiro.`,
+      confirmText: 'Eliminar Definitivamente',
+      variant: 'danger',
+    });
     if (!confirmDelete) return;
 
     try {
@@ -652,16 +661,16 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         await deleteDoc(doc(db, 'partners', partner.code)).catch(() => {});
       }
       setSelectedPartner(null);
-      alert(`Parceiro "${partner.name}" eliminado com sucesso.`);
+      notify.success(`Parceiro "${partner.name}" eliminado com sucesso.`);
     } catch (e: any) {
-      alert('Erro ao eliminar parceiro: ' + e.message);
+      notify.error('Erro ao eliminar parceiro: ' + e.message);
     }
   };
 
   const handleSavePartnerProfile = async () => {
     if (!selectedPartner) return;
     if (!editPartnerName.trim()) {
-      alert('Por favor insira o nome do parceiro ou da empresa.');
+      notify.warning('Por favor insira o nome do parceiro ou da empresa.');
       return;
     }
 
@@ -700,9 +709,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         ...updatePayload,
       });
 
-      alert('Dados do parceiro atualizados com sucesso no Firebase!');
+      notify.success('Dados do parceiro atualizados com sucesso no Firebase!');
     } catch (e: any) {
-      alert('Erro ao guardar dados do parceiro: ' + e.message);
+      notify.error('Erro ao guardar dados do parceiro: ' + e.message);
     } finally {
       setSavingPartnerProfile(false);
     }
@@ -710,7 +719,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
   const handleDeleteProof = async (item: any) => {
     const candidateName = item.name || item.empresa || 'este registo';
-    const confirmDelete = window.confirm(`Tem a certeza que deseja apagar o ficheiro de comprovativo de "${candidateName}"?\n\nEsta ação irá libertar espaço de armazenamento no Firebase mantendo a candidatura e o parceiro ativos.`);
+    const confirmDelete = await confirmDialog({
+      title: 'Apagar Comprovativo',
+      message: `Tem a certeza que deseja apagar o ficheiro de comprovativo de "${candidateName}"?\n\nEsta ação irá libertar espaço de armazenamento no Firebase mantendo a candidatura e o parceiro ativos.`,
+      confirmText: 'Apagar Ficheiro',
+      variant: 'danger',
+    });
     if (!confirmDelete) return;
 
     try {
@@ -738,9 +752,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         setViewProofModal(null);
       }
 
-      alert(`Comprovativo de "${candidateName}" apagado com sucesso! Espaço libertado no Firebase.`);
+      notify.success(`Comprovativo de "${candidateName}" apagado com sucesso! Espaço libertado no Firebase.`);
     } catch (err: any) {
-      alert('Erro ao apagar comprovativo: ' + err.message);
+      notify.error('Erro ao apagar comprovativo: ' + err.message);
     }
   };
 
@@ -758,15 +772,15 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       }
       setSelectedDebtIds([]);
       setGlobalSelectedDebtIds([]);
-      alert(`Liquidação de ${debtIds.length} fatura(s) concluída com sucesso! Licenças provisórias foram promovidas a definitivas.`);
-    } catch (err: any) { alert('Erro ao liquidar: ' + err.message); }
+      notify.success(`Liquidação de ${debtIds.length} fatura(s) concluída com sucesso! Licenças provisórias foram promovidas a definitivas.`);
+    } catch (err: any) { notify.error('Erro ao liquidar: ' + err.message); }
     finally { setMarkingPaid(false); }
   };
 
   const handleSavePricing = async () => {
     setSavingPricing(true);
-    try { await savePartnerPricing(pricingDraft); setEditingPricing(false); alert('Tabela de preços de atacado atualizada com sucesso!'); }
-    catch (err: any) { alert('Erro: ' + err.message); }
+    try { await savePartnerPricing(pricingDraft); setEditingPricing(false); notify.success('Tabela de preços de atacado atualizada com sucesso!'); }
+    catch (err: any) { notify.error('Erro: ' + err.message); }
     finally { setSavingPricing(false); }
   };
 
@@ -775,9 +789,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     try {
       await savePartnerPolicy(policyDraft);
       setPolicy(policyDraft);
-      alert('Políticas e quotas de licenciamento guardadas com sucesso no Firebase!');
+      notify.success('Políticas e quotas de licenciamento guardadas com sucesso no Firebase!');
     } catch (err: any) {
-      alert('Erro ao guardar políticas: ' + err.message);
+      notify.error('Erro ao guardar políticas: ' + err.message);
     } finally {
       setSavingPolicy(false);
     }
@@ -2010,8 +2024,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                           tier: editTier,
                           credit_slots_limit: editCreditSlots,
                         }, { merge: true });
-                        alert('Categoria e Quota de Slots atualizadas no Firebase!');
-                      } catch (e: any) { alert('Erro: ' + e.message); }
+                        notify.success('Categoria e Quota de Slots atualizadas no Firebase!');
+                      } catch (e: any) { notify.error('Erro: ' + e.message); }
                       finally { setSavingFinancials(false); }
                     }}
                     disabled={savingFinancials}
@@ -2041,9 +2055,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                     try {
                       const cur = selectedPartner.wallet_balance_aoa || 0;
                       await setDoc(doc(db, 'partners', selectedPartner.id), { wallet_balance_aoa: cur + topUpAmount }, { merge: true });
-                      alert(`Saldo de ${fmt(topUpAmount)} Kz creditado na carteira!`);
+                      notify.success(`Saldo de ${fmt(topUpAmount)} Kz creditado na carteira!`);
                       setTopUpAmount(0);
-                    } catch (e: any) { alert('Erro: ' + e.message); }
+                    } catch (e: any) { notify.error('Erro: ' + e.message); }
                     finally { setSavingFinancials(false); }
                   }}
                   disabled={savingFinancials || !topUpAmount}
@@ -2258,7 +2272,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               type="button"
               onClick={async () => {
                 if (!credentialsModal.email || !credentialsModal.email.includes('@')) {
-                  alert('Este parceiro não tem endereço de e-mail válido.');
+                  notify.warning('Este parceiro não tem endereço de e-mail válido.');
                   return;
                 }
                 setSendingPartnerEmail(true);
@@ -2272,12 +2286,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   if (res.success) {
                     setPartnerEmailSent(true);
                     setTimeout(() => setPartnerEmailSent(false), 4000);
-                    alert(`Credenciais enviadas com sucesso por e-mail para ${credentialsModal.email}!`);
+                    notify.success(`Credenciais enviadas com sucesso por e-mail para ${credentialsModal.email}!`);
                   } else {
-                    alert(`Não foi possível enviar o e-mail: ${res.error || 'Verifique as definições em Configurações ➔ Serviço de E-mails.'}`);
+                    notify.warning(`Não foi possível enviar o e-mail: ${res.error || 'Verifique as definições em Configurações ➔ Serviço de E-mails.'}`);
                   }
                 } catch (err: any) {
-                  alert('Erro ao enviar e-mail: ' + err.message);
+                  notify.error('Erro ao enviar e-mail: ' + err.message);
                 } finally {
                   setSendingPartnerEmail(false);
                 }

@@ -3,6 +3,7 @@ import { Monitor, Search, Unlink } from 'lucide-react';
 import { AdminTopbar, StatusBadge } from './AdminComponents';
 import { useLicenses } from './hooks/useFirebase';
 import { releaseLicenseFromDevice } from './services/licenseService';
+import { notify, confirmDialog } from '../services/notificationService';
 
 export const AdminInstalacoes: React.FC = () => {
   const { licenses, loading } = useLicenses();
@@ -33,13 +34,19 @@ export const AdminInstalacoes: React.FC = () => {
   );
 
   const handleUnlink = async (key: string) => {
-    if (!confirm(`Desvincular o computador vinculado à licença ${key}? O cliente poderá ativar num novo PC.`)) return;
+    const confirmed = await confirmDialog({
+      title: 'Desvincular Computador',
+      message: `Desvincular o computador vinculado à licença ${key}? O cliente poderá ativar num novo PC.`,
+      confirmText: 'Desvincular Agora',
+    });
+    if (!confirmed) return;
+
     setActionLoading(key);
     try {
       await releaseLicenseFromDevice(key);
-      alert('Computador desvinculado com sucesso no Firebase!');
+      notify.success('Computador desvinculado com sucesso no Firebase!');
     } catch (e: any) {
-      alert('Erro ao desvincular: ' + e.message);
+      notify.error('Erro ao desvincular: ' + e.message);
     } finally {
       setActionLoading(null);
     }

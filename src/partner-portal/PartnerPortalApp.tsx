@@ -43,6 +43,7 @@ import {
   getPartnerSeatCost
 } from '../admin/services/partnerDebtService';
 import type { PlanType, KivoraLicense, Company } from '../admin/types';
+import { notify, alertDialog } from '../services/notificationService';
 import { PartnerOfficialCertificatesModal } from '../components/PartnerOfficialCertificatesModal';
 import { LicenseOfficialCertificateModal } from '../components/LicenseOfficialCertificateModal';
 
@@ -463,9 +464,19 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       } else {
         // 3. Sem slots disponíveis ou com dívida vencida
         if (isOverdue) {
-          alert(`Bloqueio de Emissão a Crédito: Possui débitos pendentes com mais de ${overdueDaysLimit} dias. Por favor, regularize as pendências com o Admin ou efetue uma recarga na Wallet.`);
+          await alertDialog({
+            title: 'Bloqueio de Emissão a Crédito',
+            message: `Possui débitos pendentes com mais de ${overdueDaysLimit} dias sem liquidação.\n\nPara voltar a emitir novas licenças, regularize as pendências com o Administrador Kivora ou utilize a Carteira Pré-paga.`,
+            type: 'warning',
+            buttonText: 'Compreendi',
+          });
         } else {
-          alert(`Limite de Quota Atingido: Utilizou todos os ${creditSlotsLimit} slots de crédito disponíveis. Proceda à liquidação de licenças pendentes ou utilize a Carteira Pré-paga (Wallet).`);
+          await alertDialog({
+            title: `Limite de Quota Atingido (${activeSlotsInUse} de ${creditSlotsLimit} Slots Ocupados)`,
+            message: `Atingiu o limite de ${creditSlotsLimit} licenças a crédito ativas.\n\nPara emitir a 3ª licença, deve proceder à liquidação das licenças anteriores com a Kivora ou utilizar o saldo da sua Carteira Pré-paga (Wallet).`,
+            type: 'warning',
+            buttonText: 'Entendido',
+          });
         }
         setSubmitting(false);
         return;
@@ -561,9 +572,17 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         paymentMethod = 'credit';
       } else {
         if (isOverdue) {
-          alert(`Bloqueio de Crédito: Regularize os débitos pendentes há mais de ${overdueDaysLimit} dias ou recarregue a Wallet.`);
+          await alertDialog({
+            title: 'Bloqueio de Crédito',
+            message: `Regularize os débitos pendentes há mais de ${overdueDaysLimit} dias ou recarregue a Carteira Pré-paga.`,
+            type: 'warning',
+          });
         } else {
-          alert(`Limite de Quota Atingido: Saldo insuficiente na Wallet (${fmt(walletBalance)} Kz vs ${fmt(expansionCost)} Kz) e sem slots de crédito.`);
+          await alertDialog({
+            title: 'Limite de Quota Atingido',
+            message: `Saldo insuficiente na Carteira (${fmt(walletBalance)} Kz vs ${fmt(expansionCost)} Kz) e sem slots de crédito livres (${activeSlotsInUse}/${creditSlotsLimit} em uso).`,
+            type: 'warning',
+          });
         }
         setAddSeatsSubmitting(false);
         return;
@@ -2241,7 +2260,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText('AO06.0040.0000.1234.5678.9012.3');
-                        alert('IBAN BAI copiado para a área de transferência!');
+                        notify.success('IBAN BAI copiado para a área de transferência!');
                       }}
                       className="p-2 text-slate-400 hover:text-white bg-white/10 rounded-lg cursor-pointer"
                       title="Copiar IBAN"
@@ -2258,7 +2277,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText('AO06.0006.0000.9876.5432.1098.7');
-                        alert('IBAN BFA copiado para a área de transferência!');
+                        notify.success('IBAN BFA copiado para a área de transferência!');
                       }}
                       className="p-2 text-slate-400 hover:text-white bg-white/10 rounded-lg cursor-pointer"
                       title="Copiar IBAN"
@@ -2500,7 +2519,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         <p className="text-slate-500 text-xs mt-0.5">Drivers ESC/POS para gavetas e impressoras de talão 80mm/58mm.</p>
                       </div>
                       <button
-                        onClick={() => alert('Download do pacote de drivers de impressão iniciado!')}
+                        onClick={() => notify.info('Download do pacote de drivers de impressão iniciado!')}
                         className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                       >
                         <Download className="w-4 h-4" />
@@ -2524,7 +2543,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         <h4 className="font-bold text-slate-900 text-xs">{m.titulo}</h4>
                         <p className="text-[11px] text-slate-500">{m.desc}</p>
                         <button
-                          onClick={() => alert(`Download de ${m.titulo} iniciado.`)}
+                          onClick={() => notify.info(`Download de ${m.titulo} iniciado.`)}
                           className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                           <Download className="w-3.5 h-3.5" />

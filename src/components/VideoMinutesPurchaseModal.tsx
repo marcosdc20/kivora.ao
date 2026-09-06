@@ -13,6 +13,7 @@ import {
   VideoSupportAccount,
   purchaseVideoMinutes
 } from '../services/videoSupportService';
+import { notify, alertDialog } from '../services/notificationService';
 
 export interface VideoMinutesPurchaseModalProps {
   isOpen: boolean;
@@ -86,14 +87,18 @@ export const VideoMinutesPurchaseModal: React.FC<VideoMinutesPurchaseModalProps>
       // Se parceiro pagar via carteira
       if (paymentMethod === 'wallet_partner' && onDebitPartnerWallet) {
         if (partnerWalletBalance < totalAoa) {
-          alert(`Saldo insuficiente na sua carteira Kivora (Saldo: ${fmt(partnerWalletBalance)} Kz). Necessário: ${fmt(totalAoa)} Kz. Escolha Transferência Bancária.`);
+          alertDialog({
+            title: 'Saldo Insuficiente na Carteira',
+            message: `Saldo atual na sua carteira Kivora (${fmt(partnerWalletBalance)} Kz) é inferior ao necessário (${fmt(totalAoa)} Kz). Por favor, utilize Transferência Bancária ou recarregue a sua carteira.`,
+            type: 'warning',
+          });
           setIsProcessing(false);
           return;
         }
 
         const debited = await onDebitPartnerWallet(totalAoa, `Compra de ${minutesToBuy} minutos de Videochamada de Suporte`);
         if (!debited) {
-          alert('Erro ao debitar da carteira. Tente outro método de pagamento.');
+          notify.error('Erro ao debitar da carteira. Tente outro método de pagamento.');
           setIsProcessing(false);
           return;
         }
@@ -115,10 +120,11 @@ export const VideoMinutesPurchaseModal: React.FC<VideoMinutesPurchaseModalProps>
       if (res.success) {
         setPurchasedInfo({ minutes: minutesToBuy, totalAoa });
         setPurchasedSuccess(true);
+        notify.success(`Pacote de ${minutesToBuy} minutos adquirido com sucesso!`);
         if (onSuccess) onSuccess(res.account);
       }
     } catch (err: any) {
-      alert('Erro ao processar recarga: ' + err.message);
+      notify.error('Erro ao processar recarga: ' + err.message);
     } finally {
       setIsProcessing(false);
     }
