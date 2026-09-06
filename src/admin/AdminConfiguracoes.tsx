@@ -1144,13 +1144,24 @@ export const AdminConfiguracoes: React.FC = () => {
                   </div>
 
                   <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Categoria / Tagline</label>
+                    <input
+                      type="text"
+                      value={settings.planMensalCategory || ''}
+                      onChange={(e) => handleChange('planMensalCategory', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 focus:border-blue-600 outline-none uppercase text-xs"
+                      placeholder="Arranque Flexível"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
                     <label className="font-bold text-slate-700">Nome do Plano</label>
                     <input
                       type="text"
                       value={settings.planMensalName || ''}
                       onChange={(e) => handleChange('planMensalName', e.target.value)}
                       className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
-                      placeholder="Mensal Standalone"
+                      placeholder="Plano Mensal"
                     />
                   </div>
 
@@ -1217,7 +1228,7 @@ export const AdminConfiguracoes: React.FC = () => {
                       value={settings.planMensalFeatures || ''}
                       onChange={(e) => handleChange('planMensalFeatures', e.target.value)}
                       className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-mono text-[11px] text-slate-800 focus:border-blue-600 outline-none leading-relaxed"
-                      placeholder="1 Posto de Trabalho Standalone&#10;Faturação Eletrónica AGT DS.120 com QR Code"
+                      placeholder="1 Posto de Trabalho Ativo&#10;Faturação Certificada AGT com QR Code"
                     />
                   </div>
                 </div>
@@ -1234,25 +1245,48 @@ export const AdminConfiguracoes: React.FC = () => {
                   </div>
 
                   <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Categoria / Tagline</label>
+                    <input
+                      type="text"
+                      value={settings.planAnualCategory || ''}
+                      onChange={(e) => handleChange('planAnualCategory', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 focus:border-blue-600 outline-none uppercase text-xs"
+                      placeholder="Multi-Postos & Rede LAN"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
                     <label className="font-bold text-slate-700">Nome do Plano</label>
                     <input
                       type="text"
                       value={settings.planAnualName || ''}
                       onChange={(e) => handleChange('planAnualName', e.target.value)}
                       className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
-                      placeholder="Anual Multi-Postos (Recomendado)"
+                      placeholder="Plano Anual LAN"
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Badge Superior</label>
-                    <input
-                      type="text"
-                      value={settings.planAnualBadge || ''}
-                      onChange={(e) => handleChange('planAnualBadge', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-blue-700 focus:border-blue-600 outline-none uppercase"
-                      placeholder="MAIS POPULAR EM ANGOLA"
-                    />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-700">Badge Superior</label>
+                      <input
+                        type="text"
+                        value={settings.planAnualBadge || ''}
+                        onChange={(e) => handleChange('planAnualBadge', e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-blue-700 focus:border-blue-600 outline-none uppercase text-xs"
+                        placeholder="Mais Escolhido em Angola"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-700">Nota de Poupança</label>
+                      <input
+                        type="text"
+                        value={settings.planAnualSavings || ''}
+                        onChange={(e) => handleChange('planAnualSavings', e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-emerald-700 focus:border-blue-600 outline-none text-xs"
+                        placeholder="Poupança de 50.000 Kz vs Mensal"
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
@@ -1307,7 +1341,7 @@ export const AdminConfiguracoes: React.FC = () => {
                       value={settings.planAnualCta || ''}
                       onChange={(e) => handleChange('planAnualCta', e.target.value)}
                       className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
-                      placeholder="Adquirir Licença Anual"
+                      placeholder="Contratar Plano Anual"
                     />
                   </div>
 
@@ -1318,7 +1352,7 @@ export const AdminConfiguracoes: React.FC = () => {
                       value={settings.planAnualFeatures || ''}
                       onChange={(e) => handleChange('planAnualFeatures', e.target.value)}
                       className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-mono text-[11px] text-slate-800 focus:border-blue-600 outline-none leading-relaxed"
-                      placeholder="Até 3 Postos de Trabalho em Rede LAN&#10;Tudo do Plano Mensal incluído"
+                      placeholder="Até 3 Postos em Rede LAN Incluídos&#10;Módulos de Stock, POS e RH Integrados"
                     />
                   </div>
                 </div>
@@ -1331,7 +1365,18 @@ export const AdminConfiguracoes: React.FC = () => {
                     <span className="text-[10px] font-black uppercase tracking-wider text-purple-600 bg-purple-50 px-2 py-0.5 rounded border border-purple-100">
                       Plano 3
                     </span>
-                    <h4 className="font-black text-slate-900 text-sm mt-1">Licença Vitalícia Perpétua</h4>
+                    <h4 className="font-black text-slate-900 text-sm mt-1">Licença Vitalícia</h4>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Categoria / Tagline</label>
+                    <input
+                      type="text"
+                      value={settings.planVitalicioCategory || ''}
+                      onChange={(e) => handleChange('planVitalicioCategory', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 focus:border-blue-600 outline-none uppercase text-xs"
+                      placeholder="Pagamento Único"
+                    />
                   </div>
 
                   <div className="space-y-1">
@@ -1341,7 +1386,7 @@ export const AdminConfiguracoes: React.FC = () => {
                       value={settings.planVitalicioName || ''}
                       onChange={(e) => handleChange('planVitalicioName', e.target.value)}
                       className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
-                      placeholder="Licença Vitalícia Perpétua"
+                      placeholder="Licença Vitalícia"
                     />
                   </div>
 

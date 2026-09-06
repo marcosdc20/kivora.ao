@@ -84,6 +84,7 @@ export interface SystemCompanySettings {
   pricingSubtitle?: string;
 
   // Plano Mensal
+  planMensalCategory?: string;
   planMensalName?: string;
   planMensalPrice?: string;
   planMensalPeriod?: string;
@@ -93,9 +94,11 @@ export interface SystemCompanySettings {
   planMensalExtraTerminal?: number;
 
   // Plano Anual
+  planAnualCategory?: string;
   planAnualName?: string;
   planAnualPrice?: string;
   planAnualPeriod?: string;
+  planAnualSavings?: string;
   planAnualDesc?: string;
   planAnualBadge?: string;
   planAnualFeatures?: string;
@@ -103,6 +106,7 @@ export interface SystemCompanySettings {
   planAnualExtraTerminal?: number;
 
   // Plano Vitalício
+  planVitalicioCategory?: string;
   planVitalicioName?: string;
   planVitalicioPrice?: string;
   planVitalicioPeriod?: string;
@@ -358,31 +362,35 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   pricingSubtitle: 'Preços claros em Kwanzas (AOA) com IVA incluído no regime de isenção de software e sem cobrança por fatura emitida.',
 
   // Plano Mensal
-  planMensalName: 'Mensal Standalone',
+  planMensalCategory: 'Arranque Flexível',
+  planMensalName: 'Plano Mensal',
   planMensalPrice: '25.000',
   planMensalPeriod: '/ mês',
   planMensalDesc: 'Flexibilidade total sem contratos de fidelização. Ideal para 1 computador isolado ou início de atividade.',
-  planMensalFeatures: '1 Posto de Trabalho Standalone\nFaturação Eletrónica AGT DS.120 com QR Code\nPOS de Balcão e Fecho de Caixa com Relatório Z\nGestão de Stock Básica e Preços de Venda\nExportação SAF-T AO mensal sem erros\nAtualizações fiscais legais incluídas\nSuporte por email e WhatsApp em horário comercial',
+  planMensalFeatures: '1 Posto de Trabalho Ativo\nFaturação Certificada AGT com QR Code\nExportação SAF-T (AO) Mensal\nSuporte Técnico em Horário Comercial',
   planMensalCta: 'Aderir ao Plano Mensal',
   planMensalExtraTerminal: 10000,
 
   // Plano Anual
-  planAnualName: 'Anual Multi-Postos (Recomendado)',
+  planAnualCategory: 'Multi-Postos & Rede LAN',
+  planAnualName: 'Plano Anual LAN',
   planAnualPrice: '250.000',
   planAnualPeriod: '/ ano',
+  planAnualSavings: 'Poupança de 50.000 Kz vs Mensal',
   planAnualDesc: 'A opção mais rentável para empresas ativas. Inclui 3 postos em rede local e poupança imediata.',
-  planAnualBadge: 'MAIS POPULAR EM ANGOLA',
-  planAnualFeatures: 'Até 3 Postos de Trabalho em Rede LAN (Caixas + Servidor)\nTudo do Plano Mensal incluído\nMódulo de Recursos Humanos & IRT 2026\nContabilidade PGC-AO & SAF-T Completo\nMultidepósito e Controlo de Validades e Lotes\nSuporte Técnico Prioritário (SLA 4h)\nFormação operacional da equipa incluída',
-  planAnualCta: 'Adquirir Licença Anual',
+  planAnualBadge: 'Mais Escolhido em Angola',
+  planAnualFeatures: 'Até 3 Postos em Rede LAN Incluídos\nMódulos de Stock, POS e RH Integrados\nAtualizações Fiscais AGT Garantidas\nSuporte Prioritário por WhatsApp e Remoto',
+  planAnualCta: 'Contratar Plano Anual',
   planAnualExtraTerminal: 35000,
 
   // Plano Vitalício
-  planVitalicioName: 'Licença Vitalícia Perpétua',
+  planVitalicioCategory: 'Pagamento Único',
+  planVitalicioName: 'Licença Vitalícia',
   planVitalicioPrice: '650.000',
-  planVitalicioPeriod: 'pagamento único',
+  planVitalicioPeriod: 'taxa única',
   planVitalicioDesc: 'Sem renovações anuais ou mensalidades. A licença definitiva para a sua empresa com 5 postos LAN.',
-  planVitalicioFeatures: '5 Postos de Trabalho em Rede Local / Servidor Dedicado\nLicença perpétua sem expiração\nInstalação e parametrização presencial ou remota assistida\nTodos os módulos do Kivora ERP desbloqueados\nFormação presencial certificada para operadores e gerentes\nGestor de conta executivo e canal VIP de atendimento\nCópia de segurança automática local e em Pen USB',
-  planVitalicioCta: 'Adquirir Licença Perpétua',
+  planVitalicioFeatures: 'Uso Perpétuo Sem Mensalidades\nServidor Principal + 5 Terminais LAN\nFormação Presencial da Equipa em Luanda\nCertificado de Licenciamento Definitivo',
+  planVitalicioCta: 'Solicitar Proposta Vitalícia',
   planVitalicioExtraTerminal: 60000,
   // Comunicados de Topo & Cookies
   announcementBarEnabled: false,
