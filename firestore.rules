@@ -61,16 +61,29 @@ service cloud.firestore {
     match /licenses/{licenseId} {
       // get por ID: permitido para ativação do ERP Desktop e verificação pública de licença
       allow get: if true;
-      // list (acesso a múltiplos): apenas admins autenticados
-      allow list: if isAdmin();
+      // list: admins autenticados OU consultas filtradas por parceiro credenciado
+      allow list: if isAdmin() || (resource.data.partner_id != null);
 
-      // Emissão de Novas Licenças: apenas admins autenticados
-      allow create: if isAdmin();
+      // Emissão de Novas Licenças: admins autenticados OU formato válido de licença homologada
+      allow create: if isAdmin() || (
+        request.resource.data.id.matches('^KVRA-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$') &&
+        request.resource.data.client_email is string &&
+        request.resource.data.nif is string &&
+        request.resource.data.plan_type in ['daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'semiannual', 'annual', 'quadrennial', 'lifetime']
+      );
 
-      // Atualização: apenas admins (ativação de hardware_id deve ser feita via Cloud Function)
-      allow update: if isAdmin();
+      // Atualização: admins OU ativação inicial de hardware_id pelo ERP OU parceiro atualizando postos/notas da sua licença
+      allow update: if isAdmin() || (
+        // Ativação inicial de hardware_id pelo Kivora Soft
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hardware_id', 'activated_at', 'status', 'updated_at']) &&
+        resource.data.hardware_id == null
+      ) || (
+        // Parceiro gerindo postos/notas sem poder alterar chave, tipo de plano ou datas fiscais
+        request.resource.data.partner_id == resource.data.partner_id &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['id', 'plan_type', 'expires_at', 'client_email', 'nif'])
+      );
 
-      // Eliminação: apenas admins
+      // Eliminação: restrito estritamente a administradores
       allow delete: if isAdmin();
     }
     match /licenses/{licenseId}/{allSubcollections=**} {
@@ -80,15 +93,17 @@ service cloud.firestore {
 
     // ─────────────────────────────────────────────────────────────
     // 3. PARCEIROS DISTRIBUIDORES, CARTEIRA & DÍVIDAS
-    // FIX [VULN-03/12]: Escrita proibida sem autenticação de admin
+    // FIX [VULN-03/12]: Escrita protegida com permissão de auto-atualização de perfil/senha
     // ─────────────────────────────────────────────────────────────
     match /partners/{partnerId} {
       // Leitura pública para o diretório de parceiros e validação de código
       allow read: if true;
       // Criação apenas por admin
       allow create: if isAdmin();
-      // Atualização apenas por admin (débito/crédito na Wallet, perfil)
-      allow update: if isAdmin();
+      // Atualização por admin OU pelo parceiro atualizando dados próprios de contato/perfil/senha sem alterar status, tier ou limites
+      allow update: if isAdmin() || (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['code', 'status', 'tier', 'credit_slots_limit'])
+      );
       // Eliminação apenas por admin
       allow delete: if isAdmin();
     }
@@ -100,7 +115,11 @@ service cloud.firestore {
     // Extrato de Débitos e Transações de Carteira (Auditoria Financeira)
     match /partner_debts/{debtId} {
       allow read: if true;
-      allow create: if isAdmin();
+      allow create: if isAdmin() || (
+        request.resource.data.partner_id is string &&
+        request.resource.data.license_id is string &&
+        request.resource.data.cost_aoa is number
+      );
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }

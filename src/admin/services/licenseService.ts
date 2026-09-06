@@ -7,7 +7,7 @@
 import {
   collection, doc, getDocs, getDoc,
   setDoc, updateDoc, deleteDoc,
-  query, orderBy, Timestamp, onSnapshot
+  query, where, orderBy, Timestamp, onSnapshot
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import type {
@@ -205,35 +205,33 @@ export function subscribePartnerLicenses(
   partnerCode: string,
   onUpdate: (licenses: KivoraLicense[]) => void
 ) {
-  const q = query(collection(db, 'licenses'));
+  // Consulta filtrada diretamente por partner_id para respeitar as regras Zero-Trust do Firestore
+  const q = query(
+    collection(db, 'licenses'),
+    where('partner_id', '==', partnerCode)
+  );
+
   return onSnapshot(
     q,
     (snap) => {
-      const list: KivoraLicense[] = [];
-      snap.docs.forEach((d) => {
+      const list: KivoraLicense[] = snap.docs.map((d) => {
         const data = d.data();
-        const matchesPartner = (data.partner_id && data.partner_id === partnerCode) ||
-          (data.notes && data.notes.includes(partnerCode)) ||
-          (data.client_email && data.client_email.toLowerCase() === partnerCode.toLowerCase());
-        
-        if (matchesPartner) {
-          list.push({
-            id: d.id,
-            client_email: data.client_email || '',
-            company_name: data.company_name || 'Sem Nome',
-            nif: data.nif || '999999999',
-            plan_type: data.plan_type || 'monthly',
-            status: data.status || 'active',
-            hardware_id: data.hardware_id ?? null,
-            created_at: data.created_at || Date.now(),
-            expires_at: data.expires_at ?? null,
-            price_aoa: data.price_aoa ?? 0,
-            notes: data.notes ?? '',
-            partner_id: data.partner_id || partnerCode,
-            activated_at: data.activated_at ?? null,
-            extra_seats: data.extra_seats ?? 0,
-          });
-        }
+        return {
+          id: d.id,
+          client_email: data.client_email || '',
+          company_name: data.company_name || 'Sem Nome',
+          nif: data.nif || '999999999',
+          plan_type: data.plan_type || 'monthly',
+          status: data.status || 'active',
+          hardware_id: data.hardware_id ?? null,
+          created_at: data.created_at || Date.now(),
+          expires_at: data.expires_at ?? null,
+          price_aoa: data.price_aoa ?? 0,
+          notes: data.notes ?? '',
+          partner_id: data.partner_id || partnerCode,
+          activated_at: data.activated_at ?? null,
+          extra_seats: data.extra_seats ?? 0,
+        };
       });
       onUpdate(list);
     },

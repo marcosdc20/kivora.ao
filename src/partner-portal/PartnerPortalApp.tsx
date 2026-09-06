@@ -8,7 +8,7 @@ import {
   RefreshCw, Ban, ShieldCheck, Printer, Calculator,
   ExternalLink, Lock, Check, Share2, Award,
   Unlink, UserPlus, Receipt, ArrowRight, PhoneCall,
-  Wallet, CreditCard, Clock, Save, Video
+  Wallet, CreditCard, Clock, Save, Video, Eye, EyeOff, Loader2
 } from 'lucide-react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { CURRENT_RELEASE, KIVORA_INFO } from '../data/kivoraData';
@@ -152,6 +152,53 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
+
+  // Notificação & Modal de Primeiro Acesso (Troca Obrigatória de Senha Provisória)
+  const [mustChangePassword, setMustChangePassword] = useState<boolean>(() => {
+    return session?.mustChangePassword === true;
+  });
+  const [showFirstLoginPasswordModal, setShowFirstLoginPasswordModal] = useState<boolean>(() => {
+    return session?.mustChangePassword === true;
+  });
+  const [firstNewPassword, setFirstNewPassword] = useState('');
+  const [firstConfirmPassword, setFirstConfirmPassword] = useState('');
+  const [firstPasswordError, setFirstPasswordError] = useState('');
+  const [firstPasswordSaving, setFirstPasswordSaving] = useState(false);
+  const [showFirstPassText, setShowFirstPassText] = useState(false);
+
+  useEffect(() => {
+    if (session?.mustChangePassword) {
+      setMustChangePassword(true);
+      setShowFirstLoginPasswordModal(true);
+    }
+  }, [session?.mustChangePassword]);
+
+  const handleFirstPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFirstPasswordError('');
+    if (firstNewPassword.length < 6) {
+      setFirstPasswordError('A nova palavra-passe deve conter pelo menos 6 caracteres.');
+      return;
+    }
+    if (firstNewPassword !== firstConfirmPassword) {
+      setFirstPasswordError('A confirmação da palavra-passe não coincide com a nova palavra-passe.');
+      return;
+    }
+
+    setFirstPasswordSaving(true);
+    try {
+      await changeUserPassword(session?.id || partnerCode, firstNewPassword, session?.email, partnerCode);
+      setMustChangePassword(false);
+      setShowFirstLoginPasswordModal(false);
+      setFirstNewPassword('');
+      setFirstConfirmPassword('');
+      showToast('Palavra-passe pessoal atualizada com sucesso! A sua conta está segura.');
+    } catch (err: any) {
+      setFirstPasswordError('Erro ao atualizar palavra-passe: ' + err.message);
+    } finally {
+      setFirstPasswordSaving(false);
+    }
+  };
 
   const handleSavePartnerBranding = (e: React.FormEvent) => {
     e.preventDefault();
@@ -758,8 +805,11 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     try {
       await changeUserPassword(session?.id || partnerCode, newPassword, session?.email, partnerCode);
       setPasswordSuccess(true);
+      setMustChangePassword(false);
+      setShowFirstLoginPasswordModal(false);
       setNewPassword('');
       setConfirmPassword('');
+      showToast('Palavra-passe pessoal atualizada com sucesso!');
     } catch (e: any) {
       setPasswordError('Erro ao atualizar palavra-passe: ' + e.message);
     } finally {
@@ -1223,6 +1273,36 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
           tabIndex={0}
           className="portal-scroll-container flex-1 overflow-y-auto overflow-x-hidden min-h-0 p-4 sm:p-6 lg:p-8 space-y-6 focus:outline-none"
         >
+
+          {/* BANNER DE AVISO DE SEGURANÇA: SENHA PROVISÓRIA */}
+          {mustChangePassword && (
+            <div className="p-4 sm:p-5 bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border-2 border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-amber-950 animate-fadeIn shadow-xs">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0 text-amber-700">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-black text-amber-900 flex items-center gap-2">
+                    <span>Aviso de Segurança: Palavra-passe Padrão em Uso</span>
+                    <span className="text-[10px] bg-amber-200/80 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase">Provisória</span>
+                  </h4>
+                  <p className="text-xs text-amber-800/90 mt-0.5 leading-relaxed">
+                    A sua conta de parceiro está atualmente a utilizar a palavra-passe padrão atribuída pelo sistema. Por motivos de conformidade e segurança da sua carteira comercial, altere a sua palavra-passe para uma combinação pessoal e segura.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0 sm:self-center">
+                <button
+                  type="button"
+                  onClick={() => setShowFirstLoginPasswordModal(true)}
+                  className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>Alterar Palavra-passe Agora</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* SECTION: DASHBOARD */}
           {activeSection === 'dashboard' && (
@@ -3618,6 +3698,131 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
           setVideoAccount(updatedAcc);
         }}
       />
+
+      {/* Modal de Primeiro Acesso: Definição Obrigatória de Nova Palavra-passe */}
+      {showFirstLoginPasswordModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 sm:p-8 space-y-6 animate-scaleUp relative">
+            
+            {/* Fechar / Lembrar Depois */}
+            <button
+              type="button"
+              onClick={() => setShowFirstLoginPasswordModal(false)}
+              className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
+              title="Lembrar mais tarde"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Cabeçalho do Modal */}
+            <div className="text-center space-y-2">
+              <div className="w-14 h-14 bg-gradient-to-tr from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center mx-auto text-white shadow-lg shadow-amber-500/30">
+                <ShieldCheck className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 tracking-tight">
+                Proteja a sua Conta de Parceiro
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed px-2">
+                Detectámos que está a utilizar a palavra-passe padrão atribuída pelo sistema. Por motivos de segurança cibernética e proteção da sua carteira comercial, defina a sua nova palavra-passe pessoal.
+              </p>
+            </div>
+
+            {/* Formulário */}
+            <form onSubmit={handleFirstPasswordSubmit} className="space-y-4">
+              
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                  Nova Palavra-passe Definitiva
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                  <input
+                    type={showFirstPassText ? 'text' : 'password'}
+                    required
+                    minLength={6}
+                    placeholder="Mínimo de 6 caracteres"
+                    value={firstNewPassword}
+                    onChange={(e) => setFirstNewPassword(e.target.value)}
+                    className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none font-medium transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowFirstPassText(!showFirstPassText)}
+                    className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    {showFirstPassText ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                  Confirmar Nova Palavra-passe
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                  <input
+                    type={showFirstPassText ? 'text' : 'password'}
+                    required
+                    minLength={6}
+                    placeholder="Repita a nova palavra-passe"
+                    value={firstConfirmPassword}
+                    onChange={(e) => setFirstConfirmPassword(e.target.value)}
+                    className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none font-medium transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Indicador de Requisitos */}
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-[11px] text-slate-500 space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className={`w-3.5 h-3.5 ${firstNewPassword.length >= 6 ? 'text-emerald-500' : 'text-slate-300'}`} />
+                  <span>Pelo menos 6 caracteres</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className={`w-3.5 h-3.5 ${firstNewPassword && firstNewPassword === firstConfirmPassword ? 'text-emerald-500' : 'text-slate-300'}`} />
+                  <span>Ambas as palavras-passe coincidem</span>
+                </div>
+              </div>
+
+              {firstPasswordError && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-medium animate-fadeIn">
+                  {firstPasswordError}
+                </div>
+              )}
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowFirstLoginPasswordModal(false)}
+                  className="w-1/3 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer text-center"
+                >
+                  Depois
+                </button>
+                <button
+                  type="submit"
+                  disabled={firstPasswordSaving}
+                  className="w-2/3 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {firstPasswordSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>A proteger conta...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="w-4 h-4" />
+                      <span>Guardar & Proteger Conta</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

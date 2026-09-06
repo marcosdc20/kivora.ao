@@ -499,8 +499,19 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         tier: newPartnerTier, credit_slots_limit: initialSlots,
         debt_aoa: 0, total_paid_aoa: 0, total_sales: 0,
         status: 'active', createdAt: Date.now(),
+        password: pwd,
+        mustChangePassword: true,
       }, { merge: true });
-      await createOrApprovePartnerAccount({ nome: name, email, phone, region, partnerCode: pCode, tier: newPartnerTier });
+      await createOrApprovePartnerAccount({
+        nome: name,
+        email,
+        phone,
+        region,
+        partnerCode: pCode,
+        tier: newPartnerTier,
+        password: pwd,
+        mustChangePassword: true,
+      });
       
       // Envio automático de e-mail de credenciais ao parceiro via Google Gmail
       if (email && email.includes('@')) {
@@ -523,7 +534,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     const pCode = (cand.code || `KVR-PR-2026-${Math.floor(100 + Math.random() * 900)}`).toUpperCase().trim();
     const initialSlots = policy.tier_slots['bronze'] || 2;
     try {
-      // 1. Grava na coleção `partners` com status 'active'
+      // 1. Grava na coleção `partners` com status 'active' e credenciais persistidas
       await setDoc(doc(db, 'partners', pCode), {
         id: pCode,
         code: pCode,
@@ -539,6 +550,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         total_paid_aoa: cand.fee_amount_aoa || 25000,
         total_sales: 0,
         status: 'active',
+        password: pwd,
+        mustChangePassword: true,
         payment_proof_url: cand.payment_proof_url || '',
         payment_proof_name: cand.payment_proof_name || '',
         createdAt: cand.createdAt || Date.now(),
@@ -546,7 +559,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       }, { merge: true });
 
       if (cand.id && cand.id !== pCode) {
-        await setDoc(doc(db, 'partners', cand.id), { status: 'active', code: pCode }, { merge: true });
+        await setDoc(doc(db, 'partners', cand.id), {
+          status: 'active',
+          code: pCode,
+          password: pwd,
+          mustChangePassword: true,
+        }, { merge: true });
       }
 
       // 2. Se for candidatura de `partner_applications`, marca como aprovada
@@ -558,13 +576,15 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         }).catch(() => {});
       }
 
-      // 3. Cria utilizador no portal
+      // 3. Cria utilizador no portal com credenciais completas
       await createOrApprovePartnerAccount({
         nome: cand.name,
         email: cand.email,
         phone: cand.phone,
         region: cand.sede_completa || cand.region || 'Luanda, Angola',
         partnerCode: pCode,
+        password: pwd,
+        mustChangePassword: true,
       });
 
       // 4. Envio de e-mail de homologação oficial via Google Gmail (kivora.angola@gmail.com)
@@ -969,6 +989,34 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                             </td>
                             <td className="p-4 text-right">
                               <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  onClick={() => {
+                                    const partnerPass = (p as any).password || `kivora${Math.floor(1000 + Math.random() * 9000)}`;
+                                    if (!(p as any).password) {
+                                      createOrApprovePartnerAccount({
+                                        nome: p.name,
+                                        email: p.email,
+                                        phone: p.phone,
+                                        region: p.region,
+                                        partnerCode: p.code,
+                                        password: partnerPass,
+                                        mustChangePassword: true,
+                                      }).catch(console.warn);
+                                    }
+                                    setCredentialsModal({
+                                      open: true,
+                                      partnerName: p.name,
+                                      email: p.email,
+                                      password: partnerPass,
+                                      partnerCode: p.code,
+                                      phone: p.phone,
+                                    });
+                                  }}
+                                  title="Ver, Gerar & Enviar Credenciais de Acesso"
+                                  className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <Key className="w-4 h-4" />
+                                </button>
                                 <button
                                   onClick={() => setCertificatesPartnerModal({
                                     partnerName: p.name,
@@ -1874,14 +1922,45 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   />
                 </div>
 
-                <button
-                  onClick={handleSavePartnerProfile}
-                  disabled={savingPartnerProfile}
-                  className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
-                >
-                  {savingPartnerProfile ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                  <span>Guardar Dados do Parceiro</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const partnerPass = (selectedPartner as any).password || `kivora${Math.floor(1000 + Math.random() * 9000)}`;
+                      if (!(selectedPartner as any).password) {
+                        createOrApprovePartnerAccount({
+                          nome: selectedPartner.name,
+                          email: selectedPartner.email,
+                          phone: selectedPartner.phone,
+                          region: selectedPartner.region,
+                          partnerCode: selectedPartner.code,
+                          password: partnerPass,
+                          mustChangePassword: true,
+                        }).catch(console.warn);
+                      }
+                      setCredentialsModal({
+                        open: true,
+                        partnerName: selectedPartner.name,
+                        email: selectedPartner.email,
+                        password: partnerPass,
+                        partnerCode: selectedPartner.code,
+                        phone: selectedPartner.phone,
+                      });
+                    }}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Key className="w-3.5 h-3.5" />
+                    <span>Ver / Emitir Credenciais</span>
+                  </button>
+                  <button
+                    onClick={handleSavePartnerProfile}
+                    disabled={savingPartnerProfile}
+                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    {savingPartnerProfile ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                    <span>Guardar Dados do Parceiro</span>
+                  </button>
+                </div>
               </div>
             </div>
 

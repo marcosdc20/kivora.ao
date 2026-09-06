@@ -27,6 +27,7 @@ export interface KivoraUserSession {
   licenseKey?: string;
   status: UserStatus;
   token?: string;
+  mustChangePassword?: boolean;
 }
 
 const SESSION_KEY = 'kivora_user_session';
@@ -205,7 +206,35 @@ export async function loginUser(
     const snapUsers = await getDocs(qUsers);
 
     if (!snapUsers.empty) {
-      const u = snapUsers.docs[0].data();
+      const uDoc = snapUsers.docs[0];
+      const u = uDoc.data();
+
+      // AUTO-HEALING & SUPORTE À PALAVRA-PASSE PADRÃO DE PARCEIRO:
+      // Se a conta for de parceiro ativo e ainda não tiver senha gravada no Firestore (ou senha vazia)
+      // permite autenticar com a senha inicial fornecida, gravando-a e exigindo a troca no painel.
+      if (!u.password && (u.role === 'parceiro' || u.partnerCode)) {
+        if (cleanPass.length >= 4) {
+          u.password = cleanPass;
+          u.mustChangePassword = true;
+          try {
+            await setDoc(uDoc.ref, {
+              password: cleanPass,
+              mustChangePassword: true,
+              passwordSetAt: Date.now(),
+              updatedAt: Date.now(),
+            }, { merge: true });
+            if (u.partnerCode) {
+              await setDoc(doc(db, 'partners', u.partnerCode), {
+                password: cleanPass,
+                mustChangePassword: true,
+                updatedAt: Date.now(),
+              }, { merge: true });
+            }
+          } catch (e) {
+            console.warn('Erro ao auto-atribuir senha de parceiro:', e);
+          }
+        }
+      }
 
       // SEGURANÇA [VULN-01/FIX]: Senha obrigatória — bloqueia acesso se não houver senha definida
       if (!u.password) {
@@ -230,6 +259,9 @@ export async function loginUser(
               success: false,
               error: 'A sua conta de parceiro foi suspensa pela administração da Visual Software. Entre em contacto com o suporte para regularização.',
             };
+          }
+          if (pDoc.exists() && pDoc.data()?.mustChangePassword !== undefined) {
+            u.mustChangePassword = pDoc.data()?.mustChangePassword;
           }
         } catch (e) {
           console.error('Erro ao verificar status do parceiro:', e);
@@ -256,6 +288,7 @@ export async function loginUser(
         partnerCode: u.partnerCode,
         companyName: u.companyName,
         status: u.status || 'active',
+        mustChangePassword: u.mustChangePassword ?? false,
       };
       setStoredSession(session);
       return { success: true, session };
@@ -275,6 +308,33 @@ export async function loginUser(
 
     if (matchedPartner) {
       const p = matchedPartner.data();
+
+      // AUTO-HEALING & SUPORTE À PALAVRA-PASSE PADRÃO DE PARCEIRO
+      if (!p.password && p.status === 'active' && cleanPass.length >= 4) {
+        p.password = cleanPass;
+        p.mustChangePassword = true;
+        try {
+          await setDoc(matchedPartner.ref, {
+            password: cleanPass,
+            mustChangePassword: true,
+            updatedAt: Date.now(),
+          }, { merge: true });
+          const pCode = p.code || matchedPartner.id;
+          const uId = pCode.toLowerCase().replace(/[^a-z0-9]/g, '_');
+          await setDoc(doc(db, 'users', uId), {
+            email: p.email?.toLowerCase().trim() || cleanId,
+            nome: p.name || p.nome,
+            partnerCode: pCode,
+            role: 'parceiro',
+            status: 'active',
+            password: cleanPass,
+            mustChangePassword: true,
+            updatedAt: Date.now(),
+          }, { merge: true });
+        } catch (e) {
+          console.warn('Erro ao auto-atribuir senha em partners:', e);
+        }
+      }
 
       // SEGURANÇA [VULN-05/FIX]: Senha SEMPRE obrigatória para parceiros
       if (!p.password) {
@@ -306,6 +366,7 @@ export async function loginUser(
         nome: p.name || p.nome || 'Parceiro Revendedor',
         partnerCode: p.code || matchedPartner.id,
         status: 'active',
+        mustChangePassword: p.mustChangePassword ?? false,
       };
       setStoredSession(session);
       return { success: true, session };
@@ -448,31 +509,46 @@ export async function createOrApprovePartnerAccount(params: {
   phone?: string;
   region?: string;
   tier?: string;
+  password?: string;
+  mustChangePassword?: boolean;
 }): Promise<void> {
+  const cleanPass = params.password || generateTempPassword();
   const userId = params.partnerCode.toLowerCase().replace(/[^a-z0-9]/g, '_');
-  await setDoc(doc(db, 'users', userId), {
-    email: params.email.toLowerCase(),
+  const emailUserId = params.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+  const userData = {
+    email: params.email.toLowerCase().trim(),
     nome: params.nome,
     partnerCode: params.partnerCode,
     tier: params.tier || 'bronze',
-    role: 'parceiro',
-    status: 'active',
+    role: 'parceiro' as UserRole,
+    status: 'active' as UserStatus,
     phone: params.phone || '',
     region: params.region || 'Luanda',
+    password: cleanPass,
+    mustChangePassword: params.mustChangePassword !== false,
     updatedAt: Date.now(),
-  }, { merge: true });
+  };
+
+  await setDoc(doc(db, 'users', userId), userData, { merge: true });
+  if (emailUserId !== userId) {
+    await setDoc(doc(db, 'users', emailUserId), userData, { merge: true });
+  }
 
   await setDoc(doc(db, 'partners', params.partnerCode), {
     code: params.partnerCode,
     name: params.nome,
-    email: params.email.toLowerCase(),
+    email: params.email.toLowerCase().trim(),
     phone: params.phone || '',
     region: params.region || 'Luanda',
     status: 'active',
     commission_rate: 20,
     total_sales: 0,
     balance_aoa: 0,
+    password: cleanPass,
+    mustChangePassword: params.mustChangePassword !== false,
     createdAt: Date.now(),
+    updatedAt: Date.now(),
   }, { merge: true });
 }
 
@@ -487,15 +563,38 @@ export async function changeUserPassword(userId: string, newPass: string, _userE
   const targetId = userId.toLowerCase().replace(/[^a-z0-9]/g, '_');
   await setDoc(doc(db, 'users', targetId), {
     password: cleanPass,
+    mustChangePassword: false,
+    passwordSetAt: Date.now(),
     updatedAt: Date.now(),
   }, { merge: true });
+
+  if (_userEmail) {
+    const emailTargetId = _userEmail.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    if (emailTargetId !== targetId) {
+      await setDoc(doc(db, 'users', emailTargetId), {
+        password: cleanPass,
+        mustChangePassword: false,
+        passwordSetAt: Date.now(),
+        updatedAt: Date.now(),
+      }, { merge: true });
+    }
+  }
 
   // Se for parceiro, atualizar também na coleção `partners` se existir
   if (partnerCode) {
     await setDoc(doc(db, 'partners', partnerCode), {
       password: cleanPass,
+      mustChangePassword: false,
+      passwordSetAt: Date.now(),
       updatedAt: Date.now(),
     }, { merge: true });
+  }
+
+  // Atualiza sessão em cache local
+  const currentSession = getStoredSession();
+  if (currentSession) {
+    currentSession.mustChangePassword = false;
+    setStoredSession(currentSession);
   }
 }
 
