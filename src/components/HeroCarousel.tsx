@@ -164,7 +164,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                 {slide.cta.action === 'download' ? (
                   <button
                     onClick={() => onNavigatePage('download')}
-                    className="shimmer-button inline-flex items-center justify-center gap-2 bg-[#FF6500] hover:bg-[#EB5B00] active:bg-[#C94A00] text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-2xl shadow-xl shadow-orange-950/40 transition-all hover:-translate-y-0.5 cursor-pointer"
+                    className="inline-flex items-center justify-center gap-2 bg-[#FF6500] hover:bg-[#E05900] active:bg-[#C94A00] text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl shadow-md transition-all hover:-translate-y-0.5 cursor-pointer"
                   >
                     <Download className="w-4 h-4" strokeWidth={2.25} />
                     <span>{slide.cta.label}</span>
@@ -172,7 +172,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                 ) : (
                   <button
                     onClick={() => onOpenDemoModal()}
-                    className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 active:bg-slate-200 text-slate-950 font-bold text-xs sm:text-sm px-7 py-3.5 rounded-2xl shadow-xl transition-all hover:-translate-y-0.5 cursor-pointer border border-slate-200"
+                    className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 active:bg-slate-200 text-slate-950 font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl shadow-md transition-all hover:-translate-y-0.5 cursor-pointer border border-slate-200"
                   >
                     <span>{slide.cta.label}</span>
                     <ArrowRight className="w-4 h-4" strokeWidth={2.25} />
@@ -181,7 +181,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
 
                 <button
                   onClick={() => onNavigatePage('funcionalidades')}
-                  className="bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 px-5 py-3.5 rounded-2xl cursor-pointer backdrop-blur-xs"
+                  className="bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 px-5 py-3.5 rounded-xl cursor-pointer"
                 >
                   <span>Conhecer Módulos</span>
                   <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
