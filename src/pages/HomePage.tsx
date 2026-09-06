@@ -368,19 +368,21 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Em Angola, a instabilidade da internet não pode travar as vendas do seu negócio. O <strong className="text-white">KIVORA Desktop ERP</strong> armazena a base de dados no seu computador ou servidor local (LAN), com operação contínua e sem interrupções.
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
                 {[
                   { icon: <CheckCircle2 className="w-4 h-4" />, title: '100% Offline-First', desc: 'Emita faturas, feche caixas e gira stocks sem depender de ligação externa.' },
                   { icon: <Wifi className="w-4 h-4" />, title: 'Rede Local Multi-Postos', desc: 'Conecte 10 ou mais terminais de caixa ao servidor na rede do balcão.' },
                   { icon: <Zap className="w-4 h-4" />, title: 'Sem Riscos Cambiais', desc: 'Preços fixados em Kwanzas (AOA), sem mensalidades em moeda estrangeira.' },
                   { icon: <ShieldCheck className="w-4 h-4" />, title: 'Segurança & Cópia USB', desc: 'Backups automáticos encriptados para Pen Drive ou disco externo.' },
                 ].map((f, i) => (
-                  <div key={i} className="bg-white/5 hover:bg-white/[0.08] p-4.5 rounded-2xl border border-white/10 hover:border-white/20 space-y-1.5 transition-all group/feat">
-                    <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
-                      <span>{f.icon}</span>
-                      <span>{f.title}</span>
+                  <div key={i} className="bg-white/[0.04] hover:bg-white/[0.07] p-4 rounded-xl border border-white/[0.08] hover:border-white/[0.16] space-y-2 transition-all">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-white/[0.08] flex items-center justify-center shrink-0 text-blue-300">
+                        {f.icon}
+                      </div>
+                      <span className="text-white font-semibold text-xs sm:text-[13px] tracking-tight">{f.title}</span>
                     </div>
-                    <p className="text-xs text-slate-300 leading-relaxed">{f.desc}</p>
+                    <p className="text-xs text-slate-300/85 leading-relaxed font-normal">{f.desc}</p>
                   </div>
                 ))}
               </div>
