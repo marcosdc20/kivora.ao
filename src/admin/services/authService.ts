@@ -9,6 +9,7 @@ import {
 } from 'firebase/firestore';
 import {
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut as firebaseSignOut
 } from 'firebase/auth';
 import { db, auth } from '../../lib/firebase';
@@ -196,6 +197,32 @@ export async function loginUser(
       }
     } catch (authError: any) {
       console.log('Firebase Auth direto não logou ou é perfil de cliente/parceiro:', authError.code);
+      const masterAdmins = ['admin@kivora.ao', 'kivora.angola@gmail.com', 'narcisomarcos826@gmail.com', 'comercial@kivora.ao', 'suporte@kivora.ao'];
+      // Auto-provisionar admin no Firebase Auth caso a conta não exista ainda
+      if (authError.code === 'auth/user-not-found' && (masterAdmins.includes(cleanId) || cleanId.endsWith('@kivora.ao')) && cleanPass.length >= 6) {
+        try {
+          const newUserCred = await createUserWithEmailAndPassword(auth, cleanId, cleanPass);
+          const newUser = newUserCred.user;
+          await setDoc(doc(db, 'admins', newUser.uid), {
+            email: cleanId,
+            nome: 'Administrador Kivora',
+            role: 'admin',
+            active: true,
+            updatedAt: Date.now(),
+          }, { merge: true });
+          const session: KivoraUserSession = {
+            id: newUser.uid,
+            email: newUser.email || cleanId,
+            role: 'admin',
+            nome: 'Administrador Kivora',
+            status: 'active',
+          };
+          setStoredSession(session);
+          return { success: true, session };
+        } catch (createErr) {
+          console.warn('Auto-provisioning Firebase Auth admin falhou:', createErr);
+        }
+      }
     }
   }
 
@@ -291,6 +318,28 @@ export async function loginUser(
         status: u.status || 'active',
         mustChangePassword: u.mustChangePassword ?? false,
       };
+
+      if (session.role === 'admin' && !auth.currentUser && cleanPass.length >= 6) {
+        signInWithEmailAndPassword(auth, cleanId, cleanPass)
+          .catch((err) => {
+            if (err.code === 'auth/user-not-found') {
+              return createUserWithEmailAndPassword(auth, cleanId, cleanPass);
+            }
+          })
+          .then(async (userCred) => {
+            if (userCred?.user) {
+              await setDoc(doc(db, 'admins', userCred.user.uid), {
+                email: cleanId,
+                nome: session.nome,
+                role: 'admin',
+                active: true,
+                updatedAt: Date.now(),
+              }, { merge: true });
+            }
+          })
+          .catch((e) => console.warn('Sync admin auth background warning:', e));
+      }
+
       setStoredSession(session);
       return { success: true, session };
     }

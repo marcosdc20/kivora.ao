@@ -143,8 +143,8 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
     }
 
     if (file.type === 'application/pdf') {
-      if (file.size > 750 * 1024) {
-        setComprovativoError('O documento PDF selecionado excede 750 KB. Por favor comprima o PDF ou utilize uma foto do comprovativo.');
+      if (file.size > 400 * 1024) {
+        setComprovativoError('O documento PDF selecionado excede 400 KB. Por favor comprima o PDF ou utilize uma foto/captura de ecrã do comprovativo.');
         return;
       }
       const sizeFormatted = `${Math.round(file.size / 1024)} KB`;
@@ -1085,7 +1085,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                         Clique para anexar o comprovativo bancário (opcional)
                       </span>
                       <span className="text-[10px] text-slate-400 mt-1">
-                        Formatos aceites: Imagens (PNG, JPG, WEBP) ou PDF. Pode anexar agora ou enviar posteriormente ao suporte comercial.
+                        Formatos aceites: Imagens (PNG, JPG, WEBP) ou PDF (até 400 KB). Pode anexar agora ou enviar posteriormente ao suporte comercial.
                       </span>
                     </label>
                   )}

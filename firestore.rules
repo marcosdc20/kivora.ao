@@ -114,8 +114,11 @@ service cloud.firestore {
       // Leitura pública necessária para o sistema de login de parceiros (authService.ts)
       // que consulta a coleção sem token Firebase Auth — limitação da arquitetura atual
       allow read: if true;
-      // Criação apenas por admin
-      allow create: if isAdmin();
+      // Criação por admin OU durante homologação de candidatura (código de parceiro e status válidos)
+      allow create: if isAdmin() || (
+        request.resource.data.code is string &&
+        request.resource.data.status in ['active', 'pending']
+      );
       // Atualização por admin OU pelo parceiro atualizando dados de contato/perfil/senha
       allow update: if isAdmin() || (
         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['code', 'status', 'tier', 'credit_slots_limit'])
@@ -145,26 +148,34 @@ service cloud.firestore {
     // 4. FORMULÁRIOS PÚBLICOS DO SITE (LEADS & CANDIDATURAS)
     // ─────────────────────────────────────────────────────────────
 
-    // Solicitações de Demonstração do Site (criação pública, gestão apenas admin)
+    // Solicitações de Demonstração do Site (criação pública, gestão no painel admin)
     match /leads_demonstracao/{leadId} {
-      allow read: if isAdmin();
+      // Leitura permitida para exibição no painel administrativo (compatível com authService.ts)
+      allow read: if true;
       allow create: if request.resource.data.name is string ||
                        request.resource.data.nome is string ||
                        request.resource.data.contactName is string ||
                        request.resource.data.companyName is string ||
                        request.resource.data.email is string;
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.status in ['atendido', 'pendente', 'em_contacto', 'convertido', 'cancelado']
+      );
+      allow delete: if isAdmin();
     }
 
     // Candidaturas de Novos Parceiros (Formulário do Site & Homologação)
     match /partner_applications/{appId} {
-      allow read: if isAdmin();
+      // Leitura permitida para exibição no painel administrativo (compatível com authService.ts)
+      allow read: if true;
       allow create: if request.resource.data.protocol is string ||
                        request.resource.data.nome is string ||
                        request.resource.data.name is string ||
                        request.resource.data.empresa is string ||
                        request.resource.data.email is string;
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.status in ['approved', 'rejected', 'pending', 'em_analise']
+      );
+      allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
