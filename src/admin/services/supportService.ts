@@ -172,9 +172,9 @@ export function subscribeClientTickets(
   }, (err) => console.warn('Erro ao escutar tickets do cliente:', err));
 }
 
-/** Subscrição em Tempo Real para Tickets do Parceiro (clientes do parceiro e chamados abertos pelo parceiro) */
+/** Subscrição em Tempo Real para Tickets do Parceiro (Segregação Multi-Tenant Estrita) */
 export function subscribePartnerTickets(
-  partnerCode: string,
+  partnerCodeOrIdentifiers: string | string[],
   onUpdateOrEmail?: ((tickets: { clientTickets: SupportTicket[]; adminTickets: SupportTicket[] }) => void) | string | null,
   maybeOnUpdate?: (tickets: { clientTickets: SupportTicket[]; adminTickets: SupportTicket[] }) => void
 ) {
@@ -182,12 +182,27 @@ export function subscribePartnerTickets(
   const partnerEmail = typeof onUpdateOrEmail === 'string' ? onUpdateOrEmail : '';
   if (!onUpdate) return () => {};
 
+  const rawList = Array.isArray(partnerCodeOrIdentifiers)
+    ? [...partnerCodeOrIdentifiers]
+    : [partnerCodeOrIdentifiers];
+  if (partnerEmail) rawList.push(partnerEmail);
+
+  const cleanIdentifiers = new Set(
+    rawList
+      .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
+      .map((s) => s.trim().toLowerCase())
+  );
+
+  // Se não houver identificador do parceiro, não expor nada
+  if (cleanIdentifiers.size === 0) {
+    onUpdate({ clientTickets: [], adminTickets: [] });
+    return () => {};
+  }
+
   const q = query(collection(db, 'support_tickets'), orderBy('createdAt', 'desc'));
   return onSnapshot(q, (snap) => {
     const clientTickets: SupportTicket[] = [];
     const adminTickets: SupportTicket[] = [];
-    const pCode = (partnerCode || '').toLowerCase().trim();
-    const pEmail = (partnerEmail || '').toLowerCase().trim();
 
     snap.forEach((d) => {
       const data = d.data() as any;
@@ -212,24 +227,22 @@ export function subscribePartnerTickets(
         messages: Array.isArray(data.messages) ? data.messages : []
       };
 
-      const matchPartner = 
-        (pCode && tk.partner_id?.toLowerCase().includes(pCode)) ||
-        (pCode && tk.contact_email?.toLowerCase().includes(pCode)) ||
-        (pEmail && tk.contact_email?.toLowerCase().includes(pEmail)) ||
-        (pEmail && tk.partner_id?.toLowerCase().includes(pEmail)) ||
-        (pCode && pCode.includes(tk.partner_id?.toLowerCase() || '')) ||
-        (pCode && pCode.includes(tk.contact_email?.toLowerCase() || ''));
+      const tkPartnerId = (tk.partner_id || '').trim().toLowerCase();
+      const tkEmail = (tk.contact_email || '').trim().toLowerCase();
+
+      // Correspondência estrita e segura: nunca comparar com string vazia
+      const matchPartner =
+        (tkPartnerId.length > 0 && cleanIdentifiers.has(tkPartnerId)) ||
+        (tkEmail.length > 0 && cleanIdentifiers.has(tkEmail));
+
+      if (!matchPartner) {
+        return; // Pertence a outro parceiro ou a cliente não vinculado a este parceiro
+      }
 
       // Se foi o parceiro que abriu para o Admin
-      if (tk.created_by_role === 'partner' && (matchPartner || !pCode)) {
+      if (tk.created_by_role === 'partner') {
         adminTickets.push(tk);
-      }
-      // Se é um ticket aberto pelo cliente direcionado para este parceiro
-      else if (tk.target_type === 'partner' && matchPartner) {
-        clientTickets.push(tk);
-      }
-      // Fallback: se tiver o ID do parceiro associado
-      else if (matchPartner) {
+      } else {
         clientTickets.push(tk);
       }
     });
@@ -237,3 +250,4 @@ export function subscribePartnerTickets(
     onUpdate({ clientTickets, adminTickets });
   }, (err) => console.warn('Erro ao escutar tickets do parceiro:', err));
 }
+

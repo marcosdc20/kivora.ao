@@ -388,28 +388,30 @@ export function subscribePartnerDebts(
       rawList.filter(Boolean).map((s) => s.trim().toLowerCase())
     );
 
+    if (cleanSet.size === 0) {
+      cb([]);
+      return () => {};
+    }
+
     return onSnapshot(collection(db, 'partner_debts'), (snap) => {
       const debts: PartnerDebtEntry[] = [];
       snap.forEach((d) => {
         const data = d.data();
         const pId = (data.partner_id || '').trim().toLowerCase();
         const pCode = (data.partner_code || '').trim().toLowerCase();
-        const pName = (data.partner_name || '').trim().toLowerCase();
         const licId = (data.license_id || d.id || '').trim().toLowerCase();
 
-        let matches = cleanSet.size === 0;
-        if (!matches) {
-          for (const clean of cleanSet) {
-            if (
-              pId === clean ||
-              pCode === clean ||
-              licId === clean ||
-              (pName && pName.includes(clean)) ||
-              (clean && pId.includes(clean))
-            ) {
-              matches = true;
-              break;
-            }
+        let matches = false;
+        for (const clean of cleanSet) {
+          if (!clean) continue;
+          if (
+            pId === clean ||
+            pCode === clean ||
+            licId === clean ||
+            (clean.length > 3 && pId.length > 3 && pId.includes(clean))
+          ) {
+            matches = true;
+            break;
           }
         }
 

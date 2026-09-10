@@ -380,9 +380,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     return () => unsub();
   }, [partnerCode, partnerIdentifiers]);
 
-  // Subscrição em Tempo Real aos Chamados do Parceiro
+  // Subscrição em Tempo Real aos Chamados do Parceiro (Segregação Multi-Tenant Estrita)
   useEffect(() => {
-    const unsub = subscribePartnerTickets(partnerCode, session?.email || '', ({ clientTickets: cTks, adminTickets: aTks }) => {
+    const ids = partnerIdentifiers.length > 0 ? partnerIdentifiers : partnerCode;
+    const unsub = subscribePartnerTickets(ids, session?.email || '', ({ clientTickets: cTks, adminTickets: aTks }) => {
       setClientTickets(cTks);
       setAdminTickets(aTks);
       if (selectedTicket) {
@@ -392,7 +393,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       }
     });
     return () => unsub();
-  }, [partnerCode, session?.email, selectedTicket]);
+  }, [partnerCode, session?.email, partnerIdentifiers, selectedTicket]);
 
   // Subscrição em Tempo Real às Licenças deste Parceiro (Multi-identificador resiliente)
   useEffect(() => {
@@ -414,9 +415,11 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
   // Escuta em tempo real os documentos oficiais em /licenses de solicitações que foram aprovadas
   useEffect(() => {
-    const approvedReqs = myLicenseRequests.filter(
-      (r) => r.status === 'approved' && r.license_id && r.license_id.trim().length > 0
-    );
+    const approvedReqs = myLicenseRequests.filter((r) => {
+      const licKey = (r.license_id || (r as any).licenseId || (r as any).licenseKey || '').trim();
+      return r.status === 'approved' && licKey.length > 0;
+    });
+
     if (approvedReqs.length === 0) {
       setApprovedRequestLicenses({});
       return;
@@ -425,7 +428,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     const unsubs: (() => void)[] = [];
 
     approvedReqs.forEach((req) => {
-      const licId = req.license_id!.trim();
+      const licId = (req.license_id || (req as any).licenseId || (req as any).licenseKey || '').trim();
       try {
         const unsub = onSnapshot(
           doc(db, 'licenses', licId),
@@ -448,7 +451,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 expires_at: calculateExpiresAt(req.plan_type),
                 price_aoa: req.price_aoa,
                 notes: req.notes || `Aprovada pelo Administrador (${req.reviewed_by || 'Admin'})`,
-                partner_id: partnerCode,
+                partner_id: req.partner_id || partnerCode,
                 activated_at: null,
                 extra_seats: req.extra_seats,
                 is_provisional: req.is_provisional,
@@ -482,18 +485,23 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
     // 2. Licenças de solicitações aprovadas (escutadas em tempo real de /licenses)
     Object.values(approvedRequestLicenses).forEach((lic) => {
-      if (!map.has(lic.id.toUpperCase())) {
-        map.set(lic.id.toUpperCase(), lic);
+      const keyUpper = lic.id.toUpperCase();
+      if (!map.has(keyUpper)) {
+        map.set(keyUpper, lic);
+      } else {
+        // Enriquecer dados se o doc oficial trouxer mais detalhes de ativação/hardware
+        map.set(keyUpper, { ...map.get(keyUpper)!, ...lic });
       }
     });
 
     // 3. Fallback imediato para qualquer solicitação aprovada que ainda não tenha entrado em approvedRequestLicenses
     myLicenseRequests.forEach((req) => {
-      if (req.status === 'approved' && req.license_id) {
-        const keyUpper = req.license_id.trim().toUpperCase();
+      const licKey = (req.license_id || (req as any).licenseId || (req as any).licenseKey || '').trim();
+      if (req.status === 'approved' && licKey) {
+        const keyUpper = licKey.toUpperCase();
         if (!map.has(keyUpper)) {
           map.set(keyUpper, {
-            id: req.license_id.trim(),
+            id: licKey,
             company_name: req.company_name,
             nif: req.nif,
             client_email: req.client_email || '',
@@ -504,7 +512,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
             expires_at: calculateExpiresAt(req.plan_type),
             price_aoa: req.price_aoa,
             notes: req.notes || 'Aprovada pela Administração Kivora',
-            partner_id: partnerCode,
+            partner_id: req.partner_id || partnerCode,
             activated_at: null,
             extra_seats: req.extra_seats,
             is_provisional: req.is_provisional,
@@ -569,29 +577,68 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const partnerClients = React.useMemo(() => {
     const clientMap = new Map<string, Company>();
 
-    // 1. Clientes registados na coleção 'companies' vinculados a qualquer identificador do parceiro
+    const isGenericNif = (n?: string) => {
+      if (!n) return true;
+      const clean = n.replace(/\D/g, '');
+      return (
+        clean.length === 0 ||
+        clean === '999999999' ||
+        clean === '000000000' ||
+        n.trim().toLowerCase() === 'consumidor final'
+      );
+    };
+
+    const cleanIdentifiers = new Set(
+      partnerIdentifiers
+        .filter((id): id is string => Boolean(id && typeof id === 'string' && id.trim().length > 0))
+        .map((id) => id.trim().toLowerCase())
+    );
+
+    // 1. Clientes registados na coleção 'companies'
+    // REGRA DE OURO ZERO-LEAK: Nunca incluir uma empresa que pertença a outro parceiro!
     companies.forEach((c) => {
       const cPartner = (c.partner_id || '').trim().toLowerCase();
-      const matchesPartner = partnerIdentifiers.some((id) => id.trim().toLowerCase() === cPartner);
-      const matchesAddress =
-        c.address && partnerIdentifiers.some((id) => c.address!.toLowerCase().includes(id.trim().toLowerCase()));
-      const matchesLicense = allPartnerLicenses.some((l) => l.nif && l.nif.trim() === (c.nif || '').trim());
-      const matchesRequest = myLicenseRequests.some((r) => r.nif && r.nif.trim() === (c.nif || '').trim());
 
-      if (matchesPartner || matchesAddress || matchesLicense || matchesRequest) {
-        const key = (c.nif || c.id || c.name).trim().toUpperCase();
-        clientMap.set(key, c);
+      // Se a empresa possui explicitamente um parceiro diferente deste parceiro, NUNCA expor!
+      if (cPartner.length > 0 && !cleanIdentifiers.has(cPartner)) {
+        return;
+      }
+
+      // Pertence diretamente a este parceiro pelo partner_id
+      const matchesDirectPartner = cPartner.length > 0 && cleanIdentifiers.has(cPartner);
+
+      // Ou corresponde a uma licença OU solicitação deste parceiro com NIF específico (não genérico)
+      const cNif = (c.nif || '').trim();
+      const hasSpecificNif = !isGenericNif(cNif);
+      const matchesLicenseNif =
+        hasSpecificNif &&
+        allPartnerLicenses.some((l) => (l.nif || '').trim() === cNif);
+      const matchesRequestNif =
+        hasSpecificNif &&
+        myLicenseRequests.some((r) => (r.nif || '').trim() === cNif);
+
+      if (matchesDirectPartner || matchesLicenseNif || matchesRequestNif) {
+        const mapKey = hasSpecificNif ? `NIF_${cNif.toUpperCase()}` : `DOC_${c.id}`;
+        clientMap.set(mapKey, {
+          ...c,
+          partner_id: c.partner_id || partnerCode,
+        });
       }
     });
 
-    // 2. Fallback de alta fidelidade: Derivar clientes diretamente de todas as licenças do parceiro
+    // 2. Fallback de alta fidelidade: Derivar clientes diretamente de todas as licenças oficiais e aprovadas deste parceiro
     allPartnerLicenses.forEach((lic) => {
-      const key = (lic.nif || lic.company_name || lic.id).trim().toUpperCase();
-      if (!clientMap.has(key)) {
-        clientMap.set(key, {
-          id: lic.nif || `lic_client_${lic.id}`,
-          name: lic.company_name,
-          nif: lic.nif,
+      const licNif = (lic.nif || '').trim();
+      const hasSpecificNif = !isGenericNif(licNif);
+      const mapKey = hasSpecificNif
+        ? `NIF_${licNif.toUpperCase()}`
+        : `LIC_${lic.id.toUpperCase()}`;
+
+      if (!clientMap.has(mapKey)) {
+        clientMap.set(mapKey, {
+          id: hasSpecificNif ? licNif : `lic_client_${lic.id}`,
+          name: lic.company_name || 'Cliente Empresarial',
+          nif: lic.nif || '',
           email: lic.client_email || '',
           phone: '',
           address: 'Angola',
@@ -599,17 +646,28 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
           status: 'active',
           createdAt: lic.created_at || Date.now(),
         });
+      } else {
+        // Enriquecer dados cadastrais se a licença tiver email mais detalhado
+        const existing = clientMap.get(mapKey)!;
+        if (!existing.email && lic.client_email) {
+          existing.email = lic.client_email;
+        }
       }
     });
 
-    // 3. Derivar também a partir de solicitações de licença
+    // 3. Derivar também a partir de solicitações de licença deste parceiro
     myLicenseRequests.forEach((req) => {
-      const key = (req.nif || req.company_name || req.id).trim().toUpperCase();
-      if (!clientMap.has(key)) {
-        clientMap.set(key, {
-          id: req.nif || `req_client_${req.id}`,
-          name: req.company_name,
-          nif: req.nif,
+      const reqNif = (req.nif || '').trim();
+      const hasSpecificNif = !isGenericNif(reqNif);
+      const mapKey = hasSpecificNif
+        ? `NIF_${reqNif.toUpperCase()}`
+        : `REQ_${req.id.toUpperCase()}`;
+
+      if (!clientMap.has(mapKey)) {
+        clientMap.set(mapKey, {
+          id: hasSpecificNif ? reqNif : `req_client_${req.id}`,
+          name: req.company_name || 'Cliente Solicitado',
+          nif: req.nif || '',
           email: req.client_email || '',
           phone: '',
           address: 'Angola',
@@ -634,6 +692,15 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       (c.email || '').toLowerCase().includes(s)
     );
   });
+
+  // Solicitações aprovadas prontas para entrega ao cliente
+  const approvedRequestsReady = React.useMemo(() => {
+    return myLicenseRequests.filter(
+      (r) =>
+        r.status === 'approved' &&
+        Boolean((r.license_id || (r as any).licenseId || (r as any).licenseKey || '').trim())
+    );
+  }, [myLicenseRequests]);
 
   // Filtro de Licenças do Parceiro (Todas as licenças: emitidas diretamente + aprovadas por solicitação)
   const filteredLicenses = allPartnerLicenses.filter((lic) => {
@@ -1732,6 +1799,115 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 </div>
               </div>
 
+              {/* Card Destaque: Licenças Aprovadas Prontas para Entrega */}
+              {approvedRequestsReady.length > 0 && (
+                <div className="p-6 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 border-2 border-emerald-400/40 rounded-3xl space-y-4 shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md">
+                        <CheckCircle2 className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-black text-slate-900 text-base">
+                            {approvedRequestsReady.length === 1
+                              ? '1 Licença Oficial Aprovada pela Kivora!'
+                              : `${approvedRequestsReady.length} Licenças Oficiais Aprovadas pela Kivora!`}
+                          </h4>
+                          <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            Pronta para Entrega
+                          </span>
+                        </div>
+                        <p className="text-slate-600 text-xs mt-0.5">
+                          As chaves abaixo foram homologadas pela Kivora e já se encontram ativas. Copie e entregue diretamente aos clientes.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setActiveSection('licencas');
+                        setActiveLicensesTab('solicitacoes');
+                      }}
+                      className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 cursor-pointer shadow-sm flex items-center gap-2 self-start sm:self-auto transition-colors"
+                    >
+                      <Key className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Ver Todas as Solicitações</span>
+                    </button>
+                  </div>
+
+                  {/* Mini-cards das Licenças Aprovadas Recentes */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                    {approvedRequestsReady.slice(0, 4).map((req) => {
+                      const licKey = (req.license_id || (req as any).licenseId || (req as any).licenseKey || '').trim();
+                      const associatedLic = allPartnerLicenses.find(l => l.id.toUpperCase() === licKey.toUpperCase());
+                      return (
+                        <div key={req.id} className="p-4 bg-white rounded-2xl border border-emerald-200/80 shadow-xs flex flex-col justify-between gap-3">
+                          <div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-mono text-xs font-black text-emerald-900 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+                                {licKey}
+                              </span>
+                              <span className="text-[10px] font-bold text-slate-500 uppercase">
+                                {getPlanLabel(req.plan_type)}
+                              </span>
+                            </div>
+                            <h5 className="font-black text-slate-900 text-sm mt-2">{req.company_name}</h5>
+                            <p className="text-[11px] text-slate-500 font-mono">NIF: {req.nif}</p>
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-2 border-t border-slate-100 flex-wrap">
+                            <button
+                              onClick={() => handleCopyKey(licKey)}
+                              className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                            >
+                              {copiedKey === licKey ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                              <span>{copiedKey === licKey ? 'Copiada!' : 'Copiar Chave'}</span>
+                            </button>
+
+                            {associatedLic && (
+                              <button
+                                onClick={() => handleShareWhatsapp(associatedLic)}
+                                className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-emerald-200 cursor-pointer transition-colors"
+                              >
+                                <Share2 className="w-3.5 h-3.5" />
+                                <span>WhatsApp</span>
+                              </button>
+                            )}
+
+                            <button
+                              onClick={() => {
+                                const licToCert: KivoraLicense = associatedLic || {
+                                  id: licKey,
+                                  company_name: req.company_name,
+                                  nif: req.nif,
+                                  client_email: req.client_email || '',
+                                  plan_type: req.plan_type,
+                                  status: 'active',
+                                  hardware_id: null,
+                                  created_at: req.approved_at || req.created_at,
+                                  expires_at: calculateExpiresAt(req.plan_type),
+                                  price_aoa: req.price_aoa,
+                                  notes: req.notes || 'Aprovada pela Administração Kivora',
+                                  partner_id: req.partner_id || partnerCode,
+                                  activated_at: null,
+                                  extra_seats: req.extra_seats,
+                                  is_provisional: req.is_provisional,
+                                };
+                                setSelectedLicenseForCert(licToCert);
+                              }}
+                              className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-blue-200 cursor-pointer transition-colors"
+                            >
+                              <Printer className="w-3.5 h-3.5" />
+                              <span>Certificado AGT</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Dívida Alert se houver pendência */}
               {totalPendingDebt > 0 && (
                 <div className="p-5 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs shadow-xs">
@@ -2385,7 +2561,13 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               ) : (
                 <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs">
                   {filteredClients.map((c) => {
-                    const clientLicenses = allPartnerLicenses.filter(l => l.nif === c.nif);
+                    const clientLicenses = allPartnerLicenses.filter((l) => {
+                      const cNif = (c.nif || '').trim();
+                      if (cNif && !['999999999', '000000000'].includes(cNif)) {
+                        return (l.nif || '').trim() === cNif;
+                      }
+                      return (l.company_name || '').toLowerCase().trim() === (c.name || '').toLowerCase().trim();
+                    });
                     return (
                       <div key={c.id || c.nif} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition-colors">
                         <div>
@@ -2685,7 +2867,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       <label className="font-bold text-slate-700 uppercase text-[10px]">Preenchimento Rápido com Cliente da Carteira</label>
                       <select
                         onChange={(e) => {
-                          const c = partnerClients.find(item => item.nif === e.target.value);
+                          const val = e.target.value;
+                          const c = partnerClients.find((item) => (item.id && item.id === val) || item.nif === val);
                           if (c) {
                             setCompanyName(c.name);
                             setNif(c.nif);
@@ -2695,8 +2878,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-emerald-500"
                       >
                         <option value="">-- Selecione uma empresa já cadastrada ou digite abaixo --</option>
-                        {partnerClients.map(c => (
-                          <option key={c.id || c.nif} value={c.nif}>{c.name} (NIF: {c.nif})</option>
+                        {partnerClients.map((c) => (
+                          <option key={c.id || c.nif} value={c.id || c.nif}>
+                            {c.name} {c.nif ? `(NIF: ${c.nif})` : ''}
+                          </option>
                         ))}
                       </select>
                     </div>
