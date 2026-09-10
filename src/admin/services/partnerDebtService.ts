@@ -482,33 +482,59 @@ export function subscribeAllDebts(cb: (debts: PartnerDebtEntry[]) => void): () =
 
 /**
  * Escuta a conta do parceiro com Quota de Slots de Crédito, Saldo de Carteira e Categoria
+ * Suporta múltiplos identificadores (código, ID, aliases e e-mail)
  */
 export function subscribePartnerAccount(
-  partnerCode: string,
-  cb: (account: PartnerAccount | null) => void
+  partnerCodeOrIdentifiers: string | string[],
+  cb: (account: PartnerAccount | null) => void,
+  userEmail?: string
 ): () => void {
   try {
-    const clean = (partnerCode || '').trim().toLowerCase();
+    const rawList = Array.isArray(partnerCodeOrIdentifiers)
+      ? [...partnerCodeOrIdentifiers]
+      : [partnerCodeOrIdentifiers];
+    if (userEmail) rawList.push(userEmail);
+
+    const cleanList = rawList
+      .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
+      .map((s) => s.trim().toLowerCase());
+    const emailList = cleanList.filter((s) => s.includes('@'));
+
     return onSnapshot(collection(db, 'partners'), (snap) => {
       let matchedDoc: any = null;
-      let matchedId = partnerCode;
+      let matchedId = cleanList[0] || '';
 
       snap.forEach((docSnap) => {
         const d = docSnap.data();
         const dId = docSnap.id.trim().toLowerCase();
         const dCode = (d.code || '').trim().toLowerCase();
+        const dAlias = (d.alias_code || '').trim().toLowerCase();
         const dEmail = (d.email || '').trim().toLowerCase();
+        const dProto = (d.protocol || '').trim().toLowerCase();
+        const dSuggested = (d.partner_code_suggested || '').trim().toLowerCase();
 
-        if (dId === clean || dCode === clean || (clean.includes('@') && dEmail === clean)) {
-          matchedDoc = d;
-          matchedId = docSnap.id;
+        const matchesCode = cleanList.some(
+          (c) => c === dId || c === dCode || c === dAlias || c === dProto || c === dSuggested
+        );
+        const matchesEmail = emailList.length > 0 && dEmail.length > 0 && emailList.includes(dEmail);
+
+        if (matchesCode || matchesEmail) {
+          if (
+            !matchedDoc ||
+            (d.status === 'active' && matchedDoc.status !== 'active') ||
+            (d.code && !matchedDoc.code) ||
+            (d.credit_limit_aoa && !matchedDoc.credit_limit_aoa)
+          ) {
+            matchedDoc = d;
+            matchedId = docSnap.id;
+          }
         }
       });
 
       if (matchedDoc) {
         const tier = (matchedDoc.tier as any) || 'bronze';
         const defaultSlots = TIER_DEFAULT_SLOTS[tier as keyof typeof TIER_DEFAULT_SLOTS] || 2;
-        
+
         cb({
           id: matchedId,
           code: matchedDoc.code || matchedId,
@@ -527,8 +553,12 @@ export function subscribePartnerAccount(
       } else {
         cb(null);
       }
-    }, () => cb(null));
-  } catch {
+    }, (err) => {
+      console.warn('Erro subscribePartnerAccount:', err);
+      cb(null);
+    });
+  } catch (err) {
+    console.warn('Erro ao inicializar subscribePartnerAccount:', err);
     cb(null);
     return () => {};
   }

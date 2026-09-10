@@ -25,7 +25,7 @@ import {
   changeUserPassword
 } from '../admin/services/authService';
 import { useCompanies } from '../admin/hooks/useFirebase';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import {
   subscribePartnerLicenses,
@@ -86,9 +86,77 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
   // Conta de Parceiro (Wallet & Limite de Crédito)
   const [partnerAccount, setPartnerAccount] = useState<PartnerAccount | null>(null);
+  const displayPartnerCode = partnerAccount?.code || partnerCode;
+  const displayPartnerName = partnerAccount?.name || partnerName;
   const [policy, setPolicy] = useState<PartnerLicensingPolicy>(DEFAULT_PARTNER_POLICY);
+  const [partnerDiscoveredCodes, setPartnerDiscoveredCodes] = useState<string[]>([]);
 
-  // Identificadores resilientes do parceiro (Código, Email, ID e variações de caixa)
+  // Descoberta dinâmica em tempo real de códigos/aliases vinculados a este parceiro
+  useEffect(() => {
+    const userEmail = (session?.email || '').trim().toLowerCase();
+    const currentCode = (session?.partnerCode || '').trim().toLowerCase();
+    if (!userEmail && !currentCode) return;
+
+    const unsubs: (() => void)[] = [];
+
+    // Escuta em /partners todos os registos correspondentes ao e-mail ou código
+    try {
+      const uPartners = onSnapshot(collection(db, 'partners'), (snap) => {
+        const found = new Set<string>();
+        snap.forEach((d) => {
+          const data = d.data();
+          const dEmail = (data.email || '').trim().toLowerCase();
+          const dCode = (data.code || '').trim();
+          const dAlias = (data.alias_code || '').trim();
+          const dId = d.id.trim();
+
+          const matchesEmail = userEmail && dEmail === userEmail;
+          const matchesCode =
+            currentCode &&
+            (dId.toLowerCase() === currentCode ||
+              dCode.toLowerCase() === currentCode ||
+              dAlias.toLowerCase() === currentCode);
+
+          if (matchesEmail || matchesCode) {
+            if (dId) found.add(dId);
+            if (dCode) found.add(dCode);
+            if (dAlias) found.add(dAlias);
+          }
+        });
+        if (found.size > 0) {
+          setPartnerDiscoveredCodes((prev) => Array.from(new Set([...prev, ...found])));
+        }
+      });
+      unsubs.push(uPartners);
+    } catch (e) {
+      console.warn('Erro ao descobrir aliases em partners:', e);
+    }
+
+    // Escuta em /users todos os registos vinculados ao e-mail
+    if (userEmail) {
+      try {
+        const qUsers = query(collection(db, 'users'), where('email', '==', userEmail));
+        const uUsers = onSnapshot(qUsers, (snap) => {
+          const found = new Set<string>();
+          snap.forEach((d) => {
+            const data = d.data();
+            if (data.partnerCode) found.add(data.partnerCode.trim());
+            if (data.alias_partner_code) found.add(data.alias_partner_code.trim());
+          });
+          if (found.size > 0) {
+            setPartnerDiscoveredCodes((prev) => Array.from(new Set([...prev, ...found])));
+          }
+        });
+        unsubs.push(uUsers);
+      } catch (e) {
+        console.warn('Erro ao descobrir aliases em users:', e);
+      }
+    }
+
+    return () => unsubs.forEach((u) => u());
+  }, [session?.email, session?.partnerCode]);
+
+  // Identificadores resilientes do parceiro (Código, Email, ID, Aliases descobertos e variações de caixa)
   const partnerIdentifiers = React.useMemo(() => {
     const ids = new Set<string>();
     if (session?.partnerCode) ids.add(session.partnerCode.trim());
@@ -98,6 +166,9 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     if (partnerAccount?.id) ids.add(partnerAccount.id.trim());
     if (partnerAccount?.email) ids.add(partnerAccount.email.trim());
     if (partnerCode) ids.add(partnerCode.trim());
+    partnerDiscoveredCodes.forEach((c) => {
+      if (c) ids.add(c.trim());
+    });
 
     const result: string[] = [];
     ids.forEach((id) => {
@@ -108,7 +179,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       }
     });
     return Array.from(new Set(result)).filter(Boolean);
-  }, [session, partnerAccount, partnerCode]);
+  }, [session, partnerAccount, partnerCode, partnerDiscoveredCodes]);
   const [showOfficialCertificatesModal, setShowOfficialCertificatesModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -278,12 +349,16 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
   // Subscrição em Tempo Real à Conta do Parceiro (Wallet & Limite)
   useEffect(() => {
-    if (!partnerCode) return;
-    const unsub = subscribePartnerAccount(partnerCode, (acc) => {
-      setPartnerAccount(acc);
-    });
+    if (!partnerCode && !session?.email && partnerIdentifiers.length === 0) return;
+    const unsub = subscribePartnerAccount(
+      partnerIdentifiers.length > 0 ? partnerIdentifiers : (partnerCode || session?.email || ''),
+      (acc) => {
+        setPartnerAccount(acc);
+      },
+      session?.email
+    );
     return () => unsub();
-  }, [partnerCode]);
+  }, [partnerCode, session?.email, partnerIdentifiers]);
 
   // Subscrição em Tempo Real à Conta de Minutos de Vídeo do Parceiro
   useEffect(() => {
@@ -491,19 +566,71 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     return list;
   }, [partnerDebts, allPartnerLicenses, pricingPlans, partnerAccount?.tier, policy, partnerCode, partnerName]);
 
-  const partnerClients = companies.filter(
-    (c) =>
-      (c.partner_id && c.partner_id === partnerCode) ||
-      (c.address && c.address.includes(partnerCode)) ||
-      allPartnerLicenses.some((l) => l.nif === c.nif)
-  );
+  const partnerClients = React.useMemo(() => {
+    const clientMap = new Map<string, Company>();
+
+    // 1. Clientes registados na coleção 'companies' vinculados a qualquer identificador do parceiro
+    companies.forEach((c) => {
+      const cPartner = (c.partner_id || '').trim().toLowerCase();
+      const matchesPartner = partnerIdentifiers.some((id) => id.trim().toLowerCase() === cPartner);
+      const matchesAddress =
+        c.address && partnerIdentifiers.some((id) => c.address!.toLowerCase().includes(id.trim().toLowerCase()));
+      const matchesLicense = allPartnerLicenses.some((l) => l.nif && l.nif.trim() === (c.nif || '').trim());
+      const matchesRequest = myLicenseRequests.some((r) => r.nif && r.nif.trim() === (c.nif || '').trim());
+
+      if (matchesPartner || matchesAddress || matchesLicense || matchesRequest) {
+        const key = (c.nif || c.id || c.name).trim().toUpperCase();
+        clientMap.set(key, c);
+      }
+    });
+
+    // 2. Fallback de alta fidelidade: Derivar clientes diretamente de todas as licenças do parceiro
+    allPartnerLicenses.forEach((lic) => {
+      const key = (lic.nif || lic.company_name || lic.id).trim().toUpperCase();
+      if (!clientMap.has(key)) {
+        clientMap.set(key, {
+          id: lic.nif || `lic_client_${lic.id}`,
+          name: lic.company_name,
+          nif: lic.nif,
+          email: lic.client_email || '',
+          phone: '',
+          address: 'Angola',
+          partner_id: lic.partner_id || partnerCode,
+          status: 'active',
+          createdAt: lic.created_at || Date.now(),
+        });
+      }
+    });
+
+    // 3. Derivar também a partir de solicitações de licença
+    myLicenseRequests.forEach((req) => {
+      const key = (req.nif || req.company_name || req.id).trim().toUpperCase();
+      if (!clientMap.has(key)) {
+        clientMap.set(key, {
+          id: req.nif || `req_client_${req.id}`,
+          name: req.company_name,
+          nif: req.nif,
+          email: req.client_email || '',
+          phone: '',
+          address: 'Angola',
+          partner_id: req.partner_id || partnerCode,
+          status: 'active',
+          createdAt: req.created_at || Date.now(),
+        });
+      }
+    });
+
+    const list = Array.from(clientMap.values());
+    list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    return list;
+  }, [companies, partnerIdentifiers, allPartnerLicenses, myLicenseRequests, partnerCode]);
 
   const filteredClients = partnerClients.filter((c) => {
     if (!clientSearch) return true;
     const s = clientSearch.toLowerCase();
     return (
-      c.name.toLowerCase().includes(s) ||
-      c.nif.toLowerCase().includes(s) ||
+      (c.name || '').toLowerCase().includes(s) ||
+      (c.nif || '').toLowerCase().includes(s) ||
       (c.email || '').toLowerCase().includes(s)
     );
   });
@@ -592,8 +719,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       // 1. Pagamento via Carteira Virtual (Pré-pago) -> 100% INSTANTÂNEO 24/7
       if (canPayWithWallet) {
         const instantRes = await issueInstantPartnerLicense({
-          partnerCode,
-          partnerName,
+          partnerCode: displayPartnerCode,
+          partnerName: displayPartnerName,
           companyName,
           nif,
           clientEmail,
@@ -630,8 +757,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         const isHighRiskPlan = (plan === 'lifetime' && policy.require_provisional_lifetime) || extraSeats >= 3;
 
         const instantRes = await issueInstantPartnerLicense({
-          partnerCode,
-          partnerName,
+          partnerCode: displayPartnerCode,
+          partnerName: displayPartnerName,
           companyName,
           nif,
           clientEmail,
@@ -669,8 +796,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       }
 
       const req = await createLicenseRequest({
-        partner_id: partnerCode,
-        partner_name: partnerName,
+        partner_id: displayPartnerCode,
+        partner_name: displayPartnerName,
         company_name: companyName,
         nif,
         client_email: clientEmail,
@@ -681,7 +808,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         payment_method: canPayWithWallet ? 'wallet' : 'credit',
         is_provisional: plan === 'lifetime' || extraSeats >= 3,
         ...(plan === 'lifetime' ? { provisional_target_plan: plan } : {}),
-        notes: `${exceptionReason} Solicitada pelo parceiro ${partnerCode} (+${extraSeats} postos extras). Requer aprovação da Administração.`,
+        notes: `${exceptionReason} Solicitada pelo parceiro ${displayPartnerCode} (+${extraSeats} postos extras). Requer aprovação da Administração.`,
       });
 
       // Regista também na coleção de empresas clientes se ainda não existir
@@ -692,8 +819,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
           nif,
           email: clientEmail,
           phone: '',
-          address: `Parceiro: ${partnerCode}`,
-          partner_id: partnerCode,
+          address: `Parceiro: ${displayPartnerCode}`,
+          partner_id: displayPartnerCode,
           status: 'active',
         }).catch(() => {});
       }
@@ -1257,8 +1384,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               {partnerName.slice(0, 2).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-black text-white truncate">{partnerName}</p>
-              <p className="text-[10px] text-emerald-400 font-mono font-bold mt-0.5">{partnerCode}</p>
+              <p className="text-xs font-black text-white truncate">{displayPartnerName}</p>
+              <p className="text-[10px] text-emerald-400 font-mono font-bold mt-0.5">{displayPartnerCode}</p>
             </div>
           </div>
 
@@ -1352,8 +1479,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
             </div>
 
             <div className="p-4 bg-slate-900/60 border-b border-slate-800/80">
-              <p className="text-xs font-black text-white truncate">{partnerName}</p>
-              <p className="text-[10px] text-emerald-400 font-mono font-bold mt-0.5">{partnerCode}</p>
+              <p className="text-xs font-black text-white truncate">{displayPartnerName}</p>
+              <p className="text-[10px] text-emerald-400 font-mono font-bold mt-0.5">{displayPartnerCode}</p>
               <div className="mt-2 flex items-center justify-between text-xs text-slate-300">
                 <span>Wallet:</span>
                 <strong className="text-emerald-400 font-mono">{fmt(walletBalance)} Kz</strong>

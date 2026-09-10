@@ -239,22 +239,50 @@ export async function loginUser(
 
       // Se a senha coincidir com a fornecida
       if (u.password && u.password === cleanPass) {
-        // Se o utilizador for parceiro, verificar estado na coleção `partners`
+        // Se o utilizador for parceiro, verificar estado e harmonizar código na coleção `partners`
+        let resolvedPartnerCode = u.partnerCode || uDoc.id;
         if (u.role === 'parceiro' || u.partnerCode) {
-          const pCode = u.partnerCode || uDoc.id;
           try {
-            const pDoc = await getDoc(doc(db, 'partners', pCode));
-            if (pDoc.exists() && pDoc.data()?.status === 'suspended') {
-              return {
-                success: false,
-                error: 'A sua conta de parceiro foi suspensa pela administração da Visual Software. Entre em contacto com o suporte para regularização.',
-              };
-            }
-            if (pDoc.exists() && pDoc.data()?.mustChangePassword !== undefined) {
-              u.mustChangePassword = pDoc.data()?.mustChangePassword;
+            const partnersSnap = await getDocs(collection(db, 'partners'));
+            let matchedP: any = null;
+            let matchedDocId = resolvedPartnerCode;
+
+            partnersSnap.forEach((pSnap) => {
+              const pData = pSnap.data();
+              const pEmail = (pData.email || '').trim().toLowerCase();
+              const pCode = (pData.code || '').trim().toLowerCase();
+              const pAlias = (pData.alias_code || '').trim().toLowerCase();
+              const pId = pSnap.id.trim().toLowerCase();
+              const currentCode = (resolvedPartnerCode || '').trim().toLowerCase();
+
+              const matchesEmail = cleanId.includes('@') && pEmail === cleanId;
+              const matchesCode = currentCode && (pCode === currentCode || pId === currentCode || pAlias === currentCode);
+
+              if (matchesEmail || matchesCode) {
+                if (!matchedP || (pData.status === 'active' && matchedP.status !== 'active') || pData.code) {
+                  matchedP = pData;
+                  matchedDocId = pSnap.id;
+                }
+              }
+            });
+
+            if (matchedP) {
+              resolvedPartnerCode = matchedP.code || matchedDocId;
+              if (matchedP.status === 'suspended') {
+                return {
+                  success: false,
+                  error: 'A sua conta de parceiro foi suspensa pela administração da Visual Software. Entre em contacto com o suporte para regularização.',
+                };
+              }
+              if (matchedP.mustChangePassword !== undefined) {
+                u.mustChangePassword = matchedP.mustChangePassword;
+              }
+              if (matchedP.name) {
+                u.nome = matchedP.name;
+              }
             }
           } catch (e) {
-            console.error('Erro ao verificar status do parceiro:', e);
+            console.error('Erro ao verificar status e código do parceiro:', e);
           }
         }
 
@@ -275,7 +303,7 @@ export async function loginUser(
           role: u.role || 'cliente',
           nome: u.nome || u.name || 'Utilizador Kivora',
           nif: u.nif,
-          partnerCode: u.partnerCode,
+          partnerCode: resolvedPartnerCode,
           companyName: u.companyName,
           status: u.status || 'active',
           mustChangePassword: u.mustChangePassword ?? false,
