@@ -113,18 +113,18 @@ export const AdminAuditoria: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard
             label="Total Registos de Auditoria"
-            value="1.842"
+            value={logs.length.toLocaleString('pt-AO')}
             icon={<Terminal className="w-4 h-4" />}
             iconBg="bg-blue-50 text-blue-600"
-            sub="Últimos 30 dias"
+            sub="Eventos sincronizados"
           />
           <StatCard
-            label="Bloqueios de Segurança (IP)"
-            value="1 Bloqueio"
+            label="Eventos de Segurança"
+            value={`${logs.filter(l => l.category === 'security').length} ${logs.filter(l => l.category === 'security').length === 1 ? 'Alerta' : 'Alertas'}`}
             icon={<ShieldAlert className="w-4 h-4" />}
             iconBg="bg-red-50 text-red-600"
-            sub="Tentativa de ataque Tor"
-            subColor="red"
+            sub="Proteção perimetral"
+            subColor={logs.filter(l => l.category === 'security').length > 0 ? 'red' : 'green'}
           />
           <StatCard
             label="Assinatura Criptográfica"

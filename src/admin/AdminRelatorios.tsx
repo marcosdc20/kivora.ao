@@ -20,17 +20,57 @@ export const AdminRelatorios: React.FC = () => {
   const [allLicenses, setAllLicenses] = useState<{ price_aoa: number; created_at: number; plan_type: string }[]>([]);
 
   useEffect(() => {
+    let partnersByRegion: Record<string, number> = {
+      'Luanda': 0,
+      'Benguela': 0,
+      'Huíla': 0,
+      'Huambo': 0,
+      'Cabinda': 0,
+      'Cuanza Sul': 0,
+    };
+
+    let unsubPart: (() => void) | null = null;
+    try {
+      unsubPart = onSnapshot(collection(db, 'partners'), (snapPart) => {
+        const counts: Record<string, number> = {
+          'Luanda': 0,
+          'Benguela': 0,
+          'Huíla': 0,
+          'Huambo': 0,
+          'Cabinda': 0,
+          'Cuanza Sul': 0,
+        };
+        snapPart.forEach((docSnap) => {
+          const d = docSnap.data();
+          const prov = d.provincia || d.cidade || d.location || d.address || 'Luanda';
+          const matchedKey = Object.keys(counts).find(k => prov.toLowerCase().includes(k.toLowerCase())) || 'Luanda';
+          counts[matchedKey] = (counts[matchedKey] || 0) + 1;
+        });
+        partnersByRegion = counts;
+
+        // Atualizar stats existentes com os parceiros reais
+        setStats(prev => prev.map(s => ({
+          ...s,
+          parceiros: partnersByRegion[s.provincia] ?? 0
+        })));
+      }, (err) => {
+        console.warn('Erro em relatorios partners:', err);
+      });
+    } catch (e) {
+      console.warn(e);
+    }
+
     try {
       const unsubLic = onSnapshot(collection(db, 'licenses'), (snapLic) => {
         let licTotal = 0;
         let sumAoa = 0;
         const regionMap: Record<string, { empresas: number; receita: number; parceiros: number }> = {
-          'Luanda': { empresas: 0, receita: 0, parceiros: 0 },
-          'Benguela': { empresas: 0, receita: 0, parceiros: 0 },
-          'Huíla': { empresas: 0, receita: 0, parceiros: 0 },
-          'Huambo': { empresas: 0, receita: 0, parceiros: 0 },
-          'Cabinda': { empresas: 0, receita: 0, parceiros: 0 },
-          'Cuanza Sul': { empresas: 0, receita: 0, parceiros: 0 },
+          'Luanda': { empresas: 0, receita: 0, parceiros: partnersByRegion['Luanda'] || 0 },
+          'Benguela': { empresas: 0, receita: 0, parceiros: partnersByRegion['Benguela'] || 0 },
+          'Huíla': { empresas: 0, receita: 0, parceiros: partnersByRegion['Huíla'] || 0 },
+          'Huambo': { empresas: 0, receita: 0, parceiros: partnersByRegion['Huambo'] || 0 },
+          'Cabinda': { empresas: 0, receita: 0, parceiros: partnersByRegion['Cabinda'] || 0 },
+          'Cuanza Sul': { empresas: 0, receita: 0, parceiros: partnersByRegion['Cuanza Sul'] || 0 },
         };
 
         const rawLicenses: { price_aoa: number; created_at: number; plan_type: string }[] = [];
@@ -61,7 +101,7 @@ export const AdminRelatorios: React.FC = () => {
           provincia,
           empresas: data.empresas,
           receita: data.receita,
-          parceiros: data.parceiros
+          parceiros: partnersByRegion[provincia] ?? data.parceiros
         }));
 
         setStats(list);
@@ -69,9 +109,13 @@ export const AdminRelatorios: React.FC = () => {
         console.warn('Erro em relatorios licenses:', err);
       });
 
-      return () => unsubLic();
+      return () => {
+        unsubLic();
+        if (unsubPart) unsubPart();
+      };
     } catch (e) {
       console.warn(e);
+      if (unsubPart) unsubPart();
     }
   }, []);
 

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Plus, CheckCircle2, ArrowRight,
   X, Check, Users, Layers
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
 import { notify } from '../services/notificationService';
+import { db } from '../lib/firebase';
+import { collection, doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 export interface ProductModule {
   id: string;
@@ -130,12 +132,55 @@ export const AdminPlanos: React.FC = () => {
   const [price, setPrice] = useState<number>(20000);
   const [featureText, setFeatureText] = useState('');
 
-  const handleCreateModule = (e: React.FormEvent) => {
+  // Sincronização em tempo real com Firestore (/product_modules)
+  useEffect(() => {
+    try {
+      const unsub = onSnapshot(collection(db, 'product_modules'), (snapshot) => {
+        if (!snapshot.empty) {
+          const fireMods: ProductModule[] = [];
+          snapshot.forEach((docSnap) => {
+            const d = docSnap.data();
+            fireMods.push({
+              id: docSnap.id,
+              code: d.code || 'MOD-CUSTOM',
+              name: d.name || 'Módulo Customizado',
+              category: d.category || 'ERP Core',
+              version: d.version || '1.0.0-PROD',
+              price_monthly_aoa: Number(d.price_monthly_aoa) || 20000,
+              active_tenants: Number(d.active_tenants) || 0,
+              status: d.status || 'available',
+              features: Array.isArray(d.features) ? d.features : []
+            });
+          });
+
+          // Combinar módulos oficiais com módulos criados no Firestore (evitando duplicados por código)
+          const merged = [...OFFICIAL_MODULES];
+          fireMods.forEach((fm) => {
+            const idx = merged.findIndex(m => m.code === fm.code || m.id === fm.id);
+            if (idx >= 0) {
+              merged[idx] = fm;
+            } else {
+              merged.push(fm);
+            }
+          });
+          setModules(merged);
+        }
+      }, (err) => {
+        console.warn('Erro ao carregar product_modules:', err);
+      });
+
+      return () => unsub();
+    } catch (e) {
+      console.warn(e);
+    }
+  }, []);
+
+  const handleCreateModule = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !code) return;
 
     const newMod: ProductModule = {
-      id: Date.now().toString(),
+      id: `mod_${Date.now()}`,
       code: code.toUpperCase().trim(),
       name,
       category,
@@ -146,12 +191,19 @@ export const AdminPlanos: React.FC = () => {
       features: featureText.split('\n').filter(f => f.trim().length > 0)
     };
 
-    setModules([...modules, newMod]);
+    setModules(prev => [...prev, newMod]);
     setShowModal(false);
     setName('');
     setCode('');
     setFeatureText('');
-    notify.success(`Módulo ${newMod.name} adicionado ao catálogo oficial com sucesso!`);
+
+    try {
+      await setDoc(doc(db, 'product_modules', newMod.id), newMod);
+      notify.success(`Módulo ${newMod.name} guardado e sincronizado com sucesso!`);
+    } catch (err: any) {
+      console.warn('Aviso ao persistir módulo:', err);
+      notify.info(`Módulo ${newMod.name} adicionado localmente.`);
+    }
   };
 
   const totalTenants = modules.reduce((acc, m) => acc + m.active_tenants, 0);
