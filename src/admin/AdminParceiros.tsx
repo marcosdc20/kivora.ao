@@ -112,6 +112,76 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const [certificatesPartnerModal, setCertificatesPartnerModal] = useState<PartnerCertificateData | null>(null);
   const [viewProofModal, setViewProofModal] = useState<{ open: boolean; item: any } | null>(null);
 
+  // Modal Dedicado de Recarga Rápida de Carteira Pré-Paga
+  const [walletRechargeModal, setWalletRechargeModal] = useState<{
+    open: boolean;
+    partner: Partner | null;
+  }>({ open: false, partner: null });
+  const [rechargeSelectedPartnerId, setRechargeSelectedPartnerId] = useState<string>('');
+  const [customRechargeAmount, setCustomRechargeAmount] = useState<number>(100000);
+  const [rechargeNote, setRechargeNote] = useState<string>('');
+  const [savingRecharge, setSavingRecharge] = useState<boolean>(false);
+
+  const targetPartnerForRecharge = walletRechargeModal.partner || partners.find(p => p.id === rechargeSelectedPartnerId || p.code === rechargeSelectedPartnerId) || null;
+
+  const handleExecuteWalletRecharge = async () => {
+    if (!targetPartnerForRecharge || customRechargeAmount <= 0) return;
+    setSavingRecharge(true);
+    try {
+      const current = Number(targetPartnerForRecharge.wallet_balance_aoa) || 0;
+      const newBalance = current + customRechargeAmount;
+      const targetDocId = targetPartnerForRecharge.id || targetPartnerForRecharge.code;
+
+      await setDoc(doc(db, 'partners', targetDocId), {
+        wallet_balance_aoa: newBalance,
+        updated_at: Date.now(),
+      }, { merge: true });
+
+      if (targetPartnerForRecharge.code && targetPartnerForRecharge.code !== targetDocId) {
+        await setDoc(doc(db, 'partners', targetPartnerForRecharge.code), {
+          wallet_balance_aoa: newBalance,
+          updated_at: Date.now(),
+        }, { merge: true }).catch(() => {});
+      }
+
+      // Sincronizar na coleção users se existir
+      const uId = (targetPartnerForRecharge.code || targetDocId).toLowerCase().replace(/[^a-z0-9]/g, '_');
+      await setDoc(doc(db, 'users', uId), {
+        wallet_balance_aoa: newBalance,
+        updatedAt: Date.now(),
+      }, { merge: true }).catch(() => {});
+
+      // Registo de auditoria
+      await setDoc(doc(collection(db, 'audit_logs')), {
+        event: 'PARTNER_WALLET_TOPUP',
+        partner_id: targetPartnerForRecharge.id,
+        partner_code: targetPartnerForRecharge.code,
+        partner_name: targetPartnerForRecharge.name,
+        amount_aoa: customRechargeAmount,
+        previous_balance_aoa: current,
+        new_balance_aoa: newBalance,
+        reference: rechargeNote || 'Recarga direta pelo Administrador',
+        created_at: Date.now(),
+      }).catch(() => {});
+
+      // Atualizar estado em memória
+      setPartners(prev => prev.map(p => (p.id === targetPartnerForRecharge.id || p.code === targetPartnerForRecharge.code) ? { ...p, wallet_balance_aoa: newBalance } : p));
+      if (selectedPartner && (selectedPartner.id === targetPartnerForRecharge.id || selectedPartner.code === targetPartnerForRecharge.code)) {
+        setSelectedPartner(prev => prev ? { ...prev, wallet_balance_aoa: newBalance } : null);
+      }
+
+      notify.success(`Saldo de ${fmt(customRechargeAmount)} Kz creditado na carteira de ${targetPartnerForRecharge.name}! Novo saldo: ${fmt(newBalance)} Kz.`);
+      setWalletRechargeModal({ open: false, partner: null });
+      setCustomRechargeAmount(100000);
+      setRechargeNote('');
+      setRechargeSelectedPartnerId('');
+    } catch (err: any) {
+      notify.error('Erro ao recarregar carteira: ' + err.message);
+    } finally {
+      setSavingRecharge(false);
+    }
+  };
+
   const [allDebts, setAllDebts] = useState<PartnerDebtEntry[]>([]);
   const [partnerDebts, setPartnerDebts] = useState<PartnerDebtEntry[]>([]);
   const [selectedDebtIds, setSelectedDebtIds] = useState<string[]>([]);
@@ -933,6 +1003,18 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         actions={
           <div className="flex items-center gap-2">
             <button
+              onClick={() => {
+                setWalletRechargeModal({ open: true, partner: null });
+                setRechargeSelectedPartnerId('');
+                setCustomRechargeAmount(100000);
+              }}
+              className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm shadow-emerald-600/20 transition-all cursor-pointer"
+              title="Injetar saldo pré-pago na carteira de qualquer parceiro"
+            >
+              <Wallet className="w-4 h-4" />
+              <span>Carregar Carteira</span>
+            </button>
+            <button
               onClick={handleExportPartnersCSV}
               className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold px-3 py-2 rounded-xl shadow-xs transition-all cursor-pointer"
               title="Descarregar lista completa em ficheiro CSV"
@@ -1096,9 +1178,23 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                               </div>
                             </td>
                             <td className="p-4">
-                              <span className="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                                {fmt(p.wallet_balance_aoa || 0)} Kz
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 whitespace-nowrap">
+                                  {fmt(p.wallet_balance_aoa || 0)} Kz
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setWalletRechargeModal({ open: true, partner: p });
+                                    setCustomRechargeAmount(100000);
+                                  }}
+                                  title={`Carregar saldo na carteira de ${p.name}`}
+                                  className="p-1 px-2 text-emerald-700 hover:text-emerald-900 bg-emerald-100/70 hover:bg-emerald-200 rounded-lg transition-all cursor-pointer flex items-center gap-1 text-[10px] font-bold shadow-2xs shrink-0"
+                                >
+                                  <Plus className="w-3 h-3" />
+                                  <span>Carregar</span>
+                                </button>
+                              </div>
                             </td>
                             <td className="p-4">
                               {debt > 0 ? (
@@ -1117,6 +1213,17 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                             </td>
                             <td className="p-4 text-right">
                               <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setWalletRechargeModal({ open: true, partner: p });
+                                    setCustomRechargeAmount(100000);
+                                  }}
+                                  title={`Carregar Carteira (Saldo Pré-Pago) de ${p.name}`}
+                                  className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <Wallet className="w-4 h-4" />
+                                </button>
                                 <button
                                   onClick={() => {
                                     const partnerPass = p.password || (p as any).tempPassword || `kivora${Math.floor(1000 + Math.random() * 9000)}`;
@@ -2192,35 +2299,75 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-200 flex items-center gap-2">
-                <div className="flex-1 space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Injetar Saldo na Carteira Pré-Paga (Kz)</label>
-                  <input
-                    type="number"
-                    step={10000}
-                    placeholder="Ex: 150000"
-                    value={topUpAmount || ''}
-                    onChange={(e) => setTopUpAmount(Number(e.target.value))}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
-                  />
+              <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                      <Wallet className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="font-black text-emerald-900 text-xs uppercase block">Carteira Pré-Paga (Wallet)</span>
+                      <span className="text-[10px] text-emerald-700">Saldo disponível para emissão instantânea</span>
+                    </div>
+                  </div>
+                  <span className="font-mono font-black text-sm text-emerald-900 bg-white px-3 py-1 rounded-xl border border-emerald-300 shadow-2xs">
+                    {fmt(selectedPartner.wallet_balance_aoa || 0)} Kz
+                  </span>
                 </div>
-                <button
-                  onClick={async () => {
-                    if (!topUpAmount || topUpAmount <= 0) return;
-                    setSavingFinancials(true);
-                    try {
-                      const cur = selectedPartner.wallet_balance_aoa || 0;
-                      await setDoc(doc(db, 'partners', selectedPartner.id), { wallet_balance_aoa: cur + topUpAmount }, { merge: true });
-                      notify.success(`Saldo de ${fmt(topUpAmount)} Kz creditado na carteira!`);
-                      setTopUpAmount(0);
-                    } catch (e: any) { notify.error('Erro: ' + e.message); }
-                    finally { setSavingFinancials(false); }
-                  }}
-                  disabled={savingFinancials || !topUpAmount}
-                  className="mt-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer shrink-0"
-                >
-                  Recarregar Carteira
-                </button>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <div className="flex-1 space-y-1">
+                    <input
+                      type="number"
+                      step={10000}
+                      placeholder="Valor a Injetar (Ex: 150000)"
+                      value={topUpAmount || ''}
+                      onChange={(e) => setTopUpAmount(Number(e.target.value))}
+                      className="w-full bg-white border border-emerald-300 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-emerald-600"
+                    />
+                  </div>
+                  <button
+                    onClick={async () => {
+                      if (!topUpAmount || topUpAmount <= 0) return;
+                      setSavingFinancials(true);
+                      try {
+                        const cur = selectedPartner.wallet_balance_aoa || 0;
+                        const newBal = cur + topUpAmount;
+                        const targetDocId = selectedPartner.id || selectedPartner.code;
+                        await setDoc(doc(db, 'partners', targetDocId), { wallet_balance_aoa: newBal, updated_at: Date.now() }, { merge: true });
+                        if (selectedPartner.code && selectedPartner.code !== targetDocId) {
+                          await setDoc(doc(db, 'partners', selectedPartner.code), { wallet_balance_aoa: newBal, updated_at: Date.now() }, { merge: true }).catch(() => {});
+                        }
+                        const uId = (selectedPartner.code || targetDocId).toLowerCase().replace(/[^a-z0-9]/g, '_');
+                        await setDoc(doc(db, 'users', uId), { wallet_balance_aoa: newBal, updatedAt: Date.now() }, { merge: true }).catch(() => {});
+                        
+                        // Registo de auditoria
+                        await setDoc(doc(collection(db, 'audit_logs')), {
+                          event: 'PARTNER_WALLET_TOPUP',
+                          partner_id: targetDocId,
+                          partner_code: selectedPartner.code,
+                          partner_name: selectedPartner.name,
+                          amount_aoa: topUpAmount,
+                          previous_balance_aoa: cur,
+                          new_balance_aoa: newBal,
+                          reference: 'Recarga direta via Detalhes do Parceiro',
+                          created_at: Date.now(),
+                        }).catch(() => {});
+
+                        setPartners(prev => prev.map(p => (p.id === targetDocId || p.code === selectedPartner.code) ? { ...p, wallet_balance_aoa: newBal } : p));
+                        setSelectedPartner(prev => prev ? { ...prev, wallet_balance_aoa: newBal } : null);
+                        notify.success(`Saldo de ${fmt(topUpAmount)} Kz creditado na carteira!`);
+                        setTopUpAmount(0);
+                      } catch (e: any) { notify.error('Erro: ' + e.message); }
+                      finally { setSavingFinancials(false); }
+                    }}
+                    disabled={savingFinancials || !topUpAmount}
+                    className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5"
+                  >
+                    {savingFinancials ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                    <span>Carregar Carteira</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -2675,6 +2822,149 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               </div>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Modal Dedicado de Recarga de Carteira (Wallet Top-Up) */}
+      {walletRechargeModal.open && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+            {/* Cabeçalho */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20">
+                  <Wallet className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 text-base">Carregar Carteira do Parceiro</h3>
+                  <p className="text-xs text-slate-500">Injetar saldo pré-pago para emissão instantânea de licenças</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setWalletRechargeModal({ open: false, partner: null })}
+                className="text-slate-400 hover:text-slate-900 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Seletor de Parceiro (se aberto globalmente sem parceiro fixo) */}
+            {!walletRechargeModal.partner ? (
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">Selecione o Parceiro:</label>
+                <select
+                  value={rechargeSelectedPartnerId}
+                  onChange={(e) => setRechargeSelectedPartnerId(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="">-- Escolha um parceiro --</option>
+                  {partners.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.code || p.id}) — Saldo Atual: {fmt(p.wallet_balance_aoa || 0)} Kz
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex items-center justify-between">
+                <div>
+                  <span className="font-mono text-[10px] font-black text-slate-500 uppercase">{walletRechargeModal.partner.code} • {walletRechargeModal.partner.region}</span>
+                  <h4 className="font-black text-slate-900 text-sm">{walletRechargeModal.partner.name}</h4>
+                  <p className="text-xs text-slate-500">{walletRechargeModal.partner.email}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Saldo Atual</span>
+                  <span className="font-mono font-black text-emerald-700 text-sm">
+                    {fmt(walletRechargeModal.partner.wallet_balance_aoa || 0)} Kz
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Presets Rápidos */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-700 block">Valores Rápidos de Recarga:</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[50000, 100000, 200000, 350000, 500000, 1000000].map((amt) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => setCustomRechargeAmount(amt)}
+                    className={`py-2 px-3 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer ${
+                      customRechargeAmount === amt
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                        : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40'
+                    }`}
+                  >
+                    +{fmt(amt)} Kz
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Input de Valor Customizado */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700">Ou digite o valor exato (Kz):</label>
+              <div className="relative">
+                <input
+                  type="number"
+                  min="1000"
+                  step="5000"
+                  placeholder="Ex: 150000"
+                  value={customRechargeAmount || ''}
+                  onChange={(e) => setCustomRechargeAmount(Number(e.target.value))}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
+                />
+                <span className="absolute right-4 top-2.5 text-xs font-bold text-slate-400">Kz</span>
+              </div>
+            </div>
+
+            {/* Nota / Comprovativo Bancário */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700">Nota / Referência de Pagamento (Opcional):</label>
+              <input
+                type="text"
+                placeholder="Ex: Depósito BAI Ref #849201"
+                value={rechargeNote}
+                onChange={(e) => setRechargeNote(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            {/* Resumo do Novo Saldo */}
+            {targetPartnerForRecharge && customRechargeAmount > 0 && (
+              <div className="bg-emerald-50/70 border border-emerald-200 p-3.5 rounded-2xl flex items-center justify-between text-xs font-mono">
+                <span className="text-emerald-800 font-bold font-sans">Novo Saldo da Carteira:</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400 line-through">{fmt(targetPartnerForRecharge.wallet_balance_aoa || 0)} Kz</span>
+                  <span className="text-slate-400 font-sans">➔</span>
+                  <strong className="text-emerald-700 font-black text-sm">
+                    {fmt((targetPartnerForRecharge.wallet_balance_aoa || 0) + customRechargeAmount)} Kz
+                  </strong>
+                </div>
+              </div>
+            )}
+
+            {/* Ações */}
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setWalletRechargeModal({ open: false, partner: null })}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3 rounded-xl transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={savingRecharge || !targetPartnerForRecharge || customRechargeAmount <= 0}
+                onClick={handleExecuteWalletRecharge}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs py-3 rounded-xl transition-all cursor-pointer shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2"
+              >
+                {savingRecharge ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                <span>Confirmar e Carregar</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
