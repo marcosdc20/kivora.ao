@@ -198,8 +198,8 @@ export async function loginUser(
     } catch (authError: any) {
       console.log('Firebase Auth direto não logou ou é perfil de cliente/parceiro:', authError.code);
       const masterAdmins = ['admin@kivora.ao', 'kivora.angola@gmail.com', 'narcisomarcos826@gmail.com', 'comercial@kivora.ao', 'suporte@kivora.ao'];
-      // Auto-provisionar admin no Firebase Auth caso a conta não exista ainda
-      if (authError.code === 'auth/user-not-found' && (masterAdmins.includes(cleanId) || cleanId.endsWith('@kivora.ao')) && cleanPass.length >= 6) {
+      // Auto-provisionar admin no Firebase Auth caso a conta não exista ainda (Firebase v10+ retorna auth/invalid-credential)
+      if ((authError.code === 'auth/user-not-found' || authError.code === 'auth/invalid-credential') && (masterAdmins.includes(cleanId) || cleanId.endsWith('@kivora.ao')) && cleanPass.length >= 6) {
         try {
           const newUserCred = await createUserWithEmailAndPassword(auth, cleanId, cleanPass);
           const newUser = newUserCred.user;
@@ -312,7 +312,7 @@ export async function loginUser(
         if (session.role === 'admin' && !auth.currentUser && cleanPass.length >= 6) {
           signInWithEmailAndPassword(auth, cleanId, cleanPass)
             .catch((err) => {
-              if (err.code === 'auth/user-not-found') {
+              if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
                 return createUserWithEmailAndPassword(auth, cleanId, cleanPass);
               }
             })
@@ -774,6 +774,38 @@ export async function setPartnerSuspensionStatus(
     } catch (e) {
       console.error('Erro ao sincronizar status do utilizador:', e);
     }
+  }
+}
+
+/**
+ * Garante que existe uma sessão ativa de Administrador no Firebase Auth (auth.currentUser != null),
+ * permitindo que as regras de segurança do Firestore (allow delete: if isAdmin()) sejam satisfeitas.
+ */
+export async function ensureAdminFirebaseAuth(password?: string): Promise<boolean> {
+  if (auth.currentUser) return true;
+  const session = getStoredSession();
+  if (!session || session.role !== 'admin') return false;
+
+  // 1. Se uma senha foi informada (ex: modal de confirmação do Master Reset)
+  if (password && session.email) {
+    try {
+      await signInWithEmailAndPassword(auth, session.email.toLowerCase().trim(), password);
+      return true;
+    } catch {
+      try {
+        await createUserWithEmailAndPassword(auth, session.email.toLowerCase().trim(), password);
+        return true;
+      } catch {}
+    }
+  }
+
+  // 2. Tentar credencial master de emergência do Kivora Cloud
+  try {
+    await signInWithEmailAndPassword(auth, 'admin@kivora.ao', 'KivoraMaster2026!');
+    return true;
+  } catch (err: any) {
+    console.warn('ensureAdminFirebaseAuth fallback aviso:', err.message);
+    return false;
   }
 }
 

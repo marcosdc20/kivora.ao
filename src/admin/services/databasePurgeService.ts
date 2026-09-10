@@ -1,7 +1,8 @@
 /**
  * databasePurgeService.ts — Kivora Master Reset & Purge Service
  * Limpeza cirúrgica de dados de teste / operacionais com proteção estrita do SuperAdmin,
- * backup automático pré-limpeza e preservação de configurações institucionais e contas admin.
+ * backup automático pré-limpeza, contagem de documentos em tempo real e preservação
+ * de configurações institucionais, tabela de preços e contas admin.
  */
 
 import {
@@ -19,7 +20,33 @@ export interface PurgeTarget {
   category: 'Licenciamento' | 'Parceiros' | 'Operações' | 'Atendimento' | 'Testes';
 }
 
+export const MASTER_ADMIN_EMAILS = [
+  'admin@kivora.ao',
+  'kivora.angola@gmail.com',
+  'narcisomarcos826@gmail.com',
+  'comercial@kivora.ao',
+  'suporte@kivora.ao',
+  'investidores@kivora.ao',
+  'parceiros@kivora.ao'
+];
+
 export const PURGE_TARGETS: PurgeTarget[] = [
+  {
+    id: 'users',
+    name: 'Contas de Acesso de Parceiros & Clientes',
+    description: 'Apaga os logins, acessos e credenciais de revendedores e clientes (as contas de SuperAdmin são sempre preservadas).',
+    collectionName: 'users',
+    recommended: true,
+    category: 'Parceiros',
+  },
+  {
+    id: 'license_requests',
+    name: 'Pedidos de Licença de Parceiros',
+    description: 'Apaga todos os pedidos de emissão, aprovações pendentes e histórico de solicitações de licenças.',
+    collectionName: 'license_requests',
+    recommended: true,
+    category: 'Licenciamento',
+  },
   {
     id: 'licenses',
     name: 'Licenças de Software & Chaves',
@@ -30,17 +57,25 @@ export const PURGE_TARGETS: PurgeTarget[] = [
   },
   {
     id: 'partners',
-    name: 'Contas de Parceiros Revendedores',
-    description: 'Apaga os perfis e quotas de parceiros credenciados.',
+    name: 'Contas & Perfis de Parceiros Revendedores',
+    description: 'Apaga os perfis e registos de parceiros credenciados na rede Kivora.',
     collectionName: 'partners',
     recommended: true,
     category: 'Parceiros',
   },
   {
     id: 'partner_debts',
-    name: 'Extrato & Dívidas de Parceiros',
-    description: 'Apaga todas as transações de dívida, quotas a crédito e extratos financeiros de atacado.',
+    name: 'Extrato, Saldos & Dívidas de Parceiros',
+    description: 'Apaga todas as transações financeiras, débitos de licenças a crédito e extratos de revenda.',
     collectionName: 'partner_debts',
+    recommended: true,
+    category: 'Parceiros',
+  },
+  {
+    id: 'partner_quotas',
+    name: 'Quotas & Limites de Crédito de Parceiros',
+    description: 'Apaga as quotas atribuídas e saldos de crédito de atacado.',
+    collectionName: 'partner_quotas',
     recommended: true,
     category: 'Parceiros',
   },
@@ -117,7 +152,56 @@ export const PURGE_TARGETS: PurgeTarget[] = [
     recommended: true,
     category: 'Atendimento',
   },
+  {
+    id: 'cloud_backups',
+    name: 'Backups Nuvem do Kivora ERP Desktop',
+    description: 'Apaga os arquivos de backup enviados para a nuvem pelo software desktop.',
+    collectionName: 'cloud_backups',
+    recommended: true,
+    category: 'Testes',
+  },
+  {
+    id: 'store_orders',
+    name: 'Encomendas da Loja de Hardware',
+    description: 'Apaga encomendas de TPAs, impressoras térmicas e periféricos da loja.',
+    collectionName: 'store_orders',
+    recommended: true,
+    category: 'Operações',
+  },
+  {
+    id: 'audit_logs',
+    name: 'Trilha de Auditoria & Segurança AGT',
+    description: 'Limpa o histórico de registos de auditoria e segurança perimetral.',
+    collectionName: 'audit_logs',
+    recommended: false,
+    category: 'Testes',
+  },
 ];
+
+/**
+ * Consulta em tempo real o Firebase para saber quantos documentos existem em cada coleção
+ */
+export async function getLiveCollectionCounts(): Promise<Record<string, number>> {
+  const counts: Record<string, number> = {};
+  for (const target of PURGE_TARGETS) {
+    try {
+      const snap = await getDocs(collection(db, target.collectionName));
+      if (target.id === 'users') {
+        const nonAdmins = snap.docs.filter((d) => {
+          const u = d.data();
+          const email = (u.email || '').toLowerCase().trim();
+          return u.role !== 'admin' && !MASTER_ADMIN_EMAILS.includes(email) && !email.endsWith('@kivora.ao');
+        });
+        counts[target.id] = nonAdmins.length;
+      } else {
+        counts[target.id] = snap.docs.length;
+      }
+    } catch {
+      counts[target.id] = 0;
+    }
+  }
+  return counts;
+}
 
 /**
  * Faz backup integral de todas as coleções selecionadas antes de apagar qualquer documento
@@ -166,9 +250,17 @@ export async function createPrePurgeBackup(targetCollectionNames: string[]): Pro
 export async function executePurge(
   targetCollectionIds: string[],
   onProgress?: (step: string, percent: number) => void
-): Promise<{ success: boolean; deletedCounts: Record<string, number>; totalDeleted: number }> {
+): Promise<{
+  success: boolean;
+  deletedCounts: Record<string, number>;
+  totalDeleted: number;
+  failedCount: number;
+  errors: string[];
+}> {
   const deletedCounts: Record<string, number> = {};
   let totalDeleted = 0;
+  let failedCount = 0;
+  const errors: string[] = [];
 
   const targets = PURGE_TARGETS.filter(t => targetCollectionIds.includes(t.id));
   const totalTargets = targets.length;
@@ -188,6 +280,15 @@ export async function executePurge(
 
       const docs = snap.docs;
       for (const docSnap of docs) {
+        // Se for a coleção `users`, preservar rigorosamente utilizadores administradores
+        if (colName === 'users') {
+          const u = docSnap.data();
+          const email = (u.email || '').toLowerCase().trim();
+          if (u.role === 'admin' || MASTER_ADMIN_EMAILS.includes(email) || email.endsWith('@kivora.ao')) {
+            continue; // Pula sem apagar a conta admin
+          }
+        }
+
         if (target.subcollections && target.subcollections.length > 0) {
           for (const sub of target.subcollections) {
             try {
@@ -199,11 +300,15 @@ export async function executePurge(
           }
         }
 
-        await deleteDoc(doc(db, colName, docSnap.id)).catch((err) => {
-          console.warn(`Aviso ao apagar doc ${docSnap.id} em ${colName}:`, err);
-        });
-        count++;
-        totalDeleted++;
+        try {
+          await deleteDoc(doc(db, colName, docSnap.id));
+          count++;
+          totalDeleted++;
+        } catch (delErr: any) {
+          failedCount++;
+          errors.push(`[${colName}/${docSnap.id}] ${delErr.message}`);
+          console.warn(`Falha ao apagar doc ${docSnap.id} em ${colName}:`, delErr);
+        }
 
         if (onProgress && docs.length > 5) {
           const docPercent = Math.round(((i + (count / docs.length)) / totalTargets) * 100);
@@ -212,9 +317,10 @@ export async function executePurge(
       }
 
       deletedCounts[target.name] = count;
-    } catch (err) {
-      console.error(`Erro ao limpar coleção ${colName}:`, err);
+    } catch (err: any) {
+      console.error(`Erro ao consultar coleção ${colName}:`, err);
       deletedCounts[target.name] = 0;
+      errors.push(`[${colName}] ${err.message}`);
     }
   }
 
@@ -223,8 +329,10 @@ export async function executePurge(
   }
 
   return {
-    success: true,
+    success: failedCount === 0,
     deletedCounts,
     totalDeleted,
+    failedCount,
+    errors,
   };
 }

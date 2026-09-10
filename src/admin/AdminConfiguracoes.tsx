@@ -29,9 +29,9 @@ import {
 } from '../services/aiAssistantService';
 import { notify, confirmDialog, alertDialog } from '../services/notificationService';
 import {
-  PURGE_TARGETS, createPrePurgeBackup, executePurge
+  PURGE_TARGETS, createPrePurgeBackup, executePurge, getLiveCollectionCounts
 } from './services/databasePurgeService';
-import { getStoredSession } from './services/authService';
+import { getStoredSession, ensureAdminFirebaseAuth } from './services/authService';
 
 export interface UpdateRelease {
   id: string;
@@ -121,6 +121,26 @@ export const AdminConfiguracoes: React.FC = () => {
   const [purgeProgressPercent, setPurgeProgressPercent] = useState(0);
   const [purgeReport, setPurgeReport] = useState<{ totalDeleted: number; deletedCounts: Record<string, number>; backupFilename: string } | null>(null);
   const [purgeError, setPurgeError] = useState<string | null>(null);
+  const [liveCounts, setLiveCounts] = useState<Record<string, number>>({});
+  const [loadingLiveCounts, setLoadingLiveCounts] = useState(false);
+
+  const refreshLiveCounts = async () => {
+    setLoadingLiveCounts(true);
+    try {
+      const counts = await getLiveCollectionCounts();
+      setLiveCounts(counts);
+    } catch (e) {
+      console.warn('Erro ao carregar contagens reais de coleções:', e);
+    } finally {
+      setLoadingLiveCounts(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'zona-perigo') {
+      refreshLiveCounts();
+    }
+  }, [activeTab]);
 
   // System Settings State
   const [settings, setSettings] = useState<SystemCompanySettings>(DEFAULT_SETTINGS);
@@ -470,16 +490,27 @@ export const AdminConfiguracoes: React.FC = () => {
     const targetCollectionNames = selectedTargetObjs.map(t => t.collectionName);
 
     setIsPurging(true);
-    setPurgeProgressText('A gerar cópia de segurança (backup) antes da limpeza...');
+    setPurgeProgressText('A autenticar permissões de Administrador no Firebase Auth...');
     setPurgeProgressPercent(5);
 
+    // 1. Garantir autenticação real no Firebase Auth para cumprir a regra `allow delete: if isAdmin();`
+    const authOk = await ensureAdminFirebaseAuth(purgeAdminPassword);
+    if (!authOk) {
+      setIsPurging(false);
+      setPurgeError('Palavra-passe de Administrador incorreta ou sem permissões de SuperAdmin no Firebase Auth.');
+      return;
+    }
+
+    setPurgeProgressText('A gerar cópia de segurança (backup) antes da limpeza...');
+    setPurgeProgressPercent(15);
+
     try {
-      // 1. Gera e descarrega automaticamente o backup de segurança
+      // 2. Gera e descarrega automaticamente o backup de segurança
       const backupFilename = await createPrePurgeBackup(targetCollectionNames);
       setPurgeProgressText('Backup descarregado com sucesso! A iniciar remoção cirúrgica...');
-      setPurgeProgressPercent(20);
+      setPurgeProgressPercent(30);
 
-      // 2. Executa a limpeza cirúrgica
+      // 3. Executa a limpeza cirúrgica
       const result = await executePurge(selectedPurgeTargets, (step, pct) => {
         setPurgeProgressText(step);
         setPurgeProgressPercent(pct);
@@ -494,11 +525,23 @@ export const AdminConfiguracoes: React.FC = () => {
       setPurgeConfirmationPhrase('');
       setPurgeAdminPassword('');
       setPurgeConsentChecked(false);
-      alertDialog({
-        title: 'Master Reset Concluído',
-        message: `Foram eliminados ${result.totalDeleted} documentos operacionais do Firebase. O sistema está limpo e pronto para ser utilizado do zero.`,
-        type: 'info',
-      });
+
+      // 4. Atualizar imediatamente as contagens ao vivo para o admin ver todas zeradas
+      await refreshLiveCounts();
+
+      if (result.failedCount > 0) {
+        alertDialog({
+          title: 'Master Reset Concluído com Avisos',
+          message: `Foram eliminados ${result.totalDeleted} documentos operacionais. ${result.failedCount} documentos não puderam ser apagados devido a regras de proteção.`,
+          type: 'warning',
+        });
+      } else {
+        alertDialog({
+          title: 'Master Reset Concluído com Sucesso Total',
+          message: `Foram eliminados ${result.totalDeleted} documentos operacionais do Firebase. O sistema está completamente limpo e pronto para começar do zero!`,
+          type: 'info',
+        });
+      }
     } catch (err: any) {
       console.error('Erro no Master Reset:', err);
       setPurgeError('Erro durante a execução do Master Reset: ' + (err?.message || 'Falha na comunicação com o banco de dados.'));
@@ -3239,14 +3282,26 @@ export const AdminConfiguracoes: React.FC = () => {
               
               {/* Seleção Granular de Coleções */}
               <div className="space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                  <h4 className="font-black text-slate-900 text-xs uppercase tracking-wider">
-                    Selecione os Dados Operacionais que Deseja Limpar:
-                  </h4>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-black text-slate-900 text-xs uppercase tracking-wider">
+                      Selecione os Dados Operacionais que Deseja Limpar:
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={refreshLiveCounts}
+                      disabled={loadingLiveCounts}
+                      className="inline-flex items-center gap-1 text-[11px] text-slate-600 hover:text-blue-600 font-bold bg-slate-100 hover:bg-blue-50 px-2.5 py-1 rounded-lg transition-all cursor-pointer"
+                      title="Atualizar contagem em tempo real do Firebase"
+                    >
+                      <RotateCcw className={`w-3 h-3 ${loadingLiveCounts ? 'animate-spin text-blue-600' : ''}`} />
+                      <span>{loadingLiveCounts ? 'A verificar...' : 'Atualizar Contagens'}</span>
+                    </button>
+                  </div>
                   <button
                     type="button"
                     onClick={handleSelectAllPurgeTargets}
-                    className="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer"
+                    className="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer self-start sm:self-auto"
                   >
                     {selectedPurgeTargets.length === PURGE_TARGETS.length ? 'Desmarcar Todos' : 'Selecionar Todos'}
                   </button>
@@ -3255,6 +3310,7 @@ export const AdminConfiguracoes: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {PURGE_TARGETS.map((target) => {
                     const isChecked = selectedPurgeTargets.includes(target.id);
+                    const count = liveCounts[target.id] ?? 0;
                     return (
                       <label
                         key={target.id}
@@ -3272,9 +3328,20 @@ export const AdminConfiguracoes: React.FC = () => {
                           className="mt-0.5 w-4 h-4 accent-red-600 rounded cursor-pointer"
                         />
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <strong className="text-xs font-black text-slate-900 block">{target.name}</strong>
-                            <span className="text-[9px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <strong className="text-xs font-black text-slate-900 block">{target.name}</strong>
+                              {count > 0 ? (
+                                <span className="text-[10px] font-black text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full">
+                                  {count} no Firebase
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                                  0 (Vazia)
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-[9px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200 shrink-0">
                               /{target.collectionName}
                             </span>
                           </div>

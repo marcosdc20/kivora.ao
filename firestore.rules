@@ -57,6 +57,18 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Quotas & Limites de Crédito de Parceiros
+    match /partner_quotas/{quotaId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Catálogo Oficial de Módulos & Extensões do Kivora ERP
+    match /product_modules/{moduleId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // ─────────────────────────────────────────────────────────────
     // 2. LICENCIAMENTO OFICIAL, VALIDAÇÃO & KIVORA SOFT (DESKTOP ERP)
     //
