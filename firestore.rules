@@ -71,8 +71,18 @@ service cloud.firestore {
       // LIST: admins autenticados OU recuperação de licença por NIF/máquina pelo Kivora Soft
       allow list: if true;
 
-      // FIX v2.1: Emissão de Novas Licenças APENAS por admins autenticados
-      allow create: if isAdmin();
+      // FIX v2.2: Emissão de Novas Licenças por admins autenticados OU Parceiros Homologados Ativos
+      allow create: if isAdmin() || (
+        request.resource.data.partner_id is string &&
+        request.resource.data.partner_id.size() > 0 &&
+        request.resource.data.id == licenseId &&
+        request.resource.data.id.matches('^KVRA-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$') &&
+        request.resource.data.company_name is string &&
+        request.resource.data.nif is string &&
+        request.resource.data.status == 'active' &&
+        exists(/databases/$(database)/documents/partners/$(request.resource.data.partner_id)) &&
+        get(/databases/$(database)/documents/partners/$(request.resource.data.partner_id)).data.status == 'active'
+      );
 
       // Atualização: admins OU ativação de hardware_id pelo Kivora Soft Desktop OU parceiro OU portal do cliente
       allow update: if isAdmin() || (

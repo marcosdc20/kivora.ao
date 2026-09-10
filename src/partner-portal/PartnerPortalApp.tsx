@@ -33,7 +33,7 @@ import {
 import {
   createLicenseRequest, subscribePartnerLicenseRequests, LicenseRequest
 } from '../admin/services/licenseRequestService';
-import { issueInstantCreditLicense } from './services/partnerCreditService';
+import { issueInstantPartnerLicense } from './services/partnerCreditService';
 import {
   SupportTicket, createSupportTicket, sendTicketMessage,
   updateTicketStatus, subscribePartnerTickets
@@ -453,47 +453,9 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     if (!companyName || !nif) return;
     setSubmitting(true);
     try {
-      let paymentMethod: 'wallet' | 'credit' | 'provisional' = 'credit';
-      let isProvisional = false;
-
-      // 1. Pagamento via Wallet (Pré-pago)
+      // 1. Pagamento via Carteira Virtual (Pré-pago) -> 100% INSTANTÂNEO 24/7
       if (canPayWithWallet) {
-        paymentMethod = 'wallet';
-        isProvisional = false;
-      } else if (canPayWithCredit) {
-        // 2. Emissão com Quota de Crédito (Slot Rotativo)
-        paymentMethod = 'credit';
-
-        // Trava Anti-Fraude: Planos Vitalícios ou com 3+ postos LAN iniciam como Provisórios
-        const isHighRiskPlan = (plan === 'lifetime' && policy.require_provisional_lifetime) || extraSeats >= 3;
-        isProvisional = isHighRiskPlan;
-      } else {
-        // 3. Sem slots disponíveis ou com dívida vencida
-        if (isOverdue) {
-          await alertDialog({
-            title: 'Bloqueio de Emissão a Crédito',
-            message: `Possui débitos pendentes com mais de ${overdueDaysLimit} dias sem liquidação.\n\nPara voltar a emitir novas licenças, regularize as pendências com o Administrador Kivora ou utilize a Carteira Pré-paga.`,
-            type: 'warning',
-            buttonText: 'Compreendi',
-          });
-        } else {
-          await alertDialog({
-            title: `Limite de Quota Atingido (${activeSlotsInUse} de ${creditSlotsLimit} Slots Ocupados)`,
-            message: `Atingiu o limite de ${creditSlotsLimit} licenças a crédito ativas.\n\nPara emitir a 3ª licença, deve proceder à liquidação das licenças anteriores com a Kivora ou utilizar o saldo da sua Carteira Pré-paga (Wallet).`,
-            type: 'warning',
-            buttonText: 'Entendido',
-          });
-        }
-        setSubmitting(false);
-        return;
-      }
-
-      const provisionalDays = policy.provisional_lifetime_days || 30;
-      const isAutoInstant = partnerAccount?.credit_issuance_mode === 'auto_instant';
-
-      // Se o parceiro está configurado com emissão instantânea e paga a crédito:
-      if (isAutoInstant && paymentMethod === 'credit') {
-        const instantRes = await issueInstantCreditLicense({
+        const instantRes = await issueInstantPartnerLicense({
           partnerCode,
           partnerName,
           companyName,
@@ -503,33 +465,71 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
           extraSeats,
           priceAoa: totalClientPrice,
           costAoa: currentTotalCost,
-          isProvisional,
+          paymentMethod: 'wallet',
+          isProvisional: false,
         });
 
         if (instantRes.success && instantRes.licenseId) {
-          const exists = companies.some((c) => c.nif === nif);
-          if (!exists) {
-            await addCompany({
-              name: companyName,
-              nif,
-              email: clientEmail,
-              phone: '',
-              address: `Parceiro: ${partnerCode}`,
-              partner_id: partnerCode,
-              status: 'active',
-            }).catch(() => {});
-          }
-
           setGeneratedKey(instantRes.licenseId);
-          setGeneratedIsProvisional(instantRes.isProvisional ?? isProvisional);
-          showToast('Licença emitida com sucesso via API Instantânea!');
+          setGeneratedIsProvisional(false);
+          setPartnerAccount((prev) => prev ? {
+            ...prev,
+            wallet_balance_aoa: Math.max(0, (prev.wallet_balance_aoa || 0) - currentTotalCost),
+          } : prev);
+          showToast('Licença emitida instantaneamente com sucesso via Carteira Virtual!');
+          setSubmitting(false);
+          return;
+        }
+
+        if (instantRes.error) {
+          showToast('Erro ao emitir via Carteira: ' + instantRes.error);
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      // 2. Emissão com Quota de Crédito (Slot Rotativo) -> INSTANTÂNEO (salvo se bloqueado manualmente)
+      const isAutoInstant = partnerAccount?.credit_issuance_mode !== 'manual_approval';
+      if (canPayWithCredit && isAutoInstant) {
+        const isHighRiskPlan = (plan === 'lifetime' && policy.require_provisional_lifetime) || extraSeats >= 3;
+
+        const instantRes = await issueInstantPartnerLicense({
+          partnerCode,
+          partnerName,
+          companyName,
+          nif,
+          clientEmail,
+          planType: plan,
+          extraSeats,
+          priceAoa: totalClientPrice,
+          costAoa: currentTotalCost,
+          paymentMethod: 'credit',
+          isProvisional: isHighRiskPlan,
+        });
+
+        if (instantRes.success && instantRes.licenseId) {
+          setGeneratedKey(instantRes.licenseId);
+          setGeneratedIsProvisional(instantRes.isProvisional ?? isHighRiskPlan);
+          showToast('Licença emitida instantaneamente a Crédito!');
           setSubmitting(false);
           return;
         }
 
         if (instantRes.error && !instantRes.requiresManualApproval) {
-          showToast('Aviso API: ' + instantRes.error);
+          showToast('Erro ao emitir a crédito: ' + instantRes.error);
+          setSubmitting(false);
+          return;
         }
+      }
+
+      // 3. Fila de Exceção / Solicitação ao Administrador (Apenas se quota esgotada, faturas vencidas ou modo manual)
+      let exceptionReason = '';
+      if (isOverdue) {
+        exceptionReason = `[EXCEÇÃO: DÍVIDA VENCIDA > ${overdueDaysLimit} DIAS]`;
+      } else if (availableCreditSlots <= 0 && !canPayWithWallet) {
+        exceptionReason = `[EXCEÇÃO: QUOTA ESGOTADA (${activeSlotsInUse}/${creditSlotsLimit} SLOTS)]`;
+      } else if (partnerAccount?.credit_issuance_mode === 'manual_approval') {
+        exceptionReason = `[PARCEIRO EM MODO DE REVISÃO MANUAL]`;
       }
 
       const req = await createLicenseRequest({
@@ -542,14 +542,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         extra_seats: extraSeats,
         price_aoa: totalClientPrice,
         cost_aoa: currentTotalCost,
-        payment_method: paymentMethod,
-        is_provisional: isProvisional,
-        ...(isProvisional ? { provisional_target_plan: plan } : {}),
-        notes: isProvisional
-          ? `[PROVISÓRIA ${provisionalDays} DIAS PENDENTE] Solicitada pelo parceiro ${partnerCode} (${extraSeats} terminais extras).`
-          : paymentMethod === 'wallet'
-          ? `Solicitada com pagamento via Carteira pelo parceiro ${partnerCode} (${extraSeats} terminais extras).`
-          : `Solicitada a crédito (Slot ${activeSlotsInUse + 1}/${creditSlotsLimit}) pelo parceiro ${partnerCode} (${extraSeats} terminais extras).`,
+        payment_method: canPayWithWallet ? 'wallet' : 'credit',
+        is_provisional: plan === 'lifetime' || extraSeats >= 3,
+        ...(plan === 'lifetime' ? { provisional_target_plan: plan } : {}),
+        notes: `${exceptionReason} Solicitada pelo parceiro ${partnerCode} (+${extraSeats} postos extras). Requer aprovação da Administração.`,
       });
 
       // Regista também na coleção de empresas clientes se ainda não existir
@@ -563,13 +559,13 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
           address: `Parceiro: ${partnerCode}`,
           partner_id: partnerCode,
           status: 'active',
-        });
+        }).catch(() => {});
       }
 
       setSubmittedRequest(req);
       showToast('Solicitação de licença registada com sucesso! Aguarda validação da administração.');
     } catch (err: any) {
-      showToast('Erro ao emitir licença: ' + err.message);
+      showToast('Erro ao processar licença: ' + err.message);
     } finally {
       setSubmitting(false);
     }
@@ -2060,20 +2056,22 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       `A sua quota de ${creditSlotsLimit} slots de crédito está esgotada. Efetue a liquidação de licenças pendentes ou utilize a Carteira Pré-paga.`
                     )}
                   </p>
-                  {canPayWithCredit && (
-                    <div className="mt-2 pt-2 border-t border-slate-200/80 flex items-center justify-between text-[10px]">
-                      <span className="text-slate-500 font-medium">Modo de Processamento a Crédito:</span>
-                      {partnerAccount?.credit_issuance_mode === 'auto_instant' ? (
-                        <span className="font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-300 flex items-center gap-1">
-                          ⚡ Emissão Instantânea via API (Chave Imediata)
-                        </span>
-                      ) : (
-                        <span className="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-300 flex items-center gap-1">
-                          🛡️ Fila de Análise (Aprovação pelo Administrador)
-                        </span>
-                      )}
-                    </div>
-                  )}
+                  <div className="mt-2 pt-2 border-t border-slate-200/80 flex items-center justify-between text-[10px]">
+                    <span className="text-slate-500 font-medium">Modo de Processamento:</span>
+                    {canPayWithWallet ? (
+                      <span className="font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-300 flex items-center gap-1">
+                        ⚡ Emissão Instantânea (Débito em Carteira)
+                      </span>
+                    ) : canPayWithCredit && partnerAccount?.credit_issuance_mode !== 'manual_approval' ? (
+                      <span className="font-bold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-md border border-blue-300 flex items-center gap-1">
+                        ⚡ Emissão Instantânea a Crédito (Chave Imediata)
+                      </span>
+                    ) : (
+                      <span className="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-300 flex items-center gap-1">
+                        🛡️ Fila de Exceção (Aprovação pelo Administrador)
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -2350,10 +2348,24 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 rounded-2xl shadow-md shadow-emerald-600/20 cursor-pointer transition-all flex items-center justify-center gap-2"
+                    className={`w-full text-white font-bold text-xs py-3.5 rounded-2xl shadow-md cursor-pointer transition-all flex items-center justify-center gap-2 ${
+                      canPayWithWallet
+                        ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/20'
+                        : canPayWithCredit && partnerAccount?.credit_issuance_mode !== 'manual_approval'
+                        ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/20'
+                        : 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/20'
+                    }`}
                   >
                     <Key className="w-4 h-4" />
-                    <span>{submitting ? 'A Gravar no Firebase...' : 'Confirmar & Emitir Chave de Licença KVRA'}</span>
+                    <span>
+                      {submitting
+                        ? 'A Processar...'
+                        : canPayWithWallet
+                        ? '⚡ Emitir Licença Imediata (Débito em Carteira)'
+                        : canPayWithCredit && partnerAccount?.credit_issuance_mode !== 'manual_approval'
+                        ? '⚡ Emitir Licença Imediata a Crédito'
+                        : 'Solicitar Liberação Excepcional ao Administrador'}
+                    </span>
                   </button>
                 </form>
               )}

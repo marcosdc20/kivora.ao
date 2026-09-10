@@ -117,13 +117,25 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    // 2. Verificar Modo de Emissão (Trava de Segurança: auto_instant)
-    const issuanceMode = pFields.credit_issuance_mode?.stringValue || 'manual_approval';
-    if (issuanceMode !== 'auto_instant') {
-      return res.status(403).json({
-        requiresManualApproval: true,
-        error: 'O seu perfil de parceiro requer aprovação manual pelo Administrador para emissão a crédito. Submeta a solicitação pelo portal.'
-      });
+    const paymentMethod = body.paymentMethod || 'credit';
+    const isWallet = paymentMethod === 'wallet';
+
+    if (isWallet) {
+      const walletBalance = Number(pFields.wallet_balance_aoa?.integerValue || pFields.wallet_balance_aoa?.doubleValue) || 0;
+      if (walletBalance < Number(costAoa || 0)) {
+        return res.status(400).json({
+          error: `Saldo insuficiente na Carteira (${walletBalance} Kz). Custo: ${costAoa} Kz.`
+        });
+      }
+    } else {
+      // 2. Verificar Modo de Emissão (Trava de Segurança: auto_instant)
+      const issuanceMode = pFields.credit_issuance_mode?.stringValue || 'auto_instant';
+      if (issuanceMode === 'manual_approval') {
+        return res.status(403).json({
+          requiresManualApproval: true,
+          error: 'O seu perfil de parceiro requer aprovação manual pelo Administrador para emissão a crédito. Submeta a solicitação pelo portal.'
+        });
+      }
     }
 
     // 3. Verificar Quotas de Slots e Débitos Vencidos
@@ -267,8 +279,8 @@ export default async function handler(req: any, res: any) {
         cost_aoa: { integerValue: String(costAoa || 0) },
         client_price_aoa: { integerValue: String(priceAoa || 0) },
         created_at: { integerValue: String(now) },
-        paid: { booleanValue: false },
-        payment_method: { stringValue: 'credit' },
+        paid: { booleanValue: isWallet },
+        payment_method: { stringValue: paymentMethod },
         is_provisional: { booleanValue: Boolean(isProv) },
       }
     };
@@ -278,6 +290,21 @@ export default async function handler(req: any, res: any) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(debtPayload)
     });
+
+    if (isWallet) {
+      const currentBal = Number(pFields.wallet_balance_aoa?.integerValue || pFields.wallet_balance_aoa?.doubleValue) || 0;
+      const newBalance = Math.max(0, currentBal - Number(costAoa || 0));
+      await fetch(`${FIRESTORE_BASE_URL}/partners/${encodeURIComponent(partnerCode)}?updateMask.fieldPaths=wallet_balance_aoa&updateMask.fieldPaths=updatedAt`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fields: {
+            wallet_balance_aoa: { integerValue: String(newBalance) },
+            updatedAt: { integerValue: String(now) }
+          }
+        })
+      }).catch(console.warn);
+    }
 
     // 7. Retorno de Sucesso (Sem envio de mensagem automática ao cliente)
     return res.status(200).json({

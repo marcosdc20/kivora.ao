@@ -383,7 +383,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
-            <span>Solicitações de Parceiros</span>
+            <span>Fila de Exceções & Quota Extra</span>
             {pendingRequestsCount > 0 ? (
               <span className="bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse">
                 {pendingRequestsCount} pendente{pendingRequestsCount > 1 ? 's' : ''}
@@ -608,14 +608,16 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
         ) : (
           /* Aba: Solicitações de Parceiros */
           <div className="space-y-5">
-            {/* Banner de Garantia Comercial */}
+            {/* Banner de Garantia Comercial e Isolamento de Exceções */}
             <div className="p-4 bg-blue-50/80 border border-blue-200 rounded-2xl text-xs text-blue-900 flex items-start gap-3 shadow-xs">
               <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
               <div>
-                <strong className="font-black block">Controlo de Emissão & Política Anti-Disparo Automático</strong>
+                <strong className="font-black block">Fila de Exceções & Pedidos Especiais de Parceiros</strong>
                 <span>
-                  Ao aprovar uma solicitação, a licença é imediatamente gerada em Firestore e disponibilizada no painel do parceiro para que ele a entregue sob as suas condições contratuais.
-                  <strong> As chaves de licença NUNCA são enviadas automaticamente aos clientes por WhatsApp ou e-mail</strong>.
+                  Parceiros com saldo na Carteira Pré-Paga ou com linha de crédito regular (slots livres e sem faturas atrasadas) emitem licenças de forma <strong>100% instantânea e autônoma 24/7</strong>.
+                  Esta fila recebe exclusivamente <strong>exceções</strong> (pedidos de quota extra acima do limite, liberação provisória por dívidas vencidas ou parceiros em quarentena de aprovação manual).
+                  <br className="my-1" />
+                  🔒 <em>Política Anti-Disparo: As chaves geradas nunca são enviadas diretamente ao cliente final; o parceiro mantém o controle total da entrega.</em>
                 </span>
               </div>
             </div>

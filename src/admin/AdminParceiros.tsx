@@ -121,7 +121,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
   const [editTier, setEditTier] = useState<'bronze' | 'silver' | 'gold' | 'diamond'>('bronze');
   const [editCreditSlots, setEditCreditSlots] = useState<number>(2);
-  const [editCreditIssuanceMode, setEditCreditIssuanceMode] = useState<'manual_approval' | 'auto_instant'>('manual_approval');
+  const [editCreditIssuanceMode, setEditCreditIssuanceMode] = useState<'manual_approval' | 'auto_instant'>('auto_instant');
   const [topUpAmount, setTopUpAmount] = useState<number>(0);
   const [savingFinancials, setSavingFinancials] = useState(false);
 
@@ -183,7 +183,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             createdAt: Number(d.createdAt) || Number(d.created_at) || Date.now(),
             nif: d.nif || '',
             payment_proof_url: d.payment_proof_url || '',
-            credit_issuance_mode: (d.credit_issuance_mode as any) || 'manual_approval',
+            credit_issuance_mode: (d.credit_issuance_mode as any) || 'auto_instant',
             password: d.password || '',
             mustChangePassword: d.mustChangePassword ?? false,
           };
@@ -294,7 +294,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       setSelectedDebtIds([]);
       setEditTier(selectedPartner.tier || 'bronze');
       setEditCreditSlots(selectedPartner.credit_slots_limit || 2);
-      setEditCreditIssuanceMode(selectedPartner.credit_issuance_mode || 'manual_approval');
+      setEditCreditIssuanceMode(selectedPartner.credit_issuance_mode || 'auto_instant');
       setEditPartnerName(selectedPartner.name || '');
       setEditPartnerEmail(selectedPartner.email || '');
       setEditPartnerPhone(selectedPartner.phone || '');
@@ -557,6 +557,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         id: pCode, code: pCode, name, email, phone, region,
         tier: newPartnerTier, credit_slots_limit: initialSlots,
         debt_aoa: 0, total_paid_aoa: 0, total_sales: 0,
+        credit_issuance_mode: 'auto_instant',
         status: 'active', createdAt: Date.now(),
         password: pwd,
         mustChangePassword: true,
@@ -609,6 +610,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         mustChangePassword: true,
         credit_slots_limit: initialSlots,
         credit_limit_aoa: 250000,
+        credit_issuance_mode: 'auto_instant',
         approved_at: Date.now(),
         updated_at: Date.now(),
       }, { merge: true });
@@ -2146,8 +2148,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                     onChange={(e) => setEditCreditIssuanceMode(e.target.value as any)}
                     className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800"
                   >
-                    <option value="manual_approval">🛡️ Aprovação Manual (Padrão de Segurança)</option>
-                    <option value="auto_instant">⚡ Emissão Instantânea (Parceiro Homologado)</option>
+                    <option value="auto_instant">⚡ Emissão Instantânea (Recomendado / Autonomia 24/7)</option>
+                    <option value="manual_approval">🛡️ Revisão Manual pelo Admin (Em Quarentena)</option>
                   </select>
                 </div>
 
