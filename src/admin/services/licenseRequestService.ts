@@ -88,16 +88,27 @@ export async function createLicenseRequest(params: {
 }
 
 /**
- * Assina em tempo real as solicitações de um parceiro específico
+ * Assina em tempo real as solicitações de um parceiro específico (Suporte a múltiplos identificadores)
  */
 export function subscribePartnerLicenseRequests(
-  partnerCode: string,
+  partnerIdentifiers: string | string[],
   onUpdate: (requests: LicenseRequest[]) => void
 ): () => void {
-  const q = query(
-    collection(db, 'license_requests'),
-    where('partner_id', '==', partnerCode)
-  );
+  const rawList = Array.isArray(partnerIdentifiers) ? partnerIdentifiers : [partnerIdentifiers];
+  const cleanList = Array.from(new Set(
+    rawList
+      .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
+      .flatMap((s) => [s.trim(), s.trim().toUpperCase(), s.trim().toLowerCase()])
+  )).slice(0, 30);
+
+  if (cleanList.length === 0) {
+    onUpdate([]);
+    return () => {};
+  }
+
+  const q = cleanList.length === 1
+    ? query(collection(db, 'license_requests'), where('partner_id', '==', cleanList[0]))
+    : query(collection(db, 'license_requests'), where('partner_id', 'in', cleanList.slice(0, 10)));
 
   return onSnapshot(
     q,

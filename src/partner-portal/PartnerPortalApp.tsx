@@ -25,10 +25,13 @@ import {
   changeUserPassword
 } from '../admin/services/authService';
 import { useCompanies } from '../admin/hooks/useFirebase';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import {
   subscribePartnerLicenses,
   revokeLicense, reactivateLicense, releaseLicenseFromDevice,
-  extendLicenseExpiry, formatLicenseDate, getPlanLabel, updateLicenseSeats
+  extendLicenseExpiry, formatLicenseDate, getPlanLabel, updateLicenseSeats,
+  mapDocToKivoraLicense, calculateExpiresAt
 } from '../admin/services/licenseService';
 import {
   createLicenseRequest, subscribePartnerLicenseRequests, LicenseRequest
@@ -73,6 +76,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const session: KivoraUserSession | null = getStoredSession();
   const { companies, addCompany } = useCompanies();
   const [myPartnerLicenses, setMyPartnerLicenses] = useState<KivoraLicense[]>([]);
+  // Licenças de solicitações aprovadas pelo administrador
+  const [approvedRequestLicenses, setApprovedRequestLicenses] = useState<Record<string, KivoraLicense>>({});
 
   const [activeSection, setActiveSection] = useState<PartnerSection>('dashboard');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -82,6 +87,28 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   // Conta de Parceiro (Wallet & Limite de Crédito)
   const [partnerAccount, setPartnerAccount] = useState<PartnerAccount | null>(null);
   const [policy, setPolicy] = useState<PartnerLicensingPolicy>(DEFAULT_PARTNER_POLICY);
+
+  // Identificadores resilientes do parceiro (Código, Email, ID e variações de caixa)
+  const partnerIdentifiers = React.useMemo(() => {
+    const ids = new Set<string>();
+    if (session?.partnerCode) ids.add(session.partnerCode.trim());
+    if (session?.email) ids.add(session.email.trim());
+    if (session?.id) ids.add(session.id.trim());
+    if (partnerAccount?.code) ids.add(partnerAccount.code.trim());
+    if (partnerAccount?.id) ids.add(partnerAccount.id.trim());
+    if (partnerAccount?.email) ids.add(partnerAccount.email.trim());
+    if (partnerCode) ids.add(partnerCode.trim());
+
+    const result: string[] = [];
+    ids.forEach((id) => {
+      if (id) {
+        result.push(id);
+        result.push(id.toLowerCase());
+        result.push(id.toUpperCase());
+      }
+    });
+    return Array.from(new Set(result)).filter(Boolean);
+  }, [session, partnerAccount, partnerCode]);
   const [showOfficialCertificatesModal, setShowOfficialCertificatesModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -275,26 +302,164 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     return () => unsub();
   }, [partnerCode]);
 
+  // Subscrição em Tempo Real aos Chamados do Parceiro
+  useEffect(() => {
+    const unsub = subscribePartnerTickets(partnerCode, session?.email || '', ({ clientTickets: cTks, adminTickets: aTks }) => {
+      setClientTickets(cTks);
+      setAdminTickets(aTks);
+      if (selectedTicket) {
+        const all = [...cTks, ...aTks];
+        const updated = all.find((t) => t.id === selectedTicket.id);
+        if (updated) setSelectedTicket(updated);
+      }
+    });
+    return () => unsub();
+  }, [partnerCode, session?.email, selectedTicket]);
+
+  // Subscrição em Tempo Real às Licenças deste Parceiro (Multi-identificador resiliente)
+  useEffect(() => {
+    if (partnerIdentifiers.length === 0) return;
+    const unsub = subscribePartnerLicenses(partnerIdentifiers, (list) => {
+      setMyPartnerLicenses(list);
+    });
+    return () => unsub();
+  }, [partnerIdentifiers]);
+
+  // Subscrição em Tempo Real às Solicitações de Licença deste Parceiro (Multi-identificador resiliente)
+  useEffect(() => {
+    if (partnerIdentifiers.length === 0) return;
+    const unsub = subscribePartnerLicenseRequests(partnerIdentifiers, (list) => {
+      setMyLicenseRequests(list);
+    });
+    return () => unsub();
+  }, [partnerIdentifiers]);
+
+  // Escuta em tempo real os documentos oficiais em /licenses de solicitações que foram aprovadas
+  useEffect(() => {
+    const approvedReqs = myLicenseRequests.filter(
+      (r) => r.status === 'approved' && r.license_id && r.license_id.trim().length > 0
+    );
+    if (approvedReqs.length === 0) {
+      setApprovedRequestLicenses({});
+      return;
+    }
+
+    const unsubs: (() => void)[] = [];
+
+    approvedReqs.forEach((req) => {
+      const licId = req.license_id!.trim();
+      try {
+        const unsub = onSnapshot(
+          doc(db, 'licenses', licId),
+          (snap) => {
+            if (snap.exists()) {
+              const data = snap.data();
+              const lic = mapDocToKivoraLicense(snap.id, data);
+              setApprovedRequestLicenses((prev) => ({ ...prev, [licId]: lic }));
+            } else {
+              // Fallback imediato de alta fidelidade
+              const fallbackLic: KivoraLicense = {
+                id: licId,
+                company_name: req.company_name,
+                nif: req.nif,
+                client_email: req.client_email || '',
+                plan_type: req.plan_type,
+                status: 'active',
+                hardware_id: null,
+                created_at: req.approved_at || req.created_at,
+                expires_at: calculateExpiresAt(req.plan_type),
+                price_aoa: req.price_aoa,
+                notes: req.notes || `Aprovada pelo Administrador (${req.reviewed_by || 'Admin'})`,
+                partner_id: partnerCode,
+                activated_at: null,
+                extra_seats: req.extra_seats,
+                is_provisional: req.is_provisional,
+              };
+              setApprovedRequestLicenses((prev) => ({ ...prev, [licId]: fallbackLic }));
+            }
+          },
+          (err) => {
+            console.warn('Erro ao sincronizar licença aprovada:', licId, err);
+          }
+        );
+        unsubs.push(unsub);
+      } catch (err) {
+        console.warn('Erro ao iniciar listener para licença aprovada:', licId, err);
+      }
+    });
+
+    return () => {
+      unsubs.forEach((u) => u());
+    };
+  }, [myLicenseRequests, partnerCode]);
+
+  // UNIFICAÇÃO MASTER: Licenças emitidas diretamente + Licenças de solicitações aprovadas pelo Admin
+  const allPartnerLicenses = React.useMemo(() => {
+    const map = new Map<string, KivoraLicense>();
+
+    // 1. Licenças emitidas diretamente pelo parceiro (da subscrição de licenças)
+    myPartnerLicenses.forEach((lic) => {
+      map.set(lic.id.toUpperCase(), lic);
+    });
+
+    // 2. Licenças de solicitações aprovadas (escutadas em tempo real de /licenses)
+    Object.values(approvedRequestLicenses).forEach((lic) => {
+      if (!map.has(lic.id.toUpperCase())) {
+        map.set(lic.id.toUpperCase(), lic);
+      }
+    });
+
+    // 3. Fallback imediato para qualquer solicitação aprovada que ainda não tenha entrado em approvedRequestLicenses
+    myLicenseRequests.forEach((req) => {
+      if (req.status === 'approved' && req.license_id) {
+        const keyUpper = req.license_id.trim().toUpperCase();
+        if (!map.has(keyUpper)) {
+          map.set(keyUpper, {
+            id: req.license_id.trim(),
+            company_name: req.company_name,
+            nif: req.nif,
+            client_email: req.client_email || '',
+            plan_type: req.plan_type,
+            status: 'active',
+            hardware_id: null,
+            created_at: req.approved_at || req.created_at,
+            expires_at: calculateExpiresAt(req.plan_type),
+            price_aoa: req.price_aoa,
+            notes: req.notes || 'Aprovada pela Administração Kivora',
+            partner_id: partnerCode,
+            activated_at: null,
+            extra_seats: req.extra_seats,
+            is_provisional: req.is_provisional,
+          });
+        }
+      }
+    });
+
+    const list = Array.from(map.values());
+    list.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+    return list;
+  }, [myPartnerLicenses, approvedRequestLicenses, myLicenseRequests, partnerCode]);
+
   // Reconciliação automática em background de licenças emitidas sem débito correspondente
   useEffect(() => {
-    if (!partnerCode || myPartnerLicenses.length === 0) return;
+    if (!partnerCode || allPartnerLicenses.length === 0) return;
     reconcilePartnerDebtsWithLicenses(
       partnerCode,
       partnerName,
-      myPartnerLicenses,
+      allPartnerLicenses,
       partnerDebts,
       policy,
       pricingPlans,
       partnerAccount?.tier || 'bronze'
     );
-  }, [partnerCode, partnerName, myPartnerLicenses, partnerDebts, policy, pricingPlans, partnerAccount?.tier]);
+  }, [partnerCode, partnerName, allPartnerLicenses, partnerDebts, policy, pricingPlans, partnerAccount?.tier]);
 
   // Lista Efetiva de Débitos (Garante coerência de slots e extrato mesmo antes da gravação assíncrona)
   const effectiveDebts = React.useMemo(() => {
     const list = [...partnerDebts];
     const existingLicIds = new Set(list.map((d) => (d.license_id || d.id).toLowerCase()));
 
-    myPartnerLicenses.forEach((lic) => {
+    allPartnerLicenses.forEach((lic) => {
       if (!existingLicIds.has(lic.id.toLowerCase())) {
         const baseCost = pricingPlans.find((p) => p.plan_type === lic.plan_type)?.cost_aoa ?? 120000;
         const seatCost = getPartnerSeatCost(partnerAccount?.tier || 'bronze', policy);
@@ -321,45 +486,13 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
     list.sort((a, b) => b.created_at - a.created_at);
     return list;
-  }, [partnerDebts, myPartnerLicenses, pricingPlans, partnerAccount?.tier, policy, partnerCode, partnerName]);
-
-  // Subscrição em Tempo Real aos Chamados do Parceiro
-  useEffect(() => {
-    const unsub = subscribePartnerTickets(partnerCode, session?.email || '', ({ clientTickets: cTks, adminTickets: aTks }) => {
-      setClientTickets(cTks);
-      setAdminTickets(aTks);
-      if (selectedTicket) {
-        const all = [...cTks, ...aTks];
-        const updated = all.find((t) => t.id === selectedTicket.id);
-        if (updated) setSelectedTicket(updated);
-      }
-    });
-    return () => unsub();
-  }, [partnerCode, session?.email, selectedTicket]);
-
-  // Subscrição em Tempo Real às Licenças deste Parceiro
-  useEffect(() => {
-    if (!partnerCode) return;
-    const unsub = subscribePartnerLicenses(partnerCode, (list) => {
-      setMyPartnerLicenses(list);
-    });
-    return () => unsub();
-  }, [partnerCode]);
-
-  // Subscrição em Tempo Real às Solicitações de Licença deste Parceiro
-  useEffect(() => {
-    if (!partnerCode) return;
-    const unsub = subscribePartnerLicenseRequests(partnerCode, (list) => {
-      setMyLicenseRequests(list);
-    });
-    return () => unsub();
-  }, [partnerCode]);
+  }, [partnerDebts, allPartnerLicenses, pricingPlans, partnerAccount?.tier, policy, partnerCode, partnerName]);
 
   const partnerClients = companies.filter(
     (c) =>
       (c.partner_id && c.partner_id === partnerCode) ||
       (c.address && c.address.includes(partnerCode)) ||
-      myPartnerLicenses.some((l) => l.nif === c.nif)
+      allPartnerLicenses.some((l) => l.nif === c.nif)
   );
 
   const filteredClients = partnerClients.filter((c) => {
@@ -372,8 +505,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     );
   });
 
-  // Filtro de Licenças do Parceiro
-  const filteredLicenses = myPartnerLicenses.filter((lic) => {
+  // Filtro de Licenças do Parceiro (Todas as licenças: emitidas diretamente + aprovadas por solicitação)
+  const filteredLicenses = allPartnerLicenses.filter((lic) => {
     const s = licenseSearch.toLowerCase();
     const matchesSearch =
       !licenseSearch ||
@@ -950,7 +1083,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
   const navItems = [
     { id: 'dashboard', label: 'Painel Geral', icon: LayoutDashboard },
-    { id: 'licencas', label: 'Minhas Licenças', icon: Key, badge: myPartnerLicenses.length },
+    { id: 'licencas', label: 'Minhas Licenças', icon: Key, badge: allPartnerLicenses.length },
     { id: 'clientes', label: 'Meus Clientes', icon: Users, badge: partnerClients.length },
     { id: 'emitir-licenca', label: 'Emitir Licença', icon: Plus },
     { id: 'certificados', label: 'Certificados Oficiais', icon: Award },
@@ -1417,7 +1550,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
                   <span className="text-[11px] font-bold text-slate-400 uppercase">Licenças Emitidas</span>
-                  <p className="text-2xl font-black text-slate-900">{myPartnerLicenses.length}</p>
+                  <p className="text-2xl font-black text-slate-900">{allPartnerLicenses.length}</p>
                   <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full inline-block">
                     Conectado ao Firebase
                   </span>
@@ -1523,12 +1656,12 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     onClick={() => setActiveSection('licencas')}
                     className="text-xs font-bold text-emerald-600 hover:text-emerald-700 cursor-pointer flex items-center gap-1"
                   >
-                    <span>Ver Todas ({myPartnerLicenses.length})</span>
+                    <span>Ver Todas ({allPartnerLicenses.length})</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
-                {myPartnerLicenses.length === 0 ? (
+                {allPartnerLicenses.length === 0 ? (
                   <div className="p-8 text-center text-slate-400 space-y-2">
                     <Key className="w-8 h-8 mx-auto text-slate-300" />
                     <p className="font-bold text-xs text-slate-700">Ainda não emitiu licenças</p>
@@ -1536,31 +1669,44 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-100 border border-slate-100 rounded-2xl overflow-hidden text-xs">
-                    {myPartnerLicenses.slice(0, 5).map((lic) => (
-                      <div key={lic.id} className="p-4 bg-slate-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-mono font-bold text-slate-900">{lic.id}</span>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                              lic.is_provisional ? 'bg-amber-100 text-amber-900 border-amber-300' :
-                              lic.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'
-                            }`}>
-                              {lic.is_provisional ? '⏳ Provisória (7 Dias)' : lic.status === 'active' ? 'Ativa' : 'Suspensa'}
-                            </span>
-                            {lic.hardware_id ? (
-                              <span className="text-[9px] font-bold bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200">
-                                PC Vinculado
+                    {allPartnerLicenses.slice(0, 5).map((lic) => {
+                      const isApprovedFromReq = myLicenseRequests.some(
+                        (r) => r.status === 'approved' && r.license_id?.toUpperCase() === lic.id.toUpperCase()
+                      );
+                      return (
+                        <div key={lic.id} className="p-4 bg-slate-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-mono font-bold text-slate-900">{lic.id}</span>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                                lic.is_provisional ? 'bg-amber-100 text-amber-900 border-amber-300' :
+                                lic.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'
+                              }`}>
+                                {lic.is_provisional ? '⏳ Provisória (7 Dias)' : lic.status === 'active' ? 'Ativa' : 'Suspensa'}
                               </span>
-                            ) : (
-                              <span className="text-[9px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
-                                Livre p/ Ativar
-                              </span>
-                            )}
+                              {isApprovedFromReq ? (
+                                <span className="text-[9px] font-bold bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200">
+                                  ✓ Aprovada por Solicitação
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-bold bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-200">
+                                  ⚡ Emissão Direta
+                                </span>
+                              )}
+                              {lic.hardware_id ? (
+                                <span className="text-[9px] font-bold bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200">
+                                  PC Vinculado
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
+                                  Livre p/ Ativar
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-slate-600 font-medium mt-1">
+                              {lic.company_name} (NIF: {lic.nif}) • Plano: {getPlanLabel(lic.plan_type)}
+                            </p>
                           </div>
-                          <p className="text-slate-600 font-medium mt-1">
-                            {lic.company_name} (NIF: {lic.nif}) • Plano: {getPlanLabel(lic.plan_type)}
-                          </p>
-                        </div>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleCopyKey(lic.id)}
@@ -1588,7 +1734,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                           </button>
                         </div>
                       </div>
-                    ))}
+                    );
+                  })}
                   </div>
                 )}
               </div>
@@ -1629,7 +1776,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   }`}
                 >
                   <Key className="w-3.5 h-3.5" />
-                  <span>Licenças Emitidas ({myPartnerLicenses.length})</span>
+                  <span>Licenças Emitidas ({allPartnerLicenses.length})</span>
                 </button>
 
                 <button
@@ -1676,7 +1823,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                               : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                           }`}
                         >
-                          {st === 'all' && `Todas (${myPartnerLicenses.length})`}
+                          {st === 'all' && `Todas (${allPartnerLicenses.length})`}
                           {st === 'active' && 'Ativas'}
                           {st === 'provisional' && 'Provisórias (7d)'}
                           {st === 'expiring' && 'A Expirar'}
@@ -1700,6 +1847,9 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         const now = Date.now();
                         const isExpiringSoon = lic.expires_at && lic.expires_at > now && lic.expires_at - now < 7 * 86400000;
                         const isExpired = lic.expires_at && lic.expires_at <= now;
+                        const isApprovedFromReq = myLicenseRequests.some(
+                          (r) => r.status === 'approved' && r.license_id?.toUpperCase() === lic.id.toUpperCase()
+                        );
 
                         return (
                           <div
@@ -1721,6 +1871,16 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                                   }`}>
                                     {lic.is_provisional ? '⏳ Provisória (7 Dias)' : lic.status === 'revoked' ? 'Suspensa' : isExpired ? 'Expirada' : isExpiringSoon ? 'A Expirar em Breve' : 'Ativa'}
                                   </span>
+                                  {isApprovedFromReq ? (
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-blue-50 text-blue-800 border-blue-200 flex items-center gap-1">
+                                      <CheckCircle2 className="w-3 h-3 text-blue-600" />
+                                      <span>Aprovada por Solicitação</span>
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-800 border-emerald-200 flex items-center gap-1">
+                                      <span>⚡ Emissão Direta</span>
+                                    </span>
+                                  )}
                                   <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
                                     {getPlanLabel(lic.plan_type)}
                                   </span>
@@ -1905,21 +2065,121 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                           </div>
 
                           {req.status === 'approved' && req.license_id && (
-                            <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                              <div className="flex items-center gap-2">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                                <div>
-                                  <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Chave de Licença Oficial (Entregar ao Cliente):</span>
-                                  <span className="font-mono font-black text-slate-900 text-sm select-all">{req.license_id}</span>
+                            <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl space-y-3">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div className="flex items-center gap-2">
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                                  <div>
+                                    <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Chave de Licença Oficial (Entregar ao Cliente):</span>
+                                    <span className="font-mono font-black text-slate-900 text-sm select-all">{req.license_id}</span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <button
+                                    onClick={() => handleCopyKey(req.license_id!)}
+                                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                                  >
+                                    {copiedKey === req.license_id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                                    <span>{copiedKey === req.license_id ? 'Copiada!' : 'Copiar Chave'}</span>
+                                  </button>
+
+                                  <button
+                                    onClick={() => {
+                                      const lic = allPartnerLicenses.find(l => l.id.toUpperCase() === req.license_id!.toUpperCase()) || {
+                                        id: req.license_id!,
+                                        company_name: req.company_name,
+                                        nif: req.nif,
+                                        client_email: req.client_email || '',
+                                        plan_type: req.plan_type,
+                                        status: 'active',
+                                        hardware_id: null,
+                                        created_at: req.approved_at || req.created_at,
+                                        expires_at: calculateExpiresAt(req.plan_type),
+                                        price_aoa: req.price_aoa,
+                                        notes: req.notes,
+                                        partner_id: partnerCode,
+                                        activated_at: null,
+                                        extra_seats: req.extra_seats,
+                                        is_provisional: req.is_provisional,
+                                      };
+                                      setSelectedLicenseForCert(lic);
+                                    }}
+                                    className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-blue-200 cursor-pointer"
+                                    title="Visualizar e Imprimir Certificado Oficial A4"
+                                  >
+                                    <Printer className="w-3.5 h-3.5" />
+                                    <span>Certificado</span>
+                                  </button>
+
+                                  <button
+                                    onClick={() => {
+                                      const lic = allPartnerLicenses.find(l => l.id.toUpperCase() === req.license_id!.toUpperCase()) || {
+                                        id: req.license_id!,
+                                        company_name: req.company_name,
+                                        nif: req.nif,
+                                        client_email: req.client_email || '',
+                                        plan_type: req.plan_type,
+                                        status: 'active',
+                                        hardware_id: null,
+                                        created_at: req.approved_at || req.created_at,
+                                        expires_at: calculateExpiresAt(req.plan_type),
+                                        price_aoa: req.price_aoa,
+                                        notes: req.notes,
+                                        partner_id: partnerCode,
+                                        activated_at: null,
+                                        extra_seats: req.extra_seats,
+                                        is_provisional: req.is_provisional,
+                                      };
+                                      setSelectedLicenseForInvoice(lic);
+                                    }}
+                                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-200 cursor-pointer"
+                                    title="Visualizar Fatura/Recibo A4"
+                                  >
+                                    <Receipt className="w-3.5 h-3.5" />
+                                    <span>Recibo / Fatura</span>
+                                  </button>
+
+                                  <button
+                                    onClick={() => {
+                                      setLicenseSearch(req.license_id!);
+                                      setActiveLicensesTab('emitidas');
+                                    }}
+                                    className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                                    title="Localizar esta licença na aba de emitidas"
+                                  >
+                                    <Key className="w-3.5 h-3.5" />
+                                    <span>Ver nas Emitidas</span>
+                                  </button>
+
+                                  <button
+                                    onClick={() => {
+                                      const lic = allPartnerLicenses.find(l => l.id.toUpperCase() === req.license_id!.toUpperCase()) || {
+                                        id: req.license_id!,
+                                        company_name: req.company_name,
+                                        nif: req.nif,
+                                        client_email: req.client_email || '',
+                                        plan_type: req.plan_type,
+                                        status: 'active',
+                                        hardware_id: null,
+                                        created_at: req.approved_at || req.created_at,
+                                        expires_at: calculateExpiresAt(req.plan_type),
+                                        price_aoa: req.price_aoa,
+                                        notes: req.notes,
+                                        partner_id: partnerCode,
+                                        activated_at: null,
+                                        extra_seats: req.extra_seats,
+                                        is_provisional: req.is_provisional,
+                                      };
+                                      handleShareWhatsapp(lic);
+                                    }}
+                                    className="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-emerald-300 cursor-pointer"
+                                    title="Enviar dados de ativação por WhatsApp"
+                                  >
+                                    <Share2 className="w-3.5 h-3.5" />
+                                    <span>WhatsApp</span>
+                                  </button>
                                 </div>
                               </div>
-                              <button
-                                onClick={() => handleCopyKey(req.license_id!)}
-                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
-                              >
-                                {copiedKey === req.license_id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                                <span>{copiedKey === req.license_id ? 'Copiada!' : 'Copiar Chave'}</span>
-                              </button>
                             </div>
                           )}
                         </div>
@@ -1972,7 +2232,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               ) : (
                 <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs">
                   {filteredClients.map((c) => {
-                    const clientLicenses = myPartnerLicenses.filter(l => l.nif === c.nif);
+                    const clientLicenses = allPartnerLicenses.filter(l => l.nif === c.nif);
                     return (
                       <div key={c.id || c.nif} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition-colors">
                         <div>
@@ -2169,6 +2429,77 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     >
                       {copiedKey === generatedKey ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                       <span>{copiedKey === generatedKey ? 'Chave Copiada!' : 'Copiar Chave'}</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const lic = allPartnerLicenses.find(l => l.id.toUpperCase() === generatedKey.toUpperCase()) || {
+                          id: generatedKey,
+                          company_name: companyName,
+                          nif: nif,
+                          client_email: clientEmail,
+                          plan_type: plan,
+                          status: 'active',
+                          hardware_id: null,
+                          created_at: Date.now(),
+                          expires_at: calculateExpiresAt(plan),
+                          price_aoa: totalClientPrice,
+                          notes: 'Emitida via Portal do Parceiro',
+                          partner_id: partnerCode,
+                          activated_at: null,
+                          extra_seats: extraSeats,
+                          is_provisional: generatedIsProvisional,
+                        };
+                        setSelectedLicenseForCert(lic);
+                      }}
+                      className="bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/40 text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer"
+                      title="Imprimir Certificado Oficial A4"
+                    >
+                      <Printer className="w-4 h-4" />
+                      <span>Certificado Oficial</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const lic = allPartnerLicenses.find(l => l.id.toUpperCase() === generatedKey.toUpperCase()) || {
+                          id: generatedKey,
+                          company_name: companyName,
+                          nif: nif,
+                          client_email: clientEmail,
+                          plan_type: plan,
+                          status: 'active',
+                          hardware_id: null,
+                          created_at: Date.now(),
+                          expires_at: calculateExpiresAt(plan),
+                          price_aoa: totalClientPrice,
+                          notes: 'Emitida via Portal do Parceiro',
+                          partner_id: partnerCode,
+                          activated_at: null,
+                          extra_seats: extraSeats,
+                          is_provisional: generatedIsProvisional,
+                        };
+                        setSelectedLicenseForInvoice(lic);
+                      }}
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer"
+                      title="Imprimir Fatura / Recibo A4"
+                    >
+                      <Receipt className="w-4 h-4" />
+                      <span>Recibo / Fatura</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setGeneratedKey(null);
+                        setCompanyName('');
+                        setNif('');
+                        setClientEmail('');
+                        setActiveSection('licencas');
+                        setActiveLicensesTab('emitidas');
+                      }}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-md"
+                    >
+                      <Key className="w-4 h-4" />
+                      <span>Ver em Minhas Licenças</span>
                     </button>
                   </div>
 

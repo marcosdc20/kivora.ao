@@ -123,7 +123,7 @@ export async function promoteProvisionalLicenseToDefinitive(licenseId: string, t
   });
 }
 
-function mapDocToKivoraLicense(id: string, data: any): KivoraLicense {
+export function mapDocToKivoraLicense(id: string, data: any): KivoraLicense {
   return {
     id,
     client_email: data.client_email || '',
@@ -190,15 +190,27 @@ export function subscribeToLicenses(
   );
 }
 
-/** Assina apenas as licenças vinculadas a um parceiro específico (Segregação Multi-Tenant) */
+/** Assina apenas as licenças vinculadas a um parceiro específico (Segregação Multi-Tenant Resiliente) */
 export function subscribePartnerLicenses(
-  partnerCode: string,
-  onUpdate: (licenses: KivoraLicense[]) => void
-) {
-  const q = query(
-    collection(db, 'licenses'),
-    where('partner_id', '==', partnerCode)
-  );
+  partnerIdentifiers: string | string[],
+  onUpdate: (licenses: KivoraLicense[]) => void,
+  onError?: (error: any) => void
+): () => void {
+  const rawList = Array.isArray(partnerIdentifiers) ? partnerIdentifiers : [partnerIdentifiers];
+  const cleanList = Array.from(new Set(
+    rawList
+      .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
+      .flatMap((s) => [s.trim(), s.trim().toUpperCase(), s.trim().toLowerCase()])
+  )).slice(0, 30);
+
+  if (cleanList.length === 0) {
+    onUpdate([]);
+    return () => {};
+  }
+
+  const q = cleanList.length === 1
+    ? query(collection(db, 'licenses'), where('partner_id', '==', cleanList[0]))
+    : query(collection(db, 'licenses'), where('partner_id', 'in', cleanList.slice(0, 10)));
 
   return onSnapshot(
     q,
@@ -208,6 +220,7 @@ export function subscribePartnerLicenses(
     },
     (error) => {
       console.warn('Erro ao escutar licenças do parceiro:', error);
+      if (onError) onError(error);
     }
   );
 }
