@@ -87,8 +87,14 @@ export interface PartnerLicensingPolicy {
   membership_bank_info: {
     bank: string;
     iban: string;
-    account_number: string;
-    beneficiary: string;
+    account_number?: string;
+    beneficiary?: string;
+  };
+  membership_bank_info_2?: {
+    bank: string;
+    iban: string;
+    account_number?: string;
+    beneficiary?: string;
   };
   updated_at?: number;
 }
@@ -122,9 +128,15 @@ export const DEFAULT_PARTNER_POLICY: PartnerLicensingPolicy = {
     'Compromisso com o código de ética e suporte de qualidade ao cliente final',
   ],
   membership_bank_info: {
-    bank: 'BAI / BFA',
+    bank: 'Banco BAI',
     iban: 'AO06 0040 0000 1234 5678 9012 3',
     account_number: '0040.0000.1234.5678.9012.3',
+    beneficiary: 'VISUAL SOFTWARE / KIVORA TECNOLOGIAS, LDA',
+  },
+  membership_bank_info_2: {
+    bank: 'Banco BFA',
+    iban: 'AO06 0006 0000 9876 5432 1098 7',
+    account_number: '0006.0000.9876.5432.1098.7',
     beneficiary: 'VISUAL SOFTWARE / KIVORA TECNOLOGIAS, LDA',
   },
 };
@@ -166,6 +178,26 @@ export async function savePartnerPolicy(policy: PartnerLicensingPolicy): Promise
     ...policy,
     updated_at: Date.now(),
   }), { merge: true });
+
+  // Sincroniza em 2 vias com as configurações globais da empresa
+  try {
+    const bank1 = policy.membership_bank_info;
+    const bank2 = policy.membership_bank_info_2;
+    if (bank1 || bank2) {
+      await setDoc(doc(db, 'system_settings', 'company_info'), cleanFirestoreData({
+        bank1Name: bank1?.bank || 'Banco BAI',
+        ibanBai: bank1?.iban || '',
+        bank1Account: bank1?.account_number || '',
+        bank2Name: bank2?.bank || 'Banco BFA',
+        ibanBfa: bank2?.iban || '',
+        bank2Account: bank2?.account_number || '',
+        ibanTitular: bank1?.beneficiary || bank2?.beneficiary || 'VISUAL SOFTWARE LIMITADA',
+        updatedAt: Date.now(),
+      }), { merge: true });
+    }
+  } catch (err) {
+    console.warn('Aviso ao sincronizar partner_policy com system_settings:', err);
+  }
 }
 
 export async function getPartnerPolicy(): Promise<PartnerLicensingPolicy> {

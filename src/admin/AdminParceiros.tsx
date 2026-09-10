@@ -20,6 +20,7 @@ import {
 import type { PartnerPricingPlan, PartnerDebtEntry, PartnerLicensingPolicy } from './services/partnerDebtService';
 import { PartnerOfficialCertificatesModal, PartnerCertificateData } from '../components/PartnerOfficialCertificatesModal';
 import { notify, confirmDialog } from '../services/notificationService';
+import { getCachedSystemSettings } from '../services/systemSettingsService';
 
 export interface Partner {
   id: string;
@@ -970,6 +971,26 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     }
   };
 
+  const handlePullGlobalBankSettings = () => {
+    const sys = getCachedSystemSettings();
+    setPolicyDraft((prev) => ({
+      ...prev,
+      membership_bank_info: {
+        bank: sys.bank1Name || 'Banco BAI',
+        iban: sys.ibanBai || '',
+        account_number: sys.bank1Account || '',
+        beneficiary: sys.ibanTitular || 'VISUAL SOFTWARE LIMITADA',
+      },
+      membership_bank_info_2: {
+        bank: sys.bank2Name || 'Banco BFA',
+        iban: sys.ibanBfa || '',
+        account_number: sys.bank2Account || '',
+        beneficiary: sys.ibanTitular || 'VISUAL SOFTWARE LIMITADA',
+      },
+    }));
+    notify.success('Coordenadas bancárias importadas das definições gerais da empresa com sucesso!');
+  };
+
   const copyRefLink = (p: Partner) => {
     navigator.clipboard.writeText(`https://kivora.ao/?ref=${p.code}`);
     setCopiedCode(p.code); setTimeout(() => setCopiedCode(null), 2500);
@@ -1772,28 +1793,136 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                     </div>
                   </div>
 
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                    <label className="text-xs font-bold text-slate-800 block">IBAN / Conta para Pagamento da Taxa</label>
-                    <div className="space-y-1.5 pt-1">
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4 md:col-span-2">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-2">
+                      <div>
+                        <label className="text-xs font-black text-slate-800 uppercase tracking-wider block">
+                          Coordenadas Bancárias Oficiais (Ambas as Contas Configuráveis)
+                        </label>
+                        <p className="text-[11px] text-slate-500">
+                          Configure as 2 contas bancárias para pagamento da taxa de adesão e liquidação de dívidas dos parceiros.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handlePullGlobalBankSettings}
+                        className="text-[11px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
+                        title="Importar coordenadas das Definições Gerais da Empresa"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Puxar das Definições Gerais</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* CONTA 1 */}
+                      <div className="p-3.5 bg-white rounded-xl border border-emerald-200 space-y-2 text-xs">
+                        <div className="flex items-center gap-2 text-emerald-800 font-bold">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span>Conta Bancária 1 (Principal)</span>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Instituição Bancária 1</label>
+                          <input
+                            type="text"
+                            placeholder="Banco (ex: Banco BAI)"
+                            value={policyDraft.membership_bank_info?.bank || ''}
+                            onChange={(e) => setPolicyDraft({
+                              ...policyDraft,
+                              membership_bank_info: { ...(policyDraft.membership_bank_info || DEFAULT_PARTNER_POLICY.membership_bank_info), bank: e.target.value }
+                            })}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-900 focus:bg-white focus:border-emerald-500 outline-none"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">IBAN 1</label>
+                          <input
+                            type="text"
+                            placeholder="IBAN (ex: AO06 0040...)"
+                            value={policyDraft.membership_bank_info?.iban || ''}
+                            onChange={(e) => setPolicyDraft({
+                              ...policyDraft,
+                              membership_bank_info: { ...(policyDraft.membership_bank_info || DEFAULT_PARTNER_POLICY.membership_bank_info), iban: e.target.value }
+                            })}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:border-emerald-500 outline-none"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Nº de Conta / Referência 1</label>
+                          <input
+                            type="text"
+                            placeholder="Número de Conta / Swift"
+                            value={policyDraft.membership_bank_info?.account_number || ''}
+                            onChange={(e) => setPolicyDraft({
+                              ...policyDraft,
+                              membership_bank_info: { ...(policyDraft.membership_bank_info || DEFAULT_PARTNER_POLICY.membership_bank_info), account_number: e.target.value }
+                            })}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-800 focus:bg-white focus:border-emerald-500 outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      {/* CONTA 2 */}
+                      <div className="p-3.5 bg-white rounded-xl border border-blue-200 space-y-2 text-xs">
+                        <div className="flex items-center gap-2 text-blue-800 font-bold">
+                          <span className="w-2 h-2 rounded-full bg-blue-500" />
+                          <span>Conta Bancária 2 (Alternativa)</span>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Instituição Bancária 2</label>
+                          <input
+                            type="text"
+                            placeholder="Banco (ex: Banco BFA)"
+                            value={policyDraft.membership_bank_info_2?.bank || ''}
+                            onChange={(e) => setPolicyDraft({
+                              ...policyDraft,
+                              membership_bank_info_2: { ...(policyDraft.membership_bank_info_2 || DEFAULT_PARTNER_POLICY.membership_bank_info_2 || DEFAULT_PARTNER_POLICY.membership_bank_info), bank: e.target.value }
+                            })}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-900 focus:bg-white focus:border-blue-500 outline-none"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">IBAN 2</label>
+                          <input
+                            type="text"
+                            placeholder="IBAN (ex: AO06 0006...)"
+                            value={policyDraft.membership_bank_info_2?.iban || ''}
+                            onChange={(e) => setPolicyDraft({
+                              ...policyDraft,
+                              membership_bank_info_2: { ...(policyDraft.membership_bank_info_2 || DEFAULT_PARTNER_POLICY.membership_bank_info_2 || DEFAULT_PARTNER_POLICY.membership_bank_info), iban: e.target.value }
+                            })}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-500 outline-none"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Nº de Conta / Referência 2</label>
+                          <input
+                            type="text"
+                            placeholder="Número de Conta / Swift"
+                            value={policyDraft.membership_bank_info_2?.account_number || ''}
+                            onChange={(e) => setPolicyDraft({
+                              ...policyDraft,
+                              membership_bank_info_2: { ...(policyDraft.membership_bank_info_2 || DEFAULT_PARTNER_POLICY.membership_bank_info_2 || DEFAULT_PARTNER_POLICY.membership_bank_info), account_number: e.target.value }
+                            })}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-800 focus:bg-white focus:border-blue-500 outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Titular Beneficiário */}
+                    <div className="pt-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Titular Oficial / Beneficiário das Contas</label>
                       <input
                         type="text"
-                        placeholder="Banco (ex: BAI / BFA)"
-                        value={policyDraft.membership_bank_info?.bank || ''}
+                        placeholder="VISUAL SOFTWARE / KIVORA TECNOLOGIAS, LDA"
+                        value={policyDraft.membership_bank_info?.beneficiary || ''}
                         onChange={(e) => setPolicyDraft({
                           ...policyDraft,
-                          membership_bank_info: { ...(policyDraft.membership_bank_info || DEFAULT_PARTNER_POLICY.membership_bank_info), bank: e.target.value }
+                          membership_bank_info: { ...(policyDraft.membership_bank_info || DEFAULT_PARTNER_POLICY.membership_bank_info), beneficiary: e.target.value },
+                          membership_bank_info_2: policyDraft.membership_bank_info_2 ? { ...policyDraft.membership_bank_info_2, beneficiary: e.target.value } : undefined
                         })}
-                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium"
-                      />
-                      <input
-                        type="text"
-                        placeholder="IBAN (ex: AO06 0040...)"
-                        value={policyDraft.membership_bank_info?.iban || ''}
-                        onChange={(e) => setPolicyDraft({
-                          ...policyDraft,
-                          membership_bank_info: { ...(policyDraft.membership_bank_info || DEFAULT_PARTNER_POLICY.membership_bank_info), iban: e.target.value }
-                        })}
-                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                        className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2 text-xs font-bold text-slate-900 focus:border-blue-600 outline-none"
                       />
                     </div>
                   </div>

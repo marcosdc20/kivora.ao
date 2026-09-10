@@ -382,31 +382,31 @@ export const VideoMinutesPurchaseModal: React.FC<VideoMinutesPurchaseModalProps>
 
                     <div className="flex items-center justify-between p-2 bg-white rounded-xl border border-slate-200">
                       <div>
-                        <span className="text-[10px] font-bold text-blue-600 block">BANCO BAI:</span>
+                        <span className="text-[10px] font-bold text-blue-600 block">{settings.bank1Name?.toUpperCase() || 'BANCO BAI'}:</span>
                         <span className="font-mono text-[11px] font-bold text-slate-800">{settings.ibanBai}</span>
                       </div>
                       <button
                         type="button"
-                        onClick={() => handleCopyIban(settings.ibanBai, 'BAI')}
+                        onClick={() => handleCopyIban(settings.ibanBai, settings.bank1Name || 'BAI')}
                         className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                       >
-                        {copiedIban === 'BAI' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                        <span>{copiedIban === 'BAI' ? 'Copiado' : 'Copiar'}</span>
+                        {copiedIban === (settings.bank1Name || 'BAI') ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                        <span>{copiedIban === (settings.bank1Name || 'BAI') ? 'Copiado' : 'Copiar'}</span>
                       </button>
                     </div>
 
                     <div className="flex items-center justify-between p-2 bg-white rounded-xl border border-slate-200">
                       <div>
-                        <span className="text-[10px] font-bold text-amber-600 block">BANCO BFA:</span>
+                        <span className="text-[10px] font-bold text-amber-600 block">{settings.bank2Name?.toUpperCase() || 'BANCO BFA'}:</span>
                         <span className="font-mono text-[11px] font-bold text-slate-800">{settings.ibanBfa}</span>
                       </div>
                       <button
                         type="button"
-                        onClick={() => handleCopyIban(settings.ibanBfa, 'BFA')}
+                        onClick={() => handleCopyIban(settings.ibanBfa, settings.bank2Name || 'BFA')}
                         className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                       >
-                        {copiedIban === 'BFA' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                        <span>{copiedIban === 'BFA' ? 'Copiado' : 'Copiar'}</span>
+                        {copiedIban === (settings.bank2Name || 'BFA') ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                        <span>{copiedIban === (settings.bank2Name || 'BFA') ? 'Copiado' : 'Copiar'}</span>
                       </button>
                     </div>
 

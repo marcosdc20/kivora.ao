@@ -53,6 +53,7 @@ import type { PlanType, KivoraLicense, Company } from '../admin/types';
 import { notify, alertDialog } from '../services/notificationService';
 import { PartnerOfficialCertificatesModal } from '../components/PartnerOfficialCertificatesModal';
 import { LicenseOfficialCertificateModal } from '../components/LicenseOfficialCertificateModal';
+import { subscribeSystemSettings, getCachedSystemSettings, SystemCompanySettings } from '../services/systemSettingsService';
 
 interface PartnerPortalAppProps {
   onLogout: () => void;
@@ -89,7 +90,24 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const displayPartnerCode = partnerAccount?.code || partnerCode;
   const displayPartnerName = partnerAccount?.name || partnerName;
   const [policy, setPolicy] = useState<PartnerLicensingPolicy>(DEFAULT_PARTNER_POLICY);
+  const [systemSettings, setSystemSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
   const [partnerDiscoveredCodes, setPartnerDiscoveredCodes] = useState<string[]>([]);
+
+  // Escuta em tempo real as políticas de crédito de parceiro e coordenadas bancárias centrais
+  useEffect(() => {
+    const unsubPolicy = subscribePartnerPolicy(setPolicy);
+    const unsubSettings = subscribeSystemSettings(setSystemSettings);
+    return () => {
+      unsubPolicy();
+      unsubSettings();
+    };
+  }, []);
+
+  const officialBank1Name = policy.membership_bank_info?.bank || systemSettings.bank1Name || 'Banco BAI';
+  const officialBank1Iban = policy.membership_bank_info?.iban || systemSettings.ibanBai || 'AO06 0040 0000 1234 5678 9012 3';
+  const officialBank2Name = policy.membership_bank_info_2?.bank || systemSettings.bank2Name || 'Banco BFA';
+  const officialBank2Iban = policy.membership_bank_info_2?.iban || systemSettings.ibanBfa || 'AO06 0006 0000 9876 5432 1098 7';
+  const officialBeneficiary = policy.membership_bank_info?.beneficiary || systemSettings.ibanTitular || 'VISUAL SOFTWARE LIMITADA';
 
   // Descoberta dinâmica em tempo real de códigos/aliases vinculados a este parceiro
   useEffect(() => {
@@ -237,7 +255,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const [showProofPaymentModal, setShowProofPaymentModal] = useState(false);
   const [showTopUpWalletModal, setShowTopUpWalletModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
-  const [paymentBank, setPaymentBank] = useState<'BAI' | 'BFA'>('BAI');
+  const [paymentBank, setPaymentBank] = useState<string>('BAI');
   const [paymentRef, setPaymentRef] = useState('');
   const [paymentNotes, setPaymentNotes] = useState('');
   const [submittingProof, setSubmittingProof] = useState(false);
@@ -3157,13 +3175,13 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
                   <div className="p-3.5 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
                     <div>
-                      <span className="text-[10px] text-slate-400 font-sans block">Banco BAI (Kz) — Kivora Tech</span>
-                      <strong className="text-white">AO06.0040.0000.1234.5678.9012.3</strong>
+                      <span className="text-[10px] text-slate-400 font-sans block">{officialBank1Name} (Kz) — {officialBeneficiary}</span>
+                      <strong className="text-white">{officialBank1Iban}</strong>
                     </div>
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText('AO06.0040.0000.1234.5678.9012.3');
-                        notify.success('IBAN BAI copiado para a área de transferência!');
+                        navigator.clipboard.writeText(officialBank1Iban.replace(/\s/g, ''));
+                        notify.success(`IBAN ${officialBank1Name} copiado para a área de transferência!`);
                       }}
                       className="p-2 text-slate-400 hover:text-white bg-white/10 rounded-lg cursor-pointer"
                       title="Copiar IBAN"
@@ -3174,13 +3192,13 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                   <div className="p-3.5 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
                     <div>
-                      <span className="text-[10px] text-slate-400 font-sans block">Banco BFA (Kz) — Kivora Tech</span>
-                      <strong className="text-white">AO06.0006.0000.9876.5432.1098.7</strong>
+                      <span className="text-[10px] text-slate-400 font-sans block">{officialBank2Name} (Kz) — {officialBeneficiary}</span>
+                      <strong className="text-white">{officialBank2Iban}</strong>
                     </div>
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText('AO06.0006.0000.9876.5432.1098.7');
-                        notify.success('IBAN BFA copiado para a área de transferência!');
+                        navigator.clipboard.writeText(officialBank2Iban.replace(/\s/g, ''));
+                        notify.success(`IBAN ${officialBank2Name} copiado para a área de transferência!`);
                       }}
                       className="p-2 text-slate-400 hover:text-white bg-white/10 rounded-lg cursor-pointer"
                       title="Copiar IBAN"
@@ -4014,10 +4032,13 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
             </div>
 
             <div className="p-4 bg-slate-950 text-white rounded-2xl space-y-2 text-xs">
-              <span className="text-[10px] text-slate-400 uppercase font-bold block">Contas Bancárias Oficiais para Depósito</span>
-              <div className="space-y-1 font-mono text-[11px]">
-                <p>• BAI: <strong className="text-emerald-400">AO06.0040.0000.1234.5678.9012.3</strong></p>
-                <p>• BFA: <strong className="text-blue-400">AO06.0006.0000.9876.5432.1098.7</strong></p>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 border-b border-white/10 pb-1.5">
+                <span className="text-[10px] text-slate-400 uppercase font-bold block">Contas Bancárias Oficiais para Depósito</span>
+                <span className="text-[10px] text-slate-300">Titular: <strong className="text-white">{officialBeneficiary}</strong></span>
+              </div>
+              <div className="space-y-1 font-mono text-[11px] pt-1">
+                <p>• {officialBank1Name}: <strong className="text-emerald-400">{officialBank1Iban}</strong></p>
+                <p>• {officialBank2Name}: <strong className="text-blue-400">{officialBank2Iban}</strong></p>
               </div>
             </div>
 
@@ -4041,11 +4062,11 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   <label className="font-bold text-slate-700 uppercase text-[11px]">Banco de Destino (Kivora)</label>
                   <select
                     value={paymentBank}
-                    onChange={(e) => setPaymentBank(e.target.value as any)}
+                    onChange={(e) => setPaymentBank(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-bold"
                   >
-                    <option value="BAI">Banco BAI (Conta Kivora)</option>
-                    <option value="BFA">Banco BFA (Conta Kivora)</option>
+                    <option value={officialBank1Name}>{officialBank1Name} (Conta Oficial)</option>
+                    <option value={officialBank2Name}>{officialBank2Name} (Conta Oficial)</option>
                   </select>
                 </div>
               </div>
@@ -4303,11 +4324,11 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   <label className="font-bold text-slate-700 uppercase text-[11px]">Banco de Destino (Kivora)</label>
                   <select
                     value={paymentBank}
-                    onChange={(e) => setPaymentBank(e.target.value as any)}
+                    onChange={(e) => setPaymentBank(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-bold"
                   >
-                    <option value="BAI">Banco BAI (Conta Kivora)</option>
-                    <option value="BFA">Banco BFA (Conta Kivora)</option>
+                    <option value={officialBank1Name}>{officialBank1Name} (Conta Oficial)</option>
+                    <option value={officialBank2Name}>{officialBank2Name} (Conta Oficial)</option>
                   </select>
                 </div>
               </div>

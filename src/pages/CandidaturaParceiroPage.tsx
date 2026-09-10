@@ -62,7 +62,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
   const [submitting, setSubmitting] = useState(false);
   const [submittedProtocol, setSubmittedProtocol] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [copiedIban, setCopiedIban] = useState(false);
+  const [copiedIban, setCopiedIban] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubSettings = subscribeSystemSettings(setSettings);
@@ -73,10 +73,10 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
     };
   }, []);
 
-  const handleCopyIban = (iban: string) => {
-    navigator.clipboard.writeText(iban);
-    setCopiedIban(true);
-    setTimeout(() => setCopiedIban(false), 2000);
+  const handleCopyIban = (iban: string, bankKey: string) => {
+    navigator.clipboard.writeText(iban.replace(/\s/g, ''));
+    setCopiedIban(bankKey);
+    setTimeout(() => setCopiedIban(null), 2000);
   };
 
   const compressImage = (file: File): Promise<{ base64: string; sizeFormatted: string }> => {
@@ -294,8 +294,14 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
     return `https://wa.me/${phoneDigits}?text=${msg}`;
   };
 
-  const ibanOficial = policy.membership_bank_info?.iban || 'AO06 0040 0000 1234 5678 9012 3';
-  const bancoOficial = policy.membership_bank_info?.bank || 'Banco Angolano de Investimentos (BAI)';
+  const ibanOficial1 = policy.membership_bank_info?.iban || settings.ibanBai || 'AO06 0040 0000 1234 5678 9012 3';
+  const bancoOficial1 = policy.membership_bank_info?.bank || settings.bank1Name || 'Banco BAI';
+
+  const ibanOficial2 = policy.membership_bank_info_2?.iban || settings.ibanBfa || 'AO06 0006 0000 9876 5432 1098 7';
+  const bancoOficial2 = policy.membership_bank_info_2?.bank || settings.bank2Name || 'Banco BFA';
+
+  const titularOficial = policy.membership_bank_info?.beneficiary || settings.ibanTitular || 'VISUAL SOFTWARE LIMITADA';
+  const nifOficial = settings.ibanTitularNif || settings.nif || '5002863944';
 
   const handleDownloadPdf = () => {
     const link = document.createElement('a');
@@ -671,27 +677,28 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
             {/* Dados para Transferência */}
             <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-slate-200/90 space-y-2.5 text-xs relative z-10 shadow-xs">
               <div>
-                <span className="text-slate-400 text-[11px] block">Banco:</span>
-                <span className="font-semibold text-slate-800">{bancoOficial}</span>
+                <span className="text-slate-400 text-[11px] block">Bancos Oficiais:</span>
+                <span className="font-semibold text-slate-800">{bancoOficial1} & {bancoOficial2}</span>
               </div>
               <div>
                 <span className="text-slate-400 text-[11px] block">Beneficiário:</span>
-                <span className="font-semibold text-slate-800">A VISUAL SOFTWARE, LDA.</span>
+                <span className="font-semibold text-slate-800">{titularOficial}</span>
               </div>
               <div>
                 <span className="text-slate-400 text-[11px] block">NIF da Entidade:</span>
-                <span className="font-mono font-semibold text-slate-800">5002863944</span>
+                <span className="font-mono font-semibold text-slate-800">{nifOficial}</span>
               </div>
               
-              <div className="pt-2 border-t border-slate-200/80">
+              {/* CONTA 1 */}
+              <div className="pt-2 border-t border-slate-200/80 space-y-1">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-slate-500 text-[11px] font-semibold">IBAN Oficial:</span>
+                  <span className="text-slate-700 text-[11px] font-bold">1. {bancoOficial1}:</span>
                   <button
                     type="button"
-                    onClick={() => handleCopyIban(ibanOficial)}
+                    onClick={() => handleCopyIban(ibanOficial1, 'bank1')}
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 cursor-pointer"
                   >
-                    {copiedIban ? (
+                    {copiedIban === 'bank1' ? (
                       <>
                         <Check className="w-3 h-3 text-emerald-600" />
                         <span className="text-emerald-600">Copiado</span>
@@ -705,7 +712,34 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
                   </button>
                 </div>
                 <div className="p-2 bg-slate-50 rounded-xl border border-slate-200 font-mono text-[11px] font-bold text-slate-900 select-all">
-                  {ibanOficial}
+                  {ibanOficial1}
+                </div>
+              </div>
+
+              {/* CONTA 2 */}
+              <div className="pt-1.5 space-y-1">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-slate-700 text-[11px] font-bold">2. {bancoOficial2}:</span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyIban(ibanOficial2, 'bank2')}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 cursor-pointer"
+                  >
+                    {copiedIban === 'bank2' ? (
+                      <>
+                        <Check className="w-3 h-3 text-emerald-600" />
+                        <span className="text-emerald-600">Copiado</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3 h-3" />
+                        <span>Copiar IBAN</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                <div className="p-2 bg-slate-50 rounded-xl border border-slate-200 font-mono text-[11px] font-bold text-slate-900 select-all">
+                  {ibanOficial2}
                 </div>
               </div>
             </div>

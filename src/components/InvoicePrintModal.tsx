@@ -3,6 +3,7 @@ import { X, Printer, ShieldCheck, FileText } from 'lucide-react';
 import { KivoraLogo } from './KivoraLogo';
 import { KIVORA_INFO } from '../data/kivoraData';
 import { formatLicenseDate, getPlanLabel } from '../admin/services/licenseService';
+import { getCachedSystemSettings } from '../services/systemSettingsService';
 import type { KivoraLicense } from '../admin/types';
 
 interface InvoicePrintModalProps {
@@ -28,6 +29,13 @@ export const InvoicePrintModal: React.FC<InvoicePrintModalProps> = ({
   const price = license.price_aoa || (license.plan_type === 'monthly' ? 25000 : license.plan_type === 'lifetime' ? 1500000 : 250000);
   const taxAoa = 0; // Regime de Software Isento
   const totalAoa = price + taxAoa;
+
+  const settings = getCachedSystemSettings();
+  const bank1Name = settings.bank1Name || 'Banco BAI';
+  const bank1Iban = settings.ibanBai || 'AO06 0040 0000 1234 5678 9012 3';
+  const bank2Name = settings.bank2Name || 'Banco BFA';
+  const bank2Iban = settings.ibanBfa || 'AO06 0006 0000 9876 5432 1098 7';
+  const titular = settings.ibanTitular || 'VISUAL SOFTWARE LIMITADA';
 
   const handlePrint = () => {
     window.print();
@@ -174,9 +182,9 @@ export const InvoicePrintModal: React.FC<InvoicePrintModalProps> = ({
                     Coordenadas Bancárias Oficiais para Pagamento
                   </span>
                   <div className="space-y-1 font-mono text-[11px]">
-                    <p><strong>BAI:</strong> AO06.0040.0000.1234.5678.9012.3</p>
-                    <p><strong>BFA:</strong> AO06.0006.0000.9876.5432.1098.7</p>
-                    <p className="text-slate-500 text-[10px] font-sans">Beneficiário: <strong>Kivora Tecnologias & Software Lda.</strong></p>
+                    <p><strong>{bank1Name}:</strong> {bank1Iban}</p>
+                    <p><strong>{bank2Name}:</strong> {bank2Iban}</p>
+                    <p className="text-slate-500 text-[10px] font-sans">Beneficiário: <strong>{titular}</strong></p>
                   </div>
                 </div>
 

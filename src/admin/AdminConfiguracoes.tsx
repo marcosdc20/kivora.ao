@@ -2961,45 +2961,183 @@ export const AdminConfiguracoes: React.FC = () => {
         )}
 
         {/* TAB 4: CONTAS BANCÁRIAS (IBANs) */}
+        {/* TAB 4: CONTAS BANCÁRIAS (IBANs) */}
         {activeTab === 'bancos' && (
           <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-3">
-              <h3 className="text-base font-black text-slate-900">Coordenadas Bancárias Oficiais (IBAN)</h3>
-              <p className="text-xs text-slate-500">Dados bancários para liquidação de dívidas de parceiros e pagamentos de licenças</p>
+            <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-blue-600" />
+                  <span>Coordenadas Bancárias Oficiais (2 Contas Configuráveis)</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Configure os nomes dos bancos, números de conta, IBANs e titular exibidos no Portal do Parceiro, depósitos de carteira, faturas e candidaturas.
+                </p>
+              </div>
+              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                Sincronização Ativa em 2 Vias
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div className="space-y-1.5 md:col-span-2">
-                <label className="font-bold text-slate-700 uppercase">Nome do Titular da Conta</label>
-                <input
-                  type="text"
-                  value={settings.ibanTitular}
-                  onChange={(e) => handleChange('ibanTitular', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
-                  placeholder="VISUAL SOFTWARE LIMITADA"
-                />
+            {/* Titular e NIF */}
+            <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200 space-y-3">
+              <span className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <Building2 className="w-4 h-4 text-slate-600" />
+                <span>Titular Oficial das Contas Bancárias</span>
+              </span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700 uppercase">Nome do Titular / Beneficiário *</label>
+                  <input
+                    type="text"
+                    required
+                    value={settings.ibanTitular || ''}
+                    onChange={(e) => handleChange('ibanTitular', e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    placeholder="VISUAL SOFTWARE LIMITADA"
+                  />
+                  <p className="text-[10px] text-slate-400">Nome exibido como destinatário da transferência ou depósito.</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700 uppercase">NIF da Empresa Titular</label>
+                  <input
+                    type="text"
+                    value={settings.ibanTitularNif || ''}
+                    onChange={(e) => handleChange('ibanTitularNif', e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    placeholder="5002863944"
+                  />
+                  <p className="text-[10px] text-slate-400">Identificação fiscal da entidade emissora.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Contas 1 e 2 em Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              {/* CONTA 1 */}
+              <div className="p-5 bg-gradient-to-br from-emerald-50/50 to-emerald-100/30 rounded-2xl border border-emerald-200/80 space-y-3 text-xs">
+                <div className="flex items-center justify-between border-b border-emerald-200/60 pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="font-black text-emerald-950 uppercase text-xs">Conta Bancária 1 (Principal)</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md">Ativa</span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700 uppercase">Nome da Instituição Bancária 1 *</label>
+                  <input
+                    type="text"
+                    required
+                    value={settings.bank1Name || ''}
+                    onChange={(e) => handleChange('bank1Name', e.target.value)}
+                    className="w-full bg-white border border-emerald-300 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-emerald-600 outline-none"
+                    placeholder="Ex: Banco BAI (Banco Angolano de Investimentos)"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700 uppercase">IBAN da Conta 1 *</label>
+                  <input
+                    type="text"
+                    required
+                    value={settings.ibanBai || ''}
+                    onChange={(e) => handleChange('ibanBai', e.target.value)}
+                    className="w-full bg-white border border-emerald-300 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:border-emerald-600 outline-none"
+                    placeholder="AO06 0040 0000 1234 5678 9012 3"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700 uppercase">Número de Conta / Referência 1 (Opcional)</label>
+                  <input
+                    type="text"
+                    value={settings.bank1Account || ''}
+                    onChange={(e) => handleChange('bank1Account', e.target.value)}
+                    className="w-full bg-white border border-emerald-200 rounded-xl px-4 py-2 text-slate-800 font-mono text-xs focus:border-emerald-600 outline-none"
+                    placeholder="0040.0000.1234.5678.9012.3"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">IBAN Banco BAI</label>
-                <input
-                  type="text"
-                  value={settings.ibanBai}
-                  onChange={(e) => handleChange('ibanBai', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
-                  placeholder="AO06 0040 0000 1234 5678 9012 3"
-                />
+              {/* CONTA 2 */}
+              <div className="p-5 bg-gradient-to-br from-blue-50/50 to-blue-100/30 rounded-2xl border border-blue-200/80 space-y-3 text-xs">
+                <div className="flex items-center justify-between border-b border-blue-200/60 pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                    <span className="font-black text-blue-950 uppercase text-xs">Conta Bancária 2 (Alternativa)</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-md">Ativa</span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700 uppercase">Nome da Instituição Bancária 2 *</label>
+                  <input
+                    type="text"
+                    required
+                    value={settings.bank2Name || ''}
+                    onChange={(e) => handleChange('bank2Name', e.target.value)}
+                    className="w-full bg-white border border-blue-300 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    placeholder="Ex: Banco BFA (Banco de Fomento Angola)"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700 uppercase">IBAN da Conta 2 *</label>
+                  <input
+                    type="text"
+                    required
+                    value={settings.ibanBfa || ''}
+                    onChange={(e) => handleChange('ibanBfa', e.target.value)}
+                    className="w-full bg-white border border-blue-300 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    placeholder="AO06 0006 0000 9876 5432 1098 7"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700 uppercase">Número de Conta / Referência 2 (Opcional)</label>
+                  <input
+                    type="text"
+                    value={settings.bank2Account || ''}
+                    onChange={(e) => handleChange('bank2Account', e.target.value)}
+                    className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2 text-slate-800 font-mono text-xs focus:border-blue-600 outline-none"
+                    placeholder="0006.0000.9876.5432.1098.7"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">IBAN Banco BFA</label>
-                <input
-                  type="text"
-                  value={settings.ibanBfa}
-                  onChange={(e) => handleChange('ibanBfa', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
-                  placeholder="AO06 0006 0000 9876 5432 1098 7"
-                />
+            </div>
+
+            {/* Live Preview Box */}
+            <div className="p-4 bg-slate-950 text-white rounded-2xl space-y-2.5 text-xs">
+              <span className="text-[10px] text-slate-400 uppercase font-black tracking-wider block">
+                Pré-visualização Oficial no Portal do Parceiro & Faturas
+              </span>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-white/10 pb-2">
+                <span className="text-slate-300">
+                  Titular: <strong className="text-white">{settings.ibanTitular || 'VISUAL SOFTWARE LIMITADA'}</strong>
+                </span>
+                {settings.ibanTitularNif && (
+                  <span className="text-slate-400 font-mono text-[11px]">
+                    NIF: <strong className="text-white">{settings.ibanTitularNif}</strong>
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 font-mono text-[11px]">
+                <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
+                  <span className="text-emerald-400 font-bold block text-[10px] font-sans">
+                    • {settings.bank1Name || 'Banco BAI'}:
+                  </span>
+                  <span className="text-white font-bold">{settings.ibanBai || 'AO06 0040 0000 1234 5678 9012 3'}</span>
+                </div>
+                <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
+                  <span className="text-blue-400 font-bold block text-[10px] font-sans">
+                    • {settings.bank2Name || 'Banco BFA'}:
+                  </span>
+                  <span className="text-white font-bold">{settings.ibanBfa || 'AO06 0006 0000 9876 5432 1098 7'}</span>
+                </div>
               </div>
             </div>
 
@@ -3007,10 +3145,10 @@ export const AdminConfiguracoes: React.FC = () => {
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer transition-all active:scale-95"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                <span>Guardar Coordenadas Bancárias</span>
+                <span>Guardar Ambas as Coordenadas Bancárias</span>
               </button>
             </div>
           </form>

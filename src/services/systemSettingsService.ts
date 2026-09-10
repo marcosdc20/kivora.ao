@@ -165,9 +165,14 @@ export interface SystemCompanySettings {
   instagramUrl: string;
   linkedinUrl?: string;
   telegramUrl?: string;
+  bank1Name?: string;
   ibanBai: string;
+  bank1Account?: string;
+  bank2Name?: string;
   ibanBfa: string;
+  bank2Account?: string;
   ibanTitular: string;
+  ibanTitularNif?: string;
   updatedAt?: number;
 }
 
@@ -438,9 +443,14 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   instagramUrl: KIVORA_INFO.instagram,
   linkedinUrl: 'https://linkedin.com/company/kivora',
   telegramUrl: 'https://t.me/kivora_ao',
+  bank1Name: 'Banco BAI',
   ibanBai: 'AO06 0040 0000 1234 5678 9012 3',
+  bank1Account: '0040.0000.1234.5678.9012.3',
+  bank2Name: 'Banco BFA',
   ibanBfa: 'AO06 0006 0000 9876 5432 1098 7',
+  bank2Account: '0006.0000.9876.5432.1098.7',
   ibanTitular: 'VISUAL SOFTWARE LIMITADA',
+  ibanTitularNif: '5002863944',
 };
 
 const LOCAL_STORAGE_KEY = 'kivora_system_settings';
@@ -510,6 +520,29 @@ export async function saveSystemSettings(settings: Partial<SystemCompanySettings
   try {
     const docRef = doc(db, 'system_settings', 'company_info');
     await setDoc(docRef, merged, { merge: true });
+
+    // Sincroniza em tempo real as 2 coordenadas bancárias com a política oficial de parceiros
+    if (settings.ibanBai || settings.ibanBfa || settings.bank1Name || settings.bank2Name || settings.ibanTitular) {
+      try {
+        await setDoc(doc(db, 'settings', 'partner_policy'), {
+          membership_bank_info: {
+            bank: merged.bank1Name || 'Banco BAI',
+            iban: merged.ibanBai || '',
+            account_number: merged.bank1Account || '',
+            beneficiary: merged.ibanTitular || '',
+          },
+          membership_bank_info_2: {
+            bank: merged.bank2Name || 'Banco BFA',
+            iban: merged.ibanBfa || '',
+            account_number: merged.bank2Account || '',
+            beneficiary: merged.ibanTitular || '',
+          },
+          updated_at: Date.now(),
+        }, { merge: true });
+      } catch (policyErr) {
+        console.warn('Aviso ao sincronizar coordenadas com partner_policy:', policyErr);
+      }
+    }
   } catch (err) {
     console.error('Erro ao guardar configurações no Firebase:', err);
     throw err;
