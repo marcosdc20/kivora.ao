@@ -293,14 +293,17 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     return () => unsub();
   }, [partnerCode, partnerName, session?.email, partnerAccount]);
 
-  // Subscrição em Tempo Real às Dívidas deste Parceiro
+  // Subscrição em Tempo Real às Dívidas deste Parceiro (Multi-identificador resiliente)
   useEffect(() => {
-    if (!partnerCode) return;
-    const unsub = subscribePartnerDebts(partnerCode, (debts) => {
-      setPartnerDebts(debts);
-    });
+    if (!partnerCode && partnerIdentifiers.length === 0) return;
+    const unsub = subscribePartnerDebts(
+      partnerIdentifiers.length > 0 ? partnerIdentifiers : partnerCode,
+      (debts) => {
+        setPartnerDebts(debts);
+      }
+    );
     return () => unsub();
-  }, [partnerCode]);
+  }, [partnerCode, partnerIdentifiers]);
 
   // Subscrição em Tempo Real aos Chamados do Parceiro
   useEffect(() => {
@@ -510,10 +513,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     const s = licenseSearch.toLowerCase();
     const matchesSearch =
       !licenseSearch ||
-      lic.id.toLowerCase().includes(s) ||
-      lic.company_name.toLowerCase().includes(s) ||
-      lic.nif.includes(s) ||
-      lic.client_email.toLowerCase().includes(s);
+      (lic.id || '').toLowerCase().includes(s) ||
+      (lic.company_name || '').toLowerCase().includes(s) ||
+      (lic.nif || '').includes(s) ||
+      (lic.client_email || '').toLowerCase().includes(s);
 
     if (!matchesSearch) return false;
 

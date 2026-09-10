@@ -197,11 +197,19 @@ export function subscribePartnerLicenses(
   onError?: (error: any) => void
 ): () => void {
   const rawList = Array.isArray(partnerIdentifiers) ? partnerIdentifiers : [partnerIdentifiers];
-  const cleanList = Array.from(new Set(
+  const exacts = Array.from(new Set(
     rawList
       .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
-      .flatMap((s) => [s.trim(), s.trim().toUpperCase(), s.trim().toLowerCase()])
-  )).slice(0, 30);
+      .map((s) => s.trim())
+  ));
+
+  // Prioriza correspondências exatas em primeiro lugar para evitar descarte pelo slice
+  const variants = new Set<string>(exacts);
+  for (const s of exacts) {
+    variants.add(s.toUpperCase());
+    variants.add(s.toLowerCase());
+  }
+  const cleanList = Array.from(variants).slice(0, 30);
 
   if (cleanList.length === 0) {
     onUpdate([]);
@@ -210,7 +218,7 @@ export function subscribePartnerLicenses(
 
   const q = cleanList.length === 1
     ? query(collection(db, 'licenses'), where('partner_id', '==', cleanList[0]))
-    : query(collection(db, 'licenses'), where('partner_id', 'in', cleanList.slice(0, 10)));
+    : query(collection(db, 'licenses'), where('partner_id', 'in', cleanList));
 
   return onSnapshot(
     q,

@@ -12,6 +12,7 @@ import {
 } from './services/partnerDebtService';
 import { generateLicenseKey } from './services/licenseService';
 import { notify, confirmDialog } from '../services/notificationService';
+import { cleanFirestoreData } from '../lib/firestoreUtils';
 
 export interface SubscriptionInvoice {
   id: string;
@@ -115,9 +116,9 @@ export const AdminPagamentos: React.FC = () => {
   const filteredInvoices = invoices.filter(inv => {
     const matchesStatus = statusFilter === 'all' || inv.status === statusFilter;
     const s = searchQuery.toLowerCase();
-    const matchesSearch = inv.company_name.toLowerCase().includes(s) ||
-      inv.invoice_number.toLowerCase().includes(s) ||
-      inv.nif.includes(s);
+    const matchesSearch = (inv.company_name || '').toLowerCase().includes(s) ||
+      (inv.invoice_number || '').toLowerCase().includes(s) ||
+      (inv.nif || '').includes(s);
     return matchesStatus && matchesSearch;
   });
 
@@ -129,7 +130,7 @@ export const AdminPagamentos: React.FC = () => {
     const matchesSearch = (d.partner_name || '').toLowerCase().includes(s) ||
       (d.partner_id || '').toLowerCase().includes(s) ||
       (d.company_name || '').toLowerCase().includes(s) ||
-      d.license_id.toLowerCase().includes(s);
+      (d.license_id || '').toLowerCase().includes(s);
     return matchesStatus && matchesSearch;
   });
 
@@ -159,7 +160,7 @@ export const AdminPagamentos: React.FC = () => {
     };
 
     try {
-      await setDoc(doc(db, 'licenses', newInvId), {
+      await setDoc(doc(db, 'licenses', newInvId), cleanFirestoreData({
         id: licenseKey,
         company_name: companyName,
         nif: companyNif || '5400000000',
@@ -169,7 +170,7 @@ export const AdminPagamentos: React.FC = () => {
         created_at: Date.now(),
         expires_at: Date.now() + 365 * 86400000,
         notes: `Fatura ${newInv.invoice_number} emitida via Admin`,
-      }, { merge: true });
+      }), { merge: true });
 
       setInvoices([newInv, ...invoices]);
       setShowModal(false);

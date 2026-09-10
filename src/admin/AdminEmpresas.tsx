@@ -36,7 +36,7 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
   // Mapear companies do Firebase para o modelo de visualização
   const mappedEmpresas: Empresa[] = companies.map((c) => {
     const empresaLicenses = licenses.filter(
-      (l) => l.nif === c.nif || l.company_name.toLowerCase() === c.name.toLowerCase()
+      (l) => (l.nif && l.nif === c.nif) || ((l.company_name || '').toLowerCase() === (c.name || '').toLowerCase())
     );
     const hasActiveLic = empresaLicenses.some((l) => l.status === 'active' && (!l.expires_at || l.expires_at >= Date.now()));
     const activeLic = empresaLicenses[0];
@@ -45,8 +45,8 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
 
     return {
       id: c.id,
-      nome: c.name,
-      nif: c.nif,
+      nome: c.name || 'Sem Nome',
+      nif: c.nif || '999999999',
       email: c.email || 'N/A',
       telefone: c.phone || 'N/A',
       provincia: c.address || 'Luanda',
@@ -64,7 +64,7 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
 
   const filtered = mappedEmpresas.filter((e) => {
     const s = search.toLowerCase();
-    const matchSearch = e.nome.toLowerCase().includes(s) || e.nif.includes(s) || e.email.toLowerCase().includes(s);
+    const matchSearch = (e.nome || '').toLowerCase().includes(s) || (e.nif || '').includes(s) || (e.email || '').toLowerCase().includes(s);
     const matchStatus = filterStatus === 'todos' || e.status === filterStatus;
     return matchSearch && matchStatus;
   });

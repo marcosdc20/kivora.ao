@@ -123,10 +123,7 @@ export const AdminSuporte: React.FC = () => {
         });
 
         setTickets(fireTickets);
-        if (selectedTicket) {
-          const updated = fireTickets.find(t => t.id === selectedTicket.id);
-          if (updated) setSelectedTicket(updated);
-        }
+        setSelectedTicket(prev => prev ? (fireTickets.find(t => t.id === prev.id) || prev) : null);
         setLoading(false);
       }, (err) => {
         console.warn('Erro ao escutar support_tickets:', err);
@@ -138,7 +135,7 @@ export const AdminSuporte: React.FC = () => {
       console.warn(e);
       setLoading(false);
     }
-  }, [selectedTicket?.id]);
+  }, []);
 
   // Sincronização em Tempo Real com Firestore (/leads_demonstracao)
   useEffect(() => {
@@ -295,10 +292,11 @@ export const AdminSuporte: React.FC = () => {
 
   // Filtros
   const filteredTickets = tickets.filter(t => {
-    const matchSearch = t.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.ticket_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (t.partner_id && t.partner_id.toLowerCase().includes(searchQuery.toLowerCase()));
+    const s = searchQuery.toLowerCase();
+    const matchSearch = (t.company_name || '').toLowerCase().includes(s) ||
+      (t.ticket_number || '').toLowerCase().includes(s) ||
+      (t.subject || '').toLowerCase().includes(s) ||
+      ((t.partner_id || '').toLowerCase().includes(s));
 
     const matchStatus = statusFilter === 'all' || t.status === statusFilter;
 

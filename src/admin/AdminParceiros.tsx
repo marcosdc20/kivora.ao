@@ -520,8 +520,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     if (!matchesTier) return false;
     if (!search) return true;
     const s = search.toLowerCase();
-    return p.name.toLowerCase().includes(s) || p.code.toLowerCase().includes(s) ||
-      p.email.toLowerCase().includes(s) || p.region.toLowerCase().includes(s);
+    return (p.name || '').toLowerCase().includes(s) || (p.code || '').toLowerCase().includes(s) ||
+      (p.email || '').toLowerCase().includes(s) || (p.region || '').toLowerCase().includes(s);
   });
 
   const currentCandidaturasList = 
@@ -532,8 +532,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const filteredCandidaturas = currentCandidaturasList.filter((cand) => {
     if (!search) return true;
     const s = search.toLowerCase();
-    return cand.name.toLowerCase().includes(s) || (cand.code && cand.code.toLowerCase().includes(s)) ||
-      cand.email.toLowerCase().includes(s) || (cand.region && cand.region.toLowerCase().includes(s));
+    return (cand.name || '').toLowerCase().includes(s) || ((cand.code || '').toLowerCase().includes(s)) ||
+      (cand.email || '').toLowerCase().includes(s) || ((cand.region || '').toLowerCase().includes(s));
   });
 
   const filteredGlobalDebts = allDebts.filter(d => {
@@ -542,8 +542,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     if (debtFilterStatus === 'provisorios' && (!d.is_provisional || d.paid)) return false;
     if (!search) return true;
     const s = search.toLowerCase();
-    return d.company_name.toLowerCase().includes(s) || d.license_id.toLowerCase().includes(s) ||
-      d.partner_name.toLowerCase().includes(s) || d.partner_id.toLowerCase().includes(s);
+    return (d.company_name || '').toLowerCase().includes(s) || (d.license_id || '').toLowerCase().includes(s) ||
+      (d.partner_name || '').toLowerCase().includes(s) || (d.partner_id || '').toLowerCase().includes(s);
   });
 
   const handleAddPartner = async (e: React.FormEvent) => {
@@ -1130,12 +1130,20 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                                         password: partnerPass,
                                         mustChangePassword: true,
                                       }).catch(console.warn);
-                                      setDoc(doc(db, 'partners', p.code), {
+                                      const partnerDocId = p.id || p.code;
+                                      setDoc(doc(db, 'partners', partnerDocId), {
                                         password: partnerPass,
                                         mustChangePassword: true,
                                         updated_at: Date.now(),
                                       }, { merge: true }).catch(console.warn);
-                                      setPartners(prev => prev.map(item => item.code === p.code ? { ...item, password: partnerPass, mustChangePassword: true } : item));
+                                      if (p.code && p.code !== partnerDocId) {
+                                        setDoc(doc(db, 'partners', p.code), {
+                                          password: partnerPass,
+                                          mustChangePassword: true,
+                                          updated_at: Date.now(),
+                                        }, { merge: true }).catch(console.warn);
+                                      }
+                                      setPartners(prev => prev.map(item => (item.code === p.code || item.id === p.id) ? { ...item, password: partnerPass, mustChangePassword: true } : item));
                                     }
                                     setCredentialsModal({
                                       open: true,
@@ -2071,12 +2079,20 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                           password: partnerPass,
                           mustChangePassword: true,
                         }).catch(console.warn);
-                        setDoc(doc(db, 'partners', selectedPartner.code), {
+                        const targetId = selectedPartner.id || selectedPartner.code;
+                        setDoc(doc(db, 'partners', targetId), {
                           password: partnerPass,
                           mustChangePassword: true,
                           updated_at: Date.now(),
                         }, { merge: true }).catch(console.warn);
-                        setPartners(prev => prev.map(item => item.code === selectedPartner.code ? { ...item, password: partnerPass, mustChangePassword: true } : item));
+                        if (selectedPartner.code && selectedPartner.code !== targetId) {
+                          setDoc(doc(db, 'partners', selectedPartner.code), {
+                            password: partnerPass,
+                            mustChangePassword: true,
+                            updated_at: Date.now(),
+                          }, { merge: true }).catch(console.warn);
+                        }
+                        setPartners(prev => prev.map(item => (item.code === selectedPartner.code || item.id === selectedPartner.id) ? { ...item, password: partnerPass, mustChangePassword: true } : item));
                       }
                       setCredentialsModal({
                         open: true,
@@ -2409,14 +2425,23 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                       password: newPass,
                       mustChangePassword: true,
                     });
-                    await setDoc(doc(db, 'partners', credentialsModal.partnerCode), {
+                    const targetPartner = partners.find(p => p.code === credentialsModal.partnerCode || p.id === credentialsModal.partnerCode);
+                    const targetDocId = targetPartner?.id || credentialsModal.partnerCode;
+                    await setDoc(doc(db, 'partners', targetDocId), {
                       password: newPass,
                       mustChangePassword: true,
                       updated_at: Date.now(),
                     }, { merge: true }).catch(() => {});
+                    if (credentialsModal.partnerCode && credentialsModal.partnerCode !== targetDocId) {
+                      await setDoc(doc(db, 'partners', credentialsModal.partnerCode), {
+                        password: newPass,
+                        mustChangePassword: true,
+                        updated_at: Date.now(),
+                      }, { merge: true }).catch(() => {});
+                    }
 
                     setCredentialsModal(prev => prev ? { ...prev, password: newPass } : null);
-                    setPartners(prev => prev.map(p => p.code === credentialsModal.partnerCode ? { ...p, password: newPass, mustChangePassword: true } : p));
+                    setPartners(prev => prev.map(p => (p.code === credentialsModal.partnerCode || p.id === targetDocId) ? { ...p, password: newPass, mustChangePassword: true } : p));
                     notify.success('Nova palavra-passe gerada e atualizada com sucesso no sistema!');
                   } catch (err: any) {
                     notify.error('Erro ao redefinir palavra-passe: ' + err.message);

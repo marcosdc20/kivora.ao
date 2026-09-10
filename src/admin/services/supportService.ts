@@ -9,6 +9,7 @@ import {
   query, orderBy, onSnapshot, arrayUnion
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { cleanFirestoreData } from '../../lib/firestoreUtils';
 
 export interface SupportMessage {
   id: string;
@@ -93,7 +94,7 @@ export async function createSupportTicket(data: CreateTicketDTO): Promise<Suppor
     messages: [firstMsg]
   };
 
-  await setDoc(doc(db, 'support_tickets', tkId), newTicket, { merge: true });
+  await setDoc(doc(db, 'support_tickets', tkId), cleanFirestoreData(newTicket), { merge: true });
   return newTicket;
 }
 
@@ -111,11 +112,11 @@ export async function sendTicketMessage(
     timestamp: Date.now()
   };
 
-  await updateDoc(doc(db, 'support_tickets', ticketId), {
-    messages: arrayUnion(newMsg),
+  await updateDoc(doc(db, 'support_tickets', ticketId), cleanFirestoreData({
+    messages: arrayUnion(cleanFirestoreData(newMsg)),
     status: message.sender_role === 'admin' || message.sender_role === 'partner' ? 'in_progress' : 'open',
     updatedAt: Date.now()
-  });
+  }));
 }
 
 /** Altera o estado do ticket (ex: 'resolved', 'closed', 'in_progress') */

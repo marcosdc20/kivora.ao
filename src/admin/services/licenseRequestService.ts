@@ -12,7 +12,7 @@ import {
 import { db } from '../../lib/firebase';
 import { PlanType } from '../types';
 import { createLicense, calculateExpiresAt } from './licenseService';
-import { recordPartnerDebt, deductPartnerWallet } from './partnerDebtService';
+import { recordPartnerDebt, deductPartnerWallet, resolvePartnerDocRef } from './partnerDebtService';
 import { cleanFirestoreData } from '../../lib/firestoreUtils';
 
 export type LicenseRequestStatus = 'pending' | 'approved' | 'rejected';
@@ -95,11 +95,19 @@ export function subscribePartnerLicenseRequests(
   onUpdate: (requests: LicenseRequest[]) => void
 ): () => void {
   const rawList = Array.isArray(partnerIdentifiers) ? partnerIdentifiers : [partnerIdentifiers];
-  const cleanList = Array.from(new Set(
+  const exacts = Array.from(new Set(
     rawList
       .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
-      .flatMap((s) => [s.trim(), s.trim().toUpperCase(), s.trim().toLowerCase()])
-  )).slice(0, 30);
+      .map((s) => s.trim())
+  ));
+
+  // Prioriza correspondências exatas em primeiro lugar para evitar descarte pelo slice
+  const variants = new Set<string>(exacts);
+  for (const s of exacts) {
+    variants.add(s.toUpperCase());
+    variants.add(s.toLowerCase());
+  }
+  const cleanList = Array.from(variants).slice(0, 30);
 
   if (cleanList.length === 0) {
     onUpdate([]);
@@ -108,7 +116,7 @@ export function subscribePartnerLicenseRequests(
 
   const q = cleanList.length === 1
     ? query(collection(db, 'license_requests'), where('partner_id', '==', cleanList[0]))
-    : query(collection(db, 'license_requests'), where('partner_id', 'in', cleanList.slice(0, 10)));
+    : query(collection(db, 'license_requests'), where('partner_id', 'in', cleanList));
 
   return onSnapshot(
     q,
@@ -178,6 +186,10 @@ export async function approveLicenseRequest(
       ? Date.now() + provisionalDays * 86_400_000
       : normalExpiresAt;
 
+    // Resolve o partner_id real para garantir vínculo estrito com o parceiro no Firestore
+    const partnerRef = await resolvePartnerDocRef(reqData.partner_id);
+    const resolvedPartnerId = partnerRef.id || reqData.partner_id;
+
     // Emite a licença oficial em /licenses (executada com credenciais de admin)
     const lic = await createLicense({
       client_email: reqData.client_email,
@@ -186,8 +198,8 @@ export async function approveLicenseRequest(
       plan_type: reqData.plan_type,
       expires_at: expiresAt,
       price_aoa: reqData.price_aoa,
-      notes: reqData.notes || `Aprovada via solicitação ${requestId} pelo administrador (${reviewerEmail}).`,
-      partner_id: reqData.partner_id,
+      notes: reqData.notes || `Aprovada via solicitação ${requestId} pelo administrador (${reviewerEmail}). [Parceiro: ${reqData.partner_name} (${reqData.partner_id})]`,
+      partner_id: resolvedPartnerId,
       extra_seats: reqData.extra_seats,
       is_provisional: reqData.is_provisional,
       provisional_target_plan: reqData.provisional_target_plan,
@@ -195,12 +207,12 @@ export async function approveLicenseRequest(
 
     const isPaid = reqData.payment_method === 'wallet';
     if (isPaid) {
-      await deductPartnerWallet(reqData.partner_id, reqData.cost_aoa);
+      await deductPartnerWallet(resolvedPartnerId, reqData.cost_aoa);
     }
 
     // Regista o débito do parceiro
     await recordPartnerDebt({
-      partner_id: reqData.partner_id,
+      partner_id: resolvedPartnerId,
       partner_name: reqData.partner_name,
       license_id: lic.id,
       company_name: reqData.company_name,

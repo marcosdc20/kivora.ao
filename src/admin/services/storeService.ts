@@ -10,6 +10,7 @@ import {
   onSnapshot
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { cleanFirestoreData } from '../../lib/firestoreUtils';
 import { StoreProductAdmin, StoreOrder, DeliveryRate } from '../types';
 
 // Coleções no Firestore
@@ -114,7 +115,7 @@ export async function saveStoreProduct(product: Partial<StoreProductAdmin> & { n
       productData.discountPercent = Number(product.discountPercent);
     }
 
-    await setDoc(doc(db, PRODUCTS_COLLECTION, id), productData, { merge: true });
+    await setDoc(doc(db, PRODUCTS_COLLECTION, id), cleanFirestoreData(productData), { merge: true });
     return { success: true, id };
   } catch (error: any) {
     console.error('Erro ao salvar produto:', error);
@@ -204,7 +205,7 @@ export async function updateStoreOrderStatus(orderId: string, status: StoreOrder
     const updatePayload: any = { status, updatedAt: Date.now() };
     if (notes !== undefined) updatePayload.notes = notes;
 
-    await updateDoc(doc(db, ORDERS_COLLECTION, orderId), updatePayload);
+    await updateDoc(doc(db, ORDERS_COLLECTION, orderId), cleanFirestoreData(updatePayload));
     return { success: true };
   } catch (error: any) {
     console.error('Erro ao atualizar status da encomenda:', error);
@@ -232,7 +233,7 @@ export async function getDeliveryRates(): Promise<DeliveryRate[]> {
 
 export async function saveDeliveryRate(rate: DeliveryRate): Promise<{ success: boolean; error?: string }> {
   try {
-    await setDoc(doc(db, DELIVERY_RATES_COLLECTION, rate.id), rate, { merge: true });
+    await setDoc(doc(db, DELIVERY_RATES_COLLECTION, rate.id), cleanFirestoreData(rate), { merge: true });
     return { success: true };
   } catch (error: any) {
     console.error('Erro ao salvar taxa de deslocação:', error);

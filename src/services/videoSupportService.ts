@@ -11,6 +11,7 @@ import {
   limit
 } from 'firebase/firestore';
 import { getCachedSystemSettings } from './systemSettingsService';
+import { cleanFirestoreData } from '../lib/firestoreUtils';
 
 export interface VideoSupportSession {
   id: string;
@@ -105,7 +106,7 @@ export async function getOrCreateVideoSupportAccount(
       };
     } else {
       // Gravar conta inicial no Firestore
-      await setDoc(docRef, currentAccount);
+      await setDoc(docRef, cleanFirestoreData(currentAccount));
     }
   } catch (err) {
     console.warn('Firebase offline ou erro ao carregar conta de vídeo:', err);
@@ -258,7 +259,7 @@ export async function purchaseVideoMinutes(params: {
 
   try {
     const docRef = doc(db, 'video_support_accounts', sanitizedId);
-    await setDoc(docRef, updatedAccount, { merge: true });
+    await setDoc(docRef, cleanFirestoreData(updatedAccount), { merge: true });
   } catch (err) {
     console.warn('Erro ao salvar compra no Firestore:', err);
   }
@@ -273,7 +274,7 @@ export async function purchaseVideoMinutes(params: {
 /**
  * Deduz o tempo gasto durante uma videochamada e registra a sessão no histórico.
  */
-export async function recordVideoSessionUsage(params: {
+export async function recordCompletedVideoSession(params: {
   entityId: string;
   durationSeconds: number;
   roomName: string;
@@ -281,17 +282,16 @@ export async function recordVideoSessionUsage(params: {
   technicianName?: string;
   topic?: string;
 }): Promise<VideoSupportAccount> {
-  const sanitizedId = (params.entityId || 'demo-account').replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
-  const current = await getOrCreateVideoSupportAccount(sanitizedId);
+  const sanitizedId = params.entityId.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
+  const current = await getOrCreateVideoSupportAccount(params.entityId);
 
-  // Calcula minutos debitados arredondando com precisão de 1 casa decimal
-  const minutesSpent = Math.max(1, Math.ceil(params.durationSeconds / 60));
-  const newRemainingSeconds = Math.max(0, current.remainingSeconds - params.durationSeconds);
-  const totalMinutesSpent = (current.totalMinutesSpent || 0) + minutesSpent;
+  // Calcula minutos arredondando para cima (mínimo 1 min se duração > 0)
+  const minutesSpent = params.durationSeconds > 0 ? Math.ceil(params.durationSeconds / 60) : 0;
+  const newRemainingSeconds = Math.max(0, (current.remainingSeconds || 0) - params.durationSeconds);
 
   const newSession: VideoSupportSession = {
-    id: `sess-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-    entityId: sanitizedId,
+    id: `vsession_${Date.now()}`,
+    entityId: params.entityId,
     entityName: current.entityName,
     entityType: current.entityType,
     date: Date.now(),
@@ -299,14 +299,14 @@ export async function recordVideoSessionUsage(params: {
     minutesDeducted: minutesSpent,
     roomName: params.roomName,
     ticketNumber: params.ticketNumber,
-    technicianName: params.technicianName || 'Técnico Especialista Kivora',
-    topic: params.topic || 'Assistência Técnica & Suporte Remoto',
+    technicianName: params.technicianName,
+    topic: params.topic,
   };
 
   const updatedAccount: VideoSupportAccount = {
     ...current,
+    totalMinutesSpent: (current.totalMinutesSpent || 0) + minutesSpent,
     remainingSeconds: newRemainingSeconds,
-    totalMinutesSpent,
     lastUpdated: Date.now(),
     history: [newSession, ...(current.history || [])],
   };
@@ -326,17 +326,19 @@ export async function recordVideoSessionUsage(params: {
   // Sincronizar com Firestore
   try {
     const docRef = doc(db, 'video_support_accounts', sanitizedId);
-    await setDoc(docRef, updatedAccount, { merge: true });
+    await setDoc(docRef, cleanFirestoreData(updatedAccount), { merge: true });
 
     // Gravar também na coleção global de sessões para o admin auditar
     const sessionDocRef = doc(db, 'video_support_sessions', newSession.id);
-    await setDoc(sessionDocRef, newSession);
+    await setDoc(sessionDocRef, cleanFirestoreData(newSession));
   } catch (err) {
     console.warn('Erro ao persistir sessão no Firestore:', err);
   }
 
   return updatedAccount;
 }
+
+export const recordVideoSessionUsage = recordCompletedVideoSession;
 
 /**
  * Permite ao Administrador conceder bónus / cortesia de minutos a qualquer cliente ou parceiro.

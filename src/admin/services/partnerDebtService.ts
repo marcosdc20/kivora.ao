@@ -379,11 +379,15 @@ export async function reconcilePartnerDebtsWithLicenses(
 }
 
 export function subscribePartnerDebts(
-  partnerId: string,
+  partnerId: string | string[],
   cb: (debts: PartnerDebtEntry[]) => void
 ): () => void {
   try {
-    const clean = (partnerId || '').trim().toLowerCase();
+    const rawList = Array.isArray(partnerId) ? partnerId : [partnerId];
+    const cleanSet = new Set(
+      rawList.filter(Boolean).map((s) => s.trim().toLowerCase())
+    );
+
     return onSnapshot(collection(db, 'partner_debts'), (snap) => {
       const debts: PartnerDebtEntry[] = [];
       snap.forEach((d) => {
@@ -393,17 +397,26 @@ export function subscribePartnerDebts(
         const pName = (data.partner_name || '').trim().toLowerCase();
         const licId = (data.license_id || d.id || '').trim().toLowerCase();
 
-        if (
-          !clean ||
-          pId === clean ||
-          pCode === clean ||
-          licId === clean ||
-          (pName && pName.includes(clean)) ||
-          (clean && pId.includes(clean))
-        ) {
+        let matches = cleanSet.size === 0;
+        if (!matches) {
+          for (const clean of cleanSet) {
+            if (
+              pId === clean ||
+              pCode === clean ||
+              licId === clean ||
+              (pName && pName.includes(clean)) ||
+              (clean && pId.includes(clean))
+            ) {
+              matches = true;
+              break;
+            }
+          }
+        }
+
+        if (matches) {
           debts.push({
             id: d.id,
-            partner_id: data.partner_id || partnerId,
+            partner_id: data.partner_id || (rawList[0] || ''),
             partner_name: data.partner_name || '',
             license_id: data.license_id || d.id,
             company_name: data.company_name || '',
@@ -522,10 +535,39 @@ export function subscribePartnerAccount(
 }
 
 /**
+ * Resolve a referência real do documento do parceiro em /partners (suporta ID direto, code ou email)
+ */
+export async function resolvePartnerDocRef(partnerIdentifier: string) {
+  const clean = (partnerIdentifier || '').trim();
+  if (!clean) return doc(db, 'partners', 'unknown');
+
+  const directRef = doc(db, 'partners', clean);
+  const directSnap = await getDoc(directRef).catch(() => null);
+  if (directSnap && directSnap.exists()) return directRef;
+
+  const snap = await getDocs(collection(db, 'partners')).catch(() => null);
+  if (snap) {
+    const cleanLower = clean.toLowerCase();
+    for (const d of snap.docs) {
+      const data = d.data();
+      if (
+        d.id.toLowerCase() === cleanLower ||
+        (data.code && String(data.code).trim().toLowerCase() === cleanLower) ||
+        (data.email && String(data.email).trim().toLowerCase() === cleanLower)
+      ) {
+        return doc(db, 'partners', d.id);
+      }
+    }
+  }
+
+  return directRef;
+}
+
+/**
  * Deduz saldo da carteira do parceiro
  */
 export async function deductPartnerWallet(partnerCode: string, amountAoa: number): Promise<boolean> {
-  const pRef = doc(db, 'partners', partnerCode);
+  const pRef = await resolvePartnerDocRef(partnerCode);
   const snap = await getDoc(pRef);
   if (!snap.exists()) return false;
   const currentWallet = Number(snap.data().wallet_balance_aoa) || 0;
@@ -542,7 +584,7 @@ export async function deductPartnerWallet(partnerCode: string, amountAoa: number
  * Adiciona saldo (recarga de wallet) ao parceiro
  */
 export async function topUpPartnerWallet(partnerCode: string, amountAoa: number): Promise<void> {
-  const pRef = doc(db, 'partners', partnerCode);
+  const pRef = await resolvePartnerDocRef(partnerCode);
   const snap = await getDoc(pRef);
   const currentWallet = snap.exists() ? (Number(snap.data().wallet_balance_aoa) || 0) : 0;
 
@@ -565,7 +607,7 @@ export async function updatePartnerWalletAndCredit(
     credit_issuance_mode?: 'manual_approval' | 'auto_instant';
   }
 ): Promise<void> {
-  const pRef = doc(db, 'partners', partnerCode);
+  const pRef = await resolvePartnerDocRef(partnerCode);
   await setDoc(pRef, cleanFirestoreData({
     ...updates,
     updatedAt: Date.now(),

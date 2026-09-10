@@ -17,7 +17,8 @@ import {
   subscribePartnerPolicy, DEFAULT_PARTNER_POLICY,
   PartnerLicensingPolicy, getAdminSeatCost
 } from './services/partnerDebtService';
-import { auth } from '../lib/firebase';
+import { auth, db } from '../lib/firebase';
+import { collection, getDocs } from 'firebase/firestore';
 import {
   subscribeAllLicenseRequests, approveLicenseRequest, rejectLicenseRequest, LicenseRequest
 } from './services/licenseRequestService';
@@ -69,12 +70,12 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
   const filteredRequests = licenseRequests.filter((r) => {
     const s = requestSearch.toLowerCase();
     const matchSearch =
-      r.id.toLowerCase().includes(s) ||
-      r.partner_name.toLowerCase().includes(s) ||
-      r.partner_id.toLowerCase().includes(s) ||
-      r.company_name.toLowerCase().includes(s) ||
-      r.nif.includes(s) ||
-      r.client_email.toLowerCase().includes(s);
+      (r.id || '').toLowerCase().includes(s) ||
+      (r.partner_name || '').toLowerCase().includes(s) ||
+      (r.partner_id || '').toLowerCase().includes(s) ||
+      (r.company_name || '').toLowerCase().includes(s) ||
+      (r.nif || '').includes(s) ||
+      (r.client_email || '').toLowerCase().includes(s);
 
     const matchStatus =
       requestFilterStatus === 'todos' ||
@@ -145,10 +146,10 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
   const filtered = licenses.filter((l) => {
     const s = search.toLowerCase();
     const matchSearch =
-      l.id.toLowerCase().includes(s) ||
-      l.company_name.toLowerCase().includes(s) ||
-      l.client_email.toLowerCase().includes(s) ||
-      l.nif.includes(s);
+      (l.id || '').toLowerCase().includes(s) ||
+      (l.company_name || '').toLowerCase().includes(s) ||
+      (l.client_email || '').toLowerCase().includes(s) ||
+      (l.nif || '').includes(s);
 
     const isExpired = l.expires_at && l.expires_at < Date.now();
     const currentStatus = isExpired ? 'expired' : l.status;
@@ -1058,6 +1059,22 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [createdLicense, setCreatedLicense] = useState<KivoraLicense | null>(null);
+  const [partnersList, setPartnersList] = useState<Array<{ id: string; code: string; name: string }>>([]);
+  const [selectedPartnerId, setSelectedPartnerId] = useState<string>('');
+
+  useEffect(() => {
+    getDocs(collection(db, 'partners')).then((snap) => {
+      const list = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          code: data.code || d.id,
+          name: data.name || data.responsible || data.code || d.id,
+        };
+      });
+      setPartnersList(list);
+    }).catch(() => {});
+  }, []);
 
   const handlePlanChange = (p: PlanType) => {
     setPlan(p);
@@ -1099,6 +1116,7 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
         expires_at: expiresAt,
         price_aoa: priceAoa,
         notes,
+        partner_id: selectedPartnerId || undefined,
         extra_seats: extraSeats,
       });
 
@@ -1229,23 +1247,44 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
         <form onSubmit={handleGenerate} className="bg-white rounded-3xl border border-slate-200 p-8 space-y-6 shadow-sm">
 
           {/* Selecionar Empresa Existente ou Nova */}
-          {companies.length > 0 && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5 text-blue-600" strokeWidth={2} />
-                Carregar Empresa Existente
-              </label>
-              <select
-                onChange={handleSelectCompany}
-                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 bg-slate-50 font-bold"
-              >
-                <option value="">— Selecionar da lista de clientes —</option>
-                {companies.map(c => (
-                  <option key={c.id} value={c.id}>{c.name} (NIF: {c.nif})</option>
-                ))}
-              </select>
-            </div>
-          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {companies.length > 0 && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-blue-600" strokeWidth={2} />
+                  Carregar Empresa Existente
+                </label>
+                <select
+                  onChange={handleSelectCompany}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 bg-slate-50 font-bold"
+                >
+                  <option value="">— Selecionar da lista de clientes —</option>
+                  {companies.map(c => (
+                    <option key={c.id} value={c.id}>{c.name} (NIF: {c.nif})</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {partnersList.length > 0 && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-indigo-600" strokeWidth={2} />
+                  Parceiro Revendedor (Opcional)
+                </label>
+                <select
+                  value={selectedPartnerId}
+                  onChange={(e) => setSelectedPartnerId(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 bg-slate-50 font-bold"
+                >
+                  <option value="">— Emissão Direta Kivora (Sem Parceiro) —</option>
+                  {partnersList.map(p => (
+                    <option key={p.id} value={p.id}>{p.name} ({p.code})</option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
 
           {/* Dados da Empresa */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
