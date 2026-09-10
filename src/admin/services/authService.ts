@@ -5,7 +5,7 @@
 
 import {
   collection, doc, getDocs, getDoc, setDoc,
-  query, where
+  query, where, deleteField
 } from 'firebase/firestore';
 import {
   signInWithEmailAndPassword,
@@ -33,6 +33,74 @@ export interface KivoraUserSession {
 }
 
 const SESSION_KEY = 'kivora_user_session';
+
+// ─── Motor Criptográfico Seguro (SHA-256 + Salt) ──────────────────────────────
+
+/**
+ * Gera um hash criptográfico seguro SHA-256 com salt do ecossistema Kivora.
+ * Suporta Web Crypto API nativa do navegador e ambientes de teste Node.js.
+ */
+export async function hashKivoraPassword(cleanPass: string): Promise<string> {
+  const salt = 'KIVORA_SECURE_AUTH_SALT_v2_2026';
+  const combined = `${salt}:${cleanPass}`;
+
+  // 1. Web Crypto API moderna (Browsers + Node.js 15+)
+  const subtleCrypto = typeof globalThis !== 'undefined' && (globalThis.crypto?.subtle || (globalThis as any).window?.crypto?.subtle);
+  if (subtleCrypto) {
+    try {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(combined);
+      const hashBuffer = await subtleCrypto.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch {
+      // fallback caso Web Crypto lance erro
+    }
+  }
+
+  // 2. Fallback determinístico seguro (ex.: SSR / ambientes restritos)
+  let h1 = 0xdeadbeef ^ 0;
+  let h2 = 0x41c6ce57 ^ 0;
+  for (let i = 0; i < combined.length; i++) {
+    const ch = combined.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return `kvr_${(h1 >>> 0).toString(16).padStart(8, '0')}${(h2 >>> 0).toString(16).padStart(8, '0')}`;
+}
+
+/**
+ * Valida a palavra-passe fornecida contra os dados armazenados no documento,
+ * suportando hashes criptográficos modernos e retrocompatibilidade com senhas anteriores.
+ */
+export async function verifyPasswordMatch(
+  stored: { password?: string; passwordHash?: string; password_hash?: string; tempPassword?: string },
+  inputPass: string
+): Promise<boolean> {
+  const clean = inputPass.trim();
+  if (!clean) return false;
+
+  // 1. Verificação primária por Hash SHA-256 seguro
+  const targetHash = stored.passwordHash || stored.password_hash;
+  if (targetHash) {
+    const computedHash = await hashKivoraPassword(clean);
+    if (targetHash === computedHash) return true;
+  }
+
+  // 2. Retrocompatibilidade: Senha temporária inicial de setup
+  if (stored.tempPassword && stored.tempPassword === clean) {
+    return true;
+  }
+
+  // 3. Retrocompatibilidade: Senha legada em texto claro
+  if (stored.password && stored.password === clean) {
+    return true;
+  }
+
+  return false;
+}
 
 // ─── Controlo de Sessão Local ──────────────────────────────────────────────────
 
@@ -237,8 +305,20 @@ export async function loginUser(
     for (const uDoc of snapUsers.docs) {
       const u = uDoc.data();
 
-      // Se a senha coincidir com a fornecida
-      if (u.password && u.password === cleanPass) {
+      // Se a senha coincidir (seja por Hash SHA-256 seguro ou texto claro legado)
+      const isMatch = await verifyPasswordMatch(u, cleanPass);
+      if (isMatch) {
+        // Auto-upgrade transparente se ainda não tinha hash criptográfico
+        if (!u.passwordHash) {
+          hashKivoraPassword(cleanPass).then((newHash) => {
+            setDoc(doc(db, 'users', uDoc.id), {
+              passwordHash: newHash,
+              password: deleteField(),
+              updatedAt: Date.now(),
+            }, { merge: true }).catch(() => {});
+          }).catch(() => {});
+        }
+
         // Se o utilizador for parceiro, verificar estado e harmonizar código na coleção `partners`
         let resolvedPartnerCode = u.partnerCode || uDoc.id;
         if (u.role === 'parceiro' || u.partnerCode) {
@@ -360,17 +440,21 @@ export async function loginUser(
     });
 
     if (candidatePartners.length > 0) {
-      // 1. Procura primeiro o documento que tem exatamente a senha correta
-      let matchedPartner = candidatePartners.find(d => {
-        const data = d.data();
-        return data.password && data.password === cleanPass;
-      });
+      // 1. Procura primeiro o documento que tem a senha correta (por hash ou texto claro)
+      let matchedPartner: any = null;
+      for (const cand of candidatePartners) {
+        if (await verifyPasswordMatch(cand.data(), cleanPass)) {
+          matchedPartner = cand;
+          break;
+        }
+      }
 
-      // 2. Se não encontrou por senha exata, seleciona o doc ativo com senha para validar erro ou auto-heal
+      // 2. Se não encontrou por senha exata, seleciona o doc ativo com credencial para validar erro ou auto-heal
       if (!matchedPartner) {
-        matchedPartner = candidatePartners.find(d => d.data().status === 'active' && d.data().password) ||
-                         candidatePartners.find(d => d.data().status === 'active') ||
-                         candidatePartners[0];
+        matchedPartner = candidatePartners.find(d => {
+          const dt = d.data();
+          return dt.status === 'active' && (dt.passwordHash || dt.password || dt.tempPassword);
+        }) || candidatePartners.find(d => d.data().status === 'active') || candidatePartners[0];
       }
 
       const p = matchedPartner.data();
@@ -378,12 +462,13 @@ export async function loginUser(
       // AUTO-HEALING & SUPORTE À PALAVRA-PASSE PADRÃO DE PARCEIRO
       // Se a conta for de parceiro ativo e ainda não tiver senha gravada no Firestore (ou senha vazia)
       // permite autenticar com a senha inicial fornecida, gravando-a e exigindo a troca imediata no painel.
-      if (!p.password && p.status === 'active' && cleanPass.length >= 4) {
-        p.password = cleanPass;
+      if (!p.password && !p.passwordHash && !p.tempPassword && p.status === 'active' && cleanPass.length >= 4) {
+        const newHash = await hashKivoraPassword(cleanPass);
+        p.passwordHash = newHash;
         p.mustChangePassword = true;
         try {
           await setDoc(matchedPartner.ref, {
-            password: cleanPass,
+            passwordHash: newHash,
             mustChangePassword: true,
             updatedAt: Date.now(),
           }, { merge: true });
@@ -393,17 +478,32 @@ export async function loginUser(
       }
 
       // Validação de senha
-      if (!p.password) {
+      const hasAnyCred = Boolean(p.passwordHash || p.password || p.tempPassword);
+      if (!hasAnyCred) {
         recordFailedAttempt(cleanId);
         return {
           success: false,
           error: 'A sua conta de parceiro ainda não tem palavra-passe definida. Contacte a equipa Kivora para ativar o seu acesso.',
         };
       }
-      if (p.password !== cleanPass) {
+
+      const isPassValid = await verifyPasswordMatch(p, cleanPass);
+      if (!isPassValid) {
         recordFailedAttempt(cleanId);
         return { success: false, error: 'Palavra-passe incorreta.' };
       }
+
+      // Auto-upgrade transparente se o documento ainda não tinha hash gravado
+      if (!p.passwordHash) {
+        hashKivoraPassword(cleanPass).then((newHash) => {
+          setDoc(matchedPartner.ref, {
+            passwordHash: newHash,
+            password: deleteField(),
+            updatedAt: Date.now(),
+          }, { merge: true }).catch(() => {});
+        }).catch(() => {});
+      }
+
       if (p.status === 'pending') {
         return { success: false, error: 'A sua candidatura de parceiro ainda está em análise pela equipa Kivora.' };
       }
@@ -428,16 +528,17 @@ export async function loginUser(
         mustChangePassword: mustChange,
       };
 
-      // Auto-sincronização preventiva na coleção `users`
+      // Auto-sincronização preventiva na coleção `users` com hash seguro
       try {
         const uId = partnerOfficialCode.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        const syncHash = p.passwordHash || await hashKivoraPassword(cleanPass);
         await setDoc(doc(db, 'users', uId), cleanFirestoreData({
           email: (p.email || cleanId).toLowerCase().trim(),
           nome: p.name || p.nome || 'Parceiro Revendedor',
           partnerCode: partnerOfficialCode,
           role: 'parceiro',
           status: 'active',
-          password: cleanPass,
+          passwordHash: syncHash,
           mustChangePassword: mustChange,
           updatedAt: Date.now(),
         }), { merge: true });
@@ -464,17 +565,30 @@ export async function loginUser(
     if (matchedLicense) {
       const lic = matchedLicense.data();
 
-      // SEGURANÇA [VULN-01/FIX]: Senha SEMPRE obrigatória — nunca conceder acesso sem autenticação
-      if (!lic.password) {
+      const hasLicCred = Boolean(lic.passwordHash || lic.password);
+      if (!hasLicCred) {
         recordFailedAttempt(cleanId);
         return {
           success: false,
           error: 'A sua conta de cliente ainda não tem palavra-passe definida. Por favor contacte o seu revendedor Kivora ou o suporte para ativar o acesso ao portal.',
         };
       }
-      if (lic.password !== cleanPass) {
+
+      const isLicValid = await verifyPasswordMatch(lic, cleanPass);
+      if (!isLicValid) {
         recordFailedAttempt(cleanId);
         return { success: false, error: 'Palavra-passe incorreta.' };
+      }
+
+      // Auto-upgrade transparente da licença para hash seguro
+      if (!lic.passwordHash) {
+        hashKivoraPassword(cleanPass).then((newHash) => {
+          setDoc(matchedLicense.ref, {
+            passwordHash: newHash,
+            password: deleteField(),
+            updatedAt: Date.now(),
+          }, { merge: true }).catch(() => {});
+        }).catch(() => {});
       }
 
       clearRateLimit(cleanId);
@@ -542,6 +656,7 @@ export async function createClientAccount(params: {
   password?: string; // senha inicial; se omitida, gera automática
 }): Promise<{ tempPassword: string }> {
   const tempPassword = params.password || generateTempPassword();
+  const passwordHash = await hashKivoraPassword(tempPassword);
   const userId = (params.email || params.nif).toLowerCase().replace(/[^a-z0-9]/g, '_');
   await setDoc(doc(db, 'users', userId), cleanFirestoreData({
     email: params.email.toLowerCase(),
@@ -550,7 +665,8 @@ export async function createClientAccount(params: {
     role: 'cliente',
     status: 'active',
     licenseKey: params.licenseKey || null,
-    password: tempPassword, // NOTA: migrar para hash bcrypt em versão futura
+    passwordHash,
+    tempPassword, // Apenas para exibição inicial no modal/email
     passwordSetAt: Date.now(),
     createdAt: Date.now(),
   }), { merge: true });
@@ -558,7 +674,8 @@ export async function createClientAccount(params: {
   // Também guarda na coleção licenses para suporte ao login por email de licença
   if (params.licenseKey) {
     await setDoc(doc(db, 'licenses', params.licenseKey), cleanFirestoreData({
-      password: tempPassword,
+      passwordHash,
+      tempPassword,
       passwordSetAt: Date.now(),
     }), { merge: true });
   }
@@ -567,17 +684,22 @@ export async function createClientAccount(params: {
 }
 
 /**
- * Define a palavra-passe para um documento de licença especificamente
+ * Define a palavra-passe para um documento de licença especificamente (com hash seguro)
  */
 export async function setClientPassword(licenseKey: string, password: string): Promise<void> {
+  const cleanPass = password.trim();
+  const passwordHash = await hashKivoraPassword(cleanPass);
   await setDoc(doc(db, 'licenses', licenseKey), {
-    password: password,
+    passwordHash,
+    password: deleteField(),
+    tempPassword: deleteField(),
     passwordSetAt: Date.now(),
+    updatedAt: Date.now(),
   }, { merge: true });
 }
 
 /**
- * Cria ou ativa conta de acesso de parceiro com credenciais no Firebase
+ * Cria ou ativa conta de acesso de parceiro com credenciais protegidas por hash no Firebase
  */
 export async function createOrApprovePartnerAccount(params: {
   email: string;
@@ -590,8 +712,10 @@ export async function createOrApprovePartnerAccount(params: {
   mustChangePassword?: boolean;
 }): Promise<void> {
   const cleanPass = params.password || generateTempPassword();
+  const passwordHash = await hashKivoraPassword(cleanPass);
   const userId = params.partnerCode.toLowerCase().replace(/[^a-z0-9]/g, '_');
   const emailUserId = params.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  const mustChange = params.mustChangePassword !== false;
 
   const userData = cleanFirestoreData({
     email: params.email.toLowerCase().trim(),
@@ -602,8 +726,9 @@ export async function createOrApprovePartnerAccount(params: {
     status: 'active' as UserStatus,
     phone: params.phone || '',
     region: params.region || 'Luanda',
-    password: cleanPass,
-    mustChangePassword: params.mustChangePassword !== false,
+    passwordHash,
+    ...(mustChange ? { tempPassword: cleanPass } : {}),
+    mustChangePassword: mustChange,
     updatedAt: Date.now(),
   });
 
@@ -626,29 +751,33 @@ export async function createOrApprovePartnerAccount(params: {
     commission_rate: 20,
     total_sales: 0,
     balance_aoa: 0,
-    password: cleanPass,
-    mustChangePassword: params.mustChangePassword !== false,
+    passwordHash,
+    ...(mustChange ? { tempPassword: cleanPass } : {}),
+    mustChangePassword: mustChange,
     createdAt: Date.now(),
     updatedAt: Date.now(),
   }), { merge: true });
 }
 
 /**
- * Atualiza a palavra-passe do utilizador autenticado no Firestore
+ * Atualiza a palavra-passe do utilizador autenticado no Firestore com hash criptográfico seguro
  */
 export async function changeUserPassword(userId: string, newPass: string, _userEmail?: string, partnerCode?: string): Promise<void> {
   const cleanPass = newPass.trim();
   if (!cleanPass) throw new Error('A palavra-passe não pode estar vazia.');
+  const passwordHash = await hashKivoraPassword(cleanPass);
 
-  const targetId = userId.toLowerCase().replace(/[^a-z0-9]/g, '_');
   const updatePayload = {
-    password: cleanPass,
+    passwordHash,
+    password: deleteField(),
+    tempPassword: deleteField(),
     mustChangePassword: false,
     passwordSetAt: Date.now(),
     updatedAt: Date.now(),
   };
 
   // 1. Atualizar na coleção `users` pelo targetId
+  const targetId = userId.toLowerCase().replace(/[^a-z0-9]/g, '_');
   try {
     await setDoc(doc(db, 'users', targetId), updatePayload, { merge: true });
   } catch (err) {

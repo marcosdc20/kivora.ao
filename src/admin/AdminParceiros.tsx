@@ -184,7 +184,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             nif: d.nif || '',
             payment_proof_url: d.payment_proof_url || '',
             credit_issuance_mode: (d.credit_issuance_mode as any) || 'auto_instant',
-            password: d.password || '',
+            password: d.tempPassword || d.password || '',
             mustChangePassword: d.mustChangePassword ?? false,
           };
 
@@ -1119,8 +1119,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                               <div className="flex items-center justify-end gap-1.5">
                                 <button
                                   onClick={() => {
-                                    const partnerPass = p.password || `kivora${Math.floor(1000 + Math.random() * 9000)}`;
-                                    if (!p.password) {
+                                    const partnerPass = p.password || (p as any).tempPassword || `kivora${Math.floor(1000 + Math.random() * 9000)}`;
+                                    if (!p.password && !(p as any).tempPassword) {
                                       createOrApprovePartnerAccount({
                                         nome: p.name,
                                         email: p.email,
@@ -1132,13 +1132,13 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                                       }).catch(console.warn);
                                       const partnerDocId = p.id || p.code;
                                       setDoc(doc(db, 'partners', partnerDocId), {
-                                        password: partnerPass,
+                                        tempPassword: partnerPass,
                                         mustChangePassword: true,
                                         updated_at: Date.now(),
                                       }, { merge: true }).catch(console.warn);
                                       if (p.code && p.code !== partnerDocId) {
                                         setDoc(doc(db, 'partners', p.code), {
-                                          password: partnerPass,
+                                          tempPassword: partnerPass,
                                           mustChangePassword: true,
                                           updated_at: Date.now(),
                                         }, { merge: true }).catch(console.warn);
@@ -2068,8 +2068,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   <button
                     type="button"
                     onClick={() => {
-                      const partnerPass = selectedPartner.password || `kivora${Math.floor(1000 + Math.random() * 9000)}`;
-                      if (!selectedPartner.password) {
+                      const partnerPass = selectedPartner.password || (selectedPartner as any).tempPassword || `kivora${Math.floor(1000 + Math.random() * 9000)}`;
+                      if (!selectedPartner.password && !(selectedPartner as any).tempPassword) {
                         createOrApprovePartnerAccount({
                           nome: selectedPartner.name,
                           email: selectedPartner.email,
@@ -2081,13 +2081,13 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                         }).catch(console.warn);
                         const targetId = selectedPartner.id || selectedPartner.code;
                         setDoc(doc(db, 'partners', targetId), {
-                          password: partnerPass,
+                          tempPassword: partnerPass,
                           mustChangePassword: true,
                           updated_at: Date.now(),
                         }, { merge: true }).catch(console.warn);
                         if (selectedPartner.code && selectedPartner.code !== targetId) {
                           setDoc(doc(db, 'partners', selectedPartner.code), {
-                            password: partnerPass,
+                            tempPassword: partnerPass,
                             mustChangePassword: true,
                             updated_at: Date.now(),
                           }, { merge: true }).catch(console.warn);

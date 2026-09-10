@@ -116,9 +116,7 @@ service cloud.firestore {
         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['id', 'plan_type', 'expires_at', 'client_email', 'nif'])
       ) || (
         // Portal do cliente a definir/alterar a sua senha de acesso ao portal
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['password', 'passwordSetAt', 'updatedAt']) &&
-        request.resource.data.password is string &&
-        request.resource.data.password.size() >= 4
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['password', 'passwordHash', 'passwordSetAt', 'updatedAt'])
       );
 
       // Eliminação: restrito estritamente a administradores
