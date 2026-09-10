@@ -11,7 +11,7 @@ import { AdminTopbar, StatCard } from './AdminComponents';
 import { createOrApprovePartnerAccount, setPartnerSuspensionStatus } from './services/authService';
 import { sendPartnerCredentialsEmail } from '../services/siteEmailService';
 import { db } from '../lib/firebase';
-import { collection, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import {
   subscribePartnerPricing, savePartnerPricing, subscribeAllDebts, markDebtsPaid,
   subscribePartnerPolicy, savePartnerPolicy,
@@ -41,6 +41,8 @@ export interface Partner {
   payment_proof_url?: string;
   payment_proof_name?: string;
   credit_issuance_mode?: 'manual_approval' | 'auto_instant';
+  password?: string;
+  mustChangePassword?: boolean;
 }
 
 interface AdminParceirosProps {
@@ -77,6 +79,9 @@ export interface PartnerApplicationItem {
   payment_proof_size?: string;
   payment_proof_type?: string;
   fee_amount_aoa?: number;
+  partner_code?: string;
+  temp_password?: string;
+  mustChangePassword?: boolean;
 }
 
 export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'todos' }) => {
@@ -101,6 +106,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     open: boolean; partnerName: string; email: string; password: string; partnerCode: string; phone: string;
   } | null>(null);
   const [copiedCredentials, setCopiedCredentials] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
   const [sendingPartnerEmail, setSendingPartnerEmail] = useState(false);
   const [partnerEmailSent, setPartnerEmailSent] = useState(false);
   const [certificatesPartnerModal, setCertificatesPartnerModal] = useState<PartnerCertificateData | null>(null);
@@ -178,14 +184,23 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             nif: d.nif || '',
             payment_proof_url: d.payment_proof_url || '',
             credit_issuance_mode: (d.credit_issuance_mode as any) || 'manual_approval',
+            password: d.password || '',
+            mustChangePassword: d.mustChangePassword ?? false,
           };
 
           if (!existing) {
             map.set(pCode, item);
           } else if (existing.status !== 'active' && item.status === 'active') {
+            if (!item.password && existing.password) item.password = existing.password;
             map.set(pCode, item);
           } else if (item.createdAt > existing.createdAt && item.status === existing.status) {
+            if (!item.password && existing.password) item.password = existing.password;
             map.set(pCode, item);
+          } else {
+            if (!existing.password && item.password) {
+              existing.password = item.password;
+              map.set(pCode, existing);
+            }
           }
         });
         setPartners(Array.from(map.values()));
@@ -226,6 +241,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             payment_proof_size: d.payment_proof_size || d.comprovativo_tamanho || '',
             payment_proof_type: d.payment_proof_type || d.comprovativo_tipo || '',
             fee_amount_aoa: d.fee_amount_aoa || 25000,
+            partner_code: d.partner_code || '',
+            temp_password: d.temp_password || '',
+            mustChangePassword: d.mustChangePassword,
           });
         });
         list.sort((a, b) => b.created_at - a.created_at);
@@ -391,6 +409,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         payment_proof_size: app.payment_proof_size,
         payment_proof_type: app.payment_proof_type,
         fee_amount_aoa: app.fee_amount_aoa || 25000,
+        partner_code: app.partner_code,
+        temp_password: app.temp_password,
+        mustChangePassword: app.mustChangePassword,
       };
 
       const existing = map.get(dedupeKey);
@@ -569,7 +590,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const handleApprovePartner = async (cand: any) => {
     setApproving(cand.id);
     const pwd = `kivora${Math.floor(1000 + Math.random() * 9000)}`;
-    const pCode = (cand.code || `KVR-PR-2026-${Math.floor(100 + Math.random() * 900)}`).toUpperCase().trim();
+    const pCode = (cand.partner_code_suggested || cand.code || `KVR-PR-2026-${Math.floor(100 + Math.random() * 900)}`).toUpperCase().trim();
     const initialSlots = policy.tier_slots['bronze'] || 2;
 
     try {
@@ -577,11 +598,13 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       await setDoc(doc(db, 'partners', pCode), {
         name: cand.name,
         email: cand.email,
-        phone: cand.phone,
-        region: cand.region,
+        phone: cand.phone || '',
+        region: cand.region || 'Luanda, Angola',
+        nif: cand.nif || '',
         status: 'active',
         tier: 'bronze',
         code: pCode,
+        protocol: cand.protocol || '',
         password: pwd,
         mustChangePassword: true,
         credit_slots_limit: initialSlots,
@@ -590,13 +613,23 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         updated_at: Date.now(),
       }, { merge: true });
 
-      // Se cand.id for diferente de pCode, atualiza também para active para evitar registos pendentes residuais
+      // Se cand.id já existia como registo prévio na coleção `partners`, sincroniza-o com a senha correta
+      // Não cria documento fantasma caso cand.id seja unicamente o ID de partner_applications
       if (cand.id && cand.id !== pCode) {
-        await setDoc(doc(db, 'partners', cand.id), {
-          status: 'active',
-          code: pCode,
-          updated_at: Date.now(),
-        }, { merge: true }).catch(() => {});
+        const existingPartnerSnap = await getDoc(doc(db, 'partners', cand.id)).catch(() => null);
+        if (existingPartnerSnap && existingPartnerSnap.exists()) {
+          await setDoc(doc(db, 'partners', cand.id), {
+            name: cand.name,
+            email: cand.email,
+            phone: cand.phone || '',
+            region: cand.region || 'Luanda, Angola',
+            status: 'active',
+            code: pCode,
+            password: pwd,
+            mustChangePassword: true,
+            updated_at: Date.now(),
+          }, { merge: true }).catch(() => {});
+        }
       }
 
       // 2. Marcar a candidatura principal e qualquer outra com o mesmo email/nif/protocolo como approved no Firestore
@@ -605,6 +638,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         await updateDoc(doc(db, 'partner_applications', targetAppId), {
           status: 'approved',
           approved_at: Date.now(),
+          partner_code: pCode,
+          temp_password: pwd,
+          mustChangePassword: true,
         }).catch(() => {});
       }
 
@@ -617,6 +653,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
           updateDoc(doc(db, 'partner_applications', app.id), {
             status: 'approved',
             approved_at: Date.now(),
+            partner_code: pCode,
+            temp_password: pwd,
+            mustChangePassword: true,
           }).catch(() => {});
         }
       });
@@ -635,7 +674,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       setPartners((prev) =>
         prev.map((p) =>
           p.id === cand.id || p.code === pCode
-            ? { ...p, status: 'active', tier: 'bronze', code: pCode, password: pwd, credit_slots_limit: initialSlots }
+            ? { ...p, status: 'active', tier: 'bronze', code: pCode, password: pwd, mustChangePassword: true, credit_slots_limit: initialSlots }
             : p
         )
       );
@@ -1078,8 +1117,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                               <div className="flex items-center justify-end gap-1.5">
                                 <button
                                   onClick={() => {
-                                    const partnerPass = (p as any).password || `kivora${Math.floor(1000 + Math.random() * 9000)}`;
-                                    if (!(p as any).password) {
+                                    const partnerPass = p.password || `kivora${Math.floor(1000 + Math.random() * 9000)}`;
+                                    if (!p.password) {
                                       createOrApprovePartnerAccount({
                                         nome: p.name,
                                         email: p.email,
@@ -1089,6 +1128,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                                         password: partnerPass,
                                         mustChangePassword: true,
                                       }).catch(console.warn);
+                                      setDoc(doc(db, 'partners', p.code), {
+                                        password: partnerPass,
+                                        mustChangePassword: true,
+                                        updated_at: Date.now(),
+                                      }, { merge: true }).catch(console.warn);
+                                      setPartners(prev => prev.map(item => item.code === p.code ? { ...item, password: partnerPass, mustChangePassword: true } : item));
                                     }
                                     setCredentialsModal({
                                       open: true,
@@ -2013,8 +2058,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   <button
                     type="button"
                     onClick={() => {
-                      const partnerPass = (selectedPartner as any).password || `kivora${Math.floor(1000 + Math.random() * 9000)}`;
-                      if (!(selectedPartner as any).password) {
+                      const partnerPass = selectedPartner.password || `kivora${Math.floor(1000 + Math.random() * 9000)}`;
+                      if (!selectedPartner.password) {
                         createOrApprovePartnerAccount({
                           nome: selectedPartner.name,
                           email: selectedPartner.email,
@@ -2024,6 +2069,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                           password: partnerPass,
                           mustChangePassword: true,
                         }).catch(console.warn);
+                        setDoc(doc(db, 'partners', selectedPartner.code), {
+                          password: partnerPass,
+                          mustChangePassword: true,
+                          updated_at: Date.now(),
+                        }, { merge: true }).catch(console.warn);
+                        setPartners(prev => prev.map(item => item.code === selectedPartner.code ? { ...item, password: partnerPass, mustChangePassword: true } : item));
                       }
                       setCredentialsModal({
                         open: true,
@@ -2336,6 +2387,47 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   <span className={cls}>{value}</span>
                 </div>
               ))}
+            </div>
+
+            {/* AÇÃO DE REDEFINIÇÃO CONTROLADA PELO ADMIN */}
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[11px] text-slate-500 font-medium">Troca de senha pelo administrador:</span>
+              <button
+                type="button"
+                disabled={resettingPassword}
+                onClick={async () => {
+                  setResettingPassword(true);
+                  try {
+                    const newPass = `kivora${Math.floor(1000 + Math.random() * 9000)}`;
+                    await createOrApprovePartnerAccount({
+                      nome: credentialsModal.partnerName,
+                      email: credentialsModal.email,
+                      phone: credentialsModal.phone,
+                      partnerCode: credentialsModal.partnerCode,
+                      password: newPass,
+                      mustChangePassword: true,
+                    });
+                    await setDoc(doc(db, 'partners', credentialsModal.partnerCode), {
+                      password: newPass,
+                      mustChangePassword: true,
+                      updated_at: Date.now(),
+                    }, { merge: true }).catch(() => {});
+
+                    setCredentialsModal(prev => prev ? { ...prev, password: newPass } : null);
+                    setPartners(prev => prev.map(p => p.code === credentialsModal.partnerCode ? { ...p, password: newPass, mustChangePassword: true } : p));
+                    notify.success('Nova palavra-passe gerada e atualizada com sucesso no sistema!');
+                  } catch (err: any) {
+                    notify.error('Erro ao redefinir palavra-passe: ' + err.message);
+                  } finally {
+                    setResettingPassword(false);
+                  }
+                }}
+                className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-2.5 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+                title="Gera e grava uma nova palavra-passe aleatória mantendo a obrigação de troca no primeiro acesso"
+              >
+                {resettingPassword ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
+                <span>Gerar Nova Senha</span>
+              </button>
             </div>
             <div className="flex gap-2">
               <button onClick={() => {

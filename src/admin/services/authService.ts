@@ -233,133 +233,123 @@ export async function loginUser(
     const qUsers = query(usersRef, where('email', '==', cleanId));
     const snapUsers = await getDocs(qUsers);
 
-    if (!snapUsers.empty) {
-      const uDoc = snapUsers.docs[0];
+    // Iterar por todos os documentos de users encontrados para este email
+    for (const uDoc of snapUsers.docs) {
       const u = uDoc.data();
 
-      // AUTO-HEALING & SUPORTE À PALAVRA-PASSE PADRÃO DE PARCEIRO:
-      // Se a conta for de parceiro ativo e ainda não tiver senha gravada no Firestore (ou senha vazia)
-      // permite autenticar com a senha inicial fornecida, gravando-a e exigindo a troca no painel.
-      if (!u.password && (u.role === 'parceiro' || u.partnerCode)) {
-        if (cleanPass.length >= 4) {
-          u.password = cleanPass;
-          u.mustChangePassword = true;
+      // Se a senha coincidir com a fornecida
+      if (u.password && u.password === cleanPass) {
+        // Se o utilizador for parceiro, verificar estado na coleção `partners`
+        if (u.role === 'parceiro' || u.partnerCode) {
+          const pCode = u.partnerCode || uDoc.id;
           try {
-            await setDoc(uDoc.ref, {
-              password: cleanPass,
-              mustChangePassword: true,
-              passwordSetAt: Date.now(),
-              updatedAt: Date.now(),
-            }, { merge: true });
-            if (u.partnerCode) {
-              await setDoc(doc(db, 'partners', u.partnerCode), {
-                password: cleanPass,
-                mustChangePassword: true,
-                updatedAt: Date.now(),
-              }, { merge: true });
+            const pDoc = await getDoc(doc(db, 'partners', pCode));
+            if (pDoc.exists() && pDoc.data()?.status === 'suspended') {
+              return {
+                success: false,
+                error: 'A sua conta de parceiro foi suspensa pela administração da Visual Software. Entre em contacto com o suporte para regularização.',
+              };
+            }
+            if (pDoc.exists() && pDoc.data()?.mustChangePassword !== undefined) {
+              u.mustChangePassword = pDoc.data()?.mustChangePassword;
             }
           } catch (e) {
-            console.warn('Erro ao auto-atribuir senha de parceiro:', e);
+            console.error('Erro ao verificar status do parceiro:', e);
           }
         }
-      }
 
-      // SEGURANÇA [VULN-01/FIX]: Senha obrigatória — bloqueia acesso se não houver senha definida
-      if (!u.password) {
-        recordFailedAttempt(cleanId);
-        return {
-          success: false,
-          error: 'Esta conta ainda não tem palavra-passe definida. Contacte o administrador Kivora para ativar o seu acesso.',
-        };
-      }
-      if (u.password !== cleanPass) {
-        recordFailedAttempt(cleanId);
-        return { success: false, error: 'Palavra-passe incorreta.' };
-      }
-
-      // Se o utilizador for parceiro, verificar estado rigoroso na coleção `partners`
-      if (u.role === 'parceiro' || u.partnerCode) {
-        const pCode = u.partnerCode || snapUsers.docs[0].id;
-        try {
-          const pDoc = await getDoc(doc(db, 'partners', pCode));
-          if (pDoc.exists() && pDoc.data()?.status === 'suspended') {
-            return {
-              success: false,
-              error: 'A sua conta de parceiro foi suspensa pela administração da Visual Software. Entre em contacto com o suporte para regularização.',
-            };
-          }
-          if (pDoc.exists() && pDoc.data()?.mustChangePassword !== undefined) {
-            u.mustChangePassword = pDoc.data()?.mustChangePassword;
-          }
-        } catch (e) {
-          console.error('Erro ao verificar status do parceiro:', e);
+        if (u.status === 'suspended') {
+          return {
+            success: false,
+            error: 'Esta conta encontra-se suspensa pela administração da Visual Software. Entre em contacto com o suporte.',
+          };
         }
-      }
+        if (u.status === 'pending') {
+          return { success: false, error: 'A sua conta ainda aguarda aprovação pelo Administrador Kivora.' };
+        }
 
-      if (u.status === 'suspended') {
-        return {
-          success: false,
-          error: 'Esta conta encontra-se suspensa pela administração da Visual Software. Entre em contacto com o suporte.',
+        clearRateLimit(cleanId);
+        const session: KivoraUserSession = {
+          id: uDoc.id,
+          email: u.email,
+          role: u.role || 'cliente',
+          nome: u.nome || u.name || 'Utilizador Kivora',
+          nif: u.nif,
+          partnerCode: u.partnerCode,
+          companyName: u.companyName,
+          status: u.status || 'active',
+          mustChangePassword: u.mustChangePassword ?? false,
         };
-      }
-      if (u.status === 'pending') {
-        return { success: false, error: 'A sua conta ainda aguarda aprovação pelo Administrador Kivora.' };
-      }
 
-      clearRateLimit(cleanId);
-      const session: KivoraUserSession = {
-        id: snapUsers.docs[0].id,
-        email: u.email,
-        role: u.role || 'cliente',
-        nome: u.nome || u.name || 'Utilizador Kivora',
-        nif: u.nif,
-        partnerCode: u.partnerCode,
-        companyName: u.companyName,
-        status: u.status || 'active',
-        mustChangePassword: u.mustChangePassword ?? false,
-      };
+        if (session.role === 'admin' && !auth.currentUser && cleanPass.length >= 6) {
+          signInWithEmailAndPassword(auth, cleanId, cleanPass)
+            .catch((err) => {
+              if (err.code === 'auth/user-not-found') {
+                return createUserWithEmailAndPassword(auth, cleanId, cleanPass);
+              }
+            })
+            .then(async (userCred) => {
+              if (userCred?.user) {
+                await setDoc(doc(db, 'admins', userCred.user.uid), {
+                  email: cleanId,
+                  nome: session.nome,
+                  role: 'admin',
+                  active: true,
+                  updatedAt: Date.now(),
+                }, { merge: true });
+              }
+            })
+            .catch((e) => console.warn('Sync admin auth background warning:', e));
+        }
 
-      if (session.role === 'admin' && !auth.currentUser && cleanPass.length >= 6) {
-        signInWithEmailAndPassword(auth, cleanId, cleanPass)
-          .catch((err) => {
-            if (err.code === 'auth/user-not-found') {
-              return createUserWithEmailAndPassword(auth, cleanId, cleanPass);
-            }
-          })
-          .then(async (userCred) => {
-            if (userCred?.user) {
-              await setDoc(doc(db, 'admins', userCred.user.uid), {
-                email: cleanId,
-                nome: session.nome,
-                role: 'admin',
-                active: true,
-                updatedAt: Date.now(),
-              }, { merge: true });
-            }
-          })
-          .catch((e) => console.warn('Sync admin auth background warning:', e));
+        setStoredSession(session);
+        return { success: true, session };
       }
-
-      setStoredSession(session);
-      return { success: true, session };
     }
 
-    // B) Verificar na coleção `partners` por código ou email
+    // B) Verificar na coleção `partners` por código, email, NIF, protocolo ou docId
+    // Fornece resiliência completa para parceiros homologados com palavra-passe inicial
     const partnersRef = collection(db, 'partners');
     const snapPartners = await getDocs(partnersRef);
-    const matchedPartner = snapPartners.docs.find(d => {
+    
+    const candidatePartners = snapPartners.docs.filter(d => {
       const data = d.data();
+      const pEmail = (data.email || '').toLowerCase().trim();
+      const pCode = (data.code || '').toLowerCase().trim();
+      const pNif = (data.nif || '').toLowerCase().trim();
+      const pProto = (data.protocol || '').toLowerCase().trim();
+      const pSuggested = (data.partner_code_suggested || '').toLowerCase().trim();
+      const docId = d.id.toLowerCase().trim();
+
       return (
-        data.email?.toLowerCase() === cleanId ||
-        data.code?.toLowerCase() === cleanId ||
-        d.id.toLowerCase() === cleanId
+        pEmail === cleanId ||
+        pCode === cleanId ||
+        pNif === cleanId ||
+        pProto === cleanId ||
+        pSuggested === cleanId ||
+        docId === cleanId
       );
     });
 
-    if (matchedPartner) {
+    if (candidatePartners.length > 0) {
+      // 1. Procura primeiro o documento que tem exatamente a senha correta
+      let matchedPartner = candidatePartners.find(d => {
+        const data = d.data();
+        return data.password && data.password === cleanPass;
+      });
+
+      // 2. Se não encontrou por senha exata, seleciona o doc ativo com senha para validar erro ou auto-heal
+      if (!matchedPartner) {
+        matchedPartner = candidatePartners.find(d => d.data().status === 'active' && d.data().password) ||
+                         candidatePartners.find(d => d.data().status === 'active') ||
+                         candidatePartners[0];
+      }
+
       const p = matchedPartner.data();
 
       // AUTO-HEALING & SUPORTE À PALAVRA-PASSE PADRÃO DE PARCEIRO
+      // Se a conta for de parceiro ativo e ainda não tiver senha gravada no Firestore (ou senha vazia)
+      // permite autenticar com a senha inicial fornecida, gravando-a e exigindo a troca imediata no painel.
       if (!p.password && p.status === 'active' && cleanPass.length >= 4) {
         p.password = cleanPass;
         p.mustChangePassword = true;
@@ -369,24 +359,12 @@ export async function loginUser(
             mustChangePassword: true,
             updatedAt: Date.now(),
           }, { merge: true });
-          const pCode = p.code || matchedPartner.id;
-          const uId = pCode.toLowerCase().replace(/[^a-z0-9]/g, '_');
-          await setDoc(doc(db, 'users', uId), {
-            email: p.email?.toLowerCase().trim() || cleanId,
-            nome: p.name || p.nome,
-            partnerCode: pCode,
-            role: 'parceiro',
-            status: 'active',
-            password: cleanPass,
-            mustChangePassword: true,
-            updatedAt: Date.now(),
-          }, { merge: true });
         } catch (e) {
           console.warn('Erro ao auto-atribuir senha em partners:', e);
         }
       }
 
-      // SEGURANÇA [VULN-05/FIX]: Senha SEMPRE obrigatória para parceiros
+      // Validação de senha
       if (!p.password) {
         recordFailedAttempt(cleanId);
         return {
@@ -409,15 +387,36 @@ export async function loginUser(
       }
 
       clearRateLimit(cleanId);
+      const partnerOfficialCode = p.code || matchedPartner.id;
+      const mustChange = p.mustChangePassword !== false; // Se não estiver explicitamente false, exige troca
+
       const session: KivoraUserSession = {
         id: matchedPartner.id,
         email: p.email || cleanId,
         role: 'parceiro',
         nome: p.name || p.nome || 'Parceiro Revendedor',
-        partnerCode: p.code || matchedPartner.id,
+        partnerCode: partnerOfficialCode,
         status: 'active',
-        mustChangePassword: p.mustChangePassword ?? false,
+        mustChangePassword: mustChange,
       };
+
+      // Auto-sincronização preventiva na coleção `users`
+      try {
+        const uId = partnerOfficialCode.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        await setDoc(doc(db, 'users', uId), cleanFirestoreData({
+          email: (p.email || cleanId).toLowerCase().trim(),
+          nome: p.name || p.nome || 'Parceiro Revendedor',
+          partnerCode: partnerOfficialCode,
+          role: 'parceiro',
+          status: 'active',
+          password: cleanPass,
+          mustChangePassword: mustChange,
+          updatedAt: Date.now(),
+        }), { merge: true });
+      } catch {
+        // Silencioso se o utilizador não tiver permissão direta de escrita em users
+      }
+
       setStoredSession(session);
       return { success: true, session };
     }
@@ -580,9 +579,13 @@ export async function createOrApprovePartnerAccount(params: {
     updatedAt: Date.now(),
   });
 
-  await setDoc(doc(db, 'users', userId), userData, { merge: true });
-  if (emailUserId !== userId) {
-    await setDoc(doc(db, 'users', emailUserId), userData, { merge: true });
+  try {
+    await setDoc(doc(db, 'users', userId), userData, { merge: true });
+    if (emailUserId !== userId) {
+      await setDoc(doc(db, 'users', emailUserId), userData, { merge: true });
+    }
+  } catch (err) {
+    console.warn('Aviso ao sincronizar credenciais na coleção users:', err);
   }
 
   await setDoc(doc(db, 'partners', params.partnerCode), cleanFirestoreData({
@@ -609,38 +612,76 @@ export async function changeUserPassword(userId: string, newPass: string, _userE
   const cleanPass = newPass.trim();
   if (!cleanPass) throw new Error('A palavra-passe não pode estar vazia.');
 
-  // Atualizar na coleção `users`
   const targetId = userId.toLowerCase().replace(/[^a-z0-9]/g, '_');
-  await setDoc(doc(db, 'users', targetId), {
+  const updatePayload = {
     password: cleanPass,
     mustChangePassword: false,
     passwordSetAt: Date.now(),
     updatedAt: Date.now(),
-  }, { merge: true });
+  };
 
+  // 1. Atualizar na coleção `users` pelo targetId
+  try {
+    await setDoc(doc(db, 'users', targetId), updatePayload, { merge: true });
+  } catch (err) {
+    console.warn('Aviso ao atualizar utilizador em users por targetId:', err);
+  }
+
+  // 2. Se email estiver presente e for diferente do targetId, atualiza também
   if (_userEmail) {
     const emailTargetId = _userEmail.toLowerCase().replace(/[^a-z0-9]/g, '_');
     if (emailTargetId !== targetId) {
-      await setDoc(doc(db, 'users', emailTargetId), {
-        password: cleanPass,
-        mustChangePassword: false,
-        passwordSetAt: Date.now(),
-        updatedAt: Date.now(),
-      }, { merge: true });
+      try {
+        await setDoc(doc(db, 'users', emailTargetId), updatePayload, { merge: true });
+      } catch (err) {
+        console.warn('Aviso ao atualizar utilizador em users por emailTargetId:', err);
+      }
     }
   }
 
-  // Se for parceiro, atualizar também na coleção `partners` se existir
-  if (partnerCode) {
-    await setDoc(doc(db, 'partners', partnerCode), {
-      password: cleanPass,
-      mustChangePassword: false,
-      passwordSetAt: Date.now(),
-      updatedAt: Date.now(),
-    }, { merge: true });
+  // 3. Se for parceiro (ou o ID tiver formato de parceiro), atualizar na coleção `partners`
+  const code = (partnerCode || (userId.startsWith('KVR-') || userId.startsWith('KIV-') ? userId : '')).toUpperCase().trim();
+  if (code) {
+    try {
+      await setDoc(doc(db, 'partners', code), updatePayload, { merge: true });
+    } catch (err) {
+      console.warn('Aviso ao atualizar parceiro em partners por código:', err);
+    }
   }
 
-  // Atualiza sessão em cache local
+  // 4. Sincronização abrangente em background: varre parceiros e utilizadores com o mesmo email ou código
+  try {
+    const [snapPartners, snapUsers] = await Promise.all([
+      getDocs(collection(db, 'partners')).catch(() => null),
+      getDocs(collection(db, 'users')).catch(() => null),
+    ]);
+
+    if (snapPartners && !snapPartners.empty) {
+      for (const pDoc of snapPartners.docs) {
+        const d = pDoc.data();
+        const matchesCode = code && (pDoc.id.toUpperCase() === code || (d.code && String(d.code).toUpperCase() === code));
+        const matchesEmail = _userEmail && d.email && String(d.email).toLowerCase() === _userEmail.toLowerCase();
+        if (matchesCode || matchesEmail) {
+          await setDoc(doc(db, 'partners', pDoc.id), updatePayload, { merge: true }).catch(() => {});
+        }
+      }
+    }
+
+    if (snapUsers && !snapUsers.empty) {
+      for (const uDoc of snapUsers.docs) {
+        const d = uDoc.data();
+        const matchesCode = code && d.partnerCode && String(d.partnerCode).toUpperCase() === code;
+        const matchesEmail = _userEmail && d.email && String(d.email).toLowerCase() === _userEmail.toLowerCase();
+        if (matchesCode || matchesEmail) {
+          await setDoc(doc(db, 'users', uDoc.id), updatePayload, { merge: true }).catch(() => {});
+        }
+      }
+    }
+  } catch (syncErr) {
+    console.warn('Aviso na sincronização abrangente de nova palavra-passe:', syncErr);
+  }
+
+  // 5. Atualiza sessão em cache local
   const currentSession = getStoredSession();
   if (currentSession) {
     currentSession.mustChangePassword = false;
