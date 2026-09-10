@@ -835,11 +835,11 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     const days = renewLicenseModal.days;
     setActionLoading(lic.id);
 
+    const matchedPlan: PlanType = days >= 365 ? 'annual' : days >= 180 ? 'semiannual' : days >= 90 ? 'quarterly' : 'monthly';
+    const renewCost = pricingPlans.find(p => p.plan_type === matchedPlan)?.cost_aoa ?? 15000;
+
     try {
       await extendLicenseExpiry(lic.id, days);
-      
-      const matchedPlan: PlanType = days >= 365 ? 'annual' : days >= 180 ? 'semiannual' : days >= 90 ? 'quarterly' : 'monthly';
-      const renewCost = pricingPlans.find(p => p.plan_type === matchedPlan)?.cost_aoa ?? 15000;
 
       await recordPartnerDebt({
         partner_id: partnerCode,
@@ -857,7 +857,30 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       showToast(`Licença estendida por +${days} dias com sucesso!`);
       setRenewLicenseModal({ open: false, license: null, days: 30 });
     } catch (e: any) {
-      showToast('Erro ao estender validade: ' + e.message);
+      // Se as regras de segurança impedirem alteração direta de expiração (Zero-Trust Anti-Tampering),
+      // submete formalmente um pedido de renovação com aprovação pelo Administrador
+      try {
+        const isWallet = walletBalance >= renewCost;
+        await createLicenseRequest({
+          partner_id: partnerCode,
+          partner_name: partnerName,
+          company_name: lic.company_name,
+          nif: lic.nif,
+          client_email: lic.client_email,
+          plan_type: matchedPlan,
+          extra_seats: lic.extra_seats,
+          price_aoa: Math.round(renewCost * 1.6),
+          cost_aoa: renewCost,
+          payment_method: isWallet ? 'wallet' : 'credit',
+          notes: `[PEDIDO DE RENOVAÇÃO] Extensão de validade por +${days} dias para a licença existente ${lic.id}.`,
+        });
+
+        showToast(`Solicitação de renovação para ${lic.company_name} enviada à Administração com sucesso!`);
+        setRenewLicenseModal({ open: false, license: null, days: 30 });
+        setActiveLicensesTab('solicitacoes');
+      } catch (reqErr: any) {
+        showToast('Erro ao processar renovação: ' + reqErr.message);
+      }
     } finally {
       setActionLoading(null);
     }
