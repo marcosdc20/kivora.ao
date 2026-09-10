@@ -12,6 +12,7 @@ import {
 import { db } from '../../lib/firebase';
 import type { PlanType } from '../types';
 import { promoteProvisionalLicenseToDefinitive } from './licenseService';
+import { cleanFirestoreData } from '../../lib/firestoreUtils';
 
 export interface PartnerPricingPlan {
   plan_type: PlanType;
@@ -49,6 +50,7 @@ export interface PartnerAccount {
   tier: 'bronze' | 'silver' | 'gold' | 'diamond';
   status: 'active' | 'pending' | 'suspended';
   overdue_days_limit?: number;     // Padrão 15 dias
+  credit_issuance_mode?: 'manual_approval' | 'auto_instant'; // Modo de emissão a crédito
 }
 
 export interface PartnerLicensingPolicy {
@@ -160,10 +162,10 @@ export function getAdminSeatCost(policy: PartnerLicensingPolicy = DEFAULT_PARTNE
 }
 
 export async function savePartnerPolicy(policy: PartnerLicensingPolicy): Promise<void> {
-  await setDoc(doc(db, 'settings', 'partner_policy'), {
+  await setDoc(doc(db, 'settings', 'partner_policy'), cleanFirestoreData({
     ...policy,
     updated_at: Date.now(),
-  }, { merge: true });
+  }), { merge: true });
 }
 
 export async function getPartnerPolicy(): Promise<PartnerLicensingPolicy> {
@@ -203,12 +205,12 @@ export const DEFAULT_PARTNER_PRICING: PartnerPricingPlan[] = [
 
 export async function savePartnerPricing(plans: PartnerPricingPlan[]): Promise<void> {
   const promises = plans.map((p) =>
-    setDoc(doc(db, 'partner_pricing', p.plan_type), {
+    setDoc(doc(db, 'partner_pricing', p.plan_type), cleanFirestoreData({
       plan_type: p.plan_type,
       label: p.label,
       cost_aoa: p.cost_aoa,
       updated_at: Date.now(),
-    }, { merge: true })
+    }), { merge: true })
   );
   await Promise.all(promises);
 }
@@ -269,7 +271,7 @@ export async function recordPartnerDebt(entry: Omit<PartnerDebtEntry, 'id'>): Pr
     payload.provisional_target_plan = entry.provisional_target_plan;
   }
 
-  await setDoc(doc(db, 'partner_debts', docId), payload, { merge: true });
+  await setDoc(doc(db, 'partner_debts', docId), cleanFirestoreData(payload), { merge: true });
 }
 
 /**
@@ -507,6 +509,7 @@ export function subscribePartnerAccount(
           tier,
           status: matchedDoc.status || 'active',
           overdue_days_limit: Number(matchedDoc.overdue_days_limit) || 15,
+          credit_issuance_mode: (matchedDoc.credit_issuance_mode as any) || 'manual_approval',
         });
       } else {
         cb(null);
@@ -559,11 +562,12 @@ export async function updatePartnerWalletAndCredit(
     credit_slots_limit?: number;
     credit_limit_aoa?: number;
     tier?: 'bronze' | 'silver' | 'gold' | 'diamond';
+    credit_issuance_mode?: 'manual_approval' | 'auto_instant';
   }
 ): Promise<void> {
   const pRef = doc(db, 'partners', partnerCode);
-  await setDoc(pRef, {
+  await setDoc(pRef, cleanFirestoreData({
     ...updates,
     updatedAt: Date.now(),
-  }, { merge: true });
+  }), { merge: true });
 }

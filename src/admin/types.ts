@@ -21,7 +21,9 @@ export interface KivoraLicense {
   plan_type: PlanType;
   status: LicenseStatus;
   hardware_id: string | null;    // Fingerprint gravado no 1º uso online
+  hostname?: string | null;       // Nome do computador/posto registado pelo Desktop ERP
   created_at: number;
+  updated_at?: number | null;
   expires_at: number | null;     // null = vitalício
   price_aoa?: number;
   notes?: string;

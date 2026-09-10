@@ -15,7 +15,7 @@ import { getPlanLabel, formatLicenseDate } from './services/licenseService';
 import { subscribeAllDebts, PartnerDebtEntry } from './services/partnerDebtService';
 import { AdminTopbar } from './AdminComponents';
 import { db } from '../lib/firebase';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { collection, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore';
 import { AdminSection } from './types';
 
 const fmt = (n: number) => n.toLocaleString('pt-AO');
@@ -36,19 +36,83 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
     return () => unsub();
   }, []);
 
-  // Escuta de candidaturas de parceiros pendentes
+  // Escuta de candidaturas de parceiros com reconciliação e autocura de registros órfãos/já homologados
   useEffect(() => {
+    let unsubPartners: (() => void) | null = null;
+    let unsubApps: (() => void) | null = null;
+
     try {
+      let activeEmails = new Set<string>();
+      let activeNifs = new Set<string>();
+      let activeCodes = new Set<string>();
+      let rawApps: Array<{ id: string; email?: string; nif?: string; protocol?: string }> = [];
+
+      const recalculate = () => {
+        let genuinePendingCount = 0;
+        rawApps.forEach((app) => {
+          const email = (app.email || '').toLowerCase().trim();
+          const nif = (app.nif || '').toLowerCase().trim();
+          const code = (app.protocol || app.id || '').toLowerCase().trim();
+
+          const isAlreadyActive =
+            (email && activeEmails.has(email)) ||
+            (nif && activeNifs.has(nif)) ||
+            (code && activeCodes.has(code));
+
+          if (isAlreadyActive) {
+            // Autocura no Firestore: o parceiro já foi homologado e é ativo, logo curamos o registo pendente residual
+            updateDoc(doc(db, 'partner_applications', app.id), {
+              status: 'approved',
+              approved_at: Date.now(),
+            }).catch(() => {});
+          } else {
+            genuinePendingCount++;
+          }
+        });
+        setPendingCandidaturasCount(genuinePendingCount);
+      };
+
+      unsubPartners = onSnapshot(collection(db, 'partners'), (snap) => {
+        const emails = new Set<string>();
+        const nifs = new Set<string>();
+        const codes = new Set<string>();
+
+        snap.forEach((d) => {
+          const data = d.data();
+          if (data.status === 'active') {
+            if (data.email) emails.add(String(data.email).toLowerCase().trim());
+            if (data.nif) nifs.add(String(data.nif).toLowerCase().trim());
+            if (data.code) codes.add(String(data.code).toLowerCase().trim());
+            codes.add(d.id.toLowerCase().trim());
+          }
+        });
+
+        activeEmails = emails;
+        activeNifs = nifs;
+        activeCodes = codes;
+        recalculate();
+      }, (err) => console.warn('Erro ao escutar partners no dashboard:', err));
+
       const q = query(collection(db, 'partner_applications'), where('status', '==', 'pending'));
-      const unsub = onSnapshot(q, (snap) => {
-        setPendingCandidaturasCount(snap.size);
+      unsubApps = onSnapshot(q, (snap) => {
+        rawApps = snap.docs.map((d) => ({
+          id: d.id,
+          email: d.data().email,
+          nif: d.data().nif,
+          protocol: d.data().protocol,
+        }));
+        recalculate();
       }, (err) => {
         console.warn('Erro ao escutar candidaturas:', err);
       });
-      return () => unsub();
     } catch {
       // ignore
     }
+
+    return () => {
+      if (unsubPartners) unsubPartners();
+      if (unsubApps) unsubApps();
+    };
   }, []);
 
   // Escuta de leads de demonstração pendentes

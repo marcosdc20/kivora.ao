@@ -17,9 +17,8 @@ import {
   getOrCreateVideoSupportAccount,
   subscribeVideoSupportAccount
 } from '../services/videoSupportService';
-import { getStoredSession, clearStoredSession, KivoraUserSession } from '../admin/services/authService';
-import { useLicenses } from '../admin/hooks/useFirebase';
-import { formatLicenseDate, getPlanLabel } from '../admin/services/licenseService';
+import { getStoredSession, logoutUser, KivoraUserSession } from '../admin/services/authService';
+import { formatLicenseDate, getPlanLabel, subscribeClientLicenses } from '../admin/services/licenseService';
 import {
   SupportTicket, createSupportTicket, sendTicketMessage,
   subscribeClientTickets
@@ -37,7 +36,22 @@ const fmt = (n: number) => n.toLocaleString('pt-AO');
 
 export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) => {
   const session: KivoraUserSession | null = getStoredSession();
-  const { licenses } = useLicenses();
+  const [matchedLicenses, setMatchedLicenses] = useState<KivoraLicense[]>([]);
+
+  useEffect(() => {
+    if (!session) return;
+    const unsub = subscribeClientLicenses(
+      {
+        nif: session.nif,
+        email: session.email,
+        licenseKey: session.licenseKey || (session.id?.startsWith('KVRA-') ? session.id : undefined),
+      },
+      (list) => {
+        setMatchedLicenses(list);
+      }
+    );
+    return () => unsub();
+  }, [session?.nif, session?.email, session?.licenseKey, session?.id]);
 
   const [activeSection, setActiveSection] = useState<ClientSection>('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -73,13 +87,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Procura a licença real do cliente no Firebase
-  const matchedLicenses = licenses.filter(
-    (l) =>
-      (session?.nif && l.nif === session.nif) ||
-      (session?.email && l.client_email.toLowerCase() === session.email.toLowerCase()) ||
-      (session?.licenseKey && l.id === session.licenseKey)
-  );
+  // Licença ativa ou primária do cliente logado
 
   const clientLicense: KivoraLicense = matchedLicenses[0] || {
     id: session?.licenseKey || 'PENDING-ACTIVATION',
@@ -206,8 +214,8 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
     }
   };
 
-  const handleLogout = () => {
-    clearStoredSession();
+  const handleLogout = async () => {
+    await logoutUser();
     onLogout();
   };
 

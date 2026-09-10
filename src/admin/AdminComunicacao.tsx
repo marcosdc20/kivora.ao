@@ -109,8 +109,8 @@ export const AdminComunicacao: React.FC = () => {
         userSnap.forEach((d: any) => {
           const data = d.data();
           if (data.email && data.email.includes('@')) {
-            if (data.role === 'partner') partnerEmails.add(data.email.trim().toLowerCase());
-            else if (data.role === 'client') clientEmails.add(data.email.trim().toLowerCase());
+            if (data.role === 'partner' || data.role === 'parceiro') partnerEmails.add(data.email.trim().toLowerCase());
+            else if (data.role === 'client' || data.role === 'cliente') clientEmails.add(data.email.trim().toLowerCase());
           }
         });
 
@@ -167,8 +167,8 @@ export const AdminComunicacao: React.FC = () => {
       userSnap.forEach((d: any) => {
         const data = d.data();
         if (data.email && data.email.includes('@')) {
-          if (data.role === 'partner') partnerEmails.add(data.email.trim().toLowerCase());
-          else if (data.role === 'client') clientEmails.add(data.email.trim().toLowerCase());
+          if (data.role === 'partner' || data.role === 'parceiro') partnerEmails.add(data.email.trim().toLowerCase());
+          else if (data.role === 'client' || data.role === 'cliente') clientEmails.add(data.email.trim().toLowerCase());
         }
       });
     } catch (e) {

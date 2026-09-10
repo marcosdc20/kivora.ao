@@ -31,13 +31,13 @@ export const ADMIN_ALERT_EMAIL = 'kivora.angola@gmail.com';
 
 export const DEFAULT_SITE_EMAIL_CONFIG: SiteEmailConfig = {
   provider: 'gmail',
-  apiKey: 'bvsn njzk cjog ovhf',
+  apiKey: (import.meta.env.VITE_SMTP_PASS as string) || '',
   senderEmail: 'kivora.angola@gmail.com',
   senderName: 'KIVORA Cloud ERP',
   smtpHost: 'smtp.gmail.com',
   smtpPort: 465,
   smtpUser: 'kivora.angola@gmail.com',
-  smtpPass: 'bvsn njzk cjog ovhf',
+  smtpPass: (import.meta.env.VITE_SMTP_PASS as string) || '',
   isActive: true,
 };
 

@@ -185,11 +185,70 @@ function devEmailPlugin(): Plugin {
   };
 }
 
+function devPartnerApiPlugin(): Plugin {
+  return {
+    name: 'dev-partner-api-server',
+    configureServer(server) {
+      server.middlewares.use('/api/partner/issue-credit-license', async (req, res) => {
+        if (req.method === 'OPTIONS') {
+          res.statusCode = 200;
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Headers', '*');
+          res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+          res.end();
+          return;
+        }
+
+        if (req.method !== 'POST') {
+          res.statusCode = 405;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'Método não permitido' }));
+          return;
+        }
+
+        let bodyRaw = '';
+        req.on('data', (chunk) => {
+          bodyRaw += chunk;
+        });
+
+        req.on('end', async () => {
+          try {
+            const body = JSON.parse(bodyRaw || '{}');
+            const handlerModule = await import('./api/partner/issue-credit-license');
+            const handler = handlerModule.default;
+
+            const resHelper = {
+              setHeader: (k: string, v: string) => res.setHeader(k, v),
+              status: (code: number) => {
+                res.statusCode = code;
+                return {
+                  json: (data: any) => {
+                    res.setHeader('Content-Type', 'application/json');
+                    res.end(JSON.stringify(data));
+                  },
+                  end: () => res.end(),
+                };
+              },
+            };
+
+            await handler({ ...req, body }, resHelper);
+          } catch (err: any) {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: err?.message || 'Erro no endpoint de emissão instantânea.' }));
+          }
+        });
+      });
+    }
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     devEmailPlugin(),
+    devPartnerApiPlugin(),
     ViteImageOptimizer({
       // PNG: reduz para 80% qualidade (de 2MB para ~400KB)
       png: {

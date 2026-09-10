@@ -45,6 +45,8 @@ export function calculateExpiresAt(plan: PlanType): number | null {
   return null; // lifetime
 }
 
+import { cleanFirestoreData } from '../../lib/firestoreUtils';
+
 // ─── CRUD de Licenças no Firestore ─────────────────────────────────────────────
 
 /** Cria uma nova licença no Firebase Firestore */
@@ -96,7 +98,7 @@ export async function createLicense(params: CreateLicenseParams): Promise<Kivora
     firestorePayload.provisional_target_plan = params.provisional_target_plan;
   }
 
-  await setDoc(doc(db, 'licenses', key), firestorePayload);
+  await setDoc(doc(db, 'licenses', key), cleanFirestoreData(firestorePayload));
 
   return data;
 }
@@ -121,30 +123,36 @@ export async function promoteProvisionalLicenseToDefinitive(licenseId: string, t
   });
 }
 
+function mapDocToKivoraLicense(id: string, data: any): KivoraLicense {
+  return {
+    id,
+    client_email: data.client_email || '',
+    company_name: data.company_name || 'Sem Nome',
+    nif: data.nif || '999999999',
+    plan_type: data.plan_type || 'monthly',
+    status: data.status || 'active',
+    hardware_id: data.hardware_id ?? null,
+    hostname: data.hostname ?? null,
+    created_at: data.created_at || Date.now(),
+    updated_at: data.updated_at ?? null,
+    expires_at: data.expires_at ?? null,
+    price_aoa: data.price_aoa ?? 0,
+    notes: data.notes ?? '',
+    partner_id: data.partner_id || undefined,
+    activated_at: data.activated_at ?? null,
+    extra_seats: data.extra_seats ?? 0,
+    max_users: data.max_users ?? (1 + (data.extra_seats ?? 0)),
+    is_provisional: Boolean(data.is_provisional),
+    provisional_target_plan: data.provisional_target_plan,
+  };
+}
+
 /** Lista todas as licenças do Firebase Firestore */
 export async function listAllLicenses(filters?: LicenseFilters): Promise<KivoraLicense[]> {
   const q = query(collection(db, 'licenses'), orderBy('created_at', 'desc'));
   const snap = await getDocs(q);
 
-  let list: KivoraLicense[] = snap.docs.map((d) => {
-    const data = d.data();
-    return {
-      id: d.id,
-      client_email: data.client_email || '',
-      company_name: data.company_name || 'Sem Nome',
-      nif: data.nif || '999999999',
-      plan_type: data.plan_type || 'monthly',
-      status: data.status || 'active',
-      hardware_id: data.hardware_id ?? null,
-      created_at: data.created_at || Date.now(),
-      expires_at: data.expires_at ?? null,
-      price_aoa: data.price_aoa ?? 0,
-      notes: data.notes ?? '',
-      partner_id: data.partner_id || undefined,
-      activated_at: data.activated_at ?? null,
-      extra_seats: data.extra_seats ?? 0,
-    };
-  });
+  let list: KivoraLicense[] = snap.docs.map((d) => mapDocToKivoraLicense(d.id, d.data()));
 
   if (filters?.status && filters.status !== 'all')
     list = list.filter((l) => l.status === filters.status);
@@ -172,25 +180,7 @@ export function subscribeToLicenses(
   return onSnapshot(
     q,
     (snap) => {
-      const list: KivoraLicense[] = snap.docs.map((d) => {
-        const data = d.data();
-        return {
-          id: d.id,
-          client_email: data.client_email || '',
-          company_name: data.company_name || 'Sem Nome',
-          nif: data.nif || '999999999',
-          plan_type: data.plan_type || 'monthly',
-          status: data.status || 'active',
-          hardware_id: data.hardware_id ?? null,
-          created_at: data.created_at || Date.now(),
-          expires_at: data.expires_at ?? null,
-          price_aoa: data.price_aoa ?? 0,
-          notes: data.notes ?? '',
-          partner_id: data.partner_id || undefined,
-          activated_at: data.activated_at ?? null,
-          extra_seats: data.extra_seats ?? 0,
-        };
-      });
+      const list: KivoraLicense[] = snap.docs.map((d) => mapDocToKivoraLicense(d.id, d.data()));
       onUpdate(list);
     },
     (error) => {
@@ -205,7 +195,6 @@ export function subscribePartnerLicenses(
   partnerCode: string,
   onUpdate: (licenses: KivoraLicense[]) => void
 ) {
-  // Consulta filtrada diretamente por partner_id para respeitar as regras Zero-Trust do Firestore
   const q = query(
     collection(db, 'licenses'),
     where('partner_id', '==', partnerCode)
@@ -214,25 +203,7 @@ export function subscribePartnerLicenses(
   return onSnapshot(
     q,
     (snap) => {
-      const list: KivoraLicense[] = snap.docs.map((d) => {
-        const data = d.data();
-        return {
-          id: d.id,
-          client_email: data.client_email || '',
-          company_name: data.company_name || 'Sem Nome',
-          nif: data.nif || '999999999',
-          plan_type: data.plan_type || 'monthly',
-          status: data.status || 'active',
-          hardware_id: data.hardware_id ?? null,
-          created_at: data.created_at || Date.now(),
-          expires_at: data.expires_at ?? null,
-          price_aoa: data.price_aoa ?? 0,
-          notes: data.notes ?? '',
-          partner_id: data.partner_id || partnerCode,
-          activated_at: data.activated_at ?? null,
-          extra_seats: data.extra_seats ?? 0,
-        };
-      });
+      const list: KivoraLicense[] = snap.docs.map((d) => mapDocToKivoraLicense(d.id, d.data()));
       onUpdate(list);
     },
     (error) => {
@@ -241,64 +212,48 @@ export function subscribePartnerLicenses(
   );
 }
 
-/** Assina apenas a licença vinculada a um cliente por NIF ou Email (Segregação do Cliente) */
-export function subscribeClientLicense(
+/** Assina todas as licenças pertencentes a um cliente por NIF, email ou chave (Segregação Multi-Tenant Estrita) */
+export function subscribeClientLicenses(
   identifier: { nif?: string; email?: string; licenseKey?: string },
-  onUpdate: (license: KivoraLicense | null) => void
-) {
+  onUpdate: (licenses: KivoraLicense[]) => void
+): () => void {
   if (identifier.licenseKey) {
     return onSnapshot(doc(db, 'licenses', identifier.licenseKey), (snap) => {
       if (snap.exists()) {
-        const data = snap.data();
-        onUpdate({
-          id: snap.id,
-          client_email: data.client_email || '',
-          company_name: data.company_name || 'Sem Nome',
-          nif: data.nif || '999999999',
-          plan_type: data.plan_type || 'monthly',
-          status: data.status || 'active',
-          hardware_id: data.hardware_id ?? null,
-          created_at: data.created_at || Date.now(),
-          expires_at: data.expires_at ?? null,
-          price_aoa: data.price_aoa ?? 0,
-          notes: data.notes ?? '',
-          partner_id: data.partner_id || undefined,
-          activated_at: data.activated_at ?? null,
-          extra_seats: data.extra_seats ?? 0,
-        });
+        onUpdate([mapDocToKivoraLicense(snap.id, snap.data())]);
       } else {
-        onUpdate(null);
+        onUpdate([]);
       }
     });
   }
 
-  const q = query(collection(db, 'licenses'));
-  return onSnapshot(q, (snap) => {
-    let found: KivoraLicense | null = null;
-    snap.docs.forEach((d) => {
-      const data = d.data();
-      const matchNif = identifier.nif && data.nif === identifier.nif;
-      const matchEmail = identifier.email && (data.client_email || '').toLowerCase() === identifier.email.toLowerCase();
-      if (matchNif || matchEmail) {
-        found = {
-          id: d.id,
-          client_email: data.client_email || '',
-          company_name: data.company_name || 'Sem Nome',
-          nif: data.nif || '999999999',
-          plan_type: data.plan_type || 'monthly',
-          status: data.status || 'active',
-          hardware_id: data.hardware_id ?? null,
-          created_at: data.created_at || Date.now(),
-          expires_at: data.expires_at ?? null,
-          price_aoa: data.price_aoa ?? 0,
-          notes: data.notes ?? '',
-          partner_id: data.partner_id || undefined,
-          activated_at: data.activated_at ?? null,
-          extra_seats: data.extra_seats ?? 0,
-        };
-      }
+  if (identifier.nif && identifier.nif !== 'Não Registado') {
+    const q = query(collection(db, 'licenses'), where('nif', '==', identifier.nif));
+    return onSnapshot(q, (snap) => {
+      const list: KivoraLicense[] = snap.docs.map((d) => mapDocToKivoraLicense(d.id, d.data()));
+      onUpdate(list);
     });
-    onUpdate(found);
+  }
+
+  if (identifier.email) {
+    const q = query(collection(db, 'licenses'), where('client_email', '==', identifier.email));
+    return onSnapshot(q, (snap) => {
+      const list: KivoraLicense[] = snap.docs.map((d) => mapDocToKivoraLicense(d.id, d.data()));
+      onUpdate(list);
+    });
+  }
+
+  onUpdate([]);
+  return () => {};
+}
+
+/** Assina apenas a licença vinculada a um cliente por NIF ou Email (Segregação do Cliente) */
+export function subscribeClientLicense(
+  identifier: { nif?: string; email?: string; licenseKey?: string },
+  onUpdate: (license: KivoraLicense | null) => void
+): () => void {
+  return subscribeClientLicenses(identifier, (list) => {
+    onUpdate(list.length > 0 ? list[0] : null);
   });
 }
 
@@ -306,22 +261,7 @@ export function subscribeClientLicense(
 export async function getLicense(key: string): Promise<KivoraLicense | null> {
   const snap = await getDoc(doc(db, 'licenses', key));
   if (!snap.exists()) return null;
-  const d = snap.data();
-  return {
-    id: key,
-    client_email: d.client_email || '',
-    company_name: d.company_name || '',
-    nif: d.nif || '',
-    plan_type: d.plan_type || 'monthly',
-    status: d.status || 'active',
-    hardware_id: d.hardware_id ?? null,
-    created_at: d.created_at || Date.now(),
-    expires_at: d.expires_at ?? null,
-    price_aoa: d.price_aoa ?? 0,
-    notes: d.notes ?? '',
-    activated_at: d.activated_at ?? null,
-    extra_seats: d.extra_seats ?? 0,
-  };
+  return mapDocToKivoraLicense(snap.id, snap.data());
 }
 
 /** Revoga uma licença */

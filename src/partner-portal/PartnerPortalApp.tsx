@@ -21,15 +21,19 @@ import {
   subscribeVideoSupportAccount
 } from '../services/videoSupportService';
 import {
-  getStoredSession, clearStoredSession, KivoraUserSession,
+  getStoredSession, logoutUser, KivoraUserSession,
   changeUserPassword
 } from '../admin/services/authService';
 import { useCompanies } from '../admin/hooks/useFirebase';
 import {
-  createLicense, calculateExpiresAt, subscribePartnerLicenses,
+  subscribePartnerLicenses,
   revokeLicense, reactivateLicense, releaseLicenseFromDevice,
   extendLicenseExpiry, formatLicenseDate, getPlanLabel, updateLicenseSeats
 } from '../admin/services/licenseService';
+import {
+  createLicenseRequest, subscribePartnerLicenseRequests, LicenseRequest
+} from '../admin/services/licenseRequestService';
+import { issueInstantCreditLicense } from './services/partnerCreditService';
 import {
   SupportTicket, createSupportTicket, sendTicketMessage,
   updateTicketStatus, subscribePartnerTickets
@@ -115,6 +119,9 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const [extraSeats, setExtraSeats] = useState(0);
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
   const [generatedIsProvisional, setGeneratedIsProvisional] = useState(false);
+  const [submittedRequest, setSubmittedRequest] = useState<LicenseRequest | null>(null);
+  const [myLicenseRequests, setMyLicenseRequests] = useState<LicenseRequest[]>([]);
+  const [activeLicensesTab, setActiveLicensesTab] = useState<'emitidas' | 'solicitacoes'>('emitidas');
   const [submitting, setSubmitting] = useState(false);
 
   // Carteira de clientes
@@ -339,6 +346,15 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     return () => unsub();
   }, [partnerCode]);
 
+  // Subscrição em Tempo Real às Solicitações de Licença deste Parceiro
+  useEffect(() => {
+    if (!partnerCode) return;
+    const unsub = subscribePartnerLicenseRequests(partnerCode, (list) => {
+      setMyLicenseRequests(list);
+    });
+    return () => unsub();
+  }, [partnerCode]);
+
   const partnerClients = companies.filter(
     (c) =>
       (c.partner_id && c.partner_id === partnerCode) ||
@@ -437,30 +453,20 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     if (!companyName || !nif) return;
     setSubmitting(true);
     try {
-      let isPaid = false;
       let paymentMethod: 'wallet' | 'credit' | 'provisional' = 'credit';
       let isProvisional = false;
 
-      // 1. Pagamento via Wallet (Pré-pago) -> 100% definitivo e livre de travas
+      // 1. Pagamento via Wallet (Pré-pago)
       if (canPayWithWallet) {
-        const deducted = await deductPartnerWallet(partnerCode, currentTotalCost);
-        if (deducted) {
-          isPaid = true;
-          paymentMethod = 'wallet';
-          isProvisional = false;
-        }
+        paymentMethod = 'wallet';
+        isProvisional = false;
       } else if (canPayWithCredit) {
         // 2. Emissão com Quota de Crédito (Slot Rotativo)
-        isPaid = false;
         paymentMethod = 'credit';
 
         // Trava Anti-Fraude: Planos Vitalícios ou com 3+ postos LAN iniciam como Provisórios
         const isHighRiskPlan = (plan === 'lifetime' && policy.require_provisional_lifetime) || extraSeats >= 3;
-        if (isHighRiskPlan) {
-          isProvisional = true;
-        } else {
-          isProvisional = false;
-        }
+        isProvisional = isHighRiskPlan;
       } else {
         // 3. Sem slots disponíveis ou com dívida vencida
         if (isOverdue) {
@@ -482,44 +488,68 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         return;
       }
 
-      // Expiração inicial no Firestore (definida nas políticas configuradas pelo Admin)
-      const normalExpiresAt = calculateExpiresAt(plan);
       const provisionalDays = policy.provisional_lifetime_days || 30;
-      const expiresAt = isProvisional ? (Date.now() + provisionalDays * 86_400_000) : normalExpiresAt;
+      const isAutoInstant = partnerAccount?.credit_issuance_mode === 'auto_instant';
 
-      const lic = await createLicense({
-        client_email: clientEmail,
-        company_name: companyName,
-        nif,
-        plan_type: plan,
-        expires_at: expiresAt,
-        price_aoa: totalClientPrice,
-        notes: isProvisional
-          ? `[PROVISÓRIA ${provisionalDays} DIAS - ${plan === 'lifetime' ? 'VITALÍCIO' : 'MULTI-POSTOS'} PENDENTE] Emitida a crédito pelo parceiro ${partnerCode} (${extraSeats} terminais extras). Tornar-se-á definitiva após liquidação.`
-          : paymentMethod === 'wallet'
-          ? `Emitida e 100% paga via Carteira Pré-paga pelo parceiro ${partnerCode} (${extraSeats} terminais extras).`
-          : `Emitida a crédito (Slot ${activeSlotsInUse + 1}/${creditSlotsLimit}) pelo parceiro ${partnerCode} (${extraSeats} terminais extras).`,
-        partner_id: partnerCode,
-        extra_seats: extraSeats,
-        is_provisional: isProvisional,
-        provisional_target_plan: isProvisional ? plan : undefined,
-      });
+      // Se o parceiro está configurado com emissão instantânea e paga a crédito:
+      if (isAutoInstant && paymentMethod === 'credit') {
+        const instantRes = await issueInstantCreditLicense({
+          partnerCode,
+          partnerName,
+          companyName,
+          nif,
+          clientEmail,
+          planType: plan,
+          extraSeats,
+          priceAoa: totalClientPrice,
+          costAoa: currentTotalCost,
+          isProvisional,
+        });
 
-      // Regista dívida ou transação no Firebase
-      await recordPartnerDebt({
+        if (instantRes.success && instantRes.licenseId) {
+          const exists = companies.some((c) => c.nif === nif);
+          if (!exists) {
+            await addCompany({
+              name: companyName,
+              nif,
+              email: clientEmail,
+              phone: '',
+              address: `Parceiro: ${partnerCode}`,
+              partner_id: partnerCode,
+              status: 'active',
+            }).catch(() => {});
+          }
+
+          setGeneratedKey(instantRes.licenseId);
+          setGeneratedIsProvisional(instantRes.isProvisional ?? isProvisional);
+          showToast('Licença emitida com sucesso via API Instantânea!');
+          setSubmitting(false);
+          return;
+        }
+
+        if (instantRes.error && !instantRes.requiresManualApproval) {
+          showToast('Aviso API: ' + instantRes.error);
+        }
+      }
+
+      const req = await createLicenseRequest({
         partner_id: partnerCode,
         partner_name: partnerName,
-        license_id: lic.id,
         company_name: companyName,
+        nif,
+        client_email: clientEmail,
         plan_type: plan,
+        extra_seats: extraSeats,
+        price_aoa: totalClientPrice,
         cost_aoa: currentTotalCost,
-        client_price_aoa: totalClientPrice,
-        created_at: Date.now(),
-        paid: isPaid,
-        paid_at: isPaid ? Date.now() : null,
         payment_method: paymentMethod,
         is_provisional: isProvisional,
-        provisional_target_plan: isProvisional ? plan : undefined,
+        ...(isProvisional ? { provisional_target_plan: plan } : {}),
+        notes: isProvisional
+          ? `[PROVISÓRIA ${provisionalDays} DIAS PENDENTE] Solicitada pelo parceiro ${partnerCode} (${extraSeats} terminais extras).`
+          : paymentMethod === 'wallet'
+          ? `Solicitada com pagamento via Carteira pelo parceiro ${partnerCode} (${extraSeats} terminais extras).`
+          : `Solicitada a crédito (Slot ${activeSlotsInUse + 1}/${creditSlotsLimit}) pelo parceiro ${partnerCode} (${extraSeats} terminais extras).`,
       });
 
       // Regista também na coleção de empresas clientes se ainda não existir
@@ -536,8 +566,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         });
       }
 
-      setGeneratedKey(lic.id);
-      setGeneratedIsProvisional(isProvisional);
+      setSubmittedRequest(req);
+      showToast('Solicitação de licença registada com sucesso! Aguarda validação da administração.');
     } catch (err: any) {
       showToast('Erro ao emitir licença: ' + err.message);
     } finally {
@@ -917,8 +947,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     }
   };
 
-  const handleLogout = () => {
-    clearStoredSession();
+  const handleLogout = async () => {
+    await logoutUser();
     onLogout();
   };
 
@@ -1592,188 +1622,314 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 </div>
               </div>
 
-              {/* Filtros & Pesquisa */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-                <div className="relative w-full sm:max-w-md">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                  <input
-                    type="text"
-                    placeholder="Pesquisar por chave KVRA, nome da empresa ou NIF..."
-                    value={licenseSearch}
-                    onChange={(e) => setLicenseSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-medium"
-                  />
-                </div>
+              {/* Abas: Licenças Emitidas vs Minhas Solicitações */}
+              <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
+                <button
+                  onClick={() => setActiveLicensesTab('emitidas')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    activeLicensesTab === 'emitidas'
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                >
+                  <Key className="w-3.5 h-3.5" />
+                  <span>Licenças Emitidas ({myPartnerLicenses.length})</span>
+                </button>
 
-                <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1">
-                  {(['all', 'active', 'provisional', 'expiring', 'expired', 'revoked'] as const).map((st) => (
-                    <button
-                      key={st}
-                      onClick={() => setLicenseStatusFilter(st)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                        licenseStatusFilter === st
-                          ? 'bg-slate-900 text-white shadow-xs'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
-                    >
-                      {st === 'all' && `Todas (${myPartnerLicenses.length})`}
-                      {st === 'active' && 'Ativas'}
-                      {st === 'provisional' && 'Provisórias (7d)'}
-                      {st === 'expiring' && 'A Expirar'}
-                      {st === 'expired' && 'Expiradas'}
-                      {st === 'revoked' && 'Suspensas'}
-                    </button>
-                  ))}
-                </div>
+                <button
+                  onClick={() => setActiveLicensesTab('solicitacoes')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    activeLicensesTab === 'solicitacoes'
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                >
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Minhas Solicitações ({myLicenseRequests.length})</span>
+                  {myLicenseRequests.filter((r) => r.status === 'pending').length > 0 && (
+                    <span className="bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+                      {myLicenseRequests.filter((r) => r.status === 'pending').length} pendente{myLicenseRequests.filter((r) => r.status === 'pending').length > 1 ? 's' : ''}
+                    </span>
+                  )}
+                </button>
               </div>
 
-              {/* Tabela / Cards de Licenças */}
-              {filteredLicenses.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 space-y-2 border border-dashed border-slate-200 rounded-2xl">
-                  <Key className="w-10 h-10 mx-auto text-slate-300" />
-                  <h4 className="font-bold text-slate-700 text-sm">Nenhuma licença encontrada</h4>
-                  <p className="text-xs text-slate-400">Tente ajustar os filtros de pesquisa ou emita uma nova licença.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-4">
-                  {filteredLicenses.map((lic) => {
-                    const now = Date.now();
-                    const isExpiringSoon = lic.expires_at && lic.expires_at > now && lic.expires_at - now < 7 * 86400000;
-                    const isExpired = lic.expires_at && lic.expires_at <= now;
+              {activeLicensesTab === 'emitidas' ? (
+                <>
+                  {/* Filtros & Pesquisa */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                    <div className="relative w-full sm:max-w-md">
+                      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                      <input
+                        type="text"
+                        placeholder="Pesquisar por chave KVRA, nome da empresa ou NIF..."
+                        value={licenseSearch}
+                        onChange={(e) => setLicenseSearch(e.target.value)}
+                        className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-medium"
+                      />
+                    </div>
 
-                    return (
-                      <div
-                        key={lic.id}
-                        className="p-5 bg-white rounded-2xl border border-slate-200 hover:border-slate-300 shadow-xs transition-all space-y-4"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-mono text-sm font-black text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
-                                {lic.id}
-                              </span>
-                              <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                                lic.is_provisional ? 'bg-amber-100 text-amber-900 border-amber-300' :
-                                lic.status === 'revoked' ? 'bg-red-50 text-red-700 border-red-200' :
-                                isExpired ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                                isExpiringSoon ? 'bg-orange-50 text-orange-700 border-orange-200' :
-                                'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              }`}>
-                                {lic.is_provisional ? '⏳ Provisória (7 Dias)' : lic.status === 'revoked' ? 'Suspensa' : isExpired ? 'Expirada' : isExpiringSoon ? 'A Expirar em Breve' : 'Ativa'}
-                              </span>
-                              <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
-                                {getPlanLabel(lic.plan_type)}
+                    <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1">
+                      {(['all', 'active', 'provisional', 'expiring', 'expired', 'revoked'] as const).map((st) => (
+                        <button
+                          key={st}
+                          onClick={() => setLicenseStatusFilter(st)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                            licenseStatusFilter === st
+                              ? 'bg-slate-900 text-white shadow-xs'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {st === 'all' && `Todas (${myPartnerLicenses.length})`}
+                          {st === 'active' && 'Ativas'}
+                          {st === 'provisional' && 'Provisórias (7d)'}
+                          {st === 'expiring' && 'A Expirar'}
+                          {st === 'expired' && 'Expiradas'}
+                          {st === 'revoked' && 'Suspensas'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Tabela / Cards de Licenças */}
+                  {filteredLicenses.length === 0 ? (
+                    <div className="p-12 text-center text-slate-400 space-y-2 border border-dashed border-slate-200 rounded-2xl">
+                      <Key className="w-10 h-10 mx-auto text-slate-300" />
+                      <h4 className="font-bold text-slate-700 text-sm">Nenhuma licença encontrada</h4>
+                      <p className="text-xs text-slate-400">Tente ajustar os filtros de pesquisa ou emita uma nova licença.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                      {filteredLicenses.map((lic) => {
+                        const now = Date.now();
+                        const isExpiringSoon = lic.expires_at && lic.expires_at > now && lic.expires_at - now < 7 * 86400000;
+                        const isExpired = lic.expires_at && lic.expires_at <= now;
+
+                        return (
+                          <div
+                            key={lic.id}
+                            className="p-5 bg-white rounded-2xl border border-slate-200 hover:border-slate-300 shadow-xs transition-all space-y-4"
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                              <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-mono text-sm font-black text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                                    {lic.id}
+                                  </span>
+                                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                                    lic.is_provisional ? 'bg-amber-100 text-amber-900 border-amber-300' :
+                                    lic.status === 'revoked' ? 'bg-red-50 text-red-700 border-red-200' :
+                                    isExpired ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                                    isExpiringSoon ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                                    'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                  }`}>
+                                    {lic.is_provisional ? '⏳ Provisória (7 Dias)' : lic.status === 'revoked' ? 'Suspensa' : isExpired ? 'Expirada' : isExpiringSoon ? 'A Expirar em Breve' : 'Ativa'}
+                                  </span>
+                                  <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+                                    {getPlanLabel(lic.plan_type)}
+                                  </span>
+                                </div>
+                                <h4 className="font-black text-slate-900 text-sm mt-2">{lic.company_name}</h4>
+                                <p className="text-slate-500 text-xs font-mono">NIF: {lic.nif} • {lic.client_email || 'Email não registado'}</p>
+                              </div>
+
+                              <div className="flex items-center gap-2 flex-wrap sm:justify-end">
+                                <button
+                                  onClick={() => handleCopyKey(lic.id)}
+                                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                                >
+                                  {copiedKey === lic.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                                  <span>{copiedKey === lic.id ? 'Copiada' : 'Copiar Chave'}</span>
+                                </button>
+
+                                <button
+                                  onClick={() => handleShareWhatsapp(lic)}
+                                  className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-emerald-200 cursor-pointer"
+                                >
+                                  <Share2 className="w-3.5 h-3.5" />
+                                  <span>WhatsApp</span>
+                                </button>
+
+                                <button
+                                  onClick={() => setSelectedLicenseForCert(lic)}
+                                  className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-blue-200 cursor-pointer"
+                                >
+                                  <Printer className="w-3.5 h-3.5" />
+                                  <span>Certificado</span>
+                                </button>
+
+                                <button
+                                  onClick={() => setSelectedLicenseForInvoice(lic)}
+                                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-200 cursor-pointer"
+                                >
+                                  <Receipt className="w-3.5 h-3.5" />
+                                  <span>Recibo / Fatura</span>
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Detalhes de Ativação & Terminal */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-slate-50 rounded-xl text-xs">
+                              <div>
+                                <span className="text-slate-400 text-[10px] uppercase font-bold block">Validade da Licença</span>
+                                <span className="font-bold text-slate-800">{formatLicenseDate(lic.expires_at)}</span>
+                              </div>
+                              <div>
+                                <span className="text-slate-400 text-[10px] uppercase font-bold block">Computadores / Terminais</span>
+                                <span className="font-bold text-slate-800">{1 + (lic.extra_seats || 0)} Terminal(ais)</span>
+                              </div>
+                              <div>
+                                <span className="text-slate-400 text-[10px] uppercase font-bold block">Hardware Fingerprint (PC)</span>
+                                <span className="font-mono text-slate-700 text-[11px] truncate block" title={lic.hardware_id || 'Nenhum'}>
+                                  {lic.hardware_id ? `Vinculado: ${lic.hardware_id.slice(0, 16)}...` : 'Livre para Ativação'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Ações Técnicas & Gestão de Terminais */}
+                            <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+                              <div className="flex items-center gap-2">
+                                {lic.hardware_id ? (
+                                  <button
+                                    onClick={() => handleUnlinkDevice(lic)}
+                                    disabled={actionLoading === lic.id}
+                                    className="text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl font-bold border border-amber-200 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                                    title="Desvincular do computador atual para permitir instalação em novo dispositivo"
+                                  >
+                                    <Unlink className="w-3.5 h-3.5" />
+                                    <span>{actionLoading === lic.id ? 'A desvincular...' : 'Desvincular Computador'}</span>
+                                  </button>
+                                ) : (
+                                  <span className="text-slate-400 text-[11px] italic">Nenhum computador ativado ainda</span>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <button
+                                  onClick={() => {
+                                    setAddSeatsModalLic(lic);
+                                    setSeatsToAdd(1);
+                                  }}
+                                  className="text-blue-700 hover:bg-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl font-bold border border-blue-200 flex items-center gap-1.5 cursor-pointer"
+                                >
+                                  <Users className="w-3.5 h-3.5" />
+                                  <span>+ Postos LAN</span>
+                                </button>
+
+                                <button
+                                  onClick={() => setRenewLicenseModal({ open: true, license: lic, days: 30 })}
+                                  className="text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl font-bold border border-emerald-200 flex items-center gap-1.5 cursor-pointer"
+                                >
+                                  <RefreshCw className="w-3.5 h-3.5" />
+                                  <span>Renovar / Prorrogar</span>
+                                </button>
+
+                                <button
+                                  onClick={() => handleToggleLicenseStatus(lic)}
+                                  disabled={actionLoading === lic.id}
+                                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer border ${
+                                    lic.status === 'revoked'
+                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                                      : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+                                  }`}
+                                >
+                                  <Ban className="w-3.5 h-3.5" />
+                                  <span>{lic.status === 'revoked' ? 'Reativar Licença' : 'Suspender Licença'}</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              ) : (
+                /* Sub-aba: Minhas Solicitações */
+                <div className="space-y-4 pt-2">
+                  <div className="p-4 bg-blue-50/80 border border-blue-200 rounded-2xl text-xs text-blue-900 flex items-start gap-3">
+                    <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="font-black block">Segurança Fiscal & Privacidade Comercial</strong>
+                      <span>
+                        As licenças aprovadas pela Kivora são disponibilizadas aqui para que possa copiar e fornecer diretamente ao cliente. Nenhuma chave é enviada automaticamente aos clientes finais por WhatsApp ou e-mail.
+                      </span>
+                    </div>
+                  </div>
+
+                  {myLicenseRequests.length === 0 ? (
+                    <div className="p-12 text-center text-slate-400 space-y-2 border border-dashed border-slate-200 rounded-2xl">
+                      <Clock className="w-10 h-10 mx-auto text-slate-300" />
+                      <h4 className="font-bold text-slate-700 text-sm">Nenhuma solicitação de licença registada</h4>
+                      <p className="text-xs text-slate-400">As suas solicitações de novas licenças aparecerão aqui para acompanhamento em tempo real.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                      {myLicenseRequests.map((req) => (
+                        <div
+                          key={req.id}
+                          className="p-5 bg-white rounded-2xl border border-slate-200 hover:border-slate-300 shadow-xs transition-all space-y-3"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-mono text-xs font-black text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                                  {req.id}
+                                </span>
+                                <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                                  req.status === 'pending' ? 'bg-amber-50 text-amber-800 border-amber-300' :
+                                  req.status === 'approved' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
+                                  'bg-red-50 text-red-800 border-red-300'
+                                }`}>
+                                  {req.status === 'pending' ? '⏳ Aguarda Confirmação do Admin' :
+                                   req.status === 'approved' ? '✓ Aprovada & Emitida' : '✕ Recusada'}
+                                </span>
+                                <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+                                  {getPlanLabel(req.plan_type)}
+                                  {req.extra_seats > 0 ? ` (+${req.extra_seats} postos)` : ''}
+                                </span>
+                                <span className="text-[10px] font-medium text-slate-500">
+                                  {new Date(req.created_at).toLocaleDateString('pt-AO')}
+                                </span>
+                              </div>
+
+                              <h4 className="font-black text-slate-900 text-sm mt-2">{req.company_name}</h4>
+                              <p className="text-slate-500 text-xs font-mono">
+                                NIF: {req.nif} • {req.client_email || 'Email não registado'}
+                              </p>
+                            </div>
+
+                            <div className="text-right flex flex-col sm:items-end justify-center">
+                              <span className="text-xs text-slate-500">Custo de Atacado:</span>
+                              <span className="font-bold text-sm text-slate-900">{fmt(req.cost_aoa)} Kz</span>
+                              <span className="text-[10px] text-slate-400">
+                                {req.payment_method === 'wallet' ? 'Pago via Carteira' : 'Linha de Crédito'}
                               </span>
                             </div>
-                            <h4 className="font-black text-slate-900 text-sm mt-2">{lic.company_name}</h4>
-                            <p className="text-slate-500 text-xs font-mono">NIF: {lic.nif} • {lic.client_email || 'Email não registado'}</p>
                           </div>
 
-                          <div className="flex items-center gap-2 flex-wrap sm:justify-end">
-                            <button
-                              onClick={() => handleCopyKey(lic.id)}
-                              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-                            >
-                              {copiedKey === lic.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                              <span>{copiedKey === lic.id ? 'Copiada' : 'Copiar Chave'}</span>
-                            </button>
-
-                            <button
-                              onClick={() => handleShareWhatsapp(lic)}
-                              className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-emerald-200 cursor-pointer"
-                            >
-                              <Share2 className="w-3.5 h-3.5" />
-                              <span>WhatsApp</span>
-                            </button>
-
-                            <button
-                              onClick={() => setSelectedLicenseForCert(lic)}
-                              className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-blue-200 cursor-pointer"
-                            >
-                              <Printer className="w-3.5 h-3.5" />
-                              <span>Certificado</span>
-                            </button>
-
-                            <button
-                              onClick={() => setSelectedLicenseForInvoice(lic)}
-                              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-200 cursor-pointer"
-                            >
-                              <Receipt className="w-3.5 h-3.5" />
-                              <span>Recibo / Fatura</span>
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Detalhes de Ativação & Terminal */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-slate-50 rounded-xl text-xs">
-                          <div>
-                            <span className="text-slate-400 text-[10px] uppercase font-bold block">Validade da Licença</span>
-                            <span className="font-bold text-slate-800">{formatLicenseDate(lic.expires_at)}</span>
-                          </div>
-                          <div>
-                            <span className="text-slate-400 text-[10px] uppercase font-bold block">Computadores / Terminais</span>
-                            <span className="font-bold text-slate-800">{1 + (lic.extra_seats || 0)} Terminal(ais)</span>
-                          </div>
-                          <div>
-                            <span className="text-slate-400 text-[10px] uppercase font-bold block">Hardware Fingerprint (PC)</span>
-                            <span className="font-mono text-slate-700 text-[11px] truncate block" title={lic.hardware_id || 'Nenhum'}>
-                              {lic.hardware_id ? `Vinculado: ${lic.hardware_id.slice(0, 16)}...` : 'Livre para Ativação'}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Ações Avançadas */}
-                        <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs flex-wrap">
-                          <div className="flex items-center gap-2">
-                            {lic.hardware_id && (
+                          {req.status === 'approved' && req.license_id && (
+                            <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                              <div className="flex items-center gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                                <div>
+                                  <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Chave de Licença Oficial (Entregar ao Cliente):</span>
+                                  <span className="font-mono font-black text-slate-900 text-sm select-all">{req.license_id}</span>
+                                </div>
+                              </div>
                               <button
-                                onClick={() => handleUnlinkDevice(lic)}
-                                disabled={actionLoading === lic.id}
-                                className="text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl font-bold border border-amber-200 flex items-center gap-1.5 cursor-pointer"
+                                onClick={() => handleCopyKey(req.license_id!)}
+                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
                               >
-                                <Unlink className="w-3.5 h-3.5" />
-                                <span>Desvincular PC (Troca de Máquina)</span>
+                                {copiedKey === req.license_id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                                <span>{copiedKey === req.license_id ? 'Copiada!' : 'Copiar Chave'}</span>
                               </button>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => {
-                                setAddSeatsModalLic(lic);
-                                setSeatsToAdd(1);
-                              }}
-                              className="text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl font-bold border border-blue-200 flex items-center gap-1.5 cursor-pointer"
-                            >
-                              <Users className="w-3.5 h-3.5" />
-                              <span>+ Postos LAN</span>
-                            </button>
-
-                            <button
-                              onClick={() => setRenewLicenseModal({ open: true, license: lic, days: 30 })}
-                              className="text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl font-bold border border-emerald-200 flex items-center gap-1.5 cursor-pointer"
-                            >
-                              <RefreshCw className="w-3.5 h-3.5" />
-                              <span>Renovar / Prorrogar</span>
-                            </button>
-
-                            <button
-                              onClick={() => handleToggleLicenseStatus(lic)}
-                              disabled={actionLoading === lic.id}
-                              className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer border ${
-                                lic.status === 'revoked'
-                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                                  : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
-                              }`}
-                            >
-                              <Ban className="w-3.5 h-3.5" />
-                              <span>{lic.status === 'revoked' ? 'Reativar Licença' : 'Suspender Licença'}</span>
-                            </button>
-                          </div>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    );
-                  })}
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1904,22 +2060,104 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       `A sua quota de ${creditSlotsLimit} slots de crédito está esgotada. Efetue a liquidação de licenças pendentes ou utilize a Carteira Pré-paga.`
                     )}
                   </p>
+                  {canPayWithCredit && (
+                    <div className="mt-2 pt-2 border-t border-slate-200/80 flex items-center justify-between text-[10px]">
+                      <span className="text-slate-500 font-medium">Modo de Processamento a Crédito:</span>
+                      {partnerAccount?.credit_issuance_mode === 'auto_instant' ? (
+                        <span className="font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-300 flex items-center gap-1">
+                          ⚡ Emissão Instantânea via API (Chave Imediata)
+                        </span>
+                      ) : (
+                        <span className="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-300 flex items-center gap-1">
+                          🛡️ Fila de Análise (Aprovação pelo Administrador)
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {generatedKey ? (
+              {submittedRequest ? (
+                <div className="p-8 bg-slate-950 text-white rounded-3xl space-y-5 text-center animate-fadeIn shadow-xl">
+                  <div className="w-14 h-14 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto border border-amber-500/30">
+                    <Clock className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-amber-400">
+                      Solicitação Registada com Sucesso!
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-1.5 max-w-md mx-auto leading-relaxed">
+                      O seu pedido de emissão foi enviado em tempo real para a Administração Kivora.
+                      Assim que validado pelo Administrador, a licença oficial estará disponível no seu painel.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 text-left space-y-2 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Código do Pedido:</span>
+                      <span className="font-mono font-bold text-amber-400 select-all">{submittedRequest.id}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Cliente / Empresa:</span>
+                      <span className="font-bold text-white">{submittedRequest.company_name} (NIF: {submittedRequest.nif})</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Plano Solicitado:</span>
+                      <span className="font-bold text-blue-400">
+                        {getPlanLabel(submittedRequest.plan_type)}
+                        {submittedRequest.extra_seats > 0 ? ` (+${submittedRequest.extra_seats} postos)` : ''}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Modalidade:</span>
+                      <span className="font-bold text-emerald-400">
+                        {submittedRequest.payment_method === 'wallet' ? 'Carteira Pré-paga' : 'Linha de Crédito'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-blue-950/60 border border-blue-800/60 rounded-xl text-[11px] text-blue-200 text-left flex items-start gap-2">
+                    <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Entrega Comercial Sob Controlo:</strong> Nenhuma chave é enviada automaticamente aos clientes finais por e-mail ou WhatsApp. O fornecimento da chave oficial ao cliente é 100% da responsabilidade do Parceiro após aprovação da licença.
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-center gap-3 pt-2">
+                    <button
+                      onClick={() => {
+                        setSubmittedRequest(null);
+                        setCompanyName('');
+                        setNif('');
+                        setClientEmail('');
+                      }}
+                      className="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer"
+                    >
+                      + Nova Solicitação
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSubmittedRequest(null);
+                        setActiveSection('licencas');
+                        setActiveLicensesTab('solicitacoes');
+                      }}
+                      className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer shadow-md"
+                    >
+                      Acompanhar Solicitações
+                    </button>
+                  </div>
+                </div>
+              ) : generatedKey ? (
                 <div className="p-8 bg-slate-950 text-white rounded-3xl space-y-5 text-center animate-fadeIn shadow-xl">
                   <div className="w-14 h-14 bg-emerald-600/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto border border-emerald-500/30">
                     <CheckCircle2 className="w-8 h-8" />
                   </div>
                   <div>
                     <h3 className="text-lg font-black">
-                      {generatedIsProvisional ? 'Chave Provisória Emitida (7 Dias)!' : 'Chave KVRA Emitida com Sucesso!'}
+                      {generatedIsProvisional ? 'Chave Provisória Emitida!' : 'Chave KVRA Emitida com Sucesso!'}
                     </h3>
                     <p className="text-xs text-slate-400 mt-1">
-                      {generatedIsProvisional
-                        ? 'A licença está ativa no cliente por 7 dias. Transfira o valor para torná-la definitiva.'
-                        : 'A licença foi ativada e associada à sua carteira de revendedor.'}
+                      A licença foi emitida e associada à sua carteira de revendedor.
                     </p>
                   </div>
                   <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800">
@@ -1934,29 +2172,13 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       {copiedKey === generatedKey ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                       <span>{copiedKey === generatedKey ? 'Chave Copiada!' : 'Copiar Chave'}</span>
                     </button>
+                  </div>
 
-                    <button
-                      onClick={() => {
-                        const fakeLic: KivoraLicense = {
-                          id: generatedKey,
-                          client_email: clientEmail,
-                          company_name: companyName,
-                          nif,
-                          plan_type: plan,
-                          status: 'active',
-                          hardware_id: null,
-                          created_at: Date.now(),
-                          expires_at: generatedIsProvisional ? (Date.now() + 7 * 86400000) : calculateExpiresAt(plan),
-                          extra_seats: extraSeats,
-                          is_provisional: generatedIsProvisional,
-                        };
-                        handleShareWhatsapp(fakeLic);
-                      }}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-md"
-                    >
-                      <Share2 className="w-4 h-4" />
-                      <span>Enviar p/ WhatsApp do Cliente</span>
-                    </button>
+                  <div className="p-3 bg-blue-950/60 border border-blue-800/60 rounded-xl text-[11px] text-blue-200 text-left flex items-start gap-2">
+                    <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Entrega Comercial Sob Controlo:</strong> Nenhuma chave foi enviada ao cliente final por WhatsApp ou e-mail. Copie a chave acima e forneça diretamente ao cliente junto com a sua fatura ou contrato.
+                    </span>
                   </div>
 
                   <div className="pt-2 border-t border-slate-800">

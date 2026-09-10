@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Plus, Search, Key, CheckSquare,
   X, Copy, Ban, RotateCcw, Unlink, Trash2, Clock, CheckCircle2,
-  Loader2, Building2, Monitor, Users, ShieldCheck, Download, Mail, Lock
+  Loader2, Building2, Monitor, Users, ShieldCheck, Download, Lock
 } from 'lucide-react';
 import { AdminTopbar, StatusBadge } from './AdminComponents';
 import { useLicenses, useCompanies } from './hooks/useFirebase';
@@ -10,15 +10,18 @@ import { FirebaseAuthModal } from './components/FirebaseAuthModal';
 import {
   createLicense, revokeLicense, reactivateLicense,
   releaseLicenseFromDevice, deleteLicense, extendLicenseExpiry, updateLicenseSeats,
-  getPlanLabel, formatLicenseDate, calculateExpiresAt, promoteProvisionalLicenseToDefinitive
+  getPlanLabel, formatLicenseDate, calculateExpiresAt
 } from './services/licenseService';
 import { createClientAccount } from './services/authService';
 import {
   subscribePartnerPolicy, DEFAULT_PARTNER_POLICY,
   PartnerLicensingPolicy, getAdminSeatCost
 } from './services/partnerDebtService';
-import { sendLicenseToClientEmail, sendClientWelcomeEmail } from '../services/siteEmailService';
-import { notify, confirmDialog, alertDialog } from '../services/notificationService';
+import { auth } from '../lib/firebase';
+import {
+  subscribeAllLicenseRequests, approveLicenseRequest, rejectLicenseRequest, LicenseRequest
+} from './services/licenseRequestService';
+import { notify, confirmDialog } from '../services/notificationService';
 import type { KivoraLicense, PlanType } from './types';
 
 // ============================
@@ -43,10 +46,101 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
   const [seatsModalLic, setSeatsModalLic] = useState<KivoraLicense | null>(null);
   const [newExtraSeats, setNewExtraSeats] = useState<number>(0);
 
+  const [mainTab, setMainTab] = useState<'licencas' | 'solicitacoes'>('licencas');
+  const [licenseRequests, setLicenseRequests] = useState<LicenseRequest[]>([]);
+  const [requestSearch, setRequestSearch] = useState('');
+  const [requestFilterStatus, setRequestFilterStatus] = useState<'todos' | 'pending' | 'approved' | 'rejected'>('todos');
+  const [rejectModalReq, setRejectModalReq] = useState<LicenseRequest | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+
   useEffect(() => {
     const unsub = subscribePartnerPolicy((p) => setPolicy(p));
-    return () => unsub();
+    const unsubReqs = subscribeAllLicenseRequests((list) => {
+      setLicenseRequests(list);
+    });
+    return () => {
+      unsub();
+      unsubReqs();
+    };
   }, []);
+
+  const pendingRequestsCount = licenseRequests.filter((r) => r.status === 'pending').length;
+
+  const filteredRequests = licenseRequests.filter((r) => {
+    const s = requestSearch.toLowerCase();
+    const matchSearch =
+      r.id.toLowerCase().includes(s) ||
+      r.partner_name.toLowerCase().includes(s) ||
+      r.partner_id.toLowerCase().includes(s) ||
+      r.company_name.toLowerCase().includes(s) ||
+      r.nif.includes(s) ||
+      r.client_email.toLowerCase().includes(s);
+
+    const matchStatus =
+      requestFilterStatus === 'todos' ||
+      r.status === requestFilterStatus;
+
+    return matchSearch && matchStatus;
+  });
+
+  const requestCounts = {
+    todos: licenseRequests.length,
+    pending: licenseRequests.filter((r) => r.status === 'pending').length,
+    approved: licenseRequests.filter((r) => r.status === 'approved').length,
+    rejected: licenseRequests.filter((r) => r.status === 'rejected').length,
+  };
+
+  const handleApproveRequest = async (req: LicenseRequest) => {
+    const confirmed = await confirmDialog({
+      title: 'Aprovar e Emitir Licença Oficial',
+      message: `Tem certeza que deseja aprovar e emitir a licença oficial para ${req.company_name} (solicitada pelo parceiro ${req.partner_name})?\n\n• Plano: ${getPlanLabel(req.plan_type)} (+${req.extra_seats} terminais)\n• Custo de Atacado Kivora: ${new Intl.NumberFormat('pt-AO').format(req.cost_aoa)} Kz\n• Modalidade: ${req.payment_method === 'wallet' ? 'Carteira Pré-paga' : 'Linha de Crédito'}\n\n🔒 PROTEÇÃO DE PRIVACIDADE: Nenhuma mensagem será enviada por WhatsApp ou e-mail ao cliente final. A chave será gerada no Firebase e disponibilizada no portal do parceiro.`,
+      confirmText: 'Aprovar & Emitir',
+      variant: 'primary',
+    });
+    if (!confirmed) return;
+
+    setActionLoading(req.id);
+    try {
+      const reviewer = auth.currentUser?.email || 'admin@kivora.ao';
+      const res = await approveLicenseRequest(req.id, reviewer);
+      if (res.success && res.licenseId) {
+        notify.success(`Licença oficial ${res.licenseId} emitida com sucesso!`);
+        refresh();
+      } else {
+        notify.error('Erro ao aprovar: ' + (res.error || 'Erro desconhecido'));
+      }
+    } catch (err: any) {
+      notify.error('Erro ao processar aprovação: ' + err.message);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRejectRequestSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rejectModalReq) return;
+    if (!rejectReason.trim()) {
+      notify.warning('Por favor informe o motivo da recusa.');
+      return;
+    }
+
+    setActionLoading(rejectModalReq.id);
+    try {
+      const reviewer = auth.currentUser?.email || 'admin@kivora.ao';
+      const res = await rejectLicenseRequest(rejectModalReq.id, rejectReason, reviewer);
+      if (res.success) {
+        notify.info(`Solicitação ${rejectModalReq.id} foi recusada com sucesso.`);
+        setRejectModalReq(null);
+        setRejectReason('');
+      } else {
+        notify.error('Erro ao recusar: ' + (res.error || 'Erro desconhecido'));
+      }
+    } catch (err: any) {
+      notify.error('Erro ao processar recusa: ' + err.message);
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const filtered = licenses.filter((l) => {
     const s = search.toLowerCase();
@@ -78,54 +172,6 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
     navigator.clipboard.writeText(text);
     setCopiedKey(text);
     setTimeout(() => setCopiedKey(null), 2500);
-  };
-
-  const handleSendLicenseEmail = async (lic: KivoraLicense) => {
-    const targetEmail = lic.client_email;
-    if (!targetEmail) {
-      alertDialog({
-        title: 'E-mail em Falta',
-        message: `Esta licença (${lic.company_name}) não possui e-mail associado. Edite os dados do cliente para associar um e-mail.`,
-        type: 'warning',
-      });
-      return;
-    }
-
-    const confirmed = await confirmDialog({
-      title: 'Enviar Licença por E-mail',
-      message: `Deseja enviar a chave de licença oficial por e-mail para ${targetEmail}?`,
-      confirmText: 'Enviar Agora',
-      cancelText: 'Cancelar',
-    });
-    if (!confirmed) return;
-
-    setActionLoading(lic.id);
-    try {
-      const res = await sendLicenseToClientEmail({
-        clientEmail: targetEmail,
-        companyName: lic.company_name,
-        nif: lic.nif,
-        licenseKey: lic.id,
-        planName: getPlanLabel(lic.plan_type),
-        validUntil: formatLicenseDate(lic.expires_at),
-        seatsCount: 1 + (lic.extra_seats || 0),
-        partnerName: lic.partner_id || undefined,
-      });
-
-      if (res.success) {
-        notify.success(`Licença enviada com sucesso para ${targetEmail}!`);
-      } else {
-        alertDialog({
-          title: 'Aviso de Envio',
-          message: `Não foi possível enviar o e-mail: ${res.error}\n\nVerifique as credenciais em Configurações ➔ Serviço de E-mails.`,
-          type: 'warning',
-        });
-      }
-    } catch (err: any) {
-      notify.error('Erro ao enviar e-mail: ' + err.message);
-    } finally {
-      setActionLoading(null);
-    }
   };
 
   const handleRevoke = async (key: string) => {
@@ -314,239 +360,495 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
           </div>
         )}
 
-        {/* Stats Inline */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { id: 'todos', label: 'Todas as Licenças', count: counts.todos, color: 'text-slate-900' },
-            { id: 'active', label: 'Ativas no Cloud', count: counts.active, color: 'text-emerald-600' },
-            { id: 'expired', label: 'Expiradas', count: counts.expired, color: 'text-amber-600' },
-            { id: 'revoked', label: 'Revogadas / Bloqueadas', count: counts.revoked, color: 'text-red-600' },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setFilterStatus(item.id)}
-              className={`rounded-2xl p-4 border text-left transition-all cursor-pointer ${
-                filterStatus === item.id
-                  ? 'bg-slate-950 border-slate-950 text-white shadow-md'
-                  : 'bg-white border-slate-200 hover:border-slate-300'
-              }`}
-            >
-              <p className={`text-2xl font-black ${filterStatus === item.id ? 'text-white' : item.color}`}>{item.count}</p>
-              <p className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${filterStatus === item.id ? 'text-slate-400' : 'text-slate-400'}`}>
-                {item.label}
-              </p>
-            </button>
-          ))}
+        {/* Abas Superiores: Licenças vs Solicitações de Parceiros */}
+        <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+          <button
+            onClick={() => setMainTab('licencas')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              mainTab === 'licencas'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <Key className="w-3.5 h-3.5" />
+            <span>Licenças Emitidas ({licenses.length})</span>
+          </button>
+
+          <button
+            onClick={() => setMainTab('solicitacoes')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              mainTab === 'solicitacoes'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>Solicitações de Parceiros</span>
+            {pendingRequestsCount > 0 ? (
+              <span className="bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse">
+                {pendingRequestsCount} pendente{pendingRequestsCount > 1 ? 's' : ''}
+              </span>
+            ) : (
+              <span className="text-slate-400 text-[10px]">({licenseRequests.length})</span>
+            )}
+          </button>
         </div>
 
-        {/* Search */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="relative w-full sm:max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" strokeWidth={1.75} />
-            <input
-              type="text"
-              placeholder="Pesquisar chave KVRA, empresa, NIF ou email..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 font-medium shadow-sm"
-            />
-          </div>
-
-          <div className="text-xs text-slate-500 font-bold flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Sincronizado com Kivora Cloud Firestore</span>
-          </div>
-        </div>
-
-        {/* Tabela de Licenças */}
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-          {loading ? (
-            <div className="p-12 text-center text-slate-400 space-y-2.5">
-              <div className="w-8 h-8 rounded-full border-[2.5px] border-slate-200 border-t-amber-500 border-r-amber-500 animate-spin mx-auto" />
-              <p className="text-xs font-semibold text-slate-500">A carregar licenças...</p>
+        {mainTab === 'licencas' ? (
+          <>
+            {/* Stats Inline */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { id: 'todos', label: 'Todas as Licenças', count: counts.todos, color: 'text-slate-900' },
+                { id: 'active', label: 'Ativas no Cloud', count: counts.active, color: 'text-emerald-600' },
+                { id: 'expired', label: 'Expiradas', count: counts.expired, color: 'text-amber-600' },
+                { id: 'revoked', label: 'Revogadas / Bloqueadas', count: counts.revoked, color: 'text-red-600' },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setFilterStatus(item.id)}
+                  className={`rounded-2xl p-4 border text-left transition-all cursor-pointer ${
+                    filterStatus === item.id
+                      ? 'bg-slate-950 border-slate-950 text-white shadow-md'
+                      : 'bg-white border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <p className={`text-2xl font-black ${filterStatus === item.id ? 'text-white' : item.color}`}>{item.count}</p>
+                  <p className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${filterStatus === item.id ? 'text-slate-400' : 'text-slate-400'}`}>
+                    {item.label}
+                  </p>
+                </button>
+              ))}
             </div>
-          ) : filtered.length === 0 ? (
-            <div className="p-12 text-center text-slate-400 space-y-2">
-              <Key className="w-10 h-10 mx-auto text-slate-300" />
-              <p className="text-sm font-bold text-slate-600">Nenhuma licença encontrada</p>
-              <p className="text-xs text-slate-400">Clique em "Emitir Nova Licença" para gerar uma chave real.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto w-full">
-              <table className="w-full text-xs min-w-[650px]">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 font-black uppercase text-[10px] tracking-wider text-left">
-                  <th className="px-5 py-3.5">Chave da Licença</th>
-                  <th className="px-4 py-3.5">Empresa / NIF</th>
-                  <th className="px-4 py-3.5 hidden md:table-cell">Plano & Terminais</th>
-                  <th className="px-4 py-3.5">Estado</th>
-                  <th className="px-4 py-3.5 hidden lg:table-cell">Validade</th>
-                  <th className="px-4 py-3.5 hidden xl:table-cell">Dispositivo Vinculado</th>
-                  <th className="text-right px-5 py-3.5">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filtered.map((lic) => {
-                  const isExpired = lic.expires_at && lic.expires_at < Date.now();
-                  const effectiveStatus = isExpired ? 'expirada' : (lic.status === 'active' ? 'ativa' : 'suspensa');
-                  const totalSeats = 1 + (lic.extra_seats || 0);
 
-                  return (
-                    <tr key={lic.id} className="hover:bg-slate-50 transition-colors group">
-                      <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-2">
-                          <Key className="w-3.5 h-3.5 text-blue-600 shrink-0" strokeWidth={2} />
-                          <span className="font-mono font-bold text-slate-900 text-xs tracking-wider select-all">{lic.id}</span>
-                          <button
-                            onClick={() => copyToClipboard(lic.id)}
-                            className="p-1 text-slate-400 hover:text-blue-600 transition-colors rounded cursor-pointer"
-                            title="Copiar Chave"
-                          >
-                            {copiedKey === lic.id ? (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <p className="font-bold text-slate-900">{lic.company_name}</p>
-                        <p className="text-slate-400 text-[10px] font-mono">NIF: {lic.nif} • {lic.client_email}</p>
-                      </td>
-                      <td className="px-4 py-3.5 hidden md:table-cell">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-bold text-slate-800">{getPlanLabel(lic.plan_type)}</span>
-                          <button
-                            onClick={() => handleOpenSeatsModal(lic)}
-                            className="text-[10px] text-blue-700 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-full font-bold border border-blue-200 flex items-center gap-1 transition-all cursor-pointer"
-                            title="Clique para Aumentar ou Alterar Terminais"
-                          >
-                            <Monitor className="w-3 h-3 text-blue-600" />
-                            <span>{totalSeats} Posto(s)</span>
-                          </button>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <StatusBadge status={effectiveStatus} />
-                          {lic.is_provisional && (
-                            <span className="text-[9px] bg-amber-100 text-amber-800 border border-amber-300 px-1.5 py-0.5 rounded font-black">
-                              Provisória (30D)
+            {/* Search */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="relative w-full sm:max-w-md">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" strokeWidth={1.75} />
+                <input
+                  type="text"
+                  placeholder="Pesquisar chave KVRA, empresa, NIF ou email..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 font-medium shadow-sm"
+                />
+              </div>
+
+              <div className="text-xs text-slate-500 font-bold flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Sincronizado com Kivora Cloud Firestore</span>
+              </div>
+            </div>
+
+            {/* Tabela de Licenças */}
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+              {loading ? (
+                <div className="p-12 text-center text-slate-400 space-y-2.5">
+                  <div className="w-8 h-8 rounded-full border-[2.5px] border-slate-200 border-t-amber-500 border-r-amber-500 animate-spin mx-auto" />
+                  <p className="text-xs font-semibold text-slate-500">A carregar licenças...</p>
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="p-12 text-center text-slate-400 space-y-2">
+                  <Key className="w-10 h-10 mx-auto text-slate-300" />
+                  <p className="text-sm font-bold text-slate-600">Nenhuma licença encontrada</p>
+                  <p className="text-xs text-slate-400">Clique em "Emitir Nova Licença" para gerar uma chave real.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto w-full">
+                  <table className="w-full text-xs min-w-[650px]">
+                    <thead>
+                      <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 font-black uppercase text-[10px] tracking-wider text-left">
+                        <th className="px-5 py-3.5">Chave da Licença</th>
+                        <th className="px-4 py-3.5">Empresa / NIF</th>
+                        <th className="px-4 py-3.5 hidden md:table-cell">Plano & Terminais</th>
+                        <th className="px-4 py-3.5">Estado</th>
+                        <th className="px-4 py-3.5 hidden lg:table-cell">Validade</th>
+                        <th className="px-4 py-3.5 hidden xl:table-cell">Dispositivo Vinculado</th>
+                        <th className="text-right px-5 py-3.5">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filtered.map((lic) => {
+                        const isExpired = lic.expires_at && lic.expires_at < Date.now();
+                        const currentStatus = isExpired ? 'expired' : lic.status;
+                        const hasDevice = !!lic.hardware_id;
+
+                        return (
+                          <tr key={lic.id} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-5 py-3.5 font-mono font-bold text-slate-900">
+                              <div className="flex items-center gap-1.5">
+                                <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded text-[11px] font-bold border border-slate-200">
+                                  {lic.id}
+                                </span>
+                                <button
+                                  onClick={() => copyToClipboard(lic.id)}
+                                  className="text-slate-400 hover:text-slate-600 p-1 rounded transition-colors"
+                                  title="Copiar chave"
+                                >
+                                  {copiedKey === lic.id ? (
+                                    <CheckSquare className="w-3.5 h-3.5 text-emerald-600" />
+                                  ) : (
+                                    <Copy className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+                              </div>
+                            </td>
+
+                            <td className="px-4 py-3.5">
+                              <p className="font-bold text-slate-900">{lic.company_name}</p>
+                              <p className="text-[11px] text-slate-400 font-mono">NIF: {lic.nif}</p>
+                              {lic.client_email && (
+                                <p className="text-[11px] text-slate-400 truncate max-w-[180px]">{lic.client_email}</p>
+                              )}
+                            </td>
+
+                            <td className="px-4 py-3.5 hidden md:table-cell">
+                              <span className="font-bold text-blue-600">{getPlanLabel(lic.plan_type)}</span>
+                              <div className="flex items-center gap-1 mt-0.5">
+                                <span className="text-[11px] text-slate-600 font-semibold">
+                                  {1 + (lic.extra_seats || 0)} Posto(s)
+                                </span>
+                                {(lic.extra_seats || 0) > 0 && (
+                                  <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.2 rounded font-bold">
+                                    +{lic.extra_seats} LAN
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+
+                            <td className="px-4 py-3.5">
+                              <StatusBadge status={currentStatus} />
+                            </td>
+
+                            <td className="px-4 py-3.5 hidden lg:table-cell text-slate-600 font-medium">
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-3.5 h-3.5 text-slate-400" />
+                                <span>{formatLicenseDate(lic.expires_at)}</span>
+                              </div>
+                            </td>
+
+                            <td className="px-4 py-3.5 hidden xl:table-cell text-slate-500 font-mono text-[11px]">
+                              {hasDevice ? (
+                                <div className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-lg w-fit">
+                                  <Monitor className="w-3 h-3" />
+                                  <span className="truncate max-w-[140px]" title={lic.hardware_id!}>
+                                    {lic.hardware_id!.slice(0, 16)}...
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-slate-400 italic">Disponível</span>
+                              )}
+                            </td>
+
+                            <td className="px-5 py-3.5 text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <button
+                                  onClick={() => handleOpenSeatsModal(lic)}
+                                  className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                  title="Configurar Postos / Terminais LAN"
+                                >
+                                  <Users className="w-3.5 h-3.5" />
+                                </button>
+
+                                {lic.hardware_id && (
+                                  <button
+                                    onClick={() => handleReleaseDevice(lic.id)}
+                                    disabled={actionLoading === lic.id}
+                                    className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                                    title="Desvincular Hardware ID (Troca de PC)"
+                                  >
+                                    <Unlink className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => setExtendModalKey(lic.id)}
+                                  className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                  title="Estender Validade"
+                                >
+                                  <Clock className="w-3.5 h-3.5" />
+                                </button>
+                                {lic.status === 'active' ? (
+                                  <button
+                                    onClick={() => handleRevoke(lic.id)}
+                                    disabled={actionLoading === lic.id}
+                                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                    title="Revogar Licença"
+                                  >
+                                    <Ban className="w-3.5 h-3.5" />
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => handleReactivate(lic.id)}
+                                    disabled={actionLoading === lic.id}
+                                    className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                                    title="Reativar Licença"
+                                  >
+                                    <RotateCcw className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleDelete(lic.id)}
+                                  disabled={actionLoading === lic.id}
+                                  className="p-1.5 text-slate-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                  title="Apagar Definitivamente"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          /* Aba: Solicitações de Parceiros */
+          <div className="space-y-5">
+            {/* Banner de Garantia Comercial */}
+            <div className="p-4 bg-blue-50/80 border border-blue-200 rounded-2xl text-xs text-blue-900 flex items-start gap-3 shadow-xs">
+              <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+              <div>
+                <strong className="font-black block">Controlo de Emissão & Política Anti-Disparo Automático</strong>
+                <span>
+                  Ao aprovar uma solicitação, a licença é imediatamente gerada em Firestore e disponibilizada no painel do parceiro para que ele a entregue sob as suas condições contratuais.
+                  <strong> As chaves de licença NUNCA são enviadas automaticamente aos clientes por WhatsApp ou e-mail</strong>.
+                </span>
+              </div>
+            </div>
+
+            {/* Stats de Solicitações */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { id: 'todos', label: 'Todas as Solicitações', count: requestCounts.todos, color: 'text-slate-900' },
+                { id: 'pending', label: 'Aguardam Aprovação', count: requestCounts.pending, color: 'text-amber-600' },
+                { id: 'approved', label: 'Aprovadas & Emitidas', count: requestCounts.approved, color: 'text-emerald-600' },
+                { id: 'rejected', label: 'Recusadas', count: requestCounts.rejected, color: 'text-red-600' },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setRequestFilterStatus(item.id as any)}
+                  className={`rounded-2xl p-4 border text-left transition-all cursor-pointer ${
+                    requestFilterStatus === item.id
+                      ? 'bg-slate-950 border-slate-950 text-white shadow-md'
+                      : 'bg-white border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <p className={`text-2xl font-black ${requestFilterStatus === item.id ? 'text-white' : item.color}`}>
+                    {item.count}
+                  </p>
+                  <p className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${requestFilterStatus === item.id ? 'text-slate-400' : 'text-slate-400'}`}>
+                    {item.label}
+                  </p>
+                </button>
+              ))}
+            </div>
+
+            {/* Pesquisa */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="relative w-full sm:max-w-md">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" strokeWidth={1.75} />
+                <input
+                  type="text"
+                  placeholder="Pesquisar por ID, parceiro, empresa, NIF..."
+                  value={requestSearch}
+                  onChange={(e) => setRequestSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 font-medium shadow-sm"
+                />
+              </div>
+
+              <div className="text-xs text-slate-500 font-bold flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Subscrição em tempo real ativa</span>
+              </div>
+            </div>
+
+            {/* Tabela de Solicitações */}
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+              {filteredRequests.length === 0 ? (
+                <div className="p-12 text-center text-slate-400 space-y-2">
+                  <Clock className="w-10 h-10 mx-auto text-slate-300" />
+                  <p className="text-sm font-bold text-slate-600">Nenhuma solicitação encontrada</p>
+                  <p className="text-xs text-slate-400">Os pedidos de licença submetidos pelos parceiros surgirão aqui para validação.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto w-full">
+                  <table className="w-full text-xs min-w-[700px]">
+                    <thead>
+                      <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 font-black uppercase text-[10px] tracking-wider text-left">
+                        <th className="px-5 py-3.5">ID / Data</th>
+                        <th className="px-4 py-3.5">Parceiro</th>
+                        <th className="px-4 py-3.5">Empresa Cliente</th>
+                        <th className="px-4 py-3.5">Plano & Postos</th>
+                        <th className="px-4 py-3.5">Modalidade & Custo</th>
+                        <th className="px-4 py-3.5">Estado</th>
+                        <th className="text-right px-5 py-3.5">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredRequests.map((req) => (
+                        <tr key={req.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="px-5 py-4">
+                            <span className="font-mono font-bold text-slate-900 block">{req.id}</span>
+                            <span className="text-[10px] text-slate-400">
+                              {new Date(req.created_at).toLocaleString('pt-AO')}
                             </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5 text-slate-600 hidden lg:table-cell font-medium">
-                        {formatLicenseDate(lic.expires_at)}
-                      </td>
-                      <td className="px-4 py-3.5 hidden xl:table-cell font-mono text-[11px] text-slate-500">
-                        {lic.hardware_id ? (
-                          <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded border border-slate-200">
-                            {lic.hardware_id.substring(0, 14)}...
-                          </span>
-                        ) : (
-                          <span className="text-slate-400 italic">Disponível p/ Ativação</span>
-                        )}
-                      </td>
-                      <td className="px-5 py-3.5 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {/* PROMOVER PROVISÓRIA PARA DEFINITIVA */}
-                          {lic.is_provisional && (
-                            <button
-                              onClick={async () => {
-                                const confirmed = await confirmDialog({
-                                  title: 'Promover Licença Provisória',
-                                  message: `Deseja promover a licença ${lic.id} para definitiva (${lic.provisional_target_plan || lic.plan_type})? A regularização do crédito será confirmada.`,
-                                  confirmText: 'Promover para Definitiva',
-                                });
-                                if (confirmed) {
-                                  await promoteProvisionalLicenseToDefinitive(lic.id, lic.provisional_target_plan || lic.plan_type);
-                                  refresh();
-                                  notify.success('Licença promovida a definitiva com sucesso!');
-                                }
-                              }}
-                              className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                              title="Promover para Licença Definitiva (Liquidação Confirmada)"
-                            >
-                              <ShieldCheck className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-
-                          {/* AUMENTAR TERMINAIS / POSTOS */}
-                          <button
-                            onClick={() => handleOpenSeatsModal(lic)}
-                            className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                            title="Aumentar / Configurar Terminais (Postos Extras)"
-                          >
-                            <Monitor className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* ENVIAR LICENÇA POR E-MAIL */}
-                          <button
-                            onClick={() => handleSendLicenseEmail(lic)}
-                            disabled={actionLoading === lic.id}
-                            className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                            title="Enviar Licença e Dados por E-mail ao Cliente"
-                          >
-                            <Mail className="w-3.5 h-3.5" />
-                          </button>
-
-                          {lic.hardware_id && (
-                            <button
-                              onClick={() => handleReleaseDevice(lic.id)}
-                              disabled={actionLoading === lic.id}
-                              className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
-                              title="Desvincular Hardware ID (Troca de PC)"
-                            >
-                              <Unlink className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => setExtendModalKey(lic.id)}
-                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                            title="Estender Validade"
-                          >
-                            <Clock className="w-3.5 h-3.5" />
-                          </button>
-                          {lic.status === 'active' ? (
-                            <button
-                              onClick={() => handleRevoke(lic.id)}
-                              disabled={actionLoading === lic.id}
-                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                              title="Revogar Licença"
-                            >
-                              <Ban className="w-3.5 h-3.5" />
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleReactivate(lic.id)}
-                              disabled={actionLoading === lic.id}
-                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                              title="Reativar Licença"
-                            >
-                              <RotateCcw className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleDelete(lic.id)}
-                            disabled={actionLoading === lic.id}
-                            className="p-1.5 text-slate-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                            title="Apagar Definitivamente"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className="font-bold text-slate-900 block">{req.partner_name}</span>
+                            <span className="text-[10px] text-slate-500 font-mono">Cód: {req.partner_id}</span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className="font-bold text-slate-900 block">{req.company_name}</span>
+                            <span className="text-[10px] text-slate-500 font-mono">NIF: {req.nif}</span>
+                            {req.client_email && (
+                              <span className="text-[10px] text-slate-400 block truncate max-w-[150px]">{req.client_email}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className="font-bold text-blue-600 block">{getPlanLabel(req.plan_type)}</span>
+                            <span className="text-[10px] text-slate-500">
+                              {1 + req.extra_seats} posto(s) {req.extra_seats > 0 ? `(+${req.extra_seats} extras)` : ''}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className="font-bold text-slate-900 block">
+                              {new Intl.NumberFormat('pt-AO').format(req.cost_aoa)} Kz
+                            </span>
+                            <span className="text-[10px] text-slate-500 block">
+                              {req.payment_method === 'wallet' ? 'Carteira (Pré-pago)' : 'Linha de Crédito'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border inline-block ${
+                              req.status === 'pending' ? 'bg-amber-50 text-amber-800 border-amber-300 animate-pulse' :
+                              req.status === 'approved' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
+                              'bg-red-50 text-red-800 border-red-300'
+                            }`}>
+                              {req.status === 'pending' ? '⏳ Aguarda Aprovação' :
+                               req.status === 'approved' ? '✓ Aprovada' : '✕ Recusada'}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 text-right">
+                            {req.status === 'pending' ? (
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => handleApproveRequest(req)}
+                                  disabled={actionLoading === req.id}
+                                  className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                                >
+                                  {actionLoading === req.id ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  ) : (
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                  )}
+                                  <span>Aprovar & Emitir</span>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setRejectModalReq(req);
+                                    setRejectReason('');
+                                  }}
+                                  disabled={actionLoading === req.id}
+                                  className="bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-200 hover:border-red-200 transition-all cursor-pointer"
+                                >
+                                  Recusar
+                                </button>
+                              </div>
+                            ) : req.status === 'approved' ? (
+                              <div className="flex items-center justify-end gap-2">
+                                {req.license_id && (
+                                  <button
+                                    onClick={() => copyToClipboard(req.license_id!)}
+                                    className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1 cursor-pointer"
+                                    title="Copiar Chave Oficial"
+                                  >
+                                    <Copy className="w-3 h-3" />
+                                    <span>{copiedKey === req.license_id ? 'Copiada' : req.license_id}</span>
+                                  </button>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-[11px] text-red-600 italic block" title={req.rejection_reason}>
+                                {req.rejection_reason ? `Motivo: ${req.rejection_reason.slice(0, 25)}...` : 'Recusada'}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
+
+      {/* Modal de Recusa de Solicitação de Parceiro */}
+      {rejectModalReq && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-red-100 text-red-600 flex items-center justify-center">
+                  <X className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm text-slate-900">Recusar Solicitação</h3>
+                  <p className="text-[11px] text-slate-400 font-mono">{rejectModalReq.id}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setRejectModalReq(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-600 bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+              <div><strong>Parceiro:</strong> {rejectModalReq.partner_name} ({rejectModalReq.partner_id})</div>
+              <div><strong>Empresa:</strong> {rejectModalReq.company_name} (NIF: {rejectModalReq.nif})</div>
+              <div><strong>Plano:</strong> {getPlanLabel(rejectModalReq.plan_type)}</div>
+            </div>
+
+            <form onSubmit={handleRejectRequestSubmit} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">Motivo da Recusa *</label>
+                <textarea
+                  required
+                  rows={3}
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Ex: Saldo em carteira insuficiente, regularização pendente..."
+                  className="w-full text-xs p-3 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 font-medium text-slate-800"
+                />
+              </div>
+
+              <div className="flex gap-2 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setRejectModalReq(null)}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoading === rejectModalReq.id}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-500 text-white shadow-md cursor-pointer disabled:opacity-50"
+                >
+                  {actionLoading === rejectModalReq.id ? 'A processar...' : 'Confirmar Recusa'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* MODAL: AUMENTAR / CONFIGURAR TERMINAIS E POSTOS DE TRABALHO */}
       {seatsModalLic && (
@@ -811,25 +1113,15 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
       }
 
       // Cria conta de acesso do cliente no Firebase com senha temporária automática
-      const { tempPassword } = await createClientAccount({
+      await createClientAccount({
         email: email || `${companyNif}@kivora.ao`,
         name: companyName,
         nif: companyNif,
         licenseKey: lic.id,
       });
 
-      // Dispara envio automático de e-mail de boas-vindas com credenciais de acesso ao portal
-      if (email && email.includes('@')) {
-        sendClientWelcomeEmail({
-          companyName,
-          nif: companyNif,
-          adminName: companyName,
-          email,
-          licenseKey: lic.id,
-          planName: getPlanLabel(plan),
-          tempPassword, // senha temporária gerada automaticamente
-        }).catch(err => console.warn('Erro envio automatico de email:', err));
-      }
+      // Nota: As licenças NUNCA são enviadas automaticamente por email ou whatsapp aos clientes finais,
+      // devendo a chave ser copiada e entregue sob controlo comercial direto.
 
       setCreatedLicense(lic);
       notify.success('Licença emitida e gravada no Firebase com sucesso!');
@@ -874,33 +1166,35 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
             <div className="flex justify-between"><span className="text-slate-500">Validade:</span><span className="font-bold text-slate-900">{formatLicenseDate(createdLicense.expires_at)}</span></div>
             <div className="flex justify-between"><span className="text-slate-500">Valor Cobrado:</span><span className="font-mono font-bold text-slate-900">{new Intl.NumberFormat('pt-AO').format(createdLicense.price_aoa || 0)} Kz</span></div>
           </div>
+          <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl text-left">
+            <p className="text-[11px] font-bold text-amber-800 flex items-center gap-1.5 mb-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+              <span>Entrega Comercial Controlada (Anti-Spam)</span>
+            </p>
+            <p className="text-[10px] text-amber-700 leading-relaxed">
+              Nenhuma chave de licença é enviada automaticamente aos clientes finais por WhatsApp ou e-mail.
+              Copie a chave acima e forneça diretamente ao cliente conforme os procedimentos comerciais da sua empresa.
+            </p>
+          </div>
+
           <div className="space-y-3">
             <button
               type="button"
-              onClick={async () => {
-                if (createdLicense.client_email) {
-                  const res = await sendClientWelcomeEmail({
-                    companyName: createdLicense.company_name,
-                    nif: createdLicense.nif,
-                    adminName: createdLicense.company_name,
-                    email: createdLicense.client_email,
-                    licenseKey: createdLicense.id,
-                    planName: getPlanLabel(createdLicense.plan_type),
-                  });
-                  if (res.success) notify.success(`Credenciais e Licença enviadas com sucesso para ${createdLicense.client_email}!`);
-                  else notify.error(`Não foi possível enviar o e-mail: ${res.error}`);
-                } else {
-                  alertDialog({
-                    title: 'E-mail Ausente',
-                    message: 'Esta licença não tem e-mail de cliente associado para envio automático.',
-                    type: 'warning',
-                  });
-                }
+              onClick={() => {
+                const text = `*KIVORA ERP — Dados de Ativação*\n\n` +
+                  `Empresa: ${createdLicense.company_name}\n` +
+                  `NIF: ${createdLicense.nif}\n` +
+                  `Plano: ${getPlanLabel(createdLicense.plan_type)}\n` +
+                  `Chave de Ativação: ${createdLicense.id}\n` +
+                  `Validade: ${formatLicenseDate(createdLicense.expires_at)}\n` +
+                  `Postos: ${1 + (createdLicense.extra_seats || 0)}`;
+                navigator.clipboard.writeText(text);
+                notify.success('Dados da licença copiados com sucesso para a área de transferência!');
               }}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 rounded-2xl shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 cursor-pointer transition-all"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3.5 rounded-2xl shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
             >
-              <Mail className="w-4 h-4" />
-              <span>Enviar / Reenviar Licença por E-mail ao Cliente</span>
+              <Copy className="w-4 h-4" />
+              <span>Copiar Dados Completos da Licença</span>
             </button>
             <div className="flex gap-3">
               <button onClick={() => setCreatedLicense(null)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs py-3.5 rounded-2xl transition-all">

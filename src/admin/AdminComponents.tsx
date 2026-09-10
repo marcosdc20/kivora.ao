@@ -4,7 +4,7 @@ import {
   CreditCard, Package, HeadphonesIcon, BarChart3,
   Bell, Users, ScrollText, Settings, ChevronDown,
   ChevronRight, LogOut, Shield, X, Menu, ShoppingBag,
-  Award, ExternalLink, Activity
+  ExternalLink, Activity
 } from 'lucide-react';
 import { AdminSection } from './types';
 
@@ -51,19 +51,8 @@ const NAV_GROUPS: NavGroup[] = [
           { id: 'licenca-criar', label: '+ Emitir Nova Licença' },
         ]
       },
-      {
-        id: 'empresas', label: 'Empresas Clientes', icon: <Building2 className="w-4 h-4" strokeWidth={1.75} />,
-        children: [
-          { id: 'empresas', label: 'Base de Empresas' },
-          { id: 'empresa-detalhe', label: 'Empresas Ativas' },
-        ]
-      },
-      {
-        id: 'instalacoes', label: 'Postos & Caixas LAN', icon: <Monitor className="w-4 h-4" strokeWidth={1.75} />,
-        children: [
-          { id: 'instalacoes', label: 'Computadores e POS' },
-        ]
-      },
+      { id: 'empresas', label: 'Empresas Clientes', icon: <Building2 className="w-4 h-4" strokeWidth={1.75} /> },
+      { id: 'instalacoes', label: 'Postos & Caixas LAN', icon: <Monitor className="w-4 h-4" strokeWidth={1.75} /> },
       { id: 'planos', label: 'Planos & Produtos', icon: <Package className="w-4 h-4" strokeWidth={1.75} /> },
       { id: 'pagamentos', label: 'Pagamentos & Faturas', icon: <CreditCard className="w-4 h-4" strokeWidth={1.75} /> },
     ]
@@ -77,13 +66,6 @@ const NAV_GROUPS: NavGroup[] = [
           { id: 'parceiros', label: 'Todos os Parceiros' },
           { id: 'parceiros-candidaturas', label: 'Candidaturas (25k)' },
         ]
-      },
-      {
-        id: 'parceiros-candidaturas',
-        label: 'Candidaturas & Homologação',
-        icon: <Award className="w-4 h-4 text-amber-400" strokeWidth={1.75} />,
-        badge: '25.000 Kz',
-        badgeColor: 'amber'
       },
       {
         id: 'loja',

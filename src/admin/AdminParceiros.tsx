@@ -40,6 +40,7 @@ export interface Partner {
   nif?: string;
   payment_proof_url?: string;
   payment_proof_name?: string;
+  credit_issuance_mode?: 'manual_approval' | 'auto_instant';
 }
 
 interface AdminParceirosProps {
@@ -114,6 +115,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
   const [editTier, setEditTier] = useState<'bronze' | 'silver' | 'gold' | 'diamond'>('bronze');
   const [editCreditSlots, setEditCreditSlots] = useState<number>(2);
+  const [editCreditIssuanceMode, setEditCreditIssuanceMode] = useState<'manual_approval' | 'auto_instant'>('manual_approval');
   const [topUpAmount, setTopUpAmount] = useState<number>(0);
   const [savingFinancials, setSavingFinancials] = useState(false);
 
@@ -175,6 +177,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             createdAt: Number(d.createdAt) || Number(d.created_at) || Date.now(),
             nif: d.nif || '',
             payment_proof_url: d.payment_proof_url || '',
+            credit_issuance_mode: (d.credit_issuance_mode as any) || 'manual_approval',
           };
 
           if (!existing) {
@@ -273,6 +276,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       setSelectedDebtIds([]);
       setEditTier(selectedPartner.tier || 'bronze');
       setEditCreditSlots(selectedPartner.credit_slots_limit || 2);
+      setEditCreditIssuanceMode(selectedPartner.credit_issuance_mode || 'manual_approval');
       setEditPartnerName(selectedPartner.name || '');
       setEditPartnerEmail(selectedPartner.email || '');
       setEditPartnerPhone(selectedPartner.phone || '');
@@ -401,11 +405,15 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       }
     });
 
-    // 2. Registos pendentes da coleção `partners` (apenas se não existirem em `partner_applications`)
+    // 2. Registos pendentes da coleção `partners` (apenas se tiverem identificador real e não existirem em `partner_applications`)
     resolvedPartners.filter(p => p.status === 'pending').forEach(p => {
       const email = (p.email || '').toLowerCase().trim();
       const nif = (p.nif || '').toLowerCase().trim();
       const code = (p.code || p.id || '').toLowerCase().trim();
+
+      // Ignora registos vazios ou fantasmas sem contacto mínimo
+      if (!email && !nif && (!p.phone || p.phone.length < 6)) return;
+
       const dedupeKey = email || (nif ? `nif_${nif}` : `code_${code}`);
 
       const isAlreadyActive =
@@ -440,6 +448,35 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     const approved = all.filter(c => c.status === 'approved');
 
     return { allApplicationsList: all, pendingApplicationsList: pending, approvedApplicationsList: approved };
+  }, [applications, resolvedPartners]);
+
+  // Autocura no Firestore: se uma candidatura está marcada como pending mas o parceiro já se encontra ativo, sincroniza para approved
+  React.useEffect(() => {
+    if (applications.length === 0 || resolvedPartners.length === 0) return;
+
+    const activeEmails = new Set(resolvedPartners.filter(p => p.status === 'active').map(p => (p.email || '').toLowerCase().trim()).filter(Boolean));
+    const activeNifs = new Set(resolvedPartners.filter(p => p.status === 'active').map(p => (p.nif || '').toLowerCase().trim()).filter(Boolean));
+    const activeCodes = new Set(resolvedPartners.filter(p => p.status === 'active').map(p => (p.code || '').toLowerCase().trim()).filter(Boolean));
+
+    applications.forEach((app) => {
+      if (app.status === 'pending') {
+        const email = (app.email || '').toLowerCase().trim();
+        const nif = (app.nif || '').toLowerCase().trim();
+        const protocol = (app.protocol || app.id || '').toLowerCase().trim();
+
+        const isAlreadyActive =
+          (email && activeEmails.has(email)) ||
+          (nif && activeNifs.has(nif)) ||
+          (protocol && activeCodes.has(protocol));
+
+        if (isAlreadyActive) {
+          updateDoc(doc(db, 'partner_applications', app.id), {
+            status: 'approved',
+            approved_at: Date.now(),
+          }).catch(() => {});
+        }
+      }
+    });
   }, [applications, resolvedPartners]);
 
   const activePartners = resolvedPartners.filter(p => p.status === 'active');
@@ -536,7 +573,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     const initialSlots = policy.tier_slots['bronze'] || 2;
 
     try {
-      await setDoc(doc(db, 'partners', cand.id), {
+      // 1. Gravar com doc ID oficial do parceiro
+      await setDoc(doc(db, 'partners', pCode), {
         name: cand.name,
         email: cand.email,
         phone: cand.phone,
@@ -552,12 +590,36 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         updated_at: Date.now(),
       }, { merge: true });
 
-      if (cand.appId) {
-        await updateDoc(doc(db, 'partner_applications', cand.appId), {
+      // Se cand.id for diferente de pCode, atualiza também para active para evitar registos pendentes residuais
+      if (cand.id && cand.id !== pCode) {
+        await setDoc(doc(db, 'partners', cand.id), {
+          status: 'active',
+          code: pCode,
+          updated_at: Date.now(),
+        }, { merge: true }).catch(() => {});
+      }
+
+      // 2. Marcar a candidatura principal e qualquer outra com o mesmo email/nif/protocolo como approved no Firestore
+      const targetAppId = cand.appId || cand.id;
+      if (targetAppId) {
+        await updateDoc(doc(db, 'partner_applications', targetAppId), {
           status: 'approved',
           approved_at: Date.now(),
         }).catch(() => {});
       }
+
+      applications.forEach((app) => {
+        const matchesEmail = cand.email && app.email && cand.email.toLowerCase().trim() === app.email.toLowerCase().trim();
+        const matchesNif = cand.nif && app.nif && cand.nif.trim() === app.nif.trim();
+        const matchesProtocol = (cand.code && app.protocol && cand.code.trim() === app.protocol.trim()) ||
+                                (cand.protocol && app.protocol && cand.protocol.trim() === app.protocol.trim());
+        if ((matchesEmail || matchesNif || matchesProtocol) && app.id !== targetAppId) {
+          updateDoc(doc(db, 'partner_applications', app.id), {
+            status: 'approved',
+            approved_at: Date.now(),
+          }).catch(() => {});
+        }
+      });
 
       await createOrApprovePartnerAccount({
         email: cand.email,
@@ -572,7 +634,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
       setPartners((prev) =>
         prev.map((p) =>
-          p.id === cand.id
+          p.id === cand.id || p.code === pCode
             ? { ...p, status: 'active', tier: 'bronze', code: pCode, password: pwd, credit_slots_limit: initialSlots }
             : p
         )
@@ -953,9 +1015,20 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                           <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
                             <td className="p-4">
                               <div className="flex flex-col">
-                                <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded w-fit mb-1 border border-blue-200">
-                                  {p.code}
-                                </span>
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded w-fit border border-blue-200">
+                                    {p.code}
+                                  </span>
+                                  {p.credit_issuance_mode === 'auto_instant' ? (
+                                    <span className="inline-flex items-center gap-0.5 text-[9px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                                      ⚡ Auto Instantâneo
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">
+                                      🛡️ Manual
+                                    </span>
+                                  )}
+                                </div>
                                 <span className="font-bold text-slate-900 text-xs">{p.name}</span>
                                 <span className="text-[11px] text-slate-400">
                                   {[p.email, p.phone, p.region].filter(Boolean).join(' • ') || 'Luanda, Angola'}
@@ -2015,6 +2088,18 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   />
                 </div>
 
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Modo de Emissão a Crédito</label>
+                  <select
+                    value={editCreditIssuanceMode}
+                    onChange={(e) => setEditCreditIssuanceMode(e.target.value as any)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800"
+                  >
+                    <option value="manual_approval">🛡️ Aprovação Manual (Padrão de Segurança)</option>
+                    <option value="auto_instant">⚡ Emissão Instantânea (Parceiro Homologado)</option>
+                  </select>
+                </div>
+
                 <div className="flex items-end">
                   <button
                     onClick={async () => {
@@ -2023,8 +2108,10 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                         await setDoc(doc(db, 'partners', selectedPartner.id), {
                           tier: editTier,
                           credit_slots_limit: editCreditSlots,
+                          credit_issuance_mode: editCreditIssuanceMode,
+                          updated_at: Date.now(),
                         }, { merge: true });
-                        notify.success('Categoria e Quota de Slots atualizadas no Firebase!');
+                        notify.success('Categoria, Quota e Modo de Emissão atualizados no Firebase!');
                       } catch (e: any) { notify.error('Erro: ' + e.message); }
                       finally { setSavingFinancials(false); }
                     }}

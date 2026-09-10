@@ -12,6 +12,7 @@ import {
   signOut as firebaseSignOut
 } from 'firebase/auth';
 import { db, auth } from '../../lib/firebase';
+import { cleanFirestoreData } from '../../lib/firestoreUtils';
 
 export type UserRole = 'admin' | 'parceiro' | 'cliente';
 export type UserStatus = 'active' | 'pending' | 'suspended';
@@ -466,7 +467,7 @@ export async function createClientAccount(params: {
 }): Promise<{ tempPassword: string }> {
   const tempPassword = params.password || generateTempPassword();
   const userId = (params.email || params.nif).toLowerCase().replace(/[^a-z0-9]/g, '_');
-  await setDoc(doc(db, 'users', userId), {
+  await setDoc(doc(db, 'users', userId), cleanFirestoreData({
     email: params.email.toLowerCase(),
     nome: params.name,
     nif: params.nif,
@@ -476,14 +477,14 @@ export async function createClientAccount(params: {
     password: tempPassword, // NOTA: migrar para hash bcrypt em versão futura
     passwordSetAt: Date.now(),
     createdAt: Date.now(),
-  }, { merge: true });
+  }), { merge: true });
 
   // Também guarda na coleção licenses para suporte ao login por email de licença
   if (params.licenseKey) {
-    await setDoc(doc(db, 'licenses', params.licenseKey), {
+    await setDoc(doc(db, 'licenses', params.licenseKey), cleanFirestoreData({
       password: tempPassword,
       passwordSetAt: Date.now(),
-    }, { merge: true });
+    }), { merge: true });
   }
 
   return { tempPassword };
@@ -516,7 +517,7 @@ export async function createOrApprovePartnerAccount(params: {
   const userId = params.partnerCode.toLowerCase().replace(/[^a-z0-9]/g, '_');
   const emailUserId = params.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
 
-  const userData = {
+  const userData = cleanFirestoreData({
     email: params.email.toLowerCase().trim(),
     nome: params.nome,
     partnerCode: params.partnerCode,
@@ -528,14 +529,14 @@ export async function createOrApprovePartnerAccount(params: {
     password: cleanPass,
     mustChangePassword: params.mustChangePassword !== false,
     updatedAt: Date.now(),
-  };
+  });
 
   await setDoc(doc(db, 'users', userId), userData, { merge: true });
   if (emailUserId !== userId) {
     await setDoc(doc(db, 'users', emailUserId), userData, { merge: true });
   }
 
-  await setDoc(doc(db, 'partners', params.partnerCode), {
+  await setDoc(doc(db, 'partners', params.partnerCode), cleanFirestoreData({
     code: params.partnerCode,
     name: params.nome,
     email: params.email.toLowerCase().trim(),
@@ -549,7 +550,7 @@ export async function createOrApprovePartnerAccount(params: {
     mustChangePassword: params.mustChangePassword !== false,
     createdAt: Date.now(),
     updatedAt: Date.now(),
-  }, { merge: true });
+  }), { merge: true });
 }
 
 /**
@@ -604,22 +605,22 @@ export async function changeUserPassword(userId: string, newPass: string, _userE
 export async function updatePartnerProfile(partnerCode: string, data: { name?: string; email?: string; phone?: string; region?: string }): Promise<void> {
   const userId = partnerCode.toLowerCase().replace(/[^a-z0-9]/g, '_');
   if (data.email) {
-    await setDoc(doc(db, 'users', userId), {
+    await setDoc(doc(db, 'users', userId), cleanFirestoreData({
       email: data.email.toLowerCase(),
       nome: data.name,
       phone: data.phone,
       region: data.region,
       updatedAt: Date.now(),
-    }, { merge: true });
+    }), { merge: true });
   }
 
-  await setDoc(doc(db, 'partners', partnerCode), {
+  await setDoc(doc(db, 'partners', partnerCode), cleanFirestoreData({
     name: data.name,
     email: data.email?.toLowerCase(),
     phone: data.phone,
     region: data.region,
     updatedAt: Date.now(),
-  }, { merge: true });
+  }), { merge: true });
 }
 
 /**

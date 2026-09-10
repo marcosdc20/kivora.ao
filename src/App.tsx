@@ -281,8 +281,39 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
   },
 };
 
+function getPageFromPathname(): PageId {
+  const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
+  if (!path || path === '') return 'home';
+  if (path === '/admin') return 'admin';
+  if (path === '/area-cliente' || path === '/cliente') return 'area-cliente';
+  if (path === '/area-parceiro' || path === '/parceiro') return 'area-parceiro';
+  if (path === '/login') return 'login';
+  if (path === '/loja') return 'loja';
+  if (path === '/modulos') return 'modulos';
+  if (path === '/precos' || path === '/planos') return 'planos';
+  if (path === '/contacto' || path === '/suporte') return 'suporte';
+  if (path === '/sobre') return 'sobre';
+  if (path === '/noticias') return 'noticias';
+  if (path === '/hardware') return 'hardware';
+  if (path === '/validar-licenca') return 'validar-licenca';
+  if (path === '/candidatura-parceiro') return 'candidatura-parceiro';
+  if (path === '/diretorio-parceiros') return 'diretorio-parceiros';
+  if (path === '/casos-sucesso') return 'casos-sucesso';
+  if (path === '/seguranca') return 'seguranca';
+  if (path === '/comparativo') return 'comparativo';
+  if (path === '/calculadora-fiscal') return 'calculadora-fiscal';
+  if (path === '/provincias') return 'provincias';
+  if (path === '/investidores') return 'investidores';
+  if (path === '/guia-agt') return 'guia-agt';
+  if (path === '/manuais') return 'manuais';
+  if (path === '/simulador-roi') return 'simulador-roi';
+  if (path === '/privacidade') return 'privacidade';
+  if (path === '/termos') return 'termos';
+  return 'home';
+}
+
 export function App() {
-  const [activePage, setActivePage] = useState<PageId>('home');
+  const [activePage, setActivePage] = useState<PageId>(() => getPageFromPathname());
   const [selectedModule, setSelectedModule] = useState<KivoraModule | null>(null);
   const [selectedNewsPost, setSelectedNewsPost] = useState<NewsPost | null>(null);
   const [selectedForSupport] = useState<string>('');
@@ -348,8 +379,21 @@ export function App() {
     }
   }, []);
 
+  // Escuta mudanças de navegação pelo histórico do navegador (botão Voltar/Avançar)
+  useEffect(() => {
+    const handlePopState = () => {
+      setActivePage(getPageFromPathname());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const handleNavigatePage = (page: PageId, _sectionId?: string) => {
     setActivePage(page);
+    const targetPath = PAGE_SEO_METADATA[page]?.path || (page === 'home' ? '/' : `/${page}`);
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({ page }, '', targetPath);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

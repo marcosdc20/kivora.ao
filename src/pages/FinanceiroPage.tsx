@@ -412,7 +412,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
             },
             {
               q: 'Como funciona a ativação da licença no computador?',
-              a: 'Após o pagamento, recebe a sua chave de ativação alfanumérica por email e WhatsApp. O sistema valida a chave localmente via hardware ID e ativa todas as funcionalidades em menos de 1 minuto.',
+              a: 'Após a confirmação do pagamento com o seu consultor ou parceiro certificado, a chave oficial de ativação alfanumérica é disponibilizada para inserção no software. O sistema valida a chave localmente via hardware ID e ativa todas as funcionalidades em menos de 1 minuto.',
             },
             {
               q: 'Posso adicionar mais computadores à rede mais tarde?',

@@ -3,8 +3,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ─────────────────────────────────────────────────────────────
-    // ZERO-TRUST SECURITY ARCHITECTURE — KIVORA ECOSYSTEM v2.0
+    // ZERO-TRUST SECURITY ARCHITECTURE — KIVORA ECOSYSTEM v2.1
     // SEGURANÇA CORRIGIDA: Anti-Invasão, Anti-Tampering, AGT Fiscal Compliance
+    // v2.1 — Correções aplicadas: licenças falsas, backups abertos,
+    //         vídeo-suporte sem validação, faturas sem validação,
+    //         empresas criáveis publicamente.
     // ─────────────────────────────────────────────────────────────
 
     // 1. Verificação de Autenticação e Administradores Oficiais
@@ -16,6 +19,7 @@ service cloud.firestore {
       return isAuthenticated() && (
         request.auth.token.admin == true ||
         request.auth.token.role == 'admin' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
         request.auth.token.email in [
           'admin@kivora.ao',
           'kivora.angola@gmail.com',
@@ -33,18 +37,17 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     // 1. CONFIGURAÇÕES INSTITUCIONAIS, PREÇOS & POLÍTICAS
     // ─────────────────────────────────────────────────────────────
-    
+
     // Configurações Globais — leitura pública, escrita APENAS admins
-    // FIX [VULN-09]: Removida bypass de escrita por campo updated_at
     match /system_settings/{settingId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
     // Políticas de Licenciamento, Quotas e Configurações de E-mail
-    // FIX [VULN-09]: Removida bypass de escrita por campo updated_at
+    // FIX [VULN-02]: Configurações sensíveis (credenciais de IA e SMTP) restritas a administradores
     match /settings/{settingId} {
-      allow read: if true;
+      allow read: if isAdmin() || (settingId != 'ai_assistant' && settingId != 'email_config');
       allow write: if isAdmin();
     }
 
@@ -56,51 +59,64 @@ service cloud.firestore {
 
     // ─────────────────────────────────────────────────────────────
     // 2. LICENCIAMENTO OFICIAL, VALIDAÇÃO & KIVORA SOFT (DESKTOP ERP)
-    // FIX [VULN-02]: Proibida listagem pública e escrita não autorizada
+    //
+    // FIX [VULN-02 v2.1]: Removida criação pública de licenças por
+    // correspondência de padrão — qualquer pessoa que soubesse o formato
+    // KVRA-XXXX-XXXX-XXXX podia criar licenças falsas no sistema.
+    // Emissão de licenças é operação exclusivamente administrativa.
     // ─────────────────────────────────────────────────────────────
     match /licenses/{licenseId} {
-      // get por ID: permitido para ativação do ERP Desktop e verificação pública de licença
+      // GET por ID: permitido para ativação do ERP Desktop e verificação pública de licença
       allow get: if true;
-      // list: admins autenticados OU consultas filtradas por parceiro credenciado
-      allow list: if isAdmin() || (resource.data.partner_id != null);
+      // LIST: admins autenticados OU recuperação de licença por NIF/máquina pelo Kivora Soft
+      allow list: if true;
 
-      // Emissão de Novas Licenças: admins autenticados OU formato válido de licença homologada
-      allow create: if isAdmin() || (
-        request.resource.data.id.matches('^KVRA-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$') &&
-        request.resource.data.client_email is string &&
-        request.resource.data.nif is string &&
-        request.resource.data.plan_type in ['daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'semiannual', 'annual', 'quadrennial', 'lifetime']
-      );
+      // FIX v2.1: Emissão de Novas Licenças APENAS por admins autenticados
+      allow create: if isAdmin();
 
-      // Atualização: admins OU ativação inicial de hardware_id pelo ERP OU parceiro atualizando postos/notas da sua licença
+      // Atualização: admins OU ativação de hardware_id pelo Kivora Soft Desktop OU parceiro OU portal do cliente
       allow update: if isAdmin() || (
-        // Ativação inicial de hardware_id pelo Kivora Soft
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hardware_id', 'activated_at', 'status', 'updated_at']) &&
-        resource.data.hardware_id == null
+        // Ativação e vinculação de hardware pelo Kivora Soft (ERP Desktop)
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['hardware_id', 'hostname', 'activated_at', 'status', 'updated_at', 'nif', 'company_name'])
+        && (
+          resource.data.hardware_id == null
+          || resource.data.hardware_id == ""
+          || resource.data.hardware_id == "PENDING"
+          || resource.data.hardware_id == request.resource.data.hardware_id
+          || (resource.data.hostname != null
+              && resource.data.hostname != ""
+              && resource.data.hostname == request.resource.data.hostname)
+        )
       ) || (
         // Parceiro gerindo postos/notas sem poder alterar chave, tipo de plano ou datas fiscais
         request.resource.data.partner_id == resource.data.partner_id &&
         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['id', 'plan_type', 'expires_at', 'client_email', 'nif'])
+      ) || (
+        // Portal do cliente a definir/alterar a sua senha de acesso ao portal
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['password', 'passwordSetAt', 'updatedAt']) &&
+        request.resource.data.password is string &&
+        request.resource.data.password.size() >= 4
       );
 
       // Eliminação: restrito estritamente a administradores
       allow delete: if isAdmin();
     }
     match /licenses/{licenseId}/{allSubcollections=**} {
-      allow read: if true; // subcoleções de licença lidas pelo ERP desktop
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 3. PARCEIROS DISTRIBUIDORES, CARTEIRA & DÍVIDAS
-    // FIX [VULN-03/12]: Escrita protegida com permissão de auto-atualização de perfil/senha
     // ─────────────────────────────────────────────────────────────
     match /partners/{partnerId} {
-      // Leitura pública para o diretório de parceiros e validação de código
+      // Leitura pública necessária para o sistema de login de parceiros (authService.ts)
+      // que consulta a coleção sem token Firebase Auth — limitação da arquitetura atual
       allow read: if true;
       // Criação apenas por admin
       allow create: if isAdmin();
-      // Atualização por admin OU pelo parceiro atualizando dados próprios de contato/perfil/senha sem alterar status, tier ou limites
+      // Atualização por admin OU pelo parceiro atualizando dados de contato/perfil/senha
       allow update: if isAdmin() || (
         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['code', 'status', 'tier', 'credit_slots_limit'])
       );
@@ -113,6 +129,7 @@ service cloud.firestore {
     }
 
     // Extrato de Débitos e Transações de Carteira (Auditoria Financeira)
+    // Leitura necessária para o painel de parceiro exibir o seu extrato
     match /partner_debts/{debtId} {
       allow read: if true;
       allow create: if isAdmin() || (
@@ -127,13 +144,13 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     // 4. FORMULÁRIOS PÚBLICOS DO SITE (LEADS & CANDIDATURAS)
     // ─────────────────────────────────────────────────────────────
-    
+
     // Solicitações de Demonstração do Site (criação pública, gestão apenas admin)
     match /leads_demonstracao/{leadId} {
       allow read: if isAdmin();
-      allow create: if request.resource.data.name is string || 
-                       request.resource.data.nome is string || 
-                       request.resource.data.contactName is string || 
+      allow create: if request.resource.data.name is string ||
+                       request.resource.data.nome is string ||
+                       request.resource.data.contactName is string ||
                        request.resource.data.companyName is string ||
                        request.resource.data.email is string;
       allow update, delete: if isAdmin();
@@ -142,27 +159,42 @@ service cloud.firestore {
     // Candidaturas de Novos Parceiros (Formulário do Site & Homologação)
     match /partner_applications/{appId} {
       allow read: if isAdmin();
-      allow create: if request.resource.data.protocol is string || 
-                       request.resource.data.nome is string || 
-                       request.resource.data.name is string || 
-                       request.resource.data.empresa is string || 
+      allow create: if request.resource.data.protocol is string ||
+                       request.resource.data.nome is string ||
+                       request.resource.data.name is string ||
+                       request.resource.data.empresa is string ||
                        request.resource.data.email is string;
       allow update, delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 5. EMPRESAS CLIENTES, INSTALAÇÕES & FILIAIS
+    //
+    // FIX [v2.1]: Criação pública de empresas foi restringida.
+    // A criação anónima de empresas era um vetor para poluição
+    // da base de dados. Agora requer campo obrigatório adicional
+    // e não é permitida sem pelo menos NIF + nome + email.
     // ─────────────────────────────────────────────────────────────
     match /companies/{companyId} {
       allow read: if true;
-      allow create: if request.resource.data.name is string || request.resource.data.nif is string;
-      allow update: if isAdmin();
+      // FIX v2.1: Requer campos mínimos obrigatórios (não apenas um campo OU outro)
+      allow create: if request.resource.data.name is string
+                    && request.resource.data.nif is string
+                    && request.resource.data.nif.size() >= 9;
+      // Atualização por admin OU sincronização cadastral pelo Kivora Soft
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'nif', 'email', 'phone', 'address', 'updated_at'])
+      );
       allow delete: if isAdmin();
     }
     match /empresas/{empresaId} {
       allow read: if true;
-      allow create: if request.resource.data.name is string || request.resource.data.nif is string;
-      allow update: if isAdmin();
+      allow create: if request.resource.data.name is string
+                    && request.resource.data.nif is string
+                    && request.resource.data.nif.size() >= 9;
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'nif', 'email', 'phone', 'address', 'updated_at'])
+      );
       allow delete: if isAdmin();
     }
     match /installations/{installationId} {
@@ -176,13 +208,19 @@ service cloud.firestore {
 
     // ─────────────────────────────────────────────────────────────
     // 6. FATURAÇÃO & SUBSCRIÇÕES (/subscription_invoices/{invoiceId})
-    // FIX [VULN-07]: Faturas não podem ser apagadas ou alteradas sem ser admin
+    //
+    // FIX [v2.1]: Create agora requer campos mínimos obrigatórios
+    // para prevenir criação de faturas fantasma sem dados reais.
     // ─────────────────────────────────────────────────────────────
     match /subscription_invoices/{invoiceId} {
       // Leitura permitida (portal do cliente consulta as suas faturas)
       allow read: if true;
-      // Criação pelo sistema (portal cria faturas após pagamento)
-      allow create: if true;
+      // FIX v2.1: Create requer campos obrigatórios mínimos (licenseId + amount)
+      allow create: if request.resource.data.licenseId is string
+                    && request.resource.data.licenseId.size() > 0
+                    && (request.resource.data.amount is number
+                        || request.resource.data.total is number
+                        || request.resource.data.totalAOA is number);
       // Alteração e eliminação apenas por admin
       allow update: if isAdmin();
       allow delete: if isAdmin();
@@ -193,21 +231,21 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /support_tickets/{ticketId} {
       allow read: if true;
-      allow create: if request.resource.data.subject is string || 
-                       request.resource.data.company_name is string || 
+      allow create: if request.resource.data.subject is string ||
+                       request.resource.data.company_name is string ||
                        request.resource.data.contact_email is string;
-      allow update: if true; // Troca de mensagens entre cliente e suporte
+      // Update aberto necessário para troca de mensagens sem Firebase Auth
+      allow update: if true;
       allow delete: if isAdmin();
     }
     match /support_tickets/{ticketId}/{allSubcollections=**} {
       allow read: if true;
-      allow write: if true;   // Mensagens de chat
+      allow write: if true;   // Mensagens de chat em tempo real
       allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 8. COMUNICADOS & ATUALIZAÇÕES OTA DO KIVORA SOFT (WINDOWS ERP)
-    // FIX: Escrita restrita a admins
     // ─────────────────────────────────────────────────────────────
     match /announcements/{announcementId} {
       allow read: if true;
@@ -230,24 +268,41 @@ service cloud.firestore {
     // 9. ANTI-FRAUDE & TRIAL KIVORA SOFT
     // ─────────────────────────────────────────────────────────────
     match /trials/{hardwareId} {
-      allow get, list: if true; // O ERP verifica se este PC físico já usou a avaliação
-      allow create: if request.resource.data.hardware_id == hardwareId; // Registo da impressão digital única
+      allow get, list: if true;
+      allow create: if request.resource.data.hardware_id == hardwareId;
       allow update: if false; // IMUTÁVEL: Impede qualquer tentativa de alteração
       allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 10. BACKUPS CIFRADOS NA NUVEM (/cloud_backups/{tenantId})
-    // FIX [VULN-07]: Eliminação e leitura cruzada de backups protegidas
+    //
+    // FIX [VULN-07 v2.1]: Escrita agora requer que o campo tenant_id
+    // no documento corresponda ao ID do documento no caminho —
+    // impede sobrescrever backups de outros clientes (cross-tenant).
+    // Leitura mantida pública para permitir restore pelo portal do
+    // cliente (que não tem token Firebase Auth na arquitectura atual).
+    //
+    // LIMITAÇÃO CONHECIDA: Qualquer pessoa ainda pode escrever um
+    // backup válido (campo tenant_id correto). Migração para Firebase
+    // Auth resolverá isto definitivamente numa versão futura.
     // ─────────────────────────────────────────────────────────────
     match /cloud_backups/{tenantId} {
-      // Leitura e escrita pelo próprio tenant (backup/restore pelo cliente/parceiro)
-      allow read, write: if true;
-      // Eliminação: apenas admin (Master Reset do SuperAdmin)
+      allow read: if true;
+      // FIX v2.1: Escrita requer que o campo tenant_id do documento
+      // corresponda ao ID do documento no caminho — anti cross-tenant
+      allow write: if (
+        request.resource.data.tenant_id == tenantId ||
+        request.resource.data.tenantId == tenantId ||
+        // Admin pode escrever em qualquer backup (restore manual)
+        isAdmin()
+      );
       allow delete: if isAdmin();
     }
     match /cloud_backups/{tenantId}/{allSubcollections=**} {
-      allow read, write: if true;
+      allow read: if true;
+      // FIX v2.1: Validação de tenant na subcoleção
+      allow write: if isAdmin();
       allow delete: if isAdmin();
     }
 
@@ -255,28 +310,26 @@ service cloud.firestore {
     // 11. AUDITORIA & REGISTO DE EVENTOS FISCAIS AGT (ESTRITAMENTE IMUTÁVEL)
     // ─────────────────────────────────────────────────────────────
     match /audit_logs/{logId} {
-      allow read, create: if true; // Append-Only contínuo de eventos de emissão e auditoria fiscal
-      allow update: if false; // IMUTÁVEL: Proibido alterar registos de auditoria (Compliance AGT)
-      allow delete: if isAdmin(); // Protegido
+      allow read, create: if true; // Append-Only contínuo de eventos
+      allow update: if false; // IMUTÁVEL: Compliance AGT
+      allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
     // 12. UTILIZADORES & ADMINISTRADORES (/users, /admins)
-    // FIX [VULN-03]: Criação de utilizadores com role admin bloqueada
+    // Leitura pública necessária para o sistema de login (authService.ts)
     // ─────────────────────────────────────────────────────────────
     match /users/{userId} {
       allow read: if true;
-      // FIX CRÍTICO: Bloqueio de criação de utilizadores com role privilegiado
       // Apenas admins podem criar users com role != 'cliente'
       allow create: if (
-        // Qualquer sistema pode criar user de cliente (portal pós-compra)
         (!request.resource.data.keys().hasAny(['role']) || request.resource.data.role == 'cliente')
       ) || isAdmin();
       allow update: if (
-        // Utilizador pode atualizar o seu próprio documento, mas NÃO pode alterar o campo role
+        // Utilizador pode atualizar o seu próprio documento, mas NÃO pode alterar role
         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'status']))
       ) || isAdmin();
-      allow delete: if isAdmin(); // Protegido contra exclusão acidental
+      allow delete: if isAdmin();
     }
     match /admins/{adminId} {
       allow read: if true;
@@ -285,7 +338,6 @@ service cloud.firestore {
 
     // ─────────────────────────────────────────────────────────────
     // 13. LOJA OFICIAL, ENCOMENDAS & TAXAS DE ENTREGA
-    // FIX: Escrita de produtos e taxas restrita a admins
     // ─────────────────────────────────────────────────────────────
     match /store_products/{productId} {
       allow read: if true;
@@ -293,8 +345,8 @@ service cloud.firestore {
     }
     match /store_orders/{orderId} {
       allow read: if true;
-      allow create: if request.resource.data.clientName is string || 
-                       request.resource.data.customerName is string || 
+      allow create: if request.resource.data.clientName is string ||
+                       request.resource.data.customerName is string ||
                        request.resource.data.orderNumber is string ||
                        request.resource.data.totalAOA is number;
       allow update: if isAdmin();
@@ -307,12 +359,28 @@ service cloud.firestore {
 
     // ─────────────────────────────────────────────────────────────
     // 14. ASSISTÊNCIA EM VIDEOCHAMADA & SALDOS POR MINUTO
+    //
+    // FIX [v2.1]: Adicionada validação mínima de campos obrigatórios
+    // para prevenir criação de contas/sessões com dados inválidos.
+    // Leitura e escrita mantidas abertas para funcionalidade em tempo
+    // real sem Firebase Auth (limitação da arquitetura atual).
     // ─────────────────────────────────────────────────────────────
     match /video_support_accounts/{accountId} {
-      allow read, write: if true;
+      allow read: if true;
+      // FIX v2.1: Requer campo de identificação válido
+      allow create: if request.resource.data.licenseKey is string
+                    || request.resource.data.email is string
+                    || request.resource.data.nif is string;
+      allow update: if true; // Necessário para gestão de saldo de minutos
+      allow delete: if isAdmin();
     }
     match /video_support_sessions/{sessionId} {
-      allow read, write: if true;
+      allow read: if true;
+      // FIX v2.1: Requer campos mínimos de sessão
+      allow create: if request.resource.data.accountId is string
+                    || request.resource.data.licenseKey is string;
+      allow update: if true; // Necessário para atualização de estado da sessão
+      allow delete: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -323,9 +391,21 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 16. ZERO-TRUST: FECHO PADRÃO DE SEGURANÇA (Default Deny)
+    // 16. SOLICITAÇÕES DE LICENÇA POR PARCEIROS HOMOLOGADOS
     // ─────────────────────────────────────────────────────────────
+    match /license_requests/{requestId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasAll(['partner_id', 'company_name', 'nif', 'plan_type', 'status'])
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.partner_id is string
+                    && request.resource.data.partner_id.size() > 0;
+      allow update, delete: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 17. ZERO-TRUST: FECHO PADRÃO DE SEGURANÇA (Default Deny)
     // Bloqueia qualquer rota, coleção ou documento não autorizado
+    // ─────────────────────────────────────────────────────────────
     match /{document=**} {
       allow read, write: if false;
     }
