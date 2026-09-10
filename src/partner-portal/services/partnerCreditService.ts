@@ -10,6 +10,9 @@ import { db } from '../../lib/firebase';
 import {
   doc,
   getDoc,
+  getDocs,
+  collection,
+  setDoc,
   writeBatch,
   increment,
   Timestamp,
@@ -66,8 +69,29 @@ export async function issueInstantPartnerLicense(
 
   try {
     const cleanPartnerCode = partnerCode.trim().toUpperCase();
-    const partnerRef = doc(db, 'partners', cleanPartnerCode);
-    const partnerSnap = await getDoc(partnerRef);
+    let partnerDocId = cleanPartnerCode;
+    let partnerRef = doc(db, 'partners', partnerDocId);
+    let partnerSnap = await getDoc(partnerRef);
+
+    // Se não encontrou por docId direto, busca por code ou email na coleção partners
+    if (!partnerSnap.exists()) {
+      const partnersSnap = await getDocs(collection(db, 'partners'));
+      for (const d of partnersSnap.docs) {
+        const data = d.data();
+        const dCode = (data.code || '').trim().toUpperCase();
+        const dEmail = (data.email || '').trim().toLowerCase();
+        if (
+          d.id.toUpperCase() === cleanPartnerCode ||
+          dCode === cleanPartnerCode ||
+          (dEmail.length > 0 && dEmail === partnerCode.trim().toLowerCase())
+        ) {
+          partnerDocId = d.id;
+          partnerRef = doc(db, 'partners', d.id);
+          partnerSnap = d;
+          break;
+        }
+      }
+    }
 
     if (!partnerSnap.exists()) {
       return {
@@ -110,7 +134,7 @@ export async function issueInstantPartnerLicense(
 
     const batch = writeBatch(db);
 
-    // 1. Gravar Licença em /licenses
+    // 1. Gravar Licença em /licenses (usando o partnerDocId validado no Firestore)
     const licenseRef = doc(db, 'licenses', key);
     const licensePayload = cleanFirestoreData({
       id: key,
@@ -126,7 +150,7 @@ export async function issueInstantPartnerLicense(
       notes: paymentMethod === 'wallet'
         ? `Emitida via Carteira Virtual pelo Parceiro ${cleanPartnerCode}.`
         : `Emitida a Crédito pelo Parceiro ${cleanPartnerCode}.`,
-      partner_id: cleanPartnerCode,
+      partner_id: partnerDocId,
       activated_at: null,
       extra_seats: extraSeats,
       is_provisional: Boolean(isProvisional),
@@ -142,7 +166,7 @@ export async function issueInstantPartnerLicense(
     const isPaid = paymentMethod === 'wallet';
     const debtPayload = cleanFirestoreData({
       id: debtId,
-      partner_id: cleanPartnerCode,
+      partner_id: partnerDocId,
       partner_name: partnerName || partnerData.name || cleanPartnerCode,
       license_id: key,
       company_name: companyName.trim(),
@@ -165,25 +189,28 @@ export async function issueInstantPartnerLicense(
       });
     }
 
-    // 4. Registar / Atualizar Empresa Cliente em /companies
-    const cleanNif = nif.trim().toUpperCase();
-    const companyRef = doc(db, 'companies', cleanNif);
-    const companyPayload = cleanFirestoreData({
-      id: cleanNif,
-      name: companyName.trim(),
-      nif: cleanNif,
-      email: (clientEmail || '').trim().toLowerCase(),
-      phone: '',
-      address: `Parceiro: ${cleanPartnerCode}`,
-      partner_id: cleanPartnerCode,
-      status: 'active',
-      createdAt: now,
-      _created_at_ts: Timestamp.fromMillis(now),
-    });
-    batch.set(companyRef, companyPayload, { merge: true });
-
-    // Commit atómico
+    // Commit atómico da licença e do débito
     await batch.commit();
+
+    // 4. Registar / Atualizar Empresa Cliente em /companies (operação aditiva não bloqueante)
+    try {
+      const cleanNif = nif.trim().toUpperCase();
+      const companyRef = doc(db, 'companies', cleanNif);
+      await setDoc(companyRef, cleanFirestoreData({
+        id: cleanNif,
+        name: companyName.trim(),
+        nif: cleanNif,
+        email: (clientEmail || '').trim().toLowerCase(),
+        phone: '',
+        address: `Parceiro: ${partnerDocId}`,
+        partner_id: partnerDocId,
+        status: 'active',
+        createdAt: now,
+        updated_at: now,
+      }), { merge: true });
+    } catch (compErr) {
+      console.warn('Aviso ao registar empresa cliente (não afeta emissão da licença):', compErr);
+    }
 
     return {
       success: true,

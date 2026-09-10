@@ -509,7 +509,7 @@ export function subscribePartnerAccount(
           tier,
           status: matchedDoc.status || 'active',
           overdue_days_limit: Number(matchedDoc.overdue_days_limit) || 15,
-          credit_issuance_mode: (matchedDoc.credit_issuance_mode as any) || 'manual_approval',
+          credit_issuance_mode: (matchedDoc.credit_issuance_mode as any) || 'auto_instant',
         });
       } else {
         cb(null);
