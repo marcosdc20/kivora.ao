@@ -150,7 +150,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
               </div>
 
               {/* Headline Responsivo com Tipografia Editorial e Quebras Nativas */}
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[54px] font-extrabold text-white leading-[1.14] sm:leading-[1.08] tracking-tight mb-4 drop-shadow-md whitespace-pre-line">
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl xl:text-[54px] font-extrabold text-white leading-[1.14] sm:leading-[1.08] tracking-tight mb-4 drop-shadow-md whitespace-pre-line">
                 {slide.headline}
               </h1>
 
@@ -263,7 +263,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
       </div>
 
       {/* ─── DOTS DE NAVEGAÇÃO INFERIORES ────────────────────────────────── */}
-      <div className="absolute bottom-6 sm:bottom-8 left-6 sm:left-12 flex justify-start items-center gap-2.5 z-20">
+      <div className="absolute bottom-6 sm:bottom-8 left-4 sm:left-12 flex justify-start items-center gap-2.5 z-20">
         {SLIDES.map((_, i) => (
           <button
             key={i}
@@ -278,8 +278,8 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
         ))}
       </div>
 
-      {/* Contador de Slides */}
-      <div className="absolute bottom-6 sm:bottom-8 right-6 sm:right-12 z-20 text-white/70 text-xs font-mono tracking-widest bg-black/20 px-3 py-1 rounded-full border border-white/10 backdrop-blur-xs">
+      {/* Contador de Slides — Oculto em mobile para não colidir com o botão de suporte flutuante */}
+      <div className="hidden sm:block absolute bottom-6 sm:bottom-8 right-6 sm:right-12 z-20 text-white/70 text-xs font-mono tracking-widest bg-black/20 px-3 py-1 rounded-full border border-white/10 backdrop-blur-xs">
         {String(current + 1).padStart(2, '0')} / {String(SLIDES.length).padStart(2, '0')}
       </div>
 

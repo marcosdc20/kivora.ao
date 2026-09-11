@@ -187,16 +187,16 @@ export const KivoraAssistantBot: React.FC<KivoraAssistantBotProps> = ({
   if (config.enabled === false) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9990] flex flex-col items-end font-sans">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9990] flex flex-col items-end font-sans">
       {/* ─── JANELA DE CHAT EXPANDIDA ─── */}
       {isOpen && (
         <div
           role="dialog"
           aria-label="Atendimento Oficial Kivora"
-          className="mb-3 w-[calc(100vw-2rem)] sm:w-[390px] md:w-[420px] h-[550px] max-h-[85vh] bg-white rounded-2xl shadow-2xl border border-slate-300 flex flex-col overflow-hidden animate-in zoom-in-95 fade-in duration-150"
+          className="mb-3 w-[calc(100vw-2rem)] sm:w-[390px] md:w-[420px] h-[520px] max-h-[80vh] sm:max-h-[85vh] bg-white rounded-2xl shadow-2xl border border-slate-300 flex flex-col overflow-hidden animate-in zoom-in-95 fade-in duration-150"
         >
           {/* Cabeçalho do Chat — Cor Sólida Corporativa, Alto Contraste */}
-          <div className="bg-[#0B192C] text-white p-4 flex items-center justify-between border-b border-slate-800 shrink-0">
+          <div className="bg-[#0B192C] text-white p-3.5 sm:p-4 flex items-center justify-between border-b border-slate-800 shrink-0">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="w-10 h-10 rounded-xl bg-[#FF6500] text-white flex items-center justify-center shadow-xs">
@@ -377,7 +377,7 @@ export const KivoraAssistantBot: React.FC<KivoraAssistantBotProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="group relative flex items-center gap-2.5 bg-[#0B192C] hover:bg-[#07111E] text-white px-4 py-3 rounded-full shadow-2xl hover:shadow-slate-900/50 hover:scale-105 active:scale-95 transition-all duration-200 border border-slate-700 cursor-pointer"
+        className="group relative flex items-center gap-2 sm:gap-2.5 bg-[#0B192C] hover:bg-[#07111E] text-white px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full shadow-2xl hover:shadow-slate-900/50 hover:scale-105 active:scale-95 transition-all duration-200 border border-slate-700 cursor-pointer"
         aria-label="Atendimento e Suporte Kivora"
       >
         <div className="relative flex items-center justify-center">

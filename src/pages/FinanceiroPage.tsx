@@ -151,7 +151,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
       />
 
       {/* Banner de Validador de Licença */}
-      <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 -mt-8 relative z-20">
+      <section className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 -mt-8 relative z-20">
         <div className="bg-mesh-dark border border-slate-800 rounded-3xl p-5 sm:p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl relative overflow-hidden">
           <div className="orb orb-blue w-48 h-48 -top-12 -left-12 opacity-30" />
           <div className="flex items-center gap-3.5 text-center sm:text-left relative z-10">
@@ -174,7 +174,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
       </section>
 
       {/* Grelha de Planos */}
-      <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-24 space-y-12">
+      <section className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 py-16 sm:py-24 space-y-12">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <span className="text-xs font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/60">
             {settings.pricingTag || DEFAULT_SETTINGS.pricingTag || 'Tabela de Preços Oficiais'}
@@ -259,7 +259,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
       </section>
 
       {/* Simulador Interativo & Comparador de ROI */}
-      <section className="bg-slate-50 border-y border-slate-200/80 py-20 px-6 sm:px-10 lg:px-16">
+      <section className="bg-slate-50 border-y border-slate-200/80 py-16 sm:py-20 px-4 sm:px-8 lg:px-16">
         <div className="max-w-4xl mx-auto space-y-10">
           
           <div className="text-center space-y-2">
@@ -275,7 +275,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
             </p>
           </div>
 
-          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-xl space-y-8">
+          <div className="bg-white rounded-3xl p-4 sm:p-8 lg:p-10 border border-slate-200 shadow-xl space-y-8">
             
             {/* Escolha da Modalidade */}
             <div className="space-y-2">
@@ -398,7 +398,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
       </section>
 
       {/* FAQ de Licenciamento */}
-      <section className="max-w-4xl mx-auto px-6 sm:px-10 lg:px-16 py-20 space-y-10">
+      <section className="max-w-4xl mx-auto px-4 sm:px-8 lg:px-16 py-16 sm:py-20 space-y-10">
         <div className="text-center space-y-2">
           <HelpCircle className="w-8 h-8 text-blue-600 mx-auto" />
           <h3 className="text-2xl font-black text-slate-950">Perguntas Frequentes sobre Licenças</h3>

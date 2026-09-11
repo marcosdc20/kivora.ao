@@ -2175,10 +2175,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       </div>
 
       {selectedPartner && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 animate-fadeIn max-h-[92vh] flex flex-col overflow-hidden">
             
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
+            {/* Header Fixo */}
+            <div className="p-4 sm:p-6 flex items-center justify-between border-b border-slate-100 shrink-0 bg-white">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black">
                   {selectedPartner.name.slice(0, 2).toUpperCase()}
@@ -2188,8 +2189,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   <p className="text-xs text-slate-500 font-mono">Código: {selectedPartner.code} • {selectedPartner.region}</p>
                 </div>
               </div>
-              <button onClick={() => setSelectedPartner(null)} className="text-slate-400 hover:text-slate-900 cursor-pointer"><X className="w-5 h-5" /></button>
+              <button onClick={() => setSelectedPartner(null)} className="text-slate-400 hover:text-slate-900 cursor-pointer p-1"><X className="w-5 h-5" /></button>
             </div>
+
+            {/* Corpo Scrollável do Modal */}
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
 
             {/* 1. Edição de Dados Cadastrais do Parceiro */}
             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 shrink-0 text-xs">
@@ -2557,8 +2561,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               ))}
             </div>
 
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100 shrink-0 gap-2">
-              <div className="flex items-center gap-2">
+            </div>
+
+            {/* Rodapé Fixo de Ações do Parceiro */}
+            <div className="p-4 sm:p-6 bg-slate-50 border-t border-slate-100 shrink-0 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => setCertificatesPartnerModal({
                     partnerName: selectedPartner.name,
@@ -2569,10 +2576,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                     phone: selectedPartner.phone,
                     createdAt: selectedPartner.createdAt,
                   })}
-                  className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
+                  className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
                 >
                   <Award className="w-4 h-4 text-amber-200" />
-                  <span>Ver Certificados Oficiais</span>
+                  <span className="hidden xs:inline">Certificados Oficiais</span>
+                  <span className="xs:hidden">Certificados</span>
                 </button>
 
                 <button
@@ -2580,11 +2588,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   className="bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs px-3 py-2 rounded-xl flex items-center gap-1 border border-rose-200 cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span>Eliminar Parceiro</span>
+                  <span>Eliminar</span>
                 </button>
               </div>
 
-              <button onClick={() => setSelectedPartner(null)} className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer">
+              <button onClick={() => setSelectedPartner(null)} className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 cursor-pointer">
                 Fechar
               </button>
             </div>
@@ -2594,7 +2602,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
       {showModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-black text-slate-900">Registar Novo Parceiro</h3>
               <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900 cursor-pointer"><X className="w-5 h-5" /></button>
@@ -2657,7 +2665,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
       {credentialsModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 animate-fadeIn max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><Key className="w-5 h-5" /></div>

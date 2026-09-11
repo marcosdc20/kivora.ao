@@ -1620,30 +1620,30 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden w-full">
 
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between shrink-0 shadow-xs">
-          <div className="flex items-center gap-2.5 sm:gap-3">
+        <header className="h-16 bg-white border-b border-slate-200 px-3 sm:px-8 flex items-center justify-between shrink-0 shadow-xs gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              className="lg:hidden flex items-center justify-center p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+              className="lg:hidden flex items-center justify-center p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer shrink-0"
               title="Abrir Menu"
             >
               <Menu className="w-4 h-4" />
             </button>
-            <h1 className="text-sm sm:text-base font-black text-slate-900 truncate">
-              {activeSection === 'dashboard' && 'Visão Geral do Parceiro'}
-              {activeSection === 'licencas' && 'Minhas Licenças Emitidas'}
+            <h1 className="text-xs sm:text-base font-black text-slate-900 truncate">
+              {activeSection === 'dashboard' && 'Visão Geral'}
+              {activeSection === 'licencas' && 'Minhas Licenças'}
               {activeSection === 'clientes' && 'Carteira de Clientes'}
               {activeSection === 'emitir-licenca' && 'Emissão de Licenças'}
-              {activeSection === 'certificados' && 'Certificados Oficiais da Parceria'}
-              {activeSection === 'extrato' && 'Extrato & Cobrança Híbrida'}
-              {activeSection === 'simulador' && 'Simulador de Rentabilidade & Lucro'}
-              {activeSection === 'materiais' && 'Kits Comerciais & Downloads'}
-              {activeSection === 'suporte' && 'Central de Suporte Multilateral'}
-              {activeSection === 'perfil' && 'Conta do Parceiro & Segurança'}
+              {activeSection === 'certificados' && 'Certificados Oficiais'}
+              {activeSection === 'extrato' && 'Extrato & Cobrança'}
+              {activeSection === 'simulador' && 'Simulador de Lucro'}
+              {activeSection === 'materiais' && 'Kits Comerciais'}
+              {activeSection === 'suporte' && 'Central de Suporte'}
+              {activeSection === 'perfil' && 'Conta do Parceiro'}
             </h1>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button
               onClick={() => setShowOfficialCertificatesModal(true)}
               className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-xs font-bold text-amber-900 transition-colors cursor-pointer"
@@ -1675,10 +1675,11 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
             <button
               onClick={() => setActiveSection('emitir-licenca')}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 sm:px-3.5 sm:py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer whitespace-nowrap"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Emitir Licença</span>
+              <span className="hidden xs:inline sm:inline">Emitir Licença</span>
+              <span className="xs:hidden sm:hidden">Emitir</span>
             </button>
           </div>
         </header>
@@ -2987,7 +2988,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                           key={st}
                           type="button"
                           onClick={() => setExtraSeats(st)}
-                          className={`py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                          className={`py-1.5 px-1 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                             extraSeats === st
                               ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
                               : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'

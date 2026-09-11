@@ -338,7 +338,7 @@ export const AdminPagamentos: React.FC = () => {
         </div>
 
         {/* Abas Superiores */}
-        <div className="flex gap-2 border-b border-slate-200 pb-3">
+        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
           <button
             onClick={() => setActiveTab('clientes')}
             className={`text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${
@@ -374,7 +374,7 @@ export const AdminPagamentos: React.FC = () => {
           <div className="space-y-4">
             {/* Filtros e Pesquisa */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-              <div className="flex gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 {[
                   { id: 'all', label: 'Todas as Faturas' },
                   { id: 'paid', label: 'Pagas' },
@@ -502,7 +502,7 @@ export const AdminPagamentos: React.FC = () => {
         {activeTab === 'parceiros' && (
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-              <div className="flex gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 {[
                   { id: 'all', label: 'Todas as Dívidas' },
                   { id: 'pending', label: 'Pendentes de Pagamento' },
