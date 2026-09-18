@@ -11,6 +11,23 @@ interface RegionalStat {
   parceiros: number;
 }
 
+const PROVINCIAS_ANGOLA = [
+  'Bengo', 'Benguela', 'Bié', 'Cabinda', 'Cuando Cubango',
+  'Cuanza Norte', 'Cuanza Sul', 'Cunene', 'Huambo', 'Huíla',
+  'Luanda', 'Lunda Norte', 'Lunda Sul', 'Malanje', 'Moxico',
+  'Namibe', 'Uíge', 'Zaire'
+];
+
+const normalizeProvince = (text?: string): string => {
+  if (!text) return 'Luanda';
+  const clean = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  const matched = PROVINCIAS_ANGOLA.find((p) => {
+    const pClean = p.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    return clean.includes(pClean) || pClean.includes(clean);
+  });
+  return matched || 'Luanda';
+};
+
 export const AdminRelatorios: React.FC = () => {
   const [period, setPeriod] = useState<'mes' | 'trimestre' | 'ano'>('ano');
   const [selectedProvince, setSelectedProvince] = useState<string>('todas');
@@ -20,30 +37,19 @@ export const AdminRelatorios: React.FC = () => {
   const [allLicenses, setAllLicenses] = useState<{ price_aoa: number; created_at: number; plan_type: string }[]>([]);
 
   useEffect(() => {
-    let partnersByRegion: Record<string, number> = {
-      'Luanda': 0,
-      'Benguela': 0,
-      'Huíla': 0,
-      'Huambo': 0,
-      'Cabinda': 0,
-      'Cuanza Sul': 0,
-    };
+    let partnersByRegion: Record<string, number> = {};
+    PROVINCIAS_ANGOLA.forEach((p) => { partnersByRegion[p] = 0; });
 
     let unsubPart: (() => void) | null = null;
     try {
       unsubPart = onSnapshot(collection(db, 'partners'), (snapPart) => {
-        const counts: Record<string, number> = {
-          'Luanda': 0,
-          'Benguela': 0,
-          'Huíla': 0,
-          'Huambo': 0,
-          'Cabinda': 0,
-          'Cuanza Sul': 0,
-        };
+        const counts: Record<string, number> = {};
+        PROVINCIAS_ANGOLA.forEach((p) => { counts[p] = 0; });
+
         snapPart.forEach((docSnap) => {
           const d = docSnap.data();
           const prov = d.provincia || d.cidade || d.location || d.address || 'Luanda';
-          const matchedKey = Object.keys(counts).find(k => prov.toLowerCase().includes(k.toLowerCase())) || 'Luanda';
+          const matchedKey = normalizeProvince(prov);
           counts[matchedKey] = (counts[matchedKey] || 0) + 1;
         });
         partnersByRegion = counts;
@@ -64,31 +70,32 @@ export const AdminRelatorios: React.FC = () => {
       const unsubLic = onSnapshot(collection(db, 'licenses'), (snapLic) => {
         let licTotal = 0;
         let sumAoa = 0;
-        const regionMap: Record<string, { empresas: number; receita: number; parceiros: number }> = {
-          'Luanda': { empresas: 0, receita: 0, parceiros: partnersByRegion['Luanda'] || 0 },
-          'Benguela': { empresas: 0, receita: 0, parceiros: partnersByRegion['Benguela'] || 0 },
-          'Huíla': { empresas: 0, receita: 0, parceiros: partnersByRegion['Huíla'] || 0 },
-          'Huambo': { empresas: 0, receita: 0, parceiros: partnersByRegion['Huambo'] || 0 },
-          'Cabinda': { empresas: 0, receita: 0, parceiros: partnersByRegion['Cabinda'] || 0 },
-          'Cuanza Sul': { empresas: 0, receita: 0, parceiros: partnersByRegion['Cuanza Sul'] || 0 },
-        };
+        const regionMap: Record<string, { empresas: number; receita: number; parceiros: number }> = {};
+        PROVINCIAS_ANGOLA.forEach((p) => {
+          regionMap[p] = { empresas: 0, receita: 0, parceiros: partnersByRegion[p] || 0 };
+        });
 
         const rawLicenses: { price_aoa: number; created_at: number; plan_type: string }[] = [];
 
         snapLic.forEach((docSnap) => {
           const d = docSnap.data();
           licTotal++;
-          const price = Number(d.price_aoa) || 250000;
+          const planType = String(d.plan_type || 'annual').toLowerCase().trim();
+          const defaultPrice = planType === 'monthly' ? 25000 : planType === 'lifetime' ? 1500000 : 250000;
+          const price = d.price_aoa !== undefined && d.price_aoa !== null && !isNaN(Number(d.price_aoa))
+            ? Number(d.price_aoa)
+            : defaultPrice;
+
           sumAoa += price;
 
           rawLicenses.push({
             price_aoa: price,
             created_at: Number(d.created_at) || Date.now(),
-            plan_type: String(d.plan_type || 'annual'),
+            plan_type: planType,
           });
 
           const prov = (d.region || d.provincia || 'Luanda');
-          const matchedKey = Object.keys(regionMap).find(k => prov.toLowerCase().includes(k.toLowerCase())) || 'Luanda';
+          const matchedKey = normalizeProvince(prov);
           regionMap[matchedKey].empresas += 1;
           regionMap[matchedKey].receita += price;
         });
@@ -97,12 +104,14 @@ export const AdminRelatorios: React.FC = () => {
         setTotalLicensesCount(licTotal);
         setTotalRevenue(sumAoa);
 
-        const list: RegionalStat[] = Object.entries(regionMap).map(([provincia, data]) => ({
-          provincia,
-          empresas: data.empresas,
-          receita: data.receita,
-          parceiros: partnersByRegion[provincia] ?? data.parceiros
-        }));
+        const list: RegionalStat[] = Object.entries(regionMap)
+          .map(([provincia, data]) => ({
+            provincia,
+            empresas: data.empresas,
+            receita: data.receita,
+            parceiros: partnersByRegion[provincia] ?? data.parceiros
+          }))
+          .sort((a, b) => b.receita - a.receita || b.empresas - a.empresas);
 
         setStats(list);
       }, (err) => {
@@ -225,12 +234,10 @@ export const AdminRelatorios: React.FC = () => {
               onChange={(e) => setSelectedProvince(e.target.value)}
               className="bg-slate-50 border border-slate-200 text-slate-800 text-xs font-bold px-3 py-2 rounded-xl focus:outline-none focus:border-blue-500"
             >
-              <option value="todas">Todas as Províncias</option>
-              <option value="luanda">Luanda</option>
-              <option value="benguela">Benguela</option>
-              <option value="huila">Huíla</option>
-              <option value="huambo">Huambo</option>
-              <option value="cabinda">Cabinda</option>
+              <option value="todas">Todas as Províncias (18)</option>
+              {PROVINCIAS_ANGOLA.map((p) => (
+                <option key={p} value={p.toLowerCase()}>{p}</option>
+              ))}
             </select>
           </div>
         </div>

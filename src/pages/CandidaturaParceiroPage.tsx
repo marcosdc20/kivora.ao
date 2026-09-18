@@ -19,6 +19,7 @@ import {
 import { triggerKivoraConfetti } from '../utils/confetti';
 import { sendPartnerApplicationEmails } from '../services/siteEmailService';
 import { PartnerProgramConditionsModal } from '../components/PartnerProgramConditionsModal';
+import { cleanFirestoreData } from '../lib/firestoreUtils';
 
 interface CandidaturaParceiroPageProps {
   onBack: () => void;
@@ -85,7 +86,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
       reader.onload = (e) => {
         const img = new Image();
         img.onload = () => {
-          const maxDim = 1280;
+          const maxDim = 1024;
           let width = img.width;
           let height = img.height;
 
@@ -110,8 +111,17 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
           }
 
           ctx.drawImage(img, 0, 0, width, height);
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
-          const approxBytes = Math.round((compressedBase64.length * 3) / 4);
+          let quality = 0.7;
+          let compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+          let approxBytes = Math.round((compressedBase64.length * 3) / 4);
+
+          // Proteção Firestore 1MB: se exceder 350KB, recomprime a 0.5
+          if (approxBytes > 350 * 1024) {
+            quality = 0.5;
+            compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+            approxBytes = Math.round((compressedBase64.length * 3) / 4);
+          }
+
           const sizeStr = approxBytes > 1024 * 1024
             ? `${(approxBytes / (1024 * 1024)).toFixed(1)} MB`
             : `${Math.round(approxBytes / 1024)} KB`;
@@ -242,8 +252,8 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
         createdAt: Date.now(),
       };
 
-      // 1. Grava na coleção principal de candidaturas `partner_applications`
-      await addDoc(collection(db, 'partner_applications'), applicationData);
+      // 1. Grava na coleção principal de candidaturas `partner_applications` sanitizando valores undefined
+      await addDoc(collection(db, 'partner_applications'), cleanFirestoreData(applicationData));
 
       // 2. Disparo de e-mails automáticos
       sendPartnerApplicationEmails({

@@ -625,18 +625,23 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       // Pertence diretamente a este parceiro pelo partner_id
       const matchesDirectPartner = cPartner.length > 0 && cleanIdentifiers.has(cPartner);
 
-      // Ou corresponde a uma licença OU solicitação deste parceiro com NIF específico (não genérico)
-      const cNif = (c.nif || '').trim();
+      // Ou corresponde a uma licença OU solicitação deste parceiro com NIF específico (não genérico) ou email
+      const cNif = (c.nif || '').trim().toUpperCase();
+      const cEmail = (c.email || '').trim().toLowerCase();
       const hasSpecificNif = !isGenericNif(cNif);
       const matchesLicenseNif =
         hasSpecificNif &&
-        allPartnerLicenses.some((l) => (l.nif || '').trim() === cNif);
+        allPartnerLicenses.some((l) => (l.nif || '').trim().toUpperCase() === cNif);
+      const matchesLicenseEmail =
+        Boolean(cEmail && allPartnerLicenses.some((l) => (l.client_email || '').trim().toLowerCase() === cEmail));
       const matchesRequestNif =
         hasSpecificNif &&
-        myLicenseRequests.some((r) => (r.nif || '').trim() === cNif);
+        myLicenseRequests.some((r) => (r.nif || '').trim().toUpperCase() === cNif);
+      const matchesRequestEmail =
+        Boolean(cEmail && myLicenseRequests.some((r) => (r.client_email || '').trim().toLowerCase() === cEmail));
 
-      if (matchesDirectPartner || matchesLicenseNif || matchesRequestNif) {
-        const mapKey = hasSpecificNif ? `NIF_${cNif.toUpperCase()}` : `DOC_${c.id}`;
+      if (matchesDirectPartner || matchesLicenseNif || matchesLicenseEmail || matchesRequestNif || matchesRequestEmail) {
+        const mapKey = hasSpecificNif ? `NIF_${cNif}` : `DOC_${c.id}`;
         clientMap.set(mapKey, {
           ...c,
           partner_id: c.partner_id || partnerCode,

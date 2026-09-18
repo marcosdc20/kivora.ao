@@ -28,14 +28,22 @@ export function useFirebaseAuth() {
 /**
  * Converte de forma resiliente qualquer tipo de data do Firestore para timestamp numérico em ms
  */
-function parseTimestamp(val: any, fallbackTs?: any): number {
+function parseTimestamp(val: any, fallbackTs?: any, secondFallback?: any): number {
   if (typeof val === 'number') return val;
   if (val && typeof val.toMillis === 'function') return val.toMillis();
   if (val && typeof val.toDate === 'function') return val.toDate().getTime();
+  if (typeof fallbackTs === 'number') return fallbackTs;
   if (fallbackTs && typeof fallbackTs.toMillis === 'function') return fallbackTs.toMillis();
   if (fallbackTs && typeof fallbackTs.toDate === 'function') return fallbackTs.toDate().getTime();
+  if (typeof secondFallback === 'number') return secondFallback;
+  if (secondFallback && typeof secondFallback.toMillis === 'function') return secondFallback.toMillis();
+  if (secondFallback && typeof secondFallback.toDate === 'function') return secondFallback.toDate().getTime();
   if (typeof val === 'string') {
     const parsed = Date.parse(val);
+    if (!isNaN(parsed)) return parsed;
+  }
+  if (typeof fallbackTs === 'string') {
+    const parsed = Date.parse(fallbackTs);
     if (!isNaN(parsed)) return parsed;
   }
   return Date.now();
@@ -63,9 +71,10 @@ export function useCompanies() {
           phone: docData.phone || '',
           address: docData.address || '',
           status: docData.status || 'active',
-          createdAt: parseTimestamp(docData.createdAt, docData._created_at_ts),
+          createdAt: parseTimestamp(docData.createdAt, docData.created_at, docData._created_at_ts),
         } as Company;
       });
+      data.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       setCompanies(data);
       setError(null);
     } catch (err: any) {
@@ -86,9 +95,8 @@ export function useCompanies() {
     const unsubscribeAuth = onAuthStateChanged(auth, () => {
       setLoading(true);
       try {
-        const q = query(collection(db, 'companies'), orderBy('createdAt', 'desc'));
         unsubscribeSnapshot = onSnapshot(
-          q,
+          collection(db, 'companies'),
           (querySnapshot) => {
             const data = querySnapshot.docs.map((d) => {
               const docData = d.data();
@@ -100,9 +108,10 @@ export function useCompanies() {
                 phone: docData.phone || '',
                 address: docData.address || '',
                 status: docData.status || 'active',
-                createdAt: parseTimestamp(docData.createdAt, docData._created_at_ts),
+                createdAt: parseTimestamp(docData.createdAt, docData.created_at, docData._created_at_ts),
               } as Company;
             });
+            data.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
             setCompanies(data);
             setLoading(false);
             setError(null);

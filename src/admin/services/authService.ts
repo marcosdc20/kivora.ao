@@ -102,20 +102,48 @@ export async function verifyPasswordMatch(
   return false;
 }
 
-// ─── Controlo de Sessão Local ──────────────────────────────────────────────────
+// ─── Controlo de Sessão Local Blindado (Anti-Tampering DevTools) ─────────────
+
+export function computeSessionToken(id: string, email: string, role: string): string {
+  const salt = 'KIVORA_SESSION_INTEGRITY_TOKEN_v2_2026';
+  let h1 = 0xdeadbeef ^ 0;
+  let h2 = 0x41c6ce57 ^ 0;
+  const str = `${salt}:${id}:${email}:${role}`;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return `kvr_tok_${(h1 >>> 0).toString(16).padStart(8, '0')}${(h2 >>> 0).toString(16).padStart(8, '0')}`;
+}
 
 export function getStoredSession(): KivoraUserSession | null {
   try {
     const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as KivoraUserSession;
+    const session = JSON.parse(raw) as KivoraUserSession;
+    if (!session || !session.id || !session.email || !session.role) return null;
+
+    // Validação estrita de integridade contra injeção arbitrária via DevTools/Inspecionar
+    const expectedToken = computeSessionToken(session.id, session.email, session.role);
+    if (!session.token || session.token !== expectedToken) {
+      console.warn('Alerta de Segurança: Sessão inválida ou adulterada via navegador. Acesso bloqueado.');
+      localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+
+    return session;
   } catch {
     return null;
   }
 }
 
 export function setStoredSession(session: KivoraUserSession): void {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  const token = computeSessionToken(session.id, session.email, session.role);
+  const secureSession: KivoraUserSession = { ...session, token };
+  localStorage.setItem(SESSION_KEY, JSON.stringify(secureSession));
 }
 
 export function clearStoredSession(): void {
@@ -390,24 +418,26 @@ export async function loginUser(
         };
 
         if (session.role === 'admin' && !auth.currentUser && cleanPass.length >= 6) {
-          signInWithEmailAndPassword(auth, cleanId, cleanPass)
-            .catch((err) => {
-              if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-                return createUserWithEmailAndPassword(auth, cleanId, cleanPass);
+          try {
+            await signInWithEmailAndPassword(auth, cleanId, cleanPass);
+          } catch (err: any) {
+            if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+              try {
+                const userCred = await createUserWithEmailAndPassword(auth, cleanId, cleanPass);
+                if (userCred?.user) {
+                  await setDoc(doc(db, 'admins', userCred.user.uid), {
+                    email: cleanId,
+                    nome: session.nome,
+                    role: 'admin',
+                    active: true,
+                    updatedAt: Date.now(),
+                  }, { merge: true });
+                }
+              } catch (createErr) {
+                console.warn('Auto-provisioning admin auth falhou:', createErr);
               }
-            })
-            .then(async (userCred) => {
-              if (userCred?.user) {
-                await setDoc(doc(db, 'admins', userCred.user.uid), {
-                  email: cleanId,
-                  nome: session.nome,
-                  role: 'admin',
-                  active: true,
-                  updatedAt: Date.now(),
-                }, { merge: true });
-              }
-            })
-            .catch((e) => console.warn('Sync admin auth background warning:', e));
+            }
+          }
         }
 
         setStoredSession(session);

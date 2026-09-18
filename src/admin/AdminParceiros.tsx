@@ -429,31 +429,31 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     });
   }, [partners, applications, allDebts]);
 
-  // Combina e deduplica candidaturas do formulário web (`partner_applications`) com registos da coleção `partners`
+  // Lista de candidaturas do formulário web (`partner_applications`) enriquecida e auditável
   const { allApplicationsList, pendingApplicationsList, approvedApplicationsList } = React.useMemo(() => {
-    const map = new Map<string, any>();
+    const list: any[] = [];
+    const seenAppIds = new Set<string>();
 
-    // Conjunto de parceiros que já estão ATIVOS
+    // Conjunto de parceiros que já estão ATIVOS para exibição de badge contextual
     const activeEmails = new Set(resolvedPartners.filter(p => p.status === 'active').map(p => (p.email || '').toLowerCase().trim()).filter(Boolean));
     const activeNifs = new Set(resolvedPartners.filter(p => p.status === 'active').map(p => (p.nif || '').toLowerCase().trim()).filter(Boolean));
     const activeCodes = new Set(resolvedPartners.filter(p => p.status === 'active').map(p => (p.code || '').toLowerCase().trim()).filter(Boolean));
 
-    // 1. Processa candidaturas da coleção `partner_applications`
+    // 1. Processa todas as candidaturas reais da coleção `partner_applications`
     applications.forEach(app => {
       const email = (app.email || '').toLowerCase().trim();
       const nif = (app.nif || '').toLowerCase().trim();
       const protocol = (app.protocol || app.id || '').toLowerCase().trim();
-
-      const dedupeKey = email || (nif ? `nif_${nif}` : `prot_${protocol}`);
 
       const isAlreadyActive =
         (email && activeEmails.has(email)) ||
         (nif && activeNifs.has(nif)) ||
         (protocol && activeCodes.has(protocol));
 
+      const rawStatus = (app.status || '').toLowerCase().trim();
       const status: 'pending' | 'approved' | 'rejected' =
-        app.status === 'approved' || isAlreadyActive ? 'approved' :
-        app.status === 'rejected' ? 'rejected' : 'pending';
+        rawStatus === 'approved' || rawStatus === 'homologado' || rawStatus === 'aprovada' ? 'approved' :
+        rawStatus === 'rejected' || rawStatus === 'rejeitado' ? 'rejected' : 'pending';
 
       const pCode = (app.protocol || `KVRA-PAR-${Math.floor(100 + Math.random() * 900)}`).trim();
 
@@ -472,6 +472,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         tem_clientes: app.tem_clientes,
         experiencia: app.experiencia,
         status,
+        isAlreadyActive: Boolean(isAlreadyActive),
         createdAt: app.created_at || Date.now(),
         protocol: app.protocol,
         tier: 'bronze',
@@ -485,28 +486,19 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         mustChangePassword: app.mustChangePassword,
       };
 
-      const existing = map.get(dedupeKey);
-      if (!existing) {
-        map.set(dedupeKey, item);
-      } else {
-        if (existing.status === 'pending' && item.status === 'approved') {
-          map.set(dedupeKey, item);
-        } else if (item.payment_proof_url && !existing.payment_proof_url) {
-          map.set(dedupeKey, item);
-        }
-      }
+      seenAppIds.add(app.id);
+      list.push(item);
     });
 
-    // 2. Registos pendentes da coleção `partners` (apenas se tiverem identificador real e não existirem em `partner_applications`)
+    // 2. Registos pendentes da coleção `partners` (caso algum parceiro tenha sido criado pendente manualmente fora de partner_applications)
     resolvedPartners.filter(p => p.status === 'pending').forEach(p => {
       const email = (p.email || '').toLowerCase().trim();
       const nif = (p.nif || '').toLowerCase().trim();
       const code = (p.code || p.id || '').toLowerCase().trim();
 
-      // Ignora registos vazios ou fantasmas sem contacto mínimo
+      // Ignora registos vazios sem contacto mínimo ou já processados em partner_applications
       if (!email && !nif && (!p.phone || p.phone.length < 6)) return;
-
-      const dedupeKey = email || (nif ? `nif_${nif}` : `code_${code}`);
+      if (seenAppIds.has(p.id)) return;
 
       const isAlreadyActive =
         (email && activeEmails.has(email)) ||
@@ -515,60 +507,32 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
       if (isAlreadyActive) return;
 
-      if (!map.has(dedupeKey)) {
-        map.set(dedupeKey, {
-          id: p.id,
-          code: p.code,
-          name: p.name,
-          email: p.email,
-          phone: p.phone,
-          region: p.region,
-          nif: p.nif,
-          status: 'pending',
-          createdAt: p.createdAt,
-          tier: p.tier,
-          payment_proof_url: p.payment_proof_url,
-          payment_proof_name: p.payment_proof_name,
-        });
-      }
+      list.push({
+        id: p.id,
+        appId: p.id,
+        code: p.code || `PRT-${p.id.slice(-4)}`,
+        name: p.name,
+        responsible: p.name,
+        email: p.email,
+        phone: p.phone,
+        region: p.region,
+        nif: p.nif,
+        status: 'pending' as const,
+        isAlreadyActive: false,
+        createdAt: p.createdAt || Date.now(),
+        tier: p.tier || 'bronze',
+        payment_proof_url: p.payment_proof_url,
+        payment_proof_name: p.payment_proof_name,
+        fee_amount_aoa: 25000,
+      });
     });
 
-    const all = Array.from(map.values());
-    all.sort((a, b) => b.createdAt - a.createdAt);
+    list.sort((a, b) => b.createdAt - a.createdAt);
 
-    const pending = all.filter(c => c.status === 'pending');
-    const approved = all.filter(c => c.status === 'approved');
+    const pending = list.filter(c => c.status === 'pending');
+    const approved = list.filter(c => c.status === 'approved');
 
-    return { allApplicationsList: all, pendingApplicationsList: pending, approvedApplicationsList: approved };
-  }, [applications, resolvedPartners]);
-
-  // Autocura no Firestore: se uma candidatura está marcada como pending mas o parceiro já se encontra ativo, sincroniza para approved
-  React.useEffect(() => {
-    if (applications.length === 0 || resolvedPartners.length === 0) return;
-
-    const activeEmails = new Set(resolvedPartners.filter(p => p.status === 'active').map(p => (p.email || '').toLowerCase().trim()).filter(Boolean));
-    const activeNifs = new Set(resolvedPartners.filter(p => p.status === 'active').map(p => (p.nif || '').toLowerCase().trim()).filter(Boolean));
-    const activeCodes = new Set(resolvedPartners.filter(p => p.status === 'active').map(p => (p.code || '').toLowerCase().trim()).filter(Boolean));
-
-    applications.forEach((app) => {
-      if (app.status === 'pending') {
-        const email = (app.email || '').toLowerCase().trim();
-        const nif = (app.nif || '').toLowerCase().trim();
-        const protocol = (app.protocol || app.id || '').toLowerCase().trim();
-
-        const isAlreadyActive =
-          (email && activeEmails.has(email)) ||
-          (nif && activeNifs.has(nif)) ||
-          (protocol && activeCodes.has(protocol));
-
-        if (isAlreadyActive) {
-          updateDoc(doc(db, 'partner_applications', app.id), {
-            status: 'approved',
-            approved_at: Date.now(),
-          }).catch(() => {});
-        }
-      }
-    });
+    return { allApplicationsList: list, pendingApplicationsList: pending, approvedApplicationsList: approved };
   }, [applications, resolvedPartners]);
 
   const activePartners = resolvedPartners.filter(p => p.status === 'active');

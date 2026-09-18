@@ -87,22 +87,34 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Licença ativa ou primária do cliente logado
+  const [selectedLicenseId, setSelectedLicenseId] = useState<string | null>(null);
 
-  const clientLicense: KivoraLicense = matchedLicenses[0] || {
-    id: session?.licenseKey || 'PENDING-ACTIVATION',
-    client_email: session?.email || 'cliente@empresa.ao',
-    company_name: session?.companyName || session?.nome || 'Empresa Cliente Kivora',
-    nif: session?.nif || 'Não Registado',
-    plan_type: 'annual' as const,
-    status: 'active' as const,
-    created_at: Date.now(),
-    expires_at: Date.now() + 365 * 86400000,
-    hardware_id: null,
-    extra_seats: 0,
-    max_users: 1,
-    is_provisional: false,
-  };
+  useEffect(() => {
+    if (matchedLicenses.length > 0) {
+      setSelectedLicenseId((prev) => {
+        if (prev && matchedLicenses.some((l) => l.id === prev)) return prev;
+        return matchedLicenses[0].id;
+      });
+    }
+  }, [matchedLicenses]);
+
+  // Licença ativa ou primária do cliente logado
+  const clientLicense: KivoraLicense =
+    matchedLicenses.find((l) => l.id === selectedLicenseId) ||
+    matchedLicenses[0] || {
+      id: session?.licenseKey || 'PENDING-ACTIVATION',
+      client_email: session?.email || 'cliente@empresa.ao',
+      company_name: session?.companyName || session?.nome || 'Empresa Cliente Kivora',
+      nif: session?.nif || 'Não Registado',
+      plan_type: 'annual' as const,
+      status: 'active' as const,
+      created_at: Date.now(),
+      expires_at: Date.now() + 365 * 86400000,
+      hardware_id: null,
+      extra_seats: 0,
+      max_users: 1,
+      is_provisional: false,
+    };
 
   // Subscrição em Tempo Real aos tickets e minutos de vídeo do cliente
   useEffect(() => {
@@ -509,6 +521,43 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                 </div>
               )}
 
+              {/* Seletor de Licenças (para empresas com múltiplos postos ou filiais) */}
+              {matchedLicenses.length > 1 && (
+                <div className="bg-white p-4 rounded-3xl border border-blue-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                      <ShieldCheck className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-slate-900">
+                        Terminais & Postos da Sua Empresa ({matchedLicenses.length})
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        Alterne entre as licenças ativas da sua empresa para consultar validade e terminais vinculados.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-1 sm:pb-0">
+                    {matchedLicenses.map((lic, idx) => {
+                      const isSel = lic.id === clientLicense.id;
+                      return (
+                        <button
+                          key={lic.id}
+                          onClick={() => setSelectedLicenseId(lic.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap border ${
+                            isSel
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
+                              : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          Posto {idx + 1} ({getPlanLabel(lic.plan_type)})
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Banner Licença */}
               <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden border border-slate-800 space-y-4">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -751,11 +800,26 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
               <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl text-xs space-y-2">
                 <div className="flex items-center gap-2 text-blue-900 font-bold">
                   <Cloud className="w-4 h-4 text-blue-600" />
-                  <span>Proteção Total Contra Falhas de Hardware</span>
+                  <span>Proteção Total Contra Falhas de Hardware & Ransomware</span>
                 </div>
                 <p className="text-blue-800 text-[11px] leading-relaxed">
-                  O Kivora ERP no seu computador realiza backups automáticos da base de dados local sempre que efetua o fecho de turno ou de caixa, protegendo os seus dados fiscais e de stock.
+                  O Kivora ERP no seu computador realiza backups automáticos da base de dados local sempre que efetua o fecho de turno ou de caixa, protegendo os seus dados fiscais, clientes e existências de stock.
                 </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Destino Local das Cópias</span>
+                  <p className="font-mono text-xs font-bold text-slate-900 truncate">%APPDATA%\Kivora\backups</p>
+                  <span className="text-[11px] text-slate-500">Gravado em disco local isolado</span>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Terminal Vinculado</span>
+                  <p className="font-mono text-xs font-bold text-slate-900 truncate">
+                    {clientLicense.hardware_id || 'Servidor / Caixa Principal'}
+                  </p>
+                  <span className="text-[11px] text-slate-500">Chave: {clientLicense.id}</span>
+                </div>
               </div>
 
               <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs">
@@ -764,13 +828,37 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                     <Cloud className="w-4 h-4 text-blue-600" />
                     <div>
                       <p className="font-bold text-slate-900">Sincronização em Tempo Real Cloud</p>
-                      <p className="text-slate-400 text-[10px]">Ligação com Firebase Firestore ativo</p>
+                      <p className="text-slate-400 text-[10px]">Cloud Firestore & Validação de Licenças AGT</p>
                     </div>
                   </div>
                   <span className="text-emerald-700 bg-emerald-100 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
                     Ativo & Seguro
                   </span>
                 </div>
+                <div className="p-4 bg-white flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <div>
+                      <p className="font-bold text-slate-900">Criptografia em Trânsito</p>
+                      <p className="text-slate-400 text-[10px]">TLS 1.3 / AES-256 com Chaves RSA-SHA256</p>
+                    </div>
+                  </div>
+                  <span className="text-blue-700 bg-blue-100 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                    Certificado
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-2">
+                <h4 className="font-bold text-slate-900 flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Como restaurar uma cópia de segurança em caso de troca de computador:</span>
+                </h4>
+                <ol className="list-decimal list-inside space-y-1 text-slate-600 text-[11px] leading-relaxed">
+                  <li>Instale o Kivora ERP no novo computador a partir do menu <strong>Downloads</strong>.</li>
+                  <li>Inicie o software e introduza a sua chave de ativação <strong>{clientLicense.id}</strong>.</li>
+                  <li>No menu <em>Definições &gt; Manutenção &gt; Restaurar Cópia</em>, selecione o ficheiro <code>.db</code> ou <code>.kvr</code> guardado no seu pendrive ou disco externo.</li>
+                </ol>
               </div>
             </div>
           )}

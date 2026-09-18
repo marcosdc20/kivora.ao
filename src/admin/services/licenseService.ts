@@ -238,34 +238,64 @@ export function subscribeClientLicenses(
   identifier: { nif?: string; email?: string; licenseKey?: string },
   onUpdate: (licenses: KivoraLicense[]) => void
 ): () => void {
-  if (identifier.licenseKey) {
-    return onSnapshot(doc(db, 'licenses', identifier.licenseKey), (snap) => {
+  const cleanNif = identifier.nif && identifier.nif !== 'Não Registado' ? identifier.nif.toUpperCase().trim() : null;
+  const cleanEmail = identifier.email ? identifier.email.toLowerCase().trim() : null;
+  const cleanKey = identifier.licenseKey?.trim() || null;
+
+  let queryLicenses: KivoraLicense[] = [];
+  let singleLicense: KivoraLicense | null = null;
+
+  const emit = () => {
+    const map = new Map<string, KivoraLicense>();
+    queryLicenses.forEach((l) => map.set(l.id, l));
+    if (singleLicense) {
+      map.set(singleLicense.id, singleLicense);
+    }
+    const result = Array.from(map.values());
+    result.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+    onUpdate(result);
+  };
+
+  const unsubs: Array<() => void> = [];
+
+  // Se tiver chave individual específica, escuta o documento direto
+  if (cleanKey) {
+    const unsubKey = onSnapshot(doc(db, 'licenses', cleanKey), (snap) => {
       if (snap.exists()) {
-        onUpdate([mapDocToKivoraLicense(snap.id, snap.data())]);
+        singleLicense = mapDocToKivoraLicense(snap.id, snap.data());
       } else {
-        onUpdate([]);
+        singleLicense = null;
       }
-    });
+      emit();
+    }, (err) => console.warn('Erro ao escutar licença direta:', err));
+    unsubs.push(unsubKey);
   }
 
-  if (identifier.nif && identifier.nif !== 'Não Registado') {
-    const q = query(collection(db, 'licenses'), where('nif', '==', identifier.nif));
-    return onSnapshot(q, (snap) => {
-      const list: KivoraLicense[] = snap.docs.map((d) => mapDocToKivoraLicense(d.id, d.data()));
-      onUpdate(list);
-    });
+  // Se tiver NIF válido, escuta todas as licenças da empresa (postos/filiais)
+  if (cleanNif) {
+    const qNif = query(collection(db, 'licenses'), where('nif', '==', cleanNif));
+    const unsubNif = onSnapshot(qNif, (snap) => {
+      queryLicenses = snap.docs.map((d) => mapDocToKivoraLicense(d.id, d.data()));
+      emit();
+    }, (err) => console.warn('Erro ao escutar licenças por NIF:', err));
+    unsubs.push(unsubNif);
+  } else if (cleanEmail) {
+    const qEmail = query(collection(db, 'licenses'), where('client_email', '==', cleanEmail));
+    const unsubEmail = onSnapshot(qEmail, (snap) => {
+      queryLicenses = snap.docs.map((d) => mapDocToKivoraLicense(d.id, d.data()));
+      emit();
+    }, (err) => console.warn('Erro ao escutar licenças por Email:', err));
+    unsubs.push(unsubEmail);
   }
 
-  if (identifier.email) {
-    const q = query(collection(db, 'licenses'), where('client_email', '==', identifier.email));
-    return onSnapshot(q, (snap) => {
-      const list: KivoraLicense[] = snap.docs.map((d) => mapDocToKivoraLicense(d.id, d.data()));
-      onUpdate(list);
-    });
+  if (unsubs.length === 0) {
+    onUpdate([]);
+    return () => {};
   }
 
-  onUpdate([]);
-  return () => {};
+  return () => {
+    unsubs.forEach((u) => u());
+  };
 }
 
 /** Assina apenas a licença vinculada a um cliente por NIF ou Email (Segregação do Cliente) */

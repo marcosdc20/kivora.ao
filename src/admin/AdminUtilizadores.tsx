@@ -5,6 +5,7 @@ import { AdminUser } from './types';
 import { db } from '../lib/firebase';
 import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import { notify } from '../services/notificationService';
+import { hashKivoraPassword } from './services/authService';
 
 const NIVEL_BADGES: Record<string, { label: string; color: string }> = {
   super_admin: { label: 'Super Admin', color: 'bg-purple-50 text-purple-700 border-purple-200' },
@@ -72,21 +73,26 @@ export const AdminUtilizadores: React.FC = () => {
     if (!nome || !email) return;
 
     const uId = `admin_${Date.now()}`;
+    const tempPassword = 'kivora' + Math.floor(1000 + Math.random() * 9000);
+
     try {
+      const passwordHash = await hashKivoraPassword(tempPassword);
+
       await setDoc(doc(db, 'admins', uId), {
-        nome,
-        email,
-        funcao: funcao || 'Membro da Equipa Executiva',
+        nome: nome.trim(),
+        email: email.toLowerCase().trim(),
+        funcao: funcao.trim() || 'Membro da Equipa Executiva',
         nivel,
         status: 'ativo',
         created_at: Date.now()
       }, { merge: true });
 
       await setDoc(doc(db, 'users', email.toLowerCase().trim()), {
-        nome,
+        nome: nome.trim(),
         email: email.toLowerCase().trim(),
         role: 'admin',
-        password: 'kivora' + Math.floor(1000 + Math.random() * 9000),
+        passwordHash,
+        mustChangePassword: true,
         status: 'ativo',
         created_at: Date.now()
       }, { merge: true });
@@ -95,7 +101,7 @@ export const AdminUtilizadores: React.FC = () => {
       setNome('');
       setEmail('');
       setFuncao('');
-      notify.success(`Administrador ${nome} registado com sucesso no Firebase!`);
+      notify.success(`Administrador ${nome} registado com sucesso! Senha temporária gerada: ${tempPassword}`);
     } catch (err: any) {
       notify.error('Erro ao registar administrador no Firebase: ' + err.message);
     }

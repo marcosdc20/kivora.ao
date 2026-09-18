@@ -83,17 +83,16 @@ service cloud.firestore {
       // LIST: admins autenticados OU recuperação de licença por NIF/máquina pelo Kivora Soft
       allow list: if true;
 
-      // FIX v2.2: Emissão de Novas Licenças por admins autenticados OU Parceiros Homologados Ativos
+      // Emissão de Novas Licenças: Restrito estritamente a administradores oficiais OU parceiros homologados ativos (Invariante 2)
       allow create: if isAdmin() || (
+        // Emissão instantânea oficial por parceiro homologado (via carteira virtual ou quota rotativa)
         request.resource.data.partner_id is string &&
         request.resource.data.partner_id.size() > 0 &&
-        request.resource.data.id == licenseId &&
-        request.resource.data.id.matches('^KVRA-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$') &&
-        request.resource.data.company_name is string &&
-        request.resource.data.nif is string &&
-        request.resource.data.status == 'active' &&
         exists(/databases/$(database)/documents/partners/$(request.resource.data.partner_id)) &&
-        get(/databases/$(database)/documents/partners/$(request.resource.data.partner_id)).data.status == 'active'
+        get(/databases/$(database)/documents/partners/$(request.resource.data.partner_id)).data.status == 'active' &&
+        request.resource.data.keys().hasAll(['id', 'company_name', 'nif', 'plan_type', 'status', 'partner_id']) &&
+        request.resource.data.status == 'active' &&
+        request.resource.data.hardware_id == null
       );
 
       // Atualização: admins OU ativação de hardware_id pelo Kivora Soft Desktop OU parceiro OU portal do cliente
@@ -102,21 +101,21 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['hardware_id', 'hostname', 'activated_at', 'status', 'updated_at', 'nif', 'company_name'])
         && (
-          resource.data.hardware_id == null
-          || resource.data.hardware_id == ""
-          || resource.data.hardware_id == "PENDING"
-          || resource.data.hardware_id == request.resource.data.hardware_id
-          || (resource.data.hostname != null
-              && resource.data.hostname != ""
-              && resource.data.hostname == request.resource.data.hostname)
+          resource.data.get('hardware_id', null) == null
+          || resource.data.get('hardware_id', '') == ""
+          || resource.data.get('hardware_id', '') == "PENDING"
+          || resource.data.get('hardware_id', '') == request.resource.data.get('hardware_id', '')
+          || (resource.data.get('hostname', '') != ""
+              && resource.data.get('hostname', '') == request.resource.data.get('hostname', ''))
         )
       ) || (
         // Parceiro gerindo postos/notas sem poder alterar chave, tipo de plano ou datas fiscais
+        resource.data.get('partner_id', '') != '' &&
         request.resource.data.partner_id == resource.data.partner_id &&
         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['id', 'plan_type', 'expires_at', 'client_email', 'nif'])
       ) || (
-        // Portal do cliente a definir/alterar a sua senha de acesso ao portal
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['password', 'passwordHash', 'passwordSetAt', 'updatedAt'])
+        // Portal do cliente a definir/alterar a sua senha de acesso ao portal (incluindo credencial temporária)
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['password', 'passwordHash', 'tempPassword', 'passwordSetAt', 'updatedAt'])
       );
 
       // Eliminação: restrito estritamente a administradores
@@ -140,8 +139,13 @@ service cloud.firestore {
         request.resource.data.status in ['active', 'pending']
       );
       // Atualização por admin OU pelo parceiro atualizando dados de contato/perfil/senha
+      // FIX [VULN-03]: Bloqueio estrito de adulteração de saldos de carteira (wallet_balance_aoa), dívidas e limites por utilizadores comuns
       allow update: if isAdmin() || (
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['code', 'status', 'tier', 'credit_slots_limit'])
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'code', 'status', 'tier', 'credit_slots_limit',
+          'wallet_balance_aoa', 'debt_aoa', 'credit_limit_aoa',
+          'total_sales', 'total_paid_aoa'
+        ])
       );
       // Eliminação apenas por admin
       allow delete: if isAdmin();
@@ -193,7 +197,7 @@ service cloud.firestore {
                        request.resource.data.empresa is string ||
                        request.resource.data.email is string;
       allow update: if isAdmin() || (
-        request.resource.data.status in ['approved', 'rejected', 'pending', 'em_analise']
+        request.resource.data.status in ['approved', 'rejected', 'pending', 'pendente', 'homologado', 'aprovada', 'em_analise']
       );
       allow delete: if isAdmin();
     }
@@ -357,8 +361,10 @@ service cloud.firestore {
         (!request.resource.data.keys().hasAny(['role']) || request.resource.data.role == 'cliente')
       ) || isAdmin();
       allow update: if (
-        // Utilizador pode atualizar o seu próprio documento, mas NÃO pode alterar role
-        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'status']))
+        // Utilizador pode atualizar o seu próprio documento, mas NÃO pode alterar role, status ou saldos de carteira
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'role', 'status', 'wallet_balance_aoa', 'debt_aoa', 'credit_limit_aoa', 'credit_slots_limit'
+        ]))
       ) || isAdmin();
       allow delete: if isAdmin();
     }
