@@ -216,9 +216,12 @@ service cloud.firestore {
       allow create: if request.resource.data.name is string
                     && request.resource.data.nif is string
                     && request.resource.data.nif.size() >= 9;
-      // Atualização por admin OU sincronização cadastral pelo Kivora Soft
+      // Atualização por admin OU sincronização cadastral pelo Kivora Soft / Portal de Parceiros
       allow update: if isAdmin() || (
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'nif', 'email', 'phone', 'address', 'updated_at'])
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'id', 'name', 'nif', 'email', 'phone', 'address',
+          'partner_id', 'status', 'createdAt', 'updatedAt', 'updated_at'
+        ])
       );
       allow delete: if isAdmin();
     }
@@ -228,7 +231,10 @@ service cloud.firestore {
                     && request.resource.data.nif is string
                     && request.resource.data.nif.size() >= 9;
       allow update: if isAdmin() || (
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'nif', 'email', 'phone', 'address', 'updated_at'])
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'id', 'name', 'nif', 'email', 'phone', 'address',
+          'partner_id', 'status', 'createdAt', 'updatedAt', 'updated_at'
+        ])
       );
       allow delete: if isAdmin();
     }
