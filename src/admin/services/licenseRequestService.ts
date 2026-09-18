@@ -11,7 +11,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { PlanType } from '../types';
-import { createLicense, calculateExpiresAt } from './licenseService';
+import { createLicense, calculateExpiresAt, getPlanLabel } from './licenseService';
 import { recordPartnerDebt, deductPartnerWallet, resolvePartnerDocRef } from './partnerDebtService';
 import { cleanFirestoreData } from '../../lib/firestoreUtils';
 
@@ -227,11 +227,35 @@ export async function approveLicenseRequest(
       provisional_target_plan: reqData.provisional_target_plan,
     });
 
+    // Regista a fatura oficial em /subscription_invoices para visualização no Portal do Cliente
+    const nowTs = Date.now();
+    const year = new Date(nowTs).getFullYear();
+    const invoiceDocId = `INV-PARTNER-${year}-${lic.id.slice(-6).toUpperCase()}`;
+    await setDoc(doc(db, 'subscription_invoices', invoiceDocId), cleanFirestoreData({
+      id: invoiceDocId,
+      invoice_number: `FT KVRA/${year}/${lic.id.slice(-5).toUpperCase()}`,
+      licenseId: lic.id,
+      license_id: lic.id,
+      company_name: reqData.company_name.trim(),
+      nif: reqData.nif.trim(),
+      plan_label: getPlanLabel(reqData.plan_type),
+      amount: reqData.price_aoa,
+      totalAOA: reqData.price_aoa,
+      status: 'paid',
+      payment_method: isPaid ? 'Carteira Parceiro Kivora' : 'Crédito Homologado Admin',
+      issue_date: new Date(nowTs).toISOString().split('T')[0],
+      due_date: new Date(expiresAt || (nowTs + 365 * 86400000)).toISOString().split('T')[0],
+      partner_id: resolvedPartnerId,
+      partner_name: reqData.partner_name,
+      created_at: nowTs,
+      updated_at: nowTs,
+    }), { merge: true });
+
     // Atualiza a solicitação com status aprovado
     await updateDoc(reqRef, {
       status: 'approved',
       license_id: lic.id,
-      approved_at: Date.now(),
+      approved_at: nowTs,
       reviewed_by: reviewerEmail,
     });
 

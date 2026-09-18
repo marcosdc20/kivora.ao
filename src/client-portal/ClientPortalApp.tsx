@@ -68,6 +68,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
   // Modal de Fatura / Recibo
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<KivoraLicense | null>(null);
+  const [selectedInvoiceMeta, setSelectedInvoiceMeta] = useState<{ invoiceNumber?: string; paymentMethod?: string } | null>(null);
 
   // Modal de Videochamada & Gestão de Minutos de Assistência
   const [videoModalOpen, setVideoModalOpen] = useState(false);
@@ -1105,6 +1106,10 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                             onClick={() => {
                               const matchingLic = matchedLicenses.find(l => l.id === inv.licenseId) || clientLicense;
                               setSelectedInvoice(matchingLic);
+                              setSelectedInvoiceMeta({
+                                invoiceNumber: inv.invoice_number,
+                                paymentMethod: inv.payment_method || 'Pagamento Validado',
+                              });
                               setInvoiceModalOpen(true);
                             }}
                             className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-xl border border-slate-200 text-xs font-bold transition-colors cursor-pointer"
@@ -1157,6 +1162,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                           <button
                             onClick={() => {
                               setSelectedInvoice(lic);
+                              setSelectedInvoiceMeta(null);
                               setInvoiceModalOpen(true);
                             }}
                             className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-xl border border-slate-200 text-xs font-bold transition-colors cursor-pointer"
@@ -1492,8 +1498,13 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
       {selectedInvoice && (
         <InvoicePrintModal
           isOpen={invoiceModalOpen}
-          onClose={() => setInvoiceModalOpen(false)}
+          onClose={() => {
+            setInvoiceModalOpen(false);
+            setSelectedInvoiceMeta(null);
+          }}
           license={selectedInvoice}
+          invoiceNumber={selectedInvoiceMeta?.invoiceNumber}
+          paymentMethod={selectedInvoiceMeta?.paymentMethod}
         />
       )}
 

@@ -18,7 +18,7 @@ import {
   writeBatch,
   Timestamp,
 } from 'firebase/firestore';
-import { generateLicenseKey, calculateExpiresAt } from '../../admin/services/licenseService';
+import { generateLicenseKey, calculateExpiresAt, getPlanLabel } from '../../admin/services/licenseService';
 import { cleanFirestoreData } from '../../lib/firestoreUtils';
 
 export interface IssueInstantLicenseParams {
@@ -183,6 +183,31 @@ export async function issueInstantPartnerLicense(
       createdAt: now,
       updated_at: now,
     }), { merge: true });
+
+    // 4. Registar Fatura de Subscrição Oficial em /subscription_invoices
+    const year = new Date(now).getFullYear();
+    const invoiceDocId = `INV-PARTNER-${year}-${key.slice(-6).toUpperCase()}`;
+    const invoiceRef = doc(db, 'subscription_invoices', invoiceDocId);
+    const invoicePayload = cleanFirestoreData({
+      id: invoiceDocId,
+      invoice_number: `FT KVRA/${year}/${key.slice(-5).toUpperCase()}`,
+      licenseId: key,
+      license_id: key,
+      company_name: companyName.trim(),
+      nif: cleanNif,
+      plan_label: getPlanLabel(planType),
+      amount: priceAoa,
+      totalAOA: priceAoa,
+      status: 'paid',
+      payment_method: isProvisional ? 'Crédito Provisório Parceiro' : 'Parceiro Homologado Kivora',
+      issue_date: new Date(now).toISOString().split('T')[0],
+      due_date: new Date(expiresAt || (now + 30 * 86400000)).toISOString().split('T')[0],
+      partner_id: partnerDocId,
+      partner_name: partnerName || partnerData.name || cleanPartnerCode,
+      created_at: now,
+      updated_at: now,
+    });
+    batch.set(invoiceRef, invoicePayload);
 
     // Commit 100% atómico: 1 único round-trip (< 350ms)
     await batch.commit();

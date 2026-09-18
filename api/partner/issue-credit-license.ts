@@ -321,6 +321,37 @@ export default async function handler(req: any, res: any) {
       })
     }).catch(console.warn));
 
+    // 8. Registar Fatura de Subscrição Oficial em /subscription_invoices
+    const year = new Date(now).getFullYear();
+    const invoiceDocId = `INV-PARTNER-${year}-${key.slice(-6).toUpperCase()}`;
+    const invoiceDocUrl = `${FIRESTORE_BASE_URL}/subscription_invoices/${encodeURIComponent(invoiceDocId)}`;
+    const invoicePayload = {
+      fields: {
+        id: { stringValue: invoiceDocId },
+        invoice_number: { stringValue: `FT KVRA/${year}/${key.slice(-5).toUpperCase()}` },
+        licenseId: { stringValue: key },
+        license_id: { stringValue: key },
+        company_name: { stringValue: companyName.trim() },
+        nif: { stringValue: cleanNif },
+        plan_label: { stringValue: `Kivora ERP - ${planType.toUpperCase()}` },
+        amount: { integerValue: String(priceAoa || 0) },
+        totalAOA: { integerValue: String(priceAoa || 0) },
+        status: { stringValue: 'paid' },
+        payment_method: { stringValue: isWallet ? 'Carteira Parceiro Kivora' : (isProv ? 'Crédito Provisório Parceiro' : 'Parceiro Homologado Kivora') },
+        issue_date: { stringValue: new Date(now).toISOString().split('T')[0] },
+        due_date: { stringValue: new Date(expiresAt).toISOString().split('T')[0] },
+        partner_id: { stringValue: targetPartnerId },
+        partner_name: { stringValue: pFields.name?.stringValue || partnerCode },
+        created_at: { integerValue: String(now) },
+        updated_at: { integerValue: String(now) },
+      }
+    };
+    backgroundWrites.push(fetch(invoiceDocUrl, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(invoicePayload)
+    }).catch(console.warn));
+
     if (isWallet) {
       const currentBal = Number(pFields.wallet_balance_aoa?.integerValue || pFields.wallet_balance_aoa?.doubleValue) || 0;
       const newBalance = Math.max(0, currentBal - Number(costAoa || 0));
