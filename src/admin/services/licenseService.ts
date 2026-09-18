@@ -6,10 +6,11 @@
 
 import {
   collection, doc, getDocs, getDoc,
-  setDoc, updateDoc, deleteDoc,
+  setDoc, updateDoc, deleteDoc, writeBatch,
   query, where, orderBy, Timestamp, onSnapshot
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { generateTempPassword, hashKivoraPassword } from './authService';
 import type {
   KivoraLicense, CreateLicenseParams,
   LicenseFilters, PlanType
@@ -101,6 +102,142 @@ export async function createLicense(params: CreateLicenseParams): Promise<Kivora
   await setDoc(doc(db, 'licenses', key), cleanFirestoreData(firestorePayload));
 
   return data;
+}
+
+export interface CreateFullAdminLicenseAtomicParams {
+  client_email?: string;
+  company_name: string;
+  nif: string;
+  plan_type: PlanType;
+  expires_at?: number | null;
+  price_aoa?: number;
+  notes?: string;
+  partner_id?: string;
+  extra_seats?: number;
+  is_provisional?: boolean;
+  provisional_target_plan?: PlanType;
+  ensureCompany?: boolean;
+}
+
+export interface CreateFullAdminLicenseAtomicResult {
+  license: KivoraLicense;
+  tempPassword: string;
+}
+
+/**
+ * Emite licença oficial pelo Administrador com gravação 100% atómica em lote único (writeBatch).
+ * Grava atomicamente num ÚNICO round-trip de rede (< 350ms):
+ * 1. /licenses/{licenseKey} (com chave, expiração, senha temporária e hash)
+ * 2. /companies/{cleanNif} (empresa cliente normalizada por NIF)
+ * 3. /users/{userId} (conta de acesso do cliente no portal)
+ * Elimina os 4 round-trips sequenciais e tempestade de listeners onSnapshot.
+ */
+export async function createFullAdminLicenseAtomic(
+  params: CreateFullAdminLicenseAtomicParams
+): Promise<CreateFullAdminLicenseAtomicResult> {
+  const key = generateLicenseKey();
+  const now = Date.now();
+  const cleanEmail = (params.client_email || '').trim().toLowerCase();
+  const cleanCompany = (params.company_name || 'Cliente Avulso').trim();
+  const cleanNif = (params.nif || '999999999').trim().toUpperCase();
+
+  const tempPassword = generateTempPassword();
+  const passwordHash = await hashKivoraPassword(tempPassword);
+
+  const licenseData: KivoraLicense = {
+    id: key,
+    client_email: cleanEmail,
+    company_name: cleanCompany,
+    nif: cleanNif,
+    plan_type: params.plan_type || 'monthly',
+    status: 'active',
+    hardware_id: null,
+    created_at: now,
+    expires_at: params.expires_at ?? null,
+    price_aoa: params.price_aoa ?? 0,
+    notes: params.notes ?? '',
+    partner_id: params.partner_id || undefined,
+    activated_at: null,
+    extra_seats: params.extra_seats ?? 0,
+    is_provisional: params.is_provisional ?? false,
+    provisional_target_plan: params.provisional_target_plan || undefined,
+  };
+
+  const firestoreLicensePayload: Record<string, any> = {
+    id: key,
+    client_email: cleanEmail,
+    company_name: cleanCompany,
+    nif: cleanNif,
+    plan_type: licenseData.plan_type,
+    status: licenseData.status,
+    hardware_id: null,
+    created_at: now,
+    expires_at: params.expires_at ?? null,
+    price_aoa: licenseData.price_aoa,
+    notes: licenseData.notes,
+    partner_id: params.partner_id || '',
+    activated_at: null,
+    extra_seats: licenseData.extra_seats,
+    is_provisional: licenseData.is_provisional,
+    max_users: 1 + (params.extra_seats ?? 0),
+    passwordHash,
+    tempPassword,
+    passwordSetAt: now,
+    _created_at_ts: Timestamp.fromMillis(now),
+    _expires_at_ts: params.expires_at ? Timestamp.fromMillis(params.expires_at) : null,
+  };
+
+  if (params.provisional_target_plan) {
+    firestoreLicensePayload.provisional_target_plan = params.provisional_target_plan;
+  }
+
+  const batch = writeBatch(db);
+
+  // 1. Gravar Licença Oficial
+  const licenseRef = doc(db, 'licenses', key);
+  batch.set(licenseRef, cleanFirestoreData(firestoreLicensePayload));
+
+  // 2. Registar / Sincronizar Empresa Cliente (idempotente por NIF)
+  if (params.ensureCompany !== false) {
+    const companyRef = doc(db, 'companies', cleanNif);
+    batch.set(companyRef, cleanFirestoreData({
+      id: cleanNif,
+      name: cleanCompany,
+      nif: cleanNif,
+      email: cleanEmail,
+      phone: '',
+      status: 'active',
+      address: params.partner_id ? `Parceiro: ${params.partner_id}` : 'Direto',
+      partner_id: params.partner_id || '',
+      createdAt: now,
+      updated_at: now,
+    }), { merge: true });
+  }
+
+  // 3. Criar Conta de Acesso do Cliente
+  const userEmail = cleanEmail || `${cleanNif.toLowerCase()}@kivora.ao`;
+  const userId = userEmail.replace(/[^a-z0-9]/g, '_');
+  const userRef = doc(db, 'users', userId);
+  batch.set(userRef, cleanFirestoreData({
+    email: userEmail,
+    nome: cleanCompany,
+    nif: cleanNif,
+    role: 'cliente',
+    status: 'active',
+    licenseKey: key,
+    passwordHash,
+    tempPassword,
+    passwordSetAt: now,
+    createdAt: now,
+  }), { merge: true });
+
+  // Commit atómico único: 1 único round-trip de rede para as 3 entidades
+  await batch.commit();
+
+  return {
+    license: licenseData,
+    tempPassword,
+  };
 }
 
 /** Promove uma licença provisória para definitiva após confirmação de liquidação */

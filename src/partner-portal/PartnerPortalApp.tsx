@@ -544,19 +544,29 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     return list;
   }, [myPartnerLicenses, approvedRequestLicenses, myLicenseRequests, partnerCode]);
 
-  // Reconciliação automática em background de licenças emitidas sem débito correspondente
+  // Reconciliação em background com debounce e lock anti-loop
+  const isReconcilingRef = React.useRef(false);
   useEffect(() => {
-    if (!partnerCode || allPartnerLicenses.length === 0) return;
-    reconcilePartnerDebtsWithLicenses(
-      partnerCode,
-      partnerName,
-      allPartnerLicenses,
-      partnerDebts,
-      policy,
-      pricingPlans,
-      partnerAccount?.tier || 'bronze'
-    );
-  }, [partnerCode, partnerName, allPartnerLicenses, partnerDebts, policy, pricingPlans, partnerAccount?.tier]);
+    if (!partnerCode || allPartnerLicenses.length === 0 || isReconcilingRef.current) return;
+    const timer = setTimeout(async () => {
+      if (isReconcilingRef.current) return;
+      isReconcilingRef.current = true;
+      try {
+        await reconcilePartnerDebtsWithLicenses(
+          partnerCode,
+          partnerName,
+          allPartnerLicenses,
+          partnerDebts,
+          policy,
+          pricingPlans,
+          partnerAccount?.tier || 'bronze'
+        );
+      } finally {
+        setTimeout(() => { isReconcilingRef.current = false; }, 4000);
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [partnerCode, partnerName, allPartnerLicenses.length, partnerDebts.length, policy, pricingPlans, partnerAccount?.tier]);
 
   // Lista Efetiva de Débitos (Garante coerência de slots e extrato mesmo antes da gravação assíncrona)
   const effectiveDebts = React.useMemo(() => {
@@ -810,6 +820,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       if (canPayWithWallet) {
         const instantRes = await issueInstantPartnerLicense({
           partnerCode: displayPartnerCode,
+          partnerDocId: partnerAccount?.id || displayPartnerCode,
           partnerName: displayPartnerName,
           companyName,
           nif,
@@ -848,6 +859,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
         const instantRes = await issueInstantPartnerLicense({
           partnerCode: displayPartnerCode,
+          partnerDocId: partnerAccount?.id || displayPartnerCode,
           partnerName: displayPartnerName,
           companyName,
           nif,

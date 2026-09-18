@@ -7,6 +7,7 @@ import {
 import { PageId } from '../components/Header';
 import { StoreProduct } from './LojaPage';
 import { createStoreOrder } from '../admin/services/storeService';
+import { getCachedSystemSettings } from '../services/systemSettingsService';
 
 interface ProdutoDetailPageProps {
   product: StoreProduct;
@@ -80,7 +81,8 @@ export const ProdutoDetailPage: React.FC<ProdutoDetailPageProps> = ({
       `Olá, gostaria de confirmar a disponibilidade e receber o IBAN para emissão da Fatura Proforma e pagamento.`;
 
     const encoded = encodeURIComponent(msg);
-    window.open(`https://wa.me/244923456789?text=${encoded}`, '_blank');
+    const targetPhone = getCachedSystemSettings().phoneRaw || '244923456789';
+    window.open(`https://wa.me/${targetPhone}?text=${encoded}`, '_blank');
   };
 
   return (

@@ -5,7 +5,7 @@ import {
   Headphones, Building2, LogOut, Monitor, Copy,
   CheckCircle2, ShieldCheck, Loader2, Send, Menu, X,
   MessageSquare, Receipt, Printer, AlertTriangle, Ban,
-  Video
+  Video, ShoppingBag, Truck, Package, ExternalLink
 } from 'lucide-react';
 import { KivoraLogo } from '../components/KivoraLogo';
 import { CURRENT_RELEASE, KIVORA_INFO } from '../data/kivoraData';
@@ -23,14 +23,17 @@ import {
   SupportTicket, createSupportTicket, sendTicketMessage,
   subscribeClientTickets
 } from '../admin/services/supportService';
-import type { KivoraLicense } from '../admin/types';
+import { subscribeToStoreOrders } from '../admin/services/storeService';
+import type { KivoraLicense, StoreOrder } from '../admin/types';
 import { getCachedSystemSettings, getDirectDownloadUrl } from '../services/systemSettingsService';
+import { db } from '../lib/firebase';
+import { collection, query, where, onSnapshot, doc } from 'firebase/firestore';
 
 interface ClientPortalAppProps {
   onLogout: () => void;
 }
 
-type ClientSection = 'dashboard' | 'licenca' | 'downloads' | 'backups' | 'faturas' | 'suporte' | 'empresa';
+type ClientSection = 'dashboard' | 'licenca' | 'downloads' | 'encomendas' | 'backups' | 'faturas' | 'suporte' | 'empresa';
 
 const fmt = (n: number) => n.toLocaleString('pt-AO');
 
@@ -143,6 +146,66 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
     return () => unsub();
   }, [clientLicense.nif, clientLicense.client_email, selectedTicket?.id]);
 
+  // ─── SINCRONIZAÇÃO EM TEMPO REAL: ENCOMENDAS DA LOJA ────────────────────────
+  const [clientOrders, setClientOrders] = useState<StoreOrder[]>([]);
+  useEffect(() => {
+    const unsub = subscribeToStoreOrders((allOrders) => {
+      const myNif = clientLicense.nif?.trim().toLowerCase();
+      const myEmail = (session?.email || clientLicense.client_email || '').trim().toLowerCase();
+      const myCompany = (clientLicense.company_name || '').trim().toLowerCase();
+
+      const matched = allOrders.filter((ord: any) => {
+        const ordNif = (ord.companyNif || ord.nif || '').trim().toLowerCase();
+        const ordEmail = (ord.clientEmail || ord.customerEmail || '').trim().toLowerCase();
+        const ordCompany = (ord.companyName || ord.clientName || ord.customerName || '').trim().toLowerCase();
+        return (
+          (myNif && myNif !== 'não registado' && ordNif && ordNif === myNif) ||
+          (myEmail && ordEmail && ordEmail === myEmail) ||
+          (myCompany && ordCompany && ordCompany.includes(myCompany))
+        );
+      });
+      setClientOrders(matched);
+    });
+    return () => unsub();
+  }, [clientLicense.nif, clientLicense.client_email, clientLicense.company_name, session?.email]);
+
+  // ─── SINCRONIZAÇÃO EM TEMPO REAL: FATURAS & SUBSGRIÇÕES OFICIAIS ───────────
+  const [clientInvoices, setClientInvoices] = useState<any[]>([]);
+  useEffect(() => {
+    const myNif = clientLicense.nif?.trim();
+    if (!myNif || myNif === 'Não Registado') return;
+
+    try {
+      const q = query(collection(db, 'subscription_invoices'), where('nif', '==', myNif));
+      const unsub = onSnapshot(q, (snap) => {
+        const invs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setClientInvoices(invs);
+      }, (err) => console.warn('Invoices snap error:', err));
+      return () => unsub();
+    } catch (e) {
+      console.warn(e);
+    }
+  }, [clientLicense.nif]);
+
+  // ─── SINCRONIZAÇÃO EM TEMPO REAL: TELEMETRIA DE BACKUPS CLOUD ─────────────
+  const [cloudBackupStatus, setCloudBackupStatus] = useState<any>(null);
+  useEffect(() => {
+    const myNif = clientLicense.nif?.trim();
+    if (!myNif || myNif === 'Não Registado') return;
+    try {
+      const unsub = onSnapshot(doc(db, 'cloud_backups', myNif), (snap) => {
+        if (snap.exists()) {
+          setCloudBackupStatus(snap.data());
+        } else {
+          setCloudBackupStatus(null);
+        }
+      }, (err) => console.warn('Backup snap error:', err));
+      return () => unsub();
+    } catch (e) {
+      console.warn(e);
+    }
+  }, [clientLicense.nif]);
+
   const handleCopyKey = () => {
     navigator.clipboard.writeText(clientLicense.id);
     setCopiedKey(true);
@@ -235,8 +298,9 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
     { id: 'dashboard', label: 'Visão Geral', icon: LayoutDashboard },
     { id: 'licenca', label: 'Minha Licença & PCs', icon: Key },
     { id: 'downloads', label: 'Instaladores & Setup', icon: Download },
+    { id: 'encomendas', label: 'Minhas Encomendas', icon: ShoppingBag, badge: clientOrders.filter((o) => o.status !== 'delivered' && o.status !== 'cancelled').length || undefined },
     { id: 'backups', label: 'Backups Cloud', icon: Cloud },
-    { id: 'faturas', label: 'Faturas & Licenças', icon: FileText, badge: matchedLicenses.length },
+    { id: 'faturas', label: 'Faturas & Subscrições', icon: FileText, badge: (clientInvoices.length > 0 ? clientInvoices.length : matchedLicenses.length) },
     { id: 'suporte', label: 'Suporte Técnico', icon: Headphones, badge: myTickets.filter((t) => t.status === 'open').length },
     { id: 'empresa', label: 'Dados Fiscais', icon: Building2 },
   ];
@@ -468,6 +532,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
               {activeSection === 'dashboard' && 'Painel do Cliente'}
               {activeSection === 'licenca' && 'Minha Licença'}
               {activeSection === 'downloads' && 'Instaladores'}
+              {activeSection === 'encomendas' && 'Minhas Encomendas de Hardware'}
               {activeSection === 'backups' && 'Cópias de Segurança'}
               {activeSection === 'faturas' && 'Histórico de Faturas'}
               {activeSection === 'suporte' && 'Assistência Técnica'}
@@ -787,6 +852,124 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
             </div>
           )}
 
+          {/* SECTION: ENCOMENDAS DE HARDWARE */}
+          {activeSection === 'encomendas' && (
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-black text-slate-900">Minhas Encomendas de Equipamentos POS</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Acompanhe o estado de entrega dos seus equipamentos de faturação, impressoras e periféricos comprados na loja oficial.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const phone = getCachedSystemSettings().phoneRaw || '244923456789';
+                    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(`Olá Suporte Comercial Kivora, pretendo encomendar novos equipamentos POS para a empresa ${clientLicense.company_name} (NIF: ${clientLicense.nif}).`)}`, '_blank');
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-2xl shadow-sm transition-all cursor-pointer whitespace-nowrap"
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  <span>Pedir Novo Equipamento</span>
+                </button>
+              </div>
+
+              {clientOrders.length === 0 ? (
+                <div className="p-10 text-center text-slate-400 border border-dashed border-slate-200 rounded-3xl space-y-3">
+                  <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto text-slate-400">
+                    <Package className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <p className="font-black text-slate-700 text-sm">Nenhuma encomenda registada para o seu NIF ({clientLicense.nif})</p>
+                    <p className="text-xs text-slate-400 max-w-md mx-auto mt-1">
+                      As impressoras térmicas, leitores de código de barras ou bobinas de papel encomendados na loja Kivora aparecerão aqui com rastreamento em tempo real.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {clientOrders.map((order) => {
+                    const statusConfig: Record<string, { label: string; color: string; bg: string; border: string }> = {
+                      pending: { label: 'Pendente de Confirmação', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200' },
+                      processing: { label: 'Em Separação & Faturação', color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-200' },
+                      shipped: { label: 'Em Trânsito com Estafeta', color: 'text-purple-700', bg: 'bg-purple-50', border: 'border-purple-200' },
+                      delivered: { label: 'Entregue com Sucesso', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' },
+                      cancelled: { label: 'Cancelada', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200' },
+                    };
+                    const st = statusConfig[order.status] || { label: order.status, color: 'text-slate-700', bg: 'bg-slate-50', border: 'border-slate-200' };
+
+                    return (
+                      <div key={order.id} className="border border-slate-200 rounded-2xl p-5 bg-white space-y-4 shadow-2xs hover:border-blue-300 transition-all">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono font-black text-sm text-slate-900">{order.orderNumber}</span>
+                              <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${st.bg} ${st.color} ${st.border}`}>
+                                {st.label}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 mt-0.5">
+                              Registo: {new Date(order.createdAt).toLocaleDateString('pt-AO')} às {new Date(order.createdAt).toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit' })} • Destino: {order.deliveryProvince}
+                            </p>
+                          </div>
+
+                          <div className="text-left sm:text-right">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Total da Encomenda</span>
+                            <span className="font-mono text-base font-black text-slate-900">
+                              {fmt(order.totalAOA || 0)} Kz
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Itens */}
+                        <div className="space-y-2">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Equipamentos Solicitados:</span>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            {order.items?.map((item, idx) => (
+                              <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between gap-2">
+                                <div>
+                                  <p className="font-bold text-slate-800">{item.productName || (item as any).product?.name || 'Item de Loja'}</p>
+                                  <p className="text-[10px] text-slate-400 font-mono">Qtd: {item.quantity} un.</p>
+                                </div>
+                                <span className="font-mono font-bold text-slate-700 text-xs">
+                                  {fmt(item.unitPriceAOA ? item.unitPriceAOA * item.quantity : 0)} Kz
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {order.notes && (
+                          <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100 text-xs text-blue-900">
+                            <strong>Notas de Transporte:</strong> {order.notes}
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between pt-2 text-xs">
+                          <span className="text-slate-500 text-[11px] flex items-center gap-1.5">
+                            <Truck className="w-3.5 h-3.5 text-blue-600" />
+                            Taxa de Entrega: {order.deliveryFeeAOA === 0 ? 'Grátis' : fmt(order.deliveryFeeAOA || 0) + ' Kz'}
+                          </span>
+                          <button
+                            onClick={() => {
+                              const phone = getCachedSystemSettings().phoneRaw || '244923456789';
+                              const text = `Olá, pretendo informações sobre a encomenda ${order.orderNumber} para a empresa ${clientLicense.company_name}.`;
+                              window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+                            }}
+                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-bold text-xs cursor-pointer"
+                          >
+                            <span>Apoio ao Estafeta</span>
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* SECTION: BACKUPS */}
           {activeSection === 'backups' && (
             <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6 max-w-3xl">
@@ -796,6 +979,23 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                   Cópias automáticas de segurança encriptadas no Google Cloud com retenção redundante.
                 </p>
               </div>
+
+              {cloudBackupStatus && (
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-3">
+                    <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+                    <div>
+                      <p className="font-bold text-emerald-950">Última Sincronização Cloud Registada</p>
+                      <p className="text-[11px] text-emerald-700">
+                        {cloudBackupStatus.updated_at ? new Date(cloudBackupStatus.updated_at).toLocaleString('pt-AO') : 'Recente'} • Terminal: {cloudBackupStatus.hostname || clientLicense.hardware_id || 'Principal'}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="bg-emerald-200/60 text-emerald-900 font-mono font-bold text-[10px] px-2.5 py-1 rounded-full shrink-0">
+                    Sincronizado
+                  </span>
+                </div>
+              )}
 
               <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl text-xs space-y-2">
                 <div className="flex items-center gap-2 text-blue-900 font-bold">
@@ -873,51 +1073,104 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                 </p>
               </div>
 
-              {matchedLicenses.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 border border-dashed border-slate-200 rounded-2xl text-xs">
-                  <Receipt className="w-8 h-8 mx-auto text-slate-300 mb-2" />
-                  <p className="font-bold text-slate-700">Nenhuma fatura emitida ainda</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs">
-                  {matchedLicenses.map((lic) => (
-                    <div key={lic.id} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-bold text-slate-900">{getPlanLabel(lic.plan_type)} — Kivora Desktop ERP</p>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                            lic.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'
-                          }`}>
-                            {lic.status === 'active' ? 'Pago & Ativo' : 'Suspenso'}
-                          </span>
-                        </div>
-                        <p className="text-slate-400 text-[10px] font-mono mt-0.5">
-                          Chave: {lic.id} • Válido até: {formatLicenseDate(lic.expires_at)}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          <p className="font-black text-slate-900 font-mono text-sm">
-                            {fmt(lic.price_aoa || (lic.plan_type === 'monthly' ? 25000 : lic.plan_type === 'lifetime' ? 1500000 : 250000))} Kz
+              {/* Faturas Oficiais em /subscription_invoices se existirem */}
+              {clientInvoices.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider">Faturas e Recibos Fiscais</h3>
+                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs">
+                    {clientInvoices.map((inv) => (
+                      <div key={inv.id} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-slate-900">{inv.invoice_number || inv.id}</span>
+                            <span className="font-medium text-slate-700">— {inv.plan_label || 'Subscrição Kivora ERP'}</span>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                              inv.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                            }`}>
+                              {inv.status === 'paid' ? 'Pago & Liquidado' : 'Pendente'}
+                            </span>
+                          </div>
+                          <p className="text-slate-400 text-[10px] mt-0.5">
+                            Emitida a: {inv.issue_date || '2026-08-01'} • Vencimento: {inv.due_date || '2026-08-30'} {inv.payment_method ? `• Método: ${inv.payment_method}` : ''}
                           </p>
-                          <span className="text-[10px] text-slate-400 block">Subscrição Oficial</span>
                         </div>
-                        <button
-                          onClick={() => {
-                            setSelectedInvoice(lic);
-                            setInvoiceModalOpen(true);
-                          }}
-                          className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-xl border border-slate-200 text-xs font-bold transition-colors cursor-pointer"
-                          title="Imprimir Fatura / Recibo"
-                        >
-                          <Printer className="w-3.5 h-3.5" />
-                          <span>Recibo</span>
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <p className="font-black text-slate-900 font-mono text-sm">
+                              {fmt(inv.amount || inv.totalAOA || 250000)} Kz
+                            </p>
+                            <span className="text-[10px] text-slate-400 block">Fatura Oficial</span>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const matchingLic = matchedLicenses.find(l => l.id === inv.licenseId) || clientLicense;
+                              setSelectedInvoice(matchingLic);
+                              setInvoiceModalOpen(true);
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-xl border border-slate-200 text-xs font-bold transition-colors cursor-pointer"
+                            title="Imprimir Fatura / Recibo"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                            <span>Recibo</span>
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
+
+              {/* Tabela de Licenças Ativas */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider">
+                  {clientInvoices.length > 0 ? 'Chaves de Licença & Postos Associados' : 'Subscrições & Licenças'}
+                </h3>
+                {matchedLicenses.length === 0 ? (
+                  <div className="p-8 text-center text-slate-400 border border-dashed border-slate-200 rounded-2xl text-xs">
+                    <Receipt className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                    <p className="font-bold text-slate-700">Nenhuma fatura ou licença emitida ainda</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs">
+                    {matchedLicenses.map((lic) => (
+                      <div key={lic.id} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-slate-900">{getPlanLabel(lic.plan_type)} — Kivora Desktop ERP</p>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                              lic.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'
+                            }`}>
+                              {lic.status === 'active' ? 'Pago & Ativo' : 'Suspenso'}
+                            </span>
+                          </div>
+                          <p className="text-slate-400 text-[10px] font-mono mt-0.5">
+                            Chave: {lic.id} • Válido até: {formatLicenseDate(lic.expires_at)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <p className="font-black text-slate-900 font-mono text-sm">
+                              {fmt(lic.price_aoa || (lic.plan_type === 'monthly' ? 25000 : lic.plan_type === 'lifetime' ? 1500000 : 250000))} Kz
+                            </p>
+                            <span className="text-[10px] text-slate-400 block">Subscrição Oficial</span>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setSelectedInvoice(lic);
+                              setInvoiceModalOpen(true);
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-xl border border-slate-200 text-xs font-bold transition-colors cursor-pointer"
+                            title="Imprimir Fatura / Recibo"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                            <span>Recibo</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

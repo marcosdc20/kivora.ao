@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  collection, addDoc, query, orderBy, onSnapshot,
+  collection, addDoc, setDoc, query, orderBy, onSnapshot,
   doc, updateDoc, deleteDoc, getDocs
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
@@ -134,11 +134,30 @@ export function useCompanies() {
 
   const addCompany = async (companyData: Omit<Company, 'id' | 'createdAt'>) => {
     try {
-      const docRef = await addDoc(collection(db, 'companies'), {
-        ...companyData,
-        createdAt: Date.now(),
-      });
-      return docRef.id;
+      const cleanNif = (companyData.nif || '').trim().toUpperCase();
+      const docId = cleanNif && cleanNif.length >= 9 && cleanNif !== '999999999'
+        ? cleanNif
+        : null;
+
+      const now = Date.now();
+      if (docId) {
+        const companyRef = doc(db, 'companies', docId);
+        await setDoc(companyRef, {
+          ...companyData,
+          id: docId,
+          nif: cleanNif,
+          createdAt: now,
+          updated_at: now,
+        }, { merge: true });
+        return docId;
+      } else {
+        const docRef = await addDoc(collection(db, 'companies'), {
+          ...companyData,
+          createdAt: now,
+          updated_at: now,
+        });
+        return docRef.id;
+      }
     } catch (err) {
       console.error('Erro ao adicionar empresa no Firebase:', err);
       throw err;

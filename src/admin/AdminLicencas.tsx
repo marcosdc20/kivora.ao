@@ -8,11 +8,10 @@ import { AdminTopbar, StatusBadge } from './AdminComponents';
 import { useLicenses, useCompanies } from './hooks/useFirebase';
 import { FirebaseAuthModal } from './components/FirebaseAuthModal';
 import {
-  createLicense, revokeLicense, reactivateLicense,
+  createFullAdminLicenseAtomic, revokeLicense, reactivateLicense,
   releaseLicenseFromDevice, deleteLicense, extendLicenseExpiry, updateLicenseSeats,
   getPlanLabel, formatLicenseDate, calculateExpiresAt
 } from './services/licenseService';
-import { createClientAccount } from './services/authService';
 import {
   subscribePartnerPolicy, DEFAULT_PARTNER_POLICY,
   PartnerLicensingPolicy, getAdminSeatCost
@@ -1049,7 +1048,7 @@ interface CriarLicencaProps {
 }
 
 export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
-  const { companies, addCompany } = useCompanies();
+  const { companies } = useCompanies();
   const [email, setEmail] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [companyNif, setCompanyNif] = useState('');
@@ -1108,7 +1107,8 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
     setLoading(true);
     try {
       const expiresAt = calculateExpiresAt(plan);
-      const lic = await createLicense({
+      const exists = companies.some(c => (c.nif || '').trim().toUpperCase() === companyNif.trim().toUpperCase());
+      const { license: lic } = await createFullAdminLicenseAtomic({
         client_email: email,
         company_name: companyName,
         nif: companyNif,
@@ -1118,26 +1118,7 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
         notes,
         partner_id: selectedPartnerId || undefined,
         extra_seats: extraSeats,
-      });
-
-      // Também adiciona à lista de empresas caso não exista
-      const exists = companies.some(c => c.nif === companyNif);
-      if (!exists) {
-        await addCompany({
-          name: companyName,
-          nif: companyNif,
-          email,
-          phone: '',
-          status: 'active',
-        });
-      }
-
-      // Cria conta de acesso do cliente no Firebase com senha temporária automática
-      await createClientAccount({
-        email: email || `${companyNif}@kivora.ao`,
-        name: companyName,
-        nif: companyNif,
-        licenseKey: lic.id,
+        ensureCompany: !exists,
       });
 
       // Nota: As licenças NUNCA são enviadas automaticamente por email ou whatsapp aos clientes finais,

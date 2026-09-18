@@ -269,8 +269,10 @@ service cloud.firestore {
       allow create: if request.resource.data.subject is string ||
                        request.resource.data.company_name is string ||
                        request.resource.data.contact_email is string;
-      // Update aberto necessário para troca de mensagens sem Firebase Auth
-      allow update: if true;
+      // FIX [ANTI-TAMPERING]: Update protegido contra adulteração de número, autoria e empresa
+      allow update: if isAdmin() || (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['id', 'ticket_number', 'createdAt', 'company_name', 'nif'])
+      );
       allow delete: if isAdmin();
     }
     match /support_tickets/{ticketId}/{allSubcollections=**} {
@@ -324,13 +326,10 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────
     match /cloud_backups/{tenantId} {
       allow read: if true;
-      // FIX v2.1: Escrita requer que o campo tenant_id do documento
-      // corresponda ao ID do documento no caminho — anti cross-tenant
-      allow write: if (
-        request.resource.data.tenant_id == tenantId ||
-        request.resource.data.tenantId == tenantId ||
-        // Admin pode escrever em qualquer backup (restore manual)
-        isAdmin()
+      // FIX v2.2: Escrita requer correspondência estrita de tenant_id e atributos mínimos de integridade
+      allow write: if isAdmin() || (
+        (request.resource.data.tenant_id == tenantId || request.resource.data.tenantId == tenantId) &&
+        request.resource.data.keys().hasAny(['updated_at', 'created_at', 'timestamp', 'backup_date', 'size_bytes', 'version', 'hostname'])
       );
       allow delete: if isAdmin();
     }
@@ -408,7 +407,14 @@ service cloud.firestore {
       allow create: if request.resource.data.licenseKey is string
                     || request.resource.data.email is string
                     || request.resource.data.nif is string;
-      allow update: if true; // Necessário para gestão de saldo de minutos
+      // FIX [ANTI-TAMPERING]: Utilizadores não-admin podem apenas decrementar minutos ou alterar estado operacional, nunca aumentar saldo concedido
+      allow update: if isAdmin() || (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['totalMinutesGranted', 'bonusMinutesGranted', 'id', 'nif', 'licenseKey'])
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['remainingSeconds'])
+          || request.resource.data.get('remainingSeconds', 0) <= resource.data.get('remainingSeconds', 0)
+        )
+      );
       allow delete: if isAdmin();
     }
     match /video_support_sessions/{sessionId} {

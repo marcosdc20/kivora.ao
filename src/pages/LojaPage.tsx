@@ -13,6 +13,7 @@ import {
   DEFAULT_DELIVERY_RATES
 } from '../admin/services/storeService';
 import { DeliveryRate } from '../admin/types';
+import { getCachedSystemSettings } from '../services/systemSettingsService';
 
 // Importação Direta e Confiável das Imagens de Produto Padrão (Vite Asset Pipeline)
 import posBundleImg from '../assets/products/pos_bundle_kit.jpg';
@@ -540,7 +541,8 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
       msg += `Gostaria de confirmar a encomenda e receber a Fatura Proforma oficial para pagamento via Transferência Bancária / Multicaixa.`;
 
       const encoded = encodeURIComponent(msg);
-      window.open(`https://wa.me/244923456789?text=${encoded}`, '_blank');
+      const targetPhone = getCachedSystemSettings().phoneRaw || '244923456789';
+      window.open(`https://wa.me/${targetPhone}?text=${encoded}`, '_blank');
       setIsCartOpen(false);
     } catch (err) {
       console.error('Erro ao registar encomenda:', err);

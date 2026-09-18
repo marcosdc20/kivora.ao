@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
 import { db } from '../lib/firebase';
-import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, writeBatch, query, where, getDocs, limit } from 'firebase/firestore';
 import {
   subscribeAllDebts, markDebtsPaid, PartnerDebtEntry
 } from './services/partnerDebtService';
@@ -160,7 +160,11 @@ export const AdminPagamentos: React.FC = () => {
     };
 
     try {
-      await setDoc(doc(db, 'licenses', newInvId), cleanFirestoreData({
+      const batch = writeBatch(db);
+      const invoiceDocId = `inv_${Date.now()}_${newInvId.slice(-4)}`;
+
+      // 1. Licença técnica do software
+      batch.set(doc(db, 'licenses', newInvId), cleanFirestoreData({
         id: licenseKey,
         company_name: companyName,
         nif: companyNif || '5400000000',
@@ -172,11 +176,32 @@ export const AdminPagamentos: React.FC = () => {
         notes: `Fatura ${newInv.invoice_number} emitida via Admin`,
       }), { merge: true });
 
+      // 2. Faturação e subscrição oficial em /subscription_invoices
+      batch.set(doc(db, 'subscription_invoices', invoiceDocId), cleanFirestoreData({
+        id: invoiceDocId,
+        invoice_number: newInv.invoice_number,
+        licenseId: newInvId,
+        license_id: newInvId,
+        company_name: companyName,
+        nif: companyNif || '5400000000',
+        plan_label: planLabel,
+        amount: amount,
+        totalAOA: amount,
+        status: status,
+        payment_method: status === 'paid' ? method : undefined,
+        issue_date: newInv.issue_date,
+        due_date: newInv.due_date,
+        created_at: Date.now(),
+        updated_at: Date.now(),
+      }), { merge: true });
+
+      await batch.commit();
+
       setInvoices([newInv, ...invoices]);
       setShowModal(false);
       setCompanyName('');
       setCompanyNif('');
-      notify.success(`Fatura ${newInv.invoice_number} registada com sucesso no Firebase!`);
+      notify.success(`Fatura ${newInv.invoice_number} registada oficialmente com sucesso!`);
     } catch (err: any) {
       notify.error('Erro ao registar fatura no Firebase: ' + err.message);
     }
@@ -184,9 +209,25 @@ export const AdminPagamentos: React.FC = () => {
 
   const handleMarkAsPaid = async (id: string) => {
     try {
-      await setDoc(doc(db, 'licenses', id), {
+      const batch = writeBatch(db);
+      batch.set(doc(db, 'licenses', id), {
         status: 'active'
       }, { merge: true });
+
+      try {
+        const invSnap = await getDocs(query(collection(db, 'subscription_invoices'), where('licenseId', '==', id), limit(1)));
+        if (!invSnap.empty) {
+          batch.update(invSnap.docs[0].ref, {
+            status: 'paid',
+            payment_method: 'Transferência Bancária (IBAN)',
+            updated_at: Date.now()
+          });
+        }
+      } catch (subErr) {
+        console.warn('Verificação de subscription_invoices:', subErr);
+      }
+
+      await batch.commit();
 
       setInvoices(invoices.map(inv =>
         inv.id === id ? { ...inv, status: 'paid', payment_method: 'Transferência Bancária (IBAN)' } : inv

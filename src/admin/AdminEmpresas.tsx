@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Search, Plus, Eye, Building2,
   Mail, Phone, MapPin, Loader2, Trash2, RotateCcw, Lock
@@ -33,48 +33,72 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
   const [address, setAddress] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Mapear companies do Firebase para o modelo de visualização
-  const mappedEmpresas: Empresa[] = companies.map((c) => {
-    const empresaLicenses = licenses.filter(
-      (l) => (l.nif && l.nif === c.nif) || ((l.company_name || '').toLowerCase() === (c.name || '').toLowerCase())
-    );
-    const hasActiveLic = empresaLicenses.some((l) => l.status === 'active' && (!l.expires_at || l.expires_at >= Date.now()));
-    const activeLic = empresaLicenses[0];
+  // Mapear companies do Firebase com memoização O(1) de alto desempenho
+  const mappedEmpresas: Empresa[] = useMemo(() => {
+    // 1. Indexar licenças por NIF e Nome (O(M) uma única vez)
+    const licByNif = new Map<string, typeof licenses>();
+    const licByName = new Map<string, typeof licenses>();
 
-    const currentStatus = c.status === 'blocked' ? 'suspensa' : (hasActiveLic ? 'ativa' : (c.status === 'suspended' ? 'suspensa' : 'pendente'));
+    for (const l of licenses) {
+      if (l.nif) {
+        const cleanN = l.nif.trim().toUpperCase();
+        if (!licByNif.has(cleanN)) licByNif.set(cleanN, []);
+        licByNif.get(cleanN)!.push(l);
+      }
+      if (l.company_name) {
+        const cleanName = l.company_name.trim().toLowerCase();
+        if (!licByName.has(cleanName)) licByName.set(cleanName, []);
+        licByName.get(cleanName)!.push(l);
+      }
+    }
 
-    return {
-      id: c.id,
-      nome: c.name || 'Sem Nome',
-      nif: c.nif || '999999999',
-      email: c.email || 'N/A',
-      telefone: c.phone || 'N/A',
-      provincia: c.address || 'Luanda',
-      plano: activeLic ? activeLic.plan_type.toUpperCase() : 'Standard',
-      status: currentStatus,
-      licencaId: activeLic ? activeLic.id : 'Sem Licença',
-      ultimoAcesso: 'Hoje via Cloud',
-      dataRegisto: new Date(c.createdAt || Date.now()).toISOString().split('T')[0],
-      computadores: {
-        atual: activeLic?.hardware_id ? 1 : 0,
-        maximo: 1 + (activeLic?.extra_seats || 0),
-      },
-    };
-  });
+    const now = Date.now();
 
-  const filtered = mappedEmpresas.filter((e) => {
+    return companies.map((c) => {
+      const cleanN = (c.nif || '').trim().toUpperCase();
+      const cleanName = (c.name || '').trim().toLowerCase();
+
+      const empresaLicenses = (cleanN && licByNif.get(cleanN)) || (cleanName && licByName.get(cleanName)) || [];
+      const hasActiveLic = empresaLicenses.some((l) => l.status === 'active' && (!l.expires_at || l.expires_at >= now));
+      const activeLic = empresaLicenses[0];
+
+      const currentStatus = c.status === 'blocked' ? 'suspensa' : (hasActiveLic ? 'ativa' : (c.status === 'suspended' ? 'suspensa' : 'pendente'));
+
+      return {
+        id: c.id,
+        nome: c.name || 'Sem Nome',
+        nif: c.nif || '999999999',
+        email: c.email || 'N/A',
+        telefone: c.phone || 'N/A',
+        provincia: c.address || 'Luanda',
+        plano: activeLic ? activeLic.plan_type.toUpperCase() : 'Standard',
+        status: currentStatus,
+        licencaId: activeLic ? activeLic.id : 'Sem Licença',
+        ultimoAcesso: 'Hoje via Cloud',
+        dataRegisto: new Date(c.createdAt || now).toISOString().split('T')[0],
+        computadores: {
+          atual: activeLic?.hardware_id ? 1 : 0,
+          maximo: 1 + (activeLic?.extra_seats || 0),
+        },
+      };
+    });
+  }, [companies, licenses]);
+
+  const filtered = useMemo(() => {
     const s = search.toLowerCase();
-    const matchSearch = (e.nome || '').toLowerCase().includes(s) || (e.nif || '').includes(s) || (e.email || '').toLowerCase().includes(s);
-    const matchStatus = filterStatus === 'todos' || e.status === filterStatus;
-    return matchSearch && matchStatus;
-  });
+    return mappedEmpresas.filter((e) => {
+      const matchSearch = (e.nome || '').toLowerCase().includes(s) || (e.nif || '').includes(s) || (e.email || '').toLowerCase().includes(s);
+      const matchStatus = filterStatus === 'todos' || e.status === filterStatus;
+      return matchSearch && matchStatus;
+    });
+  }, [mappedEmpresas, search, filterStatus]);
 
-  const statusCounts = {
+  const statusCounts = useMemo(() => ({
     todos: mappedEmpresas.length,
     ativa: mappedEmpresas.filter(e => e.status === 'ativa').length,
     pendente: mappedEmpresas.filter(e => e.status === 'pendente').length,
     suspensa: mappedEmpresas.filter(e => e.status === 'suspensa').length,
-  };
+  }), [mappedEmpresas]);
 
   const handleAddCompanySubmit = async (e: React.FormEvent) => {
     e.preventDefault();

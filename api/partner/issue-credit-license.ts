@@ -99,11 +99,16 @@ export default async function handler(req: any, res: any) {
     const FIREBASE_PROJECT_ID = process.env.VITE_FIREBASE_PROJECT_ID || 'faturasimples';
     const FIRESTORE_BASE_URL = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
 
-    // 1. Consultar dados do parceiro no Firestore via REST API
-    const partnerRes = await fetch(`${FIRESTORE_BASE_URL}/partners/${encodeURIComponent(partnerCode)}`);
+    // 1. Consultar dados do parceiro no Firestore via REST API (usando partnerDocId prioritário)
+    const targetPartnerId = (body.partnerDocId || partnerCode).trim();
+    let partnerRes = await fetch(`${FIRESTORE_BASE_URL}/partners/${encodeURIComponent(targetPartnerId)}`);
+    if (!partnerRes.ok && body.partnerDocId && body.partnerDocId !== partnerCode) {
+      partnerRes = await fetch(`${FIRESTORE_BASE_URL}/partners/${encodeURIComponent(partnerCode)}`);
+    }
+
     if (!partnerRes.ok) {
       return res.status(404).json({
-        error: `Parceiro com código ${partnerCode} não encontrado no sistema.`
+        error: `Parceiro com identificador ${targetPartnerId} não encontrado no sistema.`
       });
     }
 
@@ -285,16 +290,41 @@ export default async function handler(req: any, res: any) {
       }
     };
 
-    await fetch(debtDocUrl, {
+    const backgroundWrites: Promise<any>[] = [];
+
+    // 6. Registar Débito em /partner_debts
+    backgroundWrites.push(fetch(debtDocUrl, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(debtPayload)
-    });
+    }));
+
+    // 7. Registar / Atualizar Empresa Cliente em /companies
+    const cleanNif = nif.trim().toUpperCase();
+    const companyDocUrl = `${FIRESTORE_BASE_URL}/companies/${encodeURIComponent(cleanNif)}`;
+    backgroundWrites.push(fetch(companyDocUrl, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          id: { stringValue: cleanNif },
+          name: { stringValue: companyName.trim() },
+          nif: { stringValue: cleanNif },
+          email: { stringValue: (clientEmail || '').trim().toLowerCase() },
+          phone: { stringValue: '' },
+          address: { stringValue: `Parceiro: ${targetPartnerId}` },
+          partner_id: { stringValue: targetPartnerId },
+          status: { stringValue: 'active' },
+          createdAt: { integerValue: String(now) },
+          updated_at: { integerValue: String(now) },
+        }
+      })
+    }).catch(console.warn));
 
     if (isWallet) {
       const currentBal = Number(pFields.wallet_balance_aoa?.integerValue || pFields.wallet_balance_aoa?.doubleValue) || 0;
       const newBalance = Math.max(0, currentBal - Number(costAoa || 0));
-      await fetch(`${FIRESTORE_BASE_URL}/partners/${encodeURIComponent(partnerCode)}?updateMask.fieldPaths=wallet_balance_aoa&updateMask.fieldPaths=updatedAt`, {
+      backgroundWrites.push(fetch(`${FIRESTORE_BASE_URL}/partners/${encodeURIComponent(targetPartnerId)}?updateMask.fieldPaths=wallet_balance_aoa&updateMask.fieldPaths=updatedAt`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -303,8 +333,10 @@ export default async function handler(req: any, res: any) {
             updatedAt: { integerValue: String(now) }
           }
         })
-      }).catch(console.warn);
+      }).catch(console.warn));
     }
+
+    await Promise.all(backgroundWrites);
 
     // 7. Retorno de Sucesso (Sem envio de mensagem automática ao cliente)
     return res.status(200).json({
