@@ -43,23 +43,36 @@ function base64url(input: string | Buffer): string {
 // Cache do token OAuth2 do Google (evita chamadas repetidas)
 let cachedOAuthToken: { token: string; expiresAt: number } | null = null;
 
+function cleanPrivateKey(rawKey: string): crypto.KeyObject | string {
+  if (!rawKey) return '';
+  let k = rawKey.trim();
+  // Remove aspas envolventes se foram coladas na Vercel
+  if ((k.startsWith('"') && k.endsWith('"')) || (k.startsWith("'") && k.endsWith("'"))) {
+    k = k.slice(1, -1).trim();
+  }
+  // Converte quebras de linha escapadas (\n literal) em quebras reais e normaliza CRLF
+  k = k.replace(/\\n/g, '\n').replace(/\r\n/g, '\n');
+
+  try {
+    return crypto.createPrivateKey({ key: k, format: 'pem' });
+  } catch {
+    return k;
+  }
+}
+
 function getServiceAccount() {
   const email = process.env.FIREBASE_CLIENT_EMAIL || 'firebase-adminsdk-fbsvc@faturasimples.iam.gserviceaccount.com';
-  let rawKey = process.env.FIREBASE_PRIVATE_KEY || '';
-
-  // Formata chave substituindo quebras de linha escapadas
-  if (rawKey.includes('\\n')) {
-    rawKey = rawKey.replace(/\\n/g, '\n');
-  }
+  const rawKey = process.env.FIREBASE_PRIVATE_KEY || '';
+  const parsedKey = cleanPrivateKey(rawKey);
 
   return {
     projectId: process.env.FIREBASE_PROJECT_ID || 'faturasimples',
     clientEmail: email,
-    privateKey: rawKey,
+    privateKey: parsedKey,
   };
 }
 
-async function getGoogleAdminAccessToken(clientEmail: string, privateKey: string): Promise<string> {
+async function getGoogleAdminAccessToken(clientEmail: string, privateKey: crypto.KeyObject | string): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
 
   if (cachedOAuthToken && cachedOAuthToken.expiresAt > now + 60) {
@@ -111,7 +124,7 @@ async function getGoogleAdminAccessToken(clientEmail: string, privateKey: string
 
 function createFirebaseCustomToken(
   clientEmail: string,
-  privateKey: string,
+  privateKey: crypto.KeyObject | string,
   uid: string,
   claims: Record<string, any> = {}
 ): string {
