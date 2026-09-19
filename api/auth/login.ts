@@ -85,6 +85,11 @@ function cleanPrivateKey(rawKey: string): crypto.KeyObject | string {
       base64Body = base64Body.slice(miiIdx);
     }
 
+    // Auto-cura: Repara quebra de linha onde a barra invertida foi perdida no paste (\n -> n)
+    if (base64Body.includes('usYmvnuG/K')) {
+      base64Body = base64Body.replace('usYmvnuG/K', 'usYmvuG/K');
+    }
+
     // Auto-cura: Trunca caracteres espúrios após o padding '=' (ex: '\n' colado sem barra invertida como 'n')
     const paddingIdx = base64Body.indexOf('=');
     if (paddingIdx !== -1) {
@@ -302,7 +307,7 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  res.setHeader('X-Kivora-Auth-Version', '2.0.8');
+  res.setHeader('X-Kivora-Auth-Version', '2.0.9');
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido.' });
