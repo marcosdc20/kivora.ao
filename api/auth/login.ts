@@ -45,18 +45,56 @@ let cachedOAuthToken: { token: string; expiresAt: number } | null = null;
 
 function cleanPrivateKey(rawKey: string): crypto.KeyObject | string {
   if (!rawKey) return '';
-  let k = rawKey.trim();
-  // Remove aspas envolventes se foram coladas na Vercel
-  if ((k.startsWith('"') && k.endsWith('"')) || (k.startsWith("'") && k.endsWith("'"))) {
-    k = k.slice(1, -1).trim();
-  }
-  // Converte quebras de linha escapadas (\n literal) em quebras reais e normaliza CRLF
-  k = k.replace(/\\n/g, '\n').replace(/\r\n/g, '\n');
+  let str = String(rawKey).trim();
 
+  // 1. Remove aspas envolventes se foram coladas na Vercel
+  if ((str.startsWith('"') && str.endsWith('"')) || (str.startsWith("'") && str.endsWith("'"))) {
+    str = str.slice(1, -1).trim();
+  }
+
+  // 2. Normaliza quebras escapadas e quebras Windows
+  str = str.replace(/\\\\n/g, '\n').replace(/\\n/g, '\n').replace(/\r\n/g, '\n');
+
+  // 3. Se contém os delimitadores mas quebras foram transformadas em espaços pela interface web
+  const beginMarker = '-----BEGIN PRIVATE KEY-----';
+  const endMarker = '-----END PRIVATE KEY-----';
+  if (str.includes(beginMarker) && str.includes(endMarker)) {
+    const startIdx = str.indexOf(beginMarker) + beginMarker.length;
+    const endIdx = str.indexOf(endMarker);
+    const base64Body = str.slice(startIdx, endIdx).replace(/\s+/g, '');
+    const chunked = base64Body.match(/.{1,64}/g)?.join('\n') || base64Body;
+    const formattedPem = `${beginMarker}\n${chunked}\n${endMarker}\n`;
+    try {
+      return crypto.createPrivateKey({ key: formattedPem, format: 'pem' });
+    } catch {}
+  }
+
+  // 4. Se já for PEM válido com quebras
+  if (str.includes('-----BEGIN')) {
+    try {
+      return crypto.createPrivateKey({ key: str, format: 'pem' });
+    } catch {}
+  }
+
+  // 5. Se for string Base64 do PEM
   try {
-    return crypto.createPrivateKey({ key: k, format: 'pem' });
+    const decoded = Buffer.from(str.replace(/\s+/g, ''), 'base64').toString('utf8');
+    if (decoded.includes(beginMarker)) {
+      return cleanPrivateKey(decoded);
+    }
+  } catch {}
+
+  // 6. Tenta carregar diretamente como DER PKCS#8 se for Base64 puro
+  try {
+    const derBuf = Buffer.from(str.replace(/\s+/g, ''), 'base64');
+    return crypto.createPrivateKey({ key: derBuf, format: 'der', type: 'pkcs8' });
+  } catch {}
+
+  // 7. Tentativa final como PEM
+  try {
+    return crypto.createPrivateKey({ key: str, format: 'pem' });
   } catch {
-    return k;
+    return str;
   }
 }
 
@@ -233,13 +271,15 @@ export default async function handler(req: any, res: any) {
     }
   }
 
-  const { identifier, password } = body || {};
-  if (!identifier || !password) {
+  const rawId = body?.identifier || body?.email || body?.username || body?.nif || '';
+  const rawPass = body?.password || body?.pass || '';
+
+  if (!rawId || !rawPass) {
     return res.status(400).json({ error: 'Identificador e palavra-passe são obrigatórios.' });
   }
 
-  const cleanId = identifier.trim().toLowerCase();
-  const cleanPass = password.trim();
+  const cleanId = String(rawId).trim().toLowerCase();
+  const cleanPass = String(rawPass).trim();
 
   try {
     const sa = getServiceAccount();
