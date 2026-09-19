@@ -940,13 +940,13 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
     setPolicyDraft((prev) => ({
       ...prev,
       membership_bank_info: {
-        bank: sys.bank1Name || 'Banco BAI',
+        bank: sys.bank1Name || '',
         iban: sys.ibanBai || '',
         account_number: sys.bank1Account || '',
         beneficiary: sys.ibanTitular || 'VISUAL SOFTWARE LIMITADA',
       },
       membership_bank_info_2: {
-        bank: sys.bank2Name || 'Banco BFA',
+        bank: sys.bank2Name || '',
         iban: sys.ibanBfa || '',
         account_number: sys.bank2Account || '',
         beneficiary: sys.ibanTitular || 'VISUAL SOFTWARE LIMITADA',
@@ -1793,7 +1793,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                             value={policyDraft.membership_bank_info?.bank || ''}
                             onChange={(e) => setPolicyDraft({
                               ...policyDraft,
-                              membership_bank_info: { ...(policyDraft.membership_bank_info || DEFAULT_PARTNER_POLICY.membership_bank_info), bank: e.target.value }
+                              membership_bank_info: {
+                                bank: e.target.value,
+                                iban: policyDraft.membership_bank_info?.iban || '',
+                                account_number: policyDraft.membership_bank_info?.account_number || '',
+                                beneficiary: policyDraft.membership_bank_info?.beneficiary || '',
+                              }
                             })}
                             className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-900 focus:bg-white focus:border-emerald-500 outline-none"
                           />
@@ -1806,7 +1811,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                             value={policyDraft.membership_bank_info?.iban || ''}
                             onChange={(e) => setPolicyDraft({
                               ...policyDraft,
-                              membership_bank_info: { ...(policyDraft.membership_bank_info || DEFAULT_PARTNER_POLICY.membership_bank_info), iban: e.target.value }
+                              membership_bank_info: {
+                                bank: policyDraft.membership_bank_info?.bank || '',
+                                iban: e.target.value,
+                                account_number: policyDraft.membership_bank_info?.account_number || '',
+                                beneficiary: policyDraft.membership_bank_info?.beneficiary || '',
+                              }
                             })}
                             className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:border-emerald-500 outline-none"
                           />
@@ -1819,7 +1829,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                             value={policyDraft.membership_bank_info?.account_number || ''}
                             onChange={(e) => setPolicyDraft({
                               ...policyDraft,
-                              membership_bank_info: { ...(policyDraft.membership_bank_info || DEFAULT_PARTNER_POLICY.membership_bank_info), account_number: e.target.value }
+                              membership_bank_info: {
+                                bank: policyDraft.membership_bank_info?.bank || '',
+                                iban: policyDraft.membership_bank_info?.iban || '',
+                                account_number: e.target.value,
+                                beneficiary: policyDraft.membership_bank_info?.beneficiary || '',
+                              }
                             })}
                             className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-800 focus:bg-white focus:border-emerald-500 outline-none"
                           />
@@ -1840,7 +1855,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                             value={policyDraft.membership_bank_info_2?.bank || ''}
                             onChange={(e) => setPolicyDraft({
                               ...policyDraft,
-                              membership_bank_info_2: { ...(policyDraft.membership_bank_info_2 || DEFAULT_PARTNER_POLICY.membership_bank_info_2 || DEFAULT_PARTNER_POLICY.membership_bank_info), bank: e.target.value }
+                              membership_bank_info_2: {
+                                bank: e.target.value,
+                                iban: policyDraft.membership_bank_info_2?.iban || '',
+                                account_number: policyDraft.membership_bank_info_2?.account_number || '',
+                                beneficiary: policyDraft.membership_bank_info_2?.beneficiary || policyDraft.membership_bank_info?.beneficiary || '',
+                              }
                             })}
                             className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-900 focus:bg-white focus:border-blue-500 outline-none"
                           />
@@ -1853,7 +1873,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                             value={policyDraft.membership_bank_info_2?.iban || ''}
                             onChange={(e) => setPolicyDraft({
                               ...policyDraft,
-                              membership_bank_info_2: { ...(policyDraft.membership_bank_info_2 || DEFAULT_PARTNER_POLICY.membership_bank_info_2 || DEFAULT_PARTNER_POLICY.membership_bank_info), iban: e.target.value }
+                              membership_bank_info_2: {
+                                bank: policyDraft.membership_bank_info_2?.bank || '',
+                                iban: e.target.value,
+                                account_number: policyDraft.membership_bank_info_2?.account_number || '',
+                                beneficiary: policyDraft.membership_bank_info_2?.beneficiary || policyDraft.membership_bank_info?.beneficiary || '',
+                              }
                             })}
                             className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-500 outline-none"
                           />
@@ -1866,7 +1891,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                             value={policyDraft.membership_bank_info_2?.account_number || ''}
                             onChange={(e) => setPolicyDraft({
                               ...policyDraft,
-                              membership_bank_info_2: { ...(policyDraft.membership_bank_info_2 || DEFAULT_PARTNER_POLICY.membership_bank_info_2 || DEFAULT_PARTNER_POLICY.membership_bank_info), account_number: e.target.value }
+                              membership_bank_info_2: {
+                                bank: policyDraft.membership_bank_info_2?.bank || '',
+                                iban: policyDraft.membership_bank_info_2?.iban || '',
+                                account_number: e.target.value,
+                                beneficiary: policyDraft.membership_bank_info_2?.beneficiary || policyDraft.membership_bank_info?.beneficiary || '',
+                              }
                             })}
                             className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-800 focus:bg-white focus:border-blue-500 outline-none"
                           />

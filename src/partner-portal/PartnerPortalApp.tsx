@@ -104,10 +104,13 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   }, []);
 
   const officialBank1Name = policy.membership_bank_info?.bank || systemSettings.bank1Name || 'Banco BAI';
-  const officialBank1Iban = policy.membership_bank_info?.iban || systemSettings.ibanBai || 'AO06 0040 0000 1234 5678 9012 3';
+  const officialBank1Iban = policy.membership_bank_info?.iban || systemSettings.ibanBai || '';
   const officialBank2Name = policy.membership_bank_info_2?.bank || systemSettings.bank2Name || 'Banco BFA';
-  const officialBank2Iban = policy.membership_bank_info_2?.iban || systemSettings.ibanBfa || 'AO06 0006 0000 9876 5432 1098 7';
+  const officialBank2Iban = policy.membership_bank_info_2?.iban || systemSettings.ibanBfa || '';
   const officialBeneficiary = policy.membership_bank_info?.beneficiary || systemSettings.ibanTitular || 'VISUAL SOFTWARE LIMITADA';
+
+  const hasBank1 = Boolean(officialBank1Iban && officialBank1Iban.trim().length > 0);
+  const hasBank2 = Boolean(officialBank2Iban && officialBank2Iban.trim().length > 0);
 
   // Descoberta dinâmica em tempo real de códigos/aliases vinculados a este parceiro
   useEffect(() => {
@@ -1372,10 +1375,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     );
   }
 
-  // ─── TELA DE BLOQUEIO DE PARCEIRO SUSPENSO ──────────────────────────────────────
   if (partnerAccount?.status === 'suspended' || session?.status === 'suspended') {
     const whatsAppMessage = `Olá Direção Kivora / Visual Software. Sou o parceiro credenciado ${partnerName} (Código: ${partnerCode}, Email: ${session?.email || ''}). A minha conta no Portal do Parceiro encontra-se suspensa e pretendo solicitar o esclarecimento e a regularização do meu acesso.`;
-    const waUrl = `https://wa.me/${KIVORA_INFO.phoneRaw}?text=${encodeURIComponent(whatsAppMessage)}`;
+    const effectivePhoneRaw = (systemSettings.phoneRaw || KIVORA_INFO.phoneRaw || '').replace(/\D/g, '');
+    const waUrl = `https://wa.me/${effectivePhoneRaw}?text=${encodeURIComponent(whatsAppMessage)}`;
 
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 sm:p-6 selection:bg-red-600 selection:text-white">
@@ -3190,41 +3193,51 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
-                  <div className="p-3.5 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-sans block">{officialBank1Name} (Kz) — {officialBeneficiary}</span>
-                      <strong className="text-white">{officialBank1Iban}</strong>
-                    </div>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(officialBank1Iban.replace(/\s/g, ''));
-                        notify.success(`IBAN ${officialBank1Name} copiado para a área de transferência!`);
-                      }}
-                      className="p-2 text-slate-400 hover:text-white bg-white/10 rounded-lg cursor-pointer"
-                      title="Copiar IBAN"
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                {hasBank1 || hasBank2 ? (
+                  <div className={`grid ${hasBank1 && hasBank2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'} gap-3 text-xs font-mono`}>
+                    {hasBank1 && (
+                      <div className="p-3.5 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] text-slate-400 font-sans block">{officialBank1Name} (Kz) — {officialBeneficiary}</span>
+                          <strong className="text-white">{officialBank1Iban}</strong>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(officialBank1Iban.replace(/\s/g, ''));
+                            notify.success(`IBAN ${officialBank1Name} copiado para a área de transferência!`);
+                          }}
+                          className="p-2 text-slate-400 hover:text-white bg-white/10 rounded-lg cursor-pointer"
+                          title="Copiar IBAN"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
 
-                  <div className="p-3.5 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-sans block">{officialBank2Name} (Kz) — {officialBeneficiary}</span>
-                      <strong className="text-white">{officialBank2Iban}</strong>
-                    </div>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(officialBank2Iban.replace(/\s/g, ''));
-                        notify.success(`IBAN ${officialBank2Name} copiado para a área de transferência!`);
-                      }}
-                      className="p-2 text-slate-400 hover:text-white bg-white/10 rounded-lg cursor-pointer"
-                      title="Copiar IBAN"
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                    </button>
+                    {hasBank2 && (
+                      <div className="p-3.5 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] text-slate-400 font-sans block">{officialBank2Name} (Kz) — {officialBeneficiary}</span>
+                          <strong className="text-white">{officialBank2Iban}</strong>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(officialBank2Iban.replace(/\s/g, ''));
+                            notify.success(`IBAN ${officialBank2Name} copiado para a área de transferência!`);
+                          }}
+                          className="p-2 text-slate-400 hover:text-white bg-white/10 rounded-lg cursor-pointer"
+                          title="Copiar IBAN"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
                   </div>
-                </div>
+                ) : (
+                  <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-xs text-slate-300">
+                    Nenhuma conta bancária oficial configurada de momento. Por favor contacte o administrador da Kivora.
+                  </div>
+                )}
               </div>
 
               {/* Tabela de Lançamentos de Dívida */}
@@ -4055,8 +4068,9 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <span className="text-[10px] text-slate-300">Titular: <strong className="text-white">{officialBeneficiary}</strong></span>
               </div>
               <div className="space-y-1 font-mono text-[11px] pt-1">
-                <p>• {officialBank1Name}: <strong className="text-emerald-400">{officialBank1Iban}</strong></p>
-                <p>• {officialBank2Name}: <strong className="text-blue-400">{officialBank2Iban}</strong></p>
+                {hasBank1 && <p>• {officialBank1Name}: <strong className="text-emerald-400">{officialBank1Iban}</strong></p>}
+                {hasBank2 && <p>• {officialBank2Name}: <strong className="text-blue-400">{officialBank2Iban}</strong></p>}
+                {!hasBank1 && !hasBank2 && <p className="text-slate-400 font-sans">Nenhuma conta oficial ativa de momento.</p>}
               </div>
             </div>
 
@@ -4083,8 +4097,9 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     onChange={(e) => setPaymentBank(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-bold"
                   >
-                    <option value={officialBank1Name}>{officialBank1Name} (Conta Oficial)</option>
-                    <option value={officialBank2Name}>{officialBank2Name} (Conta Oficial)</option>
+                    {hasBank1 && <option value={officialBank1Name}>{officialBank1Name} (Conta Oficial)</option>}
+                    {hasBank2 && <option value={officialBank2Name}>{officialBank2Name} (Conta Oficial)</option>}
+                    {!hasBank1 && !hasBank2 && <option value="A Definir">Aguardando Coordenadas Oficiais</option>}
                   </select>
                 </div>
               </div>
@@ -4345,8 +4360,9 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     onChange={(e) => setPaymentBank(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-bold"
                   >
-                    <option value={officialBank1Name}>{officialBank1Name} (Conta Oficial)</option>
-                    <option value={officialBank2Name}>{officialBank2Name} (Conta Oficial)</option>
+                    {hasBank1 && <option value={officialBank1Name}>{officialBank1Name} (Conta Oficial)</option>}
+                    {hasBank2 && <option value={officialBank2Name}>{officialBank2Name} (Conta Oficial)</option>}
+                    {!hasBank1 && !hasBank2 && <option value="A Definir">Aguardando Coordenadas Oficiais</option>}
                   </select>
                 </div>
               </div>

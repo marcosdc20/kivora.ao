@@ -25,7 +25,7 @@ import {
 } from '../admin/services/supportService';
 import { subscribeToStoreOrders } from '../admin/services/storeService';
 import type { KivoraLicense, StoreOrder } from '../admin/types';
-import { getCachedSystemSettings, getDirectDownloadUrl } from '../services/systemSettingsService';
+import { getCachedSystemSettings, subscribeSystemSettings, getDirectDownloadUrl } from '../services/systemSettingsService';
 import { db } from '../lib/firebase';
 import { collection, query, where, onSnapshot, doc } from 'firebase/firestore';
 
@@ -55,6 +55,13 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
     );
     return () => unsub();
   }, [session?.nif, session?.email, session?.licenseKey, session?.id]);
+
+  const [systemSettings, setSystemSettings] = useState(getCachedSystemSettings());
+
+  useEffect(() => {
+    const unsub = subscribeSystemSettings(setSystemSettings);
+    return () => unsub();
+  }, []);
 
   const [activeSection, setActiveSection] = useState<ClientSection>('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -309,7 +316,8 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
   // ─── TELA DE BLOQUEIO SE EMPRESA / CONTA SUSPENSA ──────────────────────────────
   if (session?.status === 'suspended') {
     const whatsAppMessage = `Olá Suporte Kivora. A conta de acesso da minha empresa (${clientLicense.company_name}, NIF: ${clientLicense.nif}) encontra-se suspensa e pretendo solicitar o esclarecimento e regularização.`;
-    const waUrl = `https://wa.me/${KIVORA_INFO.phoneRaw}?text=${encodeURIComponent(whatsAppMessage)}`;
+    const effectivePhoneRaw = (systemSettings.phoneRaw || KIVORA_INFO.phoneRaw || '').replace(/\D/g, '');
+    const waUrl = `https://wa.me/${effectivePhoneRaw}?text=${encodeURIComponent(whatsAppMessage)}`;
 
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 sm:p-6 selection:bg-red-600 selection:text-white">

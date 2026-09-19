@@ -443,12 +443,12 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   instagramUrl: KIVORA_INFO.instagram,
   linkedinUrl: 'https://linkedin.com/company/kivora',
   telegramUrl: 'https://t.me/kivora_ao',
-  bank1Name: 'Banco BAI',
-  ibanBai: 'AO06 0040 0000 1234 5678 9012 3',
-  bank1Account: '0040.0000.1234.5678.9012.3',
-  bank2Name: 'Banco BFA',
-  ibanBfa: 'AO06 0006 0000 9876 5432 1098 7',
-  bank2Account: '0006.0000.9876.5432.1098.7',
+  bank1Name: '',
+  ibanBai: '',
+  bank1Account: '',
+  bank2Name: '',
+  ibanBfa: '',
+  bank2Account: '',
   ibanTitular: 'VISUAL SOFTWARE LIMITADA',
   ibanTitularNif: '5002863944',
 };
@@ -522,20 +522,32 @@ export async function saveSystemSettings(settings: Partial<SystemCompanySettings
     await setDoc(docRef, merged, { merge: true });
 
     // Sincroniza em tempo real as 2 coordenadas bancárias com a política oficial de parceiros
-    if (settings.ibanBai || settings.ibanBfa || settings.bank1Name || settings.bank2Name || settings.ibanTitular) {
+    if (
+      settings.ibanBai !== undefined ||
+      settings.ibanBfa !== undefined ||
+      settings.bank1Name !== undefined ||
+      settings.bank2Name !== undefined ||
+      settings.ibanTitular !== undefined
+    ) {
       try {
+        const hasBank2 = Boolean(merged.ibanBfa && merged.ibanBfa.trim().length > 0);
         await setDoc(doc(db, 'settings', 'partner_policy'), {
           membership_bank_info: {
-            bank: merged.bank1Name || 'Banco BAI',
+            bank: merged.bank1Name || '',
             iban: merged.ibanBai || '',
             account_number: merged.bank1Account || '',
             beneficiary: merged.ibanTitular || '',
           },
-          membership_bank_info_2: {
-            bank: merged.bank2Name || 'Banco BFA',
+          membership_bank_info_2: hasBank2 ? {
+            bank: merged.bank2Name || '',
             iban: merged.ibanBfa || '',
             account_number: merged.bank2Account || '',
             beneficiary: merged.ibanTitular || '',
+          } : {
+            bank: '',
+            iban: '',
+            account_number: '',
+            beneficiary: '',
           },
           updated_at: Date.now(),
         }, { merge: true });

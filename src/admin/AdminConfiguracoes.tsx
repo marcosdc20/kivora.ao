@@ -3128,15 +3128,19 @@ export const AdminConfiguracoes: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 font-mono text-[11px]">
                 <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
                   <span className="text-emerald-400 font-bold block text-[10px] font-sans">
-                    • {settings.bank1Name || 'Banco BAI'}:
+                    • {settings.bank1Name || 'Conta Bancária 1'}:
                   </span>
-                  <span className="text-white font-bold">{settings.ibanBai || 'AO06 0040 0000 1234 5678 9012 3'}</span>
+                  <span className="text-white font-bold">
+                    {settings.ibanBai ? settings.ibanBai : <span className="text-slate-500 font-normal italic font-sans text-xs">(Não configurada)</span>}
+                  </span>
                 </div>
                 <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
                   <span className="text-blue-400 font-bold block text-[10px] font-sans">
-                    • {settings.bank2Name || 'Banco BFA'}:
+                    • {settings.bank2Name || 'Conta Bancária 2'}:
                   </span>
-                  <span className="text-white font-bold">{settings.ibanBfa || 'AO06 0006 0000 9876 5432 1098 7'}</span>
+                  <span className="text-white font-bold">
+                    {settings.ibanBfa ? settings.ibanBfa : <span className="text-slate-500 font-normal italic font-sans text-xs">(Não configurada)</span>}
+                  </span>
                 </div>
               </div>
             </div>

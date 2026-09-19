@@ -32,10 +32,13 @@ export const InvoicePrintModal: React.FC<InvoicePrintModalProps> = ({
 
   const settings = getCachedSystemSettings();
   const bank1Name = settings.bank1Name || 'Banco BAI';
-  const bank1Iban = settings.ibanBai || 'AO06 0040 0000 1234 5678 9012 3';
+  const bank1Iban = settings.ibanBai || '';
   const bank2Name = settings.bank2Name || 'Banco BFA';
-  const bank2Iban = settings.ibanBfa || 'AO06 0006 0000 9876 5432 1098 7';
+  const bank2Iban = settings.ibanBfa || '';
   const titular = settings.ibanTitular || 'VISUAL SOFTWARE LIMITADA';
+
+  const hasBank1 = Boolean(bank1Iban && bank1Iban.trim().length > 0);
+  const hasBank2 = Boolean(bank2Iban && bank2Iban.trim().length > 0);
 
   const handlePrint = () => {
     window.print();
@@ -182,8 +185,9 @@ export const InvoicePrintModal: React.FC<InvoicePrintModalProps> = ({
                     Coordenadas Bancárias Oficiais para Pagamento
                   </span>
                   <div className="space-y-1 font-mono text-[11px]">
-                    <p><strong>{bank1Name}:</strong> {bank1Iban}</p>
-                    <p><strong>{bank2Name}:</strong> {bank2Iban}</p>
+                    {hasBank1 && <p><strong>{bank1Name}:</strong> {bank1Iban}</p>}
+                    {hasBank2 && <p><strong>{bank2Name}:</strong> {bank2Iban}</p>}
+                    {!hasBank1 && !hasBank2 && <p className="text-slate-500 text-[10px] font-sans">Aguardando indicação de coordenadas pelo emitente.</p>}
                     <p className="text-slate-500 text-[10px] font-sans">Beneficiário: <strong>{titular}</strong></p>
                   </div>
                 </div>

@@ -129,14 +129,14 @@ export const DEFAULT_PARTNER_POLICY: PartnerLicensingPolicy = {
   ],
   membership_bank_info: {
     bank: 'Banco BAI',
-    iban: 'AO06 0040 0000 1234 5678 9012 3',
-    account_number: '0040.0000.1234.5678.9012.3',
+    iban: '',
+    account_number: '',
     beneficiary: 'VISUAL SOFTWARE / KIVORA TECNOLOGIAS, LDA',
   },
   membership_bank_info_2: {
     bank: 'Banco BFA',
-    iban: 'AO06 0006 0000 9876 5432 1098 7',
-    account_number: '0006.0000.9876.5432.1098.7',
+    iban: '',
+    account_number: '',
     beneficiary: 'VISUAL SOFTWARE / KIVORA TECNOLOGIAS, LDA',
   },
 };
@@ -185,10 +185,10 @@ export async function savePartnerPolicy(policy: PartnerLicensingPolicy): Promise
     const bank2 = policy.membership_bank_info_2;
     if (bank1 || bank2) {
       await setDoc(doc(db, 'system_settings', 'company_info'), cleanFirestoreData({
-        bank1Name: bank1?.bank || 'Banco BAI',
+        bank1Name: bank1?.bank || '',
         ibanBai: bank1?.iban || '',
         bank1Account: bank1?.account_number || '',
-        bank2Name: bank2?.bank || 'Banco BFA',
+        bank2Name: bank2?.bank || '',
         ibanBfa: bank2?.iban || '',
         bank2Account: bank2?.account_number || '',
         ibanTitular: bank1?.beneficiary || bank2?.beneficiary || 'VISUAL SOFTWARE LIMITADA',
