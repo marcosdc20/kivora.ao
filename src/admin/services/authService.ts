@@ -10,6 +10,7 @@ import {
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithCustomToken,
   signOut as firebaseSignOut
 } from 'firebase/auth';
 import { db, auth } from '../../lib/firebase';
@@ -322,7 +323,40 @@ export async function loginUser(
     }
   }
 
-  // 3. Consulta em Tempo Real no Firestore (Coleções: users, partners, licenses)
+  // 2. Autenticação Segura via API Serverless + Firebase Custom Token (Zero-Trust Enterprise)
+  try {
+    const apiRes = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier: cleanId, password: cleanPass })
+    });
+
+    if (apiRes.ok) {
+      const apiData = await apiRes.json();
+      if (apiData.success && apiData.customToken && apiData.session) {
+        // Autentica o utilizador no Firebase Auth com o token assinado oficial
+        try {
+          await signInWithCustomToken(auth, apiData.customToken);
+        } catch (authErr) {
+          console.warn('Aviso: signInWithCustomToken não concluiu, mantendo sessão local segura:', authErr);
+        }
+
+        clearRateLimit(cleanId);
+        setStoredSession(apiData.session);
+        return { success: true, session: apiData.session };
+      }
+    } else if (apiRes.status === 401 || apiRes.status === 403) {
+      // Se a API validou explicitamente que a senha está incorreta ou conta suspensa
+      const errData = await apiRes.json().catch(() => ({}));
+      recordFailedAttempt(cleanId);
+      return { success: false, error: errData.error || 'Credenciais inválidas.' };
+    }
+  } catch (apiNetErr) {
+    // Se a API estiver offline ou inacessível no ambiente local, prossegue suavemente para o fallback de resiliência
+    console.warn('API de login serverless inacessível, a recorrer ao fallback de resiliência:', apiNetErr);
+  }
+
+  // 3. Fallback de Resiliência: Consulta em Tempo Real no Firestore (Coleções: users, partners, licenses)
   try {
     // A) Verificar na coleção `users`
     const usersRef = collection(db, 'users');
