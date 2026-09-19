@@ -76,8 +76,30 @@ function cleanPrivateKey(rawKey: string): crypto.KeyObject | string {
 
   if (str.includes(beginMarker) && str.includes(endMarker)) {
     const startIdx = str.indexOf(beginMarker) + beginMarker.length;
-    const endIdx = str.indexOf(endMarker);
-    const base64Body = str.slice(startIdx, endIdx).replace(/[^A-Za-z0-9+/=]/g, '');
+    let base64Body = str.slice(startIdx, endIdx).replace(/[^A-Za-z0-9+/=]/g, '');
+
+    // Auto-cura: Remove qualquer caractere espúrio antes do prefixo PKCS#8 ASN.1 (MII...)
+    const miiIdx = base64Body.indexOf('MII');
+    if (miiIdx > 0) {
+      base64Body = base64Body.slice(miiIdx);
+    }
+
+    // Auto-cura: Trunca caracteres espúrios após o padding '=' (ex: '\n' colado sem barra invertida como 'n')
+    const paddingIdx = base64Body.indexOf('=');
+    if (paddingIdx !== -1) {
+      if (base64Body[paddingIdx + 1] === '=') {
+        base64Body = base64Body.slice(0, paddingIdx + 2);
+      } else {
+        base64Body = base64Body.slice(0, paddingIdx + 1);
+      }
+    } else {
+      // Se não tem padding mas sobrou resto ímpar
+      const rem = base64Body.length % 4;
+      if (rem !== 0) {
+        base64Body = base64Body.slice(0, base64Body.length - rem);
+      }
+    }
+
     diag.base64Len = base64Body.length;
 
     // MÉTODO 1: Decodificação binária direta de ASN.1 DER PKCS#8
@@ -270,7 +292,7 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  res.setHeader('X-Kivora-Auth-Version', '2.0.3');
+  res.setHeader('X-Kivora-Auth-Version', '2.0.4');
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido.' });
