@@ -68,12 +68,6 @@ function cleanPrivateKey(rawKey: string): crypto.KeyObject | string {
   const beginMarker = '-----BEGIN PRIVATE KEY-----';
   const endMarker = '-----END PRIVATE KEY-----';
 
-  const diag: Record<string, any> = {
-    len: str.length,
-    hasBegin: str.includes(beginMarker),
-    hasEnd: str.includes(endMarker),
-  };
-
   if (str.includes(beginMarker) && str.includes(endMarker)) {
     const startIdx = str.indexOf(beginMarker) + beginMarker.length;
     const endIdx = str.indexOf(endMarker);
@@ -99,41 +93,27 @@ function cleanPrivateKey(rawKey: string): crypto.KeyObject | string {
         base64Body = base64Body.slice(0, paddingIdx + 1);
       }
     } else {
-      // Se não tem padding mas sobrou resto ímpar
       const rem = base64Body.length % 4;
       if (rem !== 0) {
         base64Body = base64Body.slice(0, base64Body.length - rem);
       }
     }
 
-    diag.base64Len = base64Body.length;
-    diag.first20 = base64Body.slice(0, 20);
-    diag.last20 = base64Body.slice(-20);
-    diag.paddingIdx = paddingIdx;
-
-    const chunks = [];
-    for (let i = 800; i <= 1000; i += 20) {
-      chunks.push({ i, s: base64Body.slice(i, i + 20) });
-    }
-    diag.range800_1000 = chunks;
-
-    // MÉTODO 1: Decodificação binária direta de ASN.1 DER PKCS#8
+    // MÉTODO 1: Decodificação binária direta de ASN.1 DER PKCS#8 (Imune a OpenSSL)
     try {
       const derBuf = Buffer.from(base64Body, 'base64');
-      diag.derBufLen = derBuf.length;
       return crypto.createPrivateKey({ key: derBuf, format: 'der', type: 'pkcs8' });
-    } catch (e1: any) {
-      diag.derErr = e1.message;
-    }
+    } catch {}
 
     // MÉTODO 2: Reconstrução canónica de PEM em 64 colunas
     const chunked = base64Body.match(/.{1,64}/g)?.join('\n') || base64Body;
     const formattedPem = `${beginMarker}\n${chunked}\n${endMarker}\n`;
     try {
       return crypto.createPrivateKey({ key: formattedPem, format: 'pem' });
-    } catch (e2: any) {
-      diag.pemErr = e2.message;
-    }
+    } catch {}
+    try {
+      return crypto.createPrivateKey(formattedPem);
+    } catch {}
   }
 
   // 5. Se for string Base64 do PEM ou do JSON
@@ -142,16 +122,13 @@ function cleanPrivateKey(rawKey: string): crypto.KeyObject | string {
     if (decoded.includes(beginMarker) || (decoded.startsWith('{') && decoded.includes('private_key'))) {
       return cleanPrivateKey(decoded);
     }
-  } catch (e3: any) {
-    diag.base64PemErr = e3.message;
-  }
+  } catch {}
 
-  // 6. Tentativa final
+  // 6. Tentativa final como PEM
   try {
     return crypto.createPrivateKey({ key: str, format: 'pem' });
   } catch (err: any) {
-    diag.finalErr = err.message;
-    throw new Error(`Falha de chave: ${JSON.stringify(diag)}`);
+    throw new Error(`Chave privada Firebase inválida: ${err.message}`);
   }
 }
 
