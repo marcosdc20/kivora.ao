@@ -76,6 +76,7 @@ function cleanPrivateKey(rawKey: string): crypto.KeyObject | string {
 
   if (str.includes(beginMarker) && str.includes(endMarker)) {
     const startIdx = str.indexOf(beginMarker) + beginMarker.length;
+    const endIdx = str.indexOf(endMarker);
     let base64Body = str.slice(startIdx, endIdx).replace(/[^A-Za-z0-9+/=]/g, '');
 
     // Auto-cura: Remove qualquer caractere espúrio antes do prefixo PKCS#8 ASN.1 (MII...)
@@ -292,7 +293,7 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  res.setHeader('X-Kivora-Auth-Version', '2.0.4');
+  res.setHeader('X-Kivora-Auth-Version', '2.0.5');
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido.' });
