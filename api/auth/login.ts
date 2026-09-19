@@ -93,8 +93,9 @@ function cleanPrivateKey(rawKey: string): crypto.KeyObject | string {
   // 7. Tentativa final como PEM
   try {
     return crypto.createPrivateKey({ key: str, format: 'pem' });
-  } catch {
-    return str;
+  } catch (err: any) {
+    const preview = str.length > 20 ? `${str.slice(0, 15)}...${str.slice(-10)} (len: ${str.length})` : str;
+    throw new Error(`Chave privada inválida ou corrompida: ${err.message}. Amostra: [${preview}]`);
   }
 }
 
@@ -249,6 +250,8 @@ export default async function handler(req: any, res: any) {
     res.status(200).end();
     return;
   }
+
+  res.setHeader('X-Kivora-Auth-Version', '2.0.1');
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido.' });
