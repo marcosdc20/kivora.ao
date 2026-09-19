@@ -47,50 +47,64 @@ function cleanPrivateKey(rawKey: string): crypto.KeyObject | string {
   if (!rawKey) return '';
   let str = String(rawKey).trim();
 
-  // 1. Remove aspas envolventes se foram coladas na Vercel
+  // 1. Se for JSON completo da Service Account colado como string
+  if (str.startsWith('{') && str.endsWith('}')) {
+    try {
+      const parsedJson = JSON.parse(str);
+      if (parsedJson.private_key) {
+        return cleanPrivateKey(parsedJson.private_key);
+      }
+    } catch {}
+  }
+
+  // 2. Remove aspas envolventes se foram coladas na Vercel
   if ((str.startsWith('"') && str.endsWith('"')) || (str.startsWith("'") && str.endsWith("'"))) {
     str = str.slice(1, -1).trim();
   }
 
-  // 2. Normaliza quebras escapadas e quebras Windows
+  // 3. Normaliza quebras escapadas e quebras Windows
   str = str.replace(/\\\\n/g, '\n').replace(/\\n/g, '\n').replace(/\r\n/g, '\n');
 
-  // 3. Se contém os delimitadores mas quebras foram transformadas em espaços pela interface web
+  // 4. Se contém os delimitadores PEM (BEGIN / END PRIVATE KEY)
   const beginMarker = '-----BEGIN PRIVATE KEY-----';
   const endMarker = '-----END PRIVATE KEY-----';
   if (str.includes(beginMarker) && str.includes(endMarker)) {
     const startIdx = str.indexOf(beginMarker) + beginMarker.length;
     const endIdx = str.indexOf(endMarker);
     const base64Body = str.slice(startIdx, endIdx).replace(/\s+/g, '');
+
+    // MÉTODO 1 (Recomendado & Imune a OpenSSL): Decodificação binária direta de ASN.1 DER PKCS#8
+    try {
+      const derBuf = Buffer.from(base64Body, 'base64');
+      return crypto.createPrivateKey({ key: derBuf, format: 'der', type: 'pkcs8' });
+    } catch {}
+
+    // MÉTODO 2: Reconstrução canónica estrita de PEM em 64 colunas
     const chunked = base64Body.match(/.{1,64}/g)?.join('\n') || base64Body;
     const formattedPem = `${beginMarker}\n${chunked}\n${endMarker}\n`;
     try {
       return crypto.createPrivateKey({ key: formattedPem, format: 'pem' });
     } catch {}
-  }
-
-  // 4. Se já for PEM válido com quebras
-  if (str.includes('-----BEGIN')) {
     try {
-      return crypto.createPrivateKey({ key: str, format: 'pem' });
+      return crypto.createPrivateKey(formattedPem);
     } catch {}
   }
 
-  // 5. Se for string Base64 do PEM
+  // 5. Se for string Base64 do PEM ou do JSON
   try {
     const decoded = Buffer.from(str.replace(/\s+/g, ''), 'base64').toString('utf8');
-    if (decoded.includes(beginMarker)) {
+    if (decoded.includes(beginMarker) || (decoded.startsWith('{') && decoded.includes('private_key'))) {
       return cleanPrivateKey(decoded);
     }
   } catch {}
 
-  // 6. Tenta carregar diretamente como DER PKCS#8 se for Base64 puro
+  // 6. Se for Base64 puro de DER PKCS#8
   try {
     const derBuf = Buffer.from(str.replace(/\s+/g, ''), 'base64');
     return crypto.createPrivateKey({ key: derBuf, format: 'der', type: 'pkcs8' });
   } catch {}
 
-  // 7. Tentativa final como PEM
+  // 7. Tentativa final
   try {
     return crypto.createPrivateKey({ key: str, format: 'pem' });
   } catch (err: any) {
@@ -251,7 +265,7 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  res.setHeader('X-Kivora-Auth-Version', '2.0.1');
+  res.setHeader('X-Kivora-Auth-Version', '2.0.2');
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido.' });
