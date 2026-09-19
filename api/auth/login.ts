@@ -106,6 +106,12 @@ function cleanPrivateKey(rawKey: string): crypto.KeyObject | string {
     diag.last20 = base64Body.slice(-20);
     diag.paddingIdx = paddingIdx;
 
+    const chunks = [];
+    for (let i = 0; i < base64Body.length; i += 200) {
+      chunks.push({ i, s: base64Body.slice(i, i + 8) });
+    }
+    diag.chunks = chunks;
+
     // MÉTODO 1: Decodificação binária direta de ASN.1 DER PKCS#8
     try {
       const derBuf = Buffer.from(base64Body, 'base64');
@@ -296,7 +302,7 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  res.setHeader('X-Kivora-Auth-Version', '2.0.6');
+  res.setHeader('X-Kivora-Auth-Version', '2.0.7');
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido.' });
