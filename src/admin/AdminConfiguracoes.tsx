@@ -590,7 +590,7 @@ export const AdminConfiguracoes: React.FC = () => {
             { id: 'agt', label: 'Certificação AGT & Fiscal', icon: <ShieldCheck className="w-4 h-4" /> },
             { id: 'updates', label: 'Atualizações OTA', icon: <Rocket className="w-4 h-4" /> },
             { id: 'backups', label: 'Backups Nuvem', icon: <Database className="w-4 h-4" /> },
-            { id: 'zona-perigo', label: '⚠️ Zona de Perigo & Master Reset', icon: <AlertTriangle className="w-4 h-4 text-red-500" /> },
+            { id: 'zona-perigo', label: '🔄 Reinicialização & Começar do Zero (Reset)', icon: <RotateCcw className="w-4 h-4 text-red-500" /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -3454,7 +3454,7 @@ export const AdminConfiguracoes: React.FC = () => {
                     const isChecked = selectedPurgeTargets.includes(target.id);
                     const count = liveCounts[target.id] ?? 0;
                     return (
-                      <label
+                      <div
                         key={target.id}
                         onClick={() => handleTogglePurgeTarget(target.id)}
                         className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 select-none ${
@@ -3466,8 +3466,8 @@ export const AdminConfiguracoes: React.FC = () => {
                         <input
                           type="checkbox"
                           checked={isChecked}
-                          onChange={() => {}}
-                          className="mt-0.5 w-4 h-4 accent-red-600 rounded cursor-pointer"
+                          readOnly
+                          className="mt-0.5 w-4 h-4 accent-red-600 rounded cursor-pointer pointer-events-none"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -3479,7 +3479,7 @@ export const AdminConfiguracoes: React.FC = () => {
                                 </span>
                               ) : (
                                 <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                                  0 (Vazia)
+                                  0 (Limpo)
                                 </span>
                               )}
                             </div>
@@ -3489,7 +3489,7 @@ export const AdminConfiguracoes: React.FC = () => {
                           </div>
                           <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">{target.description}</p>
                         </div>
-                      </label>
+                      </div>
                     );
                   })}
                 </div>
@@ -3503,10 +3503,19 @@ export const AdminConfiguracoes: React.FC = () => {
                 </h4>
 
                 <div className="space-y-3">
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700 block">
-                      1. Digite a frase de confirmação exata: <span className="font-mono text-red-600 font-black select-all">CONFIRMO LIMPAR DADOS KIVORA</span>
-                    </label>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <label className="font-bold text-slate-700 block">
+                        1. Digite a frase de confirmação exata: <span className="font-mono text-red-600 font-black select-all">CONFIRMO LIMPAR DADOS KIVORA</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setPurgeConfirmationPhrase('CONFIRMO LIMPAR DADOS KIVORA')}
+                        className="text-[10px] font-bold text-red-700 bg-red-100 hover:bg-red-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                      >
+                        ✓ Preencher Frase
+                      </button>
+                    </div>
                     <input
                       type="text"
                       required
@@ -3517,10 +3526,15 @@ export const AdminConfiguracoes: React.FC = () => {
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700 block">
-                      2. Palavra-passe de Administrador Master:
-                    </label>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <label className="font-bold text-slate-700 block">
+                        2. Palavra-passe de Administrador:
+                      </label>
+                      <span className="text-[10px] text-slate-500 font-medium">
+                        (Palavra-passe pessoal de admin ou chave master)
+                      </span>
+                    </div>
                     <input
                       type="password"
                       required

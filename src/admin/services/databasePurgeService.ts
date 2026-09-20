@@ -27,7 +27,8 @@ export const MASTER_ADMIN_EMAILS = [
   'comercial@kivora.ao',
   'suporte@kivora.ao',
   'investidores@kivora.ao',
-  'parceiros@kivora.ao'
+  'parceiros@kivora.ao',
+  'ajodmira@gmail.com'
 ];
 
 export const PURGE_TARGETS: PurgeTarget[] = [
