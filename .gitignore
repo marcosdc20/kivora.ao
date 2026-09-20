@@ -29,3 +29,4 @@ credentials.json
 *.sln
 *.sw?
 scratch-*.json
+backup_*.json
