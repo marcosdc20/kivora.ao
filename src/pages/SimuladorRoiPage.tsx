@@ -81,13 +81,13 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
       />
 
       {/* Main Container */}
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-24 space-y-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 py-16 sm:py-24 space-y-16">
         
         {/* Bloco Interativo: Calculadora + Painel de Resultados */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Inputs do Simulador (Esquerda) */}
-          <div className="lg:col-span-6 surface-card p-8 sm:p-10 space-y-6">
+          <div className="lg:col-span-6 surface-card p-6 sm:p-10 space-y-6">
             <div className="border-b border-slate-100 pb-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold mb-2">
                 <Calculator className="w-3.5 h-3.5" />
@@ -103,7 +103,7 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
               <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                 1. Setor de Atividade
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {setores.map((s) => (
                   <button
                     key={s.id}

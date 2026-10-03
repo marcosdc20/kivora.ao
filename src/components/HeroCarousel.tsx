@@ -314,7 +314,8 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                           </div>
                           <div className="mt-1 text-[11px] font-medium tracking-tight truncate text-slate-400 group-hover:text-slate-200">
                             <span className={isActive ? 'text-white font-bold' : ''}>
-                              0{idx + 1} • {s.tagline.split('•')[0].trim()}
+                              0{idx + 1}
+                              <span className="hidden sm:inline"> • {s.tagline.split('•')[0].trim()}</span>
                             </span>
                           </div>
                         </button>

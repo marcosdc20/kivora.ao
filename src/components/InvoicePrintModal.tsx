@@ -50,7 +50,7 @@ export const InvoicePrintModal: React.FC<InvoicePrintModalProps> = ({
       <div className="modal-sheet bg-slate-900 rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-800 flex flex-col max-h-[96vh] overflow-hidden animate-fadeIn print:border-none print:shadow-none print:rounded-none print:bg-transparent print:max-h-none print:overflow-visible print:w-full print:max-w-none">
 
         {/* Action Header (Oculto na Impressão) */}
-        <div className="flex items-center justify-between px-6 py-4 bg-slate-950 border-b border-slate-800 text-white print:hidden">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-950 border-b border-slate-800 text-white print:hidden">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
               <FileText className="w-5 h-5" />
@@ -61,10 +61,10 @@ export const InvoicePrintModal: React.FC<InvoicePrintModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-end sm:self-auto">
             <button
               onClick={handlePrint}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
+              className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>Imprimir / PDF (A4)</span>
@@ -84,7 +84,7 @@ export const InvoicePrintModal: React.FC<InvoicePrintModalProps> = ({
           {/* =========================================================================
               DOCUMENTO A4: FATURA PRÓ-FORMA / RECIBO OFICIAL
               ========================================================================= */}
-          <div className="printable-document invoice-document a4-document bg-white text-slate-900 w-full max-w-[800px] min-h-[1050px] p-10 sm:p-14 shadow-2xl flex flex-col justify-between relative print:shadow-none print:p-0 print:m-0 print:min-h-0 print:w-full print:max-w-none print:min-h-[265mm] font-sans">
+          <div className="printable-document invoice-document a4-document bg-white text-slate-900 w-full max-w-[800px] min-h-[1050px] p-5 sm:p-12 md:p-14 shadow-2xl flex flex-col justify-between relative print:shadow-none print:p-0 print:m-0 print:min-h-0 print:w-full print:max-w-none print:min-h-[265mm] font-sans">
             
             {/* Top Corporate Line — No fluxo do documento com margem inferior generosa */}
             <div className="w-full h-1.5 bg-slate-900 mb-6 print:mb-6 shrink-0" />
@@ -138,8 +138,8 @@ export const InvoicePrintModal: React.FC<InvoicePrintModalProps> = ({
               </div>
 
               {/* Tabela de Itens e Serviços */}
-              <div className="border border-slate-300 rounded-lg overflow-hidden">
-                <table className="w-full text-left text-xs border-collapse">
+              <div className="border border-slate-300 rounded-lg overflow-x-auto print:overflow-visible">
+                <table className="w-full text-left text-xs border-collapse min-w-[480px] print:min-w-0">
                   <thead>
                     <tr className="bg-slate-100 border-b border-slate-300 text-slate-800 font-black uppercase text-[10px] tracking-wider">
                       <th className="p-3.5">Descrição do Serviço / Módulo</th>

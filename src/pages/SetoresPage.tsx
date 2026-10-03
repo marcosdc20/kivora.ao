@@ -138,7 +138,7 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
       />
 
       {/* Tabs de Seleção de Setor */}
-      <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 -mt-8 relative z-20" data-reveal>
+      <section className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 -mt-8 relative z-20" data-reveal>
         <div className="surface-card bg-white/95 backdrop-blur-md p-2 rounded-2xl border border-slate-200/90 shadow-card flex flex-wrap gap-2 justify-center">
           {SECTORS.map((sec) => {
             const isActive = sec.id === activeSectorId;
@@ -163,7 +163,7 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
       </section>
 
       {/* Detalhes do Setor Selecionado */}
-      <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-20 space-y-16">
+      <section className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 py-16 sm:py-20 space-y-16">
         
         {/* Bloco de Apresentação */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">

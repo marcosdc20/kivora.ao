@@ -180,7 +180,7 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
       />
 
       {/* Main Container */}
-      <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-24 space-y-16">
+      <section className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 py-16 sm:py-24 space-y-16">
         
         {/* Banner de Garantia Plug & Play */}
         <div data-reveal className="bg-[#0B192C] text-white rounded-3xl p-8 sm:p-10 border border-slate-800 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">

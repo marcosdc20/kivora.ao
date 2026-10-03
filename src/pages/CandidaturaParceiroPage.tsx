@@ -360,11 +360,11 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
             </p>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={handleDownloadPdf}
-              className="inline-flex items-center gap-2 bg-[#FF6500] hover:bg-[#EB5B00] text-white text-xs font-bold px-5 py-2.5 rounded-full shadow-md shadow-orange-500/25 transition-all cursor-pointer hover:shadow-orange-500/40 active:scale-95"
+              className="w-full sm:w-auto justify-center inline-flex items-center gap-2 bg-[#FF6500] hover:bg-[#EB5B00] text-white text-xs font-bold px-4 sm:px-5 py-2.5 rounded-full shadow-md shadow-orange-500/25 transition-all cursor-pointer hover:shadow-orange-500/40 active:scale-95"
             >
               <Download className="w-4 h-4" />
               <span>Baixar Condições em PDF</span>
@@ -372,7 +372,7 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
             <button
               type="button"
               onClick={() => setShowConditionsModal(true)}
-              className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold px-5 py-2.5 rounded-full border border-slate-200 shadow-xs transition-all cursor-pointer"
+              className="w-full sm:w-auto justify-center inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold px-4 sm:px-5 py-2.5 rounded-full border border-slate-200 shadow-xs transition-all cursor-pointer"
             >
               <Eye className="w-4 h-4 text-slate-500" />
               <span>Ver Regulamento</span>

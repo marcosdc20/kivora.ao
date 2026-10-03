@@ -135,7 +135,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 relative animate-scaleUp">
         
         {/* Header - Limpo em Fundo Branco */}
-        <div className="bg-white p-6 sm:p-8 text-slate-900 relative border-b border-slate-200">
+        <div className="bg-white p-5 sm:p-8 text-slate-900 relative border-b border-slate-200">
           <button
             onClick={onClose}
             aria-label="Fechar janela de demonstração"
@@ -171,7 +171,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
         </div>
 
         {/* Content Body */}
-        <div className="p-6 sm:p-8 max-h-[75vh] overflow-y-auto">
+        <div className="p-5 sm:p-8 max-h-[80vh] sm:max-h-[75vh] overflow-y-auto">
           {submitted ? (
             <div className="text-center py-6 space-y-5">
               <div className="w-16 h-16 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-2xl flex items-center justify-center mx-auto shadow-sm">

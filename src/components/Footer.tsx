@@ -237,11 +237,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
         </div>
 
         {/* Bottom Bar: Copyright & Legal */}
-        <div className="pt-8 mt-12 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400 text-[11px]">
+        <div className="pt-8 mt-12 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400 text-[11px] text-center sm:text-left">
           <p>
             © {currentYear} {settings.company || 'KIVORA SOFT'}. Todos os direitos reservados. Software Homologado AGT N.º <span className="font-mono-num text-orange-400 font-bold">FE/387/AGT/2026</span>.
           </p>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-4 sm:gap-6">
             <a
               href="#privacidade"
               onClick={(e) => handleLinkClick(e, 'privacidade')}

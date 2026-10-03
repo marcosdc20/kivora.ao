@@ -163,14 +163,14 @@ export const HomePage: React.FC<HomePageProps> = ({
           3. LOGOTIPOS DE PARCEIROS & CLIENTES (MARQUEE INFINITO)
           ══════════════════════════════════════════════════════════════════ */}
       <section className="py-7 bg-slate-50/70 border-y border-slate-200/60 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-3 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <span className="text-[11px] font-bold uppercase tracking-widest text-slate-500 font-display flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#FF6500]" />
-            <span>Empresas e Parceiros Integrados ao Ecossistema KIVORA</span>
+            <span className="w-2 h-2 rounded-full bg-[#FF6500] shrink-0" />
+            <span className="truncate">Empresas e Parceiros Integrados ao Ecossistema KIVORA</span>
           </span>
           <button
             onClick={() => onNavigatePage('parceiros')}
-            className="text-xs font-semibold text-[#FF6500] hover:text-[#EB5B00] flex items-center gap-1 cursor-pointer transition-colors"
+            className="text-xs font-semibold text-[#FF6500] hover:text-[#EB5B00] flex items-center gap-1 cursor-pointer transition-colors shrink-0 self-start sm:self-auto"
           >
             <span>Ver Rede de Parceiros</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -226,7 +226,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* Badge Flutuante no Canto Inferior Direito (Padrão Imagem 4) */}
-            <div className="absolute -bottom-6 -right-2 sm:-bottom-8 sm:right-6 bg-[#0B1528] text-white p-5 sm:p-6 rounded-3xl border border-slate-800 shadow-2xl max-w-[260px] sm:max-w-[280px]">
+            <div className="absolute -bottom-6 right-2 sm:-bottom-8 sm:right-6 bg-[#0B1528] text-white p-4 sm:p-6 rounded-3xl border border-slate-800 shadow-2xl max-w-[240px] sm:max-w-[280px]">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#FF6500] to-[#FFA726] text-white flex items-center justify-center font-black text-sm shadow-md">
                   100%
@@ -305,17 +305,17 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* Botões de Ação Redondos */}
-            <div className="flex flex-wrap items-center gap-3.5 pt-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 pt-3">
               <button
                 onClick={() => onNavigatePage('sobre')}
-                className="bg-[#0B1528] hover:bg-slate-800 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-full transition-all cursor-pointer shadow-sm hover:shadow-md active:scale-98 flex items-center gap-2"
+                className="w-full sm:w-auto justify-center bg-[#0B1528] hover:bg-slate-800 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-full transition-all cursor-pointer shadow-sm hover:shadow-md active:scale-98 flex items-center gap-2"
               >
                 <span>Conhecer a Nossa História</span>
                 <ArrowRight className="w-4 h-4 text-orange-400" />
               </button>
               <button
                 onClick={() => onOpenDemoModal('Demonstração Sobre Kivora')}
-                className="bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs sm:text-sm px-7 py-3.5 rounded-full transition-all cursor-pointer shadow-xs active:scale-98"
+                className="w-full sm:w-auto text-center bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs sm:text-sm px-7 py-3.5 rounded-full transition-all cursor-pointer shadow-xs active:scale-98"
               >
                 Solicitar Apresentação
               </button>

@@ -50,7 +50,7 @@ export const PageHero: React.FC<PageHeroProps> = ({
         }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 lg:px-16">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 lg:px-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
           
           {/* Coluna Texto (Esquerda) */}
@@ -61,7 +61,7 @@ export const PageHero: React.FC<PageHeroProps> = ({
                 <span>{tag}</span>
               </span>
             )}
-            <h1 className="text-3xl sm:text-4xl lg:text-[46px] font-extrabold text-white leading-[1.14] tracking-tight font-display">
+            <h1 className="text-2xl sm:text-4xl lg:text-[46px] font-extrabold text-white leading-[1.14] tracking-tight font-display">
               <AnimatedText text={title} el="span" mode="letter-stagger" className="text-white" />
             </h1>
             {sub && (

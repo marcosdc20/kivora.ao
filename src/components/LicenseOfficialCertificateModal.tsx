@@ -82,7 +82,7 @@ export const LicenseOfficialCertificateModal: React.FC<LicenseOfficialCertificat
           {/* =========================================================================
               DOCUMENTO A4: CERTIFICADO DE LICENCIAMENTO DE SOFTWARE (KIVORA ERP)
               ========================================================================= */}
-          <div className="printable-document certificate-document a4-document bg-white text-slate-900 w-full max-w-[800px] min-h-[1050px] p-10 sm:p-14 shadow-2xl flex flex-col justify-between relative print:shadow-none print:p-0 print:m-0 print:w-full print:max-w-none print:min-h-[265mm] font-sans">
+          <div className="printable-document certificate-document a4-document bg-white text-slate-900 w-full max-w-[800px] min-h-[1050px] p-5 sm:p-12 md:p-14 shadow-2xl flex flex-col justify-between relative print:shadow-none print:p-0 print:m-0 print:w-full print:max-w-none print:min-h-[265mm] font-sans">
             
             {/* Top Corporate Line — No fluxo do documento com margem inferior generosa */}
             <div className="w-full h-1.5 bg-slate-900 mb-6 print:mb-6 shrink-0" />

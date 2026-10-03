@@ -48,7 +48,7 @@ export const ModulosPage: React.FC<ModulosPageProps> = ({ onSelectModule, onOpen
       />
 
       {/* Filtros */}
-      <section className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16 pt-12 pb-4">
+      <section className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-16 pt-12 pb-4">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="flex flex-wrap gap-2">
             {CATEGORIES.map((c) => (
@@ -79,7 +79,7 @@ export const ModulosPage: React.FC<ModulosPageProps> = ({ onSelectModule, onOpen
       </section>
 
       {/* Grid de Módulos */}
-      <section className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16 py-10">
+      <section className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-16 py-10">
         {modules.length === 0 ? (
           <div className="text-center py-20 text-slate-400 text-sm">
             Nenhum módulo encontrado. Tente outro termo de pesquisa.
