@@ -19,21 +19,21 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onBack }) => {
           <span>Voltar à Página Principal</span>
         </button>
 
-        <div className="card-premium p-8 md:p-12 rounded-3xl space-y-8">
+        <div className="surface-card p-8 md:p-12 space-y-8">
           <div className="flex items-center gap-3.5 border-b border-slate-100 pb-6">
-            <div className="p-3 bg-blue-50 text-blue-700 rounded-2xl border border-blue-100">
+            <div className="p-3 bg-blue-50 text-blue-700 rounded-2xl border border-blue-200/60 shadow-xs">
               <FileText className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-950">Termos e Condições de Licenciamento</h1>
-              <p className="text-xs text-slate-500 font-semibold">KIVORA ERP • Kivora Tecnologias, Lda. • Luanda, Angola</p>
+              <h1 className="font-display text-2xl sm:text-3xl font-black text-slate-950">Termos e Condições de Licenciamento</h1>
+              <p className="text-xs text-slate-500 font-medium">KIVORA ERP • Kivora Tecnologias, Lda. • Luanda, Angola</p>
             </div>
           </div>
 
           <div className="space-y-6 text-xs sm:text-sm text-slate-700 leading-relaxed">
             <h2 className="text-base font-extrabold text-slate-950">1. Licenciamento e Uso do Software</h2>
             <p>
-              O KIVORA ERP é um software executivo de gestão empresarial e faturação eletrónica certificado pela Administração Geral Tributária (AGT) com o número de homologação oficial <strong>FE/440/AGT/2026</strong> ao abrigo do <strong>Decreto Presidencial n.º 71/25</strong> e Regime Jurídico das Faturas. A utilização da plataforma é concedida mediante subscrição de planos ou aquisição de licença vitalícia para execução local (Desktop Offline-First).
+              O KIVORA ERP é um software executivo de gestão empresarial e faturação eletrónica certificado pela Administração Geral Tributária (AGT) com o número de homologação oficial <strong>FE/387/AGT/2026</strong> ao abrigo do <strong>Decreto Presidencial n.º 71/25</strong> e Regime Jurídico das Faturas. A utilização da plataforma é concedida mediante subscrição de planos ou aquisição de licença vitalícia para execução local (Desktop Offline-First).
             </p>
 
             <h2 className="text-base font-extrabold text-slate-950">2. Responsabilidade sobre Dados Fiscais e Comerciais</h2>

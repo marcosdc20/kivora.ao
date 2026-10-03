@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { HeroCarousel } from '../components/HeroCarousel';
 import { CountUp } from '../components/CountUp';
 import {
-  CheckCircle2, ArrowRight, Download, Wifi,
-  Zap, Check, ShieldCheck,
-  Headphones, MapPin,
+  ArrowRight, Download, Wifi,
+  Check, ShieldCheck,
+  Phone,
   FileCheck, ShoppingCart, Boxes, Users,
-  HardDrive, Building2
+  HardDrive, ChevronRight, Star,
+  Award, CheckCircle2
 } from 'lucide-react';
 import { PageId } from '../components/Header';
 import {
@@ -18,7 +19,6 @@ import {
 import posImg from '../assets/kivora/pc-pos-kivora.png';
 import desktopImg from '../assets/kivora/pc-descktop-kivora.png';
 import laptopImg from '../assets/kivora/pc-laptop-kivora.png';
-import tabletImg from '../assets/kivora/jovem-empresaria-com-tablet.png';
 import executivosImg from '../assets/kivora/executivos-kivora.jpg';
 import supermercadoImg from '../assets/kivora/supermercado-kivora.jpg';
 
@@ -27,6 +27,17 @@ interface HomePageProps {
   onOpenDemoModal: (subject?: string) => void;
   onNavigatePage: (page: PageId) => void;
 }
+
+const DEFAULT_PARTNER_BRANDS: PartnerBrandLogo[] = [
+  { id: 'pb-1', name: 'VISUAL SOFTWARE - COMÉRCIO E SERVIÇOS, LDA', logoUrl: '', type: 'parceiro', active: true },
+  { id: 'pb-2', name: 'GRUPO ATLÂNTICO DISTRIBUIÇÃO & LOGÍSTICA', logoUrl: '', type: 'cliente', active: true },
+  { id: 'pb-3', name: 'LUANDA RETAIL & REDE DE SUPERMERCADOS', logoUrl: '', type: 'cliente', active: true },
+  { id: 'pb-4', name: 'FARMÁCIAS VIDA & SAÚDE ANGOLA', logoUrl: '', type: 'cliente', active: true },
+  { id: 'pb-5', name: 'ANGOCOMÉRCIO MULTI-ARQUIPÉLAGO', logoUrl: '', type: 'parceiro', active: true },
+  { id: 'pb-6', name: 'RESTAURAÇÃO & HOTELARIA MIRAMAR', logoUrl: '', type: 'cliente', active: true },
+  { id: 'pb-7', name: 'KWANZA LOGÍSTICA & DISTRIBUIÇÃO', logoUrl: '', type: 'parceiro', active: true },
+  { id: 'pb-8', name: 'GABINETE FISCAL & AUDITORIA DE LUANDA', logoUrl: '', type: 'parceiro', active: true },
+];
 
 const parseFeatures = (text?: string, fallback: string[] = []): string[] => {
   if (!text) return fallback;
@@ -51,569 +62,923 @@ export const HomePage: React.FC<HomePageProps> = ({
     };
   }, []);
 
+  const effectivePartnerLogos = useMemo(() => {
+    if (partnerLogos && partnerLogos.length >= 4) {
+      return partnerLogos;
+    }
+    const existingNames = new Set((partnerLogos || []).map((p) => p.name.toLowerCase().trim()));
+    const additional = DEFAULT_PARTNER_BRANDS.filter((b) => !existingNames.has(b.name.toLowerCase().trim()));
+    return [...(partnerLogos || []), ...additional];
+  }, [partnerLogos]);
+
   return (
-    <div className="bg-white text-slate-800 font-sans">
+    <div className="bg-white text-slate-900 font-sans selection:bg-[#FF6500] selection:text-white">
       
-      {/* ========== HERO SECTION (CARROSSEL COM IMAGENS E COMPUTADORES PASSANDO JUNTOS) ========== */}
+      {/* ══════════════════════════════════════════════════════════════════
+          1. HERO CAROUSEL COM FRAMER MOTION & SLIDE SEGMENTS
+          ══════════════════════════════════════════════════════════════════ */}
       <HeroCarousel
         onNavigatePage={onNavigatePage}
         onOpenDemoModal={onOpenDemoModal}
       />
 
-      {/* ========== BARRA DE CONFIANÇA EMPRESARIAL ========== */}
-      <div className="bg-[#1746A2] text-white py-4 border-b border-blue-700/60 shadow-inner">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-4 text-xs font-semibold text-blue-100">
-            <span className="flex items-center gap-2 text-white font-bold">
-              <ShieldCheck className="w-4 h-4 text-emerald-300 shrink-0" />
-              <span>Certificação Oficial AGT • N.º FE/440/AGT/2026</span>
-            </span>
-            <div className="flex flex-wrap items-center gap-6 sm:gap-8 text-blue-100">
-              <span className="flex items-center gap-2">
-                <Wifi className="w-3.5 h-3.5 text-blue-200" />
-                Base Local 100% Offline
-              </span>
-              <span className="flex items-center gap-2">
-                <Zap className="w-3.5 h-3.5 text-amber-300" />
-                Tabelas IRT 2026 & SAF-T (AO)
-              </span>
-              <span className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-emerald-300" />
-                Assistência Técnica em Luanda
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ========== CARROSSEL DE CLIENTES E PARCEIROS (SE EXISTIREM NO FIREBASE) ========== */}
-      {partnerLogos.length > 0 && (
-        <section className="py-10 bg-slate-50 border-b border-slate-200/80 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Empresas e Parceiros Integrados ao Ecossistema KIVORA
-            </span>
-            <button
-              onClick={() => onNavigatePage('parceiros')}
-              className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
-            >
-              <span>Rede de Parceiros</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="relative w-full overflow-hidden">
-            <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none" />
-
-            <div className="animate-marquee flex items-center gap-8 py-2">
-              {[...partnerLogos, ...partnerLogos].map((partner, idx) => (
-                <div
-                  key={`${partner.id}-${idx}`}
-                  className="flex items-center gap-2.5 px-4 py-2 bg-white rounded-xl border border-slate-200 shadow-xs shrink-0 select-none"
-                >
-                  {partner.logoUrl ? (
-                    <img
-                      src={partner.logoUrl}
-                      alt={partner.name}
-                      className="h-7 w-auto object-contain rounded"
-                    />
-                  ) : (
-                    <div className="w-6 h-6 rounded bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-xs">
-                      {partner.name.substring(0, 2).toUpperCase()}
-                    </div>
-                  )}
-                  <span className="text-xs font-semibold text-slate-800">
-                    {partner.name}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ========== OS 4 MÓDULOS PRINCIPAIS DE GESTÃO ========== */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div data-reveal className="sr-init text-center max-w-2xl mx-auto mb-16 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider">
-            <span>Ecossistema Modular Integrado</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-slate-950 tracking-tight leading-tight">
-            Tudo o que a sua empresa precisa num único sistema
-          </h2>
-          <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-            Elimine planilhas manuais e softwares desconectados. O KIVORA unifica faturação fiscal, caixas de atendimento rápido, controlo de stocks e processamento de salários.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+      {/* ══════════════════════════════════════════════════════════════════
+          2. FAIXA DE DESTAQUE TRIPLA (3-PART OVERLAPPING STRIP — EXECUTIVO & ESPAÇOSO)
+          Card 1 (Slate Escuro), Card 2 (Laranja Vibrante), Card 3 (Branco Executivo)
+          ══════════════════════════════════════════════════════════════════ */}
+      <section className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 sm:-mt-14 mb-14">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           
-          {/* 1. Faturação AGT */}
-          <div
-            data-reveal
-            className="sr-init surface-card p-7 flex flex-col justify-between group cursor-pointer"
-            onClick={() => onNavigatePage('faturacao')}
-          >
-            <div>
-              <div className="w-12 h-12 rounded-xl bg-blue-50 text-[#1746A2] flex items-center justify-center group-hover:bg-[#1746A2] group-hover:text-white transition-all shadow-xs mb-5">
-                <FileCheck className="w-6 h-6" strokeWidth={1.75} />
+          {/* Card 1: Slate Escuro (#0B1528) */}
+          <div className="bg-[#0B1528] rounded-3xl p-6 sm:p-7 shadow-xl border border-slate-800 text-white flex items-center justify-between gap-5 group hover:border-orange-500/40 transition-all">
+            <div className="flex items-center gap-4">
+              <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display tracking-tight shrink-0">
+                12+
+              </span>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 block font-display">
+                  Tradição & Solidez
+                </span>
+                <h3 className="text-base sm:text-lg font-black text-white font-display leading-tight">
+                  Anos em Angola
+                </h3>
+                <span className="text-xs text-slate-300 font-medium block mt-0.5">
+                  +2.800 empresas ativas
+                </span>
               </div>
-              <h3 className="text-lg font-bold text-slate-950 mb-2 group-hover:text-[#1746A2] transition-colors">
-                Faturação Eletrónica
-              </h3>
-              <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal">
-                Assinatura digital RSA-SHA256, QR Code impresso no talão, numeração sequencial e exportação mensal de SAF-T (AO) sem erros.
-              </p>
             </div>
-            <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#1746A2] group-hover:text-blue-700">
-              <span>Explorar Faturação</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-orange-400 flex items-center justify-center shrink-0 shadow-sm group-hover:bg-[#FF6500] group-hover:text-white transition-all">
+              <Award className="w-5 h-5" />
             </div>
           </div>
 
-          {/* 2. Ponto de Venda POS */}
+          {/* Card 2: Laranja Vibrante (#FF6500) */}
           <div
-            data-reveal
-            className="sr-init surface-card p-7 flex flex-col justify-between group cursor-pointer"
-            style={{ transitionDelay: '100ms' }}
-            onClick={() => onNavigatePage('pos')}
+            onClick={() => onOpenDemoModal('Diagnóstico Fiscal Gratuito')}
+            className="bg-gradient-to-r from-[#FF6500] to-[#EB5B00] rounded-3xl p-6 sm:p-7 shadow-xl shadow-orange-500/25 text-white flex items-center justify-between gap-4 cursor-pointer hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all group"
           >
             <div>
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-xs mb-5">
-                <ShoppingCart className="w-6 h-6" strokeWidth={1.75} />
-              </div>
-              <h3 className="text-lg font-bold text-slate-950 mb-2 group-hover:text-emerald-700 transition-colors">
-                Ponto de Venda (POS)
+              <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full inline-block mb-1 font-display">
+                Apoio Gratuito
+              </span>
+              <h3 className="text-base sm:text-lg font-black text-white font-display leading-tight">
+                Precisa de Apoio Fiscal?
               </h3>
-              <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal">
-                Atendimento ultrarrápido compatível com ecrãs touch, leitura de códigos de barras, talões térmicos, fecho Z e controlo de turnos.
-              </p>
+              <span className="text-xs text-white/90 font-medium block mt-0.5">
+                Diagnóstico & Demonstração VIP
+              </span>
             </div>
-            <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700 group-hover:text-emerald-800">
-              <span>Explorar POS</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <div className="w-11 h-11 rounded-full bg-white text-[#FF6500] flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
+              <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
             </div>
           </div>
 
-          {/* 3. Stock & Armazéns */}
-          <div
-            data-reveal
-            className="sr-init surface-card p-7 flex flex-col justify-between group cursor-pointer"
-            style={{ transitionDelay: '200ms' }}
-            onClick={() => onNavigatePage('stock')}
-          >
+          {/* Card 3: Branco Executivo */}
+          <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-xl border border-slate-200/90 text-slate-900 flex items-center justify-between gap-4 group hover:border-orange-300 transition-all">
             <div>
-              <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-all shadow-xs mb-5">
-                <Boxes className="w-6 h-6" strokeWidth={1.75} />
-              </div>
-              <h3 className="text-lg font-bold text-slate-950 mb-2 group-hover:text-amber-700 transition-colors">
-                Stock & Armazéns
-              </h3>
-              <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal">
-                Rastreabilidade de entradas e saídas, gestão de lotes e datas de validade, transferências entre lojas e alertas de rutura.
-              </p>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block font-display">
+                Atendimento Imediato
+              </span>
+              <a
+                href={settings.whatsappUrl || 'https://wa.me/244974855494'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-lg sm:text-xl font-black font-mono text-slate-950 hover:text-[#FF6500] block tracking-tight transition-colors"
+              >
+                {settings.phoneDisplay || '+244 974 855 494'}
+              </a>
+              <span className="text-xs text-slate-500 font-medium block mt-0.5">
+                Linha Direta Luanda • Seg - Sáb
+              </span>
             </div>
-            <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-700 group-hover:text-amber-800">
-              <span>Explorar Stocks</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-
-          {/* 4. Recursos Humanos & IRT */}
-          <div
-            data-reveal
-            className="sr-init surface-card p-7 flex flex-col justify-between group cursor-pointer"
-            style={{ transitionDelay: '300ms' }}
-            onClick={() => onNavigatePage('rh')}
-          >
-            <div>
-              <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-all shadow-xs mb-5">
-                <Users className="w-6 h-6" strokeWidth={1.75} />
-              </div>
-              <h3 className="text-lg font-bold text-slate-950 mb-2 group-hover:text-purple-700 transition-colors">
-                Recursos Humanos & IRT
-              </h3>
-              <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal">
-                Processamento salarial mensal em conformidade com a Lei Geral do Trabalho, retenção de INSS (3%/8%) e tabelas de IRT.
-              </p>
-            </div>
-            <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-purple-700 group-hover:text-purple-800">
-              <span>Explorar RH</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <div className="w-11 h-11 rounded-full bg-[#0B1528] text-amber-400 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 group-hover:bg-[#FF6500] group-hover:text-white transition-all">
+              <Phone className="w-5 h-5" />
             </div>
           </div>
 
         </div>
       </section>
 
-      {/* ========== DESTAQUE EDITORIAL: JOVEM EMPRESÁRIA COM TABLET ========== */}
-      <section className="py-16 sm:py-24 bg-white border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
-          {/* Texto na Esquerda */}
-          <div data-reveal className="sr-init lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider">
-              <Building2 className="w-3.5 h-3.5 text-[#1746A2]" />
-              <span>Mobilidade & Controlo de Gestão</span>
-            </div>
-
-            <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-slate-950 tracking-tight leading-tight">
-              A Escolha Natural para Gestores e Empresas em Angola
-            </h2>
-
-            <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-normal">
-              Desenvolvido para responder às exigências reais do mercado nacional, o <strong>KIVORA ERP</strong> combina robustez fiscal certificada com simplicidade operacional, permitindo-lhe acompanhar o desempenho das suas lojas com total segurança.
-            </p>
-
-            <div className="space-y-3.5 pt-2">
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">✓</div>
-                <div>
-                  <strong className="text-slate-950 text-sm block">Faturação Certificada e Segura</strong>
-                  <span className="text-xs text-slate-600">Conformidade rigorosa com o Decreto 71/25 e validação imediata da AGT.</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">✓</div>
-                <div>
-                  <strong className="text-slate-950 text-sm block">Controlo de Caixas e Stocks em Tempo Real</strong>
-                  <span className="text-xs text-slate-600">Gestão multi-armazém com alertas automáticos de rutura e validade de lotes.</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">✓</div>
-                <div>
-                  <strong className="text-slate-950 text-sm block">Independência Total da Internet</strong>
-                  <span className="text-xs text-slate-600">Operação contínua em rede local com base de dados no seu próprio computador.</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4 flex flex-wrap items-center gap-4">
-              <button
-                onClick={() => onNavigatePage('funcionalidades')}
-                className="inline-flex items-center justify-center gap-2 bg-[#1746A2] hover:bg-blue-800 text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-xl shadow-sm transition-all hover:-translate-y-0.5 cursor-pointer"
-              >
-                <span>Conhecer Todos os Módulos</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => onOpenDemoModal('Demonstração Executiva')}
-                className="inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm px-6 py-3.5 rounded-xl transition-all cursor-pointer"
-              >
-                <span>Pedir Demonstração</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Imagem da Jovem Empresária com Tablet — Enquadrada de Forma Limpa e Profissional */}
-          <div data-reveal className="sr-init lg:col-span-6 flex items-center justify-center">
-            <div className="relative w-full max-w-md lg:max-w-lg bg-slate-50 border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-xs flex items-center justify-center">
-              <img
-                src={tabletImg}
-                alt="Jovem Empresária com Tablet KIVORA ERP"
-                loading="lazy"
-                decoding="async"
-                width="500"
-                height="540"
-                className="w-full h-auto max-h-[380px] sm:max-h-[460px] object-contain select-none pointer-events-none drop-shadow-sm transition-transform duration-300 hover:scale-102"
-              />
-            </div>
-          </div>
-
+      {/* ══════════════════════════════════════════════════════════════════
+          3. LOGOTIPOS DE PARCEIROS & CLIENTES (MARQUEE INFINITO)
+          ══════════════════════════════════════════════════════════════════ */}
+      <section className="py-7 bg-slate-50/70 border-y border-slate-200/60 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-3 flex items-center justify-between">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-slate-500 font-display flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#FF6500]" />
+            <span>Empresas e Parceiros Integrados ao Ecossistema KIVORA</span>
+          </span>
+          <button
+            onClick={() => onNavigatePage('parceiros')}
+            className="text-xs font-semibold text-[#FF6500] hover:text-[#EB5B00] flex items-center gap-1 cursor-pointer transition-colors"
+          >
+            <span>Ver Rede de Parceiros</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
         </div>
-      </section>
 
-      {/* ========== STATS STRIP ========== */}
-      <section className="py-12 bg-white border-y border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { component: <CountUp end={2800} suffix="+" type="odometer" duration={1.5} />, label: 'Empresas Ativas', color: 'text-[#1746A2]', bg: 'bg-blue-50', icon: <Users className="w-6 h-6" /> },
-              { component: <CountUp end={18} suffix=" Províncias" type="odometer" duration={1.5} />, label: 'Cobertura Nacional', color: 'text-emerald-700', bg: 'bg-emerald-50', icon: <MapPin className="w-6 h-6" /> },
-              { component: <CountUp end={99.9} decimals={1} suffix="%" type="counter" duration={1.5} />, label: 'Uptime Offline LAN', color: 'text-amber-700', bg: 'bg-amber-50', icon: <ShieldCheck className="w-6 h-6" /> },
-              { component: <CountUp end={440} prefix="FE/" suffix="/AGT" type="counter" duration={1.5} />, label: 'Certificação Oficial', color: 'text-purple-700', bg: 'bg-purple-50', icon: <FileCheck className="w-6 h-6" /> },
-            ].map((stat, idx) => (
-              <div key={idx} className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center shrink-0 transition-transform`}>
-                  {stat.icon}
-                </div>
-                <div>
-                  <div className={`text-2xl font-black font-mono-num tracking-tight ${stat.color}`}>{stat.component}</div>
-                  <div className="text-xs text-slate-500 font-medium leading-tight">{stat.label}</div>
-                </div>
+        <div className="relative w-full overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none" />
+
+          <div className="animate-marquee flex items-center gap-6 py-2">
+            {[...effectivePartnerLogos, ...effectivePartnerLogos].map((partner, idx) => (
+              <div
+                key={`${partner.id}-${idx}`}
+                className="flex items-center gap-3 px-4 py-2.5 bg-white rounded-2xl border border-slate-200/80 shadow-xs shrink-0 select-none hover:border-orange-300 transition-colors"
+              >
+                {partner.logoUrl ? (
+                  <img
+                    src={partner.logoUrl}
+                    alt={partner.name}
+                    className="h-7 w-auto object-contain rounded"
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-lg bg-orange-50 text-[#FF6500] flex items-center justify-center font-bold text-xs">
+                    {partner.name.substring(0, 2).toUpperCase()}
+                  </div>
+                )}
+                <span className="text-xs font-bold text-slate-800">
+                  {partner.name}
+                </span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ========== PORQUÊ O KIVORA EM ANGOLA (OFFLINE + REDE LOCAL) ========== */}
-      <section className="py-24 bg-[#0B192C] text-white relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
-            <div data-reveal className="sr-init lg:col-span-6 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-blue-200 text-xs font-bold uppercase tracking-wider">
-                <HardDrive className="w-3.5 h-3.5" />
-                <span>Soberania de Dados & Continuidade Operacional</span>
+      {/* ══════════════════════════════════════════════════════════════════
+          4. SOBRE A KIVORA SOFT (ABOUT SECTION — EXATAMENTE COMO NA IMAGEM 4)
+          Layout Dividido: Imagem com Badge Flutuante + 2 Cards Circulares + Checklist
+          ══════════════════════════════════════════════════════════════════ */}
+      <section id="sobre-kivora" className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          
+          {/* Coluna Esquerda: Imagem com Badge Flutuante */}
+          <div className="lg:col-span-6 relative">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200">
+              <img
+                src={executivosImg}
+                alt="Equipa e Consultores Kivora Soft"
+                className="w-full h-[380px] sm:h-[460px] object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+            </div>
+
+            {/* Badge Flutuante no Canto Inferior Direito (Padrão Imagem 4) */}
+            <div className="absolute -bottom-6 -right-2 sm:-bottom-8 sm:right-6 bg-[#0B1528] text-white p-5 sm:p-6 rounded-3xl border border-slate-800 shadow-2xl max-w-[260px] sm:max-w-[280px]">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#FF6500] to-[#FFA726] text-white flex items-center justify-center font-black text-sm shadow-md">
+                  100%
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-white block">Certificação AGT</span>
+                  <span className="text-[10px] text-orange-400 font-mono">FE/387/AGT/2026</span>
+                </div>
               </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-white tracking-tight leading-tight">
-                Faturação garantida mesmo quando a internet falha
-              </h2>
-              <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-normal">
-                Em Angola, a instabilidade da internet não pode travar as vendas do seu negócio. O <strong className="text-white">KIVORA Desktop ERP</strong> armazena a base de dados no seu computador ou servidor local (LAN), com operação contínua e sem interrupções.
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                Decreto Presidencial n.º 71/25 & Código do IVA plenamente integrados.
               </p>
+            </div>
+          </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
-                {[
-                  { icon: <CheckCircle2 className="w-4 h-4" />, title: '100% Offline-First', desc: 'Emita faturas, feche caixas e gira stocks sem depender de ligação externa.' },
-                  { icon: <Wifi className="w-4 h-4" />, title: 'Rede Local Multi-Postos', desc: 'Conecte 10 ou mais terminais de caixa ao servidor na rede do balcão.' },
-                  { icon: <Zap className="w-4 h-4" />, title: 'Sem Riscos Cambiais', desc: 'Preços fixados em Kwanzas (AOA), sem mensalidades em moeda estrangeira.' },
-                  { icon: <ShieldCheck className="w-4 h-4" />, title: 'Segurança & Cópia USB', desc: 'Backups automáticos encriptados para Pen Drive ou disco externo.' },
-                ].map((f, i) => (
-                  <div key={i} className="bg-white/[0.04] hover:bg-white/[0.07] p-4 rounded-xl border border-white/[0.08] hover:border-white/[0.16] space-y-2 transition-all">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-lg bg-white/[0.08] flex items-center justify-center shrink-0 text-blue-300">
-                        {f.icon}
-                      </div>
-                      <span className="text-white font-semibold text-xs sm:text-[13px] tracking-tight">{f.title}</span>
-                    </div>
-                    <p className="text-xs text-slate-300/85 leading-relaxed font-normal">{f.desc}</p>
-                  </div>
-                ))}
+          {/* Coluna Direita: Informações & 2 Cards com Ícones Circulares */}
+          <div className="lg:col-span-6 space-y-6">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
+                <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
+                <span>Sobre a Kivora Soft</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display leading-[1.12]">
+                A Escolha de Confiança em Gestão Empresarial para Angola
+              </h2>
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+                Desenvolvemos soluções de faturação e contabilidade que funcionam perfeitamente na realidade angolana: sem quedas por falta de internet, com suporte presencial em Luanda e total segurança fiscal perante a AGT.
+              </p>
+            </div>
+
+            {/* 2 Cards de Destaque com Ícones Circulares Laranja (Padrão Imagens 1 e 4) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 space-y-2 hover:border-orange-300 transition-colors">
+                <div className="w-11 h-11 rounded-full bg-orange-50 border border-orange-200/60 text-[#FF6500] flex items-center justify-center font-bold shadow-xs">
+                  <Wifi className="w-5 h-5" />
+                </div>
+                <h4 className="text-sm font-bold text-slate-950 font-display">
+                  Estratégia & Faturação Offline
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Base de dados local SQLite. A sua loja continua a faturar e atender clientes sem qualquer interrupção.
+                </p>
               </div>
 
-              <div className="pt-2 flex flex-wrap items-center gap-4">
-                <button
-                  onClick={() => onNavigatePage('download')}
-                  className="bg-[#FF6500] hover:bg-[#E05900] active:bg-[#C94A00] text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-xl transition-all shadow-sm flex items-center gap-2 cursor-pointer"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Baixar Versão de Avaliação</span>
-                </button>
-                <button
-                  onClick={() => onOpenDemoModal('Arquitetura Offline LAN')}
-                  className="text-slate-300 hover:text-white font-semibold text-xs sm:text-sm px-4 py-3 transition-colors flex items-center gap-1.5 cursor-pointer"
-                >
-                  <span>Pedir Demonstração</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+              <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 space-y-2 hover:border-orange-300 transition-colors">
+                <div className="w-11 h-11 rounded-full bg-orange-50 border border-orange-200/60 text-[#FF6500] flex items-center justify-center font-bold shadow-xs">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <h4 className="text-sm font-bold text-slate-950 font-display">
+                  Conformidade & Metas AGT
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Assinatura digital RSA-SHA256 em cada documento fiscal e exportação mensal de ficheiro SAF-T (AO) 100% limpo.
+                </p>
               </div>
             </div>
 
-            <div data-reveal className="sr-init lg:col-span-6">
-              <div className="rounded-2xl overflow-hidden border border-white/15 shadow-xl relative group">
-                <img
-                  src={supermercadoImg}
-                  alt="Supermercado e Caixas a operar com Kivora ERP"
-                  loading="lazy"
-                  decoding="async"
-                  width="640"
-                  height="440"
-                  className="w-full h-[360px] sm:h-[420px] object-cover"
-                />
+            {/* Checklist de 4 Pontos */}
+            <div className="space-y-2.5 pt-2 text-xs text-slate-700">
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-[#FF6500] shrink-0" />
+                <span>Instalação presencial rápida de postos de trabalho e servidores LAN em Luanda.</span>
               </div>
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-[#FF6500] shrink-0" />
+                <span>Módulo de Recursos Humanos com escalões IRT 2026 e desconto INSS de 3%/8%.</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-[#FF6500] shrink-0" />
+                <span>Preços transparentes fixados em Kwanzas (AOA), sem dependência cambial de moeda estrangeira.</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-[#FF6500] shrink-0" />
+                <span>Formação prática incluída para a sua equipa de operadores de caixa e gerentes.</span>
+              </div>
+            </div>
+
+            {/* Botões de Ação Redondos */}
+            <div className="flex flex-wrap items-center gap-3.5 pt-3">
+              <button
+                onClick={() => onNavigatePage('sobre')}
+                className="bg-[#0B1528] hover:bg-slate-800 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-full transition-all cursor-pointer shadow-sm hover:shadow-md active:scale-98 flex items-center gap-2"
+              >
+                <span>Conhecer a Nossa História</span>
+                <ArrowRight className="w-4 h-4 text-orange-400" />
+              </button>
+              <button
+                onClick={() => onOpenDemoModal('Demonstração Sobre Kivora')}
+                className="bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs sm:text-sm px-7 py-3.5 rounded-full transition-all cursor-pointer shadow-xs active:scale-98"
+              >
+                Solicitar Apresentação
+              </button>
             </div>
 
           </div>
+
         </div>
       </section>
 
-      {/* ========== HARDWARE & EQUIPAMENTOS POS ========== */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div data-reveal className="sr-init text-center max-w-2xl mx-auto mb-16 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider">
-            <span>Equipamentos POS</span>
+      {/* ══════════════════════════════════════════════════════════════════
+          5. O QUE FAZEMOS? (WHAT WE DO? — EXATAMENTE COMO NAS IMAGENS 1 E 4)
+          6 Cards com Ícones Circulares Gradiente Âmbar/Laranja + Barra CTA
+          ══════════════════════════════════════════════════════════════════ */}
+      <section id="o-que-fazemos" className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        
+        {/* Marcador Superior Laranja & Título Padrão XTRA */}
+        <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
+          <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
+            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
+            <span>O Que Fazemos?</span>
+            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-slate-950 tracking-tight leading-tight">
-            Equipamentos de Alto Rendimento para o Balcão
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
+            Soluções Integradas de Faturação & Gestão
           </h2>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-            Fornecemos e configuramos periféricos comerciais testados e prontos para suportar o ritmo diário de caixas de retalho, supermercados e restauração.
+            Fornecemos tecnologia de ponta desenvolvida especificamente para a realidade de Angola, unindo conformidade fiscal absoluta com facilidade de operação.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-7 items-stretch">
+        {/* Grade 3x2 com os 6 Cartões com Ícones Circulares Gradiente Laranja */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
-          {/* 1. Terminal POS Touch */}
-          <div className="surface-card p-7 flex flex-col justify-between group">
+          {/* Card 1: Faturação Eletrónica AGT */}
+          <div
+            onClick={() => onNavigatePage('faturacao')}
+            className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
+          >
             <div>
-              {/* Imagem do POS em Fundo Neutro e Limpo */}
-              <div className="h-52 sm:h-60 mb-5 flex items-center justify-center bg-slate-50/70 rounded-2xl p-4 border border-slate-100 select-none">
-                <img
-                  src={posImg}
-                  alt="Terminal Touch POS Kivora"
-                  loading="lazy"
-                  decoding="async"
-                  width="360"
-                  height="260"
-                  className="max-h-full max-w-full object-contain drop-shadow-xs transition-transform duration-300 group-hover:scale-103"
-                />
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-[#FF6500] text-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform">
+                <FileCheck className="w-8 h-8" strokeWidth={2} />
               </div>
-
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-bold text-[#1746A2] uppercase tracking-wider">
-                  Ecrã Tátil 15.6"
-                </span>
-                <span className="text-xs font-bold text-slate-900 font-mono-num">
-                  Desde 750.000 Kz
-                </span>
-              </div>
-              <h3 className="text-lg font-bold text-slate-950 mb-2 group-hover:text-[#1746A2] transition-colors">
-                Terminal POS Touch All-in-One
+              <h3 className="text-lg font-bold text-slate-900 mb-2 font-display group-hover:text-[#FF6500] transition-colors">
+                Faturação Eletrónica AGT
               </h3>
-              <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal mb-4">
-                Ecrã industrial de 15.6 polegadas com resposta rápida ao toque, processador de alta velocidade e chassis reforçado para operações intensivas.
+              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-normal mb-4">
+                Emissão homologada de Faturas (FT), Faturas-Recibo (FR), Notas de Crédito (NC) e Débito (ND) com chave RS256, QR Code fiscal e ficheiro SAF-T AO.
               </p>
             </div>
-
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-800">
-              <span className="text-slate-500 font-medium">12 Meses de Garantia</span>
-              <button
-                onClick={() => onNavigatePage('loja')}
-                className="text-[#1746A2] hover:text-blue-800 flex items-center gap-1.5 group-hover:translate-x-0.5 transition-all cursor-pointer font-bold"
-              >
-                <span>Ver na Loja</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-bold text-[#FF6500] gap-1 group-hover:gap-2 transition-all">
+              <span>Saber mais</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>
 
-          {/* 2. Computador Desktop LAN */}
-          <div className="surface-card p-7 flex flex-col justify-between group">
+          {/* Card 2: Ponto de Venda & POS Rápido */}
+          <div
+            onClick={() => onNavigatePage('pos')}
+            className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
+          >
             <div>
-              {/* Imagem do Computador Desktop em Fundo Neutro e Limpo */}
-              <div className="h-52 sm:h-60 mb-5 flex items-center justify-center bg-slate-50/70 rounded-2xl p-4 border border-slate-100 select-none">
-                <img
-                  src={desktopImg}
-                  alt="Computador Desktop Kivora"
-                  loading="lazy"
-                  decoding="async"
-                  width="360"
-                  height="260"
-                  className="max-h-full max-w-full object-contain drop-shadow-xs transition-transform duration-300 group-hover:scale-103"
-                />
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-[#FF6500] text-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform">
+                <ShoppingCart className="w-8 h-8" strokeWidth={2} />
               </div>
-
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-bold text-[#1746A2] uppercase tracking-wider">
-                  Backoffice & Servidor
-                </span>
-                <span className="text-xs font-bold text-slate-900 font-mono-num">
-                  Pronto a Operar
-                </span>
-              </div>
-              <h3 className="text-lg font-bold text-slate-950 mb-2 group-hover:text-[#1746A2] transition-colors">
-                Desktop Core i5 / SSD 256GB
+              <h3 className="text-lg font-bold text-slate-900 mb-2 font-display group-hover:text-[#FF6500] transition-colors">
+                Ponto de Venda (POS Rápido)
               </h3>
-              <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal mb-4">
-                Configurado para operar como estação principal de retaguarda, servidor central de base de dados e emissão de relatórios fiscais SAF-T.
+              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-normal mb-4">
+                Atendimento de balcão veloz em menos de 3 segundos, impressão em talões de 80mm/58mm, fecho de caixa cego, sangrias e gavetas RJ11.
               </p>
             </div>
-
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-800">
-              <span className="text-slate-500 font-medium">Windows 11 Pro</span>
-              <button
-                onClick={() => onNavigatePage('loja')}
-                className="text-[#1746A2] hover:text-blue-800 flex items-center gap-1.5 group-hover:translate-x-0.5 transition-all cursor-pointer font-bold"
-              >
-                <span>Ver na Loja</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-bold text-[#FF6500] gap-1 group-hover:gap-2 transition-all">
+              <span>Saber mais</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>
 
-          {/* 3. Portátil para Vendas */}
-          <div className="surface-card p-7 flex flex-col justify-between group">
+          {/* Card 3: Gestão de Stock Multi-Armazém */}
+          <div
+            onClick={() => onNavigatePage('stock')}
+            className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
+          >
             <div>
-              {/* Imagem do Laptop em Fundo Neutro e Limpo */}
-              <div className="h-52 sm:h-60 mb-5 flex items-center justify-center bg-slate-50/70 rounded-2xl p-4 border border-slate-100 select-none">
-                <img
-                  src={laptopImg}
-                  alt="Portátil Laptop Kivora"
-                  loading="lazy"
-                  decoding="async"
-                  width="360"
-                  height="260"
-                  className="max-h-full max-w-full object-contain drop-shadow-xs transition-transform duration-300 group-hover:scale-103"
-                />
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-[#FF6500] text-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform">
+                <Boxes className="w-8 h-8" strokeWidth={2} />
               </div>
-
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-bold text-[#1746A2] uppercase tracking-wider">
-                  Vendas & Gerência
-                </span>
-                <span className="text-xs font-bold text-slate-900 font-mono-num">
-                  Bateria Durável
-                </span>
-              </div>
-              <h3 className="text-lg font-bold text-slate-950 mb-2 group-hover:text-[#1746A2] transition-colors">
-                Laptop Comercial Executivo
+              <h3 className="text-lg font-bold text-slate-900 mb-2 font-display group-hover:text-[#FF6500] transition-colors">
+                Gestão de Stock & Armazéns
               </h3>
-              <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal mb-4">
-                Excelente mobilidade para gestores e consultores comerciais. Permite faturar, registar encomendas e consultar stocks em movimento.
+              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-normal mb-4">
+                Controlo em tempo real de entradas, saídas, quebras e inventário. Rastreio rigoroso de lotes com validade e transferências entre filiais.
+              </p>
+            </div>
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-bold text-[#FF6500] gap-1 group-hover:gap-2 transition-all">
+              <span>Saber mais</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+
+          {/* Card 4: Recursos Humanos & IRT 2026 */}
+          <div
+            onClick={() => onNavigatePage('rh')}
+            className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
+          >
+            <div>
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-[#FF6500] text-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform">
+                <Users className="w-8 h-8" strokeWidth={2} />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-2 font-display group-hover:text-[#FF6500] transition-colors">
+                Recursos Humanos & IRT 2026
+              </h3>
+              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-normal mb-4">
+                Processamento automático de salários segundo a LGT, tabelas escalonadas de IRT 2026, desconto INSS de 3%/8% e emissão de recibos em PDF.
+              </p>
+            </div>
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-bold text-[#FF6500] gap-1 group-hover:gap-2 transition-all">
+              <span>Saber mais</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+
+          {/* Card 5: Contabilidade & SAF-T AO */}
+          <div
+            onClick={() => onNavigatePage('contabilidade')}
+            className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
+          >
+            <div>
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-[#FF6500] text-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform">
+                <ShieldCheck className="w-8 h-8" strokeWidth={2} />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-2 font-display group-hover:text-[#FF6500] transition-colors">
+                Contabilidade & SAF-T AO
+              </h3>
+              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-normal mb-4">
+                Plano Geral de Contas (PGC), balanços, balancetes de verificação, mapa de impostos e exportação mensal do ficheiro SAF-T para validação AGT.
+              </p>
+            </div>
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-bold text-[#FF6500] gap-1 group-hover:gap-2 transition-all">
+              <span>Saber mais</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+
+          {/* Card 6: Hardware & Terminais de Balcão */}
+          <div
+            onClick={() => onNavigatePage('hardware')}
+            className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
+          >
+            <div>
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-[#FF6500] text-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform">
+                <HardDrive className="w-8 h-8" strokeWidth={2} />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-2 font-display group-hover:text-[#FF6500] transition-colors">
+                Hardware & Terminais POS
+              </h3>
+              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-normal mb-4">
+                Terminais touch all-in-one industriais, impressoras térmicas ESC/POS, leitores 2D de código de barras e configuração de rede local em Luanda.
+              </p>
+            </div>
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-bold text-[#FF6500] gap-1 group-hover:gap-2 transition-all">
+              <span>Saber mais</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+
+        </div>
+
+        {/* ── BARRA DE CHAMADA LARANJA (CALLOUT BAR — EXATAMENTE COMO NA IMAGEM 1 E 4) ── */}
+        <div className="mt-12 bg-gradient-to-r from-[#FF6500] via-[#FF7A1A] to-[#FF8C38] rounded-3xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-orange-500/25">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0 border border-white/25">
+              <Phone className="w-6 h-6" />
+            </div>
+            <div>
+              <h4 className="text-lg sm:text-xl font-bold font-display text-white tracking-tight">
+                Vamos falar sobre os seus planos e acelerar a sua faturação?
+              </h4>
+              <p className="text-xs sm:text-sm text-white/90 font-normal">
+                Fale diretamente com os nossos consultores especializados em Luanda para um diagnóstico gratuito.
+              </p>
+            </div>
+          </div>
+
+          <a
+            href={settings.whatsappUrl || 'https://wa.me/244974855494'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="whitespace-nowrap bg-slate-950 hover:bg-slate-900 active:scale-95 text-white font-black text-xs sm:text-sm px-7 py-3.5 rounded-full flex items-center gap-2.5 shadow-lg transition-all font-mono tracking-wide shrink-0"
+          >
+            <span>Falar Agora: {settings.phoneDisplay || '+244 974 855 494'}</span>
+            <ArrowRight className="w-4 h-4 text-orange-400" />
+          </a>
+        </div>
+
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          BANNER DE IMPACTO FOTOGRÁFICO (PADRÃO IMAGEM 4)
+          "Mais do que Faturação: É a Segurança e Continuidade do Seu Negócio"
+          ══════════════════════════════════════════════════════════════════ */}
+      <section className="relative py-24 sm:py-28 px-4 sm:px-6 lg:px-8 text-white overflow-hidden bg-[#0B1528]">
+        {/* Imagem de Fundo com Overlay Escuro Gradiente */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src={supermercadoImg}
+            alt="Operação Comercial KIVORA"
+            className="w-full h-full object-cover opacity-20 filter saturate-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0B1528] via-[#0B1528]/95 to-[#0B1528]/85" />
+        </div>
+
+        <div className="max-w-4xl mx-auto text-center space-y-6 relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase tracking-wider font-display">
+            <span>Soberania e Estabilidade</span>
+          </div>
+
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.12] font-display">
+            Mais do que Faturação: É a Segurança e Continuidade do Seu Negócio em Angola
+          </h2>
+
+          <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto font-normal">
+            Elimine as paragens de caixa causadas por quebras de internet. Mantenha os seus clientes satisfeitos, as filas a andar e o seu fecho de caixa 100% rigoroso.
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-3">
+            <button
+              onClick={() => onOpenDemoModal('Demonstração Impacto')}
+              className="bg-[#FF6500] hover:bg-[#EB5B00] active:scale-95 text-white font-bold text-xs sm:text-sm px-8 py-4 rounded-full shadow-lg shadow-orange-500/30 transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <span>Falar com um Especialista Agora</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onNavigatePage('faturacao')}
+              className="bg-white/10 hover:bg-white/20 active:scale-95 text-white border border-white/25 font-bold text-xs sm:text-sm px-8 py-4 rounded-full transition-all cursor-pointer backdrop-blur-md"
+            >
+              Ver Módulo de Faturação
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          6. COMO TRABALHAMOS? (HOW WE WORK? — 4 PASSOS COMO NAS IMAGENS 1 E 4)
+          ══════════════════════════════════════════════════════════════════ */}
+      <section id="como-trabalhamos" className="py-24 sm:py-32 bg-slate-50/80 border-y border-slate-200/70 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          
+          <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
+            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
+              <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
+              <span>Como Trabalhamos?</span>
+              <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
+              Em Apenas 4 Passos Simples Ative o KIVORA
+            </h2>
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+              Um processo estruturado e sem burocracias para colocar a sua loja, supermercado ou escritório a faturar no próprio dia.
+            </p>
+          </div>
+
+          {/* 4 Colunas Numeradas (1, 2, 3, 4 em Laranja Padrão das Imagens) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            
+            {/* Passo 1 */}
+            <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
+              <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display block leading-none">
+                1.
+              </span>
+              <h3 className="text-lg font-bold text-slate-950 font-display">
+                Demonstração
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                Apresentação prática e sem compromisso das ferramentas do ERP, alinhada com as necessidades específicas do seu negócio.
               </p>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-800">
-              <span className="text-slate-500 font-medium">Alta Autonomia</span>
-              <button
-                onClick={() => onNavigatePage('loja')}
-                className="text-[#1746A2] hover:text-blue-800 flex items-center gap-1.5 group-hover:translate-x-0.5 transition-all cursor-pointer font-bold"
-              >
-                <span>Ver na Loja</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+            {/* Passo 2 */}
+            <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
+              <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display block leading-none">
+                2.
+              </span>
+              <h3 className="text-lg font-bold text-slate-950 font-display">
+                Proposta & Plano
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                Escolha do plano ideal (Mensal, Anual LAN ou Vitalício) com preços transparentes em Kwanzas, sem surpresas cambiais com o dólar.
+              </p>
             </div>
+
+            {/* Passo 3 */}
+            <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
+              <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display block leading-none">
+                3.
+              </span>
+              <h3 className="text-lg font-bold text-slate-950 font-display">
+                Instalação em Rede
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                Instalação rápida em menos de 15 minutos nos seus computadores ou terminais POS, com base de dados local segura e rede LAN.
+              </p>
+            </div>
+
+            {/* Passo 4 */}
+            <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
+              <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display block leading-none">
+                4.
+              </span>
+              <h3 className="text-lg font-bold text-slate-950 font-display">
+                Formação & Suporte
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                Capacitação imediata dos operadores de caixa e suporte técnico contínuo presencial em Luanda e remoto nas 18 províncias.
+              </p>
+            </div>
+
+          </div>
+
+          {/* Botões de Ação Redondos (Padrão das Imagens) */}
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
+            <button
+              onClick={() => onOpenDemoModal('Demonstração 4 Passos')}
+              className="bg-[#FF6500] hover:bg-[#EB5B00] active:scale-95 text-white font-bold text-xs sm:text-sm px-8 py-4 rounded-full shadow-lg shadow-orange-500/25 transition-all cursor-pointer"
+            >
+              Solicitar Demonstração Gratuita
+            </button>
+            <button
+              onClick={() => onNavigatePage('download')}
+              className="bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 font-bold text-xs sm:text-sm px-8 py-4 rounded-full shadow-xs transition-all cursor-pointer"
+            >
+              Baixar Versão de Teste (15 Dias)
+            </button>
           </div>
 
         </div>
       </section>
 
-      {/* ========== TABELA DE PREÇOS & PLANOS EM KWANZAS (CONFIGURÁVEL NO ADMIN) ========== */}
-      <section className="py-24 bg-[#F8FAFC] border-y border-slate-200/80 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div data-reveal className="sr-init text-center max-w-2xl mx-auto mb-16 space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-200/70 border border-slate-300 text-slate-700 text-xs font-bold uppercase tracking-wider">
-              <span>{settings.pricingTag || 'Licenciamento Transparente'}</span>
+      {/* ══════════════════════════════════════════════════════════════════
+          6. RESULTADOS & MÉTRICAS (WHAT WE DONE? — FUNDO ESCURO DAS IMAGENS 2 E 4)
+          ══════════════════════════════════════════════════════════════════ */}
+      <section className="py-24 sm:py-32 bg-[#0B1528] text-white relative overflow-hidden border-y border-slate-800">
+        {/* Subtle grid pattern */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.03]"
+          style={{
+            backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`,
+            backgroundSize: '40px 40px',
+          }}
+        />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          
+          <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
+            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
+              <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
+              <span>Resultados Comprovados</span>
+              <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-slate-950 tracking-tight leading-tight">
-              {settings.pricingTitle || 'Preços Claros Fixados em Kwanzas'}
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight font-display">
+              A Escolha de Líderes em Angola
             </h2>
-            <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-              {settings.pricingSubtitle || 'Sem taxas escondidas nem variações cambiais. Escolha a modalidade que melhor se adapta à dimensão da sua operação comercial.'}
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
+              Números reais de quem confia na robustez do KIVORA ERP para faturar com tranquilidade e sem interrupções.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-7 max-w-5xl mx-auto items-stretch">
+          {/* 4 Grandes Métricas no Estilo das Imagens 2 e 4 */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             
-            {/* 1. Mensal */}
-            <div className="surface-card p-8 flex flex-col justify-between group bg-white">
+            <div className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
+              <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-white font-mono-num tracking-tight">
+                <CountUp end={12} suffix="+" type="odometer" duration={1.5} />
+              </div>
+              <p className="text-xs sm:text-sm font-bold text-orange-400 font-display">
+                Anos de Experiência
+              </p>
+              <p className="text-[11px] text-slate-400">
+                Pioneirismo em software angolano
+              </p>
+            </div>
+
+            <div className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
+              <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-white font-mono-num tracking-tight">
+                <CountUp end={2800} suffix="+" type="odometer" duration={1.5} />
+              </div>
+              <p className="text-xs sm:text-sm font-bold text-orange-400 font-display">
+                Empresas Ativas
+              </p>
+              <p className="text-[11px] text-slate-400">
+                Faturando diariamente
+              </p>
+            </div>
+
+            <div className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
+              <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-white font-mono-num tracking-tight">
+                100%
+              </div>
+              <p className="text-xs sm:text-sm font-bold text-orange-400 font-display">
+                Conformidade AGT
+              </p>
+              <p className="text-[11px] text-slate-400">
+                Decreto Presidencial 71/25
+              </p>
+            </div>
+
+            <div className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
+              <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-white font-mono-num tracking-tight">
+                <CountUp end={18} type="odometer" duration={1.5} />
+              </div>
+              <p className="text-xs sm:text-sm font-bold text-orange-400 font-display">
+                Províncias Cobertas
+              </p>
+              <p className="text-[11px] text-slate-400">
+                Assistência técnica nacional
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          7. EQUIPA DE CONSULTORES & ESPECIALISTAS (ADVISORS — IMAGENS 2 E 4)
+          Cartões Brancos com Foto Circular e Aro Laranja
+          ══════════════════════════════════════════════════════════════════ */}
+      <section id="equipa-consultores" className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        
+        <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
+          <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
+            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
+            <span>Consultores & Especialistas</span>
+            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
+            A Nossa Equipa de Apoio Técnico
+          </h2>
+          <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+            Especialistas dedicados prontos a intervir na sua loja, assegurar a conformidade fiscal e formar a sua equipa.
+          </p>
+        </div>
+
+        {/* Grade de 4 Consultores com Fotos Circulares e Aro Laranja (Padrão das Imagens) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          
+          {/* Consultor 1 */}
+          <div className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
+            <div className="w-24 h-24 rounded-full border-2 border-[#FF6500] p-1 mx-auto mb-4 shadow-sm">
+              <img
+                src="/imagens/1085.webp"
+                alt="Narciso da Costa"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
+            <h3 className="font-bold text-slate-900 text-base font-display">
+              Narciso da Costa
+            </h3>
+            <p className="text-xs text-[#FF6500] font-semibold mt-0.5">
+              Consultor Principal de Sistemas
+            </p>
+            <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+              Arquiteto de software com mais de uma década de experiência em sistemas fiscais e bases de dados locais.
+            </p>
+          </div>
+
+          {/* Consultor 2 */}
+          <div className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
+            <div className="w-24 h-24 rounded-full border-2 border-[#FF6500] p-1 mx-auto mb-4 shadow-sm">
+              <img
+                src="/imagens/2149153824.webp"
+                alt="Sandra Miguel"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
+            <h3 className="font-bold text-slate-900 text-base font-display">
+              Sandra Miguel
+            </h3>
+            <p className="text-xs text-[#FF6500] font-semibold mt-0.5">
+              Especialista Fiscal & SAF-T
+            </p>
+            <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+              Supervisão de conformidade tributária com as diretrizes do Decreto 71/25 e validação de relatórios AGT.
+            </p>
+          </div>
+
+          {/* Consultor 3 */}
+          <div className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
+            <div className="w-24 h-24 rounded-full border-2 border-[#FF6500] p-1 mx-auto mb-4 shadow-sm">
+              <img
+                src="/imagens/1163.webp"
+                alt="António Manuel"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
+            <h3 className="font-bold text-slate-900 text-base font-display">
+              António Manuel
+            </h3>
+            <p className="text-xs text-[#FF6500] font-semibold mt-0.5">
+              Engenheiro de Redes & Hardware
+            </p>
+            <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+              Instalação presencial de servidores locais, sincronização multi-postos LAN e configuração de periféricos POS.
+            </p>
+          </div>
+
+          {/* Consultor 4 */}
+          <div className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
+            <div className="w-24 h-24 rounded-full border-2 border-[#FF6500] p-1 mx-auto mb-4 shadow-sm">
+              <img
+                src="/imagens/2150690165.webp"
+                alt="Helena Gaspar"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
+            <h3 className="font-bold text-slate-900 text-base font-display">
+              Helena Gaspar
+            </h3>
+            <p className="text-xs text-[#FF6500] font-semibold mt-0.5">
+              Gestora de Suporte & Formação
+            </p>
+            <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+              Apoio diário aos operadores de caixa, esclarecimento de dúvidas operacionais e assistência remota dedicada.
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          8. TESTEMUNHOS DE GESTORES (TESTIMONIALS — IMAGENS 2 E 4)
+          Balões de Fala em Tons Quentes com Citações e Avatares
+          ══════════════════════════════════════════════════════════════════ */}
+      <section id="testemunhos" className="py-24 sm:py-32 bg-slate-50/70 border-y border-slate-200/70 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          
+          <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
+            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
+              <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
+              <span>Testemunhos</span>
+              <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
+              O Que Dizem os Nossos Clientes
+            </h2>
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+              Empresas reais em Luanda, Benguela e Huambo que transformaram a sua gestão diária com o KIVORA.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            
+            {/* Testemunho 1 (Estilo Balão Quente/Laranja da Imagem 2) */}
+            <div className="space-y-4">
+              <div className="bg-gradient-to-br from-[#FF7A1A] to-[#FF6500] text-white p-7 rounded-3xl shadow-lg shadow-orange-500/20 relative">
+                <div className="flex items-center gap-1 mb-3 text-amber-200">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-current" />
+                  ))}
+                </div>
+                <p className="text-xs sm:text-sm leading-relaxed font-normal text-white">
+                  "A estabilidade offline do KIVORA mudou a nossa operação. Em Luanda, as falhas de rede costumavam parar o caixa. Agora a loja não pára e as faturas saem imediatamente com o QR Code oficial da AGT."
+                </p>
+                {/* Triângulo do balão */}
+                <div className="absolute -bottom-2.5 left-10 w-5 h-5 bg-[#FF6500] rotate-45" />
+              </div>
+
+              <div className="flex items-center gap-3.5 pl-6 pt-2">
+                <div className="w-12 h-12 rounded-full border-2 border-[#FF6500] p-0.5">
+                  <img
+                    src="/imagens/2206.webp"
+                    alt="Mateus Kiala"
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-950 font-display">Mateus Kiala</h4>
+                  <p className="text-[11px] text-slate-500">Diretor Comercial, Supermercados Kiala (Luanda)</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testemunho 2 (Estilo Balão Quente/Laranja da Imagem 2) */}
+            <div className="space-y-4">
+              <div className="bg-gradient-to-br from-[#FF7A1A] to-[#FF6500] text-white p-7 rounded-3xl shadow-lg shadow-orange-500/20 relative">
+                <div className="flex items-center gap-1 mb-3 text-amber-200">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-current" />
+                  ))}
+                </div>
+                <p className="text-xs sm:text-sm leading-relaxed font-normal text-white">
+                  "O módulo de stock e o cálculo automático de IRT poupam-nos dias inteiros de trabalho ao fim do mês. A assistência presencial foi exemplar e o software é incrivelmente simples de usar."
+                </p>
+                {/* Triângulo do balão */}
+                <div className="absolute -bottom-2.5 left-10 w-5 h-5 bg-[#FF6500] rotate-45" />
+              </div>
+
+              <div className="flex items-center gap-3.5 pl-6 pt-2">
+                <div className="w-12 h-12 rounded-full border-2 border-[#FF6500] p-0.5">
+                  <img
+                    src="/imagens/2148708903.webp"
+                    alt="Esperança Domingos"
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-950 font-display">Esperança Domingos</h4>
+                  <p className="text-[11px] text-slate-500">Gerente Geral, Farmácia & Clínica Esperança (Benguela)</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          9. TABELA DE PREÇOS & PLANOS (PRICING — EXATAMENTE COMO NA IMAGEM 1)
+          3 Cartões: Mensal, Anual Destacado no Meio com Topo Escuro, Vitalício
+          ══════════════════════════════════════════════════════════════════ */}
+      <section id="precos-planos" className="py-24 sm:py-32 bg-white px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        
+        <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
+          <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
+            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
+            <span>Tabela Oficial</span>
+            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
+            Preços Claros Fixados em Kwanzas (AOA)
+          </h2>
+          <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+            Sem custos escondidos, sem dependência do câmbio em dólares. Escolha o formato de licenciamento que melhor atende à sua empresa.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch">
+          
+          {/* Card 1: Mensal (Padrão Imagem 1) */}
+          <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group">
+            {/* Top Header Laranja */}
+            <div className="bg-gradient-to-r from-amber-500 to-[#FF6500] p-6 text-white text-center">
+              <span className="text-[11px] font-bold uppercase tracking-wider block opacity-90">
+                {settings.planMensalCategory || 'Arranque Flexível'}
+              </span>
+              <div className="mt-2 text-3xl font-extrabold font-mono-num">
+                {settings.planMensalPrice || '25.000'} <span className="text-sm font-normal">Kz / mês</span>
+              </div>
+            </div>
+
+            <div className="p-8 flex flex-col justify-between flex-grow">
               <div>
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  {settings.planMensalCategory || 'Arranque Flexível'}
-                </span>
-                <h3 className="text-xl font-bold text-slate-950 mt-1 group-hover:text-[#1746A2] transition-colors">
+                <h3 className="text-lg font-bold text-slate-950 mb-3 text-center font-display">
                   {settings.planMensalName || 'Plano Mensal'}
                 </h3>
-                <div className="mt-4 mb-6">
-                  <span className="text-3xl sm:text-4xl font-extrabold text-slate-950 font-mono-num tracking-tight">
-                    {settings.planMensalPrice || '25.000'}&nbsp;Kz
-                  </span>
-                  <span className="text-xs text-slate-500 ml-1.5">
-                    {settings.planMensalPeriod || '/ mês'}
-                  </span>
-                </div>
-                {settings.planMensalDesc && (
-                  <p className="text-xs text-slate-600 mb-6 leading-relaxed">
-                    {settings.planMensalDesc}
-                  </p>
-                )}
-                <ul className="space-y-3 text-xs sm:text-[13px] text-slate-700 mb-8">
+                <p className="text-xs text-slate-500 text-center mb-6 leading-relaxed">
+                  Ideal para pequenas lojas, prestadores de serviços e empresas em fase de arranque.
+                </p>
+
+                <ul className="space-y-3 text-xs text-slate-700 mb-8">
                   {parseFeatures(settings.planMensalFeatures, [
                     '1 Posto de Trabalho Ativo',
                     'Faturação Certificada AGT com QR Code',
@@ -621,57 +986,49 @@ export const HomePage: React.FC<HomePageProps> = ({
                     'Suporte Técnico em Horário Comercial'
                   ]).map((feat, i) => (
                     <li key={i} className="flex items-center gap-2.5">
-                      <div className="w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center shrink-0">
-                        <Check className="w-3.5 h-3.5 text-slate-700" strokeWidth={2.5} />
+                      <div className="w-5 h-5 rounded-full bg-orange-50 text-[#FF6500] flex items-center justify-center shrink-0">
+                        <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
                       </div>
                       <span>{feat}</span>
                     </li>
                   ))}
                 </ul>
               </div>
+
               <button
                 onClick={() => onOpenDemoModal(settings.planMensalName || 'Plano Mensal')}
-                className="w-full py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs transition-all cursor-pointer"
+                className="w-full py-3.5 rounded-full bg-[#FF6500] hover:bg-[#EB5B00] active:scale-95 text-white font-bold text-xs transition-all shadow-md shadow-orange-500/20 cursor-pointer"
               >
-                {settings.planMensalCta || 'Aderir ao Plano Mensal'}
+                Aderir ao Plano Mensal
               </button>
             </div>
+          </div>
 
-            {/* 2. Anual Comercial LAN (Destaque Executivo) */}
-            <div className="surface-card p-8 flex flex-col justify-between relative ring-2 ring-slate-900 shadow-md bg-white">
+          {/* Card 2: Anual LAN (DESTACADO NO MEIO COM TOPO ESCURO — IMAGEM 1) */}
+          <div className="bg-white rounded-3xl border-2 border-[#FF6500] overflow-hidden shadow-2xl scale-103 sm:-translate-y-3 flex flex-col justify-between relative group z-10">
+            {/* Top Header Escuro/Charcoal das Imagens */}
+            <div className="bg-[#0B1528] p-7 text-white text-center relative">
+              <span className="inline-block bg-[#FF6500] text-white text-[10px] font-black uppercase px-3 py-0.5 rounded-full mb-2 tracking-wider">
+                {settings.planAnualBadge || 'Mais Escolhido em Angola'}
+              </span>
+              <div className="text-3xl sm:text-4xl font-black font-mono-num text-white">
+                {settings.planAnualPrice || '250.000'} <span className="text-sm font-normal text-slate-300">Kz / ano</span>
+              </div>
+              <span className="text-[11px] text-emerald-400 font-bold block mt-1">
+                Poupança de 50.000 Kz (2 Meses Grátis)
+              </span>
+            </div>
+
+            <div className="p-8 flex flex-col justify-between flex-grow">
               <div>
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                    {settings.planAnualCategory || 'Multi-Postos & Rede LAN'}
-                  </span>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-white">
-                    {settings.planAnualBadge || 'Mais Escolhido em Angola'}
-                  </span>
-                </div>
-                <h3 className="text-xl font-bold text-slate-950 mt-1">
+                <h3 className="text-xl font-bold text-slate-950 mb-2 text-center font-display">
                   {settings.planAnualName || 'Plano Anual LAN'}
                 </h3>
-                <div className="mt-4 mb-3">
-                  <span className="text-3xl sm:text-4xl font-extrabold text-slate-950 font-mono-num tracking-tight">
-                    {settings.planAnualPrice || '250.000'}&nbsp;Kz
-                  </span>
-                  <span className="text-xs text-slate-500 ml-1.5">
-                    {settings.planAnualPeriod || '/ ano'}
-                  </span>
-                </div>
-                {settings.planAnualSavings && (
-                  <div className="mb-4">
-                    <span className="inline-flex items-center text-xs font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200/60">
-                      {settings.planAnualSavings}
-                    </span>
-                  </div>
-                )}
-                {settings.planAnualDesc && (
-                  <p className="text-xs text-slate-600 mb-6 leading-relaxed">
-                    {settings.planAnualDesc}
-                  </p>
-                )}
-                <ul className="space-y-3 text-xs sm:text-[13px] text-slate-700 mb-8">
+                <p className="text-xs text-slate-500 text-center mb-6 leading-relaxed">
+                  Para supermercados, restaurantes, comércio geral e empresas com múltiplos caixas.
+                </p>
+
+                <ul className="space-y-3.5 text-xs text-slate-800 mb-8">
                   {parseFeatures(settings.planAnualFeatures, [
                     'Até 3 Postos em Rede LAN Incluídos',
                     'Módulos de Stock, POS e RH Integrados',
@@ -679,45 +1036,46 @@ export const HomePage: React.FC<HomePageProps> = ({
                     'Suporte Prioritário por WhatsApp e Remoto'
                   ]).map((feat, i) => (
                     <li key={i} className="flex items-center gap-2.5">
-                      <div className="w-5 h-5 rounded-md bg-blue-50 flex items-center justify-center shrink-0">
-                        <Check className="w-3.5 h-3.5 text-[#1746A2]" strokeWidth={2.5} />
+                      <div className="w-5 h-5 rounded-full bg-[#0B1528] text-white flex items-center justify-center shrink-0">
+                        <Check className="w-3.5 h-3.5 text-orange-400" strokeWidth={2.5} />
                       </div>
                       <span className={i === 0 ? 'font-bold text-slate-950' : ''}>{feat}</span>
                     </li>
                   ))}
                 </ul>
               </div>
+
               <button
                 onClick={() => onOpenDemoModal(settings.planAnualName || 'Plano Anual LAN')}
-                className="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-[#1746A2] text-white font-bold text-xs transition-all shadow-sm cursor-pointer"
+                className="w-full py-4 rounded-full bg-slate-950 hover:bg-[#FF6500] active:scale-95 text-white font-bold text-xs transition-all shadow-xl cursor-pointer"
               >
-                {settings.planAnualCta || 'Contratar Plano Anual'}
+                Contratar Plano Anual
               </button>
             </div>
+          </div>
 
-            {/* 3. Licença Vitalícia */}
-            <div className="surface-card p-8 flex flex-col justify-between group bg-white">
+          {/* Card 3: Licença Vitalícia (Padrão Imagem 1) */}
+          <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group">
+            {/* Top Header Laranja */}
+            <div className="bg-gradient-to-r from-amber-500 to-[#FF6500] p-6 text-white text-center">
+              <span className="text-[11px] font-bold uppercase tracking-wider block opacity-90">
+                {settings.planVitalicioCategory || 'Pagamento Único'}
+              </span>
+              <div className="mt-2 text-3xl font-extrabold font-mono-num">
+                {settings.planVitalicioPrice || '650.000'} <span className="text-sm font-normal">Kz / único</span>
+              </div>
+            </div>
+
+            <div className="p-8 flex flex-col justify-between flex-grow">
               <div>
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  {settings.planVitalicioCategory || 'Pagamento Único'}
-                </span>
-                <h3 className="text-xl font-bold text-slate-950 mt-1 group-hover:text-[#1746A2] transition-colors">
+                <h3 className="text-lg font-bold text-slate-950 mb-3 text-center font-display">
                   {settings.planVitalicioName || 'Licença Vitalícia'}
                 </h3>
-                <div className="mt-4 mb-6">
-                  <span className="text-3xl sm:text-4xl font-extrabold text-slate-950 font-mono-num tracking-tight">
-                    {settings.planVitalicioPrice || '650.000'}&nbsp;Kz
-                  </span>
-                  <span className="text-xs text-slate-500 ml-1.5">
-                    {settings.planVitalicioPeriod || 'taxa única'}
-                  </span>
-                </div>
-                {settings.planVitalicioDesc && (
-                  <p className="text-xs text-slate-600 mb-6 leading-relaxed">
-                    {settings.planVitalicioDesc}
-                  </p>
-                )}
-                <ul className="space-y-3 text-xs sm:text-[13px] text-slate-700 mb-8">
+                <p className="text-xs text-slate-500 text-center mb-6 leading-relaxed">
+                  Para empresas que preferem adquirir o software de forma definitiva sem anuidades.
+                </p>
+
+                <ul className="space-y-3 text-xs text-slate-700 mb-8">
                   {parseFeatures(settings.planVitalicioFeatures, [
                     'Uso Perpétuo Sem Mensalidades',
                     'Servidor Principal + 5 Terminais LAN',
@@ -725,138 +1083,218 @@ export const HomePage: React.FC<HomePageProps> = ({
                     'Certificado de Licenciamento Definitivo'
                   ]).map((feat, i) => (
                     <li key={i} className="flex items-center gap-2.5">
-                      <div className="w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center shrink-0">
-                        <Check className="w-3.5 h-3.5 text-slate-700" strokeWidth={2.5} />
+                      <div className="w-5 h-5 rounded-full bg-orange-50 text-[#FF6500] flex items-center justify-center shrink-0">
+                        <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
                       </div>
                       <span>{feat}</span>
                     </li>
                   ))}
                 </ul>
               </div>
+
               <button
                 onClick={() => onOpenDemoModal(settings.planVitalicioName || 'Licença Vitalícia')}
-                className="w-full py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs transition-all cursor-pointer"
+                className="w-full py-3.5 rounded-full bg-[#FF6500] hover:bg-[#EB5B00] active:scale-95 text-white font-bold text-xs transition-all shadow-md shadow-orange-500/20 cursor-pointer"
               >
-                {settings.planVitalicioCta || 'Solicitar Proposta Vitalícia'}
+                Solicitar Proposta Vitalícia
               </button>
             </div>
-
           </div>
 
-          <div className="mt-12 text-center">
-            <button
-              onClick={() => onNavigatePage('planos')}
-              className="text-xs sm:text-sm font-bold text-[#1746A2] hover:text-blue-800 inline-flex items-center gap-1.5 cursor-pointer bg-white hover:bg-slate-50 px-5 py-2.5 rounded-xl border border-slate-200 transition-all shadow-2xs"
-            >
-              <span>Ver comparativo detalhado e tabela completa</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
         </div>
+
       </section>
 
-      {/* ========== APOIO AO CLIENTE & CONSULTORIA EM ANGOLA ========== */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      {/* ══════════════════════════════════════════════════════════════════
+          10. HARDWARE & EQUIPAMENTOS POS HOMOLOGADOS
+          ══════════════════════════════════════════════════════════════════ */}
+      <section className="py-24 sm:py-32 bg-slate-50/70 border-t border-slate-200/80 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
+          <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
+            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
+            <span>Equipamentos Oficiais</span>
+            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
+            Periféricos POS Homologados para o Balcão
+          </h2>
+          <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+            Fornecemos e configuramos periféricos comerciais testados para suportar o ritmo diário e intenso de caixas de retalho e restauração.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
           
-          <div data-reveal className="sr-init lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold uppercase tracking-wider">
-              <Headphones className="w-3.5 h-3.5" />
-              <span>Apoio Técnico em Luanda</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-slate-950 tracking-tight leading-tight">
-              Acompanhamento dedicado à sua empresa
-            </h2>
-            <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-              Não fica sozinho na transição digital do seu negócio. A nossa equipa de técnicos em Luanda realiza a instalação, configura os terminais em rede local e dá formação prática aos operadores de caixa.
-            </p>
+          {/* Terminal POS Touch */}
+          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
+            <div>
+              <div className="h-56 mb-6 flex items-center justify-center bg-slate-50 rounded-2xl p-4 border border-slate-100 select-none">
+                <img
+                  src={posImg}
+                  alt="Terminal Touch POS Kivora"
+                  className="max-h-full max-w-full object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-              {[
-                { icon: <Headphones className="w-5 h-5" />, title: 'Atendimento 6 Dias / Semana', desc: 'Suporte telefónico e WhatsApp das 08h00 às 19h00.', color: 'bg-blue-50 text-[#1746A2]', hover: 'hover:border-blue-200' },
-                { icon: <MapPin className="w-5 h-5" />, title: 'Deslocação Presencial', desc: 'Técnicos certificados para instalação e configuração LAN.', color: 'bg-emerald-50 text-emerald-700', hover: 'hover:border-emerald-200' },
-                { icon: <ShieldCheck className="w-5 h-5" />, title: 'Garantia de Conformidade', desc: 'Atualizações fiscais AGT incluídas enquanto a licença estiver ativa.', color: 'bg-purple-50 text-purple-700', hover: 'hover:border-purple-200' },
-                { icon: <Zap className="w-5 h-5" />, title: 'Resposta em 4 Horas', desc: 'Chamados urgentes tratados em até 4 horas úteis.', color: 'bg-amber-50 text-amber-700', hover: 'hover:border-amber-200' },
-              ].map((f, i) => (
-                <div key={i} className={`flex items-start gap-3 p-4 rounded-xl border border-slate-200/80 ${f.hover} hover:shadow-xs transition-all group/sup bg-white`}>
-                  <div className={`w-10 h-10 rounded-xl ${f.color} flex items-center justify-center shrink-0`}>
-                    {f.icon}
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900">{f.title}</h4>
-                    <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">{f.desc}</p>
-                  </div>
-                </div>
-              ))}
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold text-[#FF6500] uppercase tracking-wider font-display">
+                  Ecrã Tátil 15.6" Capacitivo
+                </span>
+                <span className="text-xs font-bold text-slate-900 font-mono-num">
+                  Desde 750.000 Kz
+                </span>
+              </div>
+
+              <h3 className="text-xl font-bold text-slate-950 mb-2 group-hover:text-[#FF6500] transition-colors font-display">
+                Terminal POS Touch All-in-One
+              </h3>
+              <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal mb-4">
+                Ecrã industrial de alta sensibilidade ao toque, processador rápido e chassis reforçado para balcões de alta rotatividade.
+              </p>
             </div>
 
-            <div className="pt-2 flex flex-wrap items-center gap-3">
-              <a
-                href={settings.whatsappUrl || 'https://wa.me/244923456789'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1EBE5B] text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-xl transition-all shadow-xs hover:-translate-y-0.5"
-              >
-                <span>Falar com Técnico no WhatsApp</span>
-                <ArrowRight className="w-4 h-4" />
-              </a>
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-800">
+              <span className="text-slate-500 font-medium">12 Meses de Garantia</span>
               <button
-                onClick={() => onNavigatePage('suporte')}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs sm:text-sm px-5 py-3 rounded-xl transition-colors cursor-pointer hover:-translate-y-0.5"
+                onClick={() => onNavigatePage('loja')}
+                className="text-[#FF6500] hover:text-[#EB5B00] flex items-center gap-1.5 group-hover:translate-x-0.5 transition-all cursor-pointer font-bold"
               >
-                Central de Suporte
+                <span>Ver na Loja</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          <div data-reveal className="sr-init lg:col-span-6">
-            <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm relative group">
-              <img
-                src={executivosImg}
-                alt="Consultores e Gestores de TI Kivora Angola"
-                className="w-full h-[380px] sm:h-[440px] object-cover"
-              />
+          {/* Computador Desktop LAN */}
+          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
+            <div>
+              <div className="h-56 mb-6 flex items-center justify-center bg-slate-50 rounded-2xl p-4 border border-slate-100 select-none">
+                <img
+                  src={desktopImg}
+                  alt="Computador Desktop Kivora"
+                  className="max-h-full max-w-full object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold text-[#FF6500] uppercase tracking-wider font-display">
+                  Backoffice & Servidor LAN
+                </span>
+                <span className="text-xs font-bold text-slate-900 font-mono-num">
+                  Pronto a Operar
+                </span>
+              </div>
+
+              <h3 className="text-xl font-bold text-slate-950 mb-2 group-hover:text-[#FF6500] transition-colors font-display">
+                Desktop Core i5 / SSD 256GB
+              </h3>
+              <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal mb-4">
+                Configurado para operar como posto de retaguarda, servidor central de base de dados para múltiplos caixas e emissão de ficheiros SAF-T.
+              </p>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-800">
+              <span className="text-slate-500 font-medium">Windows 11 Pro</span>
+              <button
+                onClick={() => onNavigatePage('loja')}
+                className="text-[#FF6500] hover:text-[#EB5B00] flex items-center gap-1.5 group-hover:translate-x-0.5 transition-all cursor-pointer font-bold"
+              >
+                <span>Ver na Loja</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Portátil Laptop */}
+          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
+            <div>
+              <div className="h-56 mb-6 flex items-center justify-center bg-slate-50 rounded-2xl p-4 border border-slate-100 select-none">
+                <img
+                  src={laptopImg}
+                  alt="Portátil Laptop Kivora"
+                  className="max-h-full max-w-full object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold text-[#FF6500] uppercase tracking-wider font-display">
+                  Vendas & Gerência Móvel
+                </span>
+                <span className="text-xs font-bold text-slate-900 font-mono-num">
+                  Bateria Longa Duração
+                </span>
+              </div>
+
+              <h3 className="text-xl font-bold text-slate-950 mb-2 group-hover:text-[#FF6500] transition-colors font-display">
+                Laptop Comercial Executivo
+              </h3>
+              <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal mb-4">
+                Excelente mobilidade para gestores e equipas comerciais externas. Permite faturar, registar notas de encomenda e consultar inventário em qualquer local.
+              </p>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-800">
+              <span className="text-slate-500 font-medium">Elevada Autonomia</span>
+              <button
+                onClick={() => onNavigatePage('loja')}
+                className="text-[#FF6500] hover:text-[#EB5B00] flex items-center gap-1.5 group-hover:translate-x-0.5 transition-all cursor-pointer font-bold"
+              >
+                <span>Ver na Loja</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
 
         </div>
       </section>
 
-      {/* ========== CTA FINAL DE ALTA CONVERSÃO ========== */}
-      <section className="py-24 bg-[#0B192C] text-white relative overflow-hidden">
-        <div data-reveal className="sr-init max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-7 relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-orange-300 text-xs font-bold uppercase tracking-wider">
+      {/* ══════════════════════════════════════════════════════════════════
+          11. BANNER FINAL DE ALTA CONVERSÃO (PADRÃO XTRA DAS IMAGENS)
+          ══════════════════════════════════════════════════════════════════ */}
+      <section className="py-24 sm:py-32 bg-gradient-to-br from-[#FF6500] via-[#EB5B00] to-[#D94F00] text-white relative overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-7 relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 border border-white/30 text-white text-xs font-bold uppercase tracking-wider font-display">
             <span>Comece a Faturar Hoje Mesmo</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.12] font-display">
             Modernize a faturação da sua empresa com segurança e conformidade AGT
           </h2>
-          <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto font-normal">
-            Descarregue o instalador gratuito do KIVORA (~48.5 MB) para Windows 10/11 e experimente todas as funcionalidades com a nossa chave de demonstração.
+
+          <p className="text-white/90 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto font-normal">
+            Descarregue o instalador gratuito do KIVORA para Windows 10/11 e experimente todas as funcionalidades com a nossa licença de demonstração de 15 dias.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
             <button
               onClick={() => onNavigatePage('download')}
-              className="bg-[#FF6500] hover:bg-[#E05900] active:bg-[#C94A00] text-white font-bold text-sm px-9 py-4 rounded-xl transition-all shadow-sm flex items-center gap-2.5 cursor-pointer hover:-translate-y-0.5"
+              className="bg-slate-950 hover:bg-slate-900 active:scale-95 text-white font-bold text-sm px-8 py-4 rounded-full shadow-2xl flex items-center gap-2.5 cursor-pointer transition-all"
             >
-              <Download className="w-5 h-5" />
-              <span>Baixar KIVORA Setup (~48.5 MB)</span>
+              <Download className="w-5 h-5 text-orange-400" />
+              <span>Baixar KIVORA ERP Setup</span>
             </button>
             <button
-              onClick={() => onOpenDemoModal()}
-              className="bg-white/10 hover:bg-white/20 text-white font-bold text-sm px-8 py-4 rounded-xl border border-white/20 hover:border-white/30 transition-all flex items-center gap-2 cursor-pointer hover:-translate-y-0.5"
+              onClick={() => onOpenDemoModal('Demonstração VIP')}
+              className="bg-white/20 hover:bg-white/30 active:scale-95 text-white font-bold text-sm px-8 py-4 rounded-full border border-white/30 transition-all flex items-center gap-2 cursor-pointer"
             >
               <span>Solicitar Demonstração VIP</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Social proof strip */}
-          <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs text-slate-300">
-            <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Certificado AGT FE/440/AGT/2026</span>
-            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> 15 Dias de Avaliação Gratuita</span>
-            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Sem Cartão de Crédito</span>
+          <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs text-white/90">
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-amber-200" />
+              <span>Certificado AGT FE/387/AGT/2026</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Check className="w-4 h-4 text-amber-200" />
+              <span>15 Dias de Avaliação Gratuita</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Check className="w-4 h-4 text-amber-200" />
+              <span>Sem Fidelização nem Cartão de Crédito</span>
+            </span>
           </div>
         </div>
       </section>
@@ -864,3 +1302,4 @@ export const HomePage: React.FC<HomePageProps> = ({
     </div>
   );
 };
+

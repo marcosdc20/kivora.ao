@@ -45,7 +45,7 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onNavigatePrivacy })
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="text-xs font-black text-white">Privacidade & Cookies</h4>
+              <h4 className="text-xs font-black text-white font-display">Privacidade & Cookies</h4>
               <p className="text-[10px] text-slate-400 font-medium">KIVORA Technologies Angola</p>
             </div>
           </div>

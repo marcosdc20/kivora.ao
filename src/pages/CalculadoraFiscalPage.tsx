@@ -74,14 +74,14 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
         
         {/* Header da Página */}
         <div className="text-center max-w-3xl mx-auto mb-12 print:hidden">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold uppercase tracking-wider mb-4">
-            <Calculator className="w-3.5 h-3.5 text-blue-600" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-[#1746A2] text-xs font-bold uppercase tracking-wider mb-4 font-display">
+            <Calculator className="w-3.5 h-3.5 text-[#1746A2]" />
             Ferramenta Fiscal Gratuita para Angola
           </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
-            Calculadora Fiscal de <span className="text-[#1d4ed8]">IRT & IVA Angola</span>
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-950 tracking-tight mb-4 font-display">
+            Calculadora Fiscal de <span className="text-[#1746A2]">IRT & IVA Angola</span>
           </h1>
-          <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
+          <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
             Simule salários líquidos, retenções de IRT, contribuições para o INSS e cálculo de IVA comercial segundo a legislação fiscal da AGT em vigor.
           </p>
         </div>
@@ -90,10 +90,10 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
         <div className="flex flex-wrap items-center justify-center gap-3 mb-10 print:hidden">
           <button
             onClick={() => setActiveTab('irt')}
-            className={`px-6 py-3.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer font-display ${
               activeTab === 'irt'
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 -translate-y-0.5'
-                : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                ? 'bg-[#1746A2] text-white shadow-md shadow-blue-900/20 -translate-y-0.5'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300'
             }`}
           >
             <Receipt className="w-4 h-4" />
@@ -101,10 +101,10 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
           </button>
           <button
             onClick={() => setActiveTab('iva')}
-            className={`px-6 py-3.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer font-display ${
               activeTab === 'iva'
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 -translate-y-0.5'
-                : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                ? 'bg-[#1746A2] text-white shadow-md shadow-blue-900/20 -translate-y-0.5'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300'
             }`}
           >
             <Calculator className="w-4 h-4" />
@@ -346,18 +346,17 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
               </div>
 
               {/* Total da Fatura com IVA */}
-              <div className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-6 rounded-3xl mb-6 shadow-xl shadow-emerald-900/15 flex items-center justify-between relative overflow-hidden">
-                <div className="orb orb-green w-36 h-36 -top-10 -right-10 opacity-30" />
-                <div className="relative z-10">
-                  <p className="text-xs font-bold uppercase tracking-wider text-emerald-100 mb-1">
+              <div className="bg-slate-900 text-white p-6 rounded-3xl mb-6 border border-slate-800 shadow-xl flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1">
                     Valor Total da Fatura Emitida (Com IVA)
                   </p>
-                  <p className="text-3xl sm:text-4xl font-black font-mono-num">
-                    {Math.round(valorComIVA).toLocaleString('pt-AO')} <span className="text-xl font-bold">Kz</span>
+                  <p className="font-display text-3xl sm:text-4xl font-black font-mono-num">
+                    {Math.round(valorComIVA).toLocaleString('pt-AO')} <span className="text-xl font-bold text-slate-400">Kz</span>
                   </p>
                 </div>
-                <div className="w-14 h-14 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center relative z-10 shadow-inner">
-                  <Receipt className="w-7 h-7 text-white" />
+                <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center shadow-xs">
+                  <Receipt className="w-7 h-7 text-emerald-400" />
                 </div>
               </div>
 

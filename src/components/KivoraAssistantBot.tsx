@@ -206,7 +206,7 @@ export const KivoraAssistantBot: React.FC<KivoraAssistantBotProps> = ({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-black text-white tracking-tight">
+                  <h3 className="text-sm font-black text-white tracking-tight font-display">
                     Atendimento Kivora
                   </h3>
                   <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-emerald-950 text-emerald-300 border border-emerald-700/60">
@@ -393,7 +393,7 @@ export const KivoraAssistantBot: React.FC<KivoraAssistantBotProps> = ({
           )}
         </div>
 
-        <span className="font-extrabold text-xs sm:text-sm tracking-tight text-white select-none">
+        <span className="font-extrabold text-xs sm:text-sm tracking-tight text-white select-none font-display">
           {isOpen ? 'Fechar Atendimento' : 'Precisa de Ajuda?'}
         </span>
 

@@ -409,11 +409,11 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
                   onClick={() => setFilterStatus(item.id)}
                   className={`rounded-2xl p-4 border text-left transition-all cursor-pointer ${
                     filterStatus === item.id
-                      ? 'bg-slate-950 border-slate-950 text-white shadow-md'
-                      : 'bg-white border-slate-200 hover:border-slate-300'
+                      ? 'bg-slate-950 border-slate-950 text-white shadow-card'
+                      : 'surface-card hover:border-slate-300'
                   }`}
                 >
-                  <p className={`text-2xl font-black ${filterStatus === item.id ? 'text-white' : item.color}`}>{item.count}</p>
+                  <p className={`text-2xl font-black font-display font-mono-num ${filterStatus === item.id ? 'text-white' : item.color}`}>{item.count}</p>
                   <p className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${filterStatus === item.id ? 'text-slate-400' : 'text-slate-400'}`}>
                     {item.label}
                   </p>
@@ -424,13 +424,13 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
             {/* Search */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="relative w-full sm:max-w-md">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" strokeWidth={1.75} />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" strokeWidth={1.75} />
                 <input
                   type="text"
                   placeholder="Pesquisar chave KVRA, empresa, NIF ou email..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 font-medium shadow-sm"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200/90 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 font-medium shadow-xs"
                 />
               </div>
 
@@ -441,7 +441,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
             </div>
 
             {/* Tabela de Licenças */}
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <div className="surface-card overflow-hidden">
               {loading ? (
                 <div className="p-12 text-center text-slate-400 space-y-2.5">
                   <div className="w-8 h-8 rounded-full border-[2.5px] border-slate-200 border-t-amber-500 border-r-amber-500 animate-spin mx-auto" />

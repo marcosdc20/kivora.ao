@@ -20,9 +20,8 @@ export const ModuloDetailPage: React.FC<ModuloDetailPageProps> = ({
     <div className="min-h-screen bg-white text-slate-900 pt-28 pb-20 selection:bg-blue-600 selection:text-white page-transition-enter">
       
       {/* Header Banner */}
-      <section className="bg-mesh border-b border-slate-200/80 py-14 relative overflow-hidden shadow-xs">
-        <div className="orb orb-blue w-48 h-48 -top-12 -right-12 opacity-20" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 relative z-10">
+      <section className="bg-slate-50 border-b border-slate-200/80 py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
           <button
             onClick={onBack}
             className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-2xs transition-all cursor-pointer hover:-translate-x-0.5"
@@ -32,13 +31,13 @@ export const ModuloDetailPage: React.FC<ModuloDetailPageProps> = ({
           </button>
 
           <div className="space-y-2">
-            <span className="text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-100/70 px-3.5 py-1 rounded-full border border-blue-200/70 inline-block">
+            <span className="text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/60 inline-block font-display">
               {module.badge || 'Módulo KIVORA ERP'}
             </span>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-950 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
               {module.title}
             </h1>
-            <p className="text-slate-600 text-sm sm:text-base max-w-3xl leading-relaxed">
+            <p className="text-slate-600 text-sm sm:text-base max-w-3xl leading-relaxed font-normal">
               {module.shortDesc}
             </p>
           </div>
@@ -52,16 +51,16 @@ export const ModuloDetailPage: React.FC<ModuloDetailPageProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           <div className="lg:col-span-6 space-y-6">
-            <h2 className="text-2xl font-extrabold text-slate-950">
+            <h2 className="text-2xl font-bold text-slate-950 font-display">
               Visão Geral e Arquitetura
             </h2>
-            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
               {module.description}
             </p>
 
             {module.agtSpec && (
               <div className="p-4 bg-blue-50/80 rounded-2xl border border-blue-200/80 space-y-1">
-                <strong className="text-xs font-bold text-blue-950 flex items-center gap-1.5">
+                <strong className="text-xs font-bold text-blue-950 flex items-center gap-1.5 font-display">
                   <ShieldCheck className="w-4 h-4 text-blue-600" strokeWidth={1.75} />
                   <span>Conformidade Fiscal AGT</span>
                 </strong>
@@ -74,7 +73,7 @@ export const ModuloDetailPage: React.FC<ModuloDetailPageProps> = ({
             <div className="pt-2 flex flex-wrap gap-3">
               <button
                 onClick={() => onOpenDemoModal(module.title)}
-                className="bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-xs sm:text-sm px-8 py-4 rounded-2xl shadow-xl shadow-orange-600/30 transition-all cursor-pointer hover:-translate-y-1 shimmer-button"
+                className="btn-cta text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl shadow-lg shadow-orange-500/25 cursor-pointer hover:shadow-orange-500/40 active:scale-[0.98] transition-all"
               >
                 Solicitar Demonstração Deste Módulo
               </button>
@@ -101,8 +100,8 @@ export const ModuloDetailPage: React.FC<ModuloDetailPageProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* Features */}
-          <div className="bg-gradient-to-br from-blue-50/70 via-white to-white p-8 rounded-3xl border border-slate-200/90 shadow-sm space-y-4 card-glow-blue">
-            <h3 className="text-lg font-extrabold text-slate-950">
+          <div className="surface-card p-8 space-y-4">
+            <h3 className="font-display text-lg font-extrabold text-slate-950">
               Recursos e Funcionalidades Técnicas
             </h3>
             <ul className="space-y-3 text-xs text-slate-700 font-medium">
@@ -116,8 +115,8 @@ export const ModuloDetailPage: React.FC<ModuloDetailPageProps> = ({
           </div>
 
           {/* Benefits */}
-          <div className="bg-gradient-to-br from-emerald-50/70 via-white to-white p-8 rounded-3xl border border-slate-200/90 shadow-sm space-y-4 card-glow-green">
-            <h3 className="text-lg font-extrabold text-slate-950">
+          <div className="surface-card p-8 space-y-4">
+            <h3 className="font-display text-lg font-extrabold text-slate-950">
               Ganhos para a Operação da Sua Empresa
             </h3>
             <ul className="space-y-3 text-xs text-slate-700 font-medium">

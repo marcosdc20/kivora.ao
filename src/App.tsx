@@ -12,6 +12,7 @@ import { getStoredSession } from './admin/services/authService';
 import { useScrollReveal } from './hooks/useScrollReveal';
 import { NotificationContainer } from './components/ui/NotificationContainer';
 import { KivoraAssistantBot } from './components/KivoraAssistantBot';
+import Lenis from 'lenis';
 
 // Lazy loading for subpages & portals to minimize initial bundle size
 const ModulosPage = lazy(() => import('./pages/ModulosPage').then(m => ({ default: m.ModulosPage })));
@@ -325,6 +326,33 @@ export function App() {
   useEffect(() => {
     const unsub = subscribeSystemSettings(setAppSettings);
     return unsub;
+  }, []);
+
+  // Smooth scroll ultra-fluído de alta fidelidade (Lenis)
+  useEffect(() => {
+    // Manter o scroll natural e responsivo em smartphones e touchpads tácteis
+    if (typeof window === 'undefined') return;
+    const isTouch = window.matchMedia('(pointer: coarse)').matches;
+    if (isTouch) return;
+
+    const lenis = new Lenis({
+      duration: 1.15,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      smoothWheel: true,
+    });
+
+    let rafId: number;
+    function raf(time: number) {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    }
+    rafId = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
   }, []);
 
   // Ativação global de Scroll Reveal em todas as páginas

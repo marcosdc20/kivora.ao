@@ -7,7 +7,7 @@ export const KIVORA_INFO = {
   name: 'Kivora',
   fullName: 'Kivora – Sistema de Gestão Empresarial & Faturação Eletrónica AGT',
   company: 'Visual Software',
-  agtCertificate: 'Certificação AGT N.º FE/440/AGT/2026',
+  agtCertificate: 'Certificação AGT N.º FE/387/AGT/2026',
   phone: '+244 923 456 789',
   phoneRaw: '244923456789',
   phoneDisplay: '+244 923 456 789',

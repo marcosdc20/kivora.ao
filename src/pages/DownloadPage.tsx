@@ -44,7 +44,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
   const activeDemoKey = settings.demoKey || DEFAULT_SETTINGS.demoKey || 'KVRA-DEMO-2026-TRIAL';
   const activeChecksum = settings.sha256Checksum || DEFAULT_SETTINGS.sha256Checksum || 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
   const activeReleaseDate = settings.releaseDate || DEFAULT_SETTINGS.releaseDate || '19 de Agosto de 2026';
-  const activeAgtCert = settings.agtCertificate || DEFAULT_SETTINGS.agtCertificate || 'Certificação AGT N.º FE/440/AGT/2026';
+  const activeAgtCert = settings.agtCertificate || DEFAULT_SETTINGS.agtCertificate || 'Certificação AGT N.º FE/387/AGT/2026';
 
   const handleCopyKey = () => {
     navigator.clipboard.writeText(activeDemoKey);
@@ -136,14 +136,12 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-10">
         
         {/* Painel Principal de Download (Design Clean & Corporativo) */}
-        <div data-reveal className="bg-mesh-dark rounded-3xl p-6 sm:p-10 space-y-8 text-white relative overflow-hidden">
-          <div className="orb orb-blue w-80 h-80 -top-20 -left-20" />
-          <div className="orb orb-purple w-48 h-48 -bottom-10 -right-10" />
+        <div data-reveal className="bg-[#0B192C] border border-slate-800 rounded-3xl p-6 sm:p-10 space-y-8 text-white relative overflow-hidden shadow-2xl">
           
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-white/15 relative z-10">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-white/10 relative z-10">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 border border-white/20 text-white text-xs font-bold tracking-tight">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 border border-white/15 text-white text-xs font-semibold tracking-tight font-tight">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                   <span>{activeAgtCert}</span>
                 </span>
@@ -152,11 +150,11 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
                   Versão Estável
                 </span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                KIVORA ERP Desktop <span className="text-blue-300 font-mono-num">v{cleanVersion}</span>
+              <h2 className="text-2xl sm:text-3xl font-semibold font-display text-white tracking-tight">
+                KIVORA ERP Desktop <span className="text-blue-300 font-mono-num font-bold">v{cleanVersion}</span>
               </h2>
               <p className="text-sm text-slate-300">
-                Lançamento oficial: <span className="font-bold text-white">{activeReleaseDate}</span> • Arquitetura 64-bit Windows
+                Lançamento oficial: <span className="font-semibold text-white">{activeReleaseDate}</span> • Arquitetura 64-bit Windows
               </p>
             </div>
 
@@ -166,7 +164,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
                 href={settings.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold cursor-pointer bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold cursor-pointer bg-white/10 hover:bg-white/15 text-white border border-white/15 transition-all"
               >
                 <GitBranch className="w-3.5 h-3.5" />
                 <span>Repositório Oficial</span>
@@ -183,7 +181,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
                 <button
                   onClick={handleStartDownload}
                   disabled={downloading}
-                  className="bg-[#FF6500] hover:bg-[#EB5B00] disabled:opacity-50 text-white font-bold text-sm sm:text-base px-8 py-4 rounded-2xl cursor-pointer inline-flex items-center justify-center gap-3 shimmer-button shadow-xl shadow-orange-600/40 transition-all hover:-translate-y-1"
+                  className="btn-cta text-sm sm:text-base px-8 py-4 disabled:opacity-50 cursor-pointer inline-flex items-center justify-center gap-3"
                 >
                   <Download className="w-5 h-5" strokeWidth={2.25} />
                   <span>{downloading ? 'A preparar download...' : 'Baixar Instalador Oficial (.exe)'}</span>
@@ -194,7 +192,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
                     href={getDirectDownloadUrl(settings.downloadUrl || DEFAULT_SETTINGS.downloadUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 text-xs px-5 py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all"
+                    className="inline-flex items-center justify-center gap-2 text-xs px-5 py-4 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/15 transition-all"
                   >
                     <span>Download Direto</span>
                     <ExternalLink className="w-3 h-3 opacity-60" />
@@ -202,7 +200,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-300">
+              <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-300 font-tight">
                 <span>Tamanho: <strong className="text-white font-mono-num">{activeFileSize}</strong></span>
                 <span>•</span>
                 <span>Plataforma: <strong className="text-white">Windows 10 / 11 (x64)</strong></span>
@@ -211,7 +209,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
               </div>
 
               {downloadComplete && (
-                <div className="p-3.5 bg-emerald-500/20 border border-emerald-400/30 rounded-2xl text-emerald-300 text-xs font-semibold flex items-center gap-2">
+                <div className="p-3.5 bg-emerald-500/20 border border-emerald-400/30 rounded-xl text-emerald-300 text-xs font-semibold flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>Download iniciado com sucesso. Execute o instalador descarregado para configurar o sistema.</span>
                 </div>
@@ -219,21 +217,21 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
             </div>
 
             {/* Cartão de Chave de Demonstração */}
-            <div className="bg-white/8 border border-white/15 rounded-2xl p-5 space-y-3 relative z-10">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3 relative z-10">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5 font-tight">
                   <Key className="w-3.5 h-3.5 text-blue-400" />
                   Chave de Avaliação
                 </span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30 font-mono-num">15 Dias VIP</span>
               </div>
               <div className="flex items-center gap-2">
-                <code className="bg-slate-900/60 border border-white/15 rounded-xl px-3 py-2 text-xs font-mono-num font-bold text-white flex-1 truncate select-all">
+                <code className="bg-slate-900/90 border border-white/15 rounded-xl px-3 py-2 text-xs font-mono-num font-bold text-white flex-1 truncate select-all">
                   {activeDemoKey}
                 </code>
                 <button
                   onClick={handleCopyKey}
-                  className="px-3.5 py-2 bg-blue-500/30 hover:bg-blue-500/50 text-blue-200 border border-blue-400/30 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
+                  className="px-3.5 py-2 bg-blue-500/30 hover:bg-blue-500/40 text-blue-200 border border-blue-400/30 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
                   title="Copiar chave de demonstração"
                 >
                   {copiedKey ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -253,9 +251,9 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Requisitos Técnicos */}
-          <div data-reveal data-reveal-dir="left" className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 space-y-4">
+          <div data-reveal data-reveal-dir="left" className="surface-card bg-white rounded-2xl border border-slate-200/90 shadow-card p-6 space-y-4">
             <div>
-              <h3 className="text-base font-black text-slate-950">Requisitos do Sistema</h3>
+              <h3 className="text-base font-semibold font-display text-slate-900">Requisitos do Sistema</h3>
               <p className="text-xs text-slate-500 mt-0.5">Especificações para execução local sem lentidão.</p>
             </div>
 
@@ -266,7 +264,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
                     {req.icon}
                   </div>
                   <div className="min-w-0">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{req.label}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block font-tight">{req.label}</span>
                     <span className="text-xs font-bold text-slate-900 block truncate">{req.val}</span>
                   </div>
                 </div>
@@ -275,10 +273,10 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
           </div>
 
           {/* Notas de Lançamento (Changelog) */}
-          <div data-reveal data-reveal-dir="right" className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 space-y-4 flex flex-col justify-between">
+          <div data-reveal data-reveal-dir="right" className="surface-card bg-white rounded-2xl border border-slate-200/90 shadow-card p-6 space-y-4 flex flex-col justify-between">
             <div className="space-y-3">
               <div>
-                <h3 className="text-base font-black text-slate-950">Novidades da Versão v{cleanVersion}</h3>
+                <h3 className="text-base font-semibold font-display text-slate-900">Novidades da Versão v{cleanVersion}</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Recursos e conformidades implementadas nesta compilação:</p>
               </div>
 
@@ -298,16 +296,16 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
 
             {/* Checksum SHA-256 */}
             <div className="pt-3 border-t border-slate-100 space-y-1">
-              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 font-tight">
                 <span>Assinatura Digital SHA-256</span>
                 <button
                   onClick={handleCopyChecksum}
-                  className="text-blue-600 hover:underline flex items-center gap-1 font-semibold normal-case cursor-pointer"
+                  className="text-[#1746A2] hover:underline flex items-center gap-1 font-semibold normal-case cursor-pointer"
                 >
                   {copiedChecksum ? 'Copiado!' : 'Copiar Hash'}
                 </button>
               </div>
-              <p className="font-mono text-[10px] bg-slate-50 p-2 rounded-lg border border-slate-200 text-slate-600 break-all select-all">
+              <p className="font-mono text-[10px] bg-slate-50 p-2 rounded-lg border border-slate-200 text-slate-600 break-all select-all font-mono-num">
                 {activeChecksum}
               </p>
             </div>
@@ -316,24 +314,23 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
         </div>
 
         {/* 3 Passos Simples de Instalação */}
-        <div data-reveal className="bg-mesh border border-slate-200/80 rounded-2xl p-6 sm:p-8 space-y-6 relative overflow-hidden">
-          <div className="absolute -top-8 -right-8 w-32 h-32 orb orb-blue opacity-20" />
-          <div className="relative z-10">
-            <h3 className="text-lg font-black text-slate-950">Instalação em 3 Passos</h3>
+        <div data-reveal className="surface-card bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 space-y-6 shadow-card">
+          <div>
+            <h3 className="text-lg font-semibold font-display text-slate-900">Instalação em 3 Passos</h3>
             <p className="text-xs text-slate-500 mt-0.5">Processo guiado pelo assistente de configuração em minutos.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { step: '1', title: 'Execute o Instalador', desc: 'Abra o ficheiro .exe descarregado e siga os passos do assistente de instalação no Windows.', color: 'bg-blue-600 shadow-blue-600/30' },
-              { step: '2', title: 'Introduza a Chave', desc: 'Insira a sua chave de demonstração ou a licença adquirida para inicializar a base de dados local.', color: 'bg-emerald-600 shadow-emerald-600/30' },
-              { step: '3', title: 'Comece a Faturar', desc: 'Configure os dados da sua empresa e comece a registar vendas e emitir faturas certificadas.', color: 'bg-orange-500 shadow-orange-500/30' },
+              { step: '1', title: 'Execute o Instalador', desc: 'Abra o ficheiro .exe descarregado e siga os passos do assistente de instalação no Windows.', color: 'bg-[#1746A2]' },
+              { step: '2', title: 'Introduza a Chave', desc: 'Insira a sua chave de demonstração ou a licença adquirida para inicializar a base de dados local.', color: 'bg-emerald-600' },
+              { step: '3', title: 'Comece a Faturar', desc: 'Configure os dados da sua empresa e comece a registar vendas e emitir faturas certificadas.', color: 'bg-[#FF6500]' },
             ].map((s, idx) => (
-              <div key={idx} data-reveal data-delay={`${(idx + 1) * 100}`} className="p-5 rounded-2xl bg-white border border-slate-100 shadow-sm space-y-3 hover:shadow-md hover:-translate-y-1 transition-all group">
-                <div className={`w-8 h-8 rounded-xl ${s.color} text-white font-black text-sm flex items-center justify-center shadow-lg`}>
+              <div key={idx} data-reveal data-delay={`${(idx + 1) * 100}`} className="p-5 rounded-2xl bg-slate-50 border border-slate-100 space-y-3 hover:shadow-card hover:-translate-y-0.5 transition-all group">
+                <div className={`w-8 h-8 rounded-xl ${s.color} text-white font-bold text-sm flex items-center justify-center shadow-xs`}>
                   {s.step}
                 </div>
-                <h4 className="font-bold text-slate-900 text-sm group-hover:text-blue-600 transition-colors">{s.title}</h4>
+                <h4 className="font-semibold font-display text-slate-900 text-sm group-hover:text-[#1746A2] transition-colors">{s.title}</h4>
                 <p className="text-[11px] text-slate-600 leading-relaxed">{s.desc}</p>
               </div>
             ))}

@@ -30,7 +30,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigatePage, onOpenDemoModal }) =
           {/* Official AGT Certification Status Pill */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-slate-900 text-white rounded-full text-xs font-semibold shadow-sm">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" strokeWidth={1.75} />
-            <span>Certificado AGT nº XXX/AGT/2026 • Decreto Presidencial n.º 71/25</span>
+            <span>Certificado AGT nº FE/387/AGT/2026 • Decreto Presidencial n.º 71/25</span>
           </div>
 
           {/* Main Headline */}

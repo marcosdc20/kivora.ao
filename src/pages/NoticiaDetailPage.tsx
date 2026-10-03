@@ -16,21 +16,23 @@ export const NoticiaDetailPage: React.FC<NoticiaDetailPageProps> = ({ post, onBa
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white px-3 py-1.5 rounded-lg border border-slate-200 transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Voltar às Notícias</span>
           </button>
 
-          <span className="inline-block text-blue-600 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
-            {post.category}
-          </span>
+          <div>
+            <span className="inline-block text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3 py-1 rounded-full border border-blue-200/60 font-display">
+              {post.category}
+            </span>
+          </div>
 
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+          <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-950 tracking-tight leading-tight">
             {post.title}
           </h1>
 
-          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 pt-1 font-medium">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 pt-1 font-medium font-mono-num">
             <span className="flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-blue-600" />
               <span>{post.date}</span>
@@ -51,9 +53,9 @@ export const NoticiaDetailPage: React.FC<NoticiaDetailPageProps> = ({ post, onBa
 
       {/* Article Content */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="bg-white p-6 md:p-10 rounded-2xl border border-slate-200/90 shadow-sm space-y-6">
+        <div className="surface-card p-6 md:p-10 space-y-6">
           
-          <div className="rounded-xl overflow-hidden bg-slate-100 border border-slate-200 max-h-96">
+          <div className="rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80 max-h-96">
             <img
               src={post.image}
               alt={post.title}
@@ -61,7 +63,7 @@ export const NoticiaDetailPage: React.FC<NoticiaDetailPageProps> = ({ post, onBa
             />
           </div>
 
-          <div className="prose prose-slate max-w-none space-y-5 text-xs sm:text-sm text-slate-700 leading-relaxed">
+          <div className="prose prose-slate max-w-none space-y-5 text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
             {post.content.map((paragraph, idx) => (
               <p key={idx} className="leading-relaxed">
                 {paragraph}
@@ -72,9 +74,10 @@ export const NoticiaDetailPage: React.FC<NoticiaDetailPageProps> = ({ post, onBa
           <div className="pt-6 border-t border-slate-100">
             <button
               onClick={onBack}
-              className="text-xs font-bold text-blue-600 hover:underline"
+              className="text-xs font-bold text-blue-600 hover:text-blue-700 cursor-pointer flex items-center gap-1.5"
             >
-              ← Voltar à lista de artigos
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Voltar à lista de artigos</span>
             </button>
           </div>
 

@@ -561,19 +561,22 @@ export const AdminConfiguracoes: React.FC = () => {
         
         {/* Toast de Sucesso */}
         {savedSuccess && (
-          <div className="bg-emerald-600 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-lg shadow-emerald-600/20 flex items-center justify-between animate-fadeIn">
-            <span>✓ Configurações guardadas e sincronizadas no Firebase com sucesso!</span>
-            <button onClick={() => setSavedSuccess(false)} className="text-white/80 hover:text-white">
+          <div className="surface-card bg-emerald-50/90 border border-emerald-200 text-emerald-900 text-xs font-display font-semibold px-4 py-3 rounded-xl shadow-xs flex items-center justify-between animate-fadeIn">
+            <span className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Configurações guardadas e sincronizadas no Firebase com sucesso!</span>
+            </span>
+            <button onClick={() => setSavedSuccess(false)} className="text-emerald-700 hover:text-emerald-950 p-1 rounded-lg">
               <X className="w-4 h-4" />
             </button>
           </div>
         )}
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
+        <div className="p-1.5 bg-slate-100/80 rounded-2xl border border-slate-200/80 flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth">
           {[
             { id: 'geral', label: 'Geral & Empresa', icon: <Building2 className="w-4 h-4" /> },
-            { id: 'ia-assistente', label: 'IA & Assistente Virtual', icon: <Bot className="w-4 h-4 text-orange-500" /> },
+            { id: 'ia-assistente', label: 'IA & Assistente Virtual', icon: <Bot className="w-4 h-4 text-amber-500" /> },
             { id: 'emails', label: 'Serviço de E-mails & API', icon: <Mail className="w-4 h-4" /> },
             { id: 'precos', label: 'Planos & Preços', icon: <Tag className="w-4 h-4" /> },
             { id: 'videochamada', label: 'Videochamada & Tarifas/Min', icon: <Video className="w-4 h-4" /> },
@@ -590,95 +593,98 @@ export const AdminConfiguracoes: React.FC = () => {
             { id: 'agt', label: 'Certificação AGT & Fiscal', icon: <ShieldCheck className="w-4 h-4" /> },
             { id: 'updates', label: 'Atualizações OTA', icon: <Rocket className="w-4 h-4" /> },
             { id: 'backups', label: 'Backups Nuvem', icon: <Database className="w-4 h-4" /> },
-            { id: 'zona-perigo', label: '🔄 Reinicialização & Começar do Zero (Reset)', icon: <RotateCcw className="w-4 h-4 text-red-500" /> },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as ConfigTab)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                activeTab === tab.id
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-              }`}
-            >
-              {tab.icon}
-              <span>{tab.label}</span>
-            </button>
-          ))}
+            { id: 'zona-perigo', label: '🔄 Reinicialização (Reset)', icon: <RotateCcw className="w-4 h-4 text-rose-500" /> },
+          ].map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as ConfigTab)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-display font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-slate-950 text-white shadow-xs border border-slate-950'
+                    : 'bg-white/70 text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200'
+                }`}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* TAB 1: GERAL & EMPRESA */}
         {activeTab === 'geral' && (
-          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+          <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6">
+            <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-black text-slate-900">Identificação da Empresa & Software</h3>
-                <p className="text-xs text-slate-500">Dados institucionais exibidos nos rodapés, propostas e termos</p>
+                <h3 className="text-base font-display font-bold text-slate-950 tracking-tight">Identificação da Empresa & Software</h3>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">Dados institucionais exibidos nos rodapés, propostas e termos</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Nome Comercial do Software</label>
+                <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">Nome Comercial do Software</label>
                 <input
                   type="text"
                   value={settings.name}
                   onChange={(e) => handleChange('name', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 transition-all outline-none"
                   placeholder="Ex: Kivora"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Razão Social da Empresa Detentora</label>
+                <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">Razão Social da Empresa Detentora</label>
                 <input
                   type="text"
                   value={settings.company}
                   onChange={(e) => handleChange('company', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 transition-all outline-none"
                   placeholder="Ex: Visual Software, Lda."
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">NIF da Empresa</label>
+                <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">NIF da Empresa</label>
                 <input
                   type="text"
                   value={settings.nif}
                   onChange={(e) => handleChange('nif', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 transition-all outline-none"
                   placeholder="Ex: 5417089123"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Nome Completo do Produto</label>
+                <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">Nome Completo do Produto</label>
                 <input
                   type="text"
                   value={settings.fullName}
                   onChange={(e) => handleChange('fullName', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 transition-all outline-none"
                   placeholder="Kivora Desktop ERP & POS"
                 />
               </div>
 
               <div className="space-y-1.5 md:col-span-2">
-                <label className="font-bold text-slate-700 uppercase">Endereço Físico / Sede</label>
+                <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">Endereço Físico / Sede</label>
                 <input
                   type="text"
                   value={settings.address}
                   onChange={(e) => handleChange('address', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 font-medium text-slate-900 transition-all outline-none"
                   placeholder="Edifício KIVORA, Rua Principal, Luanda, Angola"
                 />
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex justify-end">
+            <div className="pt-4 border-t border-slate-100 flex justify-end">
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Alterações</span>
@@ -690,30 +696,30 @@ export const AdminConfiguracoes: React.FC = () => {
         {/* TAB: IA & ASSISTENTE VIRTUAL DO SITE */}
         {activeTab === 'ia-assistente' && (
           <div className="space-y-6">
-            <form onSubmit={handleSaveAIConfig} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <form onSubmit={handleSaveAIConfig} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6">
               <div className="border-b border-slate-100 pb-4 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#FF6500] to-amber-400 text-white flex items-center justify-center shadow-xs">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center border border-amber-500/20">
                       <Bot className="w-4 h-4" />
                     </div>
-                    <h3 className="text-base font-black text-slate-900">Assistente Virtual de IA (Website 24/7)</h3>
+                    <h3 className="text-base font-display font-bold text-slate-950 tracking-tight">Assistente Virtual de IA (Website 24/7)</h3>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-slate-500 font-sans mt-1">
                     Configure a chave de API de qualquer provedor de IA para atender visitantes com conhecimento certificado sobre o KIVORA ERP.
                   </p>
                 </div>
-                <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 text-xs font-bold">
+                <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 text-xs font-display font-semibold">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                   <span>Sincronizado no Firestore</span>
                 </div>
               </div>
 
               {/* Status do Assistente & Toggle Ativação */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
+              <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 flex items-center justify-between gap-4">
                 <div>
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Ativação do Bot no Site Público</h4>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <h4 className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-900">Ativação do Bot no Site Público</h4>
+                  <p className="text-xs text-slate-500 font-sans mt-0.5">
                     Quando ativo, o botão flutuante inteligente surge no canto inferior direito do site oficial para responder a visitantes.
                   </p>
                 </div>
@@ -731,11 +737,11 @@ export const AdminConfiguracoes: React.FC = () => {
               {/* Campo de Chave API com Auto-Detecção */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <Key className="w-3.5 h-3.5 text-blue-600" />
+                  <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                    <Key className="w-3.5 h-3.5 text-slate-400" />
                     Chave API de IA (Qualquer Provedor)
                   </label>
-                  <span className="text-[11px] font-bold text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-lg">
+                  <span className="text-[11px] font-display font-semibold text-slate-700 bg-slate-100 border border-slate-200/80 px-2 py-0.5 rounded-lg">
                     Auto-Detecção Ativa
                   </span>
                 </div>
@@ -746,7 +752,7 @@ export const AdminConfiguracoes: React.FC = () => {
                     value={aiConfig.apiKey}
                     onChange={(e) => handleAIKeyChange(e.target.value)}
                     placeholder="Cole aqui a sua chave (ex: AIzaSy..., sk-proj-..., gsk_..., sk-or-..., sk-ant-...)"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none pr-24 transition-all"
+                    className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 text-xs font-mono-num font-semibold text-slate-900 outline-none pr-24 transition-all"
                   />
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                     <button
@@ -763,7 +769,7 @@ export const AdminConfiguracoes: React.FC = () => {
                 {/* Banner de Provedor Detectado */}
                 <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
                   <span className="text-slate-500 font-medium">Provedor Reconhecido:</span>
-                  <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold capitalize bg-slate-900 text-white shadow-xs">
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-display font-bold capitalize bg-slate-950 text-white shadow-xs">
                     {aiConfig.provider}
                   </span>
                   <span className="text-slate-400 text-[11px]">
@@ -775,7 +781,7 @@ export const AdminConfiguracoes: React.FC = () => {
               {/* Seleção de Provedor & Modelo */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-2">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 uppercase">Provedor Selecionado</label>
+                  <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">Provedor Selecionado</label>
                   <select
                     value={aiConfig.provider}
                     onChange={(e) => {
@@ -790,7 +796,7 @@ export const AdminConfiguracoes: React.FC = () => {
                       };
                       setAiConfig((prev) => ({ ...prev, provider: p, model: defaults[p] }));
                     }}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:bg-white focus:border-blue-600 outline-none cursor-pointer"
+                    className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 text-xs font-display font-semibold text-slate-800 outline-none cursor-pointer"
                   >
                     <option value="gemini">Google Gemini (Recomendado / Mais Rápido)</option>
                     <option value="openai">OpenAI (ChatGPT / GPT-4o-mini)</option>
@@ -802,18 +808,18 @@ export const AdminConfiguracoes: React.FC = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 uppercase">Modelo de IA</label>
+                  <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">Modelo de IA</label>
                   <input
                     type="text"
                     value={aiConfig.model}
                     onChange={(e) => setAiConfig((prev) => ({ ...prev, model: e.target.value }))}
                     placeholder="Ex: gemini-1.5-flash, gpt-4o-mini, llama-3.3-70b-versatile"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                    className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 text-xs font-mono-num font-semibold text-slate-800 outline-none"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 uppercase">Temperatura / Criatividade</label>
+                  <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">Temperatura / Criatividade</label>
                   <div className="flex items-center gap-3 pt-1">
                     <input
                       type="range"
@@ -822,9 +828,9 @@ export const AdminConfiguracoes: React.FC = () => {
                       step="0.1"
                       value={aiConfig.temperature ?? 0.7}
                       onChange={(e) => setAiConfig((prev) => ({ ...prev, temperature: parseFloat(e.target.value) }))}
-                      className="flex-1 accent-blue-600 cursor-pointer"
+                      className="flex-1 accent-slate-950 cursor-pointer"
                     />
-                    <span className="font-mono font-bold text-xs text-slate-800 w-8 text-right">
+                    <span className="font-mono-num font-bold text-xs text-slate-900 w-8 text-right">
                       {aiConfig.temperature ?? 0.7}
                     </span>
                   </div>
@@ -833,26 +839,26 @@ export const AdminConfiguracoes: React.FC = () => {
 
               {/* Endpoint Customizado (se provider === 'custom') */}
               {aiConfig.provider === 'custom' && (
-                <div className="space-y-1.5 p-4 rounded-2xl bg-amber-50 border border-amber-200">
-                  <label className="text-xs font-bold text-amber-900 uppercase">URL do Endpoint Customizado (OpenAI Compatível)</label>
+                <div className="space-y-1.5 p-4 rounded-xl bg-amber-50/70 border border-amber-200/80">
+                  <label className="text-[11px] font-display font-bold uppercase tracking-wider text-amber-900">URL do Endpoint Customizado (OpenAI Compatível)</label>
                   <input
                     type="text"
                     value={aiConfig.customEndpoint || ''}
                     onChange={(e) => setAiConfig((prev) => ({ ...prev, customEndpoint: e.target.value }))}
                     placeholder="https://meu-servidor-ai.com/v1/chat/completions"
-                    className="w-full bg-white border border-amber-300 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    className="w-full bg-white border border-amber-300 rounded-xl px-3.5 py-2 text-xs font-mono-num font-semibold text-slate-900 focus:border-slate-400 outline-none"
                   />
                 </div>
               )}
 
               {/* Mensagem de Boas-Vindas */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase">Mensagem Inicial de Boas-Vindas aos Visitantes</label>
+                <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">Mensagem Inicial de Boas-Vindas aos Visitantes</label>
                 <textarea
                   rows={2}
                   value={aiConfig.welcomeMessage || ''}
                   onChange={(e) => setAiConfig((prev) => ({ ...prev, welcomeMessage: e.target.value }))}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:bg-white focus:border-blue-600 outline-none leading-relaxed"
+                  className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-800 outline-none leading-relaxed"
                   placeholder="Mensagem que o assistente exibe ao abrir a janela de chat..."
                 />
               </div>
@@ -860,13 +866,13 @@ export const AdminConfiguracoes: React.FC = () => {
               {/* Base de Conhecimento e Prompt de Sistema */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-700 uppercase">
+                  <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">
                     Base de Conhecimento Kivora & Prompt do Sistema (Grounded)
                   </label>
                   <button
                     type="button"
                     onClick={() => setAiConfig((prev) => ({ ...prev, systemPrompt: DEFAULT_AI_CONFIG.systemPrompt }))}
-                    className="text-[11px] font-bold text-blue-600 hover:text-blue-700 cursor-pointer"
+                    className="text-[11px] font-display font-semibold text-slate-600 hover:text-slate-950 cursor-pointer"
                   >
                     Restaurar Conhecimento Padrão
                   </button>
@@ -875,7 +881,7 @@ export const AdminConfiguracoes: React.FC = () => {
                   rows={6}
                   value={aiConfig.systemPrompt || ''}
                   onChange={(e) => setAiConfig((prev) => ({ ...prev, systemPrompt: e.target.value }))}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs font-mono font-medium text-slate-800 focus:bg-white focus:border-blue-600 outline-none leading-relaxed"
+                  className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl p-3.5 text-xs font-mono font-medium text-slate-800 outline-none leading-relaxed"
                   placeholder="Instruções de sistema e base factual..."
                 />
                 <p className="text-[11px] text-slate-400">
@@ -886,7 +892,7 @@ export const AdminConfiguracoes: React.FC = () => {
               {/* Feedback do Teste de Conexão */}
               {testAIResult && (
                 <div
-                  className={`p-4 rounded-2xl border text-xs font-bold leading-relaxed animate-fadeIn ${
+                  className={`p-4 rounded-xl border text-xs font-display font-semibold leading-relaxed animate-fadeIn ${
                     testAIResult.success
                       ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                       : 'bg-rose-50 text-rose-800 border-rose-200'
@@ -898,21 +904,21 @@ export const AdminConfiguracoes: React.FC = () => {
               )}
 
               {/* Ações */}
-              <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+              <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
                 <button
                   type="button"
                   onClick={handleTestAI}
                   disabled={testingAI || !aiConfig.apiKey}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-5 py-2.5 rounded-xl border border-slate-200 transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="bg-white hover:bg-slate-50 text-slate-700 font-display font-semibold text-xs px-4 py-2.5 rounded-xl border border-slate-200 shadow-xs transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                  {testingAI ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-orange-500" />}
+                  {testingAI ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-amber-500" />}
                   <span>Testar Conexão com a IA</span>
                 </button>
 
                 <button
                   type="submit"
                   disabled={savingAI}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer transition-all"
+                  className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
                 >
                   {savingAI ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   <span>Guardar Configurações de IA</span>
@@ -925,21 +931,21 @@ export const AdminConfiguracoes: React.FC = () => {
         {/* TAB: SERVIÇO DE E-MAILS & NOTIFICAÇÕES (PORTAIS, CLIENTES & PARCEIROS) */}
         {activeTab === 'emails' && (
           <div className="space-y-6">
-            <form onSubmit={handleSaveEmailConfig} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-              <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <form onSubmit={handleSaveEmailConfig} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6">
+              <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-black text-slate-900">Serviço de E-mails & Notificações KIVORA</h3>
-                  <p className="text-xs text-slate-500">Configuração global para envio de credenciais, licenças, notificações a parceiros e comunicados</p>
+                  <h3 className="text-base font-display font-bold text-slate-950 tracking-tight">Serviço de E-mails & Notificações KIVORA</h3>
+                  <p className="text-xs text-slate-500 font-sans mt-0.5">Configuração global para envio de credenciais, licenças, notificações a parceiros e comunicados</p>
                 </div>
-                <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 text-xs font-bold">
+                <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 text-xs font-display font-semibold">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                   <span>Sincronizado via Firestore</span>
                 </div>
               </div>
 
               {/* Presets Rápidos */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Predefinições Rápidas de 1 Clique</label>
+              <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+                <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-700">Predefinições Rápidas de 1 Clique</label>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
@@ -955,10 +961,10 @@ export const AdminConfiguracoes: React.FC = () => {
                       }));
                       notify.info('Predefinição Google Gmail selecionada. Insira a sua Palavra-passe de Aplicação de 16 caracteres.');
                     }}
-                    className={`px-3 py-1.5 border rounded-xl text-xs font-bold transition-all shadow-xs ${
+                    className={`px-3 py-1.5 border rounded-xl text-xs font-display font-semibold transition-all shadow-xs cursor-pointer ${
                       emailConfig.provider === 'gmail' 
-                        ? 'bg-blue-600 border-blue-600 text-white shadow-blue-600/20' 
-                        : 'bg-white border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 text-slate-700 hover:text-blue-600'
+                        ? 'bg-slate-950 border-slate-950 text-white' 
+                        : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
                     }`}
                   >
                     Google Gmail Oficial (kivora.angola@gmail.com)
@@ -974,10 +980,10 @@ export const AdminConfiguracoes: React.FC = () => {
                       }));
                       notify.info('Predefinição Resend API selecionada.');
                     }}
-                    className={`px-3 py-1.5 border rounded-xl text-xs font-bold transition-all shadow-xs ${
+                    className={`px-3 py-1.5 border rounded-xl text-xs font-display font-semibold transition-all shadow-xs cursor-pointer ${
                       emailConfig.provider === 'resend' 
-                        ? 'bg-blue-600 border-blue-600 text-white shadow-blue-600/20' 
-                        : 'bg-white border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 text-slate-700 hover:text-blue-600'
+                        ? 'bg-slate-950 border-slate-950 text-white' 
+                        : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
                     }`}
                   >
                     Resend API
@@ -992,10 +998,10 @@ export const AdminConfiguracoes: React.FC = () => {
                       }));
                       notify.info('Predefinição SendGrid selecionada.');
                     }}
-                    className={`px-3 py-1.5 border rounded-xl text-xs font-bold transition-all shadow-xs ${
+                    className={`px-3 py-1.5 border rounded-xl text-xs font-display font-semibold transition-all shadow-xs cursor-pointer ${
                       emailConfig.provider === 'sendgrid' 
-                        ? 'bg-blue-600 border-blue-600 text-white shadow-blue-600/20' 
-                        : 'bg-white border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 text-slate-700 hover:text-blue-600'
+                        ? 'bg-slate-950 border-slate-950 text-white' 
+                        : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
                     }`}
                   >
                     SendGrid API
@@ -1004,12 +1010,12 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Provedor Ativo</label>
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">Provedor Ativo</label>
                   <select
                     value={emailConfig.provider || 'gmail'}
                     onChange={(e) => setEmailConfig(prev => ({ ...prev, provider: e.target.value as any }))}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 outline-none cursor-pointer"
                   >
                     <option value="gmail">Google Gmail Oficial (Recomendado)</option>
                     <option value="resend">Resend API</option>
@@ -1017,8 +1023,8 @@ export const AdminConfiguracoes: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700">
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">
                     {emailConfig.provider === 'gmail' ? 'Palavra-passe de Aplicação (App Password 16 Dígitos)' : 'Chave de API (API Key)'}
                   </label>
                   <input
@@ -1031,10 +1037,10 @@ export const AdminConfiguracoes: React.FC = () => {
                       apiKey: e.target.value,
                       smtpPass: e.target.value 
                     }))}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-mono text-slate-900 focus:border-blue-600 outline-none"
+                    className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 font-mono-num text-xs text-slate-900 outline-none"
                   />
                   {emailConfig.provider === 'gmail' ? (
-                    <p className="text-[10px] text-blue-600 font-medium">
+                    <p className="text-[10px] text-slate-500 font-medium">
                       Gere uma senha de app em <strong>myaccount.google.com/apppasswords</strong> na conta <em>kivora.angola@gmail.com</em>
                     </p>
                   ) : (
@@ -1042,8 +1048,8 @@ export const AdminConfiguracoes: React.FC = () => {
                   )}
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700">E-mail Remetente Oficial</label>
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">E-mail Remetente Oficial</label>
                   <input
                     type="text"
                     required
@@ -1054,31 +1060,31 @@ export const AdminConfiguracoes: React.FC = () => {
                       senderEmail: e.target.value,
                       smtpUser: prev.provider === 'gmail' ? e.target.value : prev.smtpUser 
                     }))}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 outline-none"
                   />
                   <p className="text-[10px] text-emerald-600 font-medium">
                     O remetente visível para os clientes será <strong>{emailConfig.senderEmail || 'kivora.angola@gmail.com'}</strong>.
                   </p>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Nome de Exibição do Remetente</label>
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">Nome de Exibição do Remetente</label>
                   <input
                     type="text"
                     required
                     placeholder="KIVORA Cloud ERP"
                     value={emailConfig.senderName || 'KIVORA Cloud ERP'}
                     onChange={(e) => setEmailConfig(prev => ({ ...prev, senderName: e.target.value }))}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 outline-none"
                   />
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <div className="pt-4 border-t border-slate-100 flex justify-end">
                 <button
                   type="submit"
                   disabled={savingEmail}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                  className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
                 >
                   {savingEmail ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   <span>Guardar Definições de E-mail</span>
@@ -1087,10 +1093,10 @@ export const AdminConfiguracoes: React.FC = () => {
             </form>
 
             {/* Bloco de Teste de Envio */}
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4">
-              <div className="border-b border-slate-100 pb-2">
-                <h4 className="text-sm font-black text-slate-900">Testar Conexão de E-mail em Tempo Real</h4>
-                <p className="text-xs text-slate-500">Envie um e-mail de teste imediato para qualquer endereço para validar a entrega</p>
+            <div className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-4">
+              <div className="border-b border-slate-100 pb-3">
+                <h4 className="text-sm font-display font-bold text-slate-950 tracking-tight">Testar Conexão de E-mail em Tempo Real</h4>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">Envie um e-mail de teste imediato para qualquer endereço para validar a entrega</p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3">
@@ -1099,13 +1105,13 @@ export const AdminConfiguracoes: React.FC = () => {
                   placeholder="destino.teste@gmail.com"
                   value={testEmailAddress}
                   onChange={(e) => setTestEmailAddress(e.target.value)}
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:border-blue-600 outline-none"
+                  className="flex-1 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 text-xs font-display font-semibold text-slate-900 outline-none"
                 />
                 <button
                   type="button"
                   disabled={isTestingEmail}
                   onClick={handleTestEmailSend}
-                  className="bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                  className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center justify-center gap-2 shrink-0 cursor-pointer transition-all active:scale-[0.98]"
                 >
                   {isTestingEmail ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   <span>{isTestingEmail ? 'A Enviar Teste...' : 'Disparar E-mail de Teste'}</span>
@@ -1113,7 +1119,7 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               {testEmailResult && (
-                <div className={`p-4 rounded-2xl border text-xs font-bold flex items-start gap-2.5 animate-fadeIn ${
+                <div className={`p-4 rounded-xl border text-xs font-display font-semibold flex items-start gap-2.5 animate-fadeIn ${
                   testEmailResult.success ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'
                 }`}>
                   <span className="text-base">{testEmailResult.success ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <AlertTriangle className="w-4 h-4 text-rose-600" />}</span>
@@ -1128,45 +1134,45 @@ export const AdminConfiguracoes: React.FC = () => {
 
         {/* TAB 2: PLANOS & PREÇOS (CONFIGURAÇÃO COMPLETA DA TABELA OFICIAL) */}
         {activeTab === 'precos' && (
-          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-8">
-            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+          <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-8">
+            <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-black text-slate-900">Tabela de Preços, Planos & Simulador</h3>
-                <p className="text-xs text-slate-500">Configure os valores, descrições, recursos e botões da página de preços (/planos)</p>
+                <h3 className="text-base font-display font-bold text-slate-950 tracking-tight">Tabela de Preços, Planos & Simulador</h3>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">Configure os valores, descrições, recursos e botões da página de preços (/planos)</p>
               </div>
             </div>
 
             {/* Configurações Gerais do Cabeçalho */}
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-              <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Cabeçalho da Secção</h4>
+            <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-3">
+              <h4 className="text-[11px] font-display font-bold text-slate-900 uppercase tracking-wider">Cabeçalho da Secção</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Tag Superior</label>
+                  <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">Tag Superior</label>
                   <input
                     type="text"
                     value={settings.pricingTag || ''}
                     onChange={(e) => handleChange('pricingTag', e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-display font-semibold text-slate-900 focus:border-slate-400 outline-none"
                     placeholder="Tabela de Preços Oficiais"
                   />
                 </div>
                 <div className="space-y-1 md:col-span-2">
-                  <label className="font-bold text-slate-700">Título Principal</label>
+                  <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">Título Principal</label>
                   <input
                     type="text"
                     value={settings.pricingTitle || ''}
                     onChange={(e) => handleChange('pricingTitle', e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-display font-semibold text-slate-900 focus:border-slate-400 outline-none"
                     placeholder="Escolha a Modalidade de Licenciamento"
                   />
                 </div>
                 <div className="space-y-1 md:col-span-3">
-                  <label className="font-bold text-slate-700">Subtítulo / Descrição</label>
+                  <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500">Subtítulo / Descrição</label>
                   <input
                     type="text"
                     value={settings.pricingSubtitle || ''}
                     onChange={(e) => handleChange('pricingSubtitle', e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-600 outline-none"
+                    className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-slate-400 outline-none"
                     placeholder="Preços claros em Kwanzas (AOA) com IVA incluído no regime de isenção de software e sem cobrança por fatura emitida."
                   />
                 </div>
@@ -1177,100 +1183,100 @@ export const AdminConfiguracoes: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
               {/* PLANO 1: MENSAL STANDALONE */}
-              <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3.5 flex flex-col justify-between">
+              <div className="p-5 rounded-xl bg-slate-50/60 border border-slate-200/80 space-y-3.5 flex flex-col justify-between">
                 <div className="space-y-3 text-xs">
-                  <div className="border-b border-slate-200 pb-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                  <div className="border-b border-slate-200/80 pb-2">
+                    <span className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-700 bg-slate-200/60 px-2 py-0.5 rounded">
                       Plano 1
                     </span>
-                    <h4 className="font-black text-slate-900 text-sm mt-1">Mensal Standalone</h4>
+                    <h4 className="font-display font-bold text-slate-950 text-sm mt-1">Mensal Standalone</h4>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Categoria / Tagline</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Categoria / Tagline</label>
                     <input
                       type="text"
                       value={settings.planMensalCategory || ''}
                       onChange={(e) => handleChange('planMensalCategory', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 focus:border-blue-600 outline-none uppercase text-xs"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 font-display font-semibold text-slate-700 focus:border-slate-400 outline-none uppercase text-xs"
                       placeholder="Arranque Flexível"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Nome do Plano</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Nome do Plano</label>
                     <input
                       type="text"
                       value={settings.planMensalName || ''}
                       onChange={(e) => handleChange('planMensalName', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 font-display font-semibold text-slate-900 focus:border-slate-400 outline-none"
                       placeholder="Plano Mensal"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <label className="font-bold text-slate-700">Preço (AOA)</label>
+                      <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Preço (AOA)</label>
                       <input
                         type="text"
                         value={settings.planMensalPrice || ''}
                         onChange={(e) => handleChange('planMensalPrice', e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-blue-600 focus:border-blue-600 outline-none"
+                        className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 font-mono-num font-bold text-slate-950 focus:border-slate-400 outline-none"
                         placeholder="25.000"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="font-bold text-slate-700">Período</label>
+                      <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Período</label>
                       <input
                         type="text"
                         value={settings.planMensalPeriod || ''}
                         onChange={(e) => handleChange('planMensalPeriod', e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:border-blue-600 outline-none"
+                        className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 font-medium text-slate-700 focus:border-slate-400 outline-none"
                         placeholder="/ mês"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Descrição Curta</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Descrição Curta</label>
                     <textarea
                       rows={2}
                       value={settings.planMensalDesc || ''}
                       onChange={(e) => handleChange('planMensalDesc', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:border-blue-600 outline-none leading-relaxed"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl p-2.5 font-medium text-slate-800 focus:border-slate-400 outline-none leading-relaxed"
                       placeholder="Flexibilidade total sem contratos de fidelização..."
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Preço Terminal Extra (Simulador)</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Preço Terminal Extra (Simulador)</label>
                     <input
                       type="number"
                       value={settings.planMensalExtraTerminal ?? 10000}
                       onChange={(e) => handleChange('planMensalExtraTerminal', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 font-mono-num font-bold text-slate-900 focus:border-slate-400 outline-none"
                       placeholder="10000"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Texto do Botão (CTA)</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Texto do Botão (CTA)</label>
                     <input
                       type="text"
                       value={settings.planMensalCta || ''}
                       onChange={(e) => handleChange('planMensalCta', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 font-display font-semibold text-slate-900 focus:border-slate-400 outline-none"
                       placeholder="Aderir ao Plano Mensal"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Recursos Inclusos (1 por linha)</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Recursos Inclusos (1 por linha)</label>
                     <textarea
                       rows={6}
                       value={settings.planMensalFeatures || ''}
                       onChange={(e) => handleChange('planMensalFeatures', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-mono text-[11px] text-slate-800 focus:border-blue-600 outline-none leading-relaxed"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl p-2.5 font-mono text-[11px] text-slate-800 focus:border-slate-400 outline-none leading-relaxed"
                       placeholder="1 Posto de Trabalho Ativo&#10;Faturação Certificada AGT com QR Code"
                     />
                   </div>
@@ -1278,55 +1284,55 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               {/* PLANO 2: ANUAL MULTI-POSTOS (RECOMENDADO) */}
-              <div className="p-5 rounded-2xl bg-blue-50/50 border-2 border-blue-300 space-y-3.5 flex flex-col justify-between">
+              <div className="p-5 rounded-xl bg-white border-2 border-slate-950 space-y-3.5 flex flex-col justify-between shadow-xs">
                 <div className="space-y-3 text-xs">
-                  <div className="border-b border-blue-200 pb-2 flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-2 py-0.5 rounded border border-blue-200">
+                  <div className="border-b border-slate-200 pb-2 flex items-center justify-between">
+                    <span className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-950 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                       Plano 2 (Destaque)
                     </span>
-                    <span className="text-[10px] font-bold text-blue-800">Mais Popular</span>
+                    <span className="text-[10px] font-display font-bold text-slate-900">Mais Popular</span>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Categoria / Tagline</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Categoria / Tagline</label>
                     <input
                       type="text"
                       value={settings.planAnualCategory || ''}
                       onChange={(e) => handleChange('planAnualCategory', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 focus:border-blue-600 outline-none uppercase text-xs"
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3 py-2 font-display font-semibold text-slate-700 focus:border-slate-400 outline-none uppercase text-xs"
                       placeholder="Multi-Postos & Rede LAN"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Nome do Plano</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Nome do Plano</label>
                     <input
                       type="text"
                       value={settings.planAnualName || ''}
                       onChange={(e) => handleChange('planAnualName', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3 py-2 font-display font-semibold text-slate-900 focus:border-slate-400 outline-none"
                       placeholder="Plano Anual LAN"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <label className="font-bold text-slate-700">Badge Superior</label>
+                      <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Badge Superior</label>
                       <input
                         type="text"
                         value={settings.planAnualBadge || ''}
                         onChange={(e) => handleChange('planAnualBadge', e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-blue-700 focus:border-blue-600 outline-none uppercase text-xs"
+                        className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3 py-2 font-display font-semibold text-slate-900 focus:border-slate-400 outline-none uppercase text-xs"
                         placeholder="Mais Escolhido em Angola"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="font-bold text-slate-700">Nota de Poupança</label>
+                      <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Nota de Poupança</label>
                       <input
                         type="text"
                         value={settings.planAnualSavings || ''}
                         onChange={(e) => handleChange('planAnualSavings', e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-emerald-700 focus:border-blue-600 outline-none text-xs"
+                        className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3 py-2 font-display font-medium text-emerald-700 focus:border-slate-400 outline-none text-xs"
                         placeholder="Poupança de 50.000 Kz vs Mensal"
                       />
                     </div>
@@ -1334,67 +1340,67 @@ export const AdminConfiguracoes: React.FC = () => {
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <label className="font-bold text-slate-700">Preço (AOA)</label>
+                      <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Preço (AOA)</label>
                       <input
                         type="text"
                         value={settings.planAnualPrice || ''}
                         onChange={(e) => handleChange('planAnualPrice', e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-blue-600 focus:border-blue-600 outline-none"
+                        className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3 py-2 font-mono-num font-bold text-slate-950 focus:border-slate-400 outline-none"
                         placeholder="250.000"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="font-bold text-slate-700">Período</label>
+                      <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Período</label>
                       <input
                         type="text"
                         value={settings.planAnualPeriod || ''}
                         onChange={(e) => handleChange('planAnualPeriod', e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:border-blue-600 outline-none"
+                        className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3 py-2 font-medium text-slate-700 focus:border-slate-400 outline-none"
                         placeholder="/ ano"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Descrição Curta</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Descrição Curta</label>
                     <textarea
                       rows={2}
                       value={settings.planAnualDesc || ''}
                       onChange={(e) => handleChange('planAnualDesc', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:border-blue-600 outline-none leading-relaxed"
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl p-2.5 font-medium text-slate-800 focus:border-slate-400 outline-none leading-relaxed"
                       placeholder="A opção mais rentável para empresas ativas..."
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Preço Terminal Extra (Simulador)</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Preço Terminal Extra (Simulador)</label>
                     <input
                       type="number"
                       value={settings.planAnualExtraTerminal ?? 35000}
                       onChange={(e) => handleChange('planAnualExtraTerminal', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3 py-2 font-mono-num font-bold text-slate-900 focus:border-slate-400 outline-none"
                       placeholder="35000"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Texto do Botão (CTA)</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Texto do Botão (CTA)</label>
                     <input
                       type="text"
                       value={settings.planAnualCta || ''}
                       onChange={(e) => handleChange('planAnualCta', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3 py-2 font-display font-semibold text-slate-900 focus:border-slate-400 outline-none"
                       placeholder="Contratar Plano Anual"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Recursos Inclusos (1 por linha)</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Recursos Inclusos (1 por linha)</label>
                     <textarea
                       rows={6}
                       value={settings.planAnualFeatures || ''}
                       onChange={(e) => handleChange('planAnualFeatures', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-mono text-[11px] text-slate-800 focus:border-blue-600 outline-none leading-relaxed"
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl p-2.5 font-mono text-[11px] text-slate-800 focus:border-slate-400 outline-none leading-relaxed"
                       placeholder="Até 3 Postos em Rede LAN Incluídos&#10;Módulos de Stock, POS e RH Integrados"
                     />
                   </div>
@@ -1402,100 +1408,100 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               {/* PLANO 3: VITALÍCIO PERPÉTUO */}
-              <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3.5 flex flex-col justify-between">
+              <div className="p-5 rounded-xl bg-slate-50/60 border border-slate-200/80 space-y-3.5 flex flex-col justify-between">
                 <div className="space-y-3 text-xs">
-                  <div className="border-b border-slate-200 pb-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-purple-600 bg-purple-50 px-2 py-0.5 rounded border border-purple-100">
+                  <div className="border-b border-slate-200/80 pb-2">
+                    <span className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-700 bg-slate-200/60 px-2 py-0.5 rounded">
                       Plano 3
                     </span>
-                    <h4 className="font-black text-slate-900 text-sm mt-1">Licença Vitalícia</h4>
+                    <h4 className="font-display font-bold text-slate-950 text-sm mt-1">Licença Vitalícia</h4>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Categoria / Tagline</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Categoria / Tagline</label>
                     <input
                       type="text"
                       value={settings.planVitalicioCategory || ''}
                       onChange={(e) => handleChange('planVitalicioCategory', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 focus:border-blue-600 outline-none uppercase text-xs"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 font-display font-semibold text-slate-700 focus:border-slate-400 outline-none uppercase text-xs"
                       placeholder="Pagamento Único"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Nome do Plano</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Nome do Plano</label>
                     <input
                       type="text"
                       value={settings.planVitalicioName || ''}
                       onChange={(e) => handleChange('planVitalicioName', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 font-display font-semibold text-slate-900 focus:border-slate-400 outline-none"
                       placeholder="Licença Vitalícia"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <label className="font-bold text-slate-700">Preço (AOA)</label>
+                      <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Preço (AOA)</label>
                       <input
                         type="text"
                         value={settings.planVitalicioPrice || ''}
                         onChange={(e) => handleChange('planVitalicioPrice', e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-blue-600 focus:border-blue-600 outline-none"
+                        className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 font-mono-num font-bold text-slate-950 focus:border-slate-400 outline-none"
                         placeholder="650.000"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="font-bold text-slate-700">Período</label>
+                      <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Período</label>
                       <input
                         type="text"
                         value={settings.planVitalicioPeriod || ''}
                         onChange={(e) => handleChange('planVitalicioPeriod', e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 focus:border-blue-600 outline-none"
+                        className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 font-medium text-slate-700 focus:border-slate-400 outline-none"
                         placeholder="pagamento único"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Descrição Curta</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Descrição Curta</label>
                     <textarea
                       rows={2}
                       value={settings.planVitalicioDesc || ''}
                       onChange={(e) => handleChange('planVitalicioDesc', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800 focus:border-blue-600 outline-none leading-relaxed"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl p-2.5 font-medium text-slate-800 focus:border-slate-400 outline-none leading-relaxed"
                       placeholder="Sem renovações anuais ou mensalidades..."
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Preço Terminal Extra (Simulador)</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Preço Terminal Extra (Simulador)</label>
                     <input
                       type="number"
                       value={settings.planVitalicioExtraTerminal ?? 60000}
                       onChange={(e) => handleChange('planVitalicioExtraTerminal', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 font-mono-num font-bold text-slate-900 focus:border-slate-400 outline-none"
                       placeholder="60000"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Texto do Botão (CTA)</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Texto do Botão (CTA)</label>
                     <input
                       type="text"
                       value={settings.planVitalicioCta || ''}
                       onChange={(e) => handleChange('planVitalicioCta', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 font-display font-semibold text-slate-900 focus:border-slate-400 outline-none"
                       placeholder="Adquirir Licença Perpétua"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Recursos Inclusos (1 por linha)</label>
+                    <label className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-500">Recursos Inclusos (1 por linha)</label>
                     <textarea
                       rows={6}
                       value={settings.planVitalicioFeatures || ''}
                       onChange={(e) => handleChange('planVitalicioFeatures', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-mono text-[11px] text-slate-800 focus:border-blue-600 outline-none leading-relaxed"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl p-2.5 font-mono text-[11px] text-slate-800 focus:border-slate-400 outline-none leading-relaxed"
                       placeholder="5 Postos de Trabalho em Rede Local&#10;Licença perpétua sem expiração"
                     />
                   </div>
@@ -1504,11 +1510,11 @@ export const AdminConfiguracoes: React.FC = () => {
 
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex justify-end">
+            <div className="pt-4 border-t border-slate-100 flex justify-end">
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Planos & Preços</span>
@@ -1519,25 +1525,25 @@ export const AdminConfiguracoes: React.FC = () => {
 
         {/* TAB: VIDEOCHAMADA & TARIFAS POR MINUTO */}
         {activeTab === 'videochamada' && (
-          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-8">
-            <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-8">
+            <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-                  <Video className="w-5 h-5 text-blue-600" />
+                <h3 className="text-base font-display font-bold text-slate-950 flex items-center gap-2 tracking-tight">
+                  <Video className="w-5 h-5 text-slate-700" />
                   <span>Assistência por Videochamada & Tarifação por Minuto</span>
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 font-sans mt-0.5">
                   Configure o valor por minuto em Kwanzas (Kz), minutos de cortesia de boas-vindas e pacotes oficiais de minutos para clientes e parceiros.
                 </p>
               </div>
             </div>
 
             {/* Dica de Operação */}
-            <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200/80 text-xs text-blue-900 flex items-start gap-3">
-              <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 flex items-start gap-3">
+              <ShieldCheck className="w-5 h-5 text-slate-600 shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <p className="font-bold text-slate-900">Como funciona o Sistema de Tarifação por Minuto:</p>
-                <p className="text-[11px] text-slate-600 leading-relaxed">
+                <p className="font-display font-bold text-slate-900">Como funciona o Sistema de Tarifação por Minuto:</p>
+                <p className="text-[11px] text-slate-600 leading-relaxed font-sans">
                   O cliente ou parceiro escolhe um pacote de minutos (ex: 20m, 30m, 60m ou personalizado) e paga o valor equivalente em Kwanzas. Durante a chamada, o sistema calcula o tempo consumido segundo a segundo. Quando o saldo de minutos se esgota, a videochamada bloqueia automaticamente até nova recarga.
                 </p>
               </div>
@@ -1545,8 +1551,8 @@ export const AdminConfiguracoes: React.FC = () => {
 
             {/* Parâmetros Globais */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <label className="font-bold text-slate-700 block">Preço Oficial por Minuto (Kz)</label>
+              <div className="space-y-1.5 p-4 rounded-xl bg-slate-50/70 border border-slate-200/80">
+                <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500 block">Preço Oficial por Minuto (Kz)</label>
                 <div className="relative">
                   <input
                     type="number"
@@ -1554,16 +1560,16 @@ export const AdminConfiguracoes: React.FC = () => {
                     step="10"
                     value={settings.videoCallPricePerMinute ?? 300}
                     onChange={(e) => handleChange('videoCallPricePerMinute', parseInt(e.target.value) || 0)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-mono font-bold text-blue-600 text-sm focus:border-blue-600 outline-none"
+                    className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-mono-num font-bold text-slate-950 text-sm focus:border-slate-400 outline-none"
                     placeholder="300"
                   />
-                  <span className="absolute right-3 top-2 text-xs font-bold text-slate-400 font-mono">Kz / min</span>
+                  <span className="absolute right-3 top-2 text-xs font-mono-num font-bold text-slate-400">Kz / min</span>
                 </div>
                 <p className="text-[10px] text-slate-400">Valor base cobrado por cada 60 segundos de assistência.</p>
               </div>
 
-              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <label className="font-bold text-slate-700 block">Minutos de Cortesia Inicial</label>
+              <div className="space-y-1.5 p-4 rounded-xl bg-slate-50/70 border border-slate-200/80">
+                <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500 block">Minutos de Cortesia Inicial</label>
                 <div className="relative">
                   <input
                     type="number"
@@ -1571,16 +1577,16 @@ export const AdminConfiguracoes: React.FC = () => {
                     max="120"
                     value={settings.videoCallFreeMinutesOnboarding ?? 15}
                     onChange={(e) => handleChange('videoCallFreeMinutesOnboarding', parseInt(e.target.value) || 0)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-mono font-bold text-emerald-600 text-sm focus:border-blue-600 outline-none"
+                    className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-mono-num font-bold text-emerald-600 text-sm focus:border-slate-400 outline-none"
                     placeholder="15"
                   />
-                  <span className="absolute right-3 top-2 text-xs font-bold text-slate-400 font-mono">minutos</span>
+                  <span className="absolute right-3 top-2 text-xs font-mono-num font-bold text-slate-400">minutos</span>
                 </div>
                 <p className="text-[10px] text-slate-400">Crédito grátis oferecido no primeiro registo do cliente.</p>
               </div>
 
-              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <label className="font-bold text-slate-700 block">Mínimo Compra Personalizada</label>
+              <div className="space-y-1.5 p-4 rounded-xl bg-slate-50/70 border border-slate-200/80">
+                <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500 block">Mínimo Compra Personalizada</label>
                 <div className="relative">
                   <input
                     type="number"
@@ -1588,17 +1594,17 @@ export const AdminConfiguracoes: React.FC = () => {
                     max="60"
                     value={settings.videoCallMinPackageMinutes ?? 10}
                     onChange={(e) => handleChange('videoCallMinPackageMinutes', parseInt(e.target.value) || 10)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-mono font-bold text-slate-800 text-sm focus:border-blue-600 outline-none"
+                    className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-mono-num font-bold text-slate-900 text-sm focus:border-slate-400 outline-none"
                     placeholder="10"
                   />
-                  <span className="absolute right-3 top-2 text-xs font-bold text-slate-400 font-mono">minutos</span>
+                  <span className="absolute right-3 top-2 text-xs font-mono-num font-bold text-slate-400">minutos</span>
                 </div>
                 <p className="text-[10px] text-slate-400">Quantidade mínima permitida no slider personalizado.</p>
               </div>
 
-              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+              <div className="space-y-1.5 p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 flex flex-col justify-between">
                 <div>
-                  <label className="font-bold text-slate-700 block">Estado do Módulo</label>
+                  <label className="text-[11px] font-display font-bold uppercase tracking-wider text-slate-500 block">Estado do Módulo</label>
                   <p className="text-[10px] text-slate-400 mt-0.5">Ativar ou pausar a tarifação por minuto no portal.</p>
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer mt-2">
@@ -1606,9 +1612,9 @@ export const AdminConfiguracoes: React.FC = () => {
                     type="checkbox"
                     checked={settings.videoCallEnabled ?? true}
                     onChange={(e) => handleChange('videoCallEnabled', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded"
+                    className="w-4 h-4 accent-slate-950 rounded cursor-pointer"
                   />
-                  <span className="font-bold text-xs text-slate-800">
+                  <span className="font-display font-semibold text-xs text-slate-800">
                     {settings.videoCallEnabled ?? true ? 'Ativo & Tarifado' : 'Pausado (Acesso Livre)'}
                   </span>
                 </label>
@@ -1619,10 +1625,10 @@ export const AdminConfiguracoes: React.FC = () => {
             <div className="space-y-4 pt-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                  <h4 className="text-[11px] font-display font-bold text-slate-900 uppercase tracking-wider">
                     Pacotes Oficiais de Minutos Sugeridos
                   </h4>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 font-sans">
                     Configuração dos cartões exibidos no modal de compra rápida com descontos automáticos.
                   </p>
                 </div>
@@ -1641,7 +1647,7 @@ export const AdminConfiguracoes: React.FC = () => {
                     };
                     handleChange('videoCallPackages', [...current, newPkg]);
                   }}
-                  className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-display font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Adicionar Pacote</span>
@@ -1655,16 +1661,16 @@ export const AdminConfiguracoes: React.FC = () => {
                   const finalCost = rawCost - Math.round(rawCost * ((pkg.discountPercent || 0) / 100));
 
                   return (
-                    <div key={pkg.id || idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 relative text-xs">
+                    <div key={pkg.id || idx} className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-3 relative text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="font-mono font-black text-blue-700 text-base">{pkg.minutes} minutos</span>
+                        <span className="font-mono-num font-bold text-slate-950 text-base">{pkg.minutes} minutos</span>
                         <button
                           type="button"
                           onClick={() => {
                             const current = settings.videoCallPackages || DEFAULT_VIDEO_PACKAGES;
                             handleChange('videoCallPackages', current.filter((_, i) => i !== idx));
                           }}
-                          className="text-slate-400 hover:text-red-600 p-1 rounded transition-colors"
+                          className="text-slate-400 hover:text-rose-600 p-1 rounded-lg transition-colors cursor-pointer"
                           title="Remover pacote"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -1672,7 +1678,7 @@ export const AdminConfiguracoes: React.FC = () => {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase">Rótulo / Nome</label>
+                        <label className="text-[10px] font-display font-bold text-slate-500 uppercase">Rótulo / Nome</label>
                         <input
                           type="text"
                           value={pkg.label}
@@ -1681,13 +1687,13 @@ export const AdminConfiguracoes: React.FC = () => {
                             current[idx] = { ...current[idx], label: e.target.value };
                             handleChange('videoCallPackages', current);
                           }}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:border-blue-600 outline-none"
+                          className="w-full bg-white border border-slate-200/80 rounded-lg px-2.5 py-1.5 text-xs font-display font-semibold focus:border-slate-400 outline-none"
                         />
                       </div>
 
                       <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase">Desconto (%)</label>
+                          <label className="text-[10px] font-display font-bold text-slate-500 uppercase">Desconto (%)</label>
                           <input
                             type="number"
                             min="0"
@@ -1698,12 +1704,12 @@ export const AdminConfiguracoes: React.FC = () => {
                               current[idx] = { ...current[idx], discountPercent: parseInt(e.target.value) || 0 };
                               handleChange('videoCallPackages', current);
                             }}
-                            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-emerald-600 focus:border-blue-600 outline-none"
+                            className="w-full bg-white border border-slate-200/80 rounded-lg px-2.5 py-1.5 text-xs font-mono-num font-bold text-emerald-600 focus:border-slate-400 outline-none"
                           />
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase">Badge / Tag</label>
+                          <label className="text-[10px] font-display font-bold text-slate-500 uppercase">Badge / Tag</label>
                           <input
                             type="text"
                             value={pkg.badge || ''}
@@ -1713,14 +1719,14 @@ export const AdminConfiguracoes: React.FC = () => {
                               handleChange('videoCallPackages', current);
                             }}
                             placeholder="Ex: POPULAR"
-                            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] font-bold focus:border-blue-600 outline-none"
+                            className="w-full bg-white border border-slate-200/80 rounded-lg px-2.5 py-1.5 text-[10px] font-display font-bold focus:border-slate-400 outline-none"
                           />
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px]">
-                        <span className="text-slate-500">Valor Final:</span>
-                        <span className="font-mono font-bold text-slate-900">
+                      <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-[11px]">
+                        <span className="text-slate-500 font-sans">Valor Final:</span>
+                        <span className="font-mono-num font-bold text-slate-950">
                           {new Intl.NumberFormat('pt-AO').format(finalCost)} Kz
                         </span>
                       </div>
@@ -1734,7 +1740,7 @@ export const AdminConfiguracoes: React.FC = () => {
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Definições de Videochamada</span>
@@ -1745,71 +1751,71 @@ export const AdminConfiguracoes: React.FC = () => {
 
         {/* TAB: VÍDEOS & MULTIMÉDIA DO YOUTUBE */}
         {activeTab === 'videos' && (
-          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-8">
-            <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 sm:space-y-8">
+            <div className="border-b border-slate-200/70 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                <h3 className="text-base font-display font-bold text-slate-900 flex items-center gap-2">
                   <Youtube className="w-5 h-5 text-red-600" />
                   <span>Vídeos do YouTube no Site Oficial</span>
                 </h3>
-                <p className="text-xs text-slate-500">Configure links do YouTube (normais, encurtados ou shorts) que são exibidos de forma moderna e sem molduras pesadas</p>
+                <p className="text-xs font-display text-slate-500 mt-0.5">Configure links do YouTube (normais, encurtados ou shorts) exibidos com reprodução otimizada em alta definição</p>
               </div>
             </div>
 
             {/* Dica de formato YouTube */}
-            <div className="p-4 rounded-2xl bg-red-50/70 border border-red-200/80 text-xs text-red-900 flex items-start gap-3">
+            <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 text-xs text-slate-700 flex items-start gap-3">
               <Youtube className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="font-bold text-slate-900">Formatos de Links Suportados Automaticamente:</p>
+              <div className="space-y-1 font-display">
+                <p className="font-semibold text-slate-900">Formatos de Links Suportados Automaticamente:</p>
                 <p className="text-[11px] text-slate-600 leading-relaxed">
-                  Pode colar links directos como <code>https://www.youtube.com/watch?v=XXXXXX</code>, links partilhados <code>https://youtu.be/XXXXXX</code>, links de Shorts <code>https://www.youtube.com/shorts/XXXXXX</code> ou links de incorporação <code>/embed/</code>. O sistema converte automaticamente com modo de privacidade e alta definição.
+                  Pode colar links directos como <code className="font-mono-num font-semibold text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">https://www.youtube.com/watch?v=XXXXXX</code>, links partilhados <code className="font-mono-num font-semibold text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">https://youtu.be/XXXXXX</code>, shorts ou links de incorporação. O sistema converte automaticamente com modo de privacidade estrita.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs font-display">
               
               {/* 1. Vídeo da Homepage */}
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between">
+              <div className="p-5 rounded-xl bg-slate-50/60 border border-slate-200/70 space-y-3.5 flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                    <span className="font-black text-slate-900 uppercase tracking-wider text-[11px] text-blue-600">
+                  <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                    <span className="font-display font-bold uppercase tracking-wider text-[11px] text-blue-700">
                       1. Página Inicial (Homepage)
                     </span>
-                    <span className="text-[10px] bg-blue-100/80 text-blue-700 font-bold px-2 py-0.5 rounded">
+                    <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-200/60 font-semibold px-2 py-0.5 rounded-md">
                       Secção Principal
                     </span>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Link do YouTube</label>
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Link do YouTube</label>
                     <input
                       type="url"
                       value={settings.videoHomeUrl || ''}
                       onChange={(e) => handleChange('videoHomeUrl', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono text-slate-900 focus:border-blue-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-mono-num text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="https://www.youtube.com/watch?v=..."
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Título do Vídeo</label>
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Título do Vídeo</label>
                     <input
                       type="text"
                       value={settings.videoHomeTitle || ''}
                       onChange={(e) => handleChange('videoHomeTitle', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-display font-semibold text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="Conheça o KIVORA ERP em Ação"
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Descrição / Subtítulo</label>
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Descrição / Subtítulo</label>
                     <input
                       type="text"
                       value={settings.videoHomeDesc || ''}
                       onChange={(e) => handleChange('videoHomeDesc', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:border-blue-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 text-slate-700 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="Demonstração rápida da interface do POS..."
                     />
                   </div>
@@ -1817,46 +1823,46 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               {/* 2. Vídeo dos Manuais de Apoio */}
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between">
+              <div className="p-5 rounded-xl bg-slate-50/60 border border-slate-200/70 space-y-3.5 flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                    <span className="font-black text-slate-900 uppercase tracking-wider text-[11px] text-amber-600">
+                  <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                    <span className="font-display font-bold uppercase tracking-wider text-[11px] text-amber-700">
                       2. Central de Manuais & Tutoriais
                     </span>
-                    <span className="text-[10px] bg-amber-100/80 text-amber-700 font-bold px-2 py-0.5 rounded">
+                    <span className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200/60 font-semibold px-2 py-0.5 rounded-md">
                       Área de Manuais
                     </span>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Link do YouTube</label>
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Link do YouTube</label>
                     <input
                       type="url"
                       value={settings.videoManuaisUrl || ''}
                       onChange={(e) => handleChange('videoManuaisUrl', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono text-slate-900 focus:border-amber-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-mono-num text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="https://www.youtube.com/watch?v=..."
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Título do Tutorial</label>
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Título do Tutorial</label>
                     <input
                       type="text"
                       value={settings.videoManuaisTitle || ''}
                       onChange={(e) => handleChange('videoManuaisTitle', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-amber-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-display font-semibold text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="Guia Rápido: Operação de Caixa & Fecho Z"
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Descrição / Dica</label>
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Descrição / Dica</label>
                     <input
                       type="text"
                       value={settings.videoManuaisDesc || ''}
                       onChange={(e) => handleChange('videoManuaisDesc', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:border-amber-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 text-slate-700 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="Aprenda passo a passo como realizar a abertura..."
                     />
                   </div>
@@ -1864,46 +1870,46 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               {/* 3. Vídeo do Programa de Parceiros */}
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between">
+              <div className="p-5 rounded-xl bg-slate-50/60 border border-slate-200/70 space-y-3.5 flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                    <span className="font-black text-slate-900 uppercase tracking-wider text-[11px] text-purple-600">
+                  <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                    <span className="font-display font-bold uppercase tracking-wider text-[11px] text-purple-700">
                       3. Programa de Parceiros
                     </span>
-                    <span className="text-[10px] bg-purple-100/80 text-purple-700 font-bold px-2 py-0.5 rounded">
+                    <span className="text-[10px] bg-purple-50 text-purple-700 border border-purple-200/60 font-semibold px-2 py-0.5 rounded-md">
                       Página de Parceiros
                     </span>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Link do YouTube</label>
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Link do YouTube</label>
                     <input
                       type="url"
                       value={settings.videoParceirosUrl || ''}
                       onChange={(e) => handleChange('videoParceirosUrl', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono text-slate-900 focus:border-purple-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-mono-num text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="https://www.youtube.com/watch?v=..."
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Título do Vídeo de Parcerias</label>
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Título do Vídeo de Parcerias</label>
                     <input
                       type="text"
                       value={settings.videoParceirosTitle || ''}
                       onChange={(e) => handleChange('videoParceirosTitle', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-purple-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-display font-semibold text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="Programa Oficial de Parceiros & Revendedores"
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Descrição</label>
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Descrição</label>
                     <input
                       type="text"
                       value={settings.videoParceirosDesc || ''}
                       onChange={(e) => handleChange('videoParceirosDesc', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:border-purple-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 text-slate-700 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="Descubra como lucrar até 50% de margem com a revenda..."
                     />
                   </div>
@@ -1911,46 +1917,46 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               {/* 4. Vídeo do Guia AGT */}
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between">
+              <div className="p-5 rounded-xl bg-slate-50/60 border border-slate-200/70 space-y-3.5 flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                    <span className="font-black text-slate-900 uppercase tracking-wider text-[11px] text-emerald-600">
+                  <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                    <span className="font-display font-bold uppercase tracking-wider text-[11px] text-emerald-700">
                       4. Guia Oficial AGT (Decreto 71/25)
                     </span>
-                    <span className="text-[10px] bg-emerald-100/80 text-emerald-700 font-bold px-2 py-0.5 rounded">
+                    <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold px-2 py-0.5 rounded-md">
                       Conformidade Fiscal
                     </span>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Link do YouTube</label>
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Link do YouTube</label>
                     <input
                       type="url"
                       value={settings.videoAgtUrl || ''}
                       onChange={(e) => handleChange('videoAgtUrl', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono text-slate-900 focus:border-emerald-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-mono-num text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="https://www.youtube.com/watch?v=..."
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Título</label>
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Título</label>
                     <input
                       type="text"
                       value={settings.videoAgtTitle || ''}
                       onChange={(e) => handleChange('videoAgtTitle', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-emerald-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-display font-semibold text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="Exigências do Decreto 71/25 & Faturação AGT"
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Descrição</label>
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Descrição</label>
                     <input
                       type="text"
                       value={settings.videoAgtDesc || ''}
                       onChange={(e) => handleChange('videoAgtDesc', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:border-emerald-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 text-slate-700 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="Entenda os regimes de IVA e a regra de anulação..."
                     />
                   </div>
@@ -1958,47 +1964,47 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               {/* 5. Vídeo de Hardware & POS */}
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between md:col-span-2">
+              <div className="p-5 rounded-xl bg-slate-50/60 border border-slate-200/70 space-y-3.5 flex flex-col justify-between md:col-span-2">
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                    <span className="font-black text-slate-900 uppercase tracking-wider text-[11px] text-slate-800">
+                  <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                    <span className="font-display font-bold uppercase tracking-wider text-[11px] text-slate-800">
                       5. Hardware & Equipamentos POS
                     </span>
-                    <span className="text-[10px] bg-slate-200 text-slate-800 font-bold px-2 py-0.5 rounded">
+                    <span className="text-[10px] bg-slate-100 text-slate-700 border border-slate-200 font-semibold px-2 py-0.5 rounded-md">
                       Página de Hardware
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div className="space-y-1">
-                      <label className="font-bold text-slate-700">Link do YouTube</label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                    <div className="space-y-1.5">
+                      <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Link do YouTube</label>
                       <input
                         type="url"
                         value={settings.videoHardwareUrl || ''}
                         onChange={(e) => handleChange('videoHardwareUrl', e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono text-slate-900 focus:border-blue-600 outline-none"
+                        className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-mono-num text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                         placeholder="https://www.youtube.com/watch?v=..."
                       />
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="font-bold text-slate-700">Título</label>
+                    <div className="space-y-1.5">
+                      <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Título</label>
                       <input
                         type="text"
                         value={settings.videoHardwareTitle || ''}
                         onChange={(e) => handleChange('videoHardwareTitle', e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                        className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-display font-semibold text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                         placeholder="Instalação Rápida de Impressoras Térmicas 80mm"
                       />
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="font-bold text-slate-700">Descrição</label>
+                    <div className="space-y-1.5">
+                      <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Descrição</label>
                       <input
                         type="text"
                         value={settings.videoHardwareDesc || ''}
                         onChange={(e) => handleChange('videoHardwareDesc', e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:border-blue-600 outline-none"
+                        className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 text-slate-700 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                         placeholder="Configuração plug-and-play de impressoras ESC/POS..."
                       />
                     </div>
@@ -2008,11 +2014,11 @@ export const AdminConfiguracoes: React.FC = () => {
 
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex justify-end">
+            <div className="pt-2 border-t border-slate-200/70 flex justify-end">
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Vídeos YouTube</span>
@@ -2023,15 +2029,15 @@ export const AdminConfiguracoes: React.FC = () => {
 
         {/* TAB: NOTIFICAÇÕES & WEBHOOK */}
         {activeTab === 'notificacoes' && (
-          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-3">
-              <h3 className="text-base font-black text-slate-900">Notificações, Leads & Integrações Webhook</h3>
-              <p className="text-xs text-slate-500">Configure os canais de recepção de agendamentos de demonstrações, candidaturas de parceiros e automação de marketing</p>
+          <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 sm:space-y-8">
+            <div className="border-b border-slate-200/70 pb-4">
+              <h3 className="text-base font-display font-bold text-slate-900">Notificações, Leads & Integrações Webhook</h3>
+              <p className="text-xs font-display text-slate-500 mt-0.5">Configure os canais de recepção de agendamentos de demonstrações, candidaturas de parceiros e automação de marketing</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs font-display">
               <div className="space-y-1.5 md:col-span-2">
-                <label className="font-bold text-slate-700 uppercase flex items-center justify-between">
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider flex items-center justify-between">
                   <span>URL do Webhook Externo (Zapier / Make / n8n / CRM)</span>
                   <span className="text-[10px] text-slate-400 font-normal">Opcional</span>
                 </label>
@@ -2039,54 +2045,54 @@ export const AdminConfiguracoes: React.FC = () => {
                   type="url"
                   value={settings.webhookUrl || ''}
                   onChange={(e) => handleChange('webhookUrl', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="https://webhook.site/sua-url-ou-zapier"
                 />
-                <p className="text-[10px] text-slate-400">Todos os pedidos de demonstração e candidaturas de parceiros podem ser enviados em JSON para este endpoint.</p>
+                <p className="text-[11px] text-slate-400">Todos os pedidos de demonstração e candidaturas de parceiros podem ser enviados em JSON para este endpoint.</p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Email de Recepção de Leads (Demonstrações)</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Email de Recepção de Leads (Demonstrações)</label>
                 <input
                   type="email"
                   value={settings.notifyEmailLeads || ''}
                   onChange={(e) => handleChange('notifyEmailLeads', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="comercial@kivora.ao"
                 />
-                <p className="text-[10px] text-slate-400">Caixa de correio alertada quando um cliente solicita uma demonstração.</p>
+                <p className="text-[11px] text-slate-400">Caixa de correio alertada quando um cliente solicita uma demonstração.</p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Email de Recepção de Candidaturas de Parceiros</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Email de Recepção de Candidaturas de Parceiros</label>
                 <input
                   type="email"
                   value={settings.notifyEmailPartners || ''}
                   onChange={(e) => handleChange('notifyEmailPartners', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="parceiros@kivora.ao"
                 />
-                <p className="text-[10px] text-slate-400">Caixa de correio alertada quando um revendedor envia candidatura.</p>
+                <p className="text-[11px] text-slate-400">Caixa de correio alertada quando um revendedor envia candidatura.</p>
               </div>
 
               <div className="space-y-1.5 md:col-span-2">
-                <label className="font-bold text-slate-700 uppercase">Mensagem Padrão de Abertura no WhatsApp</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Mensagem Padrão de Abertura no WhatsApp</label>
                 <input
                   type="text"
                   value={settings.whatsappDefaultMessage || ''}
                   onChange={(e) => handleChange('whatsappDefaultMessage', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-medium text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="Olá! Gostaria de agendar uma demonstração do KIVORA ERP para a minha empresa."
                 />
-                <p className="text-[10px] text-slate-400">Texto pré-preenchido quando o visitante clica no botão de WhatsApp do site.</p>
+                <p className="text-[11px] text-slate-400">Texto pré-preenchido quando o visitante clica no botão de WhatsApp do site.</p>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex justify-end">
+            <div className="pt-2 border-t border-slate-200/70 flex justify-end">
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Notificações</span>
@@ -2097,17 +2103,17 @@ export const AdminConfiguracoes: React.FC = () => {
 
         {/* TAB: AVISOS & COMUNICADOS */}
         {activeTab === 'comunicados' && (
-          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-3">
-              <h3 className="text-base font-black text-slate-900">Barra de Avisos Globais & Banner de Cookies</h3>
-              <p className="text-xs text-slate-500">Configure avisos de topo, comunicados de atualizações fiscais e consentimento de cookies</p>
+          <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 sm:space-y-8">
+            <div className="border-b border-slate-200/70 pb-4">
+              <h3 className="text-base font-display font-bold text-slate-900">Barra de Avisos Globais & Banner de Cookies</h3>
+              <p className="text-xs font-display text-slate-500 mt-0.5">Configure avisos de topo, comunicados de atualizações fiscais e consentimento de cookies</p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-blue-50/60 border border-blue-200 space-y-4 text-xs">
+            <div className="p-5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-4 text-xs font-display">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-bold text-slate-900">Barra de Anúncio / Comunicado no Topo do Portal</h4>
-                  <p className="text-[11px] text-slate-500">Exibe uma faixa de destaque no cabeçalho de todas as páginas públicas.</p>
+                  <h4 className="font-semibold text-slate-900">Barra de Anúncio / Comunicado no Topo do Portal</h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Exibe uma faixa de destaque no cabeçalho de todas as páginas públicas.</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -2116,39 +2122,39 @@ export const AdminConfiguracoes: React.FC = () => {
                     onChange={(e) => handleChange('announcementBarEnabled', e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-slate-950"></div>
                 </label>
               </div>
 
               {settings.announcementBarEnabled && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-blue-200/60">
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Badge / Etiqueta</label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-3 border-t border-slate-200/70">
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Badge / Etiqueta</label>
                     <input
                       type="text"
                       value={settings.announcementBadge || ''}
                       onChange={(e) => handleChange('announcementBadge', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:border-blue-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs font-display font-semibold text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="DECRETO 71/25"
                     />
                   </div>
-                  <div className="space-y-1 md:col-span-2">
-                    <label className="font-bold text-slate-700">Texto da Mensagem</label>
+                  <div className="space-y-1.5 md:col-span-2">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Texto da Mensagem</label>
                     <input
                       type="text"
                       value={settings.announcementText || ''}
                       onChange={(e) => handleChange('announcementText', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:border-blue-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs font-display font-medium text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="Conformidade integral com o Decreto Presidencial n.º 71/25 e novas regras fiscais da AGT 2026."
                     />
                   </div>
-                  <div className="space-y-1 md:col-span-3">
-                    <label className="font-bold text-slate-700">Link de Destino ao Clicar (Rota ou URL)</label>
+                  <div className="space-y-1.5 md:col-span-3">
+                    <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Link de Destino ao Clicar (Rota ou URL)</label>
                     <input
                       type="text"
                       value={settings.announcementLink || ''}
                       onChange={(e) => handleChange('announcementLink', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 focus:border-blue-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs font-mono-num text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="/guia-agt"
                     />
                   </div>
@@ -2156,10 +2162,10 @@ export const AdminConfiguracoes: React.FC = () => {
               )}
             </div>
 
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+            <div className="p-5 rounded-xl bg-slate-50/70 border border-slate-200/80 flex items-center justify-between text-xs font-display">
               <div>
-                <h4 className="font-bold text-slate-900">Banner de Política de Cookies & Privacidade</h4>
-                <p className="text-[11px] text-slate-500">Exibe a caixa de aviso de cookies no primeiro acesso do visitante.</p>
+                <h4 className="font-semibold text-slate-900">Banner de Política de Cookies & Privacidade</h4>
+                <p className="text-[11px] text-slate-500 mt-0.5">Exibe a caixa de aviso de cookies no primeiro acesso do visitante.</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -2168,15 +2174,15 @@ export const AdminConfiguracoes: React.FC = () => {
                   onChange={(e) => handleChange('cookieBannerEnabled', e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-slate-950"></div>
               </label>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex justify-end">
+            <div className="pt-2 border-t border-slate-200/70 flex justify-end">
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Avisos & Comunicados</span>
@@ -2187,96 +2193,96 @@ export const AdminConfiguracoes: React.FC = () => {
 
         {/* TAB: MÉTRICAS & NÚMEROS */}
         {activeTab === 'metricas' && (
-          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+          <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 sm:space-y-8">
+            <div className="border-b border-slate-200/70 pb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-black text-slate-900">Estatísticas & Números de Impacto</h3>
-                <p className="text-xs text-slate-500">Métricas exibidas com animação de contagem na Homepage e páginas oficiais</p>
+                <h3 className="text-base font-display font-bold text-slate-900">Estatísticas & Números de Impacto</h3>
+                <p className="text-xs font-display text-slate-500 mt-0.5">Métricas exibidas com animação de contagem na Homepage e páginas oficiais</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 text-xs">
-              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <label className="font-bold text-slate-800 uppercase flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-blue-600" />
-                  Empresas & Lojas Ativas
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 text-xs font-display">
+              <div className="space-y-2 p-5 rounded-xl bg-slate-50/60 border border-slate-200/70">
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-blue-700" />
+                  <span>Empresas & Lojas Ativas</span>
                 </label>
                 <input
                   type="number"
                   value={settings.statCompaniesCount ?? 850}
                   onChange={(e) => handleChange('statCompaniesCount', parseInt(e.target.value) || 0)}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-black text-base text-slate-900 focus:border-blue-600 outline-none"
+                  className="w-full bg-white border border-slate-200/80 rounded-xl px-4 py-2.5 font-mono-num font-bold text-base text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="850"
                 />
                 <p className="text-[11px] text-slate-500">Número de empresas faturando com o Kivora</p>
               </div>
 
-              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <label className="font-bold text-slate-800 uppercase flex items-center gap-1.5">
-                  <Monitor className="w-3.5 h-3.5 text-emerald-600" />
-                  Terminais LAN / Caixas Instalados
+              <div className="space-y-2 p-5 rounded-xl bg-slate-50/60 border border-slate-200/70">
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                  <Monitor className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>Terminais LAN / Caixas Instalados</span>
                 </label>
                 <input
                   type="number"
                   value={settings.statTerminalsCount ?? 2400}
                   onChange={(e) => handleChange('statTerminalsCount', parseInt(e.target.value) || 0)}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-black text-base text-emerald-600 focus:border-blue-600 outline-none"
+                  className="w-full bg-white border border-slate-200/80 rounded-xl px-4 py-2.5 font-mono-num font-bold text-base text-emerald-700 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="2400"
                 />
                 <p className="text-[11px] text-slate-500">Total de postos físicos em operação</p>
               </div>
 
-              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <label className="font-bold text-slate-800 uppercase flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-                  Volume de Faturas Emitidas
+              <div className="space-y-2 p-5 rounded-xl bg-slate-50/60 border border-slate-200/70">
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Volume de Faturas Emitidas</span>
                 </label>
                 <input
                   type="text"
                   value={settings.statInvoicesCount || '+14.5M'}
                   onChange={(e) => handleChange('statInvoicesCount', e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-black text-base text-amber-600 focus:border-blue-600 outline-none"
+                  className="w-full bg-white border border-slate-200/80 rounded-xl px-4 py-2.5 font-mono-num font-bold text-base text-amber-700 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="+14.5M"
                 />
                 <p className="text-[11px] text-slate-500">Faturas processadas com QR Code da AGT</p>
               </div>
 
-              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <label className="font-bold text-slate-800 uppercase flex items-center gap-1.5">
-                  <TrendingUp className="w-3.5 h-3.5 text-blue-600" />
-                  Disponibilidade Operacional (Uptime)
+              <div className="space-y-2 p-5 rounded-xl bg-slate-50/60 border border-slate-200/70">
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                  <TrendingUp className="w-3.5 h-3.5 text-blue-700" />
+                  <span>Disponibilidade Operacional (Uptime)</span>
                 </label>
                 <input
                   type="text"
                   value={settings.statUptimePercent || '99.98%'}
                   onChange={(e) => handleChange('statUptimePercent', e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-black text-base text-blue-600 focus:border-blue-600 outline-none"
+                  className="w-full bg-white border border-slate-200/80 rounded-xl px-4 py-2.5 font-mono-num font-bold text-base text-blue-700 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="99.98%"
                 />
                 <p className="text-[11px] text-slate-500">Estabilidade sem interrupção de caixas</p>
               </div>
 
-              <div className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <label className="font-bold text-slate-800 uppercase flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-indigo-600" />
-                  Províncias com Presença Ativa
+              <div className="space-y-2 p-5 rounded-xl bg-slate-50/60 border border-slate-200/70">
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-indigo-700" />
+                  <span>Províncias com Presença Ativa</span>
                 </label>
                 <input
                   type="number"
                   value={settings.statProvincesCount ?? 18}
                   onChange={(e) => handleChange('statProvincesCount', parseInt(e.target.value) || 18)}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-black text-base text-indigo-600 focus:border-blue-600 outline-none"
+                  className="w-full bg-white border border-slate-200/80 rounded-xl px-4 py-2.5 font-mono-num font-bold text-base text-indigo-700 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="18"
                 />
                 <p className="text-[11px] text-slate-500">Total de províncias de Angola atendidas</p>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex justify-end">
+            <div className="pt-2 border-t border-slate-200/70 flex justify-end">
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Métricas</span>
@@ -2289,77 +2295,77 @@ export const AdminConfiguracoes: React.FC = () => {
         {activeTab === 'marcas' && (
           <div className="space-y-6">
             {/* Formulário de Adicionar Nova Marca */}
-            <form onSubmit={handleAddBrand} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4">
-              <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <form onSubmit={handleAddBrand} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-5">
+              <div className="border-b border-slate-200/70 pb-4 flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-black text-slate-900">Adicionar Empresa Parceira ou Cliente</h3>
-                  <p className="text-xs text-slate-500">Exibido no carrossel da homepage e nas páginas de parceiros</p>
+                  <h3 className="text-base font-display font-bold text-slate-900">Adicionar Empresa Parceira ou Cliente</h3>
+                  <p className="text-xs font-display text-slate-500 mt-0.5">Exibido no carrossel da homepage e nas páginas de parceiros</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
-                <div className="space-y-1 lg:col-span-2">
-                  <label className="font-bold text-slate-700 uppercase">Nome da Empresa</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 text-xs font-display">
+                <div className="space-y-1.5 lg:col-span-2">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Nome da Empresa</label>
                   <input
                     type="text"
                     value={newBrandName}
                     onChange={(e) => setNewBrandName(e.target.value)}
                     placeholder="Ex: Supermercados Aliança"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-semibold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                     required
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Tipo</label>
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Tipo</label>
                   <select
                     value={newBrandType}
                     onChange={(e) => setNewBrandType(e.target.value as any)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-800 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all"
                   >
                     <option value="cliente">Cliente</option>
                     <option value="parceiro">Parceiro TI</option>
                   </select>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Setor</label>
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Setor</label>
                   <input
                     type="text"
                     value={newBrandSector}
                     onChange={(e) => setNewBrandSector(e.target.value)}
                     placeholder="Ex: Retalho"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-semibold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Província</label>
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Província</label>
                   <input
                     type="text"
                     value={newBrandProvince}
                     onChange={(e) => setNewBrandProvince(e.target.value)}
                     placeholder="Ex: Luanda"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-semibold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1 text-xs">
-                <label className="font-bold text-slate-700 uppercase">URL do Logótipo (Opcional — se vazio usa iniciais elegantes)</label>
+              <div className="space-y-1.5 text-xs font-display">
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">URL do Logótipo (Opcional — se vazio usa iniciais elegantes)</label>
                 <input
                   type="url"
                   value={newBrandLogoUrl}
                   onChange={(e) => setNewBrandLogoUrl(e.target.value)}
                   placeholder="https://exemplo.ao/logo.png"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-mono text-xs text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num text-xs text-slate-800 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                 />
               </div>
 
               <div className="flex justify-end pt-1">
                 <button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                  className="bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Adicionar à Lista</span>
@@ -2368,58 +2374,58 @@ export const AdminConfiguracoes: React.FC = () => {
             </form>
 
             {/* Lista Atual de Marcas */}
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="text-base font-black text-slate-900">
-                  Marcas Cadastradas ({(settings.partnerLogos || []).length})
+            <div className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-200/70 pb-4">
+                <h3 className="text-base font-display font-bold text-slate-900">
+                  Marcas Cadastradas <span className="font-mono-num text-sm text-slate-500 font-semibold">({(settings.partnerLogos || []).length})</span>
                 </h3>
                 <button
                   onClick={handleSaveSettings}
                   disabled={saving}
-                  className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs px-5 py-2 rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer"
+                  className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-4 py-2 rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98]"
                 >
                   {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                   <span>Salvar Alterações</span>
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 {(settings.partnerLogos || []).map((brand) => (
                   <div
                     key={brand.id}
-                    className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition-all ${
-                      brand.active ? 'bg-slate-50 border-slate-200' : 'bg-slate-100/60 border-slate-200/50 opacity-60'
+                    className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 transition-all ${
+                      brand.active ? 'bg-slate-50/70 border-slate-200/80 hover:bg-white hover:border-slate-300' : 'bg-slate-100/50 border-slate-200/50 opacity-60'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-black text-xs shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-800 flex items-center justify-center font-display font-bold text-xs shrink-0 overflow-hidden">
                         {brand.logoUrl ? (
-                          <img src={brand.logoUrl} alt={brand.name} className="w-full h-full object-contain rounded-xl" />
+                          <img src={brand.logoUrl} alt={brand.name} className="w-full h-full object-contain p-1" />
                         ) : (
                           brand.name.substring(0, 2).toUpperCase()
                         )}
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 font-display">
                         <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-xs text-slate-900 truncate block">{brand.name}</span>
-                          <span className={`px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider shrink-0 ${
-                            brand.type === 'parceiro' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
+                          <span className="font-semibold text-xs text-slate-900 truncate block">{brand.name}</span>
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider shrink-0 border ${
+                            brand.type === 'parceiro' ? 'bg-blue-50 text-blue-700 border-blue-200/60' : 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
                           }`}>
                             {brand.type}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-500 truncate">
+                        <p className="text-[11px] text-slate-500 truncate mt-0.5">
                           {[brand.sector, brand.province].filter(Boolean).join(' • ')}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <button
                         type="button"
                         onClick={() => handleToggleBrandActive(brand.id)}
-                        className={`p-1.5 rounded-lg text-xs font-bold ${
-                          brand.active ? 'text-emerald-700 bg-emerald-100' : 'text-slate-500 bg-slate-200'
+                        className={`px-2 py-1 rounded-lg text-[10px] font-display font-semibold transition-colors cursor-pointer border ${
+                          brand.active ? 'text-emerald-700 bg-emerald-50 border-emerald-200/60' : 'text-slate-600 bg-slate-100 border-slate-200'
                         }`}
                         title={brand.active ? 'Ativo (clique para ocultar)' : 'Oculto (clique para ativar)'}
                       >
@@ -2428,7 +2434,7 @@ export const AdminConfiguracoes: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleDeleteBrand(brand.id)}
-                        className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                        className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
                         title="Remover"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -2443,92 +2449,92 @@ export const AdminConfiguracoes: React.FC = () => {
 
         {/* TAB: INVESTIDORES & GOVERNANÇA */}
         {activeTab === 'investidores' && (
-          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+          <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 sm:space-y-8">
+            <div className="border-b border-slate-200/70 pb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-black text-slate-900">Relações com Investidores & Governança</h3>
-                <p className="text-xs text-slate-500">Dados institucionais exibidos na página /investidores</p>
+                <h3 className="text-base font-display font-bold text-slate-900">Relações com Investidores & Governança</h3>
+                <p className="text-xs font-display text-slate-500 mt-0.5">Dados institucionais exibidos na página oficial de investidores</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs font-display">
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Título da Seção de Investidores</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Título da Seção de Investidores</label>
                 <input
                   type="text"
                   value={settings.investorInfo?.title || DEFAULT_INVESTOR_SETTINGS.title}
                   onChange={(e) => handleInvestorChange('title', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Crescimento Anual</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Crescimento Anual</label>
                 <input
                   type="text"
                   value={settings.investorInfo?.annualGrowth || DEFAULT_INVESTOR_SETTINGS.annualGrowth}
                   onChange={(e) => handleInvestorChange('annualGrowth', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-blue-600 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-emerald-700 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="+128% ao ano"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Entidade Legal</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Entidade Legal</label>
                 <input
                   type="text"
                   value={settings.investorInfo?.legalEntity || DEFAULT_INVESTOR_SETTINGS.legalEntity}
                   onChange={(e) => handleInvestorChange('legalEntity', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Capital Social</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Capital Social</label>
                 <input
                   type="text"
                   value={settings.investorInfo?.shareCapital || DEFAULT_INVESTOR_SETTINGS.shareCapital}
                   onChange={(e) => handleInvestorChange('shareCapital', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Auditoria & Homologação</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Auditoria & Homologação</label>
                 <input
                   type="text"
                   value={settings.investorInfo?.auditedBy || DEFAULT_INVESTOR_SETTINGS.auditedBy}
                   onChange={(e) => handleInvestorChange('auditedBy', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-emerald-600 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-emerald-700 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Email do Conselho de Administração</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Email do Conselho de Administração</label>
                 <input
                   type="email"
                   value={settings.investorInfo?.contactEmail || DEFAULT_INVESTOR_SETTINGS.contactEmail}
                   onChange={(e) => handleInvestorChange('contactEmail', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-blue-600 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                 />
               </div>
 
               <div className="space-y-1.5 md:col-span-2">
-                <label className="font-bold text-slate-700 uppercase">Resumo da Tese de Negócio</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Resumo da Tese de Negócio</label>
                 <textarea
                   rows={3}
                   value={settings.investorInfo?.summary || DEFAULT_INVESTOR_SETTINGS.summary}
                   onChange={(e) => handleInvestorChange('summary', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:bg-white focus:border-blue-600 outline-none leading-relaxed"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl p-3.5 text-xs font-display text-slate-800 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none leading-relaxed transition-all placeholder:text-slate-400"
                 />
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex justify-end">
+            <div className="pt-2 border-t border-slate-200/70 flex justify-end">
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Dados de Investidores</span>
@@ -2539,75 +2545,77 @@ export const AdminConfiguracoes: React.FC = () => {
 
         {/* TAB: 18 PROVÍNCIAS */}
         {activeTab === 'provincias' && (
-          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+          <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 sm:space-y-8">
+            <div className="border-b border-slate-200/70 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-base font-black text-slate-900">Cobertura nas 18 Províncias de Angola</h3>
-                <p className="text-xs text-slate-500">Configure clientes ativos e parceiros técnicos por região (/provincias)</p>
+                <h3 className="text-base font-display font-bold text-slate-900">Cobertura nas 18 Províncias de Angola</h3>
+                <p className="text-xs font-display text-slate-500 mt-0.5">Configure clientes ativos e parceiros técnicos por região (/provincias)</p>
               </div>
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-5 py-2 rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-4 py-2 rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98] self-start sm:self-auto"
               >
                 {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                 <span>Guardar Todas as Províncias</span>
               </button>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-bold uppercase text-[11px]">
-                    <th className="py-3 px-4">Província</th>
-                    <th className="py-3 px-4">Capital</th>
-                    <th className="py-3 px-4">Clientes Ativos</th>
-                    <th className="py-3 px-4">Parceiros Certificados</th>
-                    <th className="py-3 px-4">Status de Atendimento</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {(settings.provincesCoverage || DEFAULT_PROVINCES).map((prov) => (
-                    <tr key={prov.id} className="hover:bg-slate-50/70">
-                      <td className="py-2.5 px-4 font-bold text-slate-900">{prov.name}</td>
-                      <td className="py-2.5 px-4 text-slate-500">{prov.capital}</td>
-                      <td className="py-2.5 px-4">
-                        <input
-                          type="number"
-                          value={prov.activeClients}
-                          onChange={(e) => handleProvinceChange(prov.id, 'activeClients', parseInt(e.target.value) || 0)}
-                          className="w-24 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 font-bold text-blue-600 focus:bg-white focus:border-blue-600 outline-none"
-                        />
-                      </td>
-                      <td className="py-2.5 px-4">
-                        <input
-                          type="number"
-                          value={prov.certifiedPartners}
-                          onChange={(e) => handleProvinceChange(prov.id, 'certifiedPartners', parseInt(e.target.value) || 0)}
-                          className="w-24 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 font-bold text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
-                        />
-                      </td>
-                      <td className="py-2.5 px-4">
-                        <select
-                          value={prov.status}
-                          onChange={(e) => handleProvinceChange(prov.id, 'status', e.target.value as any)}
-                          className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 font-bold text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
-                        >
-                          <option value="Ativo">Ativo</option>
-                          <option value="Em Expansão">Em Expansão</option>
-                        </select>
-                      </td>
+            <div className="border border-slate-200/80 rounded-xl overflow-hidden shadow-xs">
+              <div className="overflow-x-auto w-full">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200/80 bg-slate-50/80 text-slate-500 font-display font-semibold uppercase text-[10px] tracking-wider">
+                      <th className="py-3 px-4">Província</th>
+                      <th className="py-3 px-4">Capital</th>
+                      <th className="py-3 px-4">Clientes Ativos</th>
+                      <th className="py-3 px-4">Parceiros Certificados</th>
+                      <th className="py-3 px-4">Status de Atendimento</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-display">
+                    {(settings.provincesCoverage || DEFAULT_PROVINCES).map((prov) => (
+                      <tr key={prov.id} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-2.5 px-4 font-semibold text-slate-900">{prov.name}</td>
+                        <td className="py-2.5 px-4 text-slate-500">{prov.capital}</td>
+                        <td className="py-2.5 px-4">
+                          <input
+                            type="number"
+                            value={prov.activeClients}
+                            onChange={(e) => handleProvinceChange(prov.id, 'activeClients', parseInt(e.target.value) || 0)}
+                            className="w-24 bg-white border border-slate-200/80 rounded-lg px-2.5 py-1 font-mono-num font-bold text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all"
+                          />
+                        </td>
+                        <td className="py-2.5 px-4">
+                          <input
+                            type="number"
+                            value={prov.certifiedPartners}
+                            onChange={(e) => handleProvinceChange(prov.id, 'certifiedPartners', parseInt(e.target.value) || 0)}
+                            className="w-24 bg-white border border-slate-200/80 rounded-lg px-2.5 py-1 font-mono-num font-semibold text-slate-800 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all"
+                          />
+                        </td>
+                        <td className="py-2.5 px-4">
+                          <select
+                            value={prov.status}
+                            onChange={(e) => handleProvinceChange(prov.id, 'status', e.target.value as any)}
+                            className="bg-white border border-slate-200/80 rounded-lg px-2.5 py-1 font-display font-semibold text-slate-800 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all"
+                          >
+                            <option value="Ativo">Ativo</option>
+                            <option value="Em Expansão">Em Expansão</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex justify-end">
+            <div className="pt-2 border-t border-slate-200/70 flex justify-end">
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Configurações das 18 Províncias</span>
@@ -2616,132 +2624,132 @@ export const AdminConfiguracoes: React.FC = () => {
           </form>
         )}
 
-        {/* TAB 3: CONTACTOS & WHATSAPP */}
+        {/* TAB: CONTACTOS & WHATSAPP */}
         {activeTab === 'contactos' && (
-          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-3">
-              <h3 className="text-base font-black text-slate-900">Contactos Oficiais, Horários & Linhas de Atendimento</h3>
-              <p className="text-xs text-slate-500">Configuração de números de WhatsApp, linhas de suporte, horários e emails de contacto do site</p>
+          <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 sm:space-y-8">
+            <div className="border-b border-slate-200/70 pb-4">
+              <h3 className="text-base font-display font-bold text-slate-900">Contactos Oficiais, Horários & Linhas de Atendimento</h3>
+              <p className="text-xs font-display text-slate-500 mt-0.5">Configuração de números de WhatsApp, linhas de suporte, horários e emails de contacto do site</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs font-display">
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Telefone / WhatsApp Principal</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Telefone / WhatsApp Principal</label>
                 <input
                   type="text"
                   value={settings.phoneDisplay}
                   onChange={(e) => handleChange('phoneDisplay', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="+244 923 456 789"
                 />
-                <p className="text-[10px] text-slate-400">O link do WhatsApp gerado automaticamente será: <code>https://wa.me/{settings.phoneDisplay.replace(/\D/g, '')}</code></p>
+                <p className="text-[11px] text-slate-400">O link do WhatsApp gerado automaticamente será: <code className="font-mono-num text-slate-600 font-semibold">https://wa.me/{settings.phoneDisplay.replace(/\D/g, '')}</code></p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Linha Comercial / Telefone Secundário</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Linha Comercial / Telefone Secundário</label>
                 <input
                   type="text"
                   value={settings.phoneCommercial || ''}
                   onChange={(e) => handleChange('phoneCommercial', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="+244 923 111 222"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Horário de Atendimento Principal</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Horário de Atendimento Principal</label>
                 <input
                   type="text"
                   value={settings.supportHours || ''}
                   onChange={(e) => handleChange('supportHours', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="Segunda a Sábado: 08h00 – 19h00"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Horário de Plantão / Fins de Semana</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Horário de Plantão / Fins de Semana</label>
                 <input
                   type="text"
                   value={settings.supportHoursSunday || ''}
                   onChange={(e) => handleChange('supportHoursSunday', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="Domingos e Feriados: Plantão para Urgências"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Email Comercial / Vendas</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Email Comercial / Vendas</label>
                 <input
                   type="email"
                   value={settings.email}
                   onChange={(e) => handleChange('email', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-medium text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="comercial@kivora.ao"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Email de Suporte Técnico & Fiscal</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Email de Suporte Técnico & Fiscal</label>
                 <input
                   type="email"
                   value={settings.supportEmail}
                   onChange={(e) => handleChange('supportEmail', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-medium text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="suporte@kivora.ao"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Email de Parcerias & Revendedores</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Email de Parcerias & Revendedores</label>
                 <input
                   type="email"
                   value={settings.partnerEmail || ''}
                   onChange={(e) => handleChange('partnerEmail', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-medium text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="parceiros@kivora.ao"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Página do Instagram</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Página do Instagram</label>
                 <input
                   type="text"
                   value={settings.instagramUrl}
                   onChange={(e) => handleChange('instagramUrl', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-medium text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="https://instagram.com/kivora.ao"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Página do Facebook</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Página do Facebook</label>
                 <input
                   type="text"
                   value={settings.facebookUrl}
                   onChange={(e) => handleChange('facebookUrl', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-medium text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="https://facebook.com/kivora.ao"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">LinkedIn Corporativo</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">LinkedIn Corporativo</label>
                 <input
                   type="text"
                   value={settings.linkedinUrl || ''}
                   onChange={(e) => handleChange('linkedinUrl', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-medium text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="https://linkedin.com/company/kivora"
                 />
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex justify-end">
+            <div className="pt-2 border-t border-slate-200/70 flex justify-end">
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Contactos</span>
@@ -2750,28 +2758,28 @@ export const AdminConfiguracoes: React.FC = () => {
           </form>
         )}
 
-        {/* TAB 3: LINKS, GITHUB & DOWNLOAD */}
+        {/* TAB: LINKS, GITHUB & DOWNLOAD */}
         {activeTab === 'links' && (
-          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-3">
-              <h3 className="text-base font-black text-slate-900">Links Externos, Repositório GitHub & Setup Windows</h3>
-              <p className="text-xs text-slate-500">Configure o link do GitHub e a URL direta para descarregar o instalador desktop (.exe)</p>
+          <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 sm:space-y-8">
+            <div className="border-b border-slate-200/70 pb-4">
+              <h3 className="text-base font-display font-bold text-slate-900">Links Externos, Repositório GitHub & Setup Windows</h3>
+              <p className="text-xs font-display text-slate-500 mt-0.5">Configure o link do GitHub e a URL direta para descarregar o instalador desktop (.exe)</p>
             </div>
 
             {/* Dica Informativa GitHub & Download */}
-            <div className="p-4 rounded-2xl bg-blue-50/80 border border-blue-200 text-xs text-blue-900 space-y-1">
-              <p className="font-bold flex items-center gap-1.5">
-                <GitBranch className="w-4 h-4 text-blue-600" />
+            <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 text-xs text-slate-700 space-y-1 font-display">
+              <p className="font-semibold text-slate-900 flex items-center gap-1.5">
+                <GitBranch className="w-4 h-4 text-slate-600" />
                 <span>Compatibilidade Total com GitHub Releases & Arquivos Raw</span>
               </p>
-              <p className="text-[11px] text-blue-800 leading-relaxed">
-                Pode colar links do GitHub (ex: <code>.../blob/main/setup.exe</code>), Google Drive ou VPS. O Kivora converte automaticamente URLs do GitHub Blob para <strong>download direto de ficheiro binário</strong> sem abrir a página HTML de código.
+              <p className="text-[11px] text-slate-600 leading-relaxed">
+                Pode colar links do GitHub (ex: <code className="font-mono-num font-semibold text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">.../blob/main/setup.exe</code>), Google Drive ou VPS. O Kivora converte automaticamente URLs do GitHub Blob para <strong className="text-slate-900">download direto de ficheiro binário</strong> sem abrir a página HTML de código.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs font-display">
               <div className="space-y-1.5 md:col-span-2">
-                <label className="font-bold text-slate-700 uppercase flex items-center justify-between">
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <GitBranch className="w-3.5 h-3.5 text-slate-500" />
                     Link do Repositório no GitHub
@@ -2781,7 +2789,7 @@ export const AdminConfiguracoes: React.FC = () => {
                       href={settings.githubUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-blue-600 hover:underline inline-flex items-center gap-1 font-bold text-[11px]"
+                      className="text-slate-800 hover:text-slate-950 hover:underline inline-flex items-center gap-1 font-semibold text-[11px]"
                     >
                       <span>Abrir Repositório</span>
                       <ExternalLink className="w-3 h-3" />
@@ -2792,14 +2800,14 @@ export const AdminConfiguracoes: React.FC = () => {
                   type="text"
                   value={settings.githubUrl}
                   onChange={(e) => handleChange('githubUrl', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="https://github.com/marcosdc20/kivora-setup-vers-o"
                 />
               </div>
 
               <div className="space-y-1.5 md:col-span-2">
                 <div className="flex items-center justify-between">
-                  <label className="font-bold text-slate-700 uppercase flex items-center gap-1.5">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
                     <Download className="w-3.5 h-3.5 text-slate-500" />
                     Link de Download Direto do Instalador (.exe / .msi)
                   </label>
@@ -2808,7 +2816,7 @@ export const AdminConfiguracoes: React.FC = () => {
                       href={getDirectDownloadUrl(settings.downloadUrl)}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-bold text-[11px] bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors"
+                      className="inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800 font-display font-semibold text-[11px] bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/60 transition-all cursor-pointer"
                       title="Testar se o ficheiro .exe descarrega diretamente no navegador"
                     >
                       <Download className="w-3 h-3" />
@@ -2824,134 +2832,134 @@ export const AdminConfiguracoes: React.FC = () => {
                     const val = e.target.value;
                     handleChange('downloadUrl', val);
                   }}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="https://github.com/marcosdc20/kivora-setup-vers-o/raw/main/KIVORA_1.1.0_x64-setup.exe"
                 />
-                <div className="flex items-center justify-between text-[10px] text-slate-400">
-                  <span>URL direta convertida: <code className="text-slate-600 font-mono">{getDirectDownloadUrl(settings.downloadUrl) || 'Nenhuma'}</code></span>
+                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                  <span>URL direta convertida: <code className="text-slate-600 font-mono-num font-semibold">{getDirectDownloadUrl(settings.downloadUrl) || 'Nenhuma'}</code></span>
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Versão do Executável Windows</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Versão do Executável Windows</label>
                 <input
                   type="text"
                   value={settings.releaseVersion}
                   onChange={(e) => handleChange('releaseVersion', e.target.value.replace(/^v+/i, ''))}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="1.1.0"
                 />
-                <span className="text-[10px] text-slate-400">Exibido no site como: v{settings.releaseVersion || '1.1.0'}</span>
+                <span className="text-[11px] text-slate-400">Exibido no site como: v{settings.releaseVersion || '1.1.0'}</span>
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Tamanho do Arquivo (.exe)</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Tamanho do Arquivo (.exe)</label>
                 <input
                   type="text"
                   value={settings.fileSize || ''}
                   onChange={(e) => handleChange('fileSize', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="78.4 MB"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Data de Lançamento da Versão</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Data de Lançamento da Versão</label>
                 <input
                   type="text"
                   value={settings.releaseDate}
                   onChange={(e) => handleChange('releaseDate', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-medium text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="19 de Agosto de 2026"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Chave de Demonstração / Avaliação</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Chave de Demonstração / Avaliação</label>
                 <input
                   type="text"
                   value={settings.demoKey || ''}
                   onChange={(e) => handleChange('demoKey', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-blue-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="KVRA-DEMO-2026-TRIAL"
                 />
               </div>
 
               <div className="space-y-1.5 md:col-span-2">
-                <label className="font-bold text-slate-700 uppercase">Assinatura Digital SHA-256 (Checksum)</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Assinatura Digital SHA-256 (Checksum)</label>
                 <input
                   type="text"
                   value={settings.sha256Checksum || ''}
                   onChange={(e) => handleChange('sha256Checksum', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono text-[11px] text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num text-[11px] text-slate-800 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
                 />
               </div>
 
-              <div className="md:col-span-2 pt-2 border-t border-slate-100">
-                <h4 className="font-black text-slate-900 text-xs uppercase tracking-wider mb-2">Requisitos Mínimos do Sistema</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-600">Sistema Operativo</label>
+              <div className="md:col-span-2 pt-3 border-t border-slate-200/70">
+                <h4 className="font-display font-bold text-slate-900 text-xs uppercase tracking-wider mb-3">Requisitos Mínimos do Sistema</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Sistema Operativo</label>
                     <input
                       type="text"
                       value={settings.minOs || ''}
                       onChange={(e) => handleChange('minOs', e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs font-display text-slate-800 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="Windows 10 / 11 (64-bit)"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-600">Memória RAM</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Memória RAM</label>
                     <input
                       type="text"
                       value={settings.minRam || ''}
                       onChange={(e) => handleChange('minRam', e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs font-display text-slate-800 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="4 GB RAM (Recomendado 8 GB)"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-600">Espaço em Disco</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Espaço em Disco</label>
                     <input
                       type="text"
                       value={settings.minStorage || ''}
                       onChange={(e) => handleChange('minStorage', e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs font-display text-slate-800 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="2 GB livres em SSD (+ base de dados)"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-600">Processador (CPU)</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Processador (CPU)</label>
                     <input
                       type="text"
                       value={settings.minCpu || ''}
                       onChange={(e) => handleChange('minCpu', e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:border-blue-600 outline-none"
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs font-display text-slate-800 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                       placeholder="Intel Core i3 / AMD Ryzen 3 ou superior"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-1.5 md:col-span-2 pt-2 border-t border-slate-100">
-                <label className="font-bold text-slate-700 uppercase">Notas da Versão / Novidades (Changelog)</label>
+              <div className="space-y-1.5 md:col-span-2 pt-3 border-t border-slate-200/70">
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Notas da Versão / Novidades (Changelog)</label>
                 <textarea
                   rows={4}
                   value={settings.releaseNotes || ''}
                   onChange={(e) => handleChange('releaseNotes', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 focus:bg-white focus:border-blue-600 outline-none leading-relaxed"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl p-3.5 text-xs font-display font-medium text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none leading-relaxed transition-all placeholder:text-slate-400"
                   placeholder="• Motor de faturação certificado em conformidade com a AGT&#10;• Base de dados 100% local com funcionamento sem internet"
                 />
-                <span className="text-[10px] text-slate-400">Escreva um item por linha para formatar os tópicos no site.</span>
+                <span className="text-[11px] text-slate-400">Escreva um item por linha para formatar os tópicos no site.</span>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex justify-end">
+            <div className="pt-2 border-t border-slate-200/70 flex justify-end">
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Links & Versão</span>
@@ -2960,149 +2968,148 @@ export const AdminConfiguracoes: React.FC = () => {
           </form>
         )}
 
-        {/* TAB 4: CONTAS BANCÁRIAS (IBANs) */}
-        {/* TAB 4: CONTAS BANCÁRIAS (IBANs) */}
+        {/* TAB: CONTAS BANCÁRIAS (IBANs) */}
         {activeTab === 'bancos' && (
-          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 sm:space-y-8">
+            <div className="border-b border-slate-200/70 pb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-blue-600" />
+                <h3 className="text-base font-display font-bold text-slate-900 flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-slate-700" />
                   <span>Coordenadas Bancárias Oficiais (2 Contas Configuráveis)</span>
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs font-display text-slate-500 mt-0.5">
                   Configure os nomes dos bancos, números de conta, IBANs e titular exibidos no Portal do Parceiro, depósitos de carteira, faturas e candidaturas.
                 </p>
               </div>
-              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+              <span className="text-[11px] font-display font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/60">
                 Sincronização Ativa em 2 Vias
               </span>
             </div>
 
             {/* Titular e NIF */}
-            <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200 space-y-3">
-              <span className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+            <div className="bg-slate-50/60 rounded-xl p-5 border border-slate-200/70 space-y-3.5">
+              <span className="text-xs font-display font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                 <Building2 className="w-4 h-4 text-slate-600" />
                 <span>Titular Oficial das Contas Bancárias</span>
               </span>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-display">
                 <div className="space-y-1.5">
-                  <label className="font-bold text-slate-700 uppercase">Nome do Titular / Beneficiário *</label>
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Nome do Titular / Beneficiário *</label>
                   <input
                     type="text"
                     required
                     value={settings.ibanTitular || ''}
                     onChange={(e) => handleChange('ibanTitular', e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                     placeholder="VISUAL SOFTWARE LIMITADA"
                   />
-                  <p className="text-[10px] text-slate-400">Nome exibido como destinatário da transferência ou depósito.</p>
+                  <p className="text-[11px] text-slate-400">Nome exibido como destinatário da transferência ou depósito.</p>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-bold text-slate-700 uppercase">NIF da Empresa Titular</label>
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">NIF da Empresa Titular</label>
                   <input
                     type="text"
                     value={settings.ibanTitularNif || ''}
                     onChange={(e) => handleChange('ibanTitularNif', e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                     placeholder="5002863944"
                   />
-                  <p className="text-[10px] text-slate-400">Identificação fiscal da entidade emissora.</p>
+                  <p className="text-[11px] text-slate-400">Identificação fiscal da entidade emissora.</p>
                 </div>
               </div>
             </div>
 
             {/* Contas 1 e 2 em Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 font-display">
               
               {/* CONTA 1 */}
-              <div className="p-5 bg-gradient-to-br from-emerald-50/50 to-emerald-100/30 rounded-2xl border border-emerald-200/80 space-y-3 text-xs">
-                <div className="flex items-center justify-between border-b border-emerald-200/60 pb-2">
+              <div className="p-5 bg-white rounded-xl border border-slate-200/80 shadow-xs space-y-3.5 text-xs">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="font-black text-emerald-950 uppercase text-xs">Conta Bancária 1 (Principal)</span>
+                    <span className="font-display font-bold text-slate-900 uppercase text-xs">Conta Bancária 1 (Principal)</span>
                   </div>
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md">Ativa</span>
+                  <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-md">Ativa</span>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-bold text-slate-700 uppercase">Nome da Instituição Bancária 1 *</label>
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Nome da Instituição Bancária 1 *</label>
                   <input
                     type="text"
                     required
                     value={settings.bank1Name || ''}
                     onChange={(e) => handleChange('bank1Name', e.target.value)}
-                    className="w-full bg-white border border-emerald-300 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-emerald-600 outline-none"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                     placeholder="Ex: Banco BAI (Banco Angolano de Investimentos)"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-bold text-slate-700 uppercase">IBAN da Conta 1 *</label>
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">IBAN da Conta 1 *</label>
                   <input
                     type="text"
                     required
                     value={settings.ibanBai || ''}
                     onChange={(e) => handleChange('ibanBai', e.target.value)}
-                    className="w-full bg-white border border-emerald-300 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:border-emerald-600 outline-none"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                     placeholder="AO06 0040 0000 1234 5678 9012 3"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-bold text-slate-700 uppercase">Número de Conta / Referência 1 (Opcional)</label>
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Número de Conta / Referência 1 (Opcional)</label>
                   <input
                     type="text"
                     value={settings.bank1Account || ''}
                     onChange={(e) => handleChange('bank1Account', e.target.value)}
-                    className="w-full bg-white border border-emerald-200 rounded-xl px-4 py-2 text-slate-800 font-mono text-xs focus:border-emerald-600 outline-none"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2 text-slate-800 font-mono-num text-xs focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                     placeholder="0040.0000.1234.5678.9012.3"
                   />
                 </div>
               </div>
 
               {/* CONTA 2 */}
-              <div className="p-5 bg-gradient-to-br from-blue-50/50 to-blue-100/30 rounded-2xl border border-blue-200/80 space-y-3 text-xs">
-                <div className="flex items-center justify-between border-b border-blue-200/60 pb-2">
+              <div className="p-5 bg-white rounded-xl border border-slate-200/80 shadow-xs space-y-3.5 text-xs">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                    <span className="font-black text-blue-950 uppercase text-xs">Conta Bancária 2 (Alternativa)</span>
+                    <span className="font-display font-bold text-slate-900 uppercase text-xs">Conta Bancária 2 (Alternativa)</span>
                   </div>
-                  <span className="text-[10px] font-bold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-md">Ativa</span>
+                  <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 border border-blue-200/60 px-2 py-0.5 rounded-md">Ativa</span>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-bold text-slate-700 uppercase">Nome da Instituição Bancária 2 *</label>
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Nome da Instituição Bancária 2 *</label>
                   <input
                     type="text"
                     required
                     value={settings.bank2Name || ''}
                     onChange={(e) => handleChange('bank2Name', e.target.value)}
-                    className="w-full bg-white border border-blue-300 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                     placeholder="Ex: Banco BFA (Banco de Fomento Angola)"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-bold text-slate-700 uppercase">IBAN da Conta 2 *</label>
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">IBAN da Conta 2 *</label>
                   <input
                     type="text"
                     required
                     value={settings.ibanBfa || ''}
                     onChange={(e) => handleChange('ibanBfa', e.target.value)}
-                    className="w-full bg-white border border-blue-300 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:border-blue-600 outline-none"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                     placeholder="AO06 0006 0000 9876 5432 1098 7"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-bold text-slate-700 uppercase">Número de Conta / Referência 2 (Opcional)</label>
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Número de Conta / Referência 2 (Opcional)</label>
                   <input
                     type="text"
                     value={settings.bank2Account || ''}
                     onChange={(e) => handleChange('bank2Account', e.target.value)}
-                    className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2 text-slate-800 font-mono text-xs focus:border-blue-600 outline-none"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2 text-slate-800 font-mono-num text-xs focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                     placeholder="0006.0000.9876.5432.1098.7"
                   />
                 </div>
@@ -3111,45 +3118,45 @@ export const AdminConfiguracoes: React.FC = () => {
             </div>
 
             {/* Live Preview Box */}
-            <div className="p-4 bg-slate-950 text-white rounded-2xl space-y-2.5 text-xs">
-              <span className="text-[10px] text-slate-400 uppercase font-black tracking-wider block">
+            <div className="p-5 bg-slate-950 text-white rounded-xl border border-slate-800 space-y-3 text-xs font-display">
+              <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
                 Pré-visualização Oficial no Portal do Parceiro & Faturas
               </span>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-white/10 pb-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-white/10 pb-2.5">
                 <span className="text-slate-300">
-                  Titular: <strong className="text-white">{settings.ibanTitular || 'VISUAL SOFTWARE LIMITADA'}</strong>
+                  Titular: <strong className="text-white font-semibold">{settings.ibanTitular || 'VISUAL SOFTWARE LIMITADA'}</strong>
                 </span>
                 {settings.ibanTitularNif && (
-                  <span className="text-slate-400 font-mono text-[11px]">
+                  <span className="text-slate-400 font-mono-num text-[11px]">
                     NIF: <strong className="text-white">{settings.ibanTitularNif}</strong>
                   </span>
                 )}
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 font-mono text-[11px]">
-                <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
-                  <span className="text-emerald-400 font-bold block text-[10px] font-sans">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 font-mono-num text-[11px]">
+                <div className="bg-white/5 p-3 rounded-lg border border-white/10">
+                  <span className="text-emerald-400 font-semibold block text-[10px] font-display">
                     • {settings.bank1Name || 'Conta Bancária 1'}:
                   </span>
                   <span className="text-white font-bold">
-                    {settings.ibanBai ? settings.ibanBai : <span className="text-slate-500 font-normal italic font-sans text-xs">(Não configurada)</span>}
+                    {settings.ibanBai ? settings.ibanBai : <span className="text-slate-500 font-normal italic font-display text-xs">(Não configurada)</span>}
                   </span>
                 </div>
-                <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
-                  <span className="text-blue-400 font-bold block text-[10px] font-sans">
+                <div className="bg-white/5 p-3 rounded-lg border border-white/10">
+                  <span className="text-blue-400 font-semibold block text-[10px] font-display">
                     • {settings.bank2Name || 'Conta Bancária 2'}:
                   </span>
                   <span className="text-white font-bold">
-                    {settings.ibanBfa ? settings.ibanBfa : <span className="text-slate-500 font-normal italic font-sans text-xs">(Não configurada)</span>}
+                    {settings.ibanBfa ? settings.ibanBfa : <span className="text-slate-500 font-normal italic font-display text-xs">(Não configurada)</span>}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex justify-end">
+            <div className="pt-2 border-t border-slate-200/70 flex justify-end">
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer transition-all active:scale-95"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Ambas as Coordenadas Bancárias</span>
@@ -3158,59 +3165,59 @@ export const AdminConfiguracoes: React.FC = () => {
           </form>
         )}
 
-        {/* TAB 5: AGT */}
+        {/* TAB: AGT */}
         {activeTab === 'agt' && (
-          <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-3">
-              <h3 className="text-base font-black text-slate-900">Parâmetros de Validação Fiscal AGT</h3>
-              <p className="text-xs text-slate-500">Certificado oficial e número de registo emitido pela Administração Geral Tributária</p>
+          <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 sm:space-y-8">
+            <div className="border-b border-slate-200/70 pb-4">
+              <h3 className="text-base font-display font-bold text-slate-900">Parâmetros de Validação Fiscal AGT</h3>
+              <p className="text-xs font-display text-slate-500 mt-0.5">Certificado oficial e número de registo emitido pela Administração Geral Tributária</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs font-display">
               <div className="space-y-1.5 md:col-span-2">
-                <label className="font-bold text-slate-700 uppercase">Selo de Homologação / Certificado AGT</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Selo de Homologação / Certificado AGT</label>
                 <input
                   type="text"
                   value={settings.agtCertificate}
                   onChange={(e) => handleChange('agtCertificate', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
-                  placeholder="Programa Validado nº 321/AGT/2026"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
+                  placeholder="Certificação AGT N.º FE/387/AGT/2026"
                 />
-                <p className="text-[10px] text-slate-400">Este texto é exibido no topo do portal do cliente e no rodapé do site.</p>
+                <p className="text-[11px] text-slate-400">Este texto é exibido no topo do portal do cliente e no rodapé do site.</p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Referência do Decreto Presidencial</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Referência do Decreto Presidencial</label>
                 <input
                   type="text"
                   value={settings.agtDecretoRef || ''}
                   onChange={(e) => handleChange('agtDecretoRef', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="Decreto Presidencial n.º 71/25"
                 />
-                <p className="text-[10px] text-slate-400">Marco regulatório exibido nas páginas fiscais e rodapé.</p>
+                <p className="text-[11px] text-slate-400">Marco regulatório exibido nas páginas fiscais e rodapé.</p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 uppercase">Dia Limite de Submissão do SAF-T AO</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Dia Limite de Submissão do SAF-T AO</label>
                 <input
                   type="number"
                   min={1}
                   max={31}
                   value={settings.saftSubmissionDeadlineDay ?? 15}
                   onChange={(e) => handleChange('saftSubmissionDeadlineDay', Number(e.target.value))}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold font-mono text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                   placeholder="15"
                 />
-                <p className="text-[10px] text-slate-400">Dia limite do mês subsequente para submissão do XML à AGT.</p>
+                <p className="text-[11px] text-slate-400">Dia limite do mês subsequente para submissão do XML à AGT.</p>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex justify-end">
+            <div className="pt-2 border-t border-slate-200/70 flex justify-end">
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Parâmetros AGT</span>
@@ -3222,25 +3229,25 @@ export const AdminConfiguracoes: React.FC = () => {
         {/* TAB 6: UPDATES OTA */}
         {activeTab === 'updates' && (
           <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <div className="surface-card p-6 rounded-2xl border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-base font-black text-slate-900">Atualizações de Executáveis Windows (OTA)</h3>
-                <p className="text-xs text-slate-500">Distribuição automatizada para postos de venda e servidores</p>
+                <h3 className="text-base font-semibold font-display text-slate-900 tracking-tight">Atualizações de Executáveis Windows (OTA)</h3>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">Distribuição automatizada para postos de venda e servidores</p>
               </div>
               <button
                 onClick={() => setShowUpdateModal(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-md shadow-blue-600/20 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs px-4 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 <Rocket className="w-4 h-4" />
                 <span>Publicar Nova Versão</span>
               </button>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <div className="surface-card rounded-2xl border border-slate-200/80 overflow-hidden">
               <div className="overflow-x-auto w-full">
                 <table className="w-full text-xs text-left min-w-[650px]">
                   <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 uppercase font-black text-[10px] tracking-wider">
+                    <tr className="border-b border-slate-100 bg-slate-50/75 text-slate-500 uppercase font-semibold text-[10px] tracking-wider font-display">
                       <th className="p-4">Versão</th>
                       <th className="p-4">Canal</th>
                       <th className="p-4">Changelog</th>
@@ -3251,40 +3258,40 @@ export const AdminConfiguracoes: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {releases.map((rel) => (
-                      <tr key={rel.id} className="hover:bg-slate-50 transition-colors">
+                      <tr key={rel.id} className="hover:bg-slate-50/80 transition-colors">
                         <td className="p-4">
-                          <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                          <span className="font-mono-num font-semibold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80">
                             v{rel.version}
                           </span>
-                          <p className="text-[10px] text-slate-400 mt-1">{rel.releaseDate}</p>
+                          <p className="font-mono-num text-[10px] text-slate-400 mt-1">{rel.releaseDate}</p>
                         </td>
-                        <td className="p-4 font-bold text-slate-700 uppercase text-[10px]">
-                          <span className={`px-2 py-0.5 rounded-full ${
-                            rel.channel === 'stable' ? 'bg-emerald-50 text-emerald-700' :
-                            rel.channel === 'beta' ? 'bg-purple-50 text-purple-700' : 'bg-red-50 text-red-700'
+                        <td className="p-4 font-semibold text-slate-700 uppercase text-[10px]">
+                          <span className={`px-2 py-0.5 rounded-full border ${
+                            rel.channel === 'stable' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' :
+                            rel.channel === 'beta' ? 'bg-purple-50 text-purple-700 border-purple-200/80' : 'bg-rose-50 text-rose-700 border-rose-200/80'
                           }`}>
                             {rel.channel}
                           </span>
                         </td>
-                        <td className="p-4 text-slate-600 max-w-xs font-medium whitespace-pre-line text-[11px]">
+                        <td className="p-4 text-slate-600 max-w-xs font-sans whitespace-pre-line text-[11px] leading-relaxed">
                           {rel.changelog}
                         </td>
-                        <td className="p-4 font-mono font-bold text-slate-800">{rel.rolloutPercentage}%</td>
+                        <td className="p-4 font-mono-num font-semibold text-slate-800">{rel.rolloutPercentage}%</td>
                         <td className="p-4">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            rel.status === 'published' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                            rel.status === 'testing' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                            'bg-red-50 text-red-700 border border-red-200'
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                            rel.status === 'published' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' :
+                            rel.status === 'testing' ? 'bg-amber-50 text-amber-700 border-amber-200/80' :
+                            'bg-rose-50 text-rose-700 border-rose-200/80'
                           }`}>
                             {rel.status === 'published' ? 'Em Produção' : rel.status === 'testing' ? 'Em Testes' : 'Rollback Efetuado'}
                           </span>
                         </td>
                         <td className="p-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-1.5">
                             {rel.status !== 'rollback' && (
                               <button
                                 onClick={() => handleRollback(rel)}
-                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                                 title="Rollback"
                               >
                                 <RotateCcw className="w-3.5 h-3.5" />
@@ -3294,7 +3301,7 @@ export const AdminConfiguracoes: React.FC = () => {
                               href={rel.downloadUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
                               title="Descarregar"
                             >
                               <Download className="w-3.5 h-3.5" />
@@ -3312,16 +3319,16 @@ export const AdminConfiguracoes: React.FC = () => {
 
         {/* TAB 7: BACKUPS NUVEM */}
         {activeTab === 'backups' && (
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-base font-black text-slate-900">Exportação de Cópias de Segurança (Backups)</h3>
-                <p className="text-xs text-slate-500">Transfira um instantâneo JSON completo das coleções do Firebase Firestore</p>
+                <h3 className="text-base font-semibold font-display text-slate-900 tracking-tight">Exportação de Cópias de Segurança (Backups)</h3>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">Transfira um instantâneo JSON completo das coleções do Firebase Firestore</p>
               </div>
               <button
                 onClick={handleExportBackup}
                 disabled={isExporting}
-                className="bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md flex items-center gap-2 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                 <span>{isExporting ? 'A Exportar...' : 'Descarregar Backup JSON'}</span>
@@ -3329,13 +3336,16 @@ export const AdminConfiguracoes: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                <p className="text-slate-400 font-bold uppercase text-[10px]">Último Backup Realizado</p>
-                <p className="font-mono font-bold text-slate-800">{lastBackup || 'Nenhum backup recente nesta máquina'}</p>
+              <div className="p-4 rounded-xl bg-slate-50/60 border border-slate-200/70 space-y-1">
+                <p className="text-slate-500 font-semibold uppercase text-[10px] tracking-wider font-display">Último Backup Realizado</p>
+                <p className="font-mono-num font-semibold text-slate-800">{lastBackup || 'Nenhum backup recente nesta máquina'}</p>
               </div>
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                <p className="text-slate-400 font-bold uppercase text-[10px]">Proteção dos Dados</p>
-                <p className="font-bold text-emerald-600">✓ Sincronização Contínua no Firebase Firestore</p>
+              <div className="p-4 rounded-xl bg-slate-50/60 border border-slate-200/70 space-y-1">
+                <p className="text-slate-500 font-semibold uppercase text-[10px] tracking-wider font-display">Proteção dos Dados</p>
+                <p className="font-semibold text-emerald-600 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Sincronização Contínua no Firebase Firestore</span>
+                </p>
               </div>
             </div>
           </div>
@@ -3343,24 +3353,24 @@ export const AdminConfiguracoes: React.FC = () => {
 
         {/* TAB 8: ZONA DE PERIGO & MASTER RESET */}
         {activeTab === 'zona-perigo' && (
-          <div className="bg-white rounded-3xl border border-red-200 p-6 sm:p-8 shadow-sm space-y-6 animate-fadeIn">
+          <div className="surface-card rounded-2xl border border-rose-200/80 p-6 sm:p-8 space-y-6 animate-fadeIn">
             
             {/* Header de Alerta Máximo */}
-            <div className="p-5 rounded-2xl bg-gradient-to-r from-red-950 via-slate-950 to-red-950 text-white border border-red-800/60 shadow-lg space-y-3">
+            <div className="p-5 rounded-xl bg-gradient-to-r from-rose-950 via-slate-950 to-rose-950 text-white border border-rose-800/60 shadow-xs space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400 shrink-0">
-                  <AlertTriangle className="w-6 h-6" />
+                <div className="w-11 h-11 rounded-xl bg-rose-600/20 border border-rose-500/40 flex items-center justify-center text-rose-400 shrink-0">
+                  <AlertTriangle className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base font-black text-white uppercase tracking-wider">
+                    <h3 className="text-base font-semibold font-display text-white uppercase tracking-wider">
                       Zona de Perigo & Master Reset (SuperAdmin)
                     </h3>
-                    <span className="bg-red-500/20 text-red-300 border border-red-400/40 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase">
+                    <span className="bg-rose-500/20 text-rose-300 border border-rose-400/40 text-[10px] font-mono-num font-semibold px-2 py-0.5 rounded-full uppercase">
                       Acesso Restrito
                     </span>
                   </div>
-                  <p className="text-xs text-slate-300 mt-0.5">
+                  <p className="text-xs text-slate-300 font-sans mt-0.5">
                     Permite limpar cirurgicamente dados de teste para iniciar a operação oficial do zero com segurança total.
                   </p>
                 </div>
@@ -3368,26 +3378,26 @@ export const AdminConfiguracoes: React.FC = () => {
             </div>
 
             {/* Quadro de Dados Protegidos (NUNCA SÃO APAGADOS) */}
-            <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 space-y-2">
-              <div className="flex items-center gap-2 text-emerald-900 font-black text-xs uppercase tracking-wider">
+            <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200/70 space-y-2">
+              <div className="flex items-center gap-2 text-emerald-950 font-semibold font-display text-xs uppercase tracking-wider">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
                 <span>Dados do Núcleo do Sistema Preservados (100% Protegidos contra Limpeza)</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-[11px] text-emerald-800 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-[11px] text-emerald-800 pt-1 font-sans">
                 <div className="flex items-center gap-1.5 font-medium">
-                  <span className="text-emerald-600 font-bold">✓</span> Contas de Administrador (`users`)
+                  <span className="text-emerald-600 font-bold">✓</span> Contas de Administrador (<code className="font-mono-num text-[10px]">users</code>)
                 </div>
                 <div className="flex items-center gap-1.5 font-medium">
-                  <span className="text-emerald-600 font-bold">✓</span> Configurações da Empresa & IBANs (`system_settings`)
+                  <span className="text-emerald-600 font-bold">✓</span> Configurações da Empresa & IBANs (<code className="font-mono-num text-[10px]">system_settings</code>)
                 </div>
                 <div className="flex items-center gap-1.5 font-medium">
-                  <span className="text-emerald-600 font-bold">✓</span> Políticas & Quotas de Parceiro (`settings`)
+                  <span className="text-emerald-600 font-bold">✓</span> Políticas & Quotas de Parceiro (<code className="font-mono-num text-[10px]">settings</code>)
                 </div>
                 <div className="flex items-center gap-1.5 font-medium">
-                  <span className="text-emerald-600 font-bold">✓</span> Tabela Oficial de Preços de Atacado (`partner_pricing`)
+                  <span className="text-emerald-600 font-bold">✓</span> Tabela Oficial de Preços de Atacado (<code className="font-mono-num text-[10px]">partner_pricing</code>)
                 </div>
                 <div className="flex items-center gap-1.5 font-medium">
-                  <span className="text-emerald-600 font-bold">✓</span> Logs de Auditoria Fiscal AGT (`audit_logs`)
+                  <span className="text-emerald-600 font-bold">✓</span> Logs de Auditoria Fiscal AGT (<code className="font-mono-num text-[10px]">audit_logs</code>)
                 </div>
                 <div className="flex items-center gap-1.5 font-medium">
                   <span className="text-emerald-600 font-bold">✓</span> Backup Automático em JSON antes de apagar
@@ -3397,23 +3407,23 @@ export const AdminConfiguracoes: React.FC = () => {
 
             {/* Relatório de Limpeza Concluída */}
             {purgeReport && (
-              <div className="p-5 rounded-2xl bg-slate-900 text-white border border-slate-800 space-y-3 animate-fadeIn">
+              <div className="p-5 rounded-xl bg-slate-950 text-white border border-slate-800 space-y-3 animate-fadeIn">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                    <strong className="text-sm font-black text-emerald-400">Master Reset Executado com Sucesso!</strong>
+                    <strong className="text-sm font-semibold font-display text-emerald-400">Master Reset Executado com Sucesso!</strong>
                   </div>
-                  <span className="font-mono text-xs text-slate-400">Total Removido: {purgeReport.totalDeleted} documentos</span>
+                  <span className="font-mono-num text-xs text-slate-400">Total Removido: {purgeReport.totalDeleted} documentos</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                   {Object.entries(purgeReport.deletedCounts).map(([name, count]) => (
-                    <div key={name} className="p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/50">
-                      <span className="text-[10px] text-slate-400 block">{name}</span>
-                      <strong className="font-mono text-white text-sm">{count} apagados</strong>
+                    <div key={name} className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
+                      <span className="text-[10px] text-slate-400 block font-display">{name}</span>
+                      <strong className="font-mono-num text-white text-sm">{count} apagados</strong>
                     </div>
                   ))}
                 </div>
-                <p className="text-[11px] text-emerald-300 font-mono pt-1">
+                <p className="text-[11px] text-emerald-300 font-mono-num pt-1">
                   📦 Cópia de segurança gerada: {purgeReport.backupFilename}
                 </p>
               </div>
@@ -3426,24 +3436,24 @@ export const AdminConfiguracoes: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-black text-slate-900 text-xs uppercase tracking-wider">
+                    <h4 className="font-semibold font-display text-slate-900 text-xs uppercase tracking-wider">
                       Selecione os Dados Operacionais que Deseja Limpar:
                     </h4>
                     <button
                       type="button"
                       onClick={refreshLiveCounts}
                       disabled={loadingLiveCounts}
-                      className="inline-flex items-center gap-1 text-[11px] text-slate-600 hover:text-blue-600 font-bold bg-slate-100 hover:bg-blue-50 px-2.5 py-1 rounded-lg transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1 text-[11px] text-slate-600 hover:text-slate-900 font-display font-semibold bg-slate-100 hover:bg-slate-200/80 px-2.5 py-1 rounded-lg transition-all cursor-pointer"
                       title="Atualizar contagem em tempo real do Firebase"
                     >
-                      <RotateCcw className={`w-3 h-3 ${loadingLiveCounts ? 'animate-spin text-blue-600' : ''}`} />
+                      <RotateCcw className={`w-3 h-3 ${loadingLiveCounts ? 'animate-spin text-slate-900' : ''}`} />
                       <span>{loadingLiveCounts ? 'A verificar...' : 'Atualizar Contagens'}</span>
                     </button>
                   </div>
                   <button
                     type="button"
                     onClick={handleSelectAllPurgeTargets}
-                    className="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer self-start sm:self-auto"
+                    className="text-xs text-slate-700 hover:text-slate-900 font-display font-semibold cursor-pointer self-start sm:self-auto"
                   >
                     {selectedPurgeTargets.length === PURGE_TARGETS.length ? 'Desmarcar Todos' : 'Selecionar Todos'}
                   </button>
@@ -3457,37 +3467,37 @@ export const AdminConfiguracoes: React.FC = () => {
                       <div
                         key={target.id}
                         onClick={() => handleTogglePurgeTarget(target.id)}
-                        className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 select-none ${
+                        className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-3 select-none ${
                           isChecked
-                            ? 'bg-red-50/70 border-red-200 shadow-xs'
-                            : 'bg-slate-50 border-slate-200 opacity-60 hover:opacity-100'
+                            ? 'bg-rose-50/60 border-rose-300 shadow-xs'
+                            : 'bg-slate-50/60 border-slate-200/70 opacity-70 hover:opacity-100'
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={isChecked}
                           readOnly
-                          className="mt-0.5 w-4 h-4 accent-red-600 rounded cursor-pointer pointer-events-none"
+                          className="mt-0.5 w-4 h-4 accent-rose-600 rounded cursor-pointer pointer-events-none"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2 flex-wrap">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <strong className="text-xs font-black text-slate-900 block">{target.name}</strong>
+                              <strong className="text-xs font-semibold font-display text-slate-900 block">{target.name}</strong>
                               {count > 0 ? (
-                                <span className="text-[10px] font-black text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full">
+                                <span className="text-[10px] font-semibold font-mono-num text-rose-700 bg-rose-100/80 border border-rose-200 px-2 py-0.5 rounded-full">
                                   {count} no Firebase
                                 </span>
                               ) : (
-                                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                                <span className="text-[10px] font-semibold font-mono-num text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
                                   0 (Limpo)
                                 </span>
                               )}
                             </div>
-                            <span className="text-[9px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200 shrink-0">
+                            <span className="text-[9px] font-mono-num text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200/80 shrink-0">
                               /{target.collectionName}
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">{target.description}</p>
+                          <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed font-sans">{target.description}</p>
                         </div>
                       </div>
                     );
@@ -3496,22 +3506,22 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               {/* Protocolo de Confirmação & Segurança */}
-              <div className="p-5 rounded-2xl bg-red-50/50 border border-red-200 space-y-4 text-xs">
-                <h4 className="font-black text-red-900 uppercase tracking-wider flex items-center gap-1.5 text-xs">
-                  <AlertTriangle className="w-4 h-4 text-red-600" />
+              <div className="p-5 rounded-xl bg-rose-50/40 border border-rose-200/80 space-y-4 text-xs">
+                <h4 className="font-semibold font-display text-rose-950 uppercase tracking-wider flex items-center gap-1.5 text-xs">
+                  <AlertTriangle className="w-4 h-4 text-rose-600" />
                   <span>Protocolo de Confirmação Obrigatório</span>
                 </h4>
 
                 <div className="space-y-3">
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between flex-wrap gap-2">
-                      <label className="font-bold text-slate-700 block">
-                        1. Digite a frase de confirmação exata: <span className="font-mono text-red-600 font-black select-all">CONFIRMO LIMPAR DADOS KIVORA</span>
+                      <label className="font-semibold text-slate-700 block font-display text-[11px] uppercase tracking-wider">
+                        1. Digite a frase de confirmação exata: <span className="font-mono-num text-rose-600 font-bold select-all">CONFIRMO LIMPAR DADOS KIVORA</span>
                       </label>
                       <button
                         type="button"
                         onClick={() => setPurgeConfirmationPhrase('CONFIRMO LIMPAR DADOS KIVORA')}
-                        className="text-[10px] font-bold text-red-700 bg-red-100 hover:bg-red-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                        className="text-[10px] font-semibold text-rose-800 bg-rose-100/80 hover:bg-rose-200/80 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
                       >
                         ✓ Preencher Frase
                       </button>
@@ -3522,16 +3532,16 @@ export const AdminConfiguracoes: React.FC = () => {
                       placeholder="CONFIRMO LIMPAR DADOS KIVORA"
                       value={purgeConfirmationPhrase}
                       onChange={(e) => setPurgeConfirmationPhrase(e.target.value)}
-                      className="w-full bg-white border border-red-300 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 focus:border-red-600 outline-none uppercase"
+                      className="w-full bg-white border border-rose-300 rounded-xl px-4 py-2.5 font-mono-num font-semibold text-slate-900 focus:border-rose-600 focus:ring-1 focus:ring-rose-600/10 outline-none uppercase transition-all"
                     />
                   </div>
 
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between flex-wrap gap-2">
-                      <label className="font-bold text-slate-700 block">
+                      <label className="font-semibold text-slate-700 block font-display text-[11px] uppercase tracking-wider">
                         2. Palavra-passe de Administrador:
                       </label>
-                      <span className="text-[10px] text-slate-500 font-medium">
+                      <span className="text-[10px] text-slate-500 font-sans">
                         (Palavra-passe pessoal de admin ou chave master)
                       </span>
                     </div>
@@ -3541,7 +3551,7 @@ export const AdminConfiguracoes: React.FC = () => {
                       placeholder="••••••••"
                       value={purgeAdminPassword}
                       onChange={(e) => setPurgeAdminPassword(e.target.value)}
-                      className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-red-600 outline-none"
+                      className="w-full bg-white border border-slate-200/80 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 rounded-xl px-4 py-2.5 font-display text-slate-900 outline-none transition-all"
                     />
                   </div>
 
@@ -3550,33 +3560,33 @@ export const AdminConfiguracoes: React.FC = () => {
                       type="checkbox"
                       checked={purgeConsentChecked}
                       onChange={(e) => setPurgeConsentChecked(e.target.checked)}
-                      className="mt-0.5 w-4 h-4 accent-red-600 rounded cursor-pointer"
+                      className="mt-0.5 w-4 h-4 accent-rose-600 rounded cursor-pointer"
                     />
-                    <span className="text-[11px] text-slate-700 leading-relaxed font-medium">
+                    <span className="text-[11px] text-slate-700 leading-relaxed font-sans">
                       Estou ciente de que esta ação apagará as <strong>{selectedPurgeTargets.length}</strong> coleções operacionais selecionadas para que o sistema possa ser utilizado do zero. Um arquivo de backup JSON será descarregado automaticamente no meu computador antes da exclusão.
                     </span>
                   </label>
                 </div>
 
                 {purgeError && (
-                  <div className="p-3 bg-red-100 border border-red-300 rounded-xl text-red-700 text-xs font-bold flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <div className="p-3 bg-rose-100/80 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
                     <span>{purgeError}</span>
                   </div>
                 )}
 
                 {isPurging && (
-                  <div className="p-4 bg-white rounded-xl border border-red-200 space-y-2">
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-                      <span className="flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin text-red-600" />
+                  <div className="p-4 bg-white rounded-xl border border-rose-200/80 space-y-2">
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-800">
+                      <span className="flex items-center gap-2 font-display">
+                        <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
                         <span>{purgeProgressText}</span>
                       </span>
-                      <span className="font-mono text-red-600">{purgeProgressPercent}%</span>
+                      <span className="font-mono-num text-rose-600">{purgeProgressPercent}%</span>
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                       <div
-                        className="bg-red-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-rose-600 h-1.5 rounded-full transition-all duration-300"
                         style={{ width: `${purgeProgressPercent}%` }}
                       />
                     </div>
@@ -3587,7 +3597,7 @@ export const AdminConfiguracoes: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isPurging || selectedPurgeTargets.length === 0 || !purgeConsentChecked || purgeConfirmationPhrase.trim() !== 'CONFIRMO LIMPAR DADOS KIVORA'}
-                    className="bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-black text-xs px-6 py-3 rounded-xl shadow-lg shadow-red-600/30 flex items-center gap-2 transition-all cursor-pointer hover:-translate-y-0.5"
+                    className="bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white font-display font-semibold text-xs px-6 py-2.5 rounded-xl shadow-xs flex items-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
                   >
                     {isPurging ? (
                       <>
@@ -3615,38 +3625,38 @@ export const AdminConfiguracoes: React.FC = () => {
       {/* OTA Publish Modal */}
       {showUpdateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5">
+          <div className="surface-card rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200/80 space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
-                  <Rocket className="w-5 h-5" />
+                <div className="p-2 rounded-xl bg-slate-100 text-slate-800">
+                  <Rocket className="w-4 h-4" />
                 </div>
-                <h3 className="text-base font-black text-slate-900">Publicar Nova Versão OTA</h3>
+                <h3 className="text-base font-semibold font-display text-slate-900 tracking-tight">Publicar Nova Versão OTA</h3>
               </div>
-              <button onClick={() => setShowUpdateModal(false)} className="text-slate-400 hover:text-slate-700">
-                <X className="w-5 h-5" />
+              <button onClick={() => setShowUpdateModal(false)} className="text-slate-400 hover:text-slate-700 p-1 rounded-lg transition-colors cursor-pointer">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handlePublishRelease} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Versão (Sem 'v')</label>
+                  <label className="font-semibold text-slate-700 font-display text-[11px] uppercase tracking-wider">Versão (Sem 'v')</label>
                   <input
                     type="text"
                     required
                     placeholder="1.2.0"
                     value={newVersion}
                     onChange={(e) => setNewVersion(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-mono font-bold"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2 font-mono-num font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Canal de Lançamento</label>
+                  <label className="font-semibold text-slate-700 font-display text-[11px] uppercase tracking-wider">Canal de Lançamento</label>
                   <select
                     value={newChannel}
                     onChange={(e) => setNewChannel(e.target.value as any)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-bold"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2 font-display font-medium text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all"
                   >
                     <option value="stable">Estável (Produção)</option>
                     <option value="beta">Beta (Testes)</option>
@@ -3656,7 +3666,10 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Percentagem de Rollout ({newRollout}%)</label>
+                <div className="flex items-center justify-between">
+                  <label className="font-semibold text-slate-700 font-display text-[11px] uppercase tracking-wider">Percentagem de Rollout</label>
+                  <span className="font-mono-num font-semibold text-slate-900 text-xs">{newRollout}%</span>
+                </div>
                 <input
                   type="range"
                   min={5}
@@ -3664,19 +3677,19 @@ export const AdminConfiguracoes: React.FC = () => {
                   step={5}
                   value={newRollout}
                   onChange={(e) => setNewRollout(Number(e.target.value))}
-                  className="w-full"
+                  className="w-full accent-slate-900 cursor-pointer"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Changelog & Novidades</label>
+                <label className="font-semibold text-slate-700 font-display text-[11px] uppercase tracking-wider">Changelog & Novidades</label>
                 <textarea
                   required
                   rows={3}
                   placeholder="Descreva as correções fiscais ou melhorias do executável..."
                   value={newChangelog}
                   onChange={(e) => setNewChangelog(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 resize-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl p-3 resize-none font-sans text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all"
                 />
               </div>
 
@@ -3686,9 +3699,9 @@ export const AdminConfiguracoes: React.FC = () => {
                   id="mandatory"
                   checked={newMandatory}
                   onChange={(e) => setNewMandatory(e.target.checked)}
-                  className="rounded border-slate-300 text-blue-600"
+                  className="rounded border-slate-300 text-slate-900 accent-slate-900"
                 />
-                <label htmlFor="mandatory" className="font-medium text-slate-700">
+                <label htmlFor="mandatory" className="font-medium text-slate-700 font-sans text-xs">
                   Atualização Obrigatória (Bloqueia versões antigas)
                 </label>
               </div>
@@ -3697,13 +3710,13 @@ export const AdminConfiguracoes: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowUpdateModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-600 font-bold hover:bg-slate-100"
+                  className="px-4 py-2 rounded-xl text-slate-600 font-display font-semibold hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2"
+                  className="bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Publicar Release</span>

@@ -100,9 +100,9 @@ export const AdminAuditoria: React.FC = () => {
         actions={
           <button
             onClick={handleExportLogs}
-            className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition-all"
+            className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold font-display px-4 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4 text-slate-500" />
             <span>Exportar Relatório JSON</span>
           </button>
         }
@@ -115,14 +115,14 @@ export const AdminAuditoria: React.FC = () => {
             label="Total Registos de Auditoria"
             value={logs.length.toLocaleString('pt-AO')}
             icon={<Terminal className="w-4 h-4" />}
-            iconBg="bg-blue-50 text-blue-600"
+            iconBg="bg-brand-50 text-brand-600"
             sub="Eventos sincronizados"
           />
           <StatCard
             label="Eventos de Segurança"
             value={`${logs.filter(l => l.category === 'security').length} ${logs.filter(l => l.category === 'security').length === 1 ? 'Alerta' : 'Alertas'}`}
             icon={<ShieldAlert className="w-4 h-4" />}
-            iconBg="bg-red-50 text-red-600"
+            iconBg="bg-rose-50 text-rose-600"
             sub="Proteção perimetral"
             subColor={logs.filter(l => l.category === 'security').length > 0 ? 'red' : 'green'}
           />
@@ -138,7 +138,7 @@ export const AdminAuditoria: React.FC = () => {
 
         {/* Filtros e Busca */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {[
               { id: 'all', label: 'Todos os Logs' },
               { id: 'license', label: 'Licenciamento' },
@@ -149,10 +149,10 @@ export const AdminAuditoria: React.FC = () => {
               <button
                 key={f.id}
                 onClick={() => setCategoryFilter(f.id as any)}
-                className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all ${
+                className={`text-xs font-semibold font-display px-4 py-2 rounded-xl border transition-all cursor-pointer ${
                   categoryFilter === f.id
                     ? 'bg-slate-950 text-white border-slate-950 shadow-sm'
-                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
                 }`}
               >
                 {f.label}
@@ -167,17 +167,17 @@ export const AdminAuditoria: React.FC = () => {
               placeholder="Pesquisar por ação, IP, utilizador..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-medium"
+              className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-brand-500 font-sans shadow-xs transition-all"
             />
           </div>
         </div>
 
         {/* Tabela de Logs */}
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <div className="surface-card rounded-2xl overflow-hidden">
           <div className="overflow-x-auto w-full">
             <table className="w-full text-xs text-left min-w-[700px]">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 uppercase font-black text-[10px] tracking-wider">
+              <tr className="border-b border-slate-200/80 bg-slate-50/80 text-slate-500 font-semibold uppercase text-[11px] tracking-wider font-display">
                 <th className="p-4">Evento / Ação</th>
                 <th className="p-4">Alvo / Recurso</th>
                 <th className="p-4">Operador</th>
@@ -189,34 +189,34 @@ export const AdminAuditoria: React.FC = () => {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-400">
-                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
+                  <td colSpan={6} className="p-8 text-center text-slate-400 font-sans">
+                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-brand-600" />
                     <span>A carregar registos de auditoria do Firebase...</span>
                   </td>
                 </tr>
               ) : (
                 filteredLogs.map((l) => (
-                  <tr key={l.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={l.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="p-4">
-                      <p className="font-bold text-slate-900">{l.action}</p>
-                      <p className="text-slate-400 text-[10px] mt-0.5">{l.details}</p>
+                      <p className="font-bold text-slate-900 font-display">{l.action}</p>
+                      <p className="text-slate-500 text-[11px] mt-0.5 font-sans">{l.details}</p>
                     </td>
-                  <td className="p-4 font-medium text-slate-700">{l.target}</td>
-                  <td className="p-4 font-mono font-bold text-blue-600">{l.actor_email}</td>
-                  <td className="p-4 font-mono text-slate-600 text-[11px]">{l.ip_address}</td>
-                  <td className="p-4 text-slate-500 font-medium whitespace-nowrap">
-                    {new Date(l.timestamp).toLocaleString('pt-AO')}
-                  </td>
-                  <td className="p-4">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                      l.category === 'security' ? 'bg-red-50 text-red-700 border border-red-200' :
-                      l.category === 'license' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                      l.category === 'company' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
-                      'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                    }`}>
-                      {l.category}
-                    </span>
-                  </td>
+                    <td className="p-4 font-medium text-slate-700 font-sans">{l.target}</td>
+                    <td className="p-4 font-mono font-semibold text-brand-600">{l.actor_email}</td>
+                    <td className="p-4 font-mono text-slate-600 text-[11px]">{l.ip_address}</td>
+                    <td className="p-4 text-slate-500 font-medium whitespace-nowrap font-mono-num">
+                      {new Date(l.timestamp).toLocaleString('pt-AO')}
+                    </td>
+                    <td className="p-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider font-display ${
+                        l.category === 'security' ? 'bg-rose-50 text-rose-700 border border-rose-200' :
+                        l.category === 'license' ? 'bg-brand-50 text-brand-700 border border-brand-200' :
+                        l.category === 'company' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
+                        'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      }`}>
+                        {l.category}
+                      </span>
+                    </td>
                   </tr>
                 ))
               )}

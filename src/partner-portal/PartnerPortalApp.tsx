@@ -1355,18 +1355,18 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   // ─── TELA DE ACESSO RESTRITO (SESSÃO INVÁLIDA OU EXPIRADA) ─────────────────────
   if (!session || (session.role !== 'parceiro' && session.role !== 'admin')) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-center">
-        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-6 text-white shadow-2xl">
-          <div className="w-14 h-14 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto">
-            <ShieldCheck className="w-7 h-7" />
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-center font-sans">
+        <div className="max-w-md w-full surface-card bg-slate-900 border border-slate-800 rounded-2xl p-8 space-y-6 text-white shadow-2xl">
+          <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center mx-auto">
+            <ShieldCheck className="w-6 h-6" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-bold">Acesso Restrito a Parceiros</h2>
+            <h2 className="text-lg font-semibold font-display tracking-tight">Acesso Restrito a Parceiros</h2>
             <p className="text-xs text-slate-400">É necessário iniciar sessão com uma conta de parceiro credenciado para aceder a este portal.</p>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/30 cursor-pointer"
+            className="w-full bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs py-3 rounded-xl transition-all shadow-xs border border-white/10 cursor-pointer active:scale-[0.98]"
           >
             Ir para Início de Sessão
           </button>
@@ -1381,64 +1381,64 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     const waUrl = `https://wa.me/${effectivePhoneRaw}?text=${encodeURIComponent(whatsAppMessage)}`;
 
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 sm:p-6 selection:bg-red-600 selection:text-white">
-        <div className="max-w-lg w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl space-y-6 text-center animate-fadeIn">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 sm:p-6 selection:bg-red-600 selection:text-white font-sans">
+        <div className="max-w-lg w-full surface-card bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 text-center animate-fadeIn">
           
           {/* Ícone de Bloqueio Executivo */}
-          <div className="w-16 h-16 bg-red-950/60 border border-red-800/50 rounded-2xl flex items-center justify-center mx-auto text-red-400 shadow-lg shadow-red-950/50">
-            <Ban className="w-8 h-8 text-red-500" strokeWidth={2} />
+          <div className="w-14 h-14 bg-red-950/60 border border-red-800/50 rounded-xl flex items-center justify-center mx-auto text-red-400 shadow-xs">
+            <Ban className="w-7 h-7 text-red-500" strokeWidth={2} />
           </div>
 
           <div className="space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-red-400 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/60 inline-block">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-red-400 bg-red-950/80 px-2.5 py-1 rounded-full border border-red-800/60 inline-block font-display">
               Acesso Suspenso pela Administração
             </span>
-            <h1 className="text-xl sm:text-2xl font-black text-white">
+            <h1 className="text-xl font-bold font-display text-white tracking-tight">
               Conta de Parceiro Suspensa
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              O seu acesso ao <strong>Portal de Parceiros KIVORA</strong> foi suspenso pela Direção da <strong>VISUAL SOFTWARE</strong>.
+              O seu acesso ao <strong className="text-slate-200">Portal de Parceiros KIVORA</strong> foi suspenso pela Direção da <strong className="text-slate-200">VISUAL SOFTWARE</strong>.
             </p>
           </div>
 
           {/* Dados do Parceiro */}
-          <div className="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 text-xs text-left space-y-2 font-mono">
-            <div className="flex justify-between border-b border-slate-800 pb-1.5">
-              <span className="text-slate-500">Parceiro:</span>
-              <strong className="text-white font-sans font-bold">{partnerName}</strong>
+          <div className="p-4 bg-slate-950/80 rounded-xl border border-slate-800 text-xs text-left space-y-2 font-mono-num">
+            <div className="flex justify-between border-b border-slate-800/80 pb-1.5">
+              <span className="text-slate-400 font-sans">Parceiro:</span>
+              <strong className="text-white font-sans font-semibold">{partnerName}</strong>
             </div>
-            <div className="flex justify-between border-b border-slate-800 pb-1.5">
-              <span className="text-slate-500">Código PRT:</span>
-              <strong className="text-amber-400">{partnerCode}</strong>
+            <div className="flex justify-between border-b border-slate-800/80 pb-1.5">
+              <span className="text-slate-400 font-sans">Código PRT:</span>
+              <strong className="text-amber-400 font-mono-num font-semibold">{partnerCode}</strong>
             </div>
-            <div className="flex justify-between border-b border-slate-800 pb-1.5">
-              <span className="text-slate-500">Email:</span>
-              <span className="text-slate-300">{session?.email || '—'}</span>
+            <div className="flex justify-between border-b border-slate-800/80 pb-1.5">
+              <span className="text-slate-400 font-sans">Email:</span>
+              <span className="text-slate-300 font-sans">{session?.email || '—'}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Estado:</span>
-              <span className="text-red-400 font-black uppercase">● Suspenso</span>
+              <span className="text-slate-400 font-sans">Estado:</span>
+              <span className="text-red-400 font-semibold font-display uppercase tracking-wider text-[11px]">● Suspenso</span>
             </div>
           </div>
 
           {/* Orientações */}
-          <div className="p-4 bg-amber-950/30 border border-amber-900/40 rounded-2xl text-[11px] text-amber-200/90 leading-relaxed text-left space-y-1.5">
-            <p className="font-bold flex items-center gap-1.5 text-amber-300">
+          <div className="p-4 bg-amber-950/20 border border-amber-900/40 rounded-xl text-[11px] text-amber-200/90 leading-relaxed text-left space-y-1.5">
+            <p className="font-semibold flex items-center gap-1.5 text-amber-300 font-display">
               <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
               <span>Motivos de Suspensão de Canal:</span>
             </p>
-            <p>• Pendência financeira ou faturas vencidas além do limite de tolerância.</p>
-            <p>• Auditoria de conformidade fiscal e validação de licenças emitidas.</p>
-            <p>• Atualização cadastral ou renegociação de quotas operacionais.</p>
+            <p className="text-slate-300">• Pendência financeira ou faturas vencidas além do limite de tolerância.</p>
+            <p className="text-slate-300">• Auditoria de conformidade fiscal e validação de licenças emitidas.</p>
+            <p className="text-slate-300">• Atualização cadastral ou renegociação de quotas operacionais.</p>
           </div>
 
           {/* Ações */}
-          <div className="space-y-3 pt-2">
+          <div className="space-y-2.5 pt-2">
             <a
               href={waUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 rounded-xl shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-display font-semibold text-xs py-3 rounded-xl shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
             >
               <MessageSquare className="w-4 h-4" />
               <span>Contactar Direção via WhatsApp</span>
@@ -1446,7 +1446,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
             <button
               onClick={handleLogout}
-              className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="w-full bg-white/5 hover:bg-white/10 text-slate-300 font-display font-semibold text-xs py-2.5 rounded-xl border border-white/10 flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <LogOut className="w-4 h-4 text-slate-400" />
               <span>Terminar Sessão</span>
@@ -1459,22 +1459,22 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   }
 
   return (
-    <div className="flex h-screen h-[100dvh] overflow-hidden bg-slate-50 font-sans selection:bg-emerald-600 selection:text-white">
+    <div className="flex h-screen h-[100dvh] overflow-hidden bg-slate-50 font-sans selection:bg-slate-900 selection:text-white">
 
       {/* Toast Flutuante de Feedback */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 text-xs font-bold flex items-center gap-2.5 animate-fadeIn">
+        <div className="fixed bottom-6 right-6 z-50 surface-card bg-slate-950 text-white px-4 py-2.5 rounded-xl shadow-xl border border-slate-800 text-xs font-semibold font-display flex items-center gap-2.5 animate-fadeIn">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 bg-slate-950 text-white flex-col shrink-0 border-r border-slate-800">
-        <div className="p-5 border-b border-slate-800/80">
+      <aside className="hidden lg:flex w-64 bg-slate-950 text-white flex-col shrink-0 border-r border-slate-800/80">
+        <div className="p-5 border-b border-white/10">
           <KivoraLogo variant="light" size="sm" />
           <div className="mt-3 flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-800/50 flex items-center gap-1.5">
+            <span className="text-[10px] font-semibold font-display uppercase tracking-wider text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 flex items-center gap-1.5">
               <ShieldCheck className="w-3 h-3 text-emerald-400" />
               <span>Portal do Parceiro</span>
             </span>
@@ -1483,24 +1483,24 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         </div>
 
         {/* Info Parceiro com Wallet & Tier */}
-        <div className="p-4 bg-slate-900/60 border-b border-slate-800/80 space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center font-black text-xs shadow-sm">
+        <div className="p-3 mx-3 my-2 rounded-xl bg-white/5 border border-white/10 space-y-2">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 flex items-center justify-center font-bold font-display text-xs">
               {partnerName.slice(0, 2).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-black text-white truncate">{displayPartnerName}</p>
-              <p className="text-[10px] text-emerald-400 font-mono font-bold mt-0.5">{displayPartnerCode}</p>
+              <p className="text-xs font-semibold font-display text-white truncate">{displayPartnerName}</p>
+              <p className="text-[10px] text-emerald-400 font-mono-num font-semibold mt-0.5">{displayPartnerCode}</p>
             </div>
           </div>
 
           {/* Mini Card de Wallet */}
-          <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800/80 flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2">
+          <div className="p-2 bg-slate-950/80 rounded-lg border border-white/5 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5">
               <Wallet className="w-3.5 h-3.5 text-emerald-400" />
               <span className="text-[10px] text-slate-400 font-medium">Saldo Wallet:</span>
             </div>
-            <strong className="text-emerald-400 font-mono text-xs">{fmt(walletBalance)} Kz</strong>
+            <strong className="text-emerald-400 font-mono-num font-bold text-xs">{fmt(walletBalance)} Kz</strong>
           </div>
         </div>
 
@@ -1513,23 +1513,23 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id as PartnerSection)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-display transition-all text-left cursor-pointer ${
                   active
-                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                    ? 'bg-white/10 text-white font-semibold border border-white/10 shadow-xs'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   <Icon className="w-4 h-4 shrink-0" />
                   <span>{item.label}</span>
                 </div>
                 {item.alertBadge && (
-                  <span className="bg-amber-500 text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded-full" title="Dívida pendente">
+                  <span className="bg-amber-500 text-slate-950 text-[9px] font-bold px-1.5 py-0.5 rounded-full" title="Dívida pendente">
                     Pendente
                   </span>
                 )}
                 {!item.alertBadge && item.badge !== undefined && item.badge > 0 && (
-                  <span className="bg-slate-800 text-slate-300 text-[10px] font-black px-2 py-0.5 rounded-full border border-slate-700">
+                  <span className="bg-white/10 text-slate-300 text-[10px] font-mono-num font-semibold px-2 py-0.5 rounded-full border border-white/10">
                     {item.badge}
                   </span>
                 )}
@@ -1539,10 +1539,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         </nav>
 
         {/* Footer Sidebar */}
-        <div className="p-3 border-t border-slate-800/80 space-y-2">
+        <div className="p-3 border-t border-white/10 space-y-1.5">
           <button
             onClick={() => setShowTopUpWalletModal(true)}
-            className="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+            className="w-full bg-white/10 hover:bg-white/15 text-white border border-white/10 text-xs font-display font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Recarregar Saldo Wallet</span>
@@ -1550,9 +1550,9 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl transition-all cursor-pointer"
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-display font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all cursor-pointer"
           >
-            <LogOut className="w-4 h-4 text-slate-500" />
+            <LogOut className="w-4 h-4 text-slate-400" />
             <span>Terminar Sessão</span>
           </button>
         </div>
@@ -1566,29 +1566,29 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
             onClick={() => setMobileSidebarOpen(false)}
           />
           <aside className="relative w-72 max-w-[85vw] h-full bg-slate-950 text-white flex flex-col z-10 shadow-2xl border-r border-slate-800">
-            <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
+            <div className="p-5 border-b border-white/10 flex items-center justify-between">
               <div>
                 <KivoraLogo variant="light" size="sm" />
                 <div className="mt-2 flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-800/50">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-display">
                     Portal do Parceiro
                   </span>
                 </div>
               </div>
               <button
                 onClick={() => setMobileSidebarOpen(false)}
-                className="p-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white"
+                className="p-1.5 rounded-lg bg-white/5 text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-4 bg-slate-900/60 border-b border-slate-800/80">
-              <p className="text-xs font-black text-white truncate">{displayPartnerName}</p>
-              <p className="text-[10px] text-emerald-400 font-mono font-bold mt-0.5">{displayPartnerCode}</p>
+            <div className="p-3 mx-3 my-2 rounded-xl bg-white/5 border border-white/10">
+              <p className="text-xs font-semibold font-display text-white truncate">{displayPartnerName}</p>
+              <p className="text-[10px] text-emerald-400 font-mono-num font-semibold mt-0.5">{displayPartnerCode}</p>
               <div className="mt-2 flex items-center justify-between text-xs text-slate-300">
                 <span>Wallet:</span>
-                <strong className="text-emerald-400 font-mono">{fmt(walletBalance)} Kz</strong>
+                <strong className="text-emerald-400 font-mono-num">{fmt(walletBalance)} Kz</strong>
               </div>
             </div>
 
@@ -1603,18 +1603,18 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       setActiveSection(item.id as PartnerSection);
                       setMobileSidebarOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-display transition-all text-left cursor-pointer ${
                       active
-                        ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                        ? 'bg-white/10 text-white font-semibold border border-white/10 shadow-xs'
+                        : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       <Icon className="w-4 h-4 shrink-0" />
                       <span>{item.label}</span>
                     </div>
                     {item.alertBadge && (
-                      <span className="bg-amber-500 text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded-full">
+                      <span className="bg-amber-500 text-slate-950 text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                         Pendente
                       </span>
                     )}
@@ -1623,12 +1623,12 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               })}
             </nav>
 
-            <div className="p-3 border-t border-slate-800/80">
+            <div className="p-3 border-t border-white/10">
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl transition-all cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-display font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all cursor-pointer"
               >
-                <LogOut className="w-4 h-4 text-slate-500" />
+                <LogOut className="w-4 h-4 text-slate-400" />
                 <span>Terminar Sessão</span>
               </button>
             </div>
@@ -1640,8 +1640,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden w-full">
 
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 px-3 sm:px-8 flex items-center justify-between shrink-0 shadow-xs gap-2">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <header className="h-14 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between shrink-0 shadow-xs gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
             <button
               onClick={() => setMobileSidebarOpen(true)}
               className="lg:hidden flex items-center justify-center p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer shrink-0"
@@ -1649,7 +1649,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
             >
               <Menu className="w-4 h-4" />
             </button>
-            <h1 className="text-xs sm:text-base font-black text-slate-900 truncate">
+            <h1 className="text-xs sm:text-sm font-semibold font-display text-slate-900 tracking-tight truncate">
               {activeSection === 'dashboard' && 'Visão Geral'}
               {activeSection === 'licencas' && 'Minhas Licenças'}
               {activeSection === 'clientes' && 'Carteira de Clientes'}
@@ -1663,10 +1663,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
             </h1>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setShowOfficialCertificatesModal(true)}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-xs font-bold text-amber-900 transition-colors cursor-pointer"
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-display font-medium text-slate-700 transition-all shadow-xs cursor-pointer"
               title="Ver Certificados Oficiais (Visual Software & Kivora)"
             >
               <Award className="w-3.5 h-3.5 text-amber-600" />
@@ -1676,17 +1676,17 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
             {/* Badge Saldo Wallet */}
             <button
               onClick={() => setShowTopUpWalletModal(true)}
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-800 transition-colors cursor-pointer"
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-display font-medium text-slate-700 transition-all shadow-xs cursor-pointer"
               title="Clique para Recarregar Saldo"
             >
               <Wallet className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Wallet: {fmt(walletBalance)} Kz</span>
-              <span className="text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded font-black">+ Recarga</span>
+              <span>Wallet: <strong className="text-emerald-700 font-mono-num font-semibold">{fmt(walletBalance)} Kz</strong></span>
+              <span className="text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded font-display font-semibold">+ Recarga</span>
             </button>
 
             <button
               onClick={() => setShowVideoModal(true)}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl text-xs font-bold text-blue-800 transition-colors cursor-pointer"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-display font-medium text-slate-700 transition-all shadow-xs cursor-pointer"
               title="Entrar em videochamada de suporte com a equipa Kivora"
             >
               <Video className="w-3.5 h-3.5 text-blue-600" />
@@ -1695,7 +1695,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
             <button
               onClick={() => setActiveSection('emitir-licenca')}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 sm:px-3.5 sm:py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer whitespace-nowrap"
+              className="bg-slate-950 hover:bg-slate-800 text-white text-xs font-display font-semibold px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98] cursor-pointer whitespace-nowrap"
             >
               <Plus className="w-3.5 h-3.5" />
               <span className="hidden xs:inline sm:inline">Emitir Licença</span>
@@ -1713,17 +1713,17 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
           {/* BANNER DE AVISO DE SEGURANÇA: SENHA PROVISÓRIA */}
           {mustChangePassword && (
-            <div className="p-4 sm:p-5 bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border-2 border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-amber-950 animate-fadeIn shadow-xs">
+            <div className="p-4 sm:p-5 surface-card bg-amber-50/50 border border-amber-200/80 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-amber-950 animate-fadeIn shadow-xs">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0 text-amber-700">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 text-amber-700">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-xs sm:text-sm font-black text-amber-900 flex items-center gap-2">
+                  <h4 className="text-xs sm:text-sm font-semibold font-display text-amber-950 flex items-center gap-2">
                     <span>Aviso de Segurança: Palavra-passe Padrão em Uso</span>
-                    <span className="text-[10px] bg-amber-200/80 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase">Provisória</span>
+                    <span className="text-[10px] bg-amber-200/80 text-amber-900 font-semibold px-2 py-0.5 rounded-full uppercase font-display">Provisória</span>
                   </h4>
-                  <p className="text-xs text-amber-800/90 mt-0.5 leading-relaxed">
+                  <p className="text-xs text-amber-900/80 mt-0.5 leading-relaxed">
                     A sua conta de parceiro está atualmente a utilizar a palavra-passe padrão atribuída pelo sistema. Por motivos de conformidade e segurança da sua carteira comercial, altere a sua palavra-passe para uma combinação pessoal e segura.
                   </p>
                 </div>
@@ -1732,7 +1732,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <button
                   type="button"
                   onClick={() => setShowFirstLoginPasswordModal(true)}
-                  className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="bg-amber-600 hover:bg-amber-500 text-white font-display font-semibold text-xs px-4 py-2 rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
                 >
                   <Lock className="w-3.5 h-3.5" />
                   <span>Alterar Palavra-passe Agora</span>
@@ -1746,16 +1746,16 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
             <div className="space-y-6">
 
               {/* Banner de Saldo & Linha de Crédito Híbrida */}
-              <div className="p-6 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white rounded-3xl border border-slate-800 shadow-lg space-y-4">
+              <div className="surface-card p-6 bg-slate-950 text-white rounded-2xl border border-slate-800/80 shadow-xs space-y-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-800/50 inline-block mb-1">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 px-2.5 py-0.5 rounded-md border border-emerald-800/50 inline-block mb-1 font-display">
                       Modelo Híbrido de Cobrança — Kivora Tech
                     </span>
-                    <h3 className="text-lg sm:text-xl font-black">
+                    <h3 className="text-lg font-bold font-display tracking-tight text-white">
                       Carteira Pré-Paga & Linha de Crédito Operacional
                     </h3>
-                    <p className="text-xs text-slate-300 mt-0.5">
+                    <p className="text-xs text-slate-400 mt-0.5">
                       Emissão instantânea com débito em carteira ou dentro do seu teto de crédito homologado.
                     </p>
                   </div>
@@ -1763,7 +1763,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setShowTopUpWalletModal(true)}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer"
+                      className="bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs px-4 py-2 rounded-xl shadow-xs border border-white/10 flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98]"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Recarregar Wallet</span>
@@ -1771,34 +1771,34 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                  <div className="p-3.5 bg-white/5 rounded-2xl border border-white/10">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Saldo na Carteira (Wallet)</span>
-                    <span className="text-xl font-black font-mono text-emerald-400">{fmt(walletBalance)} Kz</span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                    <span className="text-[10px] uppercase font-semibold text-slate-400 block tracking-wider font-display">Saldo na Carteira (Wallet)</span>
+                    <span className="text-xl font-bold font-display font-mono-num text-emerald-400">{fmt(walletBalance)} Kz</span>
                     <span className="text-[10px] text-slate-400 block mt-0.5">Ativação instantânea 24/7</span>
                   </div>
 
-                  <div className="p-3.5 bg-white/5 rounded-2xl border border-white/10">
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Slots de Crédito Livres</span>
+                      <span className="text-[10px] uppercase font-semibold text-slate-400 block tracking-wider font-display">Slots de Crédito Livres</span>
                       {isOverdue && (
-                        <span className="text-[9px] bg-red-500/30 text-red-300 border border-red-500/50 px-1.5 py-0.5 rounded font-black">Vencido</span>
+                        <span className="text-[9px] bg-red-500/20 text-red-300 border border-red-500/40 px-1.5 py-0.5 rounded font-bold font-display uppercase">Vencido</span>
                       )}
                     </div>
-                    <span className={`text-xl font-black font-mono ${availableCreditSlots > 0 && !isOverdue ? 'text-blue-400' : 'text-amber-400'}`}>
+                    <span className={`text-xl font-bold font-display font-mono-num ${availableCreditSlots > 0 && !isOverdue ? 'text-blue-400' : 'text-amber-400'}`}>
                       {availableCreditSlots} / {creditSlotsLimit} Slots
                     </span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">
+                    <span className="text-[10px] text-slate-400 block mt-0.5 font-mono-num">
                       {activeSlotsInUse} licenças a crédito em aberto
                     </span>
                   </div>
 
-                  <div className="p-3.5 bg-white/5 rounded-2xl border border-white/10">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Dívida Atual à Kivora</span>
-                    <span className={`text-xl font-black font-mono ${totalPendingDebt > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                    <span className="text-[10px] uppercase font-semibold text-slate-400 block tracking-wider font-display">Dívida Atual à Kivora</span>
+                    <span className={`text-xl font-bold font-display font-mono-num ${totalPendingDebt > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
                       {fmt(totalPendingDebt)} Kz
                     </span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">
+                    <span className="text-[10px] text-slate-400 block mt-0.5 font-mono-num">
                       {oldestDebtDays > 0 ? `Mais antiga: há ${oldestDebtDays} dias` : 'Sem pendências'}
                     </span>
                   </div>
@@ -1807,53 +1807,53 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
               {/* Top Stats Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase">Licenças Emitidas</span>
-                  <p className="text-2xl font-black text-slate-900">{allPartnerLicenses.length}</p>
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full inline-block">
+                <div className="surface-card p-5 rounded-2xl border border-slate-200/80 space-y-1">
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block font-display">Licenças Emitidas</span>
+                  <p className="text-2xl font-bold text-slate-900 font-display font-mono-num">{allPartnerLicenses.length}</p>
+                  <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md inline-block border border-emerald-200/80 font-display">
                     Conectado ao Firebase
                   </span>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase">Empresas Clientes</span>
-                  <p className="text-2xl font-black text-slate-900">{partnerClients.length}</p>
+                <div className="surface-card p-5 rounded-2xl border border-slate-200/80 space-y-1">
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block font-display">Empresas Clientes</span>
+                  <p className="text-2xl font-bold text-slate-900 font-display font-mono-num">{partnerClients.length}</p>
                   <span className="text-[10px] text-slate-500 font-medium block">Carteira ativa</span>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase">Total Liquidado</span>
-                  <p className="text-xl font-black text-emerald-600 font-mono">
+                <div className="surface-card p-5 rounded-2xl border border-slate-200/80 space-y-1">
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block font-display">Total Liquidado</span>
+                  <p className="text-xl font-bold text-emerald-600 font-display font-mono-num">
                     {fmt(totalPaidToKivora)} Kz
                   </p>
                   <span className="text-[10px] text-slate-500 font-medium block">Pago à Kivora</span>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase">Margem / Lucro Estimado</span>
-                  <p className="text-xl font-black text-emerald-600 font-mono">
+                <div className="surface-card p-5 rounded-2xl border border-slate-200/80 space-y-1">
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block font-display">Margem / Lucro Estimado</span>
+                  <p className="text-xl font-bold text-emerald-600 font-display font-mono-num">
                     +{fmt(totalPartnerProfit)} Kz
                   </p>
-                  <span className="text-[10px] text-emerald-700 font-bold block">Lucro bruto obtido</span>
+                  <span className="text-[10px] text-emerald-700 font-medium block">Lucro bruto obtido</span>
                 </div>
               </div>
 
               {/* Card Destaque: Licenças Aprovadas Prontas para Entrega */}
               {approvedRequestsReady.length > 0 && (
-                <div className="p-6 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 border-2 border-emerald-400/40 rounded-3xl space-y-4 shadow-sm">
+                <div className="surface-card p-6 bg-emerald-500/5 border border-emerald-500/30 rounded-2xl space-y-4 shadow-xs">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md">
-                        <CheckCircle2 className="w-6 h-6" />
+                      <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <CheckCircle2 className="w-5 h-5" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-black text-slate-900 text-base">
+                          <h4 className="font-bold text-slate-900 text-sm sm:text-base font-display">
                             {approvedRequestsReady.length === 1
                               ? '1 Licença Oficial Aprovada pela Kivora!'
                               : `${approvedRequestsReady.length} Licenças Oficiais Aprovadas pela Kivora!`}
                           </h4>
-                          <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                          <span className="text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full uppercase tracking-wider font-display">
                             Pronta para Entrega
                           </span>
                         </div>
@@ -1867,7 +1867,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         setActiveSection('licencas');
                         setActiveLicensesTab('solicitacoes');
                       }}
-                      className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 cursor-pointer shadow-sm flex items-center gap-2 self-start sm:self-auto transition-colors"
+                      className="bg-slate-950 hover:bg-slate-800 text-white text-xs font-display font-semibold px-3.5 py-2 rounded-xl shrink-0 cursor-pointer shadow-xs flex items-center gap-1.5 self-start sm:self-auto transition-all active:scale-[0.98]"
                     >
                       <Key className="w-3.5 h-3.5 text-emerald-400" />
                       <span>Ver Todas as Solicitações</span>
@@ -1880,24 +1880,24 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       const licKey = (req.license_id || (req as any).licenseId || (req as any).licenseKey || '').trim();
                       const associatedLic = allPartnerLicenses.find(l => l.id.toUpperCase() === licKey.toUpperCase());
                       return (
-                        <div key={req.id} className="p-4 bg-white rounded-2xl border border-emerald-200/80 shadow-xs flex flex-col justify-between gap-3">
+                        <div key={req.id} className="surface-card p-4 bg-white rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between gap-3">
                           <div>
                             <div className="flex items-center justify-between gap-2">
-                              <span className="font-mono text-xs font-black text-emerald-900 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+                              <span className="font-mono-num text-xs font-bold text-emerald-900 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/80">
                                 {licKey}
                               </span>
-                              <span className="text-[10px] font-bold text-slate-500 uppercase">
+                              <span className="text-[10px] font-semibold text-slate-500 uppercase font-display">
                                 {getPlanLabel(req.plan_type)}
                               </span>
                             </div>
-                            <h5 className="font-black text-slate-900 text-sm mt-2">{req.company_name}</h5>
-                            <p className="text-[11px] text-slate-500 font-mono">NIF: {req.nif}</p>
+                            <h5 className="font-semibold text-slate-900 text-sm mt-2 font-display">{req.company_name}</h5>
+                            <p className="text-[11px] text-slate-500 font-mono-num">NIF: {req.nif}</p>
                           </div>
 
                           <div className="flex items-center gap-2 pt-2 border-t border-slate-100 flex-wrap">
                             <button
                               onClick={() => handleCopyKey(licKey)}
-                              className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                              className="px-3 py-1.5 bg-slate-950 hover:bg-slate-800 text-white rounded-xl text-xs font-display font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-all active:scale-[0.98]"
                             >
                               {copiedKey === licKey ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                               <span>{copiedKey === licKey ? 'Copiada!' : 'Copiar Chave'}</span>
@@ -1906,9 +1906,9 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                             {associatedLic && (
                               <button
                                 onClick={() => handleShareWhatsapp(associatedLic)}
-                                className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-emerald-200 cursor-pointer transition-colors"
+                                className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-display font-medium flex items-center gap-1.5 border border-slate-200/80 cursor-pointer transition-all"
                               >
-                                <Share2 className="w-3.5 h-3.5" />
+                                <Share2 className="w-3.5 h-3.5 text-emerald-600" />
                                 <span>WhatsApp</span>
                               </button>
                             )}
@@ -1934,9 +1934,9 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                                 };
                                 setSelectedLicenseForCert(licToCert);
                               }}
-                              className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-blue-200 cursor-pointer transition-colors"
+                              className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-display font-medium flex items-center gap-1.5 border border-slate-200/80 cursor-pointer transition-all"
                             >
-                              <Printer className="w-3.5 h-3.5" />
+                              <Printer className="w-3.5 h-3.5 text-blue-600" />
                               <span>Certificado AGT</span>
                             </button>
                           </div>
@@ -1949,27 +1949,27 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
               {/* Dívida Alert se houver pendência */}
               {totalPendingDebt > 0 && (
-                <div className="p-5 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs shadow-xs">
+                <div className="surface-card p-5 bg-amber-50/50 border border-amber-200/80 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs shadow-xs">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm">
-                      <AlertCircle className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
+                      <AlertCircle className="w-5 h-5 text-amber-600" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-amber-950 text-sm">Saldo Devedor de {fmt(totalPendingDebt)} Kz referente a licenças emitidas a crédito</h4>
-                      <p className="text-amber-800 text-[11px] mt-0.5">Efetue a transferência para as contas oficiais Kivora e envie o comprovativo para regularização do crédito.</p>
+                      <h4 className="font-semibold text-amber-950 text-sm font-display">Saldo Devedor de {fmt(totalPendingDebt)} Kz referente a licenças emitidas a crédito</h4>
+                      <p className="text-amber-900/80 text-[11px] mt-0.5">Efetue a transferência para as contas oficiais Kivora e envie o comprovativo para regularização do crédito.</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setShowProofPaymentModal(true)}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-2 rounded-xl shrink-0 cursor-pointer shadow-sm flex items-center gap-1.5"
+                      className="bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold px-3.5 py-2 rounded-xl shrink-0 cursor-pointer shadow-xs flex items-center gap-1.5 active:scale-[0.98]"
                     >
                       <Receipt className="w-3.5 h-3.5" />
                       <span>Notificar Pagamento</span>
                     </button>
                     <button
                       onClick={() => setActiveSection('extrato')}
-                      className="bg-amber-600 hover:bg-amber-500 text-white font-bold px-3.5 py-2 rounded-xl shrink-0 cursor-pointer shadow-sm"
+                      className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 font-display font-medium px-3.5 py-2 rounded-xl shrink-0 cursor-pointer shadow-xs"
                     >
                       Ver Extrato
                     </button>
@@ -1981,48 +1981,48 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div
                   onClick={() => setActiveSection('emitir-licenca')}
-                  className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-emerald-500 hover:shadow-md transition-all cursor-pointer space-y-2 group"
+                  className="surface-card bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-slate-400 hover:shadow-xs transition-all cursor-pointer space-y-2 group"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                    <Plus className="w-5 h-5" />
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:bg-slate-950 group-hover:text-white transition-colors">
+                    <Plus className="w-4 h-4" />
                   </div>
-                  <h4 className="font-bold text-slate-900 text-sm">Emitir Nova Licença</h4>
+                  <h4 className="font-semibold font-display text-slate-900 text-sm">Emitir Nova Licença</h4>
                   <p className="text-xs text-slate-500">Gere uma chave KVRA instantânea para o seu cliente.</p>
                 </div>
 
                 <div
                   onClick={() => setShowAddClientModal(true)}
-                  className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-blue-500 hover:shadow-md transition-all cursor-pointer space-y-2 group"
+                  className="surface-card bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-slate-400 hover:shadow-xs transition-all cursor-pointer space-y-2 group"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    <UserPlus className="w-5 h-5" />
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:bg-slate-950 group-hover:text-white transition-colors">
+                    <UserPlus className="w-4 h-4" />
                   </div>
-                  <h4 className="font-bold text-slate-900 text-sm">Cadastrar Novo Cliente</h4>
+                  <h4 className="font-semibold font-display text-slate-900 text-sm">Cadastrar Novo Cliente</h4>
                   <p className="text-xs text-slate-500">Adicione uma empresa à sua carteira comercial.</p>
                 </div>
 
                 <div
                   onClick={() => setActiveSection('simulador')}
-                  className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-purple-500 hover:shadow-md transition-all cursor-pointer space-y-2 group"
+                  className="surface-card bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-slate-400 hover:shadow-xs transition-all cursor-pointer space-y-2 group"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                    <Calculator className="w-5 h-5" />
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:bg-slate-950 group-hover:text-white transition-colors">
+                    <Calculator className="w-4 h-4" />
                   </div>
-                  <h4 className="font-bold text-slate-900 text-sm">Simular Lucros</h4>
+                  <h4 className="font-semibold font-display text-slate-900 text-sm">Simular Lucros</h4>
                   <p className="text-xs text-slate-500">Calcule o seu potencial de faturamento mensal e anual.</p>
                 </div>
               </div>
 
               {/* Licenças Recentes */}
-              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+              <div className="surface-card bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-black text-slate-900 text-sm">Últimas Licenças Emitidas pela sua Conta</h3>
+                    <h3 className="font-semibold font-display text-slate-900 text-sm">Últimas Licenças Emitidas pela sua Conta</h3>
                     <p className="text-xs text-slate-500">Histórico de chaves KVRA geradas para a sua carteira.</p>
                   </div>
                   <button
                     onClick={() => setActiveSection('licencas')}
-                    className="text-xs font-bold text-emerald-600 hover:text-emerald-700 cursor-pointer flex items-center gap-1"
+                    className="text-xs font-semibold font-display text-slate-900 hover:text-slate-600 cursor-pointer flex items-center gap-1"
                   >
                     <span>Ver Todas ({allPartnerLicenses.length})</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -2032,53 +2032,53 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 {allPartnerLicenses.length === 0 ? (
                   <div className="p-8 text-center text-slate-400 space-y-2">
                     <Key className="w-8 h-8 mx-auto text-slate-300" />
-                    <p className="font-bold text-xs text-slate-700">Ainda não emitiu licenças</p>
+                    <p className="font-semibold text-xs text-slate-700 font-display">Ainda não emitiu licenças</p>
                     <p className="text-[11px]">Clique no botão "Emitir Licença" para gerar a primeira chave para o seu cliente.</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-slate-100 border border-slate-100 rounded-2xl overflow-hidden text-xs">
+                  <div className="divide-y divide-slate-100 border border-slate-100 rounded-xl overflow-hidden text-xs">
                     {allPartnerLicenses.slice(0, 5).map((lic) => {
                       const isApprovedFromReq = myLicenseRequests.some(
                         (r) => r.status === 'approved' && r.license_id?.toUpperCase() === lic.id.toUpperCase()
                       );
                       return (
-                        <div key={lic.id} className="p-4 bg-slate-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
+                        <div key={lic.id} className="p-4 bg-slate-50/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-mono font-bold text-slate-900">{lic.id}</span>
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                              <span className="font-mono-num font-bold text-slate-900">{lic.id}</span>
+                              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border font-display ${
                                 lic.is_provisional ? 'bg-amber-100 text-amber-900 border-amber-300' :
                                 lic.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'
                               }`}>
                                 {lic.is_provisional ? '⏳ Provisória (7 Dias)' : lic.status === 'active' ? 'Ativa' : 'Suspensa'}
                               </span>
                               {isApprovedFromReq ? (
-                                <span className="text-[9px] font-bold bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200">
+                                <span className="text-[9px] font-semibold bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200 font-display">
                                   ✓ Aprovada por Solicitação
                                 </span>
                               ) : (
-                                <span className="text-[9px] font-bold bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-200">
+                                <span className="text-[9px] font-semibold bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-200 font-display">
                                   ⚡ Emissão Direta
                                 </span>
                               )}
                               {lic.hardware_id ? (
-                                <span className="text-[9px] font-bold bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200">
+                                <span className="text-[9px] font-semibold bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200 font-display">
                                   PC Vinculado
                                 </span>
                               ) : (
-                                <span className="text-[9px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
+                                <span className="text-[9px] font-medium bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-display">
                                   Livre p/ Ativar
                                 </span>
                               )}
                             </div>
-                            <p className="text-slate-600 font-medium mt-1">
-                              {lic.company_name} (NIF: {lic.nif}) • Plano: {getPlanLabel(lic.plan_type)}
+                            <p className="text-slate-600 font-medium mt-1 font-display">
+                              {lic.company_name} <span className="font-mono-num text-slate-500">(NIF: {lic.nif})</span> • Plano: {getPlanLabel(lic.plan_type)}
                             </p>
                           </div>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleCopyKey(lic.id)}
-                            className="p-2 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-600 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                            className="p-2 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-xl text-slate-700 text-xs font-display font-medium flex items-center gap-1 cursor-pointer shadow-xs"
                             title="Copiar Chave"
                           >
                             {copiedKey === lic.id ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -2086,18 +2086,18 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                           </button>
                           <button
                             onClick={() => handleShareWhatsapp(lic)}
-                            className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer"
+                            className="p-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 rounded-xl text-xs font-display font-medium flex items-center gap-1 cursor-pointer shadow-xs"
                             title="Enviar por WhatsApp"
                           >
-                            <Share2 className="w-3.5 h-3.5" />
+                            <Share2 className="w-3.5 h-3.5 text-emerald-600" />
                             <span>WhatsApp</span>
                           </button>
                           <button
                             onClick={() => setSelectedLicenseForCert(lic)}
-                            className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer"
+                            className="p-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 rounded-xl text-xs font-display font-medium flex items-center gap-1 cursor-pointer shadow-xs"
                             title="Certificado Oficial"
                           >
-                            <Printer className="w-3.5 h-3.5" />
+                            <Printer className="w-3.5 h-3.5 text-blue-600" />
                             <span>Certificado</span>
                           </button>
                         </div>
@@ -2113,10 +2113,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
           {/* SECTION: MINHAS LICENÇAS */}
           {activeSection === 'licencas' && (
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="surface-card bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-xs space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-black text-slate-900">Gestão de Licenças Emitidas</h2>
+                  <h2 className="text-lg font-bold font-display text-slate-900 tracking-tight">Gestão de Licenças Emitidas</h2>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Controlo operacional de chaves, desvinculação de terminais, renovações e emissão de certificados.
                   </p>
@@ -2125,7 +2125,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setActiveSection('emitir-licenca')}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                    className="bg-slate-950 hover:bg-slate-800 text-white text-xs font-display font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-xs transition-all cursor-pointer active:scale-[0.98]"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Emitir Nova Licença</span>
@@ -2134,13 +2134,13 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               </div>
 
               {/* Abas: Licenças Emitidas vs Minhas Solicitações */}
-              <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
+              <div className="flex items-center gap-2 border-b border-slate-200/80 pb-3">
                 <button
                   onClick={() => setActiveLicensesTab('emitidas')}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                  className={`px-4 py-2 rounded-xl text-xs font-display transition-all flex items-center gap-2 cursor-pointer ${
                     activeLicensesTab === 'emitidas'
-                      ? 'bg-slate-900 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                      ? 'bg-slate-950 text-white shadow-xs font-semibold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium'
                   }`}
                 >
                   <Key className="w-3.5 h-3.5" />
@@ -2149,16 +2149,16 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                 <button
                   onClick={() => setActiveLicensesTab('solicitacoes')}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                  className={`px-4 py-2 rounded-xl text-xs font-display transition-all flex items-center gap-2 cursor-pointer ${
                     activeLicensesTab === 'solicitacoes'
-                      ? 'bg-slate-900 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                      ? 'bg-slate-950 text-white shadow-xs font-semibold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium'
                   }`}
                 >
                   <Clock className="w-3.5 h-3.5" />
                   <span>Minhas Solicitações ({myLicenseRequests.length})</span>
                   {myLicenseRequests.filter((r) => r.status === 'pending').length > 0 && (
-                    <span className="bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+                    <span className="bg-amber-500 text-slate-950 text-[10px] font-mono-num font-bold px-2 py-0.5 rounded-full">
                       {myLicenseRequests.filter((r) => r.status === 'pending').length} pendente{myLicenseRequests.filter((r) => r.status === 'pending').length > 1 ? 's' : ''}
                     </span>
                   )}
@@ -2168,7 +2168,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               {activeLicensesTab === 'emitidas' ? (
                 <>
                   {/* Filtros & Pesquisa */}
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
                     <div className="relative w-full sm:max-w-md">
                       <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                       <input
@@ -2176,7 +2176,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         placeholder="Pesquisar por chave KVRA, nome da empresa ou NIF..."
                         value={licenseSearch}
                         onChange={(e) => setLicenseSearch(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-medium"
+                        className="w-full pl-9 pr-4 py-2 bg-slate-50/70 border border-slate-200/80 rounded-xl text-xs placeholder:text-slate-400 text-slate-900 font-display focus:outline-none focus:border-slate-900 focus:bg-white transition-all"
                       />
                     </div>
 
@@ -2185,10 +2185,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         <button
                           key={st}
                           onClick={() => setLicenseStatusFilter(st)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                          className={`px-3 py-1.5 rounded-xl text-xs font-display transition-all cursor-pointer whitespace-nowrap ${
                             licenseStatusFilter === st
-                              ? 'bg-slate-900 text-white shadow-xs'
-                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              ? 'bg-slate-950 text-white shadow-xs font-semibold'
+                              : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200 font-medium'
                           }`}
                         >
                           {st === 'all' && `Todas (${allPartnerLicenses.length})`}
@@ -2204,9 +2204,9 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                   {/* Tabela / Cards de Licenças */}
                   {filteredLicenses.length === 0 ? (
-                    <div className="p-12 text-center text-slate-400 space-y-2 border border-dashed border-slate-200 rounded-2xl">
+                    <div className="p-12 text-center text-slate-400 space-y-2 border border-dashed border-slate-200/80 rounded-2xl">
                       <Key className="w-10 h-10 mx-auto text-slate-300" />
-                      <h4 className="font-bold text-slate-700 text-sm">Nenhuma licença encontrada</h4>
+                      <h4 className="font-semibold text-slate-700 text-sm font-display">Nenhuma licença encontrada</h4>
                       <p className="text-xs text-slate-400">Tente ajustar os filtros de pesquisa ou emita uma nova licença.</p>
                     </div>
                   ) : (
@@ -2222,15 +2222,15 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         return (
                           <div
                             key={lic.id}
-                            className="p-5 bg-white rounded-2xl border border-slate-200 hover:border-slate-300 shadow-xs transition-all space-y-4"
+                            className="surface-card p-5 bg-white rounded-2xl border border-slate-200/80 hover:border-slate-300 shadow-xs transition-all space-y-4"
                           >
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                               <div>
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="font-mono text-sm font-black text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                                  <span className="font-mono-num text-xs font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200/80">
                                     {lic.id}
                                   </span>
-                                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                                  <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full border font-display ${
                                     lic.is_provisional ? 'bg-amber-100 text-amber-900 border-amber-300' :
                                     lic.status === 'revoked' ? 'bg-red-50 text-red-700 border-red-200' :
                                     isExpired ? 'bg-amber-50 text-amber-700 border-amber-200' :
@@ -2240,27 +2240,27 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                                     {lic.is_provisional ? '⏳ Provisória (7 Dias)' : lic.status === 'revoked' ? 'Suspensa' : isExpired ? 'Expirada' : isExpiringSoon ? 'A Expirar em Breve' : 'Ativa'}
                                   </span>
                                   {isApprovedFromReq ? (
-                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-blue-50 text-blue-800 border-blue-200 flex items-center gap-1">
+                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-blue-50 text-blue-800 border-blue-200 flex items-center gap-1 font-display">
                                       <CheckCircle2 className="w-3 h-3 text-blue-600" />
                                       <span>Aprovada por Solicitação</span>
                                     </span>
                                   ) : (
-                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-800 border-emerald-200 flex items-center gap-1">
+                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-800 border-emerald-200 flex items-center gap-1 font-display">
                                       <span>⚡ Emissão Direta</span>
                                     </span>
                                   )}
-                                  <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+                                  <span className="text-[10px] font-semibold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200 font-display">
                                     {getPlanLabel(lic.plan_type)}
                                   </span>
                                 </div>
-                                <h4 className="font-black text-slate-900 text-sm mt-2">{lic.company_name}</h4>
-                                <p className="text-slate-500 text-xs font-mono">NIF: {lic.nif} • {lic.client_email || 'Email não registado'}</p>
+                                <h4 className="font-semibold text-slate-900 text-sm mt-2 font-display">{lic.company_name}</h4>
+                                <p className="text-slate-500 text-xs font-mono-num">NIF: {lic.nif} • {lic.client_email || 'Email não registado'}</p>
                               </div>
 
                               <div className="flex items-center gap-2 flex-wrap sm:justify-end">
                                 <button
                                   onClick={() => handleCopyKey(lic.id)}
-                                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-display font-medium flex items-center gap-1.5 cursor-pointer transition-all"
                                 >
                                   {copiedKey === lic.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                                   <span>{copiedKey === lic.id ? 'Copiada' : 'Copiar Chave'}</span>
@@ -2268,43 +2268,43 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                                 <button
                                   onClick={() => handleShareWhatsapp(lic)}
-                                  className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-emerald-200 cursor-pointer"
+                                  className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-display font-medium flex items-center gap-1.5 border border-slate-200/80 cursor-pointer shadow-xs transition-all"
                                 >
-                                  <Share2 className="w-3.5 h-3.5" />
+                                  <Share2 className="w-3.5 h-3.5 text-emerald-600" />
                                   <span>WhatsApp</span>
                                 </button>
 
                                 <button
                                   onClick={() => setSelectedLicenseForCert(lic)}
-                                  className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-blue-200 cursor-pointer"
+                                  className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-display font-medium flex items-center gap-1.5 border border-slate-200/80 cursor-pointer shadow-xs transition-all"
                                 >
-                                  <Printer className="w-3.5 h-3.5" />
+                                  <Printer className="w-3.5 h-3.5 text-blue-600" />
                                   <span>Certificado</span>
                                 </button>
 
                                 <button
                                   onClick={() => setSelectedLicenseForInvoice(lic)}
-                                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-200 cursor-pointer"
+                                  className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-display font-medium flex items-center gap-1.5 border border-slate-200/80 cursor-pointer shadow-xs transition-all"
                                 >
-                                  <Receipt className="w-3.5 h-3.5" />
+                                  <Receipt className="w-3.5 h-3.5 text-slate-600" />
                                   <span>Recibo / Fatura</span>
                                 </button>
                               </div>
                             </div>
 
                             {/* Detalhes de Ativação & Terminal */}
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-slate-50 rounded-xl text-xs">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-slate-50/60 rounded-xl text-xs border border-slate-200/70">
                               <div>
-                                <span className="text-slate-400 text-[10px] uppercase font-bold block">Validade da Licença</span>
-                                <span className="font-bold text-slate-800">{formatLicenseDate(lic.expires_at)}</span>
+                                <span className="text-slate-400 text-[10px] uppercase font-semibold font-display block tracking-wider">Validade da Licença</span>
+                                <span className="font-semibold text-slate-800 font-mono-num">{formatLicenseDate(lic.expires_at)}</span>
                               </div>
                               <div>
-                                <span className="text-slate-400 text-[10px] uppercase font-bold block">Computadores / Terminais</span>
-                                <span className="font-bold text-slate-800">{1 + (lic.extra_seats || 0)} Terminal(ais)</span>
+                                <span className="text-slate-400 text-[10px] uppercase font-semibold font-display block tracking-wider">Computadores / Terminais</span>
+                                <span className="font-semibold text-slate-800">{1 + (lic.extra_seats || 0)} Terminal(ais)</span>
                               </div>
                               <div>
-                                <span className="text-slate-400 text-[10px] uppercase font-bold block">Hardware Fingerprint (PC)</span>
-                                <span className="font-mono text-slate-700 text-[11px] truncate block" title={lic.hardware_id || 'Nenhum'}>
+                                <span className="text-slate-400 text-[10px] uppercase font-semibold font-display block tracking-wider">Hardware Fingerprint (PC)</span>
+                                <span className="font-mono-num text-slate-700 text-[11px] truncate block" title={lic.hardware_id || 'Nenhum'}>
                                   {lic.hardware_id ? `Vinculado: ${lic.hardware_id.slice(0, 16)}...` : 'Livre para Ativação'}
                                 </span>
                               </div>
@@ -2317,14 +2317,14 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                                   <button
                                     onClick={() => handleUnlinkDevice(lic)}
                                     disabled={actionLoading === lic.id}
-                                    className="text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl font-bold border border-amber-200 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                                    className="text-amber-800 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl font-display font-semibold border border-amber-200/80 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-all"
                                     title="Desvincular do computador atual para permitir instalação em novo dispositivo"
                                   >
                                     <Unlink className="w-3.5 h-3.5" />
                                     <span>{actionLoading === lic.id ? 'A desvincular...' : 'Desvincular Computador'}</span>
                                   </button>
                                 ) : (
-                                  <span className="text-slate-400 text-[11px] italic">Nenhum computador ativado ainda</span>
+                                  <span className="text-slate-400 text-[11px] italic font-display">Nenhum computador ativado ainda</span>
                                 )}
                               </div>
 
@@ -2334,7 +2334,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                                     setAddSeatsModalLic(lic);
                                     setSeatsToAdd(1);
                                   }}
-                                  className="text-blue-700 hover:bg-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl font-bold border border-blue-200 flex items-center gap-1.5 cursor-pointer"
+                                  className="text-blue-800 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl font-display font-semibold border border-blue-200/80 flex items-center gap-1.5 cursor-pointer transition-all"
                                 >
                                   <Users className="w-3.5 h-3.5" />
                                   <span>+ Postos LAN</span>
@@ -2342,7 +2342,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                                 <button
                                   onClick={() => setRenewLicenseModal({ open: true, license: lic, days: 30 })}
-                                  className="text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl font-bold border border-emerald-200 flex items-center gap-1.5 cursor-pointer"
+                                  className="text-emerald-800 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl font-display font-semibold border border-emerald-200/80 flex items-center gap-1.5 cursor-pointer transition-all"
                                 >
                                   <RefreshCw className="w-3.5 h-3.5" />
                                   <span>Renovar / Prorrogar</span>
@@ -2351,7 +2351,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                                 <button
                                   onClick={() => handleToggleLicenseStatus(lic)}
                                   disabled={actionLoading === lic.id}
-                                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer border ${
+                                  className={`px-3 py-1.5 rounded-xl font-display font-semibold flex items-center gap-1.5 cursor-pointer border transition-all ${
                                     lic.status === 'revoked'
                                       ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
                                       : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
@@ -2370,21 +2370,21 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 </>
               ) : (
                 /* Sub-aba: Minhas Solicitações */
-                <div className="space-y-4 pt-2">
-                  <div className="p-4 bg-blue-50/80 border border-blue-200 rounded-2xl text-xs text-blue-900 flex items-start gap-3">
+                <div className="space-y-4 pt-1">
+                  <div className="p-4 surface-card bg-blue-50/50 border border-blue-200/80 rounded-xl text-xs text-blue-900 flex items-start gap-3">
                     <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="font-black block">Segurança Fiscal & Privacidade Comercial</strong>
-                      <span>
+                      <strong className="font-semibold font-display block">Segurança Fiscal & Privacidade Comercial</strong>
+                      <span className="text-blue-950/80">
                         As licenças aprovadas pela Kivora são disponibilizadas aqui para que possa copiar e fornecer diretamente ao cliente. Nenhuma chave é enviada automaticamente aos clientes finais por WhatsApp ou e-mail.
                       </span>
                     </div>
                   </div>
 
                   {myLicenseRequests.length === 0 ? (
-                    <div className="p-12 text-center text-slate-400 space-y-2 border border-dashed border-slate-200 rounded-2xl">
+                    <div className="p-12 text-center text-slate-400 space-y-2 border border-dashed border-slate-200/80 rounded-2xl">
                       <Clock className="w-10 h-10 mx-auto text-slate-300" />
-                      <h4 className="font-bold text-slate-700 text-sm">Nenhuma solicitação de licença registada</h4>
+                      <h4 className="font-semibold text-slate-700 text-sm font-display">Nenhuma solicitação de licença registada</h4>
                       <p className="text-xs text-slate-400">As suas solicitações de novas licenças aparecerão aqui para acompanhamento em tempo real.</p>
                     </div>
                   ) : (
@@ -2392,15 +2392,15 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       {myLicenseRequests.map((req) => (
                         <div
                           key={req.id}
-                          className="p-5 bg-white rounded-2xl border border-slate-200 hover:border-slate-300 shadow-xs transition-all space-y-3"
+                          className="surface-card p-5 bg-white rounded-2xl border border-slate-200/80 hover:border-slate-300 shadow-xs transition-all space-y-3"
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-mono text-xs font-black text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                                <span className="font-mono-num text-xs font-bold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200/80">
                                   {req.id}
                                 </span>
-                                <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                                <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full border font-display ${
                                   req.status === 'pending' ? 'bg-amber-50 text-amber-800 border-amber-300' :
                                   req.status === 'approved' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
                                   'bg-red-50 text-red-800 border-red-300'
@@ -2408,44 +2408,44 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                                   {req.status === 'pending' ? '⏳ Aguarda Confirmação do Admin' :
                                    req.status === 'approved' ? '✓ Aprovada & Emitida' : '✕ Recusada'}
                                 </span>
-                                <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+                                <span className="text-[10px] font-semibold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200 font-display">
                                   {getPlanLabel(req.plan_type)}
                                   {req.extra_seats > 0 ? ` (+${req.extra_seats} postos)` : ''}
                                 </span>
-                                <span className="text-[10px] font-medium text-slate-500">
+                                <span className="text-[10px] font-mono-num text-slate-500">
                                   {new Date(req.created_at).toLocaleDateString('pt-AO')}
                                 </span>
                               </div>
 
-                              <h4 className="font-black text-slate-900 text-sm mt-2">{req.company_name}</h4>
-                              <p className="text-slate-500 text-xs font-mono">
+                              <h4 className="font-semibold text-slate-900 text-sm mt-2 font-display">{req.company_name}</h4>
+                              <p className="text-slate-500 text-xs font-mono-num">
                                 NIF: {req.nif} • {req.client_email || 'Email não registado'}
                               </p>
                             </div>
 
                             <div className="text-right flex flex-col sm:items-end justify-center">
                               <span className="text-xs text-slate-500">Custo de Atacado:</span>
-                              <span className="font-bold text-sm text-slate-900">{fmt(req.cost_aoa)} Kz</span>
-                              <span className="text-[10px] text-slate-400">
+                              <span className="font-bold text-sm text-slate-900 font-mono-num">{fmt(req.cost_aoa)} Kz</span>
+                              <span className="text-[10px] text-slate-400 font-display">
                                 {req.payment_method === 'wallet' ? 'Pago via Carteira' : 'Linha de Crédito'}
                               </span>
                             </div>
                           </div>
 
                           {req.status === 'approved' && req.license_id && (
-                            <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl space-y-3">
+                            <div className="p-3.5 bg-emerald-50/70 border border-emerald-200/80 rounded-xl space-y-3">
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div className="flex items-center gap-2">
                                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                                   <div>
-                                    <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Chave de Licença Oficial (Entregar ao Cliente):</span>
-                                    <span className="font-mono font-black text-slate-900 text-sm select-all">{req.license_id}</span>
+                                    <span className="text-[10px] font-semibold text-emerald-800 uppercase tracking-wider block font-display">Chave de Licença Oficial (Entregar ao Cliente):</span>
+                                    <span className="font-mono-num font-bold text-slate-900 text-sm select-all">{req.license_id}</span>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2 flex-wrap">
                                   <button
                                     onClick={() => handleCopyKey(req.license_id!)}
-                                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                                    className="px-3 py-1.5 bg-slate-950 hover:bg-slate-800 text-white rounded-xl text-xs font-display font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-all active:scale-[0.98]"
                                   >
                                     {copiedKey === req.license_id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                                     <span>{copiedKey === req.license_id ? 'Copiada!' : 'Copiar Chave'}</span>
@@ -2472,10 +2472,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                                       };
                                       setSelectedLicenseForCert(lic);
                                     }}
-                                    className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-blue-200 cursor-pointer"
+                                    className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-display font-medium flex items-center gap-1.5 border border-slate-200/80 cursor-pointer shadow-xs transition-all"
                                     title="Visualizar e Imprimir Certificado Oficial A4"
                                   >
-                                    <Printer className="w-3.5 h-3.5" />
+                                    <Printer className="w-3.5 h-3.5 text-blue-600" />
                                     <span>Certificado</span>
                                   </button>
 
@@ -2500,10 +2500,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                                       };
                                       setSelectedLicenseForInvoice(lic);
                                     }}
-                                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-200 cursor-pointer"
+                                    className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-display font-medium flex items-center gap-1.5 border border-slate-200/80 cursor-pointer shadow-xs transition-all"
                                     title="Visualizar Fatura/Recibo A4"
                                   >
-                                    <Receipt className="w-3.5 h-3.5" />
+                                    <Receipt className="w-3.5 h-3.5 text-slate-600" />
                                     <span>Recibo / Fatura</span>
                                   </button>
 
@@ -2512,7 +2512,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                                       setLicenseSearch(req.license_id!);
                                       setActiveLicensesTab('emitidas');
                                     }}
-                                    className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                                    className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-display font-medium flex items-center gap-1.5 cursor-pointer transition-all"
                                     title="Localizar esta licença na aba de emitidas"
                                   >
                                     <Key className="w-3.5 h-3.5" />
@@ -2540,10 +2540,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                                       };
                                       handleShareWhatsapp(lic);
                                     }}
-                                    className="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-emerald-300 cursor-pointer"
+                                    className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-display font-medium flex items-center gap-1.5 border border-slate-200/80 cursor-pointer shadow-xs transition-all"
                                     title="Enviar dados de ativação por WhatsApp"
                                   >
-                                    <Share2 className="w-3.5 h-3.5" />
+                                    <Share2 className="w-3.5 h-3.5 text-emerald-600" />
                                     <span>WhatsApp</span>
                                   </button>
                                 </div>
@@ -2561,16 +2561,16 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
           {/* SECTION: CLIENTES */}
           {activeSection === 'clientes' && (
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="surface-card p-6 sm:p-8 space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-black text-slate-900">Carteira de Clientes do Parceiro</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Empresas que utilizam licenças ativadas com o seu código de parceiro.</p>
+                  <h2 className="text-lg font-display font-bold text-slate-900">Carteira de Clientes do Parceiro</h2>
+                  <p className="text-xs text-slate-500 font-sans mt-0.5">Empresas que utilizam licenças ativadas com o seu código de parceiro.</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setShowAddClientModal(true)}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                    className="bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <UserPlus className="w-3.5 h-3.5" />
                     <span>Novo Cliente</span>
@@ -2585,20 +2585,20 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   placeholder="Pesquisar por nome ou NIF..."
                   value={clientSearch}
                   onChange={(e) => setClientSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-medium"
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50/70 border border-slate-200/80 rounded-xl text-xs placeholder:text-slate-400 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 font-sans outline-none transition-all"
                 />
               </div>
 
               {filteredClients.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 space-y-2 border border-dashed border-slate-200 rounded-2xl">
+                <div className="p-12 text-center text-slate-400 space-y-2 border border-dashed border-slate-200/80 rounded-2xl bg-slate-50/40">
                   <Building2 className="w-10 h-10 mx-auto text-slate-300" />
-                  <h4 className="font-bold text-slate-700 text-sm">
+                  <h4 className="font-display font-bold text-slate-700 text-sm">
                     {clientSearch ? `Nenhum cliente com "${clientSearch}"` : 'Nenhum cliente registado ainda'}
                   </h4>
-                  <p className="text-xs text-slate-400">Emita uma licença ou adicione clientes manualmente à sua carteira.</p>
+                  <p className="text-xs text-slate-400 font-sans">Emita uma licença ou adicione clientes manualmente à sua carteira.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs">
+                <div className="divide-y divide-slate-100 border border-slate-200/80 rounded-2xl overflow-hidden text-xs bg-white shadow-xs">
                   {filteredClients.map((c) => {
                     const clientLicenses = allPartnerLicenses.filter((l) => {
                       const cNif = (c.nif || '').trim();
@@ -2608,16 +2608,16 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       return (l.company_name || '').toLowerCase().trim() === (c.name || '').toLowerCase().trim();
                     });
                     return (
-                      <div key={c.id || c.nif} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition-colors">
+                      <div key={c.id || c.nif} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50/60 transition-colors">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-slate-900 text-sm">{c.name}</h4>
-                            <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
+                            <h4 className="font-display font-bold text-slate-900 text-sm">{c.name}</h4>
+                            <span className="text-[10px] font-mono-num font-semibold bg-emerald-500/10 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-500/20">
                               {clientLicenses.length} Licença(s)
                             </span>
                           </div>
-                          <p className="text-slate-500 font-mono text-[11px] mt-0.5">
-                            NIF: {c.nif} • {c.email || 'Email não registado'} • {c.phone || 'Sem telefone'}
+                          <p className="text-slate-500 font-sans text-[11px] mt-0.5">
+                            NIF: <span className="font-mono-num font-medium text-slate-700">{c.nif}</span> • {c.email || 'Email não registado'} • {c.phone || 'Sem telefone'}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -2626,7 +2626,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                               href={`https://wa.me/244${c.phone.replace(/[^0-9]/g, '')}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-xl border border-emerald-200 flex items-center gap-1 cursor-pointer"
+                              className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 font-display font-semibold text-xs rounded-xl border border-emerald-500/20 flex items-center gap-1.5 cursor-pointer transition-all"
                             >
                               <PhoneCall className="w-3.5 h-3.5" />
                               <span>WhatsApp</span>
@@ -2634,7 +2634,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                           )}
                           <button
                             onClick={() => handleSelectClientForIssue(c)}
-                            className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl flex items-center gap-1 cursor-pointer shadow-xs"
+                            className="px-3 py-1.5 bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs transition-all active:scale-[0.98]"
                           >
                             <Plus className="w-3.5 h-3.5" />
                             <span>Emitir Licença</span>
@@ -2650,39 +2650,39 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
           {/* SECTION: EMITIR LICENÇA */}
           {activeSection === 'emitir-licenca' && (
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6 max-w-3xl">
+            <div className="surface-card p-6 sm:p-8 space-y-6 max-w-3xl">
               <div>
-                <h2 className="text-lg font-black text-slate-900">Emitir Chave de Licença para Cliente</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <h2 className="text-lg font-display font-bold text-slate-900">Emitir Chave de Licença para Cliente</h2>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">
                   Gere uma licença oficial com débito automático em Wallet, Linha de Crédito ou Modo Provisório de 7 Dias.
                 </p>
               </div>
 
               {/* Status do Método de Cobrança da Emissão */}
-              <div className="p-4 rounded-2xl border text-xs space-y-2 flex items-start gap-3 bg-slate-50 border-slate-200">
-                <div className="w-8 h-8 rounded-xl bg-emerald-600/10 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5 font-bold">
-                  {canPayWithWallet ? <Wallet className="w-4 h-4" /> : canPayWithCredit ? <CreditCard className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+              <div className="p-4 rounded-2xl border text-xs space-y-2 flex items-start gap-3 bg-slate-50/70 border-slate-200/80">
+                <div className="w-8 h-8 rounded-xl bg-slate-950 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                  {canPayWithWallet ? <Wallet className="w-4 h-4 text-emerald-400" /> : canPayWithCredit ? <CreditCard className="w-4 h-4 text-blue-400" /> : <Clock className="w-4 h-4 text-amber-400" />}
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <strong className="text-slate-900 font-black">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <strong className="text-slate-900 font-display font-bold">
                       {canPayWithWallet ? 'Pagamento Direto via Saldo Wallet' : canPayWithCredit ? 'Pagamento via Linha de Crédito Homologada' : 'Emissão Provisória (7 Dias de Graça / Grace Period)'}
                     </strong>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                      canPayWithWallet ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                      canPayWithCredit ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                    <span className={`text-[10px] font-display font-semibold px-2 py-0.5 rounded-full border ${
+                      canPayWithWallet ? 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20' :
+                      canPayWithCredit ? 'bg-blue-500/10 text-blue-700 border-blue-500/20' : 'bg-amber-500/10 text-amber-700 border-amber-500/20'
                     }`}>
                       {canPayWithWallet ? 'Débito Instantâneo' : canPayWithCredit ? (plan === 'lifetime' || extraSeats >= 3 ? 'Ativação 30 Dias (Crédito)' : 'Crédito Ativo') : 'Regularização Necessária'}
                     </span>
                   </div>
-                  <p className="text-slate-600 text-[11px] mt-0.5 leading-relaxed">
+                  <p className="text-slate-600 font-sans text-[11px] mt-0.5 leading-relaxed">
                     {canPayWithWallet ? (
-                      `O valor de custo de atacado (${fmt(currentPlanCost)} Kz) será debitado do seu saldo em carteira (${fmt(walletBalance)} Kz). Licença ativada definitivamente.`
+                      <>O valor de custo de atacado (<span className="font-mono-num font-semibold text-slate-800">{fmt(currentPlanCost)} Kz</span>) será debitado do seu saldo em carteira (<span className="font-mono-num font-semibold text-slate-800">{fmt(walletBalance)} Kz</span>). Licença ativada definitivamente.</>
                     ) : canPayWithCredit ? (
                       plan === 'lifetime' || extraSeats >= 3 ? (
-                        `O custo de atacado (${fmt(currentPlanCost)} Kz) consumirá 1 slot de crédito. A licença é emitida com 30 dias de ativação provisória e torna-se definitiva após confirmação de liquidação com o Admin.`
+                        <>O custo de atacado (<span className="font-mono-num font-semibold text-slate-800">{fmt(currentPlanCost)} Kz</span>) consumirá 1 slot de crédito. A licença é emitida com 30 dias de ativação provisória e torna-se definitiva após confirmação de liquidação com o Admin.</>
                       ) : (
-                        `O custo de atacado (${fmt(currentPlanCost)} Kz) consumirá 1 slot de crédito (${availableCreditSlots} slots livres de ${creditSlotsLimit}).`
+                        <>O custo de atacado (<span className="font-mono-num font-semibold text-slate-800">{fmt(currentPlanCost)} Kz</span>) consumirá 1 slot de crédito (<span className="font-mono-num font-semibold text-slate-800">{availableCreditSlots} slots livres</span> de {creditSlotsLimit}).</>
                       )
                     ) : isOverdue ? (
                       `Emissão a crédito suspensa: possui licenças pendentes há mais de ${overdueDaysLimit} dias. Regularize o pagamento com o Admin ou utilize a Carteira Virtual.`
@@ -2690,18 +2690,18 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       `A sua quota de ${creditSlotsLimit} slots de crédito está esgotada. Efetue a liquidação de licenças pendentes ou utilize a Carteira Pré-paga.`
                     )}
                   </p>
-                  <div className="mt-2 pt-2 border-t border-slate-200/80 flex items-center justify-between text-[10px]">
-                    <span className="text-slate-500 font-medium">Modo de Processamento:</span>
+                  <div className="mt-2 pt-2 border-t border-slate-200/80 flex items-center justify-between text-[10px] flex-wrap gap-1">
+                    <span className="text-slate-500 font-sans font-medium">Modo de Processamento:</span>
                     {canPayWithWallet ? (
-                      <span className="font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-300 flex items-center gap-1">
+                      <span className="font-display font-semibold text-emerald-700 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20 flex items-center gap-1">
                         ⚡ Emissão Instantânea (Débito em Carteira)
                       </span>
                     ) : canPayWithCredit && partnerAccount?.credit_issuance_mode !== 'manual_approval' ? (
-                      <span className="font-bold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-md border border-blue-300 flex items-center gap-1">
+                      <span className="font-display font-semibold text-blue-700 bg-blue-500/10 px-2 py-0.5 rounded-lg border border-blue-500/20 flex items-center gap-1">
                         ⚡ Emissão Instantânea a Crédito (Chave Imediata)
                       </span>
                     ) : (
-                      <span className="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-300 flex items-center gap-1">
+                      <span className="font-display font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200 flex items-center gap-1">
                         🛡️ Fila de Exceção (Aprovação pelo Administrador)
                       </span>
                     )}
@@ -2710,52 +2710,52 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               </div>
 
               {submittedRequest ? (
-                <div className="p-8 bg-slate-950 text-white rounded-3xl space-y-5 text-center animate-fadeIn shadow-xl">
-                  <div className="w-14 h-14 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto border border-amber-500/30">
+                <div className="surface-card bg-slate-950 text-white border-slate-800 p-8 space-y-5 text-center animate-fadeIn shadow-xl">
+                  <div className="w-14 h-14 bg-amber-500/15 text-amber-400 rounded-2xl flex items-center justify-center mx-auto border border-amber-500/30">
                     <Clock className="w-8 h-8" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-amber-400">
+                    <h3 className="text-lg font-display font-bold text-amber-400">
                       Solicitação Registada com Sucesso!
                     </h3>
-                    <p className="text-xs text-slate-300 mt-1.5 max-w-md mx-auto leading-relaxed">
+                    <p className="text-xs text-slate-300 font-sans mt-1.5 max-w-md mx-auto leading-relaxed">
                       O seu pedido de emissão foi enviado em tempo real para a Administração Kivora.
                       Assim que validado pelo Administrador, a licença oficial estará disponível no seu painel.
                     </p>
                   </div>
 
-                  <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 text-left space-y-2 text-xs">
+                  <div className="p-4 bg-slate-900/90 rounded-2xl border border-slate-800/80 text-left space-y-2.5 text-xs font-sans">
                     <div className="flex justify-between items-center">
                       <span className="text-slate-400">Código do Pedido:</span>
-                      <span className="font-mono font-bold text-amber-400 select-all">{submittedRequest.id}</span>
+                      <span className="font-mono-num font-bold text-amber-400 select-all">{submittedRequest.id}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-slate-400">Cliente / Empresa:</span>
-                      <span className="font-bold text-white">{submittedRequest.company_name} (NIF: {submittedRequest.nif})</span>
+                      <span className="font-display font-semibold text-white">{submittedRequest.company_name} (NIF: <span className="font-mono-num">{submittedRequest.nif}</span>)</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-slate-400">Plano Solicitado:</span>
-                      <span className="font-bold text-blue-400">
+                      <span className="font-display font-semibold text-blue-400">
                         {getPlanLabel(submittedRequest.plan_type)}
                         {submittedRequest.extra_seats > 0 ? ` (+${submittedRequest.extra_seats} postos)` : ''}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-slate-400">Modalidade:</span>
-                      <span className="font-bold text-emerald-400">
+                      <span className="font-display font-semibold text-emerald-400">
                         {submittedRequest.payment_method === 'wallet' ? 'Carteira Pré-paga' : 'Linha de Crédito'}
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-3 bg-blue-950/60 border border-blue-800/60 rounded-xl text-[11px] text-blue-200 text-left flex items-start gap-2">
+                  <div className="p-3.5 bg-blue-950/40 border border-blue-800/50 rounded-xl text-[11px] text-blue-200 text-left flex items-start gap-2.5">
                     <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                    <span>
-                      <strong>Entrega Comercial Sob Controlo:</strong> Nenhuma chave é enviada automaticamente aos clientes finais por e-mail ou WhatsApp. O fornecimento da chave oficial ao cliente é 100% da responsabilidade do Parceiro após aprovação da licença.
+                    <span className="leading-relaxed">
+                      <strong className="font-display font-semibold text-white">Entrega Comercial Sob Controlo:</strong> Nenhuma chave é enviada automaticamente aos clientes finais por e-mail ou WhatsApp. O fornecimento da chave oficial ao cliente é 100% da responsabilidade do Parceiro após aprovação da licença.
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-center gap-3 pt-2">
+                  <div className="flex items-center justify-center gap-3 pt-2 flex-wrap">
                     <button
                       onClick={() => {
                         setSubmittedRequest(null);
@@ -2763,7 +2763,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         setNif('');
                         setClientEmail('');
                       }}
-                      className="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer"
+                      className="bg-white/10 hover:bg-white/15 text-white border border-white/10 text-xs font-display font-semibold px-4 py-2.5 rounded-xl cursor-pointer transition-all"
                     >
                       + Nova Solicitação
                     </button>
@@ -2773,33 +2773,33 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         setActiveSection('licencas');
                         setActiveLicensesTab('solicitacoes');
                       }}
-                      className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer shadow-md"
+                      className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-display font-semibold px-4 py-2.5 rounded-xl cursor-pointer shadow-sm transition-all"
                     >
                       Acompanhar Solicitações
                     </button>
                   </div>
                 </div>
               ) : generatedKey ? (
-                <div className="p-8 bg-slate-950 text-white rounded-3xl space-y-5 text-center animate-fadeIn shadow-xl">
-                  <div className="w-14 h-14 bg-emerald-600/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto border border-emerald-500/30">
+                <div className="surface-card bg-slate-950 text-white border-slate-800 p-8 space-y-5 text-center animate-fadeIn shadow-xl">
+                  <div className="w-14 h-14 bg-emerald-500/15 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto border border-emerald-500/30">
                     <CheckCircle2 className="w-8 h-8" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black">
+                    <h3 className="text-lg font-display font-bold">
                       {generatedIsProvisional ? 'Chave Provisória Emitida!' : 'Chave KVRA Emitida com Sucesso!'}
                     </h3>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-slate-400 font-sans mt-1">
                       A licença foi emitida e associada à sua carteira de revendedor.
                     </p>
                   </div>
-                  <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800">
-                    <p className="font-mono text-2xl sm:text-3xl font-black text-emerald-400 tracking-wider select-all">{generatedKey}</p>
+                  <div className="p-4 bg-slate-900/90 rounded-2xl border border-slate-800/80">
+                    <p className="font-mono-num text-2xl sm:text-3xl font-black text-emerald-400 tracking-wider select-all">{generatedKey}</p>
                   </div>
 
-                  <div className="flex items-center justify-center gap-3 flex-wrap">
+                  <div className="flex items-center justify-center gap-2.5 flex-wrap">
                     <button
                       onClick={() => handleCopyKey(generatedKey)}
-                      className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer"
+                      className="bg-white/10 hover:bg-white/15 text-white border border-white/10 text-xs font-display font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer transition-all"
                     >
                       {copiedKey === generatedKey ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                       <span>{copiedKey === generatedKey ? 'Chave Copiada!' : 'Copiar Chave'}</span>
@@ -2826,7 +2826,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         };
                         setSelectedLicenseForCert(lic);
                       }}
-                      className="bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/40 text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer"
+                      className="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-display font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer transition-all"
                       title="Imprimir Certificado Oficial A4"
                     >
                       <Printer className="w-4 h-4" />
@@ -2854,7 +2854,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         };
                         setSelectedLicenseForInvoice(lic);
                       }}
-                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer"
+                      className="bg-white/10 hover:bg-white/15 text-slate-200 border border-white/10 text-xs font-display font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer transition-all"
                       title="Imprimir Fatura / Recibo A4"
                     >
                       <Receipt className="w-4 h-4" />
@@ -2870,17 +2870,17 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         setActiveSection('licencas');
                         setActiveLicensesTab('emitidas');
                       }}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-md"
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-display font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs transition-all"
                     >
                       <Key className="w-4 h-4" />
                       <span>Ver em Minhas Licenças</span>
                     </button>
                   </div>
 
-                  <div className="p-3 bg-blue-950/60 border border-blue-800/60 rounded-xl text-[11px] text-blue-200 text-left flex items-start gap-2">
+                  <div className="p-3.5 bg-blue-950/40 border border-blue-800/50 rounded-xl text-[11px] text-blue-200 text-left flex items-start gap-2.5">
                     <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                    <span>
-                      <strong>Entrega Comercial Sob Controlo:</strong> Nenhuma chave foi enviada ao cliente final por WhatsApp ou e-mail. Copie a chave acima e forneça diretamente ao cliente junto com a sua fatura ou contrato.
+                    <span className="leading-relaxed">
+                      <strong className="font-display font-semibold text-white">Entrega Comercial Sob Controlo:</strong> Nenhuma chave foi enviada ao cliente final por WhatsApp ou e-mail. Copie a chave acima e forneça diretamente ao cliente junto com a sua fatura ou contrato.
                     </span>
                   </div>
 
@@ -2892,7 +2892,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         setNif('');
                         setClientEmail('');
                       }}
-                      className="text-xs font-bold text-slate-400 hover:text-white underline cursor-pointer"
+                      className="text-xs font-display font-semibold text-slate-400 hover:text-white underline cursor-pointer transition-colors"
                     >
                       + Emitir Outra Licença
                     </button>
@@ -2902,8 +2902,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <form onSubmit={handleGenerateLicense} className="space-y-4 text-xs">
                   {/* Seleção rápida de cliente existente */}
                   {partnerClients.length > 0 && (
-                    <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
-                      <label className="font-bold text-slate-700 uppercase text-[10px]">Preenchimento Rápido com Cliente da Carteira</label>
+                    <div className="p-3.5 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-1.5">
+                      <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Preenchimento Rápido com Cliente da Carteira</label>
                       <select
                         onChange={(e) => {
                           const val = e.target.value;
@@ -2914,7 +2914,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                             setClientEmail(c.email || '');
                           }
                         }}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-display font-medium text-slate-800 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all"
                       >
                         <option value="">-- Selecione uma empresa já cadastrada ou digite abaixo --</option>
                         {partnerClients.map((c) => (
@@ -2927,48 +2927,48 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="font-bold text-slate-700 uppercase">Nome da Empresa / Cliente *</label>
+                    <div className="space-y-1.5">
+                      <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Nome da Empresa / Cliente *</label>
                       <input
                         type="text"
                         required
                         placeholder="Ex: Pastelaria Luanda, Lda"
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
-                        className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium focus:bg-white focus:outline-none focus:border-emerald-500"
+                        className="w-full border border-slate-200/80 rounded-xl px-3.5 py-2.5 bg-slate-50/70 font-sans text-xs focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all"
                       />
                     </div>
-                    <div className="space-y-1">
-                      <label className="font-bold text-slate-700 uppercase">NIF da Empresa *</label>
+                    <div className="space-y-1.5">
+                      <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">NIF da Empresa *</label>
                       <input
                         type="text"
                         required
                         placeholder="5412345678"
                         value={nif}
                         onChange={(e) => setNif(e.target.value)}
-                        className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-mono font-bold focus:bg-white focus:outline-none focus:border-emerald-500"
+                        className="w-full border border-slate-200/80 rounded-xl px-3.5 py-2.5 bg-slate-50/70 font-mono-num font-bold text-xs focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700 uppercase">Email do Cliente (Para Envio de Credenciais)</label>
+                  <div className="space-y-1.5">
+                    <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Email do Cliente (Para Envio de Credenciais)</label>
                     <input
                       type="email"
                       placeholder="geral@pastelaria.ao"
                       value={clientEmail}
                       onChange={(e) => setClientEmail(e.target.value)}
-                      className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium focus:bg-white focus:outline-none focus:border-emerald-500"
+                      className="w-full border border-slate-200/80 rounded-xl px-3.5 py-2.5 bg-slate-50/70 font-sans text-xs focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="font-bold text-slate-700 uppercase">Plano Selecionado</label>
+                    <div className="space-y-1.5">
+                      <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Plano Selecionado</label>
                       <select
                         value={plan}
                         onChange={(e) => handlePlanChange(e.target.value as PlanType)}
-                        className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-white font-bold focus:outline-none focus:border-emerald-500"
+                        className="w-full border border-slate-200/80 rounded-xl px-3.5 py-2.5 bg-white font-display font-semibold text-xs focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all"
                       >
                         {pricingPlans.map((p) => (
                           <option key={p.plan_type} value={p.plan_type}>
@@ -2978,26 +2978,26 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       </select>
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="font-bold text-slate-700 uppercase">Preço Base do Software p/ Cliente (Kz)</label>
+                    <div className="space-y-1.5">
+                      <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Preço Base do Software p/ Cliente (Kz)</label>
                       <input
                         type="number"
                         min={basePlanCost}
                         value={priceAoa}
                         onChange={(e) => setPriceAoa(Number(e.target.value))}
-                        className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-mono font-bold focus:bg-white focus:outline-none focus:border-emerald-500"
+                        className="w-full border border-slate-200/80 rounded-xl px-3.5 py-2.5 bg-slate-50/70 font-mono-num font-bold text-xs focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all"
                       />
                     </div>
                   </div>
 
                   {/* Seletor de Postos Extras com Política por Nível */}
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
+                  <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-2.5">
                     <div className="flex justify-between items-center flex-wrap gap-2">
-                      <label className="font-bold text-slate-800 uppercase text-[11px] flex items-center gap-1.5">
+                      <label className="font-display font-bold text-slate-800 uppercase text-[10px] flex items-center gap-1.5 tracking-wider">
                         <Users className="w-3.5 h-3.5 text-blue-600" />
                         <span>Computadores Adicionais / Rede Local (Extra Seats)</span>
                       </label>
-                      <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-mono-num font-semibold text-blue-700 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
                         Nível {partnerAccount?.tier?.toUpperCase() || 'BRONZE'}: {fmt(partnerSeatCost)} Kz / posto
                       </span>
                     </div>
@@ -3008,10 +3008,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                           key={st}
                           type="button"
                           onClick={() => setExtraSeats(st)}
-                          className={`py-1.5 px-1 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                          className={`py-1.5 px-1 rounded-xl text-xs font-mono-num font-semibold border transition-all cursor-pointer ${
                             extraSeats === st
-                              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                              ? 'bg-slate-950 text-white border-slate-950 shadow-xs'
+                              : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-100'
                           }`}
                         >
                           +{st}
@@ -3019,49 +3019,49 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       ))}
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
-                      <span>Total de Computadores: <strong className="text-slate-800">{1 + extraSeats} PC(s)</strong></span>
+                    <div className="flex items-center justify-between text-xs text-slate-500 pt-1 font-sans">
+                      <span>Total de Computadores: <strong className="text-slate-900 font-display font-bold">{1 + extraSeats} PC(s)</strong></span>
                       {extraSeats > 0 && (
-                        <span>Custo Terminais: <strong className="text-blue-700 font-mono">{fmt(totalExtraSeatsCost)} Kz</strong></span>
+                        <span>Custo Terminais: <strong className="text-blue-700 font-mono-num font-bold">{fmt(totalExtraSeatsCost)} Kz</strong></span>
                       )}
                     </div>
                   </div>
 
                   {/* Resumo Financeiro da Operação com Discriminação Completa */}
-                  <div className="p-5 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white rounded-2xl space-y-2.5 text-xs shadow-md">
-                    <div className="flex justify-between items-center text-slate-300">
+                  <div className="p-5 surface-card bg-slate-950 text-white rounded-2xl space-y-2.5 text-xs shadow-md border border-slate-800">
+                    <div className="flex justify-between items-center text-slate-300 font-sans">
                       <span>Custo Licença Base (Atacado):</span>
-                      <span className="font-mono text-slate-200 font-bold">{fmt(basePlanCost)} Kz</span>
+                      <span className="font-mono-num text-slate-200 font-bold">{fmt(basePlanCost)} Kz</span>
                     </div>
                     {extraSeats > 0 && (
-                      <div className="flex justify-between items-center text-blue-300">
+                      <div className="flex justify-between items-center text-blue-300 font-sans">
                         <span>{extraSeats} Posto(s) Extra ({fmt(partnerSeatCost)} Kz/unid):</span>
-                        <span className="font-mono font-bold">+{fmt(totalExtraSeatsCost)} Kz</span>
+                        <span className="font-mono-num font-bold">+{fmt(totalExtraSeatsCost)} Kz</span>
                       </div>
                     )}
                     <div className="flex justify-between items-center text-amber-400 font-bold pt-1 border-t border-slate-800">
-                      <span>Total Débito Kivora (a liquidar/wallet):</span>
-                      <strong className="font-mono text-sm">{fmt(currentTotalCost)} Kz</strong>
+                      <span className="font-sans">Total Débito Kivora (a liquidar/wallet):</span>
+                      <strong className="font-mono-num text-sm">{fmt(currentTotalCost)} Kz</strong>
                     </div>
-                    <div className="flex justify-between items-center text-slate-300">
+                    <div className="flex justify-between items-center text-slate-300 font-sans">
                       <span>Preço Cobrado ao Cliente Final:</span>
-                      <strong className="text-white font-mono text-sm">{fmt(totalClientPrice)} Kz</strong>
+                      <strong className="text-white font-mono-num text-sm">{fmt(totalClientPrice)} Kz</strong>
                     </div>
                     <div className="flex justify-between items-center pt-2 border-t border-slate-800">
-                      <span className="font-bold text-emerald-400">Sua Margem Líquida Estimada:</span>
-                      <strong className="text-emerald-400 font-mono text-lg font-black">+{fmt(partnerMargin)} Kz</strong>
+                      <span className="font-display font-bold text-emerald-400">Sua Margem Líquida Estimada:</span>
+                      <strong className="text-emerald-400 font-mono-num text-lg font-black">+{fmt(partnerMargin)} Kz</strong>
                     </div>
                   </div>
 
                   <button
                     type="submit"
                     disabled={submitting}
-                    className={`w-full text-white font-bold text-xs py-3.5 rounded-2xl shadow-md cursor-pointer transition-all flex items-center justify-center gap-2 ${
+                    className={`w-full text-white font-display font-semibold text-xs py-3.5 rounded-xl shadow-xs cursor-pointer transition-all flex items-center justify-center gap-2 active:scale-[0.99] ${
                       canPayWithWallet
-                        ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/20'
+                        ? 'bg-emerald-600 hover:bg-emerald-500'
                         : canPayWithCredit && partnerAccount?.credit_issuance_mode !== 'manual_approval'
-                        ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/20'
-                        : 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/20'
+                        ? 'bg-blue-600 hover:bg-blue-500'
+                        : 'bg-amber-600 hover:bg-amber-500'
                     }`}
                   >
                     <Key className="w-4 h-4" />
@@ -3082,18 +3082,18 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
           {/* SECTION: EXTRATO DE DÍVIDA */}
           {activeSection === 'extrato' && (
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="surface-card p-6 sm:p-8 space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-black text-slate-900">Extrato Financeiro & Cobrança Híbrida</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <h2 className="text-lg font-display font-bold text-slate-900">Extrato Financeiro & Cobrança Híbrida</h2>
+                  <p className="text-xs text-slate-500 font-sans mt-0.5">
                     Acompanhamento de liquidações via Wallet, lançamentos a crédito e comprovativos enviados.
                   </p>
                 </div>
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-2.5 flex-wrap">
                   <button
                     onClick={() => setShowTopUpWalletModal(true)}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-display font-semibold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Wallet className="w-3.5 h-3.5" />
                     <span>Recarregar Wallet</span>
@@ -3101,7 +3101,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                   <button
                     onClick={() => setShowProofPaymentModal(true)}
-                    className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                    className="bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Receipt className="w-3.5 h-3.5" />
                     <span>Liquidar Dívida</span>
@@ -3129,7 +3129,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       link.click();
                       document.body.removeChild(link);
                     }}
-                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
+                    className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 font-display font-medium text-xs px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Exportar CSV</span>
@@ -3139,74 +3139,74 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
               {/* Cards de Métricas */}
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <div className="p-5 bg-emerald-50 rounded-2xl border border-emerald-200 space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-emerald-800 block">Saldo na Carteira (Wallet)</span>
-                  <span className="text-xl font-black font-mono text-emerald-700">
+                <div className="surface-card p-5 space-y-1">
+                  <span className="text-[10px] uppercase font-display font-bold text-slate-500 tracking-wider block">Saldo na Carteira (Wallet)</span>
+                  <span className="text-xl font-bold font-mono-num text-emerald-600 block">
                     {fmt(walletBalance)} Kz
                   </span>
-                  <span className="text-[10px] text-emerald-600 font-bold block">Créditos pré-pagos</span>
+                  <span className="text-[10px] text-emerald-700 font-sans font-medium block">Créditos pré-pagos</span>
                 </div>
 
-                <div className="p-5 bg-blue-50 rounded-2xl border border-blue-200 space-y-1">
+                <div className="surface-card p-5 space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] uppercase font-bold text-blue-800 block">Slots de Crédito</span>
+                    <span className="text-[10px] uppercase font-display font-bold text-slate-500 tracking-wider block">Slots de Crédito</span>
                     {isOverdue && (
-                      <span className="text-[9px] bg-red-100 text-red-700 border border-red-200 px-1.5 py-0.5 rounded font-black">Bloqueado</span>
+                      <span className="text-[9px] bg-red-500/10 text-red-700 border border-red-500/20 px-1.5 py-0.5 rounded font-display font-bold">Bloqueado</span>
                     )}
                   </div>
-                  <span className={`text-xl font-black font-mono ${availableCreditSlots > 0 && !isOverdue ? 'text-blue-700' : 'text-amber-700'}`}>
+                  <span className={`text-xl font-bold font-mono-num block ${availableCreditSlots > 0 && !isOverdue ? 'text-blue-600' : 'text-amber-600'}`}>
                     {availableCreditSlots} / {creditSlotsLimit} Livres
                   </span>
-                  <span className="text-[10px] text-blue-600 font-bold block">
+                  <span className="text-[10px] text-slate-500 font-sans block">
                     {activeSlotsInUse} licenças ativas a crédito
                   </span>
                 </div>
 
-                <div className="p-5 bg-amber-50 rounded-2xl border border-amber-200 space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-amber-800 block">Dívida Total Pendente</span>
-                  <span className={`text-xl font-black font-mono ${totalPendingDebt > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>
+                <div className="surface-card p-5 space-y-1">
+                  <span className="text-[10px] uppercase font-display font-bold text-slate-500 tracking-wider block">Dívida Total Pendente</span>
+                  <span className={`text-xl font-bold font-mono-num block ${totalPendingDebt > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
                     {fmt(totalPendingDebt)} Kz
                   </span>
-                  <span className="text-[10px] text-amber-600 font-bold block">A regularizar</span>
+                  <span className="text-[10px] text-slate-500 font-sans block">A regularizar</span>
                 </div>
 
-                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-slate-500 block">Total Já Liquidado</span>
-                  <span className="text-xl font-black text-slate-900 font-mono">
+                <div className="surface-card p-5 space-y-1">
+                  <span className="text-[10px] uppercase font-display font-bold text-slate-500 tracking-wider block">Total Já Liquidado</span>
+                  <span className="text-xl font-bold text-slate-900 font-mono-num block">
                     {fmt(totalPaidToKivora)} Kz
                   </span>
-                  <span className="text-[10px] text-slate-500 font-bold block">Histórico pago</span>
+                  <span className="text-[10px] text-slate-500 font-sans block">Histórico pago</span>
                 </div>
               </div>
 
               {/* Card de Coordenadas Bancárias */}
-              <div className="p-6 bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white rounded-3xl border border-slate-800 space-y-4 shadow-md">
+              <div className="surface-card bg-slate-950 text-white rounded-2xl border border-slate-800 p-6 space-y-4 shadow-md">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                   <div>
-                    <h4 className="text-xs font-black uppercase tracking-wider text-blue-400">Coordenadas Bancárias Oficiais KIVORA</h4>
-                    <p className="text-[11px] text-slate-300">Efetue a transferência para liquidar débitos ou recarregar a sua carteira pré-paga.</p>
+                    <h4 className="text-xs font-display font-bold uppercase tracking-wider text-blue-400">Coordenadas Bancárias Oficiais KIVORA</h4>
+                    <p className="text-[11px] text-slate-300 font-sans mt-0.5">Efetue a transferência para liquidar débitos ou recarregar a sua carteira pré-paga.</p>
                   </div>
                   {totalPendingDebt > 0 && (
-                    <span className="text-amber-400 font-mono font-bold text-xs bg-amber-400/10 px-3 py-1.5 rounded-xl border border-amber-400/30">
+                    <span className="text-amber-400 font-mono-num font-bold text-xs bg-amber-400/10 px-3 py-1.5 rounded-xl border border-amber-400/20">
                       Pendente: {fmt(totalPendingDebt)} Kz
                     </span>
                   )}
                 </div>
 
                 {hasBank1 || hasBank2 ? (
-                  <div className={`grid ${hasBank1 && hasBank2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'} gap-3 text-xs font-mono`}>
+                  <div className={`grid ${hasBank1 && hasBank2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'} gap-3 text-xs`}>
                     {hasBank1 && (
-                      <div className="p-3.5 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
+                      <div className="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800/80 flex items-center justify-between">
                         <div>
                           <span className="text-[10px] text-slate-400 font-sans block">{officialBank1Name} (Kz) — {officialBeneficiary}</span>
-                          <strong className="text-white">{officialBank1Iban}</strong>
+                          <strong className="text-white font-mono-num text-xs">{officialBank1Iban}</strong>
                         </div>
                         <button
                           onClick={() => {
                             navigator.clipboard.writeText(officialBank1Iban.replace(/\s/g, ''));
                             notify.success(`IBAN ${officialBank1Name} copiado para a área de transferência!`);
                           }}
-                          className="p-2 text-slate-400 hover:text-white bg-white/10 rounded-lg cursor-pointer"
+                          className="p-2 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer transition-all"
                           title="Copiar IBAN"
                         >
                           <Copy className="w-3.5 h-3.5" />
@@ -3215,17 +3215,17 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     )}
 
                     {hasBank2 && (
-                      <div className="p-3.5 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
+                      <div className="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800/80 flex items-center justify-between">
                         <div>
                           <span className="text-[10px] text-slate-400 font-sans block">{officialBank2Name} (Kz) — {officialBeneficiary}</span>
-                          <strong className="text-white">{officialBank2Iban}</strong>
+                          <strong className="text-white font-mono-num text-xs">{officialBank2Iban}</strong>
                         </div>
                         <button
                           onClick={() => {
                             navigator.clipboard.writeText(officialBank2Iban.replace(/\s/g, ''));
                             notify.success(`IBAN ${officialBank2Name} copiado para a área de transferência!`);
                           }}
-                          className="p-2 text-slate-400 hover:text-white bg-white/10 rounded-lg cursor-pointer"
+                          className="p-2 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer transition-all"
                           title="Copiar IBAN"
                         >
                           <Copy className="w-3.5 h-3.5" />
@@ -3234,7 +3234,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     )}
                   </div>
                 ) : (
-                  <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-xs text-slate-300">
+                  <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-xs text-slate-300 font-sans">
                     Nenhuma conta bancária oficial configurada de momento. Por favor contacte o administrador da Kivora.
                   </div>
                 )}
@@ -3242,39 +3242,39 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
               {/* Tabela de Lançamentos de Dívida */}
               {effectiveDebts.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 space-y-2 border border-dashed border-slate-200 rounded-2xl">
+                <div className="p-12 text-center text-slate-400 space-y-2 border border-dashed border-slate-200/80 rounded-2xl bg-slate-50/40">
                   <DollarSign className="w-10 h-10 mx-auto text-slate-300" />
-                  <p className="font-bold text-slate-700 text-sm">Nenhum registo financeiro ainda</p>
-                  <p className="text-xs text-slate-400">Emita a sua primeira licença para ver os registos financeiros aqui.</p>
+                  <p className="font-display font-bold text-slate-700 text-sm">Nenhum registo financeiro ainda</p>
+                  <p className="text-xs text-slate-400 font-sans">Emita a sua primeira licença para ver os registos financeiros aqui.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs">
+                <div className="divide-y divide-slate-100 border border-slate-200/80 rounded-2xl overflow-hidden text-xs bg-white shadow-xs">
                   {effectiveDebts.map((debt) => (
-                    <div key={debt.id} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition-colors">
+                    <div key={debt.id} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50/60 transition-colors">
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-bold text-slate-900 text-sm">{debt.company_name}</p>
-                          <span className={`font-bold text-[10px] px-2 py-0.5 rounded-full border ${
-                            debt.paid ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
-                            debt.is_provisional ? 'bg-amber-100 text-amber-900 border-amber-300' :
-                            'bg-amber-50 text-amber-800 border-amber-200'
+                          <p className="font-display font-bold text-slate-900 text-sm">{debt.company_name}</p>
+                          <span className={`font-display font-semibold text-[10px] px-2 py-0.5 rounded-full border ${
+                            debt.paid ? 'bg-emerald-500/10 text-emerald-800 border-emerald-500/20' :
+                            debt.is_provisional ? 'bg-amber-500/10 text-amber-900 border-amber-500/20' :
+                            'bg-amber-500/10 text-amber-800 border-amber-500/20'
                           }`}>
                             {debt.paid ? '✓ Liquidado à Kivora' : debt.is_provisional ? 'Provisório (7 Dias)' : 'Dívida Pendente'}
                           </span>
-                          <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                          <span className="text-[10px] font-mono-num text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
                             {debt.payment_method === 'wallet' ? 'Via Wallet' : debt.payment_method === 'credit' ? 'Linha de Crédito' : 'Provisória'}
                           </span>
                         </div>
-                        <p className="text-slate-400 text-[10px] font-mono mt-0.5">
-                          {debt.license_id} • Plano: {debt.plan_type} • {new Date(debt.created_at).toLocaleDateString('pt-AO')}
+                        <p className="text-slate-400 text-[10px] font-sans mt-0.5">
+                          <span className="font-mono-num">{debt.license_id}</span> • Plano: <span className="font-display font-medium text-slate-600">{debt.plan_type}</span> • <span className="font-mono-num">{new Date(debt.created_at).toLocaleDateString('pt-AO')}</span>
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-black text-slate-900 font-mono text-sm">{fmt(debt.cost_aoa)} Kz</p>
-                        <p className="text-[10px] text-slate-400">custo atacado</p>
+                        <p className="font-mono-num font-bold text-slate-900 text-sm">{fmt(debt.cost_aoa)} Kz</p>
+                        <p className="text-[10px] text-slate-400 font-sans">custo atacado</p>
                         {debt.client_price_aoa > 0 && (
-                          <p className="text-[10px] text-emerald-600 font-bold mt-0.5">
-                            Cobrado: {fmt(debt.client_price_aoa)} Kz (Margem: +{fmt(Math.max(0, debt.client_price_aoa - debt.cost_aoa))} Kz)
+                          <p className="text-[10px] text-emerald-600 font-display font-semibold mt-0.5">
+                            Cobrado: <span className="font-mono-num">{fmt(debt.client_price_aoa)} Kz</span> (Margem: <span className="font-mono-num font-bold">+{fmt(Math.max(0, debt.client_price_aoa - debt.cost_aoa))} Kz</span>)
                           </p>
                         )}
                       </div>
@@ -3287,27 +3287,27 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
           {/* SECTION: SIMULADOR DE LUCRO */}
           {activeSection === 'simulador' && (
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6 max-w-4xl">
+            <div className="surface-card p-6 sm:p-8 space-y-6 max-w-4xl">
               <div>
-                <h2 className="text-lg font-black text-slate-900">Simulador de Rentabilidade & Lucro do Parceiro</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <h2 className="text-lg font-display font-bold text-slate-900">Simulador de Rentabilidade & Lucro do Parceiro</h2>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">
                   Projete os seus ganhos mensais e anuais revendendo licenças Kivora para empresas e comércios da sua região.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Parâmetros do Simulador */}
-                <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4 text-xs">
-                  <h3 className="font-black text-slate-900 text-sm flex items-center gap-2">
-                    <Calculator className="w-4 h-4 text-emerald-600" />
+                <div className="p-6 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-4 text-xs">
+                  <h3 className="font-display font-bold text-slate-900 text-sm flex items-center gap-2">
+                    <Calculator className="w-4 h-4 text-slate-950" />
                     <span>Configurar Volume de Vendas</span>
                   </h3>
 
                   <div className="space-y-3">
                     <div>
-                      <div className="flex justify-between font-bold text-slate-700 mb-1">
+                      <div className="flex justify-between font-display font-semibold text-slate-700 mb-1">
                         <span>Clientes com Plano Mensal:</span>
-                        <span className="text-emerald-600">{simMonthlyClients} empresas</span>
+                        <span className="text-emerald-700 font-mono-num font-bold">{simMonthlyClients} empresas</span>
                       </div>
                       <input
                         type="range"
@@ -3315,14 +3315,14 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         max={100}
                         value={simMonthlyClients}
                         onChange={(e) => setSimMonthlyClients(Number(e.target.value))}
-                        className="w-full accent-emerald-600"
+                        className="w-full accent-slate-950"
                       />
                     </div>
 
                     <div>
-                      <div className="flex justify-between font-bold text-slate-700 mb-1">
+                      <div className="flex justify-between font-display font-semibold text-slate-700 mb-1">
                         <span>Preço Cobrado no Plano Mensal:</span>
-                        <span className="font-mono text-slate-900">{fmt(simMonthlySalePrice)} Kz</span>
+                        <span className="font-mono-num font-bold text-slate-900">{fmt(simMonthlySalePrice)} Kz</span>
                       </div>
                       <input
                         type="number"
@@ -3330,15 +3330,15 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         step={5000}
                         value={simMonthlySalePrice}
                         onChange={(e) => setSimMonthlySalePrice(Number(e.target.value))}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold font-mono"
+                        className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 font-mono-num font-bold text-xs focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all"
                       />
-                      <span className="text-[10px] text-slate-400">Custo Atacado Kivora: 15.000 Kz/mês</span>
+                      <span className="text-[10px] text-slate-400 font-sans">Custo Atacado Kivora: <span className="font-mono-num">15.000 Kz/mês</span></span>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-200">
-                      <div className="flex justify-between font-bold text-slate-700 mb-1">
+                    <div className="pt-2 border-t border-slate-200/80">
+                      <div className="flex justify-between font-display font-semibold text-slate-700 mb-1">
                         <span>Clientes com Plano Anual:</span>
-                        <span className="text-emerald-600">{simAnnualClients} empresas</span>
+                        <span className="text-emerald-700 font-mono-num font-bold">{simAnnualClients} empresas</span>
                       </div>
                       <input
                         type="range"
@@ -3346,14 +3346,14 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         max={100}
                         value={simAnnualClients}
                         onChange={(e) => setSimAnnualClients(Number(e.target.value))}
-                        className="w-full accent-emerald-600"
+                        className="w-full accent-slate-950"
                       />
                     </div>
 
                     <div>
-                      <div className="flex justify-between font-bold text-slate-700 mb-1">
+                      <div className="flex justify-between font-display font-semibold text-slate-700 mb-1">
                         <span>Preço Cobrado no Plano Anual:</span>
-                        <span className="font-mono text-slate-900">{fmt(simAnnualSalePrice)} Kz</span>
+                        <span className="font-mono-num font-bold text-slate-900">{fmt(simAnnualSalePrice)} Kz</span>
                       </div>
                       <input
                         type="number"
@@ -3361,9 +3361,9 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         step={10000}
                         value={simAnnualSalePrice}
                         onChange={(e) => setSimAnnualSalePrice(Number(e.target.value))}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-bold font-mono"
+                        className="w-full bg-white border border-slate-200/80 rounded-xl px-3 py-2 font-mono-num font-bold text-xs focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all"
                       />
-                      <span className="text-[10px] text-slate-400">Custo Atacado Kivora: 120.000 Kz/ano</span>
+                      <span className="text-[10px] text-slate-400 font-sans">Custo Atacado Kivora: <span className="font-mono-num">120.000 Kz/ano</span></span>
                     </div>
                   </div>
                 </div>
@@ -3379,38 +3379,38 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   const projectedAnnualTotal = (totalMonthlyProfit * 12) + totalAnnualProfit;
 
                   return (
-                    <div className="p-6 bg-gradient-to-br from-slate-950 to-emerald-950 text-white rounded-2xl space-y-4 text-xs shadow-xl flex flex-col justify-between">
+                    <div className="surface-card bg-slate-950 text-white rounded-2xl space-y-4 text-xs shadow-xl border border-slate-800 p-6 flex flex-col justify-between">
                       <div className="space-y-4">
-                        <div className="flex items-center gap-2 text-emerald-400 font-bold uppercase tracking-wider text-[10px]">
+                        <div className="flex items-center gap-2 text-emerald-400 font-display font-bold uppercase tracking-wider text-[10px]">
                           <Award className="w-4 h-4" />
                           <span>Projeção de Lucro Líquido do Parceiro</span>
                         </div>
 
-                        <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-1">
-                          <span className="text-slate-400 text-[11px] block">Renda Recorrente Mensal Estimada:</span>
-                          <p className="text-2xl font-black text-emerald-400 font-mono">
-                            +{fmt(totalMonthlyProfit)} Kz<span className="text-xs text-slate-400 font-sans">/mês</span>
+                        <div className="p-4 bg-slate-900/90 rounded-xl border border-slate-800/80 space-y-1">
+                          <span className="text-slate-400 text-[11px] font-sans block">Renda Recorrente Mensal Estimada:</span>
+                          <p className="text-2xl font-black text-emerald-400 font-mono-num">
+                            +{fmt(totalMonthlyProfit)} Kz<span className="text-xs text-slate-400 font-sans font-normal">/mês</span>
                           </p>
                         </div>
 
-                        <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-1">
-                          <span className="text-slate-400 text-[11px] block">Lucro de Vendas Anuais:</span>
-                          <p className="text-2xl font-black text-white font-mono">
+                        <div className="p-4 bg-slate-900/90 rounded-xl border border-slate-800/80 space-y-1">
+                          <span className="text-slate-400 text-[11px] font-sans block">Lucro de Vendas Anuais:</span>
+                          <p className="text-2xl font-black text-white font-mono-num">
                             +{fmt(totalAnnualProfit)} Kz
                           </p>
                         </div>
 
-                        <div className="pt-2 border-t border-white/10">
-                          <span className="text-slate-300 text-xs font-bold block">Lucro Total Anual Projetado:</span>
-                          <p className="text-3xl font-black text-emerald-300 font-mono mt-1">
-                            +{fmt(projectedAnnualTotal)} Kz<span className="text-xs text-slate-400 font-sans">/ano</span>
+                        <div className="pt-2 border-t border-slate-800/80">
+                          <span className="text-slate-300 text-xs font-display font-semibold block">Lucro Total Anual Projetado:</span>
+                          <p className="text-3xl font-black text-emerald-400 font-mono-num mt-1">
+                            +{fmt(projectedAnnualTotal)} Kz<span className="text-xs text-slate-400 font-sans font-normal">/ano</span>
                           </p>
                         </div>
                       </div>
 
                       <button
                         onClick={() => setActiveSection('emitir-licenca')}
-                        className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 mt-4"
+                        className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-display font-semibold text-xs py-3 rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 mt-4 active:scale-[0.99]"
                       >
                         <Plus className="w-4 h-4" />
                         <span>Emitir Licença Agora</span>
@@ -3425,54 +3425,54 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
           {/* SECTION: MATERIAIS & DOWNLOADS */}
           {activeSection === 'materiais' && (
             <div className="space-y-6">
-              <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+              <div className="surface-card p-6 sm:p-8 space-y-6">
                 <div>
-                  <h2 className="text-lg font-black text-slate-900">Kits de Venda, Manuais & Downloads Oficiais</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <h2 className="text-lg font-display font-bold text-slate-900">Kits de Venda, Manuais & Downloads Oficiais</h2>
+                  <p className="text-xs text-slate-500 font-sans mt-0.5">
                     Materiais comerciais e técnicos para apresentar e instalar o Kivora Desktop ERP nos seus clientes.
                   </p>
                 </div>
 
                 {/* Softwares Oficiais Kivora */}
                 <div className="space-y-3">
-                  <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider">Instaladores Oficiais Kivora Desktop</h3>
+                  <h3 className="text-xs font-display font-bold uppercase text-slate-500 tracking-wider">Instaladores Oficiais Kivora Desktop</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="p-5 bg-slate-950 text-white rounded-2xl border border-slate-800 space-y-3 shadow-md">
+                    <div className="surface-card bg-slate-950 text-white rounded-2xl border border-slate-800 p-5 space-y-3 shadow-md">
                       <div className="flex items-center justify-between">
-                        <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-0.5 rounded border border-emerald-800/50">
+                        <span className="font-mono-num text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-0.5 rounded border border-emerald-800/50">
                           {CURRENT_RELEASE.version} Oficial
                         </span>
-                        <span className="text-slate-400 text-xs font-mono">{CURRENT_RELEASE.fileSize}</span>
+                        <span className="text-slate-400 text-xs font-mono-num">{CURRENT_RELEASE.fileSize}</span>
                       </div>
                       <div>
-                        <h4 className="font-black text-sm">Instalador Completo Windows (x64)</h4>
-                        <p className="text-slate-400 text-xs mt-0.5">Para Windows 11, Windows 10 e Windows Server.</p>
+                        <h4 className="font-display font-bold text-sm text-white">Instalador Completo Windows (x64)</h4>
+                        <p className="text-slate-400 font-sans text-xs mt-0.5">Para Windows 11, Windows 10 e Windows Server.</p>
                       </div>
                       <a
                         href={CURRENT_RELEASE.downloadUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
+                        className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-display font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer active:scale-[0.98]"
                       >
                         <Download className="w-4 h-4" />
                         <span>Baixar Setup Oficial (.exe)</span>
                       </a>
                     </div>
 
-                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                    <div className="p-5 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="font-mono text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded border border-blue-200">
+                        <span className="font-mono-num text-xs font-bold text-blue-700 bg-blue-500/10 px-2.5 py-0.5 rounded border border-blue-500/20">
                           Banco de Dados Local
                         </span>
-                        <span className="text-slate-500 text-xs font-mono">15 MB</span>
+                        <span className="text-slate-500 text-xs font-mono-num">15 MB</span>
                       </div>
                       <div>
-                        <h4 className="font-bold text-slate-900 text-sm">Motor SQLite & Drivers de Impressão Térmica</h4>
-                        <p className="text-slate-500 text-xs mt-0.5">Drivers ESC/POS para gavetas e impressoras de talão 80mm/58mm.</p>
+                        <h4 className="font-display font-bold text-slate-900 text-sm">Motor SQLite & Drivers de Impressão Térmica</h4>
+                        <p className="text-slate-500 font-sans text-xs mt-0.5">Drivers ESC/POS para gavetas e impressoras de talão 80mm/58mm.</p>
                       </div>
                       <button
                         onClick={() => notify.info('Download do pacote de drivers de impressão iniciado!')}
-                        className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                        className="w-full bg-slate-950 hover:bg-slate-800 text-white text-xs font-display font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-[0.98]"
                       >
                         <Download className="w-4 h-4" />
                         <span>Baixar Drivers Térmicos</span>
@@ -3483,23 +3483,23 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                 {/* Materiais Comerciais */}
                 <div className="space-y-3 pt-4 border-t border-slate-100">
-                  <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider">Materiais Comerciais & Certificação AGT</h3>
+                  <h3 className="text-xs font-display font-bold uppercase text-slate-500 tracking-wider">Materiais Comerciais & Certificação AGT</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {[
                       { titulo: 'Apresentação Comercial PDF', desc: 'Slides prontos para reuniões com clientes e demonstração.', tam: '4.2 MB' },
                       { titulo: 'Tabela de Preços & Margens', desc: 'Preços recomendados e cálculo de margens de revenda.', tam: '1.1 MB' },
                       { titulo: 'Certificado de Conformidade AGT', desc: 'Comprovativo oficial de validação fiscal para o cliente.', tam: '0.8 MB' },
                     ].map((m, i) => (
-                      <div key={i} className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
-                        <FileText className="w-6 h-6 text-blue-600" />
-                        <h4 className="font-bold text-slate-900 text-xs">{m.titulo}</h4>
-                        <p className="text-[11px] text-slate-500">{m.desc}</p>
+                      <div key={i} className="p-5 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-3">
+                        <FileText className="w-6 h-6 text-slate-950" />
+                        <h4 className="font-display font-bold text-slate-900 text-xs">{m.titulo}</h4>
+                        <p className="text-[11px] text-slate-500 font-sans">{m.desc}</p>
                         <button
                           onClick={() => notify.info(`Download de ${m.titulo} iniciado.`)}
-                          className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="w-full bg-slate-950 hover:bg-slate-800 text-white text-xs font-display font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-xs transition-all active:scale-[0.98]"
                         >
                           <Download className="w-3.5 h-3.5" />
-                          <span>Baixar ({m.tam})</span>
+                          <span>Baixar (<span className="font-mono-num">{m.tam}</span>)</span>
                         </button>
                       </div>
                     ))}
@@ -3508,7 +3508,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                 {/* Ferramentas de Suporte Remoto */}
                 <div className="space-y-3 pt-4 border-t border-slate-100">
-                  <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider">Softwares Recomendados para Suporte Remoto ao Cliente</h3>
+                  <h3 className="text-xs font-display font-bold uppercase text-slate-500 tracking-wider">Softwares Recomendados para Suporte Remoto ao Cliente</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {[
                       { nome: 'AnyDesk', desc: 'Acesso rápido para suporte aos seus clientes.', url: 'https://anydesk.com/pt/downloads' },
@@ -3520,11 +3520,11 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         href={tool.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200 flex items-center justify-between transition-colors"
+                        className="p-4 bg-slate-50/70 hover:bg-slate-100/70 rounded-2xl border border-slate-200/80 flex items-center justify-between transition-colors"
                       >
                         <div>
-                          <strong className="text-xs font-bold text-slate-900 block">{tool.nome}</strong>
-                          <span className="text-[10px] text-slate-500">{tool.desc}</span>
+                          <strong className="text-xs font-display font-bold text-slate-900 block">{tool.nome}</strong>
+                          <span className="text-[10px] text-slate-500 font-sans">{tool.desc}</span>
                         </div>
                         <ExternalLink className="w-4 h-4 text-slate-400" />
                       </a>
@@ -3543,8 +3543,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               {/* Header do Suporte */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-black text-slate-900">Central de Suporte & Atendimento</h2>
-                  <p className="text-xs text-slate-500">
+                  <h2 className="text-lg font-display font-bold text-slate-900">Central de Suporte & Atendimento</h2>
+                  <p className="text-xs text-slate-500 font-sans mt-0.5">
                     Atenda os chamados dos seus clientes ou solicite apoio direto via videochamada à administração central da Kivora.
                   </p>
                 </div>
@@ -3552,14 +3552,14 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <div className="flex items-center gap-2 flex-wrap">
                   <button
                     onClick={() => setShowPurchaseMinutesModal(true)}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                    className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 font-display font-semibold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
                   >
                     <span>+ Recarregar Minutos</span>
                   </button>
 
                   <button
                     onClick={() => setShowVideoModal(true)}
-                    className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+                    className="bg-blue-600 hover:bg-blue-500 text-white font-display font-semibold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
                   >
                     <Video className="w-4 h-4" />
                     <span>Abrir Videochamada</span>
@@ -3567,7 +3567,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                   <button
                     onClick={() => setShowAdminTicketModal(true)}
-                    className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                    className="bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Falar com o Admin (Kivora Central)</span>
@@ -3576,19 +3576,19 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               </div>
 
               {/* Banner de Saldo de Minutos de Vídeo para Parceiros */}
-              <div className="p-5 bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-950 text-white rounded-3xl border border-emerald-900/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-lg">
+              <div className="surface-card bg-slate-950 text-white rounded-2xl border border-slate-800 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-lg">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-600/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
-                    <Video className="w-7 h-7" />
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                    <Video className="w-6 h-6" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-base font-black tracking-tight text-white">Assistência Remota em Direto (Google Meet / Jitsi)</h3>
-                      <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase font-mono">
+                      <h3 className="text-base font-display font-bold tracking-tight text-white">Assistência Remota em Direto (Google Meet / Jitsi)</h3>
+                      <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-display font-semibold px-2.5 py-0.5 rounded-full uppercase">
                         Tarifa Parceiro
                       </span>
                     </div>
-                    <p className="text-xs text-slate-300 mt-1 max-w-xl leading-relaxed">
+                    <p className="text-xs text-slate-300 font-sans mt-1 max-w-xl leading-relaxed">
                       Apoio avançado de engenharia nível 2, auditoria de bases de dados e diagnóstico de sincronização multiloja em direto.
                     </p>
                   </div>
@@ -3596,20 +3596,20 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                 <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/10 pt-3 md:pt-0">
                   <div className="text-left md:text-right">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
+                    <span className="text-[10px] uppercase font-display font-bold text-slate-400 tracking-wider block">
                       Saldo do Canal
                     </span>
-                    <span className="font-mono text-xl font-black text-emerald-400">
+                    <span className="font-mono-num text-xl font-bold text-emerald-400 block">
                       {Math.floor((videoAccount?.remainingSeconds || 0) / 60)} min {((videoAccount?.remainingSeconds || 0) % 60)}s
                     </span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">
-                      Gasto: {videoAccount?.totalMinutesSpent || 0} min utilizados
+                    <span className="text-[10px] text-slate-400 font-sans block mt-0.5">
+                      Gasto: <span className="font-mono-num">{videoAccount?.totalMinutesSpent || 0} min</span> utilizados
                     </span>
                   </div>
 
                   <button
                     onClick={() => setShowPurchaseMinutesModal(true)}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-md shadow-emerald-600/20 whitespace-nowrap"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-display font-semibold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs whitespace-nowrap active:scale-[0.98]"
                   >
                     Recarregar (Wallet / Multicaixa)
                   </button>
@@ -3617,13 +3617,13 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               </div>
 
               {/* Sub-tabs */}
-              <div className="flex items-center gap-2 border-b border-slate-200 pb-2 text-xs font-bold">
+              <div className="flex items-center gap-2 border-b border-slate-200/80 pb-2 text-xs">
                 <button
                   onClick={() => { setSupportTab('clientes'); setSelectedTicket(null); }}
-                  className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-xl font-display font-semibold transition-all cursor-pointer ${
                     supportTab === 'clientes'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'bg-slate-950 text-white shadow-xs'
+                      : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >
                   Chamados dos Meus Clientes ({clientTickets.length})
@@ -3631,10 +3631,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                 <button
                   onClick={() => { setSupportTab('admin'); setSelectedTicket(null); }}
-                  className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-xl font-display font-semibold transition-all cursor-pointer ${
                     supportTab === 'admin'
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'bg-slate-950 text-white shadow-xs'
+                      : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >
                   Minhas Conversas com o Admin Kivora ({adminTickets.length})
@@ -3645,16 +3645,16 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
                 {/* Lista de Chamados */}
-                <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-4">
-                  <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider">
+                <div className="lg:col-span-5 surface-card p-5 space-y-4">
+                  <h3 className="text-xs font-display font-bold uppercase text-slate-500 tracking-wider">
                     {supportTab === 'clientes' ? 'Tickets da Carteira de Clientes' : 'Chamados com a Direção Kivora'}
                   </h3>
 
                   {((supportTab === 'clientes' ? clientTickets : adminTickets).length === 0) ? (
                     <div className="p-8 text-center text-slate-400 space-y-2">
                       <Headphones className="w-8 h-8 mx-auto text-slate-300" />
-                      <p className="font-bold text-xs text-slate-700">Nenhum chamado ativo nesta aba</p>
-                      <p className="text-[11px] text-slate-400">
+                      <p className="font-display font-bold text-xs text-slate-700">Nenhum chamado ativo nesta aba</p>
+                      <p className="text-[11px] text-slate-400 font-sans">
                         {supportTab === 'clientes'
                           ? 'Os seus clientes poderão abrir tickets através da Área do Cliente deles.'
                           : 'Clique em "Falar com o Admin" para abrir uma solicitação.'}
@@ -3670,27 +3670,27 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                             onClick={() => setSelectedTicket(tk)}
                             className={`p-4 rounded-2xl border transition-all cursor-pointer ${
                               isSel
-                                ? 'bg-emerald-50 border-emerald-300 shadow-xs'
-                                : 'bg-slate-50 border-slate-200 hover:bg-slate-100/70'
+                                ? 'bg-emerald-500/5 border-emerald-500/30 shadow-xs'
+                                : 'bg-slate-50/70 border-slate-200/80 hover:bg-slate-100/60'
                             }`}
                           >
                             <div className="flex items-center justify-between gap-2 mb-1">
-                              <span className="font-mono text-[10px] font-black text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
+                              <span className="font-mono-num text-[10px] font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200/80">
                                 {tk.ticket_number}
                               </span>
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                tk.status === 'resolved' ? 'bg-emerald-100 text-emerald-800' :
-                                tk.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                                'bg-amber-100 text-amber-800'
+                              <span className={`text-[10px] font-display font-semibold px-2 py-0.5 rounded-full border ${
+                                tk.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-800 border-emerald-500/20' :
+                                tk.status === 'in_progress' ? 'bg-blue-500/10 text-blue-800 border-blue-500/20' :
+                                'bg-amber-500/10 text-amber-800 border-amber-500/20'
                               }`}>
                                 {tk.status === 'resolved' ? 'Resolvido' : tk.status === 'in_progress' ? 'Em Atendimento' : 'Aberto'}
                               </span>
                             </div>
 
-                            <h4 className="font-bold text-slate-900 text-xs line-clamp-1">{tk.subject}</h4>
-                            <p className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
-                              <span className="font-semibold text-slate-700 truncate max-w-[160px]">{tk.company_name}</span>
-                              <span className="font-bold text-emerald-600">{tk.messages.length} msg(s)</span>
+                            <h4 className="font-display font-bold text-slate-900 text-xs line-clamp-1">{tk.subject}</h4>
+                            <p className="text-[11px] text-slate-500 mt-1 flex items-center justify-between font-sans">
+                              <span className="font-display font-semibold text-slate-800 truncate max-w-[160px]">{tk.company_name}</span>
+                              <span className="font-mono-num font-semibold text-emerald-700">{tk.messages.length} msg(s)</span>
                             </p>
                           </div>
                         );
@@ -3700,19 +3700,19 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 </div>
 
                 {/* Chat / Resposta ao Chamado */}
-                <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col h-[560px] overflow-hidden">
+                <div className="lg:col-span-7 surface-card flex flex-col h-[560px] overflow-hidden">
                   {selectedTicket ? (
                     <>
                       {/* Header do Chat */}
-                      <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                      <div className="p-4 border-b border-slate-200/80 bg-slate-50/70 flex items-center justify-between">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-xs font-black text-slate-900">{selectedTicket.ticket_number}</span>
+                            <span className="font-mono-num text-xs font-bold text-slate-900">{selectedTicket.ticket_number}</span>
                             <span className="text-slate-300">•</span>
-                            <h4 className="font-bold text-slate-900 text-xs">{selectedTicket.subject}</h4>
+                            <h4 className="font-display font-bold text-slate-900 text-xs">{selectedTicket.subject}</h4>
                           </div>
-                          <p className="text-[10px] text-slate-500 mt-0.5">
-                            Empresa: <strong className="text-slate-800">{selectedTicket.company_name}</strong> ({selectedTicket.contact_email})
+                          <p className="text-[10px] text-slate-500 font-sans mt-0.5">
+                            Empresa: <strong className="text-slate-800 font-display">{selectedTicket.company_name}</strong> ({selectedTicket.contact_email})
                           </p>
                         </div>
 
@@ -3720,15 +3720,15 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                           {selectedTicket.status !== 'resolved' && (
                             <button
                               onClick={() => handleResolveTicket(selectedTicket.id)}
-                              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg shadow-xs cursor-pointer"
+                              className="bg-emerald-600 hover:bg-emerald-500 text-white font-display font-semibold text-[10px] px-3 py-1.5 rounded-lg shadow-xs cursor-pointer active:scale-95"
                             >
                               Marcar Resolvido
                             </button>
                           )}
-                          <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                            selectedTicket.status === 'resolved' ? 'bg-emerald-100 text-emerald-800' :
-                            selectedTicket.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                            'bg-amber-100 text-amber-800'
+                          <span className={`text-[10px] font-display font-semibold px-2.5 py-1 rounded-full border ${
+                            selectedTicket.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-800 border-emerald-500/20' :
+                            selectedTicket.status === 'in_progress' ? 'bg-blue-500/10 text-blue-800 border-blue-500/20' :
+                            'bg-amber-500/10 text-amber-800 border-amber-500/20'
                           }`}>
                             {selectedTicket.status === 'resolved' ? 'Resolvido' : selectedTicket.status === 'in_progress' ? 'Em Atendimento' : 'Aberto'}
                           </span>
@@ -3736,7 +3736,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       </div>
 
                       {/* Thread de Mensagens */}
-                      <div className="flex-1 p-5 overflow-y-auto space-y-3 bg-slate-50/50">
+                      <div className="flex-1 p-5 overflow-y-auto space-y-3 bg-slate-50/40">
                         {selectedTicket.messages.map((msg, i) => {
                           const isMe = msg.sender_role === 'partner';
                           return (
@@ -3744,16 +3744,16 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                               key={msg.id || i}
                               className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
                             >
-                              <span className="text-[10px] font-bold text-slate-400 mb-1 px-1">
+                              <span className="text-[10px] font-display font-medium text-slate-400 mb-1 px-1">
                                 {msg.sender_name} ({msg.sender_role === 'partner' ? 'Você (Parceiro)' : msg.sender_role === 'client' ? 'Cliente' : 'Admin Central'})
                               </span>
-                              <div className={`p-3.5 rounded-2xl text-xs max-w-md ${
+                              <div className={`p-3.5 rounded-2xl text-xs max-w-md font-sans ${
                                 isMe
-                                  ? 'bg-emerald-600 text-white rounded-br-xs shadow-xs'
-                                  : 'bg-white text-slate-900 border border-slate-200 rounded-bl-xs shadow-xs'
+                                  ? 'bg-slate-950 text-white rounded-br-xs shadow-xs'
+                                  : 'bg-white text-slate-900 border border-slate-200/80 rounded-bl-xs shadow-xs'
                               }`}>
-                                <p className="whitespace-pre-wrap">{msg.text}</p>
-                                <span className={`text-[9px] font-medium mt-1.5 block text-right ${isMe ? 'text-emerald-100' : 'text-slate-400'}`}>
+                                <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                                <span className={`text-[9px] font-mono-num font-medium mt-1.5 block text-right ${isMe ? 'text-slate-400' : 'text-slate-400'}`}>
                                   {new Date(msg.timestamp).toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                               </div>
@@ -3763,18 +3763,18 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       </div>
 
                       {/* Input de Envio de Resposta */}
-                      <form onSubmit={handleSendChatMessage} className="p-3 border-t border-slate-200 bg-white flex items-center gap-2">
+                      <form onSubmit={handleSendChatMessage} className="p-3 border-t border-slate-200/80 bg-white flex items-center gap-2">
                         <input
                           type="text"
                           placeholder="Escreva a sua resposta em tempo real..."
                           value={chatReply}
                           onChange={(e) => setChatReply(e.target.value)}
-                          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white font-medium"
+                          className="flex-1 bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white font-sans transition-all"
                         />
                         <button
                           type="submit"
                           disabled={!chatReply.trim()}
-                          className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white p-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
+                          className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white p-2.5 rounded-xl shadow-xs transition-all cursor-pointer active:scale-95"
                         >
                           <Send className="w-4 h-4" />
                         </button>
@@ -3783,8 +3783,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   ) : (
                     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400">
                       <MessageSquare className="w-10 h-10 text-slate-300 mb-2" />
-                      <h4 className="font-bold text-slate-700 text-sm">Selecione um chamado ao lado</h4>
-                      <p className="text-xs text-slate-400 mt-1 max-w-xs">
+                      <h4 className="font-display font-bold text-slate-700 text-sm">Selecione um chamado ao lado</h4>
+                      <p className="text-xs text-slate-400 font-sans mt-1 max-w-xs">
                         Veja o histórico de mensagens e responda diretamente pelo portal.
                       </p>
                     </div>
@@ -3798,41 +3798,41 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
           {/* SECTION: PERFIL & SENHA */}
           {activeSection === 'perfil' && (
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6 max-w-3xl">
+            <div className="surface-card p-6 sm:p-8 space-y-6 max-w-3xl">
               <div>
-                <h2 className="text-lg font-black text-slate-900">Conta do Parceiro & Segurança</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <h2 className="text-lg font-display font-bold text-slate-900">Conta do Parceiro & Segurança</h2>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">
                   Informações da sua credencial de parceiro homologado e alteração de palavra-passe.
                 </p>
               </div>
 
               {/* Card de Dados do Parceiro */}
-              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+              <div className="p-6 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-800 text-white flex items-center justify-center text-lg font-black shadow-md">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-950 text-white flex items-center justify-center text-lg font-display font-bold shadow-xs">
                     {partnerName.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <h3 className="font-black text-slate-900 text-base">{partnerName}</h3>
-                    <p className="text-xs font-mono font-bold text-emerald-600">{partnerCode}</p>
+                    <h3 className="font-display font-bold text-slate-900 text-base">{partnerName}</h3>
+                    <p className="text-xs font-mono-num font-bold text-emerald-700">{partnerCode}</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-200 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-200/80 text-xs">
                   <div>
-                    <span className="text-slate-400 text-[10px] uppercase font-bold block">Email de Acesso</span>
-                    <span className="font-bold text-slate-800">{session?.email || 'parceiro@kivora.ao'}</span>
+                    <span className="text-slate-400 text-[10px] uppercase font-display font-bold tracking-wider block">Email de Acesso</span>
+                    <span className="font-sans font-medium text-slate-800">{session?.email || 'parceiro@kivora.ao'}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 text-[10px] uppercase font-bold block">Nível de Parceria</span>
-                    <span className="font-bold text-emerald-600 flex items-center gap-1">
+                    <span className="text-slate-400 text-[10px] uppercase font-display font-bold tracking-wider block">Nível de Parceria</span>
+                    <span className="font-display font-semibold text-emerald-700 flex items-center gap-1">
                       <Award className="w-3.5 h-3.5" />
                       <span>{partnerAccount?.tier?.toUpperCase() || 'HOMOLOGADO'}</span>
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-400 text-[10px] uppercase font-bold block">Quota de Slots a Crédito</span>
-                    <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 inline-block font-mono">
+                    <span className="text-slate-400 text-[10px] uppercase font-display font-bold tracking-wider block">Quota de Slots a Crédito</span>
+                    <span className="font-mono-num font-semibold text-blue-700 bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20 inline-block">
                       {creditSlotsLimit} Licenças Simultâneas
                     </span>
                   </div>
@@ -3840,14 +3840,14 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               </div>
 
               {/* Personalização de Identidade Visual & Logótipo */}
-              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+              <div className="p-6 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                    <h3 className="text-sm font-display font-bold text-slate-900 flex items-center gap-2">
                       <Award className="w-4 h-4 text-blue-600" />
                       <span>Identidade Visual & Logótipo da Empresa Parceira</span>
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-slate-500 font-sans mt-0.5">
                       Este logótipo será impresso nos seus certificados oficiais de técnico credenciado e propostas.
                     </p>
                   </div>
@@ -3855,28 +3855,28 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                 <form onSubmit={handleSavePartnerBranding} className="space-y-4 text-xs">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                    <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 p-2 flex items-center justify-center shadow-xs shrink-0">
+                    <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200/80 p-2 flex items-center justify-center shadow-xs shrink-0">
                       {partnerLogoUrl ? (
                         <img src={partnerLogoUrl} alt="Logo Parceiro" className="max-h-full max-w-full object-contain" />
                       ) : (
-                        <span className="font-black text-slate-400 text-xs text-center">Sem Logo</span>
+                        <span className="font-display font-semibold text-slate-400 text-xs text-center">Sem Logo</span>
                       )}
                     </div>
-                    <div className="flex-1 w-full space-y-1">
-                      <label className="font-bold text-slate-700 uppercase text-[11px]">URL da Imagem / Logótipo (PNG ou JPG)</label>
+                    <div className="flex-1 w-full space-y-1.5">
+                      <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">URL da Imagem / Logótipo (PNG ou JPG)</label>
                       <input
                         type="url"
                         value={partnerLogoUrl}
                         onChange={(e) => setPartnerLogoUrl(e.target.value)}
                         placeholder="https://suaempresa.ao/logo.png"
-                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-blue-500 font-mono"
+                        className="w-full bg-white border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 font-mono-num text-xs transition-all"
                       />
                     </div>
                   </div>
 
                   {partnerBrandingSaved && (
-                    <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl font-bold flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4" />
+                    <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 rounded-xl font-display font-semibold text-xs flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                       <span>Logótipo corporativo guardado com sucesso!</span>
                     </div>
                   )}
@@ -3884,7 +3884,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   <div className="flex justify-end">
                     <button
                       type="submit"
-                      className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2 rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-2"
+                      className="bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-2 active:scale-[0.98]"
                     >
                       <Save className="w-3.5 h-3.5" />
                       <span>Gravar Logótipo</span>
@@ -3894,47 +3894,47 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               </div>
 
               {/* Formulário de Alteração de Senha */}
-              <div className="pt-4 border-t border-slate-200">
-                <h3 className="text-sm font-black text-slate-900 mb-1 flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-emerald-600" />
+              <div className="pt-4 border-t border-slate-200/80">
+                <h3 className="text-sm font-display font-bold text-slate-900 mb-1 flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-slate-950" />
                   <span>Alterar Palavra-passe de Acesso</span>
                 </h3>
-                <p className="text-xs text-slate-500 mb-4">Defina uma nova palavra-passe segura para entrar no portal.</p>
+                <p className="text-xs text-slate-500 font-sans mb-4">Defina uma nova palavra-passe segura para entrar no portal.</p>
 
                 <form onSubmit={handleChangePassword} className="space-y-4 text-xs max-w-md">
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700 uppercase">Nova Palavra-passe</label>
+                  <div className="space-y-1.5">
+                    <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Nova Palavra-passe</label>
                     <input
                       type="password"
                       required
                       placeholder="Mínimo 6 caracteres"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-500 focus:bg-white font-medium"
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 focus:outline-none focus:border-slate-900 focus:bg-white font-sans text-xs transition-all"
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-700 uppercase">Confirmar Nova Palavra-passe</label>
+                  <div className="space-y-1.5">
+                    <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Confirmar Nova Palavra-passe</label>
                     <input
                       type="password"
                       required
                       placeholder="Repita a palavra-passe"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-500 focus:bg-white font-medium"
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 focus:outline-none focus:border-slate-900 focus:bg-white font-sans text-xs transition-all"
                     />
                   </div>
 
                   {passwordError && (
-                    <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl font-medium">
+                    <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 rounded-xl font-display font-medium text-xs">
                       {passwordError}
                     </div>
                   )}
 
                   {passwordSuccess && (
-                    <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl font-bold flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4" />
+                    <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 rounded-xl font-display font-semibold text-xs flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                       <span>Palavra-passe atualizada com sucesso no Firebase!</span>
                     </div>
                   )}
@@ -3942,7 +3942,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   <button
                     type="submit"
                     disabled={changingPassword}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer"
+                    className="bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs px-6 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer active:scale-[0.98]"
                   >
                     {changingPassword ? 'A Atualizar...' : 'Atualizar Palavra-passe'}
                   </button>
@@ -3956,24 +3956,24 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               ========================================================================= */}
           {activeSection === 'certificados' && (
             <div className="space-y-6 animate-fadeIn">
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+              <div className="surface-card p-6 sm:p-8 space-y-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
                   <div>
-                    <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-800 text-[10px] font-black uppercase px-3 py-1 rounded-full border border-blue-200">
-                      <Award className="w-3.5 h-3.5 text-[#FF6500]" />
+                    <div className="inline-flex items-center gap-2 bg-slate-100 text-slate-700 text-[10px] font-display font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-slate-200/80">
+                      <Award className="w-3.5 h-3.5 text-blue-600" />
                       <span>Documentação Institucional & Credenciação Oficial</span>
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-2">
+                    <h2 className="text-xl sm:text-2xl font-display font-bold text-slate-900 mt-2">
                       Comprovativo Oficial de Parceiro Revendedor
                     </h2>
-                    <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                    <p className="text-xs sm:text-sm font-sans text-slate-500 mt-1">
                       Aceda e imprima o seu comprovativo oficial de revenda credenciada emitido pela <strong>VISUAL SOFTWARE, LDA.</strong> com validade perante clientes e instituições de Angola.
                     </p>
                   </div>
 
                   <button
                     onClick={() => setShowOfficialCertificatesModal(true)}
-                    className="bg-[#FF6500] hover:bg-[#EB5B00] active:bg-[#C94A00] text-white font-bold text-xs px-5 py-3 rounded-2xl flex items-center gap-2 shadow-md transition-all cursor-pointer shrink-0"
+                    className="bg-slate-950 hover:bg-slate-800 active:scale-[0.98] text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-xs transition-all cursor-pointer shrink-0"
                   >
                     <Printer className="w-4 h-4" />
                     <span>Visualizar & Imprimir (A4)</span>
@@ -3981,25 +3981,25 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 </div>
 
                 {/* Card do Documento Oficial Único */}
-                <div className="bg-slate-50 rounded-2xl border-2 border-slate-200 p-6 sm:p-8 space-y-5 hover:border-slate-300 transition-all">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+                <div className="bg-slate-50/70 rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-5 hover:border-slate-300 transition-all">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-[#FF6500] shrink-0">
-                        <Award className="w-6 h-6" />
+                      <div className="w-12 h-12 rounded-xl bg-slate-950 text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <Award className="w-6 h-6 text-amber-400" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-bold text-[#FF6500] uppercase tracking-wider">
+                          <span className="text-[11px] font-display font-semibold text-slate-500 uppercase tracking-wider">
                             Certificação Oficial de Parceiro
                           </span>
-                          <span className="text-[10px] font-black uppercase text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] font-display font-bold uppercase text-emerald-700 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
                             ● HOMOLOGADO
                           </span>
                         </div>
-                        <h3 className="font-extrabold text-slate-950 text-lg sm:text-xl">
+                        <h3 className="font-display font-bold text-slate-950 text-lg sm:text-xl">
                           COMPROVATIVO DE PARCEIRO REVENDEDOR
                         </h3>
-                        <p className="text-xs font-bold text-[#1D4ED8] uppercase">
+                        <p className="text-xs font-display font-semibold text-blue-700 uppercase tracking-wider">
                           CREDENCIADO KIVORA SOFT
                         </p>
                       </div>
@@ -4007,7 +4007,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
                     <button
                       onClick={() => setShowOfficialCertificatesModal(true)}
-                      className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm self-start sm:self-center shrink-0"
+                      className="bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs self-start sm:self-center shrink-0 active:scale-[0.98]"
                     >
                       <ShieldCheck className="w-4 h-4 text-emerald-400" />
                       <span>Abrir Comprovativo Oficial</span>
@@ -4015,21 +4015,21 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                    <div className="bg-white p-3.5 rounded-xl border border-slate-200">
-                      <p className="text-[10px] font-bold text-slate-500 uppercase">Entidade Titular</p>
-                      <p className="font-bold text-slate-900 mt-0.5 truncate">{partnerName}</p>
+                    <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
+                      <p className="text-[10px] font-display font-bold text-slate-500 uppercase tracking-wider">Entidade Titular</p>
+                      <p className="font-display font-semibold text-slate-900 mt-0.5 truncate">{partnerName}</p>
                     </div>
-                    <div className="bg-white p-3.5 rounded-xl border border-slate-200">
-                      <p className="text-[10px] font-bold text-slate-500 uppercase">N.º de Credencial</p>
-                      <p className="font-mono font-bold text-[#FF6500] mt-0.5">{partnerCode}</p>
+                    <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
+                      <p className="text-[10px] font-display font-bold text-slate-500 uppercase tracking-wider">N.º de Credencial</p>
+                      <p className="font-mono-num font-bold text-slate-900 mt-0.5">{partnerCode}</p>
                     </div>
-                    <div className="bg-white p-3.5 rounded-xl border border-slate-200">
-                      <p className="text-[10px] font-bold text-slate-500 uppercase">Homologação de Software</p>
-                      <p className="font-bold text-slate-900 mt-0.5">FE/440/AGT/2026</p>
+                    <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
+                      <p className="text-[10px] font-display font-bold text-slate-500 uppercase tracking-wider">Homologação de Software</p>
+                      <p className="font-mono-num font-bold text-slate-900 mt-0.5">FE/387/AGT/2026</p>
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-slate-600 font-sans leading-relaxed">
                     Este documento certifica que a entidade acima identificada é Parceiro Revendedor oficialmente credenciado pela Visual Software, encontrando-se devidamente autorizado a comercializar, promover e revender o software <strong>KIVORA SOFT</strong> nos termos do Contrato de Parceria de Revenda.
                   </p>
                 </div>
@@ -4043,41 +4043,41 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       {/* MODAL: RECARGA DE WALLET */}
       {showTopUpWalletModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+          <div className="surface-card rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 animate-fadeIn">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-                  <Wallet className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-xl bg-slate-950 text-white flex items-center justify-center shadow-xs">
+                  <Wallet className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-black text-slate-900">Recarregar Saldo na Wallet</h3>
-                  <p className="text-xs text-slate-500">Créditos pré-pagos para emissão instantânea</p>
+                  <h3 className="text-base sm:text-lg font-display font-bold text-slate-900">Recarregar Saldo na Wallet</h3>
+                  <p className="text-xs text-slate-500 font-sans">Créditos pré-pagos para emissão instantânea</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowTopUpWalletModal(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            <div className="p-4 bg-slate-950 text-white rounded-2xl space-y-2 text-xs">
+            <div className="surface-card bg-slate-950 text-white rounded-2xl p-4 space-y-2 text-xs border border-slate-800">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 border-b border-white/10 pb-1.5">
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">Contas Bancárias Oficiais para Depósito</span>
-                <span className="text-[10px] text-slate-300">Titular: <strong className="text-white">{officialBeneficiary}</strong></span>
+                <span className="text-[10px] text-slate-400 uppercase font-display font-bold tracking-wider block">Contas Bancárias Oficiais para Depósito</span>
+                <span className="text-[10px] text-slate-300 font-sans">Titular: <strong className="text-white font-display">{officialBeneficiary}</strong></span>
               </div>
-              <div className="space-y-1 font-mono text-[11px] pt-1">
-                {hasBank1 && <p>• {officialBank1Name}: <strong className="text-emerald-400">{officialBank1Iban}</strong></p>}
-                {hasBank2 && <p>• {officialBank2Name}: <strong className="text-blue-400">{officialBank2Iban}</strong></p>}
+              <div className="space-y-1 font-mono-num text-[11px] pt-1">
+                {hasBank1 && <p className="font-sans text-slate-300">• {officialBank1Name}: <strong className="text-emerald-400 font-mono-num">{officialBank1Iban}</strong></p>}
+                {hasBank2 && <p className="font-sans text-slate-300">• {officialBank2Name}: <strong className="text-blue-400 font-mono-num">{officialBank2Iban}</strong></p>}
                 {!hasBank1 && !hasBank2 && <p className="text-slate-400 font-sans">Nenhuma conta oficial ativa de momento.</p>}
               </div>
             </div>
 
             <form onSubmit={handleSendWalletTopUp} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase text-[11px]">Valor Depositado (Kz) *</label>
+                <div className="space-y-1.5">
+                  <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Valor Depositado (Kz) *</label>
                   <input
                     type="number"
                     required
@@ -4086,16 +4086,16 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     value={paymentAmount || ''}
                     onChange={(e) => setPaymentAmount(Number(e.target.value))}
                     placeholder="Ex: 300000"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-mono font-bold"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-mono-num font-bold text-xs transition-all"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase text-[11px]">Banco de Destino (Kivora)</label>
+                <div className="space-y-1.5">
+                  <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Banco de Destino (Kivora)</label>
                   <select
                     value={paymentBank}
                     onChange={(e) => setPaymentBank(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-bold"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-display font-semibold text-xs transition-all"
                   >
                     {hasBank1 && <option value={officialBank1Name}>{officialBank1Name} (Conta Oficial)</option>}
                     {hasBank2 && <option value={officialBank2Name}>{officialBank2Name} (Conta Oficial)</option>}
@@ -4104,15 +4104,15 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase text-[11px]">Número do Comprovativo / Operação *</label>
+              <div className="space-y-1.5">
+                <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Número do Comprovativo / Operação *</label>
                 <input
                   type="text"
                   required
                   placeholder="Ex: TRF-BAI-998811"
                   value={paymentRef}
                   onChange={(e) => setPaymentRef(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-medium"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-sans text-xs transition-all"
                 />
               </div>
 
@@ -4120,14 +4120,14 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <button
                   type="button"
                   onClick={() => setShowTopUpWalletModal(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl text-xs font-display font-medium text-slate-600 hover:bg-slate-100 cursor-pointer transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={submittingProof}
-                  className="px-6 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl text-xs font-display font-semibold bg-slate-950 hover:bg-slate-800 text-white shadow-xs cursor-pointer transition-all active:scale-[0.98]"
                 >
                   {submittingProof ? 'A Enviar Solicitação...' : 'Confirmar Recarga de Wallet'}
                 </button>
@@ -4149,35 +4149,35 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       {/* MODAL: RENOVAR / PRORROGAR LICENÇA */}
       {renewLicenseModal.open && renewLicenseModal.license && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-fadeIn">
+          <div className="surface-card rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-fadeIn">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <div>
-                <h3 className="text-base font-black text-slate-900">Renovar / Prorrogar Licença</h3>
-                <p className="text-xs text-slate-500">{renewLicenseModal.license.company_name}</p>
+                <h3 className="text-base font-display font-bold text-slate-900">Renovar / Prorrogar Licença</h3>
+                <p className="text-xs text-slate-500 font-sans">{renewLicenseModal.license.company_name}</p>
               </div>
               <button
                 onClick={() => setRenewLicenseModal({ open: false, license: null, days: 30 })}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors"
               >
                 ✕
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="p-3 bg-slate-50 rounded-xl space-y-1">
-                <span className="text-[10px] text-slate-400 font-bold uppercase block">Chave de Ativação</span>
-                <span className="font-mono font-bold text-slate-900">{renewLicenseModal.license.id}</span>
-                <p className="text-[11px] text-slate-500">
-                  Validade Atual: <strong>{formatLicenseDate(renewLicenseModal.license.expires_at)}</strong>
+              <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200/80 space-y-1">
+                <span className="text-[10px] text-slate-400 font-display font-bold uppercase tracking-wider block">Chave de Ativação</span>
+                <span className="font-mono-num font-bold text-slate-900">{renewLicenseModal.license.id}</span>
+                <p className="text-[11px] text-slate-500 font-sans mt-0.5">
+                  Validade Atual: <strong className="font-mono-num text-slate-700">{formatLicenseDate(renewLicenseModal.license.expires_at)}</strong>
                 </p>
               </div>
 
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase text-[11px]">Período de Extensão</label>
+              <div className="space-y-1.5">
+                <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Período de Extensão</label>
                 <select
                   value={renewLicenseModal.days}
                   onChange={(e) => setRenewLicenseModal(prev => ({ ...prev, days: Number(e.target.value) }))}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all"
                 >
                   <option value={30}>+30 Dias (Mensal) — Custo Kivora: {fmt(pricingPlans.find(p => p.plan_type === 'monthly')?.cost_aoa ?? 15000)} Kz</option>
                   <option value={90}>+90 Dias (Trimestral) — Custo Kivora: {fmt(pricingPlans.find(p => p.plan_type === 'quarterly')?.cost_aoa ?? 40000)} Kz</option>
@@ -4186,15 +4186,15 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 </select>
               </div>
 
-              <div className="p-3.5 bg-emerald-50 text-emerald-900 rounded-xl border border-emerald-200 text-[11px] leading-relaxed">
+              <div className="p-3.5 bg-emerald-500/10 text-emerald-900 rounded-xl border border-emerald-500/20 text-[11px] font-sans leading-relaxed">
                 Ao confirmar, a data de expiração da licença será estendida no Firebase Firestore e o lançamento de dívida de atacado será adicionado ao seu extrato financeiro.
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setRenewLicenseModal({ open: false, license: null, days: 30 })}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-display font-medium text-slate-600 hover:bg-slate-100 cursor-pointer transition-colors"
                 >
                   Cancelar
                 </button>
@@ -4202,7 +4202,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   type="button"
                   onClick={handleRenewLicense}
                   disabled={actionLoading === renewLicenseModal.license.id}
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md cursor-pointer"
+                  className="px-5 py-2 rounded-xl text-xs font-display font-semibold bg-slate-950 hover:bg-slate-800 text-white shadow-xs cursor-pointer transition-all active:scale-[0.98]"
                 >
                   {actionLoading === renewLicenseModal.license.id ? 'A Renovar...' : 'Confirmar Renovação'}
                 </button>
@@ -4215,88 +4215,88 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       {/* MODAL: CADASTRO DE NOVO CLIENTE */}
       {showAddClientModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+          <div className="surface-card rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 animate-fadeIn">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <div>
-                <h3 className="text-lg font-black text-slate-900">Cadastrar Novo Cliente</h3>
-                <p className="text-xs text-slate-500">Adicione uma empresa à sua carteira de revendedor</p>
+                <h3 className="text-lg font-display font-bold text-slate-900">Cadastrar Novo Cliente</h3>
+                <p className="text-xs text-slate-500 font-sans">Adicione uma empresa à sua carteira de revendedor</p>
               </div>
               <button
                 onClick={() => setShowAddClientModal(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors"
               >
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleAddClientSubmit} className="space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase text-[11px]">Nome da Empresa *</label>
+              <div className="space-y-1.5">
+                <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Nome da Empresa *</label>
                 <input
                   type="text"
                   required
                   placeholder="Ex: Comercial Boa Esperança, Lda"
                   value={newClientName}
                   onChange={(e) => setNewClientName(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-medium"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-sans text-xs transition-all"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase text-[11px]">NIF da Empresa *</label>
+                <div className="space-y-1.5">
+                  <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">NIF da Empresa *</label>
                   <input
                     type="text"
                     required
                     placeholder="5412345678"
                     value={newClientNif}
                     onChange={(e) => setNewClientNif(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-mono font-bold"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-mono-num font-bold text-xs transition-all"
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase text-[11px]">Telefone / WhatsApp</label>
+                <div className="space-y-1.5">
+                  <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Telefone / WhatsApp</label>
                   <input
                     type="text"
                     placeholder="923 000 000"
                     value={newClientPhone}
                     onChange={(e) => setNewClientPhone(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-medium"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-sans text-xs transition-all"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase text-[11px]">Email do Cliente</label>
+                <div className="space-y-1.5">
+                  <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Email do Cliente</label>
                   <input
                     type="email"
                     placeholder="contacto@empresa.ao"
                     value={newClientEmail}
                     onChange={(e) => setNewClientEmail(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-medium"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-sans text-xs transition-all"
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase text-[11px]">Província / Localização</label>
+                <div className="space-y-1.5">
+                  <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Província / Localização</label>
                   <input
                     type="text"
                     placeholder="Luanda, Benguela, Huambo..."
                     value={newClientAddress}
                     onChange={(e) => setNewClientAddress(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-medium"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-sans text-xs transition-all"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase text-[11px]">URL do Logótipo da Empresa Cliente (Opcional)</label>
+              <div className="space-y-1.5">
+                <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">URL do Logótipo da Empresa Cliente (Opcional)</label>
                 <input
                   type="url"
                   placeholder="https://cliente.ao/logo.png"
                   value={newClientLogoUrl}
                   onChange={(e) => setNewClientLogoUrl(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-mono text-xs"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-mono-num text-xs transition-all"
                 />
               </div>
 
@@ -4304,14 +4304,14 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <button
                   type="button"
                   onClick={() => setShowAddClientModal(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl text-xs font-display font-medium text-slate-600 hover:bg-slate-100 cursor-pointer transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={addingClient}
-                  className="px-6 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl text-xs font-display font-semibold bg-slate-950 hover:bg-slate-800 text-white shadow-xs cursor-pointer transition-all active:scale-[0.98]"
                 >
                   {addingClient ? 'A Cadastrar...' : 'Gravar Cliente no Firebase'}
                 </button>
@@ -4324,15 +4324,15 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       {/* MODAL: NOTIFICAR PAGAMENTO / ENVIAR COMPROVATIVO */}
       {showProofPaymentModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+          <div className="surface-card rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 animate-fadeIn">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <div>
-                <h3 className="text-lg font-black text-slate-900">Notificar Liquidação de Dívida</h3>
-                <p className="text-xs text-slate-500">Informe a Direção Kivora sobre a transferência efetuada</p>
+                <h3 className="text-lg font-display font-bold text-slate-900">Notificar Liquidação de Dívida</h3>
+                <p className="text-xs text-slate-500 font-sans">Informe a Direção Kivora sobre a transferência efetuada</p>
               </div>
               <button
                 onClick={() => setShowProofPaymentModal(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors"
               >
                 ✕
               </button>
@@ -4340,8 +4340,8 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
             <form onSubmit={handleSendPaymentProof} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase text-[11px]">Valor Transferido (Kz) *</label>
+                <div className="space-y-1.5">
+                  <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Valor Transferido (Kz) *</label>
                   <input
                     type="number"
                     required
@@ -4349,16 +4349,16 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     value={paymentAmount || ''}
                     onChange={(e) => setPaymentAmount(Number(e.target.value))}
                     placeholder="Ex: 120000"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-mono font-bold"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-mono-num font-bold text-xs transition-all"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase text-[11px]">Banco de Destino (Kivora)</label>
+                <div className="space-y-1.5">
+                  <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Banco de Destino (Kivora)</label>
                   <select
                     value={paymentBank}
                     onChange={(e) => setPaymentBank(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-bold"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-display font-semibold text-xs transition-all"
                   >
                     {hasBank1 && <option value={officialBank1Name}>{officialBank1Name} (Conta Oficial)</option>}
                     {hasBank2 && <option value={officialBank2Name}>{officialBank2Name} (Conta Oficial)</option>}
@@ -4367,26 +4367,26 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase text-[11px]">Número do Comprovativo / Operação *</label>
+              <div className="space-y-1.5">
+                <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Número do Comprovativo / Operação *</label>
                 <input
                   type="text"
                   required
                   placeholder="Ex: TRF-2026-88992 ou Ref. do Talão"
                   value={paymentRef}
                   onChange={(e) => setPaymentRef(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-medium"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-sans text-xs transition-all"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase text-[11px]">Observações / Notas</label>
+              <div className="space-y-1.5">
+                <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Observações / Notas</label>
                 <textarea
                   rows={3}
                   placeholder="Indique detalhes adicionais (ex: transferência referente às licenças X e Y)..."
                   value={paymentNotes}
                   onChange={(e) => setPaymentNotes(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-medium resize-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-sans text-xs transition-all resize-none"
                 />
               </div>
 
@@ -4394,14 +4394,14 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <button
                   type="button"
                   onClick={() => setShowProofPaymentModal(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl text-xs font-display font-medium text-slate-600 hover:bg-slate-100 cursor-pointer transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={submittingProof}
-                  className="px-6 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl text-xs font-display font-semibold bg-slate-950 hover:bg-slate-800 text-white shadow-xs cursor-pointer transition-all active:scale-[0.98]"
                 >
                   {submittingProof ? 'A Enviar Comprovativo...' : 'Enviar Notificação à Direção'}
                 </button>
@@ -4414,39 +4414,39 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       {/* MODAL: ABRIR TICKET DIRETO PARA O ADMIN */}
       {showAdminTicketModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+          <div className="surface-card rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 animate-fadeIn">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <div>
-                <h3 className="text-lg font-black text-slate-900">Solicitação à Direção Kivora</h3>
-                <p className="text-xs text-slate-500">Destinado a: Equipa Executiva & Financeira Central</p>
+                <h3 className="text-lg font-display font-bold text-slate-900">Solicitação à Direção Kivora</h3>
+                <p className="text-xs text-slate-500 font-sans">Destinado a: Equipa Executiva & Financeira Central</p>
               </div>
               <button
                 onClick={() => setShowAdminTicketModal(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors"
               >
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleCreateAdminTicket} className="space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase text-[11px]">Assunto da Solicitação *</label>
+              <div className="space-y-1.5">
+                <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Assunto da Solicitação *</label>
                 <input
                   type="text"
                   required
                   placeholder="Ex: Regularização de Dívidas / Dúvida Técnica Nível 2"
                   value={adminTicketSubject}
                   onChange={(e) => setAdminTicketSubject(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-blue-500 font-medium"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-sans text-xs transition-all"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase text-[11px]">Categoria</label>
+              <div className="space-y-1.5">
+                <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Categoria</label>
                 <select
                   value={adminTicketCategory}
                   onChange={(e) => setAdminTicketCategory(e.target.value as any)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-blue-500 font-bold"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-display font-semibold text-xs transition-all"
                 >
                   <option value="licenciamento">Licenciamento & Regularização de Dívidas</option>
                   <option value="tecnico">Suporte Técnico Nível 2 (Engenharia)</option>
@@ -4455,15 +4455,15 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 </select>
               </div>
 
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase text-[11px]">Mensagem Detalhada *</label>
+              <div className="space-y-1.5">
+                <label className="font-display font-bold text-slate-700 uppercase tracking-wider text-[10px]">Mensagem Detalhada *</label>
                 <textarea
                   rows={4}
                   required
                   placeholder="Escreva os detalhes do seu pedido à Direção Kivora..."
                   value={adminTicketMessage}
                   onChange={(e) => setAdminTicketMessage(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-blue-500 font-medium resize-none"
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900/10 font-sans text-xs transition-all resize-none"
                 />
               </div>
 
@@ -4471,14 +4471,14 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <button
                   type="button"
                   onClick={() => setShowAdminTicketModal(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl text-xs font-display font-medium text-slate-600 hover:bg-slate-100 cursor-pointer transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={submittingAdminTicket}
-                  className="px-6 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl text-xs font-display font-semibold bg-slate-950 hover:bg-slate-800 text-white shadow-xs cursor-pointer transition-all active:scale-[0.98]"
                 >
                   {submittingAdminTicket ? 'A Enviar ao Admin...' : 'Enviar Solicitação'}
                 </button>
@@ -4491,38 +4491,38 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       {/* MODAL: ADICIONAR / EXPANDIR TERMINAIS EM REDE LOCAL */}
       {addSeatsModalLic && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+          <div className="surface-card rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5 animate-fadeIn">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
-                  <Users className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-slate-950 text-white flex items-center justify-center shadow-xs">
+                  <Users className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-slate-900">Expandir Terminais LAN</h3>
-                  <p className="text-xs text-slate-500">{addSeatsModalLic.company_name}</p>
+                  <h3 className="text-base font-display font-bold text-slate-900">Expandir Terminais LAN</h3>
+                  <p className="text-xs text-slate-500 font-sans">{addSeatsModalLic.company_name}</p>
                 </div>
               </div>
               <button
                 onClick={() => setAddSeatsModalLic(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors"
               >
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleAddSeatsSubmit} className="space-y-4 text-xs">
-              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
-                <div className="flex justify-between items-center text-slate-600">
+              <div className="p-3.5 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-1.5">
+                <div className="flex justify-between items-center text-slate-600 font-sans">
                   <span>Chave da Licença:</span>
-                  <span className="font-mono font-bold text-slate-900">{addSeatsModalLic.id}</span>
+                  <span className="font-mono-num font-bold text-slate-900">{addSeatsModalLic.id}</span>
                 </div>
-                <div className="flex justify-between items-center text-slate-600">
+                <div className="flex justify-between items-center text-slate-600 font-sans">
                   <span>Capacidade Atual:</span>
-                  <span className="font-bold text-slate-800">{1 + (addSeatsModalLic.extra_seats || 0)} Computador(es)</span>
+                  <span className="font-display font-bold text-slate-800">{1 + (addSeatsModalLic.extra_seats || 0)} Computador(es)</span>
                 </div>
-                <div className="flex justify-between items-center text-slate-600">
+                <div className="flex justify-between items-center text-slate-600 font-sans">
                   <span>Seu Nível de Homologação:</span>
-                  <span className="font-bold text-blue-700 uppercase bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                  <span className="font-display font-semibold text-blue-700 uppercase bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20">
                     {partnerAccount?.tier || 'Bronze'}
                   </span>
                 </div>
@@ -4530,7 +4530,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
               {/* Seletor de Quantidade a Adicionar */}
               <div className="space-y-2">
-                <label className="font-bold text-slate-800 uppercase text-[11px] block">
+                <label className="font-display font-bold text-slate-800 uppercase tracking-wider text-[10px] block">
                   Quantos postos extras deseja adicionar? *
                 </label>
                 <div className="grid grid-cols-5 gap-1.5">
@@ -4539,10 +4539,10 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       key={st}
                       type="button"
                       onClick={() => setSeatsToAdd(st)}
-                      className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                      className={`py-2 rounded-xl text-xs font-mono-num font-semibold border transition-all cursor-pointer ${
                         seatsToAdd === st
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                          ? 'bg-slate-950 text-white border-slate-950 shadow-xs'
+                          : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-100'
                       }`}
                     >
                       +{st} Posto{st > 1 ? 's' : ''}
@@ -4558,9 +4558,9 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       max={50}
                       value={seatsToAdd}
                       onChange={(e) => setSeatsToAdd(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2 text-xs font-mono-num font-bold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all"
                     />
-                    <span className="text-slate-500 font-bold whitespace-nowrap">Posto(s)</span>
+                    <span className="text-slate-500 font-display font-semibold whitespace-nowrap">Posto(s)</span>
                   </div>
                 </div>
               </div>
@@ -4574,26 +4574,26 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 const canWallet = walletBalance >= expansionCost;
 
                 return (
-                  <div className="p-4 bg-gradient-to-br from-slate-950 to-slate-900 text-white rounded-2xl space-y-2 text-xs shadow-md">
-                    <div className="flex justify-between items-center text-slate-300">
+                  <div className="p-4 surface-card bg-slate-950 text-white rounded-2xl space-y-2 text-xs shadow-md border border-slate-800">
+                    <div className="flex justify-between items-center text-slate-300 font-sans">
                       <span>Custo Unitário p/ Seu Nível:</span>
-                      <span className="font-mono font-bold text-blue-300">{fmt(pSeatCost)} Kz / posto</span>
+                      <span className="font-mono-num font-bold text-blue-300">{fmt(pSeatCost)} Kz / posto</span>
                     </div>
                     <div className="flex justify-between items-center text-amber-400 font-bold">
-                      <span>Total Débito Atacado ({seatsToAdd}x):</span>
-                      <span className="font-mono text-sm">{fmt(expansionCost)} Kz</span>
+                      <span className="font-sans">Total Débito Atacado ({seatsToAdd}x):</span>
+                      <span className="font-mono-num text-sm">{fmt(expansionCost)} Kz</span>
                     </div>
-                    <div className="flex justify-between items-center text-slate-300">
+                    <div className="flex justify-between items-center text-slate-300 font-sans">
                       <span>Preço Sugerido ao Cliente:</span>
-                      <span className="font-mono font-bold text-white">{fmt(clientExpPrice)} Kz</span>
+                      <span className="font-mono-num font-bold text-white">{fmt(clientExpPrice)} Kz</span>
                     </div>
                     <div className="flex justify-between items-center pt-1.5 border-t border-slate-800 text-emerald-400 font-bold">
-                      <span>Seu Lucro Líquido Estimado:</span>
-                      <span className="font-mono text-sm">+{fmt(expMargin)} Kz</span>
+                      <span className="font-display">Seu Lucro Líquido Estimado:</span>
+                      <span className="font-mono-num text-sm">+{fmt(expMargin)} Kz</span>
                     </div>
-                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-sans">
                       <span>Método de Liquidação:</span>
-                      <span className={canWallet ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>
+                      <span className={canWallet ? 'text-emerald-400 font-mono-num font-bold' : 'text-amber-400 font-sans font-bold'}>
                         {canWallet ? `Wallet Pré-paga (${fmt(walletBalance)} Kz disp.)` : 'Slot de Crédito Rotativo'}
                       </span>
                     </div>
@@ -4605,14 +4605,14 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <button
                   type="button"
                   onClick={() => setAddSeatsModalLic(null)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl text-xs font-display font-medium text-slate-600 hover:bg-slate-100 cursor-pointer transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={addSeatsSubmitting}
-                  className="px-6 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 flex items-center gap-1.5 cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl text-xs font-display font-semibold bg-slate-950 hover:bg-slate-800 text-white shadow-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98]"
                 >
                   <Users className="w-3.5 h-3.5" />
                   <span>{addSeatsSubmitting ? 'A Processar...' : `Confirmar +${seatsToAdd} Posto(s)`}</span>
@@ -4679,7 +4679,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       {/* Modal de Primeiro Acesso: Definição Obrigatória de Nova Palavra-passe */}
       {showFirstLoginPasswordModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 sm:p-8 space-y-6 animate-scaleUp relative">
+          <div className="surface-card rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 animate-scaleUp relative shadow-2xl">
             
             {/* Fechar / Lembrar Depois */}
             <button
@@ -4693,13 +4693,13 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
             {/* Cabeçalho do Modal */}
             <div className="text-center space-y-2">
-              <div className="w-14 h-14 bg-gradient-to-tr from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center mx-auto text-white shadow-lg shadow-amber-500/30">
-                <ShieldCheck className="w-8 h-8" />
+              <div className="w-12 h-12 bg-slate-950 rounded-2xl flex items-center justify-center mx-auto text-white shadow-xs">
+                <ShieldCheck className="w-6 h-6 text-amber-400" />
               </div>
-              <h3 className="text-xl font-black text-slate-900 tracking-tight">
+              <h3 className="text-xl font-display font-bold text-slate-900 tracking-tight">
                 Proteja a sua Conta de Parceiro
               </h3>
-              <p className="text-xs text-slate-600 leading-relaxed px-2">
+              <p className="text-xs text-slate-500 font-sans leading-relaxed px-2">
                 Detectámos que está a utilizar a palavra-passe padrão atribuída pelo sistema. Por motivos de segurança cibernética e proteção da sua carteira comercial, defina a sua nova palavra-passe pessoal.
               </p>
             </div>
@@ -4708,7 +4708,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
             <form onSubmit={handleFirstPasswordSubmit} className="space-y-4">
               
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                <label className="text-[10px] font-display font-bold text-slate-700 uppercase tracking-wider block">
                   Nova Palavra-passe Definitiva
                 </label>
                 <div className="relative">
@@ -4720,12 +4720,12 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     placeholder="Mínimo de 6 caracteres"
                     value={firstNewPassword}
                     onChange={(e) => setFirstNewPassword(e.target.value)}
-                    className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none font-medium transition-all"
+                    className="w-full pl-10 pr-10 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none font-sans transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowFirstPassText(!showFirstPassText)}
-                    className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 cursor-pointer"
                   >
                     {showFirstPassText ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -4733,7 +4733,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                <label className="text-[10px] font-display font-bold text-slate-700 uppercase tracking-wider block">
                   Confirmar Nova Palavra-passe
                 </label>
                 <div className="relative">
@@ -4745,13 +4745,13 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     placeholder="Repita a nova palavra-passe"
                     value={firstConfirmPassword}
                     onChange={(e) => setFirstConfirmPassword(e.target.value)}
-                    className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none font-medium transition-all"
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none font-sans transition-all"
                   />
                 </div>
               </div>
 
               {/* Indicador de Requisitos */}
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-[11px] text-slate-500 space-y-1">
+              <div className="p-3 bg-slate-50/70 rounded-xl border border-slate-200/80 text-[11px] text-slate-500 font-sans space-y-1">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className={`w-3.5 h-3.5 ${firstNewPassword.length >= 6 ? 'text-emerald-500' : 'text-slate-300'}`} />
                   <span>Pelo menos 6 caracteres</span>
@@ -4763,7 +4763,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               </div>
 
               {firstPasswordError && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-medium animate-fadeIn">
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-700 font-display font-medium animate-fadeIn">
                   {firstPasswordError}
                 </div>
               )}
@@ -4772,14 +4772,14 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <button
                   type="button"
                   onClick={() => setShowFirstLoginPasswordModal(false)}
-                  className="w-1/3 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer text-center"
+                  className="w-1/3 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 font-display font-semibold text-xs rounded-xl transition-all cursor-pointer text-center shadow-xs"
                 >
                   Depois
                 </button>
                 <button
                   type="submit"
                   disabled={firstPasswordSaving}
-                  className="w-2/3 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                  className="w-2/3 py-2.5 bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98]"
                 >
                   {firstPasswordSaving ? (
                     <>

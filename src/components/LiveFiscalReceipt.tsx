@@ -34,7 +34,7 @@ const SECTOR_RECEIPTS: Record<SectorType, ReceiptData> = {
     subtotal: 22450,
     taxTotal: 3143,
     total: 25593,
-    hash: '4kL9-89vB-440A-2026-AGT',
+    hash: '4kL9-89vB-387A-2026-AGT',
     executionMs: 64,
   },
   restaurante: {
@@ -51,7 +51,7 @@ const SECTOR_RECEIPTS: Record<SectorType, ReceiptData> = {
     subtotal: 24200,
     taxTotal: 3388,
     total: 27588,
-    hash: '7bX2-11pM-440A-2026-AGT',
+    hash: '7bX2-11pM-387A-2026-AGT',
     executionMs: 78,
   },
   farmacia: {
@@ -68,7 +68,7 @@ const SECTOR_RECEIPTS: Record<SectorType, ReceiptData> = {
     subtotal: 26400,
     taxTotal: 0,
     total: 26400,
-    hash: '9wQ4-66tN-440A-2026-AGT',
+    hash: '9wQ4-66tN-387A-2026-AGT',
     executionMs: 52,
   },
   servicos: {
@@ -85,7 +85,7 @@ const SECTOR_RECEIPTS: Record<SectorType, ReceiptData> = {
     taxTotal: 32900,
     retentionTotal: 15275, // Retenção na fonte 6.5%
     total: 252625,
-    hash: '2mZ8-90yK-440A-2026-AGT',
+    hash: '2mZ8-90yK-387A-2026-AGT',
     executionMs: 91,
   },
 };
@@ -181,7 +181,7 @@ export const LiveFiscalReceipt: React.FC = () => {
                 VISUAL SOFTWARE, LDA. · NIF: 5002863944
               </p>
               <p className="text-[10px] text-slate-400 font-mono-num">
-                Luanda, Angola · Certificado N.º FE/440/AGT/2026
+                Luanda, Angola · Certificado N.º FE/387/AGT/2026
               </p>
             </div>
 

@@ -223,11 +223,10 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
       <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-24 space-y-12">
         
         {/* Filtros por Perfil de Utilizador & Barra de Busca */}
-        <div className="bg-mesh border border-slate-200/80 rounded-3xl p-5 sm:p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm relative overflow-hidden">
-          <div className="orb orb-blue w-48 h-48 -top-12 -right-12 opacity-20" />
+        <div className="surface-card p-5 sm:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
           
           {/* Tabs em Pílulas */}
-          <div className="flex flex-wrap items-center gap-2 relative z-10">
+          <div className="flex flex-wrap items-center gap-2">
             {[
               { id: 'todos', label: 'Todos os Manuais' },
               { id: 'caixa', label: 'Operadores de Caixa' },
@@ -238,10 +237,10 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id as RoleCategory)}
-                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   selectedCategory === cat.id
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 -translate-y-0.5'
-                    : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200/80 hover:border-slate-300'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80 border border-transparent'
                 }`}
               >
                 {cat.label}
@@ -250,14 +249,14 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
           </div>
 
           {/* Search Box */}
-          <div className="relative w-full md:w-72 relative z-10">
+          <div className="relative w-full md:w-72">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Pesquisar manual ou dúvida..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-xs"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50/50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 shadow-xs transition-all"
             />
           </div>
 
@@ -265,24 +264,23 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
 
         {/* Vídeo Tutorial em Destaque — Sem Molduras Pesadas */}
         {settings.videoManuaisUrl && (
-          <div className="bg-mesh-dark rounded-3xl p-6 sm:p-10 border border-slate-800 text-white space-y-6 relative overflow-hidden shadow-2xl">
-            <div className="orb orb-orange w-64 h-64 -top-16 -right-16 opacity-25" />
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+          <div className="bg-[#0B192C] rounded-3xl p-6 sm:p-10 border border-slate-800 text-white space-y-6 shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <span className="text-amber-400 font-bold text-xs uppercase tracking-widest flex items-center gap-1.5">
+                <span className="text-amber-400 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
                   <BookOpen className="w-3.5 h-3.5" />
                   Vídeo-Aula em Destaque
                 </span>
-                <h3 className="text-xl sm:text-2xl font-black text-white">
+                <h3 className="font-display text-xl sm:text-2xl font-black text-white">
                   {settings.videoManuaisTitle || 'Guia Rápido: Operação de Caixa & Fecho Z'}
                 </h3>
-                <p className="text-xs text-slate-300 max-w-2xl">
+                <p className="text-xs text-slate-300 max-w-2xl font-normal leading-relaxed">
                   {settings.videoManuaisDesc || 'Aprenda passo a passo como realizar a abertura de turno, registo de vendas por código de barras e emissão do relatório diário Z.'}
                 </p>
               </div>
             </div>
 
-            <div className="max-w-4xl mx-auto relative z-10">
+            <div className="max-w-4xl mx-auto">
               <YouTubePlayer
                 videoUrl={settings.videoManuaisUrl}
                 title={settings.videoManuaisTitle}
@@ -305,7 +303,7 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
             </p>
 
             {filteredGuias.length === 0 ? (
-              <div className="bg-white rounded-3xl p-8 text-center border border-slate-200 space-y-3">
+              <div className="surface-card p-8 text-center space-y-3">
                 <HelpCircle className="w-8 h-8 text-slate-400 mx-auto" />
                 <p className="text-sm font-bold text-slate-800">Nenhum manual encontrado</p>
                 <p className="text-xs text-slate-500">Tente pesquisar por outro termo ou selecione "Todos os Manuais".</p>
@@ -319,30 +317,30 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
                     onClick={() => setActiveGuideId(guia.id)}
                     className={`p-5 rounded-2xl border transition-all cursor-pointer space-y-2 select-none ${
                       isActive
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20'
-                        : 'bg-white text-slate-900 border-slate-200 hover:border-blue-300 hover:shadow-sm'
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-md'
+                        : 'surface-card hover:border-slate-300 hover:shadow-xs'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span
-                        className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                        className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
                           isActive
-                            ? 'bg-white/20 text-white'
+                            ? 'bg-white/10 text-white border border-white/20'
                             : 'bg-slate-100 text-slate-600'
                         }`}
                       >
                         {guia.perfil}
                       </span>
-                      <span className={`text-[11px] font-semibold ${isActive ? 'text-blue-100' : 'text-slate-400'}`}>
+                      <span className={`text-[11px] font-mono-num ${isActive ? 'text-slate-300' : 'text-slate-400'}`}>
                         {guia.tempoLeitura}
                       </span>
                     </div>
 
-                    <h3 className={`text-sm font-bold leading-snug ${isActive ? 'text-white' : 'text-slate-950'}`}>
+                    <h3 className={`font-display text-sm font-bold leading-snug ${isActive ? 'text-white' : 'text-slate-950'}`}>
                       {guia.titulo}
                     </h3>
 
-                    <p className={`text-xs line-clamp-2 leading-relaxed ${isActive ? 'text-blue-100' : 'text-slate-500'}`}>
+                    <p className={`text-xs line-clamp-2 leading-relaxed ${isActive ? 'text-slate-300' : 'text-slate-500'}`}>
                       {guia.resumo}
                     </p>
                   </div>
@@ -354,37 +352,37 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
           {/* Visualizador do Manual Selecionado (Direita) */}
           <div className="lg:col-span-7">
             {activeGuide && (
-              <div className="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200 shadow-sm space-y-8 sticky top-24">
+              <div className="surface-card p-8 sm:p-10 space-y-8 sticky top-24">
                 
                 {/* Cabeçalho do Guia */}
                 <div className="space-y-3 border-b border-slate-100 pb-6">
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60 text-xs font-bold">
                       <BookOpen className="w-3.5 h-3.5" />
                       <span>{activeGuide.perfil}</span>
                     </span>
-                    <span className="text-xs text-slate-400 font-medium">Tempo estimado: {activeGuide.tempoLeitura}</span>
+                    <span className="text-xs text-slate-400 font-mono-num">Tempo estimado: {activeGuide.tempoLeitura}</span>
                   </div>
 
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-950 leading-tight">
+                  <h2 className="font-display text-xl sm:text-2xl font-black text-slate-950 leading-tight">
                     {activeGuide.titulo}
                   </h2>
 
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
                     {activeGuide.resumo}
                   </p>
                 </div>
 
                 {/* Passos do Procedimento */}
                 <div className="space-y-4">
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                     <span>Instruções Passo a Passo:</span>
                   </h4>
 
                   <div className="space-y-3">
                     {activeGuide.passos.map((passo, idx) => (
-                      <div key={idx} className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-                        <div className="w-6 h-6 rounded-full bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                      <div key={idx} className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50/70 border border-slate-100">
+                        <div className="w-6 h-6 rounded-full bg-slate-900 text-white font-mono-num font-bold text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                           {idx + 1}
                         </div>
                         <p className="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium">
@@ -396,12 +394,12 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
                 </div>
 
                 {/* Dica Profissional */}
-                <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-950 space-y-1.5">
+                <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-950 space-y-1.5">
                   <div className="flex items-center gap-2 text-amber-800 font-bold text-xs">
                     <ShieldCheck className="w-4 h-4 text-amber-600" />
                     <span>Recomendação de Boas Práticas KIVORA:</span>
                   </div>
-                  <p className="text-xs text-amber-900 leading-relaxed">
+                  <p className="text-xs text-amber-900 leading-relaxed font-normal">
                     {activeGuide.dicaPro}
                   </p>
                 </div>
@@ -413,7 +411,7 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
                   </span>
                   <button
                     onClick={() => onOpenDemoModal(`Formação: ${activeGuide.titulo}`)}
-                    className="bg-[#FF6500] hover:bg-[#EB5B00] text-white text-xs font-bold py-2.5 px-5 rounded-xl transition-all shadow-md shadow-orange-600/25 shrink-0 cursor-pointer"
+                    className="btn-cta text-xs font-bold py-2.5 px-5 shrink-0"
                   >
                     Agendar Sessão Técnica
                   </button>
@@ -429,15 +427,15 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
           <div
             onClick={() => onNavigatePage('guia-agt')}
-            className="bg-mesh rounded-3xl p-6 border border-slate-200/90 shadow-sm hover:border-emerald-400 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex items-center justify-between gap-4 group"
+            className="surface-card p-6 hover:border-slate-300 hover:shadow-card hover:-translate-y-1 transition-all duration-300 cursor-pointer flex items-center justify-between gap-4 group"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0 shadow-xs group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center shrink-0 shadow-xs group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-bold text-sm text-slate-950 group-hover:text-emerald-700 transition-colors">Guia Oficial de Conformidade AGT</h4>
-                <p className="text-xs text-slate-600 mt-0.5">Decreto Presidencial 71/25, regimes de IVA e prazos SAF-T.</p>
+                <h4 className="font-display font-bold text-sm text-slate-950 group-hover:text-emerald-700 transition-colors">Guia Oficial de Conformidade AGT</h4>
+                <p className="text-xs text-slate-600 mt-0.5 font-normal">Decreto Presidencial 71/25, regimes de IVA e prazos SAF-T.</p>
               </div>
             </div>
             <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all shrink-0" />
@@ -445,15 +443,15 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
 
           <div
             onClick={() => onNavigatePage('hardware')}
-            className="bg-mesh rounded-3xl p-6 border border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex items-center justify-between gap-4 group"
+            className="surface-card p-6 hover:border-slate-300 hover:shadow-card hover:-translate-y-1 transition-all duration-300 cursor-pointer flex items-center justify-between gap-4 group"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 border border-blue-200 flex items-center justify-center shrink-0 shadow-xs group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center justify-center shrink-0 shadow-xs group-hover:bg-blue-600 group-hover:text-white transition-colors">
                 <Printer className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-bold text-sm text-slate-950 group-hover:text-blue-700 transition-colors">Hardware & Equipamentos de Balcão POS</h4>
-                <p className="text-xs text-slate-600 mt-0.5">Impressoras térmicas 80mm, leitores 2D e gavetas elétricas.</p>
+                <h4 className="font-display font-bold text-sm text-slate-950 group-hover:text-blue-700 transition-colors">Hardware & Equipamentos de Balcão POS</h4>
+                <p className="text-xs text-slate-600 mt-0.5 font-normal">Impressoras térmicas 80mm, leitores 2D e gavetas elétricas.</p>
               </div>
             </div>
             <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all shrink-0" />

@@ -1034,7 +1034,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             icon={<Wallet className="w-4 h-4" />} iconBg="bg-purple-50 text-purple-600" />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
+        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/80 pb-3">
           {[
             { id: 'todos', label: `Parceiros & Quotas (${partners.length})`, icon: <Users className="w-3.5 h-3.5" /> },
             { id: 'candidaturas', label: 'Candidaturas Pendentes', icon: <CheckCircle2 className="w-3.5 h-3.5" />, badge: pendingPartners.length },
@@ -1043,12 +1043,12 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             { id: 'extrato_geral', label: 'Extrato Geral de Dívidas', icon: <DollarSign className="w-3.5 h-3.5" /> },
           ].map((t) => (
             <button key={t.id} onClick={() => setTab(t.id as any)}
-              className={`text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
-                tab === t.id ? 'bg-slate-950 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'}`}>
+              className={`text-xs font-semibold font-display px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+                tab === t.id ? 'bg-slate-950 text-white shadow-sm border border-slate-950' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'}`}>
               {t.icon}
               <span>{t.label}</span>
               {t.badge !== undefined && t.badge > 0 && (
-                <span className="bg-amber-500 text-white text-[10px] px-1.5 rounded-full font-black">{t.badge}</span>
+                <span className="bg-amber-500 text-white text-[10px] px-1.5 rounded-full font-mono-num font-black">{t.badge}</span>
               )}
             </button>
           ))}
@@ -1056,15 +1056,15 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
         {tab === 'todos' && (
           <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 surface-card p-4 rounded-2xl">
               <div className="relative flex-1 w-full">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Pesquisar por nome, código PRT, email, província..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white"
+                  className="w-full pl-10 pr-4 py-2 bg-slate-50/70 border border-slate-200 rounded-xl text-xs font-sans text-slate-900 focus:outline-none focus:border-brand-500 focus:bg-white transition-all"
                 />
               </div>
 
@@ -1072,7 +1072,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 <select
                   value={tierFilter}
                   onChange={(e) => setTierFilter(e.target.value)}
-                  className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-blue-500"
+                  className="bg-slate-50/70 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2 font-semibold font-display focus:outline-none focus:border-brand-500 cursor-pointer"
                 >
                   <option value="todos">Todos os Níveis</option>
                   <option value="bronze">Bronze (Iniciante)</option>
@@ -1083,10 +1083,10 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="surface-card rounded-3xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50/80 text-slate-600 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
+                  <thead className="bg-slate-50/80 text-slate-500 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-200/80 font-display">
                     <tr>
                       <th className="p-4">Parceiro</th>
                       <th className="p-4">Categoria</th>
@@ -1308,10 +1308,10 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         )}
 
         {tab === 'candidaturas' && (
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div className="surface-card rounded-3xl p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
               <div>
-                <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
+                <h3 className="font-bold text-slate-900 text-base flex items-center gap-2 font-display">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                   <span>Candidaturas ao Programa de Parceiros</span>
                 </h3>
@@ -1321,46 +1321,46 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               </div>
 
               {/* Sub-filtro de Candidaturas */}
-              <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+              <div className="flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60">
                 <button
                   onClick={() => setCandidaturaFilter('pendentes')}
-                  className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                  className={`text-xs font-semibold font-display px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                     candidaturaFilter === 'pendentes'
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-500 hover:text-slate-900'
+                      ? 'bg-white text-slate-900 shadow-xs border border-slate-200/60'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  Pendentes ({pendingApplicationsList.length})
+                  Pendentes (<span className="font-mono-num">{pendingApplicationsList.length}</span>)
                 </button>
                 <button
                   onClick={() => setCandidaturaFilter('aprovadas')}
-                  className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                  className={`text-xs font-semibold font-display px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                     candidaturaFilter === 'aprovadas'
-                      ? 'bg-white text-emerald-700 shadow-xs'
-                      : 'text-slate-500 hover:text-slate-900'
+                      ? 'bg-white text-emerald-700 shadow-xs border border-slate-200/60'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  Homologadas ({approvedApplicationsList.length})
+                  Homologadas (<span className="font-mono-num">{approvedApplicationsList.length}</span>)
                 </button>
                 <button
                   onClick={() => setCandidaturaFilter('todas')}
-                  className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                  className={`text-xs font-semibold font-display px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                     candidaturaFilter === 'todas'
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-500 hover:text-slate-900'
+                      ? 'bg-white text-slate-900 shadow-xs border border-slate-200/60'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  Todas ({allApplicationsList.length})
+                  Todas (<span className="font-mono-num">{allApplicationsList.length}</span>)
                 </button>
               </div>
             </div>
 
             {filteredCandidaturas.length === 0 ? (
               <div className="p-12 text-center text-slate-400 space-y-3">
-                <div className="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-xs">
+                <div className="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-xs border border-emerald-100">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <p className="font-black text-slate-700 text-sm">
+                <p className="font-bold text-slate-700 text-sm font-display">
                   {candidaturaFilter === 'pendentes'
                     ? 'Todas as candidaturas foram homologadas! Não há novos candidatos pendentes.'
                     : 'Nenhuma candidatura encontrada nesta categoria.'}
@@ -1374,30 +1374,30 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 {filteredCandidaturas.map((cand: any) => (
                   <div
                     key={cand.id}
-                    className="p-5 rounded-3xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-emerald-300 hover:shadow-md transition-all space-y-4"
+                    className="p-5 rounded-3xl border border-slate-200/80 bg-slate-50/50 hover:bg-white hover:border-emerald-300 hover:shadow-md transition-all space-y-4 surface-card"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <span className="font-mono text-[10px] font-black text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
+                        <span className="font-mono-num text-[10px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
                           {cand.protocol || cand.code}
                         </span>
-                        <h4 className="font-black text-slate-900 text-sm mt-1.5">{cand.name}</h4>
+                        <h4 className="font-bold text-slate-900 text-sm mt-1.5 font-display">{cand.name}</h4>
                         {cand.responsible && cand.responsible !== cand.name && (
                           <p className="text-xs text-slate-600 font-medium">Resp: {cand.responsible}</p>
                         )}
                       </div>
 
                       {cand.status === 'approved' ? (
-                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0 flex items-center gap-1">
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0 flex items-center gap-1 font-display">
                           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                           <span>Homologado / Ativo</span>
                         </span>
                       ) : cand.status === 'rejected' ? (
-                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 text-red-800 border border-red-200 shrink-0">
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 text-red-800 border border-red-200 shrink-0 font-display">
                           Arquivado
                         </span>
                       ) : (
-                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 shrink-0 font-display">
                           Pendente
                         </span>
                       )}
@@ -1405,21 +1405,21 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
                     <div className="grid grid-cols-2 gap-2 text-[11px] bg-white p-3 rounded-2xl border border-slate-200/80">
                       <div>
-                        <span className="text-slate-400 block text-[10px] font-bold uppercase">NIF:</span>
-                        <strong className="text-slate-800">{cand.nif || 'Não informado'}</strong>
+                        <span className="text-slate-400 block text-[10px] font-bold uppercase font-display">NIF:</span>
+                        <strong className="text-slate-800 font-mono-num">{cand.nif || 'Não informado'}</strong>
                       </div>
                       <div>
-                        <span className="text-slate-400 block text-[10px] font-bold uppercase">Localização:</span>
+                        <span className="text-slate-400 block text-[10px] font-bold uppercase font-display">Localização:</span>
                         <strong className="text-slate-800 truncate block">{cand.region || 'Luanda'}</strong>
                       </div>
                       <div>
-                        <span className="text-slate-400 block text-[10px] font-bold uppercase">Telefone:</span>
-                        <a href={`tel:${cand.phone}`} className="text-blue-600 font-bold hover:underline">
+                        <span className="text-slate-400 block text-[10px] font-bold uppercase font-display">Telefone:</span>
+                        <a href={`tel:${cand.phone}`} className="text-blue-600 font-bold hover:underline font-mono-num">
                           {cand.phone}
                         </a>
                       </div>
                       <div>
-                        <span className="text-slate-400 block text-[10px] font-bold uppercase">E-mail:</span>
+                        <span className="text-slate-400 block text-[10px] font-bold uppercase font-display">E-mail:</span>
                         <a href={`mailto:${cand.email}`} className="text-slate-700 font-medium truncate block hover:text-blue-600">
                           {cand.email}
                         </a>
@@ -1441,13 +1441,13 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                           <button
                             type="button"
                             onClick={() => setViewProofModal({ open: true, item: cand })}
-                            className="flex-1 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-between transition-all cursor-pointer shadow-xs"
+                            className="flex-1 bg-blue-50 hover:bg-blue-100/80 border border-blue-200 text-blue-800 font-semibold text-xs py-2 px-3 rounded-xl flex items-center justify-between transition-all cursor-pointer shadow-xs font-display"
                           >
                             <span className="flex items-center gap-2">
                               <FileText className="w-4 h-4 text-blue-600 shrink-0" />
-                              <span>Comprovativo Bancário (25.000 Kz)</span>
+                              <span>Comprovativo Bancário (<span className="font-mono-num">25.000 Kz</span>)</span>
                             </span>
-                            <span className="text-[10px] bg-blue-200/80 text-blue-950 font-mono px-2 py-0.5 rounded-md font-bold flex items-center gap-1">
+                            <span className="text-[10px] bg-blue-200/80 text-blue-950 font-mono-num px-2 py-0.5 rounded-md font-bold flex items-center gap-1">
                               <span>Ver Anexo</span>
                               <ExternalLink className="w-3 h-3" />
                             </span>
@@ -1462,15 +1462,15 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                           </button>
                         </div>
                       ) : (
-                        <div className="text-[11px] text-slate-500 bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 flex items-center justify-between">
-                          <span>Taxa de Homologação: <strong>25.000 Kz</strong></span>
+                        <div className="text-[11px] text-slate-500 bg-slate-100/70 border border-slate-200/80 rounded-xl px-3 py-1.5 flex items-center justify-between">
+                          <span>Taxa de Homologação: <strong className="font-mono-num">25.000 Kz</strong></span>
                           <span className="text-[10px] text-slate-400 font-medium">Sem anexo digital (Opcional)</span>
                         </div>
                       )}
                     </div>
 
                     <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 gap-2">
-                      <span className="text-[10px] text-slate-400 font-medium">
+                      <span className="text-[10px] text-slate-400 font-medium font-mono-num">
                         {new Date(cand.createdAt).toLocaleDateString('pt-AO', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </span>
 
@@ -1478,21 +1478,21 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleRejectPartner(cand)}
-                            className="px-3 py-2 text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
+                            className="px-3 py-2 text-xs font-semibold font-display text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
                           >
                             Arquivar
                           </button>
                           <button
                             onClick={() => handleApprovePartner(cand)}
                             disabled={approving === cand.id}
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold font-display text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                           >
                             {approving === cand.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                             <span>Aprovar & Homologar</span>
                           </button>
                         </div>
                       ) : (
-                        <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+                        <span className="text-xs font-semibold font-display text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
                           Conta de Parceiro Ativa
                         </span>
                       )}
@@ -1505,10 +1505,10 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         )}
 
         {tab === 'politicas' && (
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-6">
-            <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="surface-card rounded-3xl overflow-hidden space-y-6">
+            <div className="p-6 border-b border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
+                <h3 className="font-bold text-slate-900 text-base flex items-center gap-2 font-display">
                   <Sliders className="w-5 h-5 text-blue-600" />
                   <span>Configuração das Regras de Licenciamento & Crédito</span>
                 </h3>
@@ -1520,7 +1520,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               <button
                 onClick={handleSavePolicy}
                 disabled={savingPolicy}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md shadow-emerald-600/20 flex items-center gap-2 cursor-pointer shrink-0"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold font-display text-xs px-5 py-2.5 rounded-xl shadow-md shadow-emerald-600/20 flex items-center gap-2 cursor-pointer shrink-0 transition-all"
               >
                 {savingPolicy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Guardar Políticas no Firebase</span>
@@ -1530,7 +1530,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             <div className="p-6 space-y-6">
               
               <div className="space-y-3">
-                <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 font-display">
                   <Key className="w-4 h-4 text-amber-600" />
                   <span>1. Quotas Padrão de Slots de Crédito por Categoria</span>
                 </h4>
@@ -1545,8 +1545,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                     { key: 'gold', label: 'Gold (Avançado)', desc: 'Revendedores com alto volume' },
                     { key: 'diamond', label: 'Diamond (Master)', desc: 'Distribuidores oficiais e masters' },
                   ].map((t) => (
-                    <div key={t.key} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                      <span className="text-[11px] font-black uppercase text-slate-800 block">{t.label}</span>
+                    <div key={t.key} className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-2 surface-card">
+                      <span className="text-[11px] font-bold uppercase text-slate-800 block font-display">{t.label}</span>
                       <div className="flex items-center gap-2">
                         <input
                           type="number"
@@ -1563,9 +1563,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                               }
                             });
                           }}
-                          className="w-20 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold text-center"
+                          className="w-20 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono-num font-bold text-center focus:border-brand-500 outline-none"
                         />
-                        <span className="text-xs font-bold text-slate-600">Slots de Crédito</span>
+                        <span className="text-xs font-semibold text-slate-600 font-display">Slots de Crédito</span>
                       </div>
                       <p className="text-[10px] text-slate-400">{t.desc}</p>
                     </div>
@@ -1573,15 +1573,15 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 </div>
               </div>
 
-              <div className="space-y-3 pt-4 border-t border-slate-100">
-                <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="space-y-3 pt-4 border-t border-slate-200/80">
+                <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 font-display">
                   <ShieldCheck className="w-4 h-4 text-emerald-600" />
                   <span>2. Prazos e Travas de Segurança Anti-Inadimplência</span>
                 </h4>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                    <label className="text-xs font-bold text-slate-800 block">Tolerância de Vencimento de Dívidas (Dias)</label>
+                  <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-2 surface-card">
+                    <label className="text-xs font-bold text-slate-800 block font-display">Tolerância de Vencimento de Dívidas (Dias)</label>
                     <p className="text-[11px] text-slate-500">Se o parceiro tiver faturas pendentes emitidas há mais tempo que este limite, novas emissões a crédito são bloqueadas:</p>
                     <div className="flex items-center gap-2 pt-1">
                       <input
@@ -1590,14 +1590,14 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                         max={90}
                         value={policyDraft.overdue_tolerance_days}
                         onChange={(e) => setPolicyDraft({ ...policyDraft, overdue_tolerance_days: Number(e.target.value) || 15 })}
-                        className="w-24 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                        className="w-24 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono-num font-bold focus:border-brand-500 outline-none"
                       />
-                      <span className="text-xs font-bold text-slate-700">Dias corridos</span>
+                      <span className="text-xs font-semibold text-slate-700 font-display">Dias corridos</span>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                    <label className="text-xs font-bold text-slate-800 block">Ativação Provisória para Vitalício a Crédito (Dias)</label>
+                  <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-2 surface-card">
+                    <label className="text-xs font-bold text-slate-800 block font-display">Ativação Provisória para Vitalício a Crédito (Dias)</label>
                     <p className="text-[11px] text-slate-500">Prazo inicial que a licença vitalícia funciona no cliente antes da liquidação da fatura pelo parceiro:</p>
                     <div className="flex items-center gap-2 pt-1">
                       <input
@@ -1606,14 +1606,14 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                         max={90}
                         value={policyDraft.provisional_lifetime_days}
                         onChange={(e) => setPolicyDraft({ ...policyDraft, provisional_lifetime_days: Number(e.target.value) || 30 })}
-                        className="w-24 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                        className="w-24 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono-num font-bold focus:border-brand-500 outline-none"
                       />
-                      <span className="text-xs font-bold text-slate-700">Dias de proteção inicial</span>
+                      <span className="text-xs font-semibold text-slate-700 font-display">Dias de proteção inicial</span>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                    <label className="text-xs font-bold text-slate-800 block">Recarga Mínima da Carteira Pré-Paga (Kz)</label>
+                  <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-2 surface-card">
+                    <label className="text-xs font-bold text-slate-800 block font-display">Recarga Mínima da Carteira Pré-Paga (Kz)</label>
                     <p className="text-[11px] text-slate-500">Valor mínimo sugerido para transferências de recarga de Wallet:</p>
                     <div className="flex items-center gap-2 pt-1">
                       <input
@@ -1621,22 +1621,22 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                         step={10000}
                         value={policyDraft.min_wallet_topup_aoa}
                         onChange={(e) => setPolicyDraft({ ...policyDraft, min_wallet_topup_aoa: Number(e.target.value) || 50000 })}
-                        className="w-36 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                        className="w-36 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono-num font-bold focus:border-brand-500 outline-none"
                       />
-                      <span className="text-xs font-bold text-slate-700">Kz Mínimo</span>
+                      <span className="text-xs font-semibold text-slate-700 font-display">Kz Mínimo</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Seção 3: Custos & Políticas de Terminais Adicionais (Rede Local LAN) */}
-              <div className="space-y-4 pt-4 border-t border-slate-100">
+              <div className="space-y-4 pt-4 border-t border-slate-200/80">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 font-display">
                     <Users className="w-4 h-4 text-blue-600" />
                     <span>3. Configuração de Custos de Terminais / Postos Extras</span>
                   </h4>
-                  <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
+                  <span className="text-[10px] font-semibold font-display text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
                     Diferenciado por Nível (Tier)
                   </span>
                 </div>
@@ -1645,8 +1645,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                    <label className="text-xs font-bold text-slate-800 block">Preço de Terminal para Venda Final / Admin (Kz)</label>
+                  <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-2 surface-card">
+                    <label className="text-xs font-bold text-slate-800 block font-display">Preço de Terminal para Venda Final / Admin (Kz)</label>
                     <p className="text-[11px] text-slate-500">Valor cobrado quando o Admin adiciona postos a clientes ou nas vendas públicas:</p>
                     <div className="flex items-center gap-2 pt-1">
                       <input
@@ -1659,14 +1659,14 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                           retail_extra_seat_price_aoa: Number(e.target.value) || 35000,
                           extra_seat_cost_aoa: Number(e.target.value) || 35000,
                         })}
-                        className="w-36 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                        className="w-36 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono-num font-bold focus:border-brand-500 outline-none"
                       />
-                      <span className="text-xs font-bold text-slate-700">Kz / Posto Final</span>
+                      <span className="text-xs font-semibold text-slate-700 font-display">Kz / Posto Final</span>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                    <label className="text-xs font-bold text-slate-800 block">Custo Base de Atacado para Parceiros (Kz)</label>
+                  <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-2 surface-card">
+                    <label className="text-xs font-bold text-slate-800 block font-display">Custo Base de Atacado para Parceiros (Kz)</label>
                     <p className="text-[11px] text-slate-500">Referência base de custo por computador em rede cobrado aos parceiros:</p>
                     <div className="flex items-center gap-2 pt-1">
                       <input
@@ -1677,16 +1677,16 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                           ...policyDraft,
                           partner_extra_seat_base_cost_aoa: Number(e.target.value) || 25000,
                         })}
-                        className="w-36 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                        className="w-36 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono-num font-bold focus:border-brand-500 outline-none"
                       />
-                      <span className="text-xs font-bold text-slate-700">Kz / Posto Base</span>
+                      <span className="text-xs font-semibold text-slate-700 font-display">Kz / Posto Base</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Tabela de Custo de Terminal por Nível */}
-                <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-200/80 space-y-3">
-                  <span className="text-xs font-black uppercase text-blue-900 block">
+                <div className="p-4 bg-blue-50/40 rounded-2xl border border-blue-200/70 space-y-3 surface-card">
+                  <span className="text-xs font-bold uppercase text-blue-900 block font-display">
                     Custo de Atacado por Posto Conforme o Nível do Parceiro (Tier):
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -1696,10 +1696,10 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                       { key: 'gold', label: 'Gold', defaultVal: 15000, desc: 'Margem: 20.000 Kz' },
                       { key: 'diamond', label: 'Diamond', defaultVal: 10000, desc: 'Margem: 25.000 Kz' },
                     ].map((t) => (
-                      <div key={t.key} className="bg-white p-3 rounded-xl border border-blue-200/60 space-y-1.5">
+                      <div key={t.key} className="bg-white p-3 rounded-xl border border-blue-200/60 space-y-1.5 surface-card">
                         <div className="flex justify-between items-center">
-                          <span className="text-[11px] font-black uppercase text-slate-800">{t.label}</span>
-                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                          <span className="text-[11px] font-bold uppercase text-slate-800 font-display">{t.label}</span>
+                          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-display">
                             {t.desc}
                           </span>
                         </div>
@@ -1721,9 +1721,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                                 }
                               });
                             }}
-                            className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-mono font-bold text-slate-900"
+                            className="w-full bg-slate-50/80 border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-mono-num font-bold text-slate-900 focus:border-brand-500 outline-none"
                           />
-                          <span className="text-[11px] font-bold text-slate-500">Kz</span>
+                          <span className="text-[11px] font-semibold text-slate-500 font-display">Kz</span>
                         </div>
                       </div>
                     ))}
@@ -1731,19 +1731,19 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 </div>
               </div>
 
-              {/* Seção 3: Requisitos de Homologação de Parceiros & Taxa de Adesão */}
-              <div className="space-y-4 pt-4 border-t border-slate-100">
-                <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              {/* Seção 4: Requisitos de Homologação de Parceiros & Taxa de Adesão */}
+              <div className="space-y-4 pt-4 border-t border-slate-200/80">
+                <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 font-display">
                   <Award className="w-4 h-4 text-purple-600" />
-                  <span>3. Taxa de Adesão & Requisitos para se Tornar Parceiro</span>
+                  <span>4. Taxa de Adesão & Requisitos para se Tornar Parceiro</span>
                 </h4>
                 <p className="text-xs text-slate-500">
                   Configure o valor cobrado para homologação inicial e os critérios exigidos exibidos na página de candidatura:
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                    <label className="text-xs font-bold text-slate-800 block">Taxa de Adesão / Homologação (Kz)</label>
+                  <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-2 surface-card">
+                    <label className="text-xs font-bold text-slate-800 block font-display">Taxa de Adesão / Homologação (Kz)</label>
                     <p className="text-[11px] text-slate-500">Valor único cobrado para ativação do credenciamento e emissão dos certificados oficiais:</p>
                     <div className="flex items-center gap-2 pt-1">
                       <input
@@ -1751,16 +1751,16 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                         step={5000}
                         value={policyDraft.partner_membership_fee_aoa ?? 25000}
                         onChange={(e) => setPolicyDraft({ ...policyDraft, partner_membership_fee_aoa: Number(e.target.value) || 0 })}
-                        className="w-36 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                        className="w-36 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono-num font-bold focus:border-brand-500 outline-none"
                       />
-                      <span className="text-xs font-bold text-slate-700">Kz / Adesão</span>
+                      <span className="text-xs font-semibold text-slate-700 font-display">Kz / Adesão</span>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4 md:col-span-2">
+                  <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-4 md:col-span-2 surface-card">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-2">
                       <div>
-                        <label className="text-xs font-black text-slate-800 uppercase tracking-wider block">
+                        <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block font-display">
                           Coordenadas Bancárias Oficiais (Ambas as Contas Configuráveis)
                         </label>
                         <p className="text-[11px] text-slate-500">
@@ -1770,7 +1770,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                       <button
                         type="button"
                         onClick={handlePullGlobalBankSettings}
-                        className="text-[11px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
+                        className="text-[11px] font-semibold font-display text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
                         title="Importar coordenadas das Definições Gerais da Empresa"
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
@@ -1780,13 +1780,13 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* CONTA 1 */}
-                      <div className="p-3.5 bg-white rounded-xl border border-emerald-200 space-y-2 text-xs">
-                        <div className="flex items-center gap-2 text-emerald-800 font-bold">
+                      <div className="p-3.5 bg-white rounded-xl border border-emerald-200/80 space-y-2 text-xs surface-card">
+                        <div className="flex items-center gap-2 text-emerald-800 font-bold font-display">
                           <span className="w-2 h-2 rounded-full bg-emerald-500" />
                           <span>Conta Bancária 1 (Principal)</span>
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase">Instituição Bancária 1</label>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase font-display">Instituição Bancária 1</label>
                           <input
                             type="text"
                             placeholder="Banco (ex: Banco BAI)"
@@ -1800,11 +1800,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                                 beneficiary: policyDraft.membership_bank_info?.beneficiary || '',
                               }
                             })}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-900 focus:bg-white focus:border-emerald-500 outline-none"
+                            className="w-full bg-slate-50/80 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-900 focus:bg-white focus:border-brand-500 outline-none"
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase">IBAN 1</label>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase font-display">IBAN 1</label>
                           <input
                             type="text"
                             placeholder="IBAN (ex: AO06 0040...)"
@@ -1818,11 +1818,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                                 beneficiary: policyDraft.membership_bank_info?.beneficiary || '',
                               }
                             })}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:border-emerald-500 outline-none"
+                            className="w-full bg-slate-50/80 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono-num font-bold text-slate-900 focus:bg-white focus:border-brand-500 outline-none"
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase">Nº de Conta / Referência 1</label>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase font-display">Nº de Conta / Referência 1</label>
                           <input
                             type="text"
                             placeholder="Número de Conta / Swift"
@@ -1836,19 +1836,19 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                                 beneficiary: policyDraft.membership_bank_info?.beneficiary || '',
                               }
                             })}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-800 focus:bg-white focus:border-emerald-500 outline-none"
+                            className="w-full bg-slate-50/80 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono-num text-slate-800 focus:bg-white focus:border-brand-500 outline-none"
                           />
                         </div>
                       </div>
 
                       {/* CONTA 2 */}
-                      <div className="p-3.5 bg-white rounded-xl border border-blue-200 space-y-2 text-xs">
-                        <div className="flex items-center gap-2 text-blue-800 font-bold">
+                      <div className="p-3.5 bg-white rounded-xl border border-blue-200/80 space-y-2 text-xs surface-card">
+                        <div className="flex items-center gap-2 text-blue-800 font-bold font-display">
                           <span className="w-2 h-2 rounded-full bg-blue-500" />
                           <span>Conta Bancária 2 (Alternativa)</span>
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase">Instituição Bancária 2</label>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase font-display">Instituição Bancária 2</label>
                           <input
                             type="text"
                             placeholder="Banco (ex: Banco BFA)"
@@ -1862,11 +1862,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                                 beneficiary: policyDraft.membership_bank_info_2?.beneficiary || policyDraft.membership_bank_info?.beneficiary || '',
                               }
                             })}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-900 focus:bg-white focus:border-blue-500 outline-none"
+                            className="w-full bg-slate-50/80 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-900 focus:bg-white focus:border-brand-500 outline-none"
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase">IBAN 2</label>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase font-display">IBAN 2</label>
                           <input
                             type="text"
                             placeholder="IBAN (ex: AO06 0006...)"
@@ -1880,11 +1880,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                                 beneficiary: policyDraft.membership_bank_info_2?.beneficiary || policyDraft.membership_bank_info?.beneficiary || '',
                               }
                             })}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:border-blue-500 outline-none"
+                            className="w-full bg-slate-50/80 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono-num font-bold text-slate-900 focus:bg-white focus:border-brand-500 outline-none"
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase">Nº de Conta / Referência 2</label>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase font-display">Nº de Conta / Referência 2</label>
                           <input
                             type="text"
                             placeholder="Número de Conta / Swift"
@@ -1898,7 +1898,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                                 beneficiary: policyDraft.membership_bank_info_2?.beneficiary || policyDraft.membership_bank_info?.beneficiary || '',
                               }
                             })}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-800 focus:bg-white focus:border-blue-500 outline-none"
+                            className="w-full bg-slate-50/80 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono-num text-slate-800 focus:bg-white focus:border-brand-500 outline-none"
                           />
                         </div>
                       </div>
@@ -1906,7 +1906,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
                     {/* Titular Beneficiário */}
                     <div className="pt-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Titular Oficial / Beneficiário das Contas</label>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1 font-display">Titular Oficial / Beneficiário das Contas</label>
                       <input
                         type="text"
                         placeholder="VISUAL SOFTWARE / KIVORA TECNOLOGIAS, LDA"
@@ -1916,14 +1916,14 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                           membership_bank_info: { ...(policyDraft.membership_bank_info || DEFAULT_PARTNER_POLICY.membership_bank_info), beneficiary: e.target.value },
                           membership_bank_info_2: policyDraft.membership_bank_info_2 ? { ...policyDraft.membership_bank_info_2, beneficiary: e.target.value } : undefined
                         })}
-                        className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2 text-xs font-bold text-slate-900 focus:border-blue-600 outline-none"
+                        className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2 text-xs font-semibold text-slate-900 focus:border-brand-500 outline-none"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
-                  <label className="text-xs font-bold text-slate-800 block">Critérios & Requisitos Exigidos do Candidato</label>
+                <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-3 surface-card">
+                  <label className="text-xs font-bold text-slate-800 block font-display">Critérios & Requisitos Exigidos do Candidato</label>
                   <div className="space-y-2">
                     {(policyDraft.partner_requirements || DEFAULT_PARTNER_POLICY.partner_requirements).map((req, idx) => (
                       <div key={idx} className="flex items-center gap-2">
@@ -1935,7 +1935,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                             list[idx] = e.target.value;
                             setPolicyDraft({ ...policyDraft, partner_requirements: list });
                           }}
-                          className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium"
+                          className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium focus:border-brand-500 outline-none"
                         />
                         <button
                           type="button"
@@ -1958,7 +1958,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                       placeholder="Adicionar novo requisito (ex: Experiência comprovada em suporte técnico)..."
                       value={newReqInput}
                       onChange={(e) => setNewReqInput(e.target.value)}
-                      className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium"
+                      className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium focus:border-brand-500 outline-none"
                     />
                     <button
                       type="button"
@@ -1968,7 +1968,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                         setPolicyDraft({ ...policyDraft, partner_requirements: [...current, newReqInput.trim()] });
                         setNewReqInput('');
                       }}
-                      className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer shrink-0"
+                      className="bg-slate-950 hover:bg-slate-800 text-white font-semibold font-display text-xs px-3.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer shrink-0 transition-all"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Adicionar</span>
@@ -1982,10 +1982,10 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         )}
 
         {tab === 'precos' && (
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+          <div className="surface-card rounded-3xl overflow-hidden">
+            <div className="p-6 border-b border-slate-200/80 flex items-center justify-between">
               <div>
-                <h3 className="font-black text-slate-900 text-sm">Tabela de Preços de Atacado</h3>
+                <h3 className="font-bold text-slate-900 text-base font-display">Tabela de Preços de Atacado</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Custo que o parceiro deve pagar à Kivora por cada licença gerada no portal.
                 </p>
@@ -1994,16 +1994,16 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 {editingPricing ? (
                   <>
                     <button onClick={() => { setEditingPricing(false); setPricingDraft(pricingPlans); }}
-                      className="text-xs font-bold text-slate-500 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 cursor-pointer">Cancelar</button>
+                      className="text-xs font-semibold font-display text-slate-500 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 cursor-pointer">Cancelar</button>
                     <button onClick={handleSavePricing} disabled={savingPricing}
-                      className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm cursor-pointer">
+                      className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold font-display px-4 py-2.5 rounded-xl shadow-sm cursor-pointer transition-all">
                       {savingPricing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                       <span>Guardar no Firebase</span>
                     </button>
                   </>
                 ) : (
                   <button onClick={() => { setEditingPricing(true); setPricingDraft([...pricingPlans]); }}
-                    className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm cursor-pointer">
+                    className="inline-flex items-center gap-1.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold font-display px-4 py-2.5 rounded-xl shadow-sm cursor-pointer transition-all">
                     <Edit2 className="w-3.5 h-3.5" /><span>Editar Preços</span>
                   </button>
                 )}
@@ -2011,20 +2011,20 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             </div>
             <div className="p-6 space-y-3">
               {(editingPricing ? pricingDraft : pricingPlans).map((plan, idx) => (
-                <div key={plan.plan_type} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                <div key={plan.plan_type} className="flex items-center justify-between p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 surface-card">
                   <div>
-                    <span className="font-bold text-slate-900 text-sm">{plan.label}</span>
-                    <span className="ml-2 text-[10px] font-mono text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{plan.plan_type}</span>
+                    <span className="font-bold text-slate-900 text-sm font-display">{plan.label}</span>
+                    <span className="ml-2 text-[10px] font-mono-num text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{plan.plan_type}</span>
                   </div>
                   {editingPricing ? (
                     <div className="flex items-center gap-2">
                       <input type="number" min={0} value={pricingDraft[idx].cost_aoa}
                         onChange={(e) => { const d = [...pricingDraft]; d[idx] = { ...d[idx], cost_aoa: Number(e.target.value) }; setPricingDraft(d); }}
-                        className="w-36 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold bg-white focus:outline-none focus:border-blue-500 text-right" />
-                      <span className="text-xs font-bold text-slate-500">Kz</span>
+                        className="w-36 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono-num font-bold bg-white focus:outline-none focus:border-brand-500 text-right" />
+                      <span className="text-xs font-semibold text-slate-500 font-display">Kz</span>
                     </div>
                   ) : (
-                    <span className="font-mono font-black text-slate-900 text-sm">{fmt(plan.cost_aoa)} Kz</span>
+                    <span className="font-mono-num font-bold text-slate-900 text-sm">{fmt(plan.cost_aoa)} Kz</span>
                   )}
                 </div>
               ))}
@@ -2033,10 +2033,10 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
         )}
 
         {tab === 'extrato_geral' && (
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-4 p-6">
+          <div className="surface-card rounded-3xl overflow-hidden space-y-4 p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h3 className="font-black text-slate-900 text-sm">Extrato Geral de Faturamento & Liquidações</h3>
+                <h3 className="font-bold text-slate-900 text-base font-display">Extrato Geral de Faturamento & Liquidações</h3>
                 <p className="text-xs text-slate-500">Consulte todas as licenças geradas pela rede e faça liquidações em lote.</p>
               </div>
 
@@ -2045,7 +2045,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   <button
                     onClick={() => handleMarkPaid(globalSelectedDebtIds)}
                     disabled={markingPaid}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold font-display text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer transition-all"
                   >
                     {markingPaid ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                     <span>Liquidar Selecionadas ({globalSelectedDebtIds.length})</span>
@@ -2072,7 +2072,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                     link.click();
                     document.body.removeChild(link);
                   }}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer"
+                  className="bg-slate-100/80 hover:bg-slate-200/80 text-slate-700 font-semibold font-display text-xs px-3 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer transition-all border border-slate-200/60"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Exportar CSV</span>
@@ -2080,7 +2080,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200/80">
               {[
                 { id: 'pendentes', label: 'Dívidas Pendentes' },
                 { id: 'provisorios', label: 'Provisórias (Aguardam Acerto)' },
@@ -2090,8 +2090,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 <button
                   key={f.id}
                   onClick={() => setDebtFilterStatus(f.id as any)}
-                  className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                    debtFilterStatus === f.id ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                  className={`text-xs font-semibold font-display px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                    debtFilterStatus === f.id ? 'bg-slate-950 text-white shadow-sm' : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/60'
                   }`}
                 >
                   {f.label}
@@ -2101,7 +2101,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                <thead className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-semibold font-display uppercase text-[11px] tracking-wider">
                   <tr>
                     <th className="p-3 w-8">
                       <input
@@ -2130,7 +2130,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   {filteredGlobalDebts.length === 0 ? (
                     <tr><td colSpan={8} className="p-8 text-center text-slate-400">Nenhum registo encontrado com este filtro.</td></tr>
                   ) : filteredGlobalDebts.map((d) => (
-                    <tr key={d.id} className="hover:bg-slate-50">
+                    <tr key={d.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="p-3">
                         <input
                           type="checkbox"
@@ -2143,13 +2143,13 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                           className="rounded accent-emerald-600"
                         />
                       </td>
-                      <td className="p-3 font-mono font-bold text-blue-700">{d.license_id}</td>
-                      <td className="p-3 font-semibold text-slate-800">{d.partner_name || d.partner_id}</td>
-                      <td className="p-3 font-bold text-slate-900">{d.company_name}</td>
-                      <td className="p-3 font-semibold">{d.plan_type}</td>
-                      <td className="p-3 font-mono font-bold text-slate-900">{fmt(d.cost_aoa)} Kz</td>
+                      <td className="p-3 font-mono-num font-bold text-blue-700">{d.license_id}</td>
+                      <td className="p-3 font-medium text-slate-800">{d.partner_name || d.partner_id}</td>
+                      <td className="p-3 font-semibold text-slate-900">{d.company_name}</td>
+                      <td className="p-3 font-medium">{d.plan_type}</td>
+                      <td className="p-3 font-mono-num font-bold text-slate-900">{fmt(d.cost_aoa)} Kz</td>
                       <td className="p-3">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold font-display ${
                           d.paid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                           d.is_provisional ? 'bg-amber-100 text-amber-800 border border-amber-300' :
                           'bg-amber-50 text-amber-700 border border-amber-200'
@@ -2157,7 +2157,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                           {d.paid ? '✓ Pago' : d.is_provisional ? 'Provisório (30D)' : 'Pendente'}
                         </span>
                       </td>
-                      <td className="p-3 text-slate-400">{new Date(d.created_at).toLocaleDateString('pt-AO')}</td>
+                      <td className="p-3 text-slate-400 font-mono-num">{new Date(d.created_at).toLocaleDateString('pt-AO')}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -2170,77 +2170,77 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
       {selectedPartner && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 animate-fadeIn max-h-[92vh] flex flex-col overflow-hidden">
+          <div className="surface-card rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200/80 animate-fadeIn max-h-[92vh] flex flex-col overflow-hidden bg-white">
             
             {/* Header Fixo */}
-            <div className="p-4 sm:p-6 flex items-center justify-between border-b border-slate-100 shrink-0 bg-white">
+            <div className="p-4 sm:p-6 flex items-center justify-between border-b border-slate-200/80 shrink-0 bg-white">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black">
+                <div className="w-10 h-10 rounded-xl bg-slate-950 text-white flex items-center justify-center font-bold font-display shadow-xs">
                   {selectedPartner.name.slice(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="font-black text-slate-900 text-base">{selectedPartner.name}</h3>
-                  <p className="text-xs text-slate-500 font-mono">Código: {selectedPartner.code} • {selectedPartner.region}</p>
+                  <h3 className="font-bold text-slate-900 text-base font-display">{selectedPartner.name}</h3>
+                  <p className="text-xs text-slate-500 font-mono-num">Código: {selectedPartner.code} • {selectedPartner.region}</p>
                 </div>
               </div>
-              <button onClick={() => setSelectedPartner(null)} className="text-slate-400 hover:text-slate-900 cursor-pointer p-1"><X className="w-5 h-5" /></button>
+              <button onClick={() => setSelectedPartner(null)} className="text-slate-400 hover:text-slate-900 cursor-pointer p-1 rounded-lg transition-colors"><X className="w-5 h-5" /></button>
             </div>
 
             {/* Corpo Scrollável do Modal */}
             <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
 
             {/* 1. Edição de Dados Cadastrais do Parceiro */}
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 shrink-0 text-xs">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                <span className="font-bold text-slate-800 uppercase text-[10px] flex items-center gap-1.5">
+            <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-3 shrink-0 text-xs surface-card">
+              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                <span className="font-bold text-slate-800 uppercase text-[10px] flex items-center gap-1.5 font-display">
                   <Edit2 className="w-3.5 h-3.5 text-blue-600" />
                   <span>Dados Cadastrais & Identificação do Parceiro</span>
                 </span>
-                <span className="font-mono text-[10px] text-slate-500 font-bold">Código: {selectedPartner.code}</span>
+                <span className="font-mono-num text-[10px] text-slate-500 font-bold">Código: {selectedPartner.code}</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Nome da Empresa / Parceiro</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase font-display">Nome da Empresa / Parceiro</label>
                   <input
                     type="text"
                     value={editPartnerName}
                     onChange={(e) => setEditPartnerName(e.target.value)}
                     placeholder="Ex: Luanda Softwares, Lda."
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-900 focus:outline-none focus:border-brand-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Email do Parceiro</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase font-display">Email do Parceiro</label>
                   <input
                     type="email"
                     value={editPartnerEmail}
                     onChange={(e) => setEditPartnerEmail(e.target.value)}
                     placeholder="parceiro@email.com"
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-brand-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Telefone / WhatsApp</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase font-display">Telefone / WhatsApp</label>
                   <input
                     type="text"
                     value={editPartnerPhone}
                     onChange={(e) => setEditPartnerPhone(e.target.value)}
                     placeholder="Ex: +244 923 000 000"
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-brand-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Região / Sede</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase font-display">Região / Sede</label>
                   <input
                     type="text"
                     value={editPartnerRegion}
                     onChange={(e) => setEditPartnerRegion(e.target.value)}
                     placeholder="Ex: Luanda, Angola"
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-brand-500"
                   />
                 </div>
               </div>
@@ -2256,26 +2256,26 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 if (!proofUrl) return null;
 
                 return (
-                  <div className="flex items-center justify-between p-2.5 bg-blue-50/70 border border-blue-200 rounded-xl text-xs">
+                  <div className="flex items-center justify-between p-2.5 bg-blue-50/60 border border-blue-200/80 rounded-xl text-xs surface-card">
                     <div className="flex items-center gap-2">
                       <FileText className="w-4 h-4 text-blue-600 shrink-0" />
                       <div>
-                        <span className="font-bold text-slate-800 text-[11px] block">Comprovativo de Taxa (25.000 Kz)</span>
-                        <span className="text-[10px] text-slate-500 font-mono">Ficheiro guardado no Firebase</span>
+                        <span className="font-bold text-slate-800 text-[11px] block font-display">Comprovativo de Taxa (<span className="font-mono-num">25.000 Kz</span>)</span>
+                        <span className="text-[10px] text-slate-500 font-sans">Ficheiro guardado no Firebase</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => setViewProofModal({ open: true, item: matchingAppForProof || selectedPartner })}
-                        className="text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-white border border-blue-200 px-2.5 py-1 rounded-lg cursor-pointer shadow-2xs"
+                        className="text-[11px] font-semibold font-display text-blue-700 hover:text-blue-900 bg-white border border-blue-200 px-2.5 py-1 rounded-lg cursor-pointer shadow-2xs transition-colors"
                       >
                         Ver Anexo
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDeleteProof(matchingAppForProof || selectedPartner)}
-                        className="text-[11px] font-bold text-rose-700 hover:text-rose-900 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg cursor-pointer flex items-center gap-1"
+                        className="text-[11px] font-semibold font-display text-rose-700 hover:text-rose-900 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg cursor-pointer flex items-center gap-1 transition-colors"
                         title="Apagar ficheiro para libertar espaço"
                       >
                         <Trash2 className="w-3 h-3" />
@@ -2286,15 +2286,15 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 );
               })()}
 
-              <div className="flex items-center justify-between pt-2 border-t border-slate-200">
+              <div className="flex items-center justify-between pt-2 border-t border-slate-200/80">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-slate-500 font-mono">NIF:</span>
+                  <span className="text-[10px] text-slate-500 font-display font-semibold">NIF:</span>
                   <input
                     type="text"
                     value={editPartnerNif}
                     onChange={(e) => setEditPartnerNif(e.target.value.toUpperCase())}
                     placeholder="NIF da Empresa"
-                    className="w-36 bg-white border border-slate-300 rounded-lg px-2 py-1 text-[11px] font-mono font-bold uppercase"
+                    className="w-36 bg-white border border-slate-300 rounded-lg px-2 py-1 text-[11px] font-mono-num font-bold uppercase focus:border-brand-500 outline-none"
                   />
                 </div>
 
@@ -2337,7 +2337,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                         phone: selectedPartner.phone,
                       });
                     }}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
+                    className="bg-brand-600 hover:bg-brand-500 text-white font-semibold font-display text-xs px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
                   >
                     <Key className="w-3.5 h-3.5" />
                     <span>Ver / Emitir Credenciais</span>
@@ -2345,7 +2345,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   <button
                     onClick={handleSavePartnerProfile}
                     disabled={savingPartnerProfile}
-                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
+                    className="bg-slate-950 hover:bg-slate-800 text-white font-semibold font-display text-xs px-4 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
                   >
                     {savingPartnerProfile ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                     <span>Guardar Dados do Parceiro</span>
@@ -2355,22 +2355,22 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             </div>
 
             {/* 2. Configuração de Quotas & Saldo */}
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4 shrink-0 text-xs">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                <span className="font-bold text-slate-800 uppercase text-[10px] flex items-center gap-1.5">
+            <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-4 shrink-0 text-xs surface-card">
+              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                <span className="font-bold text-slate-800 uppercase text-[10px] flex items-center gap-1.5 font-display">
                   <Sliders className="w-3.5 h-3.5 text-blue-600" />
                   <span>Configuração Individual de Quotas & Categoria</span>
                 </span>
-                <span className="font-mono text-[10px] text-slate-500">ID: {selectedPartner.id}</span>
+                <span className="font-mono-num text-[10px] text-slate-500">ID: {selectedPartner.id}</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Categoria</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase font-display">Categoria</label>
                   <select
                     value={editTier}
                     onChange={(e) => setEditTier(e.target.value as any)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold font-display focus:border-brand-500 outline-none"
                   >
                     <option value="bronze">Bronze ({policy.tier_slots.bronze} Slots)</option>
                     <option value="silver">Silver ({policy.tier_slots.silver} Slots)</option>
@@ -2380,23 +2380,23 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Quota Slots Crédito</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase font-display">Quota Slots Crédito</label>
                   <input
                     type="number"
                     min={1}
                     max={50}
                     value={editCreditSlots}
                     onChange={(e) => setEditCreditSlots(Number(e.target.value) || 1)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-mono-num font-bold focus:border-brand-500 outline-none"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Modo de Emissão a Crédito</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase font-display">Modo de Emissão a Crédito</label>
                   <select
                     value={editCreditIssuanceMode}
                     onChange={(e) => setEditCreditIssuanceMode(e.target.value as any)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold font-display text-slate-800 focus:border-brand-500 outline-none"
                   >
                     <option value="auto_instant">⚡ Emissão Instantânea (Recomendado / Autonomia 24/7)</option>
                     <option value="manual_approval">🛡️ Revisão Manual pelo Admin (Em Quarentena)</option>
@@ -2419,25 +2419,25 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                       finally { setSavingFinancials(false); }
                     }}
                     disabled={savingFinancials}
-                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2 rounded-xl transition-all cursor-pointer"
+                    className="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold font-display text-xs py-2 rounded-xl transition-all cursor-pointer shadow-xs"
                   >
                     {savingFinancials ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto" /> : 'Atualizar Quota'}
                   </button>
                 </div>
               </div>
 
-              <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl space-y-3">
+              <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 rounded-2xl space-y-3 surface-card">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-xs">
                       <Wallet className="w-4 h-4" />
                     </div>
                     <div>
-                      <span className="font-black text-emerald-900 text-xs uppercase block">Carteira Pré-Paga (Wallet)</span>
+                      <span className="font-bold text-emerald-900 text-xs uppercase block font-display">Carteira Pré-Paga (Wallet)</span>
                       <span className="text-[10px] text-emerald-700">Saldo disponível para emissão instantânea</span>
                     </div>
                   </div>
-                  <span className="font-mono font-black text-sm text-emerald-900 bg-white px-3 py-1 rounded-xl border border-emerald-300 shadow-2xs">
+                  <span className="font-mono-num font-bold text-sm text-emerald-900 bg-white px-3 py-1 rounded-xl border border-emerald-300 shadow-2xs">
                     {fmt(selectedPartner.wallet_balance_aoa || 0)} Kz
                   </span>
                 </div>
@@ -2450,7 +2450,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                       placeholder="Valor a Injetar (Ex: 150000)"
                       value={topUpAmount || ''}
                       onChange={(e) => setTopUpAmount(Number(e.target.value))}
-                      className="w-full bg-white border border-emerald-300 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-white border border-emerald-300 rounded-xl px-3 py-2 text-xs font-mono-num font-bold text-slate-900 focus:outline-none focus:border-emerald-600"
                     />
                   </div>
                   <button
@@ -2489,7 +2489,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                       finally { setSavingFinancials(false); }
                     }}
                     disabled={savingFinancials || !topUpAmount}
-                    className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5"
+                    className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-semibold font-display text-xs px-4 py-2 rounded-xl transition-all cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5"
                   >
                     {savingFinancials ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                     <span>Carregar Carteira</span>
@@ -2499,13 +2499,13 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-              <div className="flex items-center justify-between sticky top-0 bg-white py-1 z-10">
-                <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Licenças Geradas ({partnerDebts.length})</h4>
+              <div className="flex items-center justify-between sticky top-0 bg-white py-1 z-10 border-b border-slate-100">
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider font-display">Licenças Geradas ({partnerDebts.length})</h4>
                 {selectedDebtIds.length > 0 && (
                   <button
                     onClick={() => handleMarkPaid(selectedDebtIds)}
                     disabled={markingPaid}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 cursor-pointer"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold font-display px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 cursor-pointer transition-all"
                   >
                     {markingPaid ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                     <span>Liquidar Selecionadas ({selectedDebtIds.length})</span>
@@ -2520,9 +2520,9 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 </div>
               ) : partnerDebts.map((d) => (
                 <label key={d.id} className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${
-                  d.paid ? 'bg-slate-50 border-slate-100 opacity-60' :
-                  selectedDebtIds.includes(d.id) ? 'bg-emerald-50 border-emerald-300' :
-                  'bg-white border-slate-200 hover:border-slate-300'
+                  d.paid ? 'bg-slate-50/60 border-slate-200/60 opacity-60' :
+                  selectedDebtIds.includes(d.id) ? 'bg-emerald-50/60 border-emerald-300' :
+                  'bg-white border-slate-200/80 hover:border-slate-300 surface-card'
                 }`}>
                   <input
                     type="checkbox"
@@ -2536,8 +2536,8 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-xs font-bold text-blue-700">{d.license_id}</span>
-                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                      <span className="font-mono-num text-xs font-bold text-blue-700">{d.license_id}</span>
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full font-display ${
                         d.paid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                         d.is_provisional ? 'bg-amber-100 text-amber-800 border border-amber-300' :
                         'bg-amber-50 text-amber-700 border border-amber-200'
@@ -2545,11 +2545,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                         {d.paid ? '✓ Pago' : d.is_provisional ? 'Provisório (30D)' : 'Pendente'}
                       </span>
                     </div>
-                    <p className="text-xs font-bold text-slate-900 truncate mt-0.5">{d.company_name}</p>
-                    <p className="text-[10px] text-slate-400">{new Date(d.created_at).toLocaleDateString('pt-AO')} • Plano: {d.plan_type}</p>
+                    <p className="text-xs font-semibold text-slate-900 truncate mt-0.5">{d.company_name}</p>
+                    <p className="text-[10px] text-slate-400 font-mono-num">{new Date(d.created_at).toLocaleDateString('pt-AO')} • Plano: {d.plan_type}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <span className="font-mono font-black text-slate-900 text-xs">{fmt(d.cost_aoa)} Kz</span>
+                    <span className="font-mono-num font-bold text-slate-900 text-xs">{fmt(d.cost_aoa)} Kz</span>
                   </div>
                 </label>
               ))}
@@ -2558,7 +2558,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             </div>
 
             {/* Rodapé Fixo de Ações do Parceiro */}
-            <div className="p-4 sm:p-6 bg-slate-50 border-t border-slate-100 shrink-0 flex flex-wrap items-center justify-between gap-2">
+            <div className="p-4 sm:p-6 bg-slate-50/80 border-t border-slate-200/80 shrink-0 flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => setCertificatesPartnerModal({
@@ -2570,7 +2570,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                     phone: selectedPartner.phone,
                     createdAt: selectedPartner.createdAt,
                   })}
-                  className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
+                  className="bg-amber-600 hover:bg-amber-500 text-white font-semibold font-display text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer transition-all"
                 >
                   <Award className="w-4 h-4 text-amber-200" />
                   <span className="hidden xs:inline">Certificados Oficiais</span>
@@ -2579,14 +2579,14 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
                 <button
                   onClick={() => handleDeletePartner(selectedPartner)}
-                  className="bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs px-3 py-2 rounded-xl flex items-center gap-1 border border-rose-200 cursor-pointer"
+                  className="bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold font-display text-xs px-3 py-2 rounded-xl flex items-center gap-1 border border-rose-200 cursor-pointer transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Eliminar</span>
                 </button>
               </div>
 
-              <button onClick={() => setSelectedPartner(null)} className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 cursor-pointer">
+              <button onClick={() => setSelectedPartner(null)} className="px-4 py-2 rounded-xl text-xs font-semibold font-display text-slate-600 hover:bg-slate-200/80 cursor-pointer transition-colors">
                 Fechar
               </button>
             </div>
@@ -2596,31 +2596,31 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
       {showModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-slate-900">Registar Novo Parceiro</h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900 cursor-pointer"><X className="w-5 h-5" /></button>
+          <div className="surface-card rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200/80 space-y-5 animate-fadeIn max-h-[90vh] overflow-y-auto bg-white">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
+              <h3 className="text-base font-bold text-slate-900 font-display">Registar Novo Parceiro</h3>
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900 cursor-pointer p-1 rounded-lg transition-colors"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleAddPartner} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Nome da Empresa / Revendedor</label>
+                <label className="font-semibold text-slate-700 uppercase font-display text-[10px]">Nome da Empresa / Revendedor</label>
                 <input type="text" required placeholder="Ex: Luanda Softwares, Lda." value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium focus:outline-none focus:border-blue-500" />
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50/70 font-medium focus:outline-none focus:border-brand-500 focus:bg-white transition-all text-xs" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Código Único (PRT)</label>
+                  <label className="font-semibold text-slate-700 uppercase font-display text-[10px]">Código Único (PRT)</label>
                   <input type="text" required placeholder="Ex: PRT-LUA-01" value={code}
                     onChange={(e) => setCode(e.target.value.toUpperCase())}
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-mono font-bold focus:outline-none focus:border-blue-500 uppercase" />
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50/70 font-mono-num font-bold focus:outline-none focus:border-brand-500 focus:bg-white transition-all uppercase text-xs" />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Categoria Inicial</label>
+                  <label className="font-semibold text-slate-700 uppercase font-display text-[10px]">Categoria Inicial</label>
                   <select
                     value={newPartnerTier}
                     onChange={(e) => setNewPartnerTier(e.target.value as any)}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 bg-slate-50 font-bold"
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 bg-slate-50/70 font-semibold font-display text-xs focus:border-brand-500 outline-none"
                   >
                     <option value="bronze">Bronze ({policy.tier_slots.bronze} Slots)</option>
                     <option value="silver">Silver ({policy.tier_slots.silver} Slots)</option>
@@ -2630,26 +2630,26 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 </div>
               </div>
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Email de Acesso</label>
+                <label className="font-semibold text-slate-700 uppercase font-display text-[10px]">Email de Acesso</label>
                 <input type="email" required placeholder="parceiro@empresa.ao" value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium focus:outline-none focus:border-blue-500" />
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50/70 font-medium focus:outline-none focus:border-brand-500 focus:bg-white transition-all text-xs" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Telefone / WhatsApp</label>
+                  <label className="font-semibold text-slate-700 uppercase font-display text-[10px]">Telefone / WhatsApp</label>
                   <input type="text" placeholder="+244 923 000 000" value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium focus:outline-none focus:border-blue-500" />
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50/70 font-medium focus:outline-none focus:border-brand-500 focus:bg-white transition-all text-xs" />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Província</label>
+                  <label className="font-semibold text-slate-700 uppercase font-display text-[10px]">Província</label>
                   <input type="text" placeholder="Luanda" value={region}
                     onChange={(e) => setRegion(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium focus:outline-none focus:border-blue-500" />
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50/70 font-medium focus:outline-none focus:border-brand-500 focus:bg-white transition-all text-xs" />
                 </div>
               </div>
-              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3 rounded-xl shadow-md transition-all cursor-pointer">
+              <button type="submit" className="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold font-display text-xs py-3 rounded-xl shadow-md transition-all cursor-pointer">
                 Registar & Ativar Acesso
               </button>
             </form>
@@ -2659,27 +2659,27 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
       {credentialsModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 animate-fadeIn max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between">
+          <div className="surface-card rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200/80 space-y-6 animate-fadeIn max-h-[90vh] overflow-y-auto bg-white">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><Key className="w-5 h-5" /></div>
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100"><Key className="w-5 h-5" /></div>
                 <div>
-                  <h3 className="text-base font-black text-slate-900">Acesso de Parceiro Homologado!</h3>
+                  <h3 className="text-base font-bold text-slate-900 font-display">Acesso de Parceiro Homologado!</h3>
                   <p className="text-xs text-slate-500">Credenciais gravadas no Firebase</p>
                 </div>
               </div>
-              <button onClick={() => setCredentialsModal(null)} className="text-slate-400 hover:text-slate-900 cursor-pointer"><X className="w-5 h-5" /></button>
+              <button onClick={() => setCredentialsModal(null)} className="text-slate-400 hover:text-slate-900 cursor-pointer p-1 rounded-lg transition-colors"><X className="w-5 h-5" /></button>
             </div>
-            <div className="bg-slate-950 text-white rounded-2xl p-5 space-y-3 font-mono text-xs select-all border border-slate-800">
+            <div className="bg-slate-950 text-white rounded-2xl p-5 space-y-3 font-mono-num text-xs select-all border border-slate-800 shadow-inner">
               {([
-                ['Parceiro', credentialsModal.partnerName, 'text-white font-sans'],
-                ['Código', credentialsModal.partnerCode, 'text-emerald-400'],
+                ['Parceiro', credentialsModal.partnerName, 'text-white font-sans font-semibold'],
+                ['Código', credentialsModal.partnerCode, 'text-emerald-400 font-bold'],
                 ['Email', credentialsModal.email, 'text-blue-300'],
-                ['Palavra-passe', credentialsModal.password, 'text-amber-300'],
-                ['Portal', 'https://kivora.ao/#login', 'text-slate-300 text-[11px]'],
+                ['Palavra-passe', credentialsModal.password, 'text-amber-300 font-bold'],
+                ['Portal', 'https://kivora.ao/#login', 'text-slate-400 text-[11px]'],
               ] as [string, string, string][]).map(([label, value, cls]) => (
-                <div key={label} className="flex justify-between items-center border-b border-slate-800 pb-2 last:border-0 last:pb-0">
-                  <span className="text-slate-400 font-sans">{label}:</span>
+                <div key={label} className="flex justify-between items-center border-b border-slate-800/80 pb-2 last:border-0 last:pb-0">
+                  <span className="text-slate-400 font-sans text-xs">{label}:</span>
                   <span className={cls}>{value}</span>
                 </div>
               ))}
@@ -2727,7 +2727,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                     setResettingPassword(false);
                   }
                 }}
-                className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-2.5 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+                className="text-[11px] font-semibold font-display text-brand-600 hover:text-brand-800 hover:bg-brand-50 px-2.5 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
                 title="Gera e grava uma nova palavra-passe aleatória mantendo a obrigação de troca no primeiro acesso"
               >
                 {resettingPassword ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
@@ -2738,14 +2738,14 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               <button onClick={() => {
                 navigator.clipboard.writeText(`*Portal do Parceiro KIVORA*\n\n• Email: ${credentialsModal.email}\n• Palavra-passe: ${credentialsModal.password}\n• Código de Parceiro: ${credentialsModal.partnerCode}\n• Acesso: https://kivora.ao/#login`);
                 setCopiedCredentials(true); setTimeout(() => setCopiedCredentials(false), 2500);
-              }} className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+              }} className="flex-1 bg-slate-950 hover:bg-slate-800 text-white font-semibold font-display text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                 {copiedCredentials ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                 <span>{copiedCredentials ? 'Copiado!' : 'Copiar Mensagem'}</span>
               </button>
               {credentialsModal.phone && (
                 <a href={`https://wa.me/${credentialsModal.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`*Portal do Parceiro KIVORA*\n• Email: ${credentialsModal.email}\n• Palavra-passe: ${credentialsModal.password}\n• Código de Parceiro: ${credentialsModal.partnerCode}\n• Acesso: https://kivora.ao/#login`)}`}
                   target="_blank" rel="noreferrer"
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-3 rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-600/20 shrink-0">
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold font-display text-xs px-4 py-3 rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-600/20 shrink-0 transition-all">
                   <MessageSquare className="w-4 h-4" /><span>WhatsApp</span>
                 </a>
               )}
@@ -2781,17 +2781,17 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 }
               }}
               disabled={sendingPartnerEmail}
-              className={`w-full font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md ${
+              className={`w-full font-semibold font-display text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md ${
                 partnerEmailSent 
                   ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20' 
-                  : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20'
+                  : 'bg-brand-600 hover:bg-brand-500 text-white shadow-brand-600/20'
               }`}
             >
               {sendingPartnerEmail ? <Loader2 className="w-4 h-4 animate-spin" /> : partnerEmailSent ? <CheckCircle2 className="w-4 h-4" /> : <Mail className="w-4 h-4" />}
               <span>{partnerEmailSent ? 'E-mail Enviado com Sucesso!' : 'Enviar Credenciais por E-mail ao Parceiro'}</span>
             </button>
 
-            <div className="pt-2 border-t border-slate-100 flex gap-2">
+            <div className="pt-2 border-t border-slate-200/80 flex gap-2">
               <button
                 onClick={() => {
                   setCertificatesPartnerModal({
@@ -2803,13 +2803,13 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                     createdAt: Date.now(),
                   });
                 }}
-                className="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                className="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-semibold font-display text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-sm transition-all"
               >
                 <Award className="w-4 h-4 text-amber-200" />
                 <span>Emitir Certificados Oficiais</span>
               </button>
               <button onClick={() => setCredentialsModal(null)}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer">
+                className="bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-semibold font-display text-xs px-4 py-2.5 rounded-xl cursor-pointer transition-colors">
                 Fechar
               </button>
             </div>
@@ -2819,18 +2819,18 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
       {/* Render do Modal de Visualização do Comprovativo de Pagamento */}
       {viewProofModal && viewProofModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
+          <div className="surface-card bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden flex flex-col max-h-[90vh]">
             
             {/* Header do Modal */}
-            <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+            <div className="px-6 py-4 bg-slate-950 text-white flex items-center justify-between border-b border-slate-800">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold">
+                <div className="w-10 h-10 rounded-2xl bg-brand-600 text-white flex items-center justify-center font-bold">
                   <FileText className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Comprovativo de Transferência Bancária</h3>
-                  <p className="text-xs text-slate-400">Taxa Única de Homologação e Certificação (25.000 Kz)</p>
+                  <h3 className="text-sm font-bold text-white font-display">Comprovativo de Transferência Bancária</h3>
+                  <p className="text-xs text-slate-400">Taxa Única de Homologação e Certificação (<span className="font-mono-num">25.000 Kz</span>)</p>
                 </div>
               </div>
               <button
@@ -2842,33 +2842,33 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             </div>
 
             {/* Metadados da Candidatura */}
-            <div className="p-4 bg-slate-50 border-b border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div className="p-4 bg-slate-50/80 border-b border-slate-200/80 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Empresa / Parceiro:</span>
-                <strong className="text-slate-900 truncate block">{viewProofModal.item.name}</strong>
+                <span className="text-[10px] font-bold text-slate-400 uppercase block font-display">Empresa / Parceiro:</span>
+                <strong className="text-slate-900 truncate block font-display">{viewProofModal.item.name}</strong>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">NIF:</span>
-                <strong className="text-slate-900 font-mono block">{viewProofModal.item.nif || 'Não informado'}</strong>
+                <span className="text-[10px] font-bold text-slate-400 uppercase block font-display">NIF:</span>
+                <strong className="text-slate-900 font-mono-num block">{viewProofModal.item.nif || 'Não informado'}</strong>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Montante:</span>
-                <strong className="text-emerald-700 font-mono block">25.000,00 Kz</strong>
+                <span className="text-[10px] font-bold text-slate-400 uppercase block font-display">Montante:</span>
+                <strong className="text-emerald-700 font-mono-num block">25.000,00 Kz</strong>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Protocolo:</span>
-                <strong className="text-blue-700 font-mono block">{viewProofModal.item.protocol || viewProofModal.item.code}</strong>
+                <span className="text-[10px] font-bold text-slate-400 uppercase block font-display">Protocolo:</span>
+                <strong className="text-blue-700 font-mono-num block">{viewProofModal.item.protocol || viewProofModal.item.code}</strong>
               </div>
             </div>
 
             {/* Visualizador do Comprovativo */}
-            <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center bg-slate-100 min-h-[300px]">
+            <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center bg-slate-100/70 min-h-[300px]">
               {viewProofModal.item.payment_proof_url ? (
                 viewProofModal.item.payment_proof_type === 'application/pdf' || viewProofModal.item.payment_proof_url.startsWith('data:application/pdf') ? (
-                  <div className="w-full h-80 flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200 p-6 text-center space-y-4 shadow-sm">
+                  <div className="w-full h-80 flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200/80 p-6 text-center space-y-4 shadow-sm surface-card">
                     <FileText className="w-16 h-16 text-rose-500 mx-auto" />
                     <div>
-                      <h4 className="text-sm font-bold text-slate-900">{viewProofModal.item.payment_proof_name || 'Comprovativo_Pagamento.pdf'}</h4>
+                      <h4 className="text-sm font-bold text-slate-900 font-display">{viewProofModal.item.payment_proof_name || 'Comprovativo_Pagamento.pdf'}</h4>
                       <p className="text-xs text-slate-500 mt-1">Documento em formato PDF ({viewProofModal.item.payment_proof_size || 'Documento Oficial'})</p>
                     </div>
                     <a
@@ -2876,7 +2876,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                       download={viewProofModal.item.payment_proof_name || 'Comprovativo_Parceiro_25000Kz.pdf'}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition-all cursor-pointer"
+                      className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-500 text-white font-semibold font-display text-xs px-5 py-2.5 rounded-xl shadow-md transition-all cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
                       <span>Abrir / Descarregar PDF</span>
@@ -2900,7 +2900,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             </div>
 
             {/* Rodapé do Modal */}
-            <div className="px-6 py-4 bg-white border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+            <div className="px-6 py-4 bg-white border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 {viewProofModal.item.payment_proof_url ? (
                   <>
@@ -2909,7 +2909,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                       download={viewProofModal.item.payment_proof_name || `Comprovativo_${viewProofModal.item.name}.png`}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold font-display text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 px-3.5 py-2 rounded-xl transition-all cursor-pointer border border-slate-200/60"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>Descarregar</span>
@@ -2918,7 +2918,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                     <button
                       type="button"
                       onClick={() => handleDeleteProof(viewProofModal.item)}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3.5 py-2 rounded-xl transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold font-display text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3.5 py-2 rounded-xl transition-all cursor-pointer"
                       title="Apagar este anexo para poupar espaço no Firebase"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -2932,7 +2932,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 <button
                   type="button"
                   onClick={() => setViewProofModal(null)}
-                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 rounded-xl transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold font-display text-slate-600 hover:text-slate-900 rounded-xl transition-colors cursor-pointer"
                 >
                   Fechar
                 </button>
@@ -2944,7 +2944,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                       setViewProofModal(null);
                       handleApprovePartner(item);
                     }}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold font-display text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
                   >
                     <Check className="w-3.5 h-3.5" />
                     <span>Aprovar & Emitir Credencial</span>
@@ -2960,21 +2960,21 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
       {/* Modal Dedicado de Recarga de Carteira (Wallet Top-Up) */}
       {walletRechargeModal.open && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+          <div className="surface-card bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200/80 space-y-5 animate-fadeIn">
             {/* Cabeçalho */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20">
                   <Wallet className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-black text-slate-900 text-base">Carregar Carteira do Parceiro</h3>
+                  <h3 className="font-bold text-slate-900 text-base font-display">Carregar Carteira do Parceiro</h3>
                   <p className="text-xs text-slate-500">Injetar saldo pré-pago para emissão instantânea de licenças</p>
                 </div>
               </div>
               <button
                 onClick={() => setWalletRechargeModal({ open: false, partner: null })}
-                className="text-slate-400 hover:text-slate-900 cursor-pointer"
+                className="text-slate-400 hover:text-slate-900 cursor-pointer p-1 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2983,11 +2983,11 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             {/* Seletor de Parceiro (se aberto globalmente sem parceiro fixo) */}
             {!walletRechargeModal.partner ? (
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">Selecione o Parceiro:</label>
+                <label className="text-xs font-semibold font-display text-slate-700">Selecione o Parceiro:</label>
                 <select
                   value={rechargeSelectedPartnerId}
                   onChange={(e) => setRechargeSelectedPartnerId(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold font-display text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="">-- Escolha um parceiro --</option>
                   {partners.map(p => (
@@ -2998,15 +2998,15 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 </select>
               </div>
             ) : (
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex items-center justify-between">
+              <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 flex items-center justify-between surface-card">
                 <div>
-                  <span className="font-mono text-[10px] font-black text-slate-500 uppercase">{walletRechargeModal.partner.code} • {walletRechargeModal.partner.region}</span>
-                  <h4 className="font-black text-slate-900 text-sm">{walletRechargeModal.partner.name}</h4>
+                  <span className="font-mono-num text-[10px] font-bold text-slate-500 uppercase">{walletRechargeModal.partner.code} • {walletRechargeModal.partner.region}</span>
+                  <h4 className="font-bold text-slate-900 text-sm font-display">{walletRechargeModal.partner.name}</h4>
                   <p className="text-xs text-slate-500">{walletRechargeModal.partner.email}</p>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Saldo Atual</span>
-                  <span className="font-mono font-black text-emerald-700 text-sm">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block font-display">Saldo Atual</span>
+                  <span className="font-mono-num font-bold text-emerald-700 text-sm">
                     {fmt(walletRechargeModal.partner.wallet_balance_aoa || 0)} Kz
                   </span>
                 </div>
@@ -3015,14 +3015,14 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
             {/* Presets Rápidos */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 block">Valores Rápidos de Recarga:</label>
+              <label className="text-xs font-semibold font-display text-slate-700 block">Valores Rápidos de Recarga:</label>
               <div className="grid grid-cols-3 gap-2">
                 {[50000, 100000, 200000, 350000, 500000, 1000000].map((amt) => (
                   <button
                     key={amt}
                     type="button"
                     onClick={() => setCustomRechargeAmount(amt)}
-                    className={`py-2 px-3 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer ${
+                    className={`py-2 px-3 rounded-xl border text-xs font-mono-num font-bold transition-all cursor-pointer ${
                       customRechargeAmount === amt
                         ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
                         : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40'
@@ -3036,7 +3036,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
 
             {/* Input de Valor Customizado */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700">Ou digite o valor exato (Kz):</label>
+              <label className="text-xs font-semibold font-display text-slate-700">Ou digite o valor exato (Kz):</label>
               <div className="relative">
                 <input
                   type="number"
@@ -3045,32 +3045,32 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   placeholder="Ex: 150000"
                   value={customRechargeAmount || ''}
                   onChange={(e) => setCustomRechargeAmount(Number(e.target.value))}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-mono-num font-bold text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
                 />
-                <span className="absolute right-4 top-2.5 text-xs font-bold text-slate-400">Kz</span>
+                <span className="absolute right-4 top-2.5 text-xs font-bold font-display text-slate-400">Kz</span>
               </div>
             </div>
 
             {/* Nota / Comprovativo Bancário */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700">Nota / Referência de Pagamento (Opcional):</label>
+              <label className="text-xs font-semibold font-display text-slate-700">Nota / Referência de Pagamento (Opcional):</label>
               <input
                 type="text"
                 placeholder="Ex: Depósito BAI Ref #849201"
                 value={rechargeNote}
                 onChange={(e) => setRechargeNote(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
+                className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
               />
             </div>
 
             {/* Resumo do Novo Saldo */}
             {targetPartnerForRecharge && customRechargeAmount > 0 && (
-              <div className="bg-emerald-50/70 border border-emerald-200 p-3.5 rounded-2xl flex items-center justify-between text-xs font-mono">
-                <span className="text-emerald-800 font-bold font-sans">Novo Saldo da Carteira:</span>
+              <div className="bg-emerald-50/70 border border-emerald-200/80 p-3.5 rounded-2xl flex items-center justify-between text-xs font-mono-num surface-card">
+                <span className="text-emerald-800 font-semibold font-display">Novo Saldo da Carteira:</span>
                 <div className="flex items-center gap-2">
                   <span className="text-slate-400 line-through">{fmt(targetPartnerForRecharge.wallet_balance_aoa || 0)} Kz</span>
                   <span className="text-slate-400 font-sans">➔</span>
-                  <strong className="text-emerald-700 font-black text-sm">
+                  <strong className="text-emerald-700 font-bold text-sm">
                     {fmt((targetPartnerForRecharge.wallet_balance_aoa || 0) + customRechargeAmount)} Kz
                   </strong>
                 </div>
@@ -3082,7 +3082,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               <button
                 type="button"
                 onClick={() => setWalletRechargeModal({ open: false, partner: null })}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3 rounded-xl transition-colors cursor-pointer"
+                className="flex-1 bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-semibold font-display text-xs py-3 rounded-xl transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
@@ -3090,7 +3090,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 type="button"
                 disabled={savingRecharge || !targetPartnerForRecharge || customRechargeAmount <= 0}
                 onClick={handleExecuteWalletRecharge}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs py-3 rounded-xl transition-all cursor-pointer shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-semibold font-display text-xs py-3 rounded-xl transition-all cursor-pointer shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2"
               >
                 {savingRecharge ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 <span>Confirmar e Carregar</span>

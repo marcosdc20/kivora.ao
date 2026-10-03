@@ -51,13 +51,17 @@ export default {
         }
       },
       fontFamily: {
-        display: ['"Cabinet Grotesk"', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        sans: ['"Satoshi"', '"Inter"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        display: ['"GeistVariable"', '"Geist"', '"Inter Tight"', '"DM Sans"', 'system-ui', 'sans-serif'],
+        sans: ['"DM Sans"', '"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+        tight: ['"Inter Tight"', '"DM Sans"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', '"IBM Plex Mono"', 'monospace'],
       },
       boxShadow: {
         'clean': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04)',
-        'card-hover': '0 12px 30px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04)',
+        'card': '0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02)',
+        'card-hover': '0 20px 40px -12px rgba(15, 23, 42, 0.12), 0 8px 16px -4px rgba(15, 23, 42, 0.06)',
+        'glow-blue': '0 0 40px -10px rgba(23, 70, 162, 0.35)',
+        'glow-orange': '0 0 35px -10px rgba(255, 101, 0, 0.4)',
         'receipt': '0 25px 50px -12px rgba(10, 25, 47, 0.25)',
         'header': '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
       }

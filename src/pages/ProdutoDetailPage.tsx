@@ -202,11 +202,10 @@ export const ProdutoDetailPage: React.FC<ProdutoDetailPageProps> = ({
                 </div>
 
                 {/* Bloco de Preço Realista Estilo E-Commerce */}
-                <div className="bg-mesh p-5 sm:p-6 rounded-2xl border border-slate-200/90 mb-5 relative overflow-hidden shadow-xs">
-                  <div className="orb orb-blue w-28 h-28 -top-6 -right-6 opacity-20" />
-                  <div className="flex items-baseline gap-2 mb-1 relative z-10">
+                <div className="surface-card p-5 sm:p-6 mb-5">
+                  <div className="flex items-baseline gap-2 mb-1">
                     <span className="text-xs font-bold text-slate-700">Kz</span>
-                    <span className="text-3xl sm:text-4xl font-black text-slate-950 font-mono-num">
+                    <span className="font-display text-3xl sm:text-4xl font-black text-slate-950 font-mono-num">
                       {product.priceAOA.toLocaleString('pt-AO')}
                     </span>
                     {product.originalPriceAOA && (
@@ -215,7 +214,7 @@ export const ProdutoDetailPage: React.FC<ProdutoDetailPageProps> = ({
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-600 relative z-10">
+                  <p className="text-xs text-slate-600 font-normal">
                     Fatura com IVA dedutível emitida pela Visual Software (Homologada AGT).
                   </p>
                 </div>

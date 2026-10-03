@@ -185,37 +185,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
 
       {/* Top Metrics Row — Valores Reais */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <div className="surface-card p-5 space-y-2">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
               <TrendingUp className="w-5 h-5" />
             </div>
-            <div>
-              <div className="text-lg font-black text-slate-900">{fmt(revenueAoa)} Kz</div>
+            <div className="min-w-0">
+              <div className="text-lg font-black text-slate-900 font-display font-mono-num truncate">{fmt(revenueAoa)} Kz</div>
               <div className="text-[11px] font-bold text-slate-400">Faturação Ativa</div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <div className="surface-card p-5 space-y-2">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shrink-0">
               <Shield className="w-5 h-5" />
             </div>
-            <div>
-              <div className="text-lg font-black text-slate-900">{licenses.length}</div>
+            <div className="min-w-0">
+              <div className="text-lg font-black text-slate-900 font-display font-mono-num">{licenses.length}</div>
               <div className="text-[11px] font-bold text-slate-400">Total de Licenças</div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <div className="surface-card p-5 space-y-2">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
               <CheckCircle2 className="w-5 h-5" />
             </div>
-            <div>
-              <div className="text-lg font-black text-emerald-600">{activeLicenses.length}</div>
+            <div className="min-w-0">
+              <div className="text-lg font-black text-emerald-600 font-display font-mono-num">{activeLicenses.length}</div>
               <div className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
                 Ativas Online
               </div>
@@ -223,25 +223,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <div className="surface-card p-5 space-y-2">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100 shrink-0">
               <AlertCircle className="w-5 h-5" />
             </div>
-            <div>
-              <div className="text-lg font-black text-amber-600">{expiredLicenses.length}</div>
+            <div className="min-w-0">
+              <div className="text-lg font-black text-amber-600 font-display font-mono-num">{expiredLicenses.length}</div>
               <div className="text-[11px] font-bold text-slate-400">Expiradas</div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <div className="surface-card p-5 space-y-2">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center border border-red-100 shrink-0">
               <Ban className="w-5 h-5" />
             </div>
-            <div>
-              <div className="text-lg font-black text-red-600">{revokedLicenses.length}</div>
+            <div className="min-w-0">
+              <div className="text-lg font-black text-red-600 font-display font-mono-num">{revokedLicenses.length}</div>
               <div className="text-[11px] font-bold text-slate-400">Revogadas</div>
             </div>
           </div>
@@ -250,47 +250,47 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
 
       {/* Plan Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-sm">
+        <div className="surface-card p-5 flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center font-black text-sm shrink-0">
             M
           </div>
           <div>
-            <div className="text-base font-black text-slate-900">{monthlyPlanCount} Licenças</div>
+            <div className="text-base font-black text-slate-900 font-display font-mono-num">{monthlyPlanCount} Licenças</div>
             <div className="text-[11px] font-bold text-slate-400">Plano Mensal (30 Dias)</div>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-black text-sm">
+        <div className="surface-card p-5 flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 border border-purple-100 flex items-center justify-center font-black text-sm shrink-0">
             A
           </div>
           <div>
-            <div className="text-base font-black text-slate-900">{annualPlanCount} Licenças</div>
+            <div className="text-base font-black text-slate-900 font-display font-mono-num">{annualPlanCount} Licenças</div>
             <div className="text-[11px] font-bold text-slate-400">Plano Anual (365 Dias)</div>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-sm">
+        <div className="surface-card p-5 flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-black text-sm shrink-0">
             ∞
           </div>
           <div>
-            <div className="text-base font-black text-slate-900">{lifetimePlanCount} Licenças</div>
+            <div className="text-base font-black text-slate-900 font-display font-mono-num">{lifetimePlanCount} Licenças</div>
             <div className="text-[11px] font-bold text-slate-400">Plano Vitalício</div>
           </div>
         </div>
       </div>
 
       {/* Partner Network & Debt Metrics */}
-      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 p-5 rounded-3xl text-white shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
+      <div className="bg-[#0B192C] p-6 rounded-3xl text-white shadow-card border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+        <div className="flex items-center gap-4">
           <div className="w-11 h-11 rounded-2xl bg-blue-500/20 border border-blue-400/30 text-blue-400 flex items-center justify-center shrink-0">
             <Users className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs font-black uppercase tracking-wider text-blue-400">Rede de Parceiros & Revenda</div>
+            <div className="text-xs font-black uppercase tracking-wider text-blue-400 font-display">Rede de Parceiros & Revenda</div>
             <div className="text-sm text-slate-300 mt-0.5">
-              <strong className="text-white font-bold">{partnerDebts.length}</strong> licenças emitidas por parceiros no portal
+              <strong className="text-white font-bold font-mono-num">{partnerDebts.length}</strong> licenças emitidas por parceiros no portal
             </div>
           </div>
         </div>
@@ -298,14 +298,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
         <div className="flex flex-wrap items-center gap-4 sm:gap-8 border-t sm:border-t-0 sm:border-l border-slate-800 pt-3 sm:pt-0 sm:pl-8 w-full sm:w-auto justify-between sm:justify-end">
           <div>
             <span className="text-[10px] uppercase font-bold text-slate-400 block">Dívidas de Parceiros a Receber</span>
-            <span className="text-base font-black font-mono text-amber-400 flex items-center gap-1">
+            <span className="text-base font-black font-mono-num text-amber-400 flex items-center gap-1">
               <TrendingDown className="w-4 h-4 text-amber-400" />
               {fmt(totalPartnerDebtPending)} Kz
             </span>
           </div>
           <div>
             <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Recebido de Parceiros</span>
-            <span className="text-base font-black font-mono text-emerald-400 flex items-center gap-1">
+            <span className="text-base font-black font-mono-num text-emerald-400 flex items-center gap-1">
               <Wallet className="w-4 h-4 text-emerald-400" />
               {fmt(totalPartnerDebtPaid)} Kz
             </span>
@@ -366,10 +366,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm lg:col-span-2">
+        <div className="surface-card p-6 lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-sm font-black text-slate-900">Licenças Criadas — Últimos 6 Meses</h3>
+              <h3 className="text-sm font-black text-slate-900 font-display">Licenças Criadas — Últimos 6 Meses</h3>
               <p className="text-xs text-slate-400">Criadas vs. Ativas por mês</p>
             </div>
           </div>
@@ -388,9 +388,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+        <div className="surface-card p-6">
           <div className="mb-2">
-            <h3 className="text-sm font-black text-slate-900">Distribuição por Plano</h3>
+            <h3 className="text-sm font-black text-slate-900 font-display">Distribuição por Plano</h3>
             <p className="text-xs text-slate-400">Proporção atual de clientes</p>
           </div>
           <div className="flex items-center justify-center" style={{ height: 260 }}>
@@ -423,10 +423,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
       </div>
 
       {/* Recent Licenses Table — Dados Reais do Firestore */}
-      <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+      <div className="surface-card overflow-hidden">
         <div className="p-5 border-b border-slate-100 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-black text-slate-900">Últimas Licenças Emitidas</h3>
+            <h3 className="text-sm font-black text-slate-900 font-display">Últimas Licenças Emitidas</h3>
             <p className="text-xs text-slate-400">Registadas em tempo real na base de dados Firebase</p>
           </div>
         </div>

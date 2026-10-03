@@ -19,20 +19,20 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onBack }) 
           <span>Voltar à Página Principal</span>
         </button>
 
-        <div className="card-premium p-8 md:p-12 rounded-3xl space-y-8">
+        <div className="surface-card p-8 md:p-12 space-y-8">
           <div className="flex items-center gap-3.5 border-b border-slate-100 pb-6">
-            <div className="p-3 bg-blue-50 text-blue-700 rounded-2xl border border-blue-100">
+            <div className="p-3 bg-blue-50 text-blue-700 rounded-2xl border border-blue-200/60 shadow-xs">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-950">Política de Privacidade & Protecção de Dados</h1>
-              <p className="text-xs text-slate-500 font-semibold">KIVORA ERP • Em conformidade com a Lei n.º 22/11 da República de Angola • Luanda, Angola</p>
+              <h1 className="font-display text-2xl sm:text-3xl font-black text-slate-950">Política de Privacidade & Protecção de Dados</h1>
+              <p className="text-xs text-slate-500 font-medium">KIVORA ERP • Em conformidade com a Lei n.º 22/11 da República de Angola • Luanda, Angola</p>
             </div>
           </div>
 
           <div className="space-y-6 text-xs sm:text-sm text-slate-700 leading-relaxed">
             <div className="p-4 bg-blue-50/70 rounded-2xl border border-blue-200/60 text-xs text-blue-950 font-medium">
-              A presente Política de Privacidade regula o tratamento de dados pelo <strong>KIVORA ERP</strong> em estrito cumprimento da <strong>Lei n.º 22/11, de 27 de Junho (Lei da Protecção de Dados Pessoais da República de Angola)</strong> e das normas da Agência de Protecção de Dados (APD), bem como do <strong>Decreto Presidencial n.º 71/25</strong> e Certificação AGT n.º <strong>FE/440/AGT/2026</strong>.
+              A presente Política de Privacidade regula o tratamento de dados pelo <strong>KIVORA ERP</strong> em estrito cumprimento da <strong>Lei n.º 22/11, de 27 de Junho (Lei da Protecção de Dados Pessoais da República de Angola)</strong> e das normas da Agência de Protecção de Dados (APD), bem como do <strong>Decreto Presidencial n.º 71/25</strong> e Certificação AGT n.º <strong>FE/387/AGT/2026</strong>.
             </div>
 
             <h2 className="text-base font-extrabold text-slate-950">1. Princípio da Soberania dos Dados & Armazenamento Local (Offline-First)</h2>

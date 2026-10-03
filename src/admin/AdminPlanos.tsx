@@ -216,7 +216,7 @@ export const AdminPlanos: React.FC = () => {
         actions={
           <button
             onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md shadow-blue-600/20 transition-all"
+            className="inline-flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold font-display px-4 py-2.5 rounded-xl shadow-md shadow-brand-600/20 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Adicionar Novo Módulo</span>
@@ -233,7 +233,7 @@ export const AdminPlanos: React.FC = () => {
             sub="Soluções setoriais ativas"
             subColor="green"
             icon={<Layers className="w-4 h-4" />}
-            iconBg="bg-blue-50 text-blue-600"
+            iconBg="bg-brand-50 text-brand-600"
           />
           <StatCard
             label="Empresas Ativas c/ Módulos"
@@ -253,19 +253,19 @@ export const AdminPlanos: React.FC = () => {
           />
         </div>
 
-        {/* Grid dos 6 Módulos Oficiais */}
+        {/* Grid dos Módulos Oficiais */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {modules.map((mod) => (
             <div
               key={mod.id}
-              className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-5"
+              className="surface-card rounded-3xl p-6 transition-all flex flex-col justify-between space-y-5"
             >
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                  <span className="text-[10px] font-mono font-semibold text-brand-600 bg-brand-50/80 px-2 py-0.5 rounded-md border border-brand-200/60">
                     {mod.code}
                   </span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  <span className={`text-[10px] font-semibold uppercase tracking-wider font-display px-2.5 py-0.5 rounded-full ${
                     mod.status === 'available' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                     'bg-amber-50 text-amber-700 border border-amber-200'
                   }`}>
@@ -274,24 +274,24 @@ export const AdminPlanos: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-base font-black text-slate-900">{mod.name}</h3>
-                  <p className="text-[11px] font-bold text-slate-400 uppercase mt-0.5">
+                  <h3 className="text-base font-black text-slate-950 font-display tracking-tight">{mod.name}</h3>
+                  <p className="text-[11px] font-semibold text-slate-400 uppercase mt-0.5 font-display">
                     {mod.category} • Versão {mod.version}
                   </p>
                 </div>
 
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-baseline justify-between">
-                  <span className="text-xs text-slate-500 font-medium">Preço Mensal:</span>
+                <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200/80 flex items-baseline justify-between">
+                  <span className="text-xs text-slate-500 font-medium font-display">Preço Mensal:</span>
                   <div>
-                    <span className="text-lg font-black text-slate-900 font-mono">{fmt(mod.price_monthly_aoa)}</span>
-                    <span className="text-xs text-slate-500 font-bold ml-1">Kz/mês</span>
+                    <span className="text-lg font-black text-slate-950 font-mono-num">{fmt(mod.price_monthly_aoa)}</span>
+                    <span className="text-xs text-slate-500 font-semibold ml-1 font-sans">Kz/mês</span>
                   </div>
                 </div>
 
                 {/* Features List */}
                 <div className="space-y-2 pt-1">
-                  <p className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Recursos Incluídos:</p>
-                  <ul className="space-y-1.5 text-xs text-slate-600">
+                  <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wider font-display">Recursos Incluídos:</p>
+                  <ul className="space-y-1.5 text-xs text-slate-600 font-sans">
                     {mod.features.map((feat, idx) => (
                       <li key={idx} className="flex items-start gap-2">
                         <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
@@ -303,12 +303,12 @@ export const AdminPlanos: React.FC = () => {
               </div>
 
               <div className="border-t border-slate-100 pt-4 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">
-                  {mod.active_tenants} empresa(s) utilizam
+                <span className="text-slate-400 font-medium font-sans">
+                  <strong className="font-mono-num font-bold text-slate-600">{mod.active_tenants}</strong> empresa(s) utilizam
                 </span>
                 <button
                   onClick={() => notify.info(`Módulo ${mod.name} pronto e sincronizado.`)}
-                  className="text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer"
+                  className="text-brand-600 hover:text-brand-700 font-semibold font-display flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   <span>Configurar</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -321,57 +321,57 @@ export const AdminPlanos: React.FC = () => {
 
       {/* Modal Adicionar Módulo */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-scaleUp">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-slate-900">Novo Módulo para o Kivora ERP</h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900">
+              <h3 className="text-base font-black text-slate-950 font-display tracking-tight">Novo Módulo para o Kivora ERP</h3>
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900 cursor-pointer p-1">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateModule} className="space-y-4 text-xs">
+            <form onSubmit={handleCreateModule} className="space-y-4 text-xs font-sans">
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Nome do Módulo</label>
+                <label className="font-semibold text-slate-700 uppercase font-display text-[11px]">Nome do Módulo</label>
                 <input
                   type="text"
                   required
                   placeholder="Ex: Gestão de Frotas & Logística"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium"
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50/70 focus:bg-white focus:border-brand-500 focus:outline-none font-medium transition-all"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Código Único</label>
+                  <label className="font-semibold text-slate-700 uppercase font-display text-[11px]">Código Único</label>
                   <input
                     type="text"
                     required
                     placeholder="MOD-FLEET-LOG"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-mono font-bold"
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50/70 focus:bg-white focus:border-brand-500 focus:outline-none font-mono font-bold text-brand-600 transition-all"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Preço Mensal (Kz)</label>
+                  <label className="font-semibold text-slate-700 uppercase font-display text-[11px]">Preço Mensal (Kz)</label>
                   <input
                     type="number"
                     value={price}
                     onChange={(e) => setPrice(Number(e.target.value))}
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-bold"
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50/70 focus:bg-white focus:border-brand-500 focus:outline-none font-mono-num font-bold text-slate-900 transition-all"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Categoria</label>
+                <label className="font-semibold text-slate-700 uppercase font-display text-[11px]">Categoria</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-white font-bold"
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-white font-semibold font-display text-slate-800 focus:border-brand-500 focus:outline-none cursor-pointer"
                 >
                   <option value="ERP Core">ERP Core</option>
                   <option value="POS & Retalho">POS & Retalho</option>
@@ -383,13 +383,13 @@ export const AdminPlanos: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Funcionalidades (1 por linha)</label>
+                <label className="font-semibold text-slate-700 uppercase font-display text-[11px]">Funcionalidades (1 por linha)</label>
                 <textarea
                   rows={3}
                   placeholder="Rastreamento GPS em tempo real&#10;Controlo de manutenção de veículos&#10;Gestão de motoristas"
                   value={featureText}
                   onChange={(e) => setFeatureText(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-medium"
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50/70 focus:bg-white focus:border-brand-500 focus:outline-none font-medium transition-all"
                 />
               </div>
 
@@ -397,13 +397,13 @@ export const AdminPlanos: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold font-display text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20"
+                  className="px-5 py-2.5 rounded-xl text-xs font-semibold font-display bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/20 transition-all cursor-pointer"
                 >
                   Criar Módulo
                 </button>

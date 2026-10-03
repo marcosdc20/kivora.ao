@@ -160,7 +160,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
                 <span>Demonstração Oficial Kivora ERP</span>
               </div>
               
-              <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight text-slate-950">
+              <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight text-slate-950 font-display">
                 Solicite uma Apresentação Personalizada
               </h3>
               <p className="text-slate-600 text-xs mt-1 max-w-lg leading-relaxed">
@@ -178,7 +178,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
                 <CheckCircle className="w-9 h-9" />
               </div>
               <div>
-                <h4 className="text-2xl font-black text-slate-900">
+                <h4 className="text-2xl font-black text-slate-900 font-display">
                   Pedido Enviado com Sucesso!
                 </h4>
                 <p className="text-slate-600 max-w-md mx-auto text-xs sm:text-sm leading-relaxed mt-2">
@@ -389,7 +389,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-xs sm:text-sm px-7 py-3 rounded-xl shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 hover:-translate-y-0.5 transition-all flex items-center gap-2 cursor-pointer"
+                  className="btn-cta text-white font-bold text-xs sm:text-sm px-7 py-3 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {submitting ? (
                     <>

@@ -68,34 +68,34 @@ const AdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/30">
+          <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/30 border border-blue-400/30">
             <Lock className="w-7 h-7 text-white" strokeWidth={1.75} />
           </div>
-          <h1 className="text-2xl font-black text-white">KIVORA Admin</h1>
-          <p className="text-slate-500 text-sm mt-1">Acesso Executivo & Gestão Cloud (Firebase)</p>
+          <h1 className="text-2xl font-black text-white font-display tracking-tight">KIVORA Admin</h1>
+          <p className="text-slate-400 text-sm mt-1">Acesso Executivo & Gestão Cloud (Firebase)</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-5">
+        <form onSubmit={handleSubmit} className="surface-card bg-slate-900/95 border-slate-800 rounded-3xl p-8 space-y-5 shadow-2xl">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Email de Administrador</label>
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider font-display">Email de Administrador</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@kivora.ao"
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
+              className="w-full bg-slate-800/90 border border-slate-700/80 text-white rounded-xl px-4 py-3 text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Palavra-passe</label>
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider font-display">Palavra-passe</label>
             <input
               type="password"
               required
               value={pass}
               onChange={(e) => setPass(e.target.value)}
               placeholder="••••••••"
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
+              className="w-full bg-slate-800/90 border border-slate-700/80 text-white rounded-xl px-4 py-3 text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
           {error && (
@@ -104,7 +104,7 @@ const AdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-sm py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/30 hover:-translate-y-0.5 disabled:opacity-50"
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-sm py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/30 hover:-translate-y-0.5 disabled:opacity-50 font-display cursor-pointer"
           >
             {loading ? 'A autenticar no Firebase...' : 'Entrar no Painel Admin'}
           </button>
@@ -313,7 +313,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
             {/* AGT Certification Live Pill */}
             <div className="hidden xl:flex items-center gap-1.5 ml-2 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Validação Fiscal AGT 2026</span>
+              <span>Homologação AGT FE/387/AGT/2026</span>
             </div>
           </div>
 

@@ -382,28 +382,28 @@ export const AdminPagamentos: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
           <button
             onClick={() => setActiveTab('clientes')}
-            className={`text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${
+            className={`text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 font-display cursor-pointer ${
               activeTab === 'clientes'
                 ? 'bg-slate-950 text-white shadow-sm'
-                : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'
+                : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
             }`}
           >
-            <CreditCard className="w-3.5 h-3.5" />
-            <span>Faturas Diretas a Clientes ({invoices.length})</span>
+            <CreditCard className="w-3.5 h-3.5 text-blue-500" />
+            <span>Faturas Diretas a Clientes <span className="font-mono-num">({invoices.length})</span></span>
           </button>
 
           <button
             onClick={() => setActiveTab('parceiros')}
-            className={`text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${
+            className={`text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 font-display cursor-pointer ${
               activeTab === 'parceiros'
                 ? 'bg-slate-950 text-white shadow-sm'
-                : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'
+                : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
             }`}
           >
-            <Users className="w-3.5 h-3.5" />
-            <span>Dívidas & Cobranças a Parceiros ({partnerDebts.length})</span>
+            <Users className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Dívidas & Cobranças a Parceiros <span className="font-mono-num">({partnerDebts.length})</span></span>
             {totalPartnerDebtPending > 0 && (
-              <span className="bg-amber-500 text-slate-950 text-[10px] font-black px-1.5 py-0.2 rounded-full">
+              <span className="bg-amber-500 text-slate-950 text-[10px] font-black px-1.5 py-0.2 rounded-full font-mono-num">
                 {fmt(totalPartnerDebtPending)} Kz
               </span>
             )}
@@ -425,10 +425,10 @@ export const AdminPagamentos: React.FC = () => {
                   <button
                     key={f.id}
                     onClick={() => setStatusFilter(f.id as any)}
-                    className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all ${
+                    className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all font-display cursor-pointer ${
                       statusFilter === f.id
                         ? 'bg-slate-950 text-white border-slate-950 shadow-sm'
-                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
+                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     {f.label}
@@ -443,17 +443,17 @@ export const AdminPagamentos: React.FC = () => {
                   placeholder="Pesquisar por fatura, empresa, NIF..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-medium"
+                  className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-medium shadow-2xs"
                 />
               </div>
             </div>
 
             {/* Tabela de Faturas */}
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <div className="surface-card rounded-2xl overflow-hidden shadow-card">
               <div className="overflow-x-auto w-full">
                 <table className="w-full text-xs text-left min-w-[700px]">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 uppercase font-black text-[10px] tracking-wider">
+                  <tr className="border-b border-slate-100 bg-slate-50/80 text-slate-400 uppercase font-black text-[10px] tracking-wider font-display">
                     <th className="p-4">N.º Fatura</th>
                     <th className="p-4">Empresa / NIF</th>
                     <th className="p-4">Plano de Subscrição</th>
@@ -469,14 +469,14 @@ export const AdminPagamentos: React.FC = () => {
                     <tr>
                       <td colSpan={8} className="p-8 text-center text-slate-400">
                         <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
-                        <span>A sincronizar faturas com o Firebase...</span>
+                        <span className="font-display">A sincronizar faturas com o Firebase...</span>
                       </td>
                     </tr>
                   ) : filteredInvoices.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="p-8 text-center text-slate-400">
                         <FileText className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                        <p className="font-bold text-slate-700">Nenhuma fatura encontrada</p>
+                        <p className="font-bold text-slate-700 font-display">Nenhuma fatura encontrada</p>
                         <p className="text-[11px] mt-1 text-slate-400">
                           As faturas são geradas automaticamente com base nas licenças ativadas no Firebase.
                         </p>
@@ -484,16 +484,16 @@ export const AdminPagamentos: React.FC = () => {
                     </tr>
                   ) : (
                     filteredInvoices.map((inv) => (
-                      <tr key={inv.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="p-4 font-mono font-bold text-blue-600">
+                      <tr key={inv.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="p-4 font-mono-num font-bold text-blue-600">
                           {inv.invoice_number}
                         </td>
                         <td className="p-4">
-                          <p className="font-bold text-slate-900">{inv.company_name}</p>
-                          <p className="text-slate-400 text-[10px] font-mono">NIF: {inv.nif}</p>
+                          <p className="font-bold text-slate-900 font-display">{inv.company_name}</p>
+                          <p className="text-slate-400 text-[10px] font-mono-num">NIF: {inv.nif}</p>
                         </td>
                         <td className="p-4 text-slate-600 font-medium">{inv.plan_label}</td>
-                        <td className="p-4 font-mono font-black text-slate-900">{fmt(inv.amount_aoa)} Kz</td>
+                        <td className="p-4 font-mono-num font-black text-slate-900">{fmt(inv.amount_aoa)} Kz</td>
                         <td className="p-4 text-slate-500 text-[11px] font-medium">
                           {inv.payment_method || '—'}
                         </td>
@@ -507,7 +507,7 @@ export const AdminPagamentos: React.FC = () => {
                             {inv.status === 'paid' ? 'Liquidada' : inv.status === 'pending' ? 'Pendente' : 'Vencida'}
                           </span>
                         </td>
-                        <td className="p-4 text-slate-500 font-medium">{inv.due_date}</td>
+                        <td className="p-4 text-slate-500 font-mono-num font-medium">{inv.due_date}</td>
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             {inv.status !== 'paid' && (
@@ -552,10 +552,10 @@ export const AdminPagamentos: React.FC = () => {
                   <button
                     key={f.id}
                     onClick={() => setPartnerStatusFilter(f.id as any)}
-                    className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all ${
+                    className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all font-display cursor-pointer ${
                       partnerStatusFilter === f.id
                         ? 'bg-slate-950 text-white border-slate-950 shadow-sm'
-                        : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'
+                        : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     {f.label}
@@ -568,7 +568,7 @@ export const AdminPagamentos: React.FC = () => {
                   <button
                     onClick={handleMarkPartnerDebtsPaid}
                     disabled={markingDebts}
-                    className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition-all cursor-pointer font-display"
                   >
                     {markingDebts ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                     <span>Confirmar Pagamento ({selectedDebtIds.length})</span>
@@ -582,18 +582,18 @@ export const AdminPagamentos: React.FC = () => {
                     placeholder="Pesquisar parceiro, chave, empresa..."
                     value={partnerSearch}
                     onChange={(e) => setPartnerSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-medium"
+                    className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-medium shadow-2xs"
                   />
                 </div>
               </div>
             </div>
 
             {/* Tabela de Dívidas de Parceiros */}
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <div className="surface-card rounded-2xl overflow-hidden shadow-card">
               <div className="overflow-x-auto w-full">
                 <table className="w-full text-xs text-left min-w-[700px]">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 uppercase font-black text-[10px] tracking-wider">
+                  <tr className="border-b border-slate-100 bg-slate-50/80 text-slate-400 uppercase font-black text-[10px] tracking-wider font-display">
                     <th className="p-4 w-10">
                       <span className="sr-only">Seleção</span>
                     </th>
@@ -611,7 +611,7 @@ export const AdminPagamentos: React.FC = () => {
                     <tr>
                       <td colSpan={8} className="p-8 text-center text-slate-400">
                         <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                        <p className="font-bold text-slate-700">Nenhuma dívida de parceiro encontrada</p>
+                        <p className="font-bold text-slate-700 font-display">Nenhuma dívida de parceiro encontrada</p>
                         <p className="text-[11px] mt-1 text-slate-400">
                           Quando os parceiros emitem licenças no portal deles, as dívidas de atacado surgem aqui automaticamente.
                         </p>
@@ -619,7 +619,7 @@ export const AdminPagamentos: React.FC = () => {
                     </tr>
                   ) : (
                     filteredPartnerDebts.map((debt) => (
-                      <tr key={debt.id} className="hover:bg-slate-50 transition-colors">
+                      <tr key={debt.id} className="hover:bg-slate-50/80 transition-colors">
                         <td className="p-4">
                           <input
                             type="checkbox"
@@ -633,20 +633,20 @@ export const AdminPagamentos: React.FC = () => {
                           />
                         </td>
                         <td className="p-4">
-                          <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                          <span className="font-mono-num font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
                             {debt.license_id}
                           </span>
-                          <p className="font-bold text-slate-900 mt-1">{debt.company_name}</p>
+                          <p className="font-bold text-slate-900 mt-1 font-display">{debt.company_name}</p>
                         </td>
                         <td className="p-4">
-                          <p className="font-bold text-slate-900">{debt.partner_name || 'Parceiro'}</p>
-                          <span className="font-mono text-[10px] text-slate-500">{debt.partner_id}</span>
+                          <p className="font-bold text-slate-900 font-display">{debt.partner_name || 'Parceiro'}</p>
+                          <span className="font-mono-num text-[10px] text-slate-500">{debt.partner_id}</span>
                         </td>
                         <td className="p-4 font-semibold text-slate-700">{debt.plan_type}</td>
-                        <td className="p-4 font-mono font-black text-slate-900">
+                        <td className="p-4 font-mono-num font-black text-slate-900">
                           {fmt(debt.cost_aoa)} Kz
                         </td>
-                        <td className="p-4 font-mono text-slate-600">
+                        <td className="p-4 font-mono-num text-slate-600">
                           {debt.client_price_aoa > 0 ? `${fmt(debt.client_price_aoa)} Kz` : '—'}
                         </td>
                         <td className="p-4">
@@ -657,7 +657,7 @@ export const AdminPagamentos: React.FC = () => {
                             {debt.paid ? 'Liquidado' : 'Dívida Pendente'}
                           </span>
                         </td>
-                        <td className="p-4 text-slate-500 font-medium">
+                        <td className="p-4 text-slate-500 font-mono-num font-medium">
                           {new Date(debt.created_at).toLocaleDateString('pt-AO')}
                         </td>
                       </tr>
@@ -673,18 +673,18 @@ export const AdminPagamentos: React.FC = () => {
 
       {/* Modal Emitir Nova Fatura de Cliente */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="surface-card bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200/90 space-y-5 animate-fadeIn">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-slate-900">Emitir Nova Fatura de Subscrição</h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900">
+              <h3 className="text-base font-black text-slate-900 font-display">Emitir Nova Fatura de Subscrição</h3>
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900 cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleCreateInvoice} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Nome da Empresa</label>
+                <label className="font-bold text-slate-700 uppercase font-display">Nome da Empresa</label>
                 <input
                   type="text"
                   required
@@ -696,18 +696,18 @@ export const AdminPagamentos: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">NIF</label>
+                <label className="font-bold text-slate-700 uppercase font-display">NIF</label>
                 <input
                   type="text"
                   placeholder="5401234567"
                   value={companyNif}
                   onChange={(e) => setCompanyNif(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-mono font-bold"
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-mono-num font-bold"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase">Plano de Subscrição</label>
+                <label className="font-bold text-slate-700 uppercase font-display">Plano de Subscrição</label>
                 <select
                   value={planLabel}
                   onChange={(e) => setPlanLabel(e.target.value)}
@@ -722,17 +722,17 @@ export const AdminPagamentos: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Valor (Kz)</label>
+                  <label className="font-bold text-slate-700 uppercase font-display">Valor (Kz)</label>
                   <input
                     type="number"
                     required
                     value={amount}
                     onChange={(e) => setAmount(Number(e.target.value))}
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-mono font-bold"
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-slate-50 font-mono-num font-bold"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Estado Inicial</label>
+                  <label className="font-bold text-slate-700 uppercase font-display">Estado Inicial</label>
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as any)}
@@ -746,7 +746,7 @@ export const AdminPagamentos: React.FC = () => {
 
               {status === 'paid' && (
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase">Método de Pagamento</label>
+                  <label className="font-bold text-slate-700 uppercase font-display">Método de Pagamento</label>
                   <select
                     value={method}
                     onChange={(e) => setMethod(e.target.value as any)}
@@ -763,13 +763,13 @@ export const AdminPagamentos: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20"
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 font-display cursor-pointer"
                 >
                   Emitir Fatura
                 </button>

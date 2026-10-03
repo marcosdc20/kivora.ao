@@ -204,14 +204,14 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
             <button
               key={key}
               onClick={() => setFilterStatus(key)}
-              className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all ${
+              className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all font-display cursor-pointer ${
                 filterStatus === key
                   ? 'bg-slate-950 text-white border-slate-950 shadow-sm'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
               }`}
             >
               {key === 'todos' ? 'Todas as Empresas' : key === 'ativa' ? 'Ativas' : key === 'pendente' ? 'Pendentes' : 'Suspensas'}
-              <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded-full ${filterStatus === key ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+              <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded-full font-mono-num ${filterStatus === key ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
                 {count}
               </span>
             </button>
@@ -226,28 +226,28 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
             placeholder="Pesquisar por nome da empresa, NIF ou email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 font-medium shadow-sm"
+            className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 font-medium shadow-2xs"
           />
         </div>
 
         {/* Tabela de Empresas */}
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <div className="surface-card rounded-2xl overflow-hidden shadow-card">
           {loading ? (
             <div className="p-12 text-center text-slate-400 space-y-2">
               <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-600" />
-              <p className="text-xs font-bold">A carregar empresas do Firebase Firestore...</p>
+              <p className="text-xs font-bold font-display">A carregar empresas do Firebase Firestore...</p>
             </div>
           ) : filtered.length === 0 ? (
             <div className="p-12 text-center text-slate-400 space-y-2">
               <Building2 className="w-10 h-10 mx-auto text-slate-300" />
-              <p className="text-sm font-bold text-slate-600">Nenhuma empresa encontrada</p>
+              <p className="text-sm font-bold text-slate-700 font-display">Nenhuma empresa encontrada</p>
               <p className="text-xs text-slate-400">Clique em "Registar Empresa" ou emita uma nova licença.</p>
             </div>
           ) : (
             <div className="overflow-x-auto w-full">
               <table className="w-full text-xs min-w-[650px]">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 font-black uppercase text-[10px] tracking-wider text-left">
+                <tr className="border-b border-slate-100 bg-slate-50/80 text-slate-400 font-black uppercase text-[10px] tracking-wider text-left font-display">
                   <th className="px-5 py-3.5">Empresa / NIF</th>
                   <th className="px-4 py-3.5">Contactos</th>
                   <th className="px-4 py-3.5 hidden md:table-cell">Plano Ativo</th>
@@ -259,44 +259,44 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filtered.map((emp) => (
-                  <tr key={emp.id} className="hover:bg-slate-50 transition-colors group">
+                  <tr key={emp.id} className="hover:bg-slate-50/80 transition-colors group">
                     <td className="px-5 py-3.5">
-                      <p className="font-bold text-slate-900 text-xs">{emp.nome}</p>
-                      <p className="text-slate-400 text-[10px] font-mono">NIF: {emp.nif} • {emp.provincia}</p>
+                      <p className="font-bold text-slate-900 text-xs font-display">{emp.nome}</p>
+                      <p className="text-slate-400 text-[10px] font-mono-num">NIF: {emp.nif} • {emp.provincia}</p>
                     </td>
                     <td className="px-4 py-3.5">
                       <p className="text-slate-700 font-medium">{emp.email}</p>
-                      <p className="text-slate-400 text-[10px]">{emp.telefone}</p>
+                      <p className="text-slate-400 text-[10px] font-mono-num">{emp.telefone}</p>
                     </td>
                     <td className="px-4 py-3.5 hidden md:table-cell">
-                      <span className="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded text-[11px]">
+                      <span className="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded text-[11px] font-display">
                         {emp.plano}
                       </span>
                     </td>
                     <td className="px-4 py-3.5">
                       <StatusBadge status={emp.status} />
                     </td>
-                    <td className="px-4 py-3.5 text-slate-600 hidden lg:table-cell font-mono text-[11px]">
+                    <td className="px-4 py-3.5 text-slate-600 hidden lg:table-cell font-mono-num text-[11px] font-bold">
                       {emp.licencaId}
                     </td>
                     <td className="px-4 py-3.5 hidden xl:table-cell">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-slate-900">{emp.computadores.atual}</span>
-                        <span className="text-slate-400">/ {emp.computadores.maximo} PC(s)</span>
+                        <span className="font-bold text-slate-900 font-mono-num">{emp.computadores.atual}</span>
+                        <span className="text-slate-400 font-mono-num">/ {emp.computadores.maximo} PC(s)</span>
                       </div>
                     </td>
                     <td className="px-5 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => onSelectEmpresa(emp)}
-                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition-colors"
+                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
                         >
                           <Eye className="w-3.5 h-3.5" />
                           <span>Detalhes</span>
                         </button>
                         <button
                           onClick={() => handleDeleteCompany(emp.id, emp.nome)}
-                          className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                           title="Remover Empresa"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -314,9 +314,9 @@ export const AdminEmpresas: React.FC<EmpresasProps> = ({ onSelectEmpresa }) => {
 
       {/* Modal Registar Empresa */}
       {modalNova && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
-            <h3 className="text-lg font-black text-slate-900">Registar Nova Empresa no Firebase</h3>
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="surface-card bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200/90 space-y-5 animate-fadeIn">
+            <h3 className="text-lg font-black text-slate-900 font-display">Registar Nova Empresa no Firebase</h3>
 
             <form onSubmit={handleAddCompanySubmit} className="space-y-4">
               <div className="space-y-1">
@@ -446,17 +446,17 @@ export const AdminEmpresaDetalhe: React.FC<EmpresaDetalheProps> = ({ empresa, on
 
       <div className="p-6 space-y-6">
         {/* Header Card */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="surface-card bg-white rounded-3xl p-6 shadow-card flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 font-black text-xl border border-blue-100">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md shadow-blue-500/20 font-display">
               {empresa.nome.charAt(0)}
             </div>
             <div>
-              <h2 className="text-lg font-black text-slate-900">{empresa.nome}</h2>
+              <h2 className="text-lg font-black text-slate-900 font-display">{empresa.nome}</h2>
               <p className="text-xs text-slate-500 flex items-center gap-3 mt-1">
-                <span>NIF: <strong className="font-mono text-slate-700">{empresa.nif}</strong></span>
+                <span>NIF: <strong className="font-mono-num text-slate-700 font-bold">{empresa.nif}</strong></span>
                 <span>•</span>
-                <span>Plano: <strong className="text-blue-600">{empresa.plano}</strong></span>
+                <span>Plano: <strong className="text-blue-600 font-display">{empresa.plano}</strong></span>
               </p>
             </div>
           </div>
@@ -465,20 +465,20 @@ export const AdminEmpresaDetalhe: React.FC<EmpresaDetalheProps> = ({ empresa, on
 
         {/* Info Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+          <div className="surface-card p-5 rounded-2xl space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5 font-display">
               <Mail className="w-3.5 h-3.5 text-blue-600" /> Email Institucional
             </span>
             <p className="text-xs font-bold text-slate-900">{empresa.email}</p>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+          <div className="surface-card p-5 rounded-2xl space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5 font-display">
               <Phone className="w-3.5 h-3.5 text-emerald-600" /> Contacto Telefónico
             </span>
-            <p className="text-xs font-bold text-slate-900 font-mono">{empresa.telefone}</p>
+            <p className="text-xs font-bold text-slate-900 font-mono-num">{empresa.telefone}</p>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+          <div className="surface-card p-5 rounded-2xl space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5 font-display">
               <MapPin className="w-3.5 h-3.5 text-amber-600" /> Localização / Sede
             </span>
             <p className="text-xs font-bold text-slate-900">{empresa.provincia}</p>
@@ -486,11 +486,11 @@ export const AdminEmpresaDetalhe: React.FC<EmpresaDetalheProps> = ({ empresa, on
         </div>
 
         {/* License Box */}
-        <div className="bg-slate-950 text-white rounded-3xl p-6 shadow-xl space-y-3">
-          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Chave de Licença Vinculada</p>
-          <p className="font-mono text-xl font-black text-blue-400 tracking-wider">{empresa.licencaId}</p>
+        <div className="surface-card bg-slate-950 text-white rounded-3xl p-6 shadow-2xl space-y-3 border-slate-800">
+          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest font-display">Chave de Licença Vinculada</p>
+          <p className="font-mono-num text-xl font-black text-blue-400 tracking-wider">{empresa.licencaId}</p>
           <p className="text-xs text-slate-400">
-            Computadores Ativados: <strong className="text-white">{empresa.computadores.atual} de {empresa.computadores.maximo}</strong>
+            Computadores Ativados: <strong className="text-white font-mono-num">{empresa.computadores.atual} de {empresa.computadores.maximo}</strong>
           </p>
         </div>
       </div>

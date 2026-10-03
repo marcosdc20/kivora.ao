@@ -171,14 +171,13 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
             </div>
           </div>
 
-          <div className="lg:col-span-5 bg-mesh-dark text-white rounded-3xl p-8 shadow-2xl border border-slate-800 space-y-6 relative overflow-hidden">
-            <div className="orb orb-orange w-40 h-40 -top-10 -right-10 opacity-25" />
+          <div className="lg:col-span-5 bg-[#0B192C] text-white rounded-3xl p-8 shadow-xl border border-slate-800 space-y-6 relative overflow-hidden">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4 relative z-10">
-              <h3 className="font-black text-base text-white flex items-center gap-2">
+              <h3 className="font-semibold font-display text-base text-white flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-400" />
                 <span>Riscos de Não Conformidade</span>
               </h3>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-rose-500/15 text-rose-300 border border-rose-500/25 px-2 py-0.5 rounded-full font-tight">
                 Atenção
               </span>
             </div>
@@ -201,7 +200,7 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
             <div className="pt-2 border-t border-slate-800 relative z-10">
               <button
                 onClick={() => onOpenDemoModal('Auditoria Fiscal AGT')}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-md shadow-blue-600/30 cursor-pointer text-center shimmer-button"
+                className="btn-primary w-full text-xs py-3 px-4 rounded-xl cursor-pointer text-center"
               >
                 Solicitar Validação Gratuita do Sistema Atual
               </button>
@@ -232,7 +231,7 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
         {/* 2. Tabela de Regimes de IVA em Angola */}
         <section className="space-y-8">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-950">
+            <h2 className="text-2xl sm:text-3xl font-semibold font-display tracking-tight text-slate-900">
               Enquadramento nos Regimes de IVA em Angola
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -242,40 +241,34 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {regimesIva.map((regime, index) => {
-              const bgGradients = [
-                'from-blue-50/70 hover:border-blue-400 card-glow-blue',
-                'from-amber-50/70 hover:border-amber-400 card-glow-amber',
-                'from-emerald-50/70 hover:border-emerald-400 card-glow-green',
-              ];
-              const icons = [
-                <Scale className="icon-watermark wm-blue w-32 h-32" strokeWidth={1.25} />,
-                <ShieldCheck className="icon-watermark wm-amber w-32 h-32" strokeWidth={1.25} />,
-                <Lock className="icon-watermark wm-emerald w-32 h-32" strokeWidth={1.25} />,
+              const borderAccents = [
+                'hover:border-blue-300',
+                'hover:border-amber-300',
+                'hover:border-emerald-300',
               ];
               return (
                 <div
                   key={index}
-                  className={`bg-gradient-to-br ${bgGradients[index % 3]} via-white to-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden`}
+                  className={`surface-card bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 ${borderAccents[index % 3]}`}
                 >
-                  {icons[index % 3]}
-                  <div className="space-y-4 relative z-10">
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className={`text-[11px] font-black font-mono-num uppercase px-3 py-1 rounded-full border shadow-xs ${regime.badge}`}>
+                      <span className={`text-[11px] font-bold font-mono-num uppercase px-3 py-0.5 rounded-md border font-tight ${regime.badge}`}>
                         {regime.taxa}
                       </span>
-                      <span className="text-xs text-slate-400 font-bold">Código do IVA</span>
+                      <span className="text-xs text-slate-400 font-medium font-tight">Código do IVA</span>
                     </div>
 
-                    <h3 className="text-lg font-black text-slate-950 group-hover:text-blue-600 transition-colors">{regime.nome}</h3>
+                    <h3 className="text-lg font-semibold font-display text-slate-900 group-hover:text-[#1746A2] transition-colors">{regime.nome}</h3>
                     <p className="text-xs text-slate-600 leading-relaxed">{regime.enquadramento}</p>
 
                     <div className="pt-3 border-t border-slate-100 space-y-2">
-                      <p className="text-[11px] font-bold text-slate-950 uppercase tracking-wider">Obrigações Operacionais:</p>
+                      <p className="text-[11px] font-bold text-slate-900 uppercase tracking-wider font-tight">Obrigações Operacionais:</p>
                       <ul className="space-y-2 text-xs text-slate-700">
                         {regime.obrigacoes.map((obrigacao, idx) => (
                           <li key={idx} className="flex items-start gap-2 font-medium">
-                            <div className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
-                              <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" strokeWidth={2.5} />
+                            <div className="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                              <CheckCircle2 className="w-3 h-3" strokeWidth={2.5} />
                             </div>
                             <span>{obrigacao}</span>
                           </li>
@@ -284,10 +277,10 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-100 relative z-10">
+                  <div className="pt-4 border-t border-slate-100">
                     <button
                       onClick={() => onNavigatePage('calculadora-fiscal')}
-                      className="w-full text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-800 font-bold transition-all"
+                      className="btn-secondary w-full text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer font-tight"
                     >
                       <span>Simular Valores na Calculadora</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -331,16 +324,14 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
         )}
 
         {/* 3. Checklist Interativo de Conformidade */}
-        <section className="bg-mesh-dark text-white rounded-3xl p-8 sm:p-12 shadow-2xl border border-slate-800 space-y-8 relative overflow-hidden">
-          <div className="orb orb-blue w-72 h-72 -top-20 -left-20 opacity-30" />
-          <div className="orb orb-green w-56 h-56 -bottom-16 -right-16 opacity-25" />
+        <section className="bg-[#0B192C] text-white rounded-3xl p-8 sm:p-12 shadow-xl border border-slate-800 space-y-8 relative overflow-hidden">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-b border-slate-800/80 pb-6 relative z-10">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold mb-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/25 text-xs font-semibold mb-2 font-tight">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 <span>Autoavaliação Fiscal Interativa</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white">
+              <h2 className="text-2xl sm:text-3xl font-semibold font-display text-white tracking-tight">
                 <AnimatedText text="Checklist de Prontidão para Auditoria da AGT" el="span" mode="letter-stagger" className="text-white" />
               </h2>
               <p className="text-xs sm:text-sm text-slate-300 mt-1">
@@ -348,11 +339,11 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
               </p>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-w-[160px] shadow-lg">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block mb-1">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center min-w-[160px]">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-300 block mb-1 font-tight">
                 Índice de Conformidade
               </span>
-              <div className="text-3xl font-black text-emerald-400 font-mono-num">
+              <div className="text-3xl font-bold text-emerald-400 font-mono-num">
                 <CountUp end={progressPercent} suffix="%" type="odometer" duration={0.8} />
               </div>
               <span className="text-[11px] text-slate-300 font-medium">
@@ -370,21 +361,21 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
                   onClick={() => toggleCheck(item.id)}
                   className={`p-5 rounded-2xl border transition-all cursor-pointer flex items-start gap-4 select-none ${
                     isChecked
-                      ? 'bg-emerald-950/60 border-emerald-500/60 shadow-lg shadow-emerald-950/40 -translate-y-0.5'
+                      ? 'bg-emerald-950/40 border-emerald-500/50 shadow-sm -translate-y-0.5'
                       : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10'
                   }`}
                 >
                   <div
                     className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-all ${
                       isChecked
-                        ? 'bg-emerald-500 text-white font-bold shadow-md shadow-emerald-500/40'
-                        : 'border-2 border-slate-400 bg-slate-800'
+                        ? 'bg-emerald-500 text-white font-bold shadow-xs'
+                        : 'border-2 border-slate-500 bg-slate-800'
                     }`}
                   >
                     {isChecked && <CheckCircle2 className="w-4 h-4" />}
                   </div>
                   <div>
-                    <h4 className={`text-sm font-bold ${isChecked ? 'text-emerald-300' : 'text-white'}`}>
+                    <h4 className={`text-sm font-semibold font-display ${isChecked ? 'text-emerald-300' : 'text-white'}`}>
                       {item.titulo}
                     </h4>
                     <p className="text-xs text-slate-300 mt-1 leading-relaxed">
@@ -402,7 +393,7 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
             </p>
             <button
               onClick={() => onOpenDemoModal('Instalação Certificada AGT')}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3 px-6 rounded-xl transition-all shrink-0 cursor-pointer shadow-lg shadow-blue-600/30 shimmer-button"
+              className="btn-cta text-xs py-3 px-6 shrink-0 cursor-pointer"
             >
               Garantir Conformidade com KIVORA ERP
             </button>
@@ -421,44 +412,41 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-50/60 via-white to-white border border-slate-200/90 shadow-sm space-y-4 relative overflow-hidden group hover:border-blue-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 card-glow-blue">
-              <Calendar className="icon-watermark wm-blue w-32 h-32" strokeWidth={1.25} />
-              <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-black relative z-10 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <div className="surface-card p-6 rounded-3xl bg-white border border-slate-200/90 shadow-card space-y-4 group hover:border-blue-300 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[#1746A2] flex items-center justify-center font-bold group-hover:bg-[#1746A2] group-hover:text-white transition-colors">
                 <Calendar className="w-6 h-6" />
               </div>
-              <div className="space-y-1 relative z-10">
-                <span className="text-xs font-black text-blue-600 uppercase tracking-widest">Até ao Dia 15 do Mês</span>
-                <h3 className="text-base font-black text-slate-950">Envio do Ficheiro SAF-T AO</h3>
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-[#1746A2] uppercase tracking-wider font-tight">Até ao Dia 15 do Mês</span>
+                <h3 className="text-base font-semibold font-display text-slate-900">Envio do Ficheiro SAF-T AO</h3>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed relative z-10">
+              <p className="text-xs text-slate-600 leading-relaxed">
                 Extração e submissão do ficheiro XML das faturas emitidas no mês anterior através do Portal do Contribuinte da AGT.
               </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-50/60 via-white to-white border border-slate-200/90 shadow-sm space-y-4 relative overflow-hidden group hover:border-emerald-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 card-glow-green">
-              <Clock className="icon-watermark wm-emerald w-32 h-32" strokeWidth={1.25} />
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-black relative z-10 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+            <div className="surface-card p-6 rounded-3xl bg-white border border-slate-200/90 shadow-card space-y-4 group hover:border-emerald-300 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                 <Clock className="w-6 h-6" />
               </div>
-              <div className="space-y-1 relative z-10">
-                <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">Último Dia do Mês</span>
-                <h3 className="text-base font-black text-slate-950">Pagamento do IVA & Retenções</h3>
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wider font-tight">Último Dia do Mês</span>
+                <h3 className="text-base font-semibold font-display text-slate-900">Pagamento do IVA & Retenções</h3>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed relative z-10">
+              <p className="text-xs text-slate-600 leading-relaxed">
                 Liquidação do imposto apurado e entrega das retenções na fonte de clientes e prestadores de serviços.
               </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-50/60 via-white to-white border border-slate-200/90 shadow-sm space-y-4 relative overflow-hidden group hover:border-amber-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 card-glow-amber">
-              <Database className="icon-watermark wm-amber w-32 h-32" strokeWidth={1.25} />
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center font-black relative z-10 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+            <div className="surface-card p-6 rounded-3xl bg-white border border-slate-200/90 shadow-card space-y-4 group hover:border-amber-300 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold group-hover:bg-amber-600 group-hover:text-white transition-colors">
                 <Database className="w-6 h-6" />
               </div>
-              <div className="space-y-1 relative z-10">
-                <span className="text-xs font-black text-amber-600 uppercase tracking-widest">Diariamente</span>
-                <h3 className="text-base font-black text-slate-950">Fecho de Caixa & Backup</h3>
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-amber-600 uppercase tracking-wider font-tight">Diariamente</span>
+                <h3 className="text-base font-semibold font-display text-slate-900">Fecho de Caixa & Backup</h3>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed relative z-10">
+              <p className="text-xs text-slate-600 leading-relaxed">
                 Emissão do relatório diário Z-Report e cópia de segurança física dos dados fiscais gravados no computador.
               </p>
             </div>

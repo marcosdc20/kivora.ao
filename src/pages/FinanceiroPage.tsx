@@ -152,22 +152,21 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
 
       {/* Banner de Validador de Licença */}
       <section className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 -mt-8 relative z-20">
-        <div className="bg-mesh-dark border border-slate-800 rounded-3xl p-5 sm:p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl relative overflow-hidden">
-          <div className="orb orb-blue w-48 h-48 -top-12 -left-12 opacity-30" />
+        <div className="bg-[#0B192C] border border-slate-800 rounded-2xl p-5 sm:p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl relative overflow-hidden">
           <div className="flex items-center gap-3.5 text-center sm:text-left relative z-10">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-300 border border-blue-400/30 flex items-center justify-center shrink-0 shadow-inner">
-              <Key className="w-6 h-6" />
+            <div className="w-11 h-11 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-400/25 flex items-center justify-center shrink-0">
+              <Key className="w-5 h-5" />
             </div>
             <div>
-              <strong className="text-sm font-bold block text-white">Já possui uma Chave de Licença KIVORA?</strong>
+              <strong className="text-sm font-semibold font-display block text-white">Já possui uma Chave de Licença KIVORA?</strong>
               <span className="text-xs text-slate-300">Consulte a autenticidade fiscal, postos autorizados e validade no validador oficial.</span>
             </div>
           </div>
           <button
             onClick={() => onNavigatePage && onNavigatePage('validar-licenca')}
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg shadow-blue-600/30 transition-all shrink-0 cursor-pointer relative z-10 shimmer-button hover:-translate-y-0.5"
+            className="btn-primary text-xs py-2.5 px-5 shrink-0 flex items-center gap-2 cursor-pointer"
           >
-            <ShieldCheck className="w-4 h-4" />
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
             <span>Validar Licença Online</span>
           </button>
         </div>
@@ -176,10 +175,10 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
       {/* Grelha de Planos */}
       <section className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 py-16 sm:py-24 space-y-12">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
-          <span className="text-xs font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/60">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-[#1746A2] border border-blue-200/60 font-tight">
             {settings.pricingTag || DEFAULT_SETTINGS.pricingTag || 'Tabela de Preços Oficiais'}
           </span>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-950">
+          <h2 className="text-3xl sm:text-4xl font-semibold font-display tracking-tight text-slate-900">
             {settings.pricingTitle || DEFAULT_SETTINGS.pricingTitle || 'Escolha a Modalidade de Licenciamento'}
           </h2>
           <p className="text-slate-600 text-sm leading-relaxed">
@@ -192,65 +191,83 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
             return (
               <div
                 key={plan.id}
-                className={`surface-card p-6 sm:p-8 flex flex-col justify-between transition-all relative ${
-                  plan.highlight ? 'ring-2 ring-slate-900 shadow-md bg-white' : 'bg-white'
+                className={`rounded-3xl overflow-hidden flex flex-col justify-between transition-all duration-300 relative bg-white border ${
+                  plan.highlight
+                    ? 'border-slate-800 shadow-2xl ring-2 ring-[#FF6500]/20 lg:-translate-y-2'
+                    : 'border-slate-200/90 shadow-md hover:shadow-xl hover:-translate-y-1'
                 }`}
               >
-                {plan.highlight && (
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-white">
+                {/* Arched Curved Header matching Image 1 */}
+                <div
+                  className={`pt-8 pb-10 px-6 text-center text-white relative ${
+                    plan.highlight
+                      ? 'bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900'
+                      : 'bg-gradient-to-b from-[#FF6500] via-[#FF7A1A] to-[#FF8C38]'
+                  }`}
+                >
+                  {plan.highlight && (
+                    <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#FF6500] text-white mb-3 shadow-xs">
                       {plan.highlightBadge || 'Mais Escolhido em Angola'}
                     </span>
-                  </div>
-                )}
+                  )}
 
-                <div className="space-y-5 pt-1">
-                  <div>
-                    <div className="text-xl font-bold text-slate-950 mb-1">{plan.name}</div>
-                    <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                      {plan.desc}
-                    </p>
+                  <div className="text-xs uppercase tracking-wider font-bold text-white/80 mb-1">
+                    {plan.name}
                   </div>
 
-                  <div className="bg-slate-50 border border-slate-200/90 rounded-2xl py-3 px-4 flex items-baseline justify-center gap-1.5 shadow-2xs">
-                    <span className="text-3xl font-extrabold tracking-tight text-slate-950 font-mono-num">{plan.price}</span>
-                    <span className="text-sm font-bold text-slate-700">Kz</span>
-                    <span className="text-xs font-semibold text-slate-500 ml-1">
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="text-3xl sm:text-4xl font-black font-mono tracking-tight text-white">
+                      {plan.price}
+                    </span>
+                    <span className="text-sm font-bold text-white/90">Kz</span>
+                    <span className="text-xs text-white/70 ml-1">
                       {plan.period}
                     </span>
                   </div>
 
-                  <div className="space-y-3 pt-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider block text-slate-400">
-                      Funcionalidades Inclusas:
-                    </span>
-                    <ul className="space-y-2.5">
-                      {plan.features.map((feat, fi) => (
-                        <li key={fi} className="flex items-start gap-2.5 text-xs text-slate-700 font-medium">
-                          <div className={`w-4.5 h-4.5 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${
-                            plan.highlight ? 'bg-blue-50 text-[#1746A2]' : 'bg-slate-100 text-slate-700'
-                          }`}>
-                            <Check className="w-3 h-3" strokeWidth={2.5} />
-                          </div>
-                          <span>{feat}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  {/* Arched wave cutout at bottom of header */}
+                  <div className="absolute -bottom-1 left-0 right-0 h-4 bg-white rounded-t-[100%]" />
                 </div>
 
-                <div className="pt-8">
-                  <button
-                    onClick={() => onOpenDemoModal(`Licença ${plan.name}`)}
-                    className={`w-full py-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                      plan.highlight
-                        ? 'bg-slate-900 hover:bg-[#1746A2] text-white shadow-sm'
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-900'
-                    }`}
-                  >
-                    <span>{plan.ctaText}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                {/* Card Body */}
+                <div className="p-6 sm:p-8 flex flex-col justify-between flex-1 space-y-6">
+                  <div className="space-y-4">
+                    <p className="text-xs text-slate-600 leading-relaxed font-normal text-center">
+                      {plan.desc}
+                    </p>
+
+                    <div className="space-y-3 pt-2">
+                      <span className="text-[11px] font-bold uppercase tracking-wider block text-slate-400 text-center font-tight">
+                        Funcionalidades Inclusas:
+                      </span>
+                      <ul className="space-y-2.5">
+                        {plan.features.map((feat, fi) => (
+                          <li key={fi} className="flex items-start gap-2.5 text-xs text-slate-700 font-medium">
+                            <div className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                              plan.highlight ? 'bg-orange-50 text-[#FF6500]' : 'bg-slate-100 text-slate-700'
+                            }`}>
+                              <Check className="w-3 h-3" strokeWidth={2.5} />
+                            </div>
+                            <span>{feat}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="pt-4">
+                    <button
+                      onClick={() => onOpenDemoModal(`Licença ${plan.name}`)}
+                      className={`w-full py-3.5 rounded-full font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md ${
+                        plan.highlight
+                          ? 'bg-slate-900 hover:bg-slate-950 text-white shadow-slate-900/20 hover:shadow-lg'
+                          : 'bg-[#FF6500] hover:bg-[#EB5B00] text-white shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/30'
+                      }`}
+                    >
+                      <span>{plan.ctaText}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -263,11 +280,11 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
         <div className="max-w-4xl mx-auto space-y-10">
           
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-blue-600 bg-blue-100/60 px-3.5 py-1 rounded-full">
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#1746A2] bg-blue-100/60 px-3.5 py-1 rounded-full font-tight">
               <Calculator className="w-3.5 h-3.5" />
               <span>Simulador de Licenciamento & ROI</span>
             </div>
-            <h3 className="text-2xl sm:text-3xl font-black text-slate-950">
+            <h3 className="text-2xl sm:text-3xl font-semibold font-display tracking-tight text-slate-900">
               Personalize o Seu Pacote e Veja a Poupança Real
             </h3>
             <p className="text-slate-600 text-xs sm:text-sm max-w-lg mx-auto">
@@ -275,17 +292,17 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
             </p>
           </div>
 
-          <div className="bg-white rounded-3xl p-4 sm:p-8 lg:p-10 border border-slate-200 shadow-xl space-y-8">
+          <div className="surface-card bg-white rounded-3xl p-6 sm:p-8 lg:p-10 border border-slate-200 shadow-card space-y-8">
             
             {/* Escolha da Modalidade */}
             <div className="space-y-2">
-              <span className="text-xs font-bold text-slate-700 block">Modalidade de Licenciamento Desejada:</span>
+              <span className="text-xs font-semibold text-slate-700 block font-tight">Modalidade de Licenciamento Desejada:</span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <button
                   onClick={() => setSelectedPlanType('anual')}
-                  className={`p-3.5 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                  className={`p-3.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${
                     selectedPlanType === 'anual'
-                      ? 'bg-slate-950 text-white border-slate-950 shadow-md'
+                      ? 'bg-slate-950 text-white border-slate-950 shadow-sm'
                       : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                   }`}
                 >
@@ -295,9 +312,9 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
 
                 <button
                   onClick={() => setSelectedPlanType('mensal')}
-                  className={`p-3.5 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                  className={`p-3.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${
                     selectedPlanType === 'mensal'
-                      ? 'bg-slate-950 text-white border-slate-950 shadow-md'
+                      ? 'bg-slate-950 text-white border-slate-950 shadow-sm'
                       : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                   }`}
                 >
@@ -307,9 +324,9 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
 
                 <button
                   onClick={() => setSelectedPlanType('vitalicio')}
-                  className={`p-3.5 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                  className={`p-3.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${
                     selectedPlanType === 'vitalicio'
-                      ? 'bg-slate-950 text-white border-slate-950 shadow-md'
+                      ? 'bg-slate-950 text-white border-slate-950 shadow-sm'
                       : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                   }`}
                 >
@@ -322,11 +339,11 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
             {/* Controlo de Postos */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <label className="font-bold text-xs sm:text-sm text-slate-800 flex items-center gap-2">
-                  <Monitor className="w-4 h-4 text-blue-600" />
+                <label className="font-semibold text-xs sm:text-sm text-slate-800 flex items-center gap-2">
+                  <Monitor className="w-4 h-4 text-[#1746A2]" />
                   <span>Número de Postos de Trabalho (Caixas + Terminais em Rede LAN):</span>
                 </label>
-                <span className="text-xl sm:text-2xl font-black text-blue-600 bg-blue-50 border border-blue-200 px-4 py-1 rounded-xl">
+                <span className="text-xl sm:text-2xl font-bold font-mono-num text-[#1746A2] bg-blue-50 border border-blue-200 px-4 py-1 rounded-xl">
                   {terminals} {terminals === 1 ? 'Posto' : 'Postos'}
                 </span>
               </div>
@@ -337,9 +354,9 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
                 step={1}
                 value={terminals}
                 onChange={(e) => setTerminals(Number(e.target.value))}
-                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#1746A2]"
               />
-              <div className="flex justify-between text-[11px] text-slate-400 font-bold">
+              <div className="flex justify-between text-[11px] text-slate-400 font-semibold font-tight">
                 <span>1 PC (Balcão Único)</span>
                 <span>3 PCs (Loja Normal)</span>
                 <span>7 PCs (Supermercado)</span>
@@ -348,12 +365,12 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
             </div>
 
             {/* Resultado do Cálculo */}
-            <div className="p-6 bg-slate-900 text-white rounded-2xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="p-6 bg-[#0B192C] text-white rounded-2xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-card">
               <div className="space-y-1 text-center sm:text-left">
-                <span className="text-slate-400 text-xs font-semibold">Valor Total da Licença:</span>
+                <span className="text-slate-400 text-xs font-medium font-tight uppercase tracking-wider">Valor Total da Licença:</span>
                 <div className="flex items-baseline justify-center sm:justify-start gap-1">
                   <span className="text-xs font-bold text-blue-400">Kz</span>
-                  <span className="text-3xl sm:text-4xl font-black text-white">{calculatedPrice.toLocaleString('pt-AO')}</span>
+                  <span className="text-3xl sm:text-4xl font-extrabold font-display text-white font-mono-num">{calculatedPrice.toLocaleString('pt-AO')}</span>
                   <span className="text-xs text-slate-400">
                     / {selectedPlanType === 'anual' ? 'ano' : selectedPlanType === 'mensal' ? 'mês' : 'pagamento único'}
                   </span>
@@ -369,27 +386,27 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
 
               <button
                 onClick={() => onOpenDemoModal(`Simulação: ${terminals} Postos (${selectedPlanType.toUpperCase()}) - Kz ${calculatedPrice.toLocaleString('pt-AO')}`)}
-                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl shadow-lg shadow-blue-600/30 transition-all hover:-translate-y-0.5 cursor-pointer shrink-0"
+                className="btn-cta text-xs sm:text-sm px-6 py-3.5 shrink-0 w-full sm:w-auto flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Solicitar Proposta Desta Simulação</span>
               </button>
             </div>
 
             {/* Comparativo de Poupança Real vs Softwares Cloud */}
-            <div className="p-5 bg-blue-50 border border-blue-200/80 rounded-2xl text-xs space-y-2">
-              <div className="flex items-center gap-2 font-black text-blue-950 text-sm">
+            <div className="p-5 bg-blue-50/70 border border-blue-200/70 rounded-2xl text-xs space-y-2">
+              <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
                 <TrendingDown className="w-4 h-4 text-emerald-600" />
                 <span>Comparativo de Custo & Confiabilidade com Sistemas na Nuvem</span>
               </div>
-              <p className="text-blue-900 leading-relaxed">
+              <p className="text-slate-700 leading-relaxed">
                 Ao contrário de softwares baseados na nuvem internacional (que cobram mensalidades em USD e bloqueiam as vendas se a internet fibra falhar), o <strong>KIVORA ERP funciona 100% offline</strong> no computador da sua loja.
               </p>
-              <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-blue-200 text-[11px] font-bold text-blue-950">
+              <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-blue-200/80 text-[11px] font-semibold text-slate-900">
                 <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Zero risco de paragem de caixas por quebra de internet</span>
                 </span>
-                <span className="text-emerald-700 font-mono">Poupança estimada: ~{realSavingsAoa.toLocaleString('pt-AO')} Kz / ano</span>
+                <span className="text-emerald-700 font-mono-num font-bold">Poupança estimada: ~{realSavingsAoa.toLocaleString('pt-AO')} Kz / ano</span>
               </div>
             </div>
 
@@ -400,8 +417,8 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
       {/* FAQ de Licenciamento */}
       <section className="max-w-4xl mx-auto px-4 sm:px-8 lg:px-16 py-16 sm:py-20 space-y-10">
         <div className="text-center space-y-2">
-          <HelpCircle className="w-8 h-8 text-blue-600 mx-auto" />
-          <h3 className="text-2xl font-black text-slate-950">Perguntas Frequentes sobre Licenças</h3>
+          <HelpCircle className="w-8 h-8 text-[#1746A2] mx-auto" />
+          <h3 className="text-2xl font-semibold font-display tracking-tight text-slate-900">Perguntas Frequentes sobre Licenças</h3>
         </div>
 
         <div className="space-y-4">
@@ -423,8 +440,8 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
               a: 'Os seus dados ficam 100% gravados com total segurança no disco local do seu computador. O sistema permite consultar todo o histórico, emitir relatórios anteriores e imprimir segundas vias, apenas bloqueando a emissão de novas faturas até à renovação.',
             },
           ].map((item, idx) => (
-            <div key={idx} className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-1.5">
-              <h4 className="font-bold text-xs sm:text-sm text-slate-900">{item.q}</h4>
+            <div key={idx} className="surface-card p-5 space-y-1.5 bg-white">
+              <h4 className="font-semibold text-xs sm:text-sm text-slate-900">{item.q}</h4>
               <p className="text-xs text-slate-600 leading-relaxed">{item.a}</p>
             </div>
           ))}

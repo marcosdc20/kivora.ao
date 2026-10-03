@@ -661,25 +661,24 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
         
         {/* Título Principal da Loja */}
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+          <h1 className="font-display text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
             Loja de Equipamentos POS & Periféricos
           </h1>
-          <p className="text-xs sm:text-sm text-slate-600 mt-1">
-            Equipamentos comerciais e periféricos para o KIVORA ERP com garantia oficial em Angola.
+          <p className="text-xs sm:text-sm text-slate-600 mt-1 font-normal">
+            Equipamentos comerciais e periféricos homologados para o KIVORA ERP com garantia oficial em Angola.
           </p>
         </div>
 
         {/* Banner Informativo de Entrega */}
-        <div className="bg-mesh rounded-3xl border border-slate-200/80 p-5 sm:p-6 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-700 shadow-sm relative overflow-hidden">
-          <div className="orb orb-blue w-36 h-36 -top-8 -left-8 opacity-20" />
-          <div className="flex items-center gap-3 relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs font-bold">
+        <div className="surface-card p-5 sm:p-6 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-700">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center shrink-0 shadow-xs font-bold">
               <Truck className="w-5 h-5" />
             </div>
             <span><strong>Entrega Rápida em Luanda</strong> em até 24h e envio expresso para todas as províncias de Angola.</span>
           </div>
-          <div className="flex items-center gap-3 relative z-10 text-slate-600 shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 shadow-xs font-bold">
+          <div className="flex items-center gap-3 text-slate-600 shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center justify-center shrink-0 shadow-xs font-bold">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <span>Equipamentos 100% Homologados com <strong>12 Meses de Garantia Oficial</strong>.</span>
@@ -688,8 +687,8 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
 
         {/* Quantidade de Itens Encontrados */}
         <div className="flex items-center justify-between mb-4">
-          <p className="text-xs text-slate-500">
-            Mostrando <strong>{filteredProducts.length}</strong> produtos em catálogo
+          <p className="text-xs text-slate-500 font-medium">
+            Mostrando <strong className="text-slate-900 font-mono-num">{filteredProducts.length}</strong> produtos em catálogo
           </p>
         </div>
 
@@ -702,7 +701,7 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
                 setSelectedProduct(prod);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-blue-400 overflow-hidden flex flex-col justify-between group cursor-pointer transition-all duration-300 card-glow-blue"
+              className="surface-card overflow-hidden flex flex-col justify-between group cursor-pointer hover:-translate-y-1 hover:border-slate-300 hover:shadow-card transition-all duration-300"
             >
               <div>
                 
@@ -711,16 +710,16 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
                   <img
                     src={prod.image}
                     alt={prod.name}
-                    className="max-h-full max-w-full object-contain group-hover:scale-108 transition-transform duration-500"
+                    className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
                     onError={(e: any) => { e.target.src = '/imagens/pos_bundle_kit.jpg'; }}
                   />
                   {prod.discountPercent && (
-                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-rose-600 text-white font-bold text-[10px] rounded-lg shadow-sm">
+                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-rose-600 text-white font-bold text-[10px] rounded-lg shadow-xs font-mono-num">
                       -{prod.discountPercent}%
                     </span>
                   )}
                   {prod.badge && !prod.discountPercent && (
-                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-blue-600 text-white font-bold text-[10px] rounded-lg shadow-sm">
+                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-slate-900 text-white font-bold text-[10px] rounded-lg shadow-xs">
                       {prod.badge}
                     </span>
                   )}
@@ -732,7 +731,7 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
                   {/* Preço em Kwanzas */}
                   <div className="flex items-baseline gap-1 mb-1">
                     <span className="text-xs font-bold text-slate-500">Kz</span>
-                    <span className="text-lg sm:text-xl font-black text-slate-950 font-mono-num">
+                    <span className="font-display text-lg sm:text-xl font-black text-slate-950 font-mono-num">
                       {prod.priceAOA.toLocaleString('pt-AO')}
                     </span>
                   </div>
@@ -745,7 +744,7 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
                   )}
 
                   {/* Nome do Produto (2 linhas) */}
-                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 mb-2 leading-snug group-hover:text-blue-600 transition-colors">
+                  <h3 className="font-display text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 mb-2 leading-snug group-hover:text-blue-600 transition-colors">
                     {prod.name}
                   </h3>
 
@@ -777,7 +776,7 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
                     setSelectedProduct(prod);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="w-full py-2.5 bg-slate-50 hover:bg-blue-600 hover:text-white text-slate-800 rounded-xl font-bold text-xs border border-slate-200 hover:border-transparent transition-all cursor-pointer shadow-2xs"
+                  className="w-full py-2.5 bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 rounded-xl font-bold text-xs border border-slate-200 hover:border-transparent transition-all cursor-pointer shadow-2xs"
                 >
                   Ver Detalhes do Produto
                 </button>

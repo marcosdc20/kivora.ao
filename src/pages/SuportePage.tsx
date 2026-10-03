@@ -118,12 +118,12 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
     {
       categoria: 'Operação & Faturação',
       q: 'O KIVORA funciona mesmo se a internet da loja falhar?',
-      a: 'Sim, a 100%. A base de dados do Kivora fica instalada no seu computador. Todas as vendas, emissão de faturas, fecho de caixa e impressão de talões ocorrem localmente sem depender de ligação à internet.',
+      a: 'Sim, a 100%. A base de dados do Kivora fica instalada no seu computador ou servidor local. Todas as vendas, emissão de faturas, fecho de caixa e impressão de talões ocorrem localmente sem depender de ligação à internet.',
     },
     {
       categoria: 'Redes Locais & Multi-Posto',
       q: 'Como posso ligar 3 ou mais caixas em rede local na mesma loja?',
-      a: 'Basta instalar o Kivora como "Servidor" no computador principal e como "Terminal Cliente" nos computadores dos caixas, todos conectados ao mesmo router/switch de rede local.',
+      a: 'Basta instalar o Kivora como "Servidor" no computador principal e como "Terminal Cliente" nos computadores dos caixas, todos conectados ao mesmo router/switch de rede local cabeada ou Wi-Fi empresarial.',
     },
     {
       categoria: 'Conformidade Fiscal AGT',
@@ -157,27 +157,26 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           
           {/* Card 1: WhatsApp */}
-          <div className="bg-gradient-to-br from-emerald-50/60 via-white to-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-emerald-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden card-glow-green">
-            <MessageCircle className="icon-watermark wm-emerald w-32 h-32" strokeWidth={1.25} />
-            <div className="space-y-4 relative z-10">
+          <div className="surface-card p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-emerald-300 transition-all duration-300">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-xs">
                   <MessageCircle className="w-6 h-6" />
                 </div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   Atendimento Ativo
                 </span>
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-950 group-hover:text-emerald-700 transition-colors">WhatsApp & Chat Imediato</h3>
+                <h3 className="text-base font-bold font-display text-slate-950 group-hover:text-emerald-700 transition-colors">WhatsApp & Chat Imediato</h3>
                 <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
                   Canal prioritário para suporte em tempo real com os nossos técnicos especializados em Angola.
                 </p>
               </div>
               <div className="text-xs font-mono-num font-bold text-slate-950 pt-3 border-t border-slate-100 flex items-center justify-between">
                 <span>{settings.phoneDisplay}</span>
-                <span className="text-[11px] font-sans font-medium text-slate-400">Direto</span>
+                <span className="text-[11px] font-sans font-medium text-slate-400">Canal Direto</span>
               </div>
               <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -189,7 +188,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-600/20 cursor-pointer relative z-10 shine-hover"
+              className="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Falar no WhatsApp Agora</span>
@@ -197,19 +196,18 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
           </div>
 
           {/* Card 2: Videochamada & Partilha de Ecrã */}
-          <div className="bg-gradient-to-br from-sky-50/60 via-white to-white border border-blue-300 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-blue-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden card-glow-blue">
-            <Video className="icon-watermark wm-sky w-32 h-32" strokeWidth={1.25} />
-            <div className="space-y-4 relative z-10">
+          <div className="surface-card p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-blue-300 transition-all duration-300">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-xs">
                   <Video className="w-6 h-6" />
                 </div>
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200/80">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200/80">
                   Google Meet / Jitsi HD
                 </span>
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-950 group-hover:text-blue-600 transition-colors">Videochamada & Ecrã</h3>
+                <h3 className="text-base font-bold font-display text-slate-950 group-hover:text-blue-600 transition-colors">Videochamada & Ecrã</h3>
                 <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
                   Assistência remota em direto para diagnóstico visual no seu computador de caixa sem custos.
                 </p>
@@ -226,7 +224,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
 
             <button
               onClick={() => setVideoModalOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-600/25 cursor-pointer relative z-10 shine-hover"
+              className="btn-primary py-3.5 px-4 text-xs font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer"
             >
               <Video className="w-4 h-4" />
               <span>Abrir Videochamada</span>
@@ -234,19 +232,18 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
           </div>
 
           {/* Card 3: Telefone Central */}
-          <div className="bg-gradient-to-br from-indigo-50/60 via-white to-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-indigo-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden card-glow-indigo">
-            <Phone className="icon-watermark wm-indigo w-32 h-32" strokeWidth={1.25} />
-            <div className="space-y-4 relative z-10">
+          <div className="surface-card p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-indigo-300 transition-all duration-300">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shadow-xs">
                   <Phone className="w-6 h-6" />
                 </div>
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
                   Voz & Central
                 </span>
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-950 group-hover:text-indigo-600 transition-colors">Atendimento Telefónico</h3>
+                <h3 className="text-base font-bold font-display text-slate-950 group-hover:text-indigo-600 transition-colors">Atendimento Telefónico</h3>
                 <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
                   Linha de suporte telefónico dedicada a operadores, caixas, gerentes e contabilistas.
                 </p>
@@ -263,7 +260,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
 
             <a
               href={`tel:${settings.phoneRaw || '244923456789'}`}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-600/25 cursor-pointer relative z-10 shine-hover"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
             >
               <Phone className="w-4 h-4" />
               <span>Ligar para a Central</span>
@@ -271,19 +268,18 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
           </div>
 
           {/* Card 4: Email Suporte */}
-          <div className="bg-gradient-to-br from-purple-50/60 via-white to-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-purple-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden card-glow-purple">
-            <Mail className="icon-watermark wm-purple w-32 h-32" strokeWidth={1.25} />
-            <div className="space-y-4 relative z-10">
+          <div className="surface-card p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-slate-300 transition-all duration-300">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 border border-purple-100 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all duration-300 shadow-xs">
                   <Mail className="w-6 h-6" />
                 </div>
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200/80">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
                   Logs & Ficheiros
                 </span>
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-950 group-hover:text-purple-600 transition-colors">Email & Faturação</h3>
+                <h3 className="text-base font-bold font-display text-slate-950 group-hover:text-slate-900 transition-colors">Email & Faturação</h3>
                 <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
                   Envio de ficheiros de log, cópias de segurança, relatórios e esclarecimento de regras fiscais.
                 </p>
@@ -292,14 +288,14 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                 {settings.supportEmail || 'suporte@kivora.ao'}
               </div>
               <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                <Building2 className="w-3.5 h-3.5 text-slate-600 shrink-0" />
                 <span className="truncate">{settings.address || 'Luanda, Angola'}</span>
               </div>
             </div>
 
             <a
               href={`mailto:${settings.supportEmail || 'suporte@kivora.ao'}`}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-purple-600/25 cursor-pointer relative z-10 shine-hover"
+              className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-slate-900/20 cursor-pointer"
             >
               <Mail className="w-4 h-4" />
               <span>Enviar por Email</span>
@@ -309,35 +305,34 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
         </div>
 
         {/* Formulário Interativo de Abertura de Ticket com Protocolo */}
-        <div className="bg-mesh border border-slate-200/80 rounded-3xl p-8 sm:p-12 space-y-8 relative overflow-hidden">
-          <div className="absolute -top-16 -right-16 w-48 h-48 orb orb-blue" />
-          <div className="max-w-2xl mx-auto text-center space-y-2 relative z-10">
-            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-blue-700 bg-blue-100 px-3.5 py-1.5 rounded-full border border-blue-200">
+        <div className="surface-card p-8 sm:p-12 space-y-8 relative overflow-hidden bg-white">
+          <div className="max-w-2xl mx-auto text-center space-y-3">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-3.5 py-1.5 rounded-full border border-blue-200">
               <Headphones className="w-3.5 h-3.5" />
               <span>Abertura de Chamado Técnico</span>
             </div>
-            <h3 className="text-2xl sm:text-3xl font-black text-slate-950">
+            <h3 className="text-2xl sm:text-3xl font-bold font-display text-slate-950 tracking-tight">
               Precisa de Intervenção Técnica ou Formação?
             </h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Preencha o formulário para gerar o seu número de protocolo e ser atendido por um engenheiro de suporte.
+            <p className="text-sm text-slate-600 leading-relaxed font-normal">
+              Preencha o formulário para gerar o seu número de protocolo e ser atendido por um técnico especializado.
             </p>
           </div>
 
           {ticketProtocol ? (
-            <div className="bg-white border-2 border-emerald-500 rounded-3xl p-8 text-center max-w-xl mx-auto space-y-4 shadow-xl animate-fadeIn">
-              <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+            <div className="bg-slate-50/80 border-2 border-emerald-500 rounded-3xl p-8 sm:p-10 text-center max-w-xl mx-auto space-y-4 shadow-xl">
+              <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto shadow-xs">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h4 className="text-xl font-black text-slate-950">Chamado Registado com Sucesso!</h4>
+              <h4 className="text-xl font-bold font-display text-slate-950">Chamado Registado com Sucesso!</h4>
               <p className="text-xs text-slate-600">
                 O seu pedido foi encaminhado para a equipa técnica. O protocolo oficial de acompanhamento é:
               </p>
-              <div className="bg-slate-900 text-white py-3 px-6 rounded-2xl font-mono font-black text-lg tracking-wider w-fit mx-auto shadow-inner">
+              <div className="bg-[#0B192C] text-emerald-400 py-3 px-6 rounded-xl font-mono-num font-bold text-lg tracking-wider w-fit mx-auto shadow-inner border border-slate-800">
                 {ticketProtocol}
               </div>
-              <p className="text-[11px] text-slate-500">
-                Um técnico entrará em contacto para o número <strong>{telefone}</strong> em menos de 2 horas úteis.
+              <p className="text-xs text-slate-600">
+                Um técnico entrará em contacto para o número <strong className="font-mono-num">{telefone}</strong> em menos de 2 horas úteis.
               </p>
               <button
                 onClick={() => {
@@ -351,7 +346,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmitTicket} className="max-w-3xl mx-auto space-y-6 bg-white p-6 sm:p-10 rounded-3xl border border-slate-200/90 shadow-sm">
+            <form onSubmit={handleSubmitTicket} className="max-w-3xl mx-auto space-y-6">
               {/* Honeypot Invisível anti-spam */}
               <input
                 type="text"
@@ -375,7 +370,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                     placeholder="Ex: João Baptista"
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
                   />
                 </div>
 
@@ -388,7 +383,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                     placeholder="Ex: +244 923 000 000"
                     value={telefone}
                     onChange={(e) => setTelefone(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white transition-all font-mono-num"
                   />
                 </div>
 
@@ -400,7 +395,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                     placeholder="Ex: geral@empresa.ao"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
                   />
                 </div>
 
@@ -412,7 +407,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                     placeholder="Ex: 5417088920"
                     value={nif}
                     onChange={(e) => setNif(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-blue-500 focus:bg-white uppercase"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono-num font-bold focus:outline-none focus:border-blue-500 focus:bg-white uppercase transition-all"
                   />
                 </div>
               </div>
@@ -423,8 +418,8 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                   <select
                     id="sup_departamento"
                     value={departamento}
-                    onChange={(e) => setDepartamento(e.target.value as any)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-500"
+                    onChange={(e) => setDepartamento(e.target.value as 'faturacao' | 'tecnico' | 'licenciamento' | 'multiloja')}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
                   >
                     <option value="tecnico">Instalação & Configuração de Rede LAN</option>
                     <option value="faturacao">Faturação Eletrónica & Validação AGT</option>
@@ -442,7 +437,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                     placeholder="Ex: Dúvida na exportação do SAF-T mensal"
                     value={assunto}
                     onChange={(e) => setAssunto(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
                   />
                 </div>
               </div>
@@ -456,14 +451,14 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                   placeholder="Descreva o que necessita, mensagem de erro que surgiu ou a data pretendida para formação..."
                   value={mensagem}
                   onChange={(e) => setMensagem(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white leading-relaxed"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white leading-relaxed transition-all"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-xs sm:text-sm py-4 rounded-2xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full btn-cta py-4 rounded-xl text-sm font-bold shadow-lg shadow-orange-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 {submitting ? (
                   <>
@@ -484,18 +479,18 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
         {/* Perguntas Frequentes Expandidas */}
         <div className="space-y-8">
           <div className="text-center max-w-xl mx-auto space-y-2">
-            <h3 className="text-2xl font-black text-slate-950">Perguntas Frequentes (FAQ)</h3>
+            <h3 className="text-2xl font-bold font-display text-slate-950">Perguntas Frequentes (FAQ)</h3>
             <p className="text-xs text-slate-500">Respostas rápidas às principais dúvidas operacionais e fiscais.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-xs space-y-2.5">
-                <span className="text-[10px] font-black uppercase text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-md">
+              <div key={idx} className="surface-card p-6 sm:p-7 space-y-2.5 hover:border-slate-300 transition-all">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-100">
                   {faq.categoria}
                 </span>
-                <h4 className="font-bold text-sm text-slate-950">{faq.q}</h4>
-                <p className="text-xs text-slate-600 leading-relaxed">{faq.a}</p>
+                <h4 className="font-bold font-display text-sm text-slate-950">{faq.q}</h4>
+                <p className="text-xs text-slate-600 leading-relaxed font-normal">{faq.a}</p>
               </div>
             ))}
           </div>
@@ -517,3 +512,4 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
     </div>
   );
 };
+

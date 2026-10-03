@@ -310,47 +310,46 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
     { id: 'backups', label: 'Backups Cloud', icon: Cloud },
     { id: 'faturas', label: 'Faturas & Subscrições', icon: FileText, badge: (clientInvoices.length > 0 ? clientInvoices.length : matchedLicenses.length) },
     { id: 'suporte', label: 'Suporte Técnico', icon: Headphones, badge: myTickets.filter((t) => t.status === 'open').length },
-    { id: 'empresa', label: 'Dados Fiscais', icon: Building2 },
+    { id: 'empresa', label: 'Minha Empresa & NIF', icon: Building2 },
   ];
 
-  // ─── TELA DE BLOQUEIO SE EMPRESA / CONTA SUSPENSA ──────────────────────────────
   if (session?.status === 'suspended') {
     const whatsAppMessage = `Olá Suporte Kivora. A conta de acesso da minha empresa (${clientLicense.company_name}, NIF: ${clientLicense.nif}) encontra-se suspensa e pretendo solicitar o esclarecimento e regularização.`;
     const effectivePhoneRaw = (systemSettings.phoneRaw || KIVORA_INFO.phoneRaw || '').replace(/\D/g, '');
     const waUrl = `https://wa.me/${effectivePhoneRaw}?text=${encodeURIComponent(whatsAppMessage)}`;
 
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 sm:p-6 selection:bg-red-600 selection:text-white">
-        <div className="max-w-lg w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl space-y-6 text-center animate-fadeIn">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 sm:p-6 selection:bg-rose-600 selection:text-white">
+        <div className="max-w-lg w-full surface-card bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl space-y-6 text-center animate-fadeIn">
           
-          <div className="w-16 h-16 bg-red-950/60 border border-red-800/50 rounded-2xl flex items-center justify-center mx-auto text-red-400 shadow-lg shadow-red-950/50">
-            <Ban className="w-8 h-8 text-red-500" strokeWidth={2} />
+          <div className="w-14 h-14 bg-rose-950/60 border border-rose-800/50 rounded-2xl flex items-center justify-center mx-auto text-rose-400 shadow-lg shadow-rose-950/50">
+            <Ban className="w-7 h-7 text-rose-500" strokeWidth={2} />
           </div>
 
           <div className="space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-red-400 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/60 inline-block">
+            <span className="text-[10px] font-mono-num font-semibold uppercase tracking-widest text-rose-400 bg-rose-950/80 px-3 py-1 rounded-full border border-rose-800/60 inline-block">
               Acesso Suspenso
             </span>
-            <h1 className="text-xl sm:text-2xl font-black text-white">
+            <h1 className="text-xl sm:text-2xl font-semibold font-display text-white tracking-tight">
               Conta de Cliente Suspensa
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              O acesso ao <strong>Portal da Empresa Cliente Kivora</strong> foi suspenso pela administração.
+            <p className="text-xs sm:text-sm text-slate-400 font-sans leading-relaxed">
+              O acesso ao <strong className="text-slate-200">Portal da Empresa Cliente Kivora</strong> foi suspenso pela administração.
             </p>
           </div>
 
-          <div className="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 text-xs text-left space-y-2 font-mono">
+          <div className="p-4 bg-slate-950/80 rounded-xl border border-slate-800 text-xs text-left space-y-2 font-mono-num">
             <div className="flex justify-between border-b border-slate-800 pb-1.5">
-              <span className="text-slate-500">Empresa:</span>
-              <strong className="text-white font-sans font-bold">{clientLicense.company_name}</strong>
+              <span className="text-slate-500 font-sans">Empresa:</span>
+              <strong className="text-white font-display font-semibold">{clientLicense.company_name}</strong>
             </div>
             <div className="flex justify-between border-b border-slate-800 pb-1.5">
-              <span className="text-slate-500">NIF:</span>
-              <strong className="text-amber-400">{clientLicense.nif}</strong>
+              <span className="text-slate-500 font-sans">NIF:</span>
+              <strong className="text-amber-400 font-semibold">{clientLicense.nif}</strong>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Estado:</span>
-              <span className="text-red-400 font-black uppercase">● Suspenso</span>
+              <span className="text-slate-500 font-sans">Estado:</span>
+              <span className="text-rose-400 font-semibold uppercase">● Suspenso</span>
             </div>
           </div>
 
@@ -359,7 +358,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
               href={waUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 rounded-xl shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-display font-semibold text-xs py-3 rounded-xl shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <MessageSquare className="w-4 h-4" />
               <span>Contactar Suporte Técnico</span>
@@ -367,7 +366,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
             <button
               onClick={handleLogout}
-              className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-display font-semibold text-xs py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <LogOut className="w-4 h-4 text-slate-400" />
               <span>Terminar Sessão</span>
@@ -380,23 +379,23 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
   }
 
   return (
-    <div className="flex h-screen h-[100dvh] overflow-hidden bg-slate-50 font-sans selection:bg-blue-600 selection:text-white">
+    <div className="flex h-screen h-[100dvh] overflow-hidden bg-slate-50 font-sans selection:bg-slate-900 selection:text-white">
       
       {/* Toast Notification Flutuante */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 text-xs font-bold flex items-center gap-2.5 animate-fadeIn">
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl border border-slate-700 text-xs font-display font-semibold flex items-center gap-2.5 animate-fadeIn">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Desktop Sidebar Executiva do Cliente */}
-      <aside className="hidden lg:flex w-64 bg-slate-950 text-white flex-col shrink-0 border-r border-slate-800">
+      <aside className="hidden lg:flex w-64 bg-slate-950 text-white flex-col shrink-0 border-r border-slate-800/80">
         <div className="p-5 border-b border-slate-800/80">
           <KivoraLogo variant="light" size="sm" />
           <div className="mt-3 flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-widest text-blue-400 bg-blue-950/60 px-2.5 py-1 rounded-full border border-blue-800/50 flex items-center gap-1.5">
-              <ShieldCheck className="w-3 h-3 text-blue-400" />
+            <span className="text-[10px] font-mono-num font-semibold uppercase tracking-wider text-slate-300 bg-slate-900 px-2.5 py-1 rounded-md border border-slate-800 flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span>Área do Cliente</span>
             </span>
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Sincronizado com o Firebase Cloud" />
@@ -404,11 +403,11 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
         </div>
 
         {/* Info Empresa */}
-        <div className="p-4 bg-slate-900/60 border-b border-slate-800/80 space-y-1">
-          <p className="text-xs font-black text-white truncate">{clientLicense.company_name}</p>
-          <p className="text-[10px] text-slate-400 font-mono">NIF: {clientLicense.nif}</p>
+        <div className="p-4 bg-slate-900/50 border-b border-slate-800/80 space-y-1">
+          <p className="text-xs font-semibold font-display text-white truncate">{clientLicense.company_name}</p>
+          <p className="text-[10px] text-slate-400 font-mono-num">NIF: {clientLicense.nif}</p>
           {clientLicense.is_provisional && (
-            <span className="text-[9px] font-bold text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800/60 block mt-1">
+            <span className="text-[9px] font-semibold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800/60 block mt-1">
               ⏳ Licença Provisória (7 Dias)
             </span>
           )}
@@ -423,10 +422,10 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id as ClientSection)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-display font-medium transition-all text-left cursor-pointer ${
                   active
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                    ? 'bg-white/10 text-white font-semibold border border-white/10 shadow-xs'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-900/80'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -434,7 +433,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                   <span>{item.label}</span>
                 </div>
                 {item.badge !== undefined && item.badge > 0 && (
-                  <span className="bg-slate-800 text-slate-300 text-[10px] font-black px-2 py-0.5 rounded-full border border-slate-700">
+                  <span className="bg-slate-800 text-slate-300 text-[10px] font-mono-num font-semibold px-2 py-0.5 rounded-full border border-slate-700/80">
                     {item.badge}
                   </span>
                 )}
@@ -447,7 +446,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
         <div className="p-4 border-t border-slate-800/80 space-y-2">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-red-950/50 hover:text-red-400 text-slate-400 text-xs font-bold py-2.5 rounded-xl transition-all border border-slate-800 cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 bg-slate-900/80 hover:bg-rose-950/40 hover:text-rose-400 hover:border-rose-900/40 text-slate-400 text-xs font-display font-semibold py-2.5 rounded-xl transition-all border border-slate-800/80 cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Terminar Sessão</span>
@@ -462,12 +461,12 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
             className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <aside className="relative w-72 max-w-[85vw] h-full bg-slate-950 text-white flex flex-col z-10 shadow-2xl border-r border-slate-800">
+          <aside className="relative w-72 max-w-[85vw] h-full bg-slate-950 text-white flex flex-col z-10 shadow-2xl border-r border-slate-800/80">
             <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
               <div>
                 <KivoraLogo variant="light" size="sm" />
                 <div className="mt-2 flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-blue-400 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800/50">
+                  <span className="text-[10px] font-mono-num font-semibold uppercase tracking-wider text-slate-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
                     Área do Cliente
                   </span>
                 </div>
@@ -480,9 +479,9 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
               </button>
             </div>
 
-            <div className="p-4 bg-slate-900/60 border-b border-slate-800/80">
-              <p className="text-xs font-black text-white truncate">{clientLicense.company_name}</p>
-              <p className="text-[10px] text-slate-400 font-mono">NIF: {clientLicense.nif}</p>
+            <div className="p-4 bg-slate-900/50 border-b border-slate-800/80">
+              <p className="text-xs font-semibold font-display text-white truncate">{clientLicense.company_name}</p>
+              <p className="text-[10px] text-slate-400 font-mono-num">NIF: {clientLicense.nif}</p>
             </div>
 
             <nav className="flex-1 p-3 space-y-1 overflow-y-auto overscroll-contain">
@@ -496,10 +495,10 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                       setActiveSection(item.id as ClientSection);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-display font-medium transition-all text-left cursor-pointer ${
                       active
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                        ? 'bg-white/10 text-white font-semibold border border-white/10 shadow-xs'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-900/80'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -514,7 +513,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
             <div className="p-4 border-t border-slate-800/80">
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-red-950/50 hover:text-red-400 text-slate-400 text-xs font-bold py-2.5 rounded-xl transition-all border border-slate-800 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 bg-slate-900/80 hover:bg-rose-950/40 hover:text-rose-400 text-slate-400 text-xs font-display font-semibold py-2.5 rounded-xl transition-all border border-slate-800/80 cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Terminar Sessão</span>
@@ -528,7 +527,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
       <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden w-full">
 
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 px-3 sm:px-8 flex items-center justify-between shrink-0 shadow-xs gap-2">
+        <header className="h-16 bg-white border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between shrink-0 shadow-xs gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -537,7 +536,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
             >
               <Menu className="w-4 h-4" />
             </button>
-            <h1 className="text-xs sm:text-base font-black text-slate-900 truncate">
+            <h1 className="text-xs sm:text-base font-semibold font-display text-slate-900 tracking-tight truncate">
               {activeSection === 'dashboard' && 'Painel do Cliente'}
               {activeSection === 'licenca' && 'Minha Licença'}
               {activeSection === 'downloads' && 'Instaladores'}
@@ -550,10 +549,10 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <div className="hidden xs:flex bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] sm:text-[11px] font-bold px-2.5 py-1 rounded-full items-center gap-1.5">
+            <div className="hidden xs:flex bg-emerald-50/80 border border-emerald-200/80 text-emerald-800 text-[10px] sm:text-[11px] font-semibold px-2.5 py-1 rounded-full items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span className="hidden sm:inline">Validação Fiscal AGT 2026</span>
-              <span className="sm:hidden">AGT 2026</span>
+              <span className="hidden sm:inline">Homologação AGT FE/387/AGT/2026</span>
+              <span className="sm:hidden font-mono">FE/387/AGT/2026</span>
             </div>
           </div>
         </header>
@@ -571,24 +570,24 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
               {/* Alerta de Expiração Próxima ou Licença Provisória */}
               {((clientLicense.expires_at && clientLicense.expires_at - Date.now() < 7 * 86400000) || clientLicense.is_provisional) && (
-                <div className="bg-amber-500 text-slate-950 p-5 rounded-3xl border-2 border-amber-400 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fadeIn">
+                <div className="surface-card bg-amber-50/80 text-slate-950 p-5 rounded-2xl border border-amber-300/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fadeIn">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-slate-950 text-amber-400 flex items-center justify-center shrink-0">
-                      <AlertTriangle className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-900 border border-amber-400/40 flex items-center justify-center shrink-0">
+                      <AlertTriangle className="w-5 h-5 text-amber-700" />
                     </div>
                     <div>
-                      <h3 className="font-black text-sm text-slate-950">
+                      <h3 className="font-semibold font-display text-sm text-slate-950">
                         {clientLicense.is_provisional ? 'Atenção: Licença Provisória de 7 Dias' : 'A sua licença Kivora expira em breve!'}
                       </h3>
-                      <p className="text-xs text-slate-900 font-medium mt-0.5">
-                        Validade até <strong className="font-bold">{formatLicenseDate(clientLicense.expires_at)}</strong>. Renove a sua subscrição para manter a faturação fiscal e a sincronização cloud ativas sem interrupções.
+                      <p className="text-xs text-slate-700 font-sans mt-0.5">
+                        Validade até <strong className="font-mono-num font-semibold text-slate-900">{formatLicenseDate(clientLicense.expires_at)}</strong>. Renove a sua subscrição para manter a faturação fiscal e a sincronização cloud ativas sem interrupções.
                       </p>
                     </div>
                   </div>
 
                   <button
                     onClick={() => setActiveSection('suporte')}
-                    className="bg-slate-950 hover:bg-slate-900 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all shadow-md shrink-0 cursor-pointer"
+                    className="bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl transition-all shadow-xs shrink-0 cursor-pointer active:scale-[0.98]"
                   >
                     Solicitar Renovação
                   </button>
@@ -597,16 +596,16 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
               {/* Seletor de Licenças (para empresas com múltiplos postos ou filiais) */}
               {matchedLicenses.length > 1 && (
-                <div className="bg-white p-4 rounded-3xl border border-blue-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="surface-card p-4 rounded-2xl border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-                      <ShieldCheck className="w-4 h-4 text-blue-600" />
+                    <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/80 flex items-center justify-center shrink-0">
+                      <ShieldCheck className="w-4 h-4 text-slate-700" />
                     </div>
                     <div>
-                      <p className="text-xs font-black text-slate-900">
+                      <p className="text-xs font-semibold font-display text-slate-900">
                         Terminais & Postos da Sua Empresa ({matchedLicenses.length})
                       </p>
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-slate-500 font-sans">
                         Alterne entre as licenças ativas da sua empresa para consultar validade e terminais vinculados.
                       </p>
                     </div>
@@ -618,10 +617,10 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                         <button
                           key={lic.id}
                           onClick={() => setSelectedLicenseId(lic.id)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap border ${
+                          className={`px-3 py-1.5 rounded-xl text-xs font-display font-semibold transition-all cursor-pointer whitespace-nowrap border ${
                             isSel
-                              ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
-                              : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                              ? 'bg-slate-950 text-white border-slate-950 shadow-xs'
+                              : 'bg-slate-50 text-slate-700 border-slate-200/80 hover:bg-slate-100'
                           }`}
                         >
                           Posto {idx + 1} ({getPlanLabel(lic.plan_type)})
@@ -633,29 +632,29 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
               )}
 
               {/* Banner Licença */}
-              <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden border border-slate-800 space-y-4">
+              <div className="surface-card bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white rounded-2xl p-6 sm:p-8 shadow-xs relative overflow-hidden border border-slate-800 space-y-4">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-blue-400 bg-blue-900/50 px-2.5 py-1 rounded-full border border-blue-700/50">
+                      <span className="text-[10px] font-mono-num font-semibold uppercase tracking-wider text-slate-300 bg-white/10 px-2.5 py-1 rounded-md border border-white/10">
                         {getPlanLabel(clientLicense.plan_type)}
                       </span>
                       {clientLicense.is_provisional && (
-                        <span className="text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-950/80 px-2.5 py-1 rounded-full border border-amber-700/60">
+                        <span className="text-[10px] font-mono-num font-semibold uppercase tracking-wider text-amber-300 bg-amber-950/80 px-2.5 py-1 rounded-md border border-amber-700/60">
                           ⏳ Provisória (7 Dias)
                         </span>
                       )}
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-black">{clientLicense.company_name}</h2>
-                    <p className="text-xs text-slate-300">
-                      Validade da Licença: <strong className="text-white">{formatLicenseDate(clientLicense.expires_at)}</strong> • Base de Dados Local & Nuvem
+                    <h2 className="text-xl sm:text-2xl font-semibold font-display tracking-tight">{clientLicense.company_name}</h2>
+                    <p className="text-xs text-slate-300 font-sans">
+                      Validade da Licença: <strong className="text-white font-mono-num font-semibold">{formatLicenseDate(clientLicense.expires_at)}</strong> • Base de Dados Local & Nuvem
                     </p>
                   </div>
 
-                  <div className="bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 space-y-2 text-left md:text-right">
-                    <p className="text-[10px] text-slate-400 uppercase font-bold">Chave de Ativação do Software</p>
+                  <div className="bg-white/5 backdrop-blur-md p-4 rounded-xl border border-white/10 space-y-2 text-left md:text-right">
+                    <p className="text-[10px] text-slate-400 uppercase font-semibold font-display tracking-wider">Chave de Ativação do Software</p>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm sm:text-base font-black text-blue-300 select-all">{clientLicense.id}</span>
+                      <span className="font-mono-num text-sm sm:text-base font-bold text-slate-100 select-all">{clientLicense.id}</span>
                       <button
                         onClick={handleCopyKey}
                         className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors cursor-pointer"
@@ -670,69 +669,69 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
               {/* Grid de Métricas */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Estado Operacional</span>
-                  <p className="text-xl font-black text-emerald-600 flex items-center gap-1.5">
+                <div className="surface-card p-5 space-y-1 rounded-2xl border border-slate-200/80">
+                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider font-display">Estado Operacional</span>
+                  <p className="text-xl font-bold text-emerald-600 font-display flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <span>{clientLicense.status === 'active' ? 'ATIVO' : 'SUSPENSO'}</span>
                   </p>
-                  <span className="text-[11px] text-slate-500">Validação online em dia</span>
+                  <span className="text-[11px] text-slate-500 font-sans">Validação online em dia</span>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Terminais Licenciados</span>
-                  <p className="text-xl font-black text-slate-900">
+                <div className="surface-card p-5 space-y-1 rounded-2xl border border-slate-200/80">
+                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider font-display">Terminais Licenciados</span>
+                  <p className="text-xl font-bold text-slate-900 font-mono-num">
                     {clientLicense.hardware_id ? 1 : 0} de {1 + (clientLicense.extra_seats || 0)} PC(s)
                   </p>
-                  <span className="text-[11px] text-slate-500">Rede Local com SQLite/PostgreSQL</span>
+                  <span className="text-[11px] text-slate-500 font-sans">Rede Local com SQLite/PostgreSQL</span>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Versão Oficial Kivora</span>
-                  <p className="text-xl font-black text-slate-900">v{CURRENT_RELEASE.version}</p>
-                  <span className="text-[11px] text-emerald-600 font-bold">Motor Fiscal AGT Atualizado</span>
+                <div className="surface-card p-5 space-y-1 rounded-2xl border border-slate-200/80">
+                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider font-display">Versão Oficial Kivora</span>
+                  <p className="text-xl font-bold text-slate-900 font-mono-num">v{CURRENT_RELEASE.version}</p>
+                  <span className="text-[11px] text-emerald-600 font-semibold font-sans">Motor Fiscal AGT Atualizado</span>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Chamados de Suporte</span>
-                  <p className="text-xl font-black text-blue-600">{myTickets.length}</p>
-                  <span className="text-[11px] text-slate-500">Atendimento direto</span>
+                <div className="surface-card p-5 space-y-1 rounded-2xl border border-slate-200/80">
+                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider font-display">Chamados de Suporte</span>
+                  <p className="text-xl font-bold text-slate-900 font-mono-num">{myTickets.length}</p>
+                  <span className="text-[11px] text-slate-500 font-sans">Atendimento direto</span>
                 </div>
               </div>
 
               {/* Ações Rápidas */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                  <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
-                    <Download className="w-4 h-4 text-blue-600" />
+                <div className="surface-card p-6 rounded-2xl border border-slate-200/80 space-y-4">
+                  <h3 className="text-sm font-semibold font-display text-slate-900 flex items-center gap-2">
+                    <Download className="w-4 h-4 text-slate-800" />
                     <span>Instalar Kivora Desktop ERP</span>
                   </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">
+                  <p className="text-xs text-slate-500 leading-relaxed font-sans">
                     Descarregue o instalador oficial completo para configurar um novo terminal ou formatar o computador de caixa.
                   </p>
-                  <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between text-xs font-bold">
-                    <span>Setup Kivora v{CURRENT_RELEASE.version} (64-bit)</span>
-                    <span className="text-slate-400 font-mono">{CURRENT_RELEASE.fileSize}</span>
+                  <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200/70 flex items-center justify-between text-xs font-semibold">
+                    <span className="font-display text-slate-800">Setup Kivora v{CURRENT_RELEASE.version} (64-bit)</span>
+                    <span className="text-slate-500 font-mono-num text-[11px]">{CURRENT_RELEASE.fileSize}</span>
                   </div>
                   <button
                     onClick={() => setActiveSection('downloads')}
-                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3 rounded-xl shadow-md shadow-blue-600/20 transition-all cursor-pointer text-center block"
+                    className="w-full bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs py-2.5 rounded-xl shadow-xs transition-all cursor-pointer text-center block active:scale-[0.98]"
                   >
                     Aceder aos Downloads Oficiais
                   </button>
                 </div>
 
-                <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                  <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                <div className="surface-card p-6 rounded-2xl border border-slate-200/80 space-y-4">
+                  <h3 className="text-sm font-semibold font-display text-slate-900 flex items-center gap-2">
                     <Headphones className="w-4 h-4 text-emerald-600" />
                     <span>Apoio Técnico & Suporte Fiscal</span>
                   </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">
+                  <p className="text-xs text-slate-500 leading-relaxed font-sans">
                     Tem dúvidas sobre o ficheiro SAF-T (AO), configuração de impressoras térmicas ou rede local? A nossa equipa responde em tempo real.
                   </p>
                   <button
                     onClick={() => setActiveSection('suporte')}
-                    className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition-all cursor-pointer text-center block"
+                    className="w-full bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs py-2.5 rounded-xl shadow-xs transition-all cursor-pointer text-center block active:scale-[0.98]"
                   >
                     Abrir Chamado de Assistência
                   </button>
@@ -744,19 +743,19 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
           {/* SECTION: MINHA LICENÇA */}
           {activeSection === 'licenca' && (
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6 max-w-3xl">
+            <div className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 max-w-3xl">
               <div>
-                <h2 className="text-lg font-black text-slate-900">Detalhes da Licença & Computadores</h2>
-                <p className="text-xs text-slate-500 mt-0.5">Informações técnicas de ativação do software no seu computador.</p>
+                <h2 className="text-lg font-semibold font-display text-slate-900 tracking-tight">Detalhes da Licença & Computadores</h2>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">Informações técnicas de ativação do software no seu computador.</p>
               </div>
 
-              <div className="bg-slate-950 text-white p-6 rounded-2xl space-y-3 border border-slate-800">
-                <p className="text-xs text-slate-400 uppercase font-bold">Chave de Ativação do Software</p>
+              <div className="surface-card bg-slate-950 text-white p-6 rounded-xl space-y-3 border border-slate-800">
+                <p className="text-xs text-slate-400 uppercase font-semibold font-display tracking-wider">Chave de Ativação do Software</p>
                 <div className="flex items-center justify-between flex-wrap gap-2">
-                  <span className="font-mono text-xl font-black text-blue-400 select-all">{clientLicense.id}</span>
+                  <span className="font-mono-num text-xl font-bold text-slate-100 select-all">{clientLicense.id}</span>
                   <button
                     onClick={handleCopyKey}
-                    className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+                    className="bg-white/10 hover:bg-white/20 text-white text-xs font-display font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     {copiedKey ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                     <span>{copiedKey ? 'Copiada!' : 'Copiar Chave'}</span>
@@ -765,38 +764,38 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                  <span className="text-slate-400 font-bold uppercase text-[10px]">Plano Contratado</span>
-                  <p className="font-black text-slate-900 text-sm">{getPlanLabel(clientLicense.plan_type)}</p>
+                <div className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/70 space-y-1">
+                  <span className="text-slate-500 font-semibold uppercase text-[10px] tracking-wider font-display">Plano Contratado</span>
+                  <p className="font-semibold text-slate-900 text-sm font-display">{getPlanLabel(clientLicense.plan_type)}</p>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                  <span className="text-slate-400 font-bold uppercase text-[10px]">Data de Expiração</span>
-                  <p className="font-black text-slate-900 text-sm">{formatLicenseDate(clientLicense.expires_at)}</p>
+                <div className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/70 space-y-1">
+                  <span className="text-slate-500 font-semibold uppercase text-[10px] tracking-wider font-display">Data de Expiração</span>
+                  <p className="font-mono-num font-semibold text-slate-900 text-sm">{formatLicenseDate(clientLicense.expires_at)}</p>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                  <span className="text-slate-400 font-bold uppercase text-[10px]">Capacidade de Rede</span>
-                  <p className="font-black text-slate-900 text-sm">{1 + (clientLicense.extra_seats || 0)} Terminal(ais)</p>
+                <div className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/70 space-y-1">
+                  <span className="text-slate-500 font-semibold uppercase text-[10px] tracking-wider font-display">Capacidade de Rede</span>
+                  <p className="font-mono-num font-semibold text-slate-900 text-sm">{1 + (clientLicense.extra_seats || 0)} Terminal(ais)</p>
                 </div>
               </div>
 
               {/* Computador Vinculado */}
               <div className="space-y-3 pt-4 border-t border-slate-100">
-                <h3 className="text-sm font-black text-slate-900">Terminal Vinculado (Hardware Fingerprint)</h3>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between text-xs">
+                <h3 className="text-sm font-semibold font-display text-slate-900">Terminal Vinculado (Hardware Fingerprint)</h3>
+                <div className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/70 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-3">
-                    <Monitor className="w-5 h-5 text-blue-600 shrink-0" />
+                    <Monitor className="w-5 h-5 text-slate-700 shrink-0" />
                     <div>
-                      <p className="font-bold text-slate-900">PC Principal de Caixa / Servidor</p>
-                      <p className="text-[10px] text-slate-500 font-mono truncate max-w-xs sm:max-w-md">
+                      <p className="font-semibold font-display text-slate-900">PC Principal de Caixa / Servidor</p>
+                      <p className="text-[10px] text-slate-500 font-mono-num truncate max-w-xs sm:max-w-md">
                         {clientLicense.hardware_id ? `ID: ${clientLicense.hardware_id}` : 'Aguardando 1º uso no ERP'}
                       </p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full shrink-0">
+                  <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full shrink-0">
                     Ativo Online
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-500 font-sans leading-relaxed">
                   Para trocar de computador, solicite a desvinculação através da Central de Suporte ou diretamente com o seu parceiro Kivora homologado.
                 </p>
               </div>
@@ -805,25 +804,25 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
           {/* SECTION: DOWNLOADS */}
           {activeSection === 'downloads' && (
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6">
               <div>
-                <h2 className="text-lg font-black text-slate-900">Instaladores Oficiais Kivora ERP</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <h2 className="text-lg font-semibold font-display text-slate-900 tracking-tight">Instaladores Oficiais Kivora ERP</h2>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">
                   Descarregue os instaladores oficiais para Windows e os drivers de periféricos de caixa.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-6 bg-slate-50 rounded-3xl border border-slate-200 space-y-4 flex flex-col justify-between">
+                <div className="p-6 bg-slate-50/50 rounded-xl border border-slate-200/80 space-y-4 flex flex-col justify-between">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-black text-blue-600 bg-blue-100 px-2.5 py-1 rounded-full uppercase">
+                      <span className="text-[10px] font-semibold font-mono-num text-slate-900 bg-slate-200/80 border border-slate-300/80 px-2.5 py-0.5 rounded-full uppercase">
                         Versão Oficial {CURRENT_RELEASE.version}
                       </span>
-                      <span className="text-xs text-slate-400 font-mono">{CURRENT_RELEASE.fileSize}</span>
+                      <span className="text-xs text-slate-500 font-mono-num">{CURRENT_RELEASE.fileSize}</span>
                     </div>
-                    <h3 className="text-base font-black text-slate-900">Kivora ERP — Setup Windows (x64)</h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">
+                    <h3 className="text-base font-semibold font-display text-slate-900">Kivora ERP — Setup Windows (x64)</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed font-sans">
                       Instalador completo que inclui o motor de faturação certificada AGT, gestão de stock, fecho de caixa POS e base de dados local.
                     </p>
                   </div>
@@ -831,27 +830,27 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                     href={getDirectDownloadUrl(getCachedSystemSettings().downloadUrl || CURRENT_RELEASE.downloadUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+                    className="w-full bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs py-3 rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-[0.98]"
                   >
                     <Download className="w-4 h-4" />
                     <span>Baixar Instalador Oficial (.exe)</span>
                   </a>
                 </div>
 
-                <div className="p-6 bg-slate-50 rounded-3xl border border-slate-200 space-y-4 flex flex-col justify-between">
+                <div className="p-6 bg-slate-50/50 rounded-xl border border-slate-200/80 space-y-4 flex flex-col justify-between">
                   <div className="space-y-2">
-                    <span className="text-xs font-black text-slate-600 bg-slate-200 px-2.5 py-1 rounded-full uppercase">
+                    <span className="text-[10px] font-semibold text-slate-700 bg-slate-200/80 border border-slate-300/80 px-2.5 py-0.5 rounded-full uppercase font-display">
                       Documentação & Periféricos
                     </span>
-                    <h3 className="text-base font-black text-slate-900">Manual do Utilizador & Drivers Térmicos</h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">
+                    <h3 className="text-base font-semibold font-display text-slate-900">Manual do Utilizador & Drivers Térmicos</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed font-sans">
                       Guia com instruções passo a passo para configuração de séries, gavetas de dinheiro e exportação do ficheiro SAF-T (AO).
                     </p>
                   </div>
                   <a
                     href="#download"
                     onClick={() => showToast('Aceda à secção de manuais no portal comercial.')}
-                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                    className="w-full bg-slate-100 hover:bg-slate-200/80 text-slate-800 font-display font-semibold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer border border-slate-200/80 active:scale-[0.98]"
                   >
                     <FileText className="w-4 h-4" />
                     <span>Aceder aos Manuais Técnicos</span>
@@ -863,11 +862,11 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
           {/* SECTION: ENCOMENDAS DE HARDWARE */}
           {activeSection === 'encomendas' && (
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-black text-slate-900">Minhas Encomendas de Equipamentos POS</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <h2 className="text-lg font-semibold font-display text-slate-900 tracking-tight">Minhas Encomendas de Equipamentos POS</h2>
+                  <p className="text-xs text-slate-500 font-sans mt-0.5">
                     Acompanhe o estado de entrega dos seus equipamentos de faturação, impressoras e periféricos comprados na loja oficial.
                   </p>
                 </div>
@@ -876,7 +875,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                     const phone = getCachedSystemSettings().phoneRaw || '244923456789';
                     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(`Olá Suporte Comercial Kivora, pretendo encomendar novos equipamentos POS para a empresa ${clientLicense.company_name} (NIF: ${clientLicense.nif}).`)}`, '_blank');
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-2xl shadow-sm transition-all cursor-pointer whitespace-nowrap"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-950 hover:bg-slate-800 text-white text-xs font-display font-semibold rounded-xl shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-[0.98]"
                 >
                   <ShoppingBag className="w-4 h-4" />
                   <span>Pedir Novo Equipamento</span>
@@ -884,13 +883,13 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
               </div>
 
               {clientOrders.length === 0 ? (
-                <div className="p-10 text-center text-slate-400 border border-dashed border-slate-200 rounded-3xl space-y-3">
-                  <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto text-slate-400">
-                    <Package className="w-7 h-7" />
+                <div className="p-10 text-center text-slate-400 border border-dashed border-slate-200/80 rounded-2xl space-y-3">
+                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto text-slate-400">
+                    <Package className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="font-black text-slate-700 text-sm">Nenhuma encomenda registada para o seu NIF ({clientLicense.nif})</p>
-                    <p className="text-xs text-slate-400 max-w-md mx-auto mt-1">
+                    <p className="font-semibold font-display text-slate-700 text-sm">Nenhuma encomenda registada para o seu NIF ({clientLicense.nif})</p>
+                    <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 font-sans">
                       As impressoras térmicas, leitores de código de barras ou bobinas de papel encomendados na loja Kivora aparecerão aqui com rastreamento em tempo real.
                     </p>
                   </div>
@@ -903,28 +902,28 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                       processing: { label: 'Em Separação & Faturação', color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-200' },
                       shipped: { label: 'Em Trânsito com Estafeta', color: 'text-purple-700', bg: 'bg-purple-50', border: 'border-purple-200' },
                       delivered: { label: 'Entregue com Sucesso', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' },
-                      cancelled: { label: 'Cancelada', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200' },
+                      cancelled: { label: 'Cancelada', color: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-200' },
                     };
                     const st = statusConfig[order.status] || { label: order.status, color: 'text-slate-700', bg: 'bg-slate-50', border: 'border-slate-200' };
 
                     return (
-                      <div key={order.id} className="border border-slate-200 rounded-2xl p-5 bg-white space-y-4 shadow-2xs hover:border-blue-300 transition-all">
+                      <div key={order.id} className="surface-card border border-slate-200/80 rounded-xl p-5 space-y-4 shadow-2xs hover:border-slate-300 transition-all">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-mono font-black text-sm text-slate-900">{order.orderNumber}</span>
-                              <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${st.bg} ${st.color} ${st.border}`}>
+                              <span className="font-mono-num font-semibold text-sm text-slate-900">{order.orderNumber}</span>
+                              <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${st.bg} ${st.color} ${st.border}`}>
                                 {st.label}
                               </span>
                             </div>
-                            <p className="text-[11px] text-slate-400 mt-0.5">
-                              Registo: {new Date(order.createdAt).toLocaleDateString('pt-AO')} às {new Date(order.createdAt).toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit' })} • Destino: {order.deliveryProvince}
+                            <p className="text-[11px] text-slate-400 font-sans mt-0.5">
+                              Registo: <span className="font-mono-num">{new Date(order.createdAt).toLocaleDateString('pt-AO')}</span> às <span className="font-mono-num">{new Date(order.createdAt).toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit' })}</span> • Destino: {order.deliveryProvince}
                             </p>
                           </div>
 
                           <div className="text-left sm:text-right">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Total da Encomenda</span>
-                            <span className="font-mono text-base font-black text-slate-900">
+                            <span className="text-[10px] uppercase font-semibold text-slate-500 font-display tracking-wider block">Total da Encomenda</span>
+                            <span className="font-mono-num text-base font-bold text-slate-900">
                               {fmt(order.totalAOA || 0)} Kz
                             </span>
                           </div>
@@ -932,15 +931,15 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
                         {/* Itens */}
                         <div className="space-y-2">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Equipamentos Solicitados:</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-display block">Equipamentos Solicitados:</span>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                             {order.items?.map((item, idx) => (
-                              <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between gap-2">
+                              <div key={idx} className="p-3 bg-slate-50/60 rounded-xl border border-slate-200/70 flex items-center justify-between gap-2">
                                 <div>
-                                  <p className="font-bold text-slate-800">{item.productName || (item as any).product?.name || 'Item de Loja'}</p>
-                                  <p className="text-[10px] text-slate-400 font-mono">Qtd: {item.quantity} un.</p>
+                                  <p className="font-semibold text-slate-800 font-display">{item.productName || (item as any).product?.name || 'Item de Loja'}</p>
+                                  <p className="text-[10px] text-slate-500 font-mono-num">Qtd: {item.quantity} un.</p>
                                 </div>
-                                <span className="font-mono font-bold text-slate-700 text-xs">
+                                <span className="font-mono-num font-semibold text-slate-800 text-xs">
                                   {fmt(item.unitPriceAOA ? item.unitPriceAOA * item.quantity : 0)} Kz
                                 </span>
                               </div>
@@ -949,15 +948,15 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                         </div>
 
                         {order.notes && (
-                          <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100 text-xs text-blue-900">
-                            <strong>Notas de Transporte:</strong> {order.notes}
+                          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs text-slate-700 font-sans">
+                            <strong className="font-semibold text-slate-900 font-display">Notas de Transporte:</strong> {order.notes}
                           </div>
                         )}
 
                         <div className="flex items-center justify-between pt-2 text-xs">
-                          <span className="text-slate-500 text-[11px] flex items-center gap-1.5">
-                            <Truck className="w-3.5 h-3.5 text-blue-600" />
-                            Taxa de Entrega: {order.deliveryFeeAOA === 0 ? 'Grátis' : fmt(order.deliveryFeeAOA || 0) + ' Kz'}
+                          <span className="text-slate-500 text-[11px] font-sans flex items-center gap-1.5">
+                            <Truck className="w-3.5 h-3.5 text-slate-600" />
+                            Taxa de Entrega: <strong className="font-mono-num">{order.deliveryFeeAOA === 0 ? 'Grátis' : fmt(order.deliveryFeeAOA || 0) + ' Kz'}</strong>
                           </span>
                           <button
                             onClick={() => {
@@ -965,7 +964,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                               const text = `Olá, pretendo informações sobre a encomenda ${order.orderNumber} para a empresa ${clientLicense.company_name}.`;
                               window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
                             }}
-                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-bold text-xs cursor-pointer"
+                            className="inline-flex items-center gap-1 text-slate-900 hover:text-slate-700 font-display font-semibold text-xs cursor-pointer"
                           >
                             <span>Apoio ao Estafeta</span>
                             <ExternalLink className="w-3.5 h-3.5" />
@@ -981,66 +980,66 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
           {/* SECTION: BACKUPS */}
           {activeSection === 'backups' && (
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6 max-w-3xl">
+            <div className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 max-w-3xl">
               <div>
-                <h2 className="text-lg font-black text-slate-900">Backups de Segurança na Nuvem</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <h2 className="text-lg font-semibold font-display text-slate-900 tracking-tight">Backups de Segurança na Nuvem</h2>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">
                   Cópias automáticas de segurança encriptadas no Google Cloud com retenção redundante.
                 </p>
               </div>
 
               {cloudBackupStatus && (
-                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs">
+                <div className="p-4 bg-emerald-50/80 border border-emerald-200/80 rounded-xl flex items-center justify-between text-xs">
                   <div className="flex items-center gap-3">
                     <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
                     <div>
-                      <p className="font-bold text-emerald-950">Última Sincronização Cloud Registada</p>
-                      <p className="text-[11px] text-emerald-700">
-                        {cloudBackupStatus.updated_at ? new Date(cloudBackupStatus.updated_at).toLocaleString('pt-AO') : 'Recente'} • Terminal: {cloudBackupStatus.hostname || clientLicense.hardware_id || 'Principal'}
+                      <p className="font-semibold font-display text-emerald-950">Última Sincronização Cloud Registada</p>
+                      <p className="text-[11px] text-emerald-700 font-sans">
+                        {cloudBackupStatus.updated_at ? new Date(cloudBackupStatus.updated_at).toLocaleString('pt-AO') : 'Recente'} • Terminal: <span className="font-mono-num">{cloudBackupStatus.hostname || clientLicense.hardware_id || 'Principal'}</span>
                       </p>
                     </div>
                   </div>
-                  <span className="bg-emerald-200/60 text-emerald-900 font-mono font-bold text-[10px] px-2.5 py-1 rounded-full shrink-0">
+                  <span className="bg-emerald-100 text-emerald-800 border border-emerald-200/80 font-mono-num font-semibold text-[10px] px-2.5 py-1 rounded-full shrink-0">
                     Sincronizado
                   </span>
                 </div>
               )}
 
-              <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl text-xs space-y-2">
-                <div className="flex items-center gap-2 text-blue-900 font-bold">
-                  <Cloud className="w-4 h-4 text-blue-600" />
+              <div className="p-5 bg-slate-50/70 border border-slate-200/80 rounded-xl text-xs space-y-2">
+                <div className="flex items-center gap-2 text-slate-900 font-semibold font-display">
+                  <Cloud className="w-4 h-4 text-slate-700" />
                   <span>Proteção Total Contra Falhas de Hardware & Ransomware</span>
                 </div>
-                <p className="text-blue-800 text-[11px] leading-relaxed">
+                <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
                   O Kivora ERP no seu computador realiza backups automáticos da base de dados local sempre que efetua o fecho de turno ou de caixa, protegendo os seus dados fiscais, clientes e existências de stock.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Destino Local das Cópias</span>
-                  <p className="font-mono text-xs font-bold text-slate-900 truncate">%APPDATA%\Kivora\backups</p>
-                  <span className="text-[11px] text-slate-500">Gravado em disco local isolado</span>
+                <div className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/70 space-y-1">
+                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider font-display">Destino Local das Cópias</span>
+                  <p className="font-mono-num text-xs font-semibold text-slate-900 truncate">%APPDATA%\Kivora\backups</p>
+                  <span className="text-[11px] text-slate-500 font-sans">Gravado em disco local isolado</span>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Terminal Vinculado</span>
-                  <p className="font-mono text-xs font-bold text-slate-900 truncate">
+                <div className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/70 space-y-1">
+                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider font-display">Terminal Vinculado</span>
+                  <p className="font-mono-num text-xs font-semibold text-slate-900 truncate">
                     {clientLicense.hardware_id || 'Servidor / Caixa Principal'}
                   </p>
-                  <span className="text-[11px] text-slate-500">Chave: {clientLicense.id}</span>
+                  <span className="text-[11px] text-slate-500 font-sans">Chave: <span className="font-mono-num">{clientLicense.id}</span></span>
                 </div>
               </div>
 
-              <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs">
+              <div className="divide-y divide-slate-100 border border-slate-200/80 rounded-xl overflow-hidden text-xs">
                 <div className="p-4 bg-white flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Cloud className="w-4 h-4 text-blue-600" />
+                    <Cloud className="w-4 h-4 text-slate-700" />
                     <div>
-                      <p className="font-bold text-slate-900">Sincronização em Tempo Real Cloud</p>
-                      <p className="text-slate-400 text-[10px]">Cloud Firestore & Validação de Licenças AGT</p>
+                      <p className="font-semibold font-display text-slate-900">Sincronização em Tempo Real Cloud</p>
+                      <p className="text-slate-500 text-[10px] font-sans">Cloud Firestore & Validação de Licenças AGT</p>
                     </div>
                   </div>
-                  <span className="text-emerald-700 bg-emerald-100 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                  <span className="text-emerald-700 bg-emerald-50 border border-emerald-200/80 font-semibold px-2.5 py-0.5 rounded-full text-[10px]">
                     Ativo & Seguro
                   </span>
                 </div>
@@ -1048,25 +1047,25 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                   <div className="flex items-center gap-3">
                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
                     <div>
-                      <p className="font-bold text-slate-900">Criptografia em Trânsito</p>
-                      <p className="text-slate-400 text-[10px]">TLS 1.3 / AES-256 com Chaves RSA-SHA256</p>
+                      <p className="font-semibold font-display text-slate-900">Criptografia em Trânsito</p>
+                      <p className="text-slate-500 text-[10px] font-sans">TLS 1.3 / AES-256 com Chaves RSA-SHA256</p>
                     </div>
                   </div>
-                  <span className="text-blue-700 bg-blue-100 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                  <span className="text-slate-800 bg-slate-100 border border-slate-200/80 font-semibold px-2.5 py-0.5 rounded-full text-[10px]">
                     Certificado
                   </span>
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-2">
-                <h4 className="font-bold text-slate-900 flex items-center gap-1.5">
+              <div className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/70 text-xs space-y-2">
+                <h4 className="font-semibold font-display text-slate-900 flex items-center gap-1.5">
                   <FileText className="w-3.5 h-3.5 text-slate-600" />
                   <span>Como restaurar uma cópia de segurança em caso de troca de computador:</span>
                 </h4>
-                <ol className="list-decimal list-inside space-y-1 text-slate-600 text-[11px] leading-relaxed">
+                <ol className="list-decimal list-inside space-y-1 text-slate-600 text-[11px] leading-relaxed font-sans">
                   <li>Instale o Kivora ERP no novo computador a partir do menu <strong>Downloads</strong>.</li>
-                  <li>Inicie o software e introduza a sua chave de ativação <strong>{clientLicense.id}</strong>.</li>
-                  <li>No menu <em>Definições &gt; Manutenção &gt; Restaurar Cópia</em>, selecione o ficheiro <code>.db</code> ou <code>.kvr</code> guardado no seu pendrive ou disco externo.</li>
+                  <li>Inicie o software e introduza a sua chave de ativação <strong className="font-mono-num">{clientLicense.id}</strong>.</li>
+                  <li>No menu <em>Definições &gt; Manutenção &gt; Restaurar Cópia</em>, selecione o ficheiro <code className="font-mono-num">.db</code> ou <code className="font-mono-num">.kvr</code> guardado no seu pendrive ou disco externo.</li>
                 </ol>
               </div>
             </div>
@@ -1074,41 +1073,41 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
           {/* SECTION: FATURAS & LICENÇAS */}
           {activeSection === 'faturas' && (
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6">
               <div>
-                <h2 className="text-lg font-black text-slate-900">Histórico de Faturas & Subscrições</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Registo oficial de subscrições ativadas para o seu NIF ({clientLicense.nif}).
+                <h2 className="text-lg font-semibold font-display text-slate-900 tracking-tight">Histórico de Faturas & Subscrições</h2>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">
+                  Registo oficial de subscrições ativadas para o seu NIF (<span className="font-mono-num font-semibold">{clientLicense.nif}</span>).
                 </p>
               </div>
 
               {/* Faturas Oficiais em /subscription_invoices se existirem */}
               {clientInvoices.length > 0 && (
                 <div className="space-y-3">
-                  <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider">Faturas e Recibos Fiscais</h3>
-                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs">
+                  <h3 className="text-xs font-semibold uppercase text-slate-500 font-display tracking-wider">Faturas e Recibos Fiscais</h3>
+                  <div className="divide-y divide-slate-100 border border-slate-200/80 rounded-xl overflow-hidden text-xs">
                     {clientInvoices.map((inv) => (
-                      <div key={inv.id} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
+                      <div key={inv.id} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50/80 transition-colors">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-slate-900">{inv.invoice_number || inv.id}</span>
-                            <span className="font-medium text-slate-700">— {inv.plan_label || 'Subscrição Kivora ERP'}</span>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                              inv.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                            <span className="font-mono-num font-semibold text-slate-900">{inv.invoice_number || inv.id}</span>
+                            <span className="font-medium text-slate-700 font-display">— {inv.plan_label || 'Subscrição Kivora ERP'}</span>
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                              inv.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' : 'bg-amber-50 text-amber-700 border-amber-200/80'
                             }`}>
                               {inv.status === 'paid' ? 'Pago & Liquidado' : 'Pendente'}
                             </span>
                           </div>
-                          <p className="text-slate-400 text-[10px] mt-0.5">
-                            Emitida a: {inv.issue_date || '2026-08-01'} • Vencimento: {inv.due_date || '2026-08-30'} {inv.payment_method ? `• Método: ${inv.payment_method}` : ''}
+                          <p className="text-slate-400 text-[10px] font-sans mt-0.5">
+                            Emitida a: <span className="font-mono-num">{inv.issue_date || '2026-08-01'}</span> • Vencimento: <span className="font-mono-num">{inv.due_date || '2026-08-30'}</span> {inv.payment_method ? `• Método: ${inv.payment_method}` : ''}
                           </p>
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="text-right">
-                            <p className="font-black text-slate-900 font-mono text-sm">
+                            <p className="font-bold text-slate-900 font-mono-num text-sm">
                               {fmt(inv.amount || inv.totalAOA || 250000)} Kz
                             </p>
-                            <span className="text-[10px] text-slate-400 block">Fatura Oficial</span>
+                            <span className="text-[10px] text-slate-400 font-display block">Fatura Oficial</span>
                           </div>
                           <button
                             onClick={() => {
@@ -1120,7 +1119,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                               });
                               setInvoiceModalOpen(true);
                             }}
-                            className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-xl border border-slate-200 text-xs font-bold transition-colors cursor-pointer"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-lg border border-slate-200/80 text-xs font-display font-semibold transition-colors cursor-pointer"
                             title="Imprimir Fatura / Recibo"
                           >
                             <Printer className="w-3.5 h-3.5" />
@@ -1135,37 +1134,37 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
               {/* Tabela de Licenças Ativas */}
               <div className="space-y-3">
-                <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider">
+                <h3 className="text-xs font-semibold uppercase text-slate-500 font-display tracking-wider">
                   {clientInvoices.length > 0 ? 'Chaves de Licença & Postos Associados' : 'Subscrições & Licenças'}
                 </h3>
                 {matchedLicenses.length === 0 ? (
-                  <div className="p-8 text-center text-slate-400 border border-dashed border-slate-200 rounded-2xl text-xs">
+                  <div className="p-8 text-center text-slate-400 border border-dashed border-slate-200/80 rounded-xl text-xs">
                     <Receipt className="w-8 h-8 mx-auto text-slate-300 mb-2" />
-                    <p className="font-bold text-slate-700">Nenhuma fatura ou licença emitida ainda</p>
+                    <p className="font-semibold font-display text-slate-700">Nenhuma fatura ou licença emitida ainda</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs">
+                  <div className="divide-y divide-slate-100 border border-slate-200/80 rounded-xl overflow-hidden text-xs">
                     {matchedLicenses.map((lic) => (
-                      <div key={lic.id} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
+                      <div key={lic.id} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50/80 transition-colors">
                         <div>
                           <div className="flex items-center gap-2">
-                            <p className="font-bold text-slate-900">{getPlanLabel(lic.plan_type)} — Kivora Desktop ERP</p>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                              lic.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'
+                            <p className="font-semibold font-display text-slate-900">{getPlanLabel(lic.plan_type)} — Kivora Desktop ERP</p>
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                              lic.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' : 'bg-rose-50 text-rose-700 border-rose-200/80'
                             }`}>
                               {lic.status === 'active' ? 'Pago & Ativo' : 'Suspenso'}
                             </span>
                           </div>
-                          <p className="text-slate-400 text-[10px] font-mono mt-0.5">
+                          <p className="text-slate-400 text-[10px] font-mono-num mt-0.5">
                             Chave: {lic.id} • Válido até: {formatLicenseDate(lic.expires_at)}
                           </p>
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="text-right">
-                            <p className="font-black text-slate-900 font-mono text-sm">
+                            <p className="font-bold text-slate-900 font-mono-num text-sm">
                               {fmt(lic.price_aoa || (lic.plan_type === 'monthly' ? 25000 : lic.plan_type === 'lifetime' ? 1500000 : 250000))} Kz
                             </p>
-                            <span className="text-[10px] text-slate-400 block">Subscrição Oficial</span>
+                            <span className="text-[10px] text-slate-400 font-display block">Subscrição Oficial</span>
                           </div>
                           <button
                             onClick={() => {
@@ -1173,7 +1172,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                               setSelectedInvoiceMeta(null);
                               setInvoiceModalOpen(true);
                             }}
-                            className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-xl border border-slate-200 text-xs font-bold transition-colors cursor-pointer"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-lg border border-slate-200/80 text-xs font-display font-semibold transition-colors cursor-pointer"
                             title="Imprimir Fatura / Recibo"
                           >
                             <Printer className="w-3.5 h-3.5" />
@@ -1193,8 +1192,8 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
             <div className="space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-black text-slate-900">Central de Assistência Técnica</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <h2 className="text-lg font-semibold font-display text-slate-900 tracking-tight">Central de Assistência Técnica</h2>
+                  <p className="text-xs text-slate-500 font-sans mt-0.5">
                     Converse diretamente com os engenheiros de suporte da Kivora ou solicite apoio remoto com partilha de ecrã.
                   </p>
                 </div>
@@ -1202,14 +1201,14 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                 <div className="flex items-center gap-2.5">
                   <button
                     onClick={() => setPurchaseMinutesModalOpen(true)}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-2xl flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                    className="bg-slate-100 hover:bg-slate-200/80 text-slate-800 text-xs font-display font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2 border border-slate-200/80 transition-all cursor-pointer active:scale-[0.98]"
                   >
                     <span>+ Recarregar Minutos</span>
                   </button>
 
                   <button
                     onClick={() => setVideoModalOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-2xl flex items-center gap-2 shadow-md shadow-blue-600/20 transition-all cursor-pointer hover:scale-[1.02]"
+                    className="bg-slate-950 hover:bg-slate-800 text-white text-xs font-display font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-xs transition-all cursor-pointer active:scale-[0.98]"
                   >
                     <Video className="w-4 h-4" />
                     <span>Iniciar Videochamada</span>
@@ -1218,19 +1217,19 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
               </div>
 
               {/* CARD DE SALDO DE MINUTOS DE VIDEOCHAMADA */}
-              <div className="p-5 bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 text-white rounded-3xl border border-blue-900/60 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-lg">
+              <div className="surface-card p-5 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white rounded-2xl border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-xs">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-blue-600/30 border border-blue-400/30 flex items-center justify-center text-blue-400 shrink-0 shadow-inner">
-                    <Video className="w-7 h-7" />
+                  <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-slate-300 shrink-0 shadow-inner">
+                    <Video className="w-6 h-6" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-base font-black tracking-tight text-white">Assistência Remota em Direto</h3>
-                      <span className="bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase font-mono">
+                      <h3 className="text-base font-semibold font-display tracking-tight text-white">Assistência Remota em Direto</h3>
+                      <span className="bg-white/10 text-slate-300 border border-white/10 text-[10px] font-semibold px-2.5 py-0.5 rounded-full uppercase font-mono-num">
                         Tarifa: {getCachedSystemSettings().videoCallPricePerMinute || 300} Kz / min
                       </span>
                     </div>
-                    <p className="text-xs text-slate-300 mt-1 max-w-xl leading-relaxed">
+                    <p className="text-xs text-slate-300 mt-1 max-w-xl leading-relaxed font-sans">
                       Diagnóstico avançado de base de dados, configuração de impressoras fiscais e formação de operadores com partilha de ecrã HD.
                     </p>
                   </div>
@@ -1238,20 +1237,20 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
                 <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/10 pt-3 md:pt-0">
                   <div className="text-left md:text-right">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
+                    <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider font-display block">
                       Saldo Disponível
                     </span>
-                    <span className="font-mono text-xl font-black text-emerald-400">
+                    <span className="font-mono-num text-xl font-bold text-emerald-400">
                       {Math.floor((videoAccount?.remainingSeconds || 0) / 60)} min {((videoAccount?.remainingSeconds || 0) % 60)}s
                     </span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">
-                      Gasto: {videoAccount?.totalMinutesSpent || 0} min no histórico
+                    <span className="text-[10px] text-slate-400 font-sans block mt-0.5">
+                      Gasto: <span className="font-mono-num">{videoAccount?.totalMinutesSpent || 0}</span> min no histórico
                     </span>
                   </div>
 
                   <button
                     onClick={() => setPurchaseMinutesModalOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-md shadow-blue-600/20 whitespace-nowrap"
+                    className="bg-white/10 hover:bg-white/20 text-white font-display font-semibold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer border border-white/10 whitespace-nowrap active:scale-[0.98]"
                   >
                     Recarregar Minutos
                   </button>
@@ -1263,32 +1262,32 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                 {/* Form Novo Ticket + Lista de Chamados */}
                 <div className="lg:col-span-5 space-y-4">
                   {/* Form Novo Chamado */}
-                  <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-4">
-                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                      <Headphones className="w-4 h-4 text-blue-600" />
+                  <div className="surface-card rounded-2xl border border-slate-200/80 p-5 space-y-4">
+                    <h3 className="text-xs font-semibold font-display text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <Headphones className="w-4 h-4 text-slate-700" />
                       <span>Abrir Novo Chamado</span>
                     </h3>
 
                     <form onSubmit={handleCreateTicket} className="space-y-3 text-xs">
                       <div className="space-y-1">
-                        <label className="font-bold text-slate-700 uppercase text-[10px]">Assunto *</label>
+                        <label className="font-semibold text-slate-700 uppercase font-display text-[10px] tracking-wider">Assunto *</label>
                         <input
                           type="text"
                           required
                           placeholder="Ex: Dúvida na exportação do ficheiro SAF-T"
                           value={ticketSubject}
                           onChange={(e) => setTicketSubject(e.target.value)}
-                          className="w-full border border-slate-200 rounded-xl px-3.5 py-2 text-xs bg-slate-50 font-medium focus:bg-white focus:outline-none focus:border-blue-500"
+                          className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs font-sans text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all"
                         />
                       </div>
 
                       <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-1">
-                          <label className="font-bold text-slate-700 uppercase text-[10px]">Categoria</label>
+                          <label className="font-semibold text-slate-700 uppercase font-display text-[10px] tracking-wider">Categoria</label>
                           <select
                             value={ticketCategory}
                             onChange={(e) => setTicketCategory(e.target.value as any)}
-                            className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs bg-white font-bold focus:outline-none focus:border-blue-500"
+                            className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-display font-medium text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all"
                           >
                             <option value="tecnico">Técnico / Instalação</option>
                             <option value="faturacao">Faturação & AGT</option>
@@ -1298,33 +1297,33 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                         </div>
 
                         <div className="space-y-1">
-                          <label className="font-bold text-slate-700 uppercase text-[10px]">AnyDesk / RustDesk</label>
+                          <label className="font-semibold text-slate-700 uppercase font-display text-[10px] tracking-wider">AnyDesk / RustDesk</label>
                           <input
                             type="text"
                             placeholder="Ex: 998 112 003"
                             value={ticketRemoteCode}
                             onChange={(e) => setTicketRemoteCode(e.target.value)}
-                            className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs bg-slate-50 font-mono focus:bg-white focus:outline-none focus:border-blue-500"
+                            className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-mono-num text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all"
                           />
                         </div>
                       </div>
 
                       <div className="space-y-1">
-                        <label className="font-bold text-slate-700 uppercase text-[10px]">Mensagem *</label>
+                        <label className="font-semibold text-slate-700 uppercase font-display text-[10px] tracking-wider">Mensagem *</label>
                         <textarea
                           rows={3}
                           required
                           placeholder="Descreva o que se passa para o ajudarmos rapidamente..."
                           value={ticketMessage}
                           onChange={(e) => setTicketMessage(e.target.value)}
-                          className="w-full border border-slate-200 rounded-xl px-3.5 py-2 text-xs bg-slate-50 font-medium focus:bg-white focus:outline-none focus:border-blue-500 resize-none"
+                          className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs font-sans text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all resize-none"
                         />
                       </div>
 
                       <button
                         type="submit"
                         disabled={submittingTicket}
-                        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2.5 rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                        className="w-full bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs py-2.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                       >
                         {submittingTicket ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                         <span>{submittingTicket ? 'A Enviar...' : 'Enviar Solicitação'}</span>
@@ -1333,15 +1332,15 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                   </div>
 
                   {/* Lista de Chamados Abertos */}
-                  <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
-                    <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider">
+                  <div className="surface-card rounded-2xl border border-slate-200/80 p-5 space-y-3">
+                    <h3 className="text-xs font-semibold uppercase text-slate-500 font-display tracking-wider">
                       Meus Chamados ({myTickets.length})
                     </h3>
 
                     {myTickets.length === 0 ? (
                       <div className="p-6 text-center text-slate-400 text-xs">
                         <MessageSquare className="w-6 h-6 mx-auto mb-1 text-slate-300" />
-                        <p className="font-bold">Nenhum chamado aberto</p>
+                        <p className="font-semibold font-display text-slate-600">Nenhum chamado aberto</p>
                       </div>
                     ) : (
                       <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 text-xs">
@@ -1353,24 +1352,24 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                               onClick={() => setSelectedTicket(t)}
                               className={`p-3 rounded-xl border transition-all cursor-pointer ${
                                 isSel
-                                  ? 'bg-blue-50 border-blue-300 shadow-xs'
-                                  : 'bg-slate-50 border-slate-200 hover:bg-slate-100/70'
+                                  ? 'bg-slate-100 border-slate-300 shadow-xs'
+                                  : 'bg-slate-50/60 border-slate-200/70 hover:bg-slate-100/70'
                               }`}
                             >
                               <div className="flex items-center justify-between gap-1 mb-1">
-                                <span className="font-mono text-[9px] font-black text-slate-900 bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                                <span className="font-mono-num text-[10px] font-semibold text-slate-900 bg-white px-1.5 py-0.5 rounded border border-slate-200/80">
                                   {t.ticket_number}
                                 </span>
-                                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                                  t.status === 'resolved' ? 'bg-emerald-100 text-emerald-800' :
-                                  t.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                                  'bg-amber-100 text-amber-800'
+                                <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border ${
+                                  t.status === 'resolved' ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80' :
+                                  t.status === 'in_progress' ? 'bg-slate-100 text-slate-800 border-slate-200/80' :
+                                  'bg-amber-50 text-amber-800 border-amber-200/80'
                                 }`}>
                                   {t.status === 'resolved' ? 'Resolvido' : t.status === 'in_progress' ? 'Em Atendimento' : 'Aberto'}
                                 </span>
                               </div>
-                              <p className="font-bold text-slate-900 truncate text-[11px]">{t.subject}</p>
-                              <p className="text-[10px] text-slate-400 mt-0.5">{new Date(t.createdAt).toLocaleDateString('pt-AO')}</p>
+                              <p className="font-semibold font-display text-slate-900 truncate text-[11px]">{t.subject}</p>
+                              <p className="text-[10px] text-slate-400 font-mono-num mt-0.5">{new Date(t.createdAt).toLocaleDateString('pt-AO')}</p>
                             </div>
                           );
                         })}
@@ -1380,17 +1379,17 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                 </div>
 
                 {/* Chat em Tempo Real com a Equipa de Suporte */}
-                <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col h-[560px] overflow-hidden">
+                <div className="lg:col-span-7 surface-card rounded-2xl border border-slate-200/80 shadow-xs flex flex-col h-[560px] overflow-hidden">
                   {selectedTicket ? (
                     <>
-                      <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between flex-wrap gap-2">
+                      <div className="p-4 border-b border-slate-200/80 bg-slate-50/70 flex items-center justify-between flex-wrap gap-2">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-xs font-black text-slate-900">{selectedTicket.ticket_number}</span>
+                            <span className="font-mono-num text-xs font-bold text-slate-900">{selectedTicket.ticket_number}</span>
                             <span className="text-slate-300">•</span>
-                            <h4 className="font-bold text-slate-900 text-xs truncate max-w-xs">{selectedTicket.subject}</h4>
+                            <h4 className="font-semibold font-display text-slate-900 text-xs truncate max-w-xs">{selectedTicket.subject}</h4>
                           </div>
-                          <p className="text-[10px] text-slate-500 mt-0.5">
+                          <p className="text-[10px] text-slate-500 font-sans mt-0.5">
                             Destinado a: <strong className="text-slate-800">{selectedTicket.target_type === 'partner' ? 'Parceiro Credenciado' : 'Engenharia Kivora Central'}</strong>
                           </p>
                         </div>
@@ -1398,16 +1397,16 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => setVideoModalOpen(true)}
-                            className="bg-blue-600/10 hover:bg-blue-600/20 text-blue-600 border border-blue-200 text-[11px] font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+                            className="bg-slate-100 hover:bg-slate-200/80 text-slate-800 border border-slate-200/80 text-[11px] font-display font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
                           >
                             <Video className="w-3.5 h-3.5" />
                             <span>Entrar em Vídeo</span>
                           </button>
 
-                          <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                            selectedTicket.status === 'resolved' ? 'bg-emerald-100 text-emerald-800' :
-                            selectedTicket.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                            'bg-amber-100 text-amber-800'
+                          <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${
+                            selectedTicket.status === 'resolved' ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80' :
+                            selectedTicket.status === 'in_progress' ? 'bg-slate-100 text-slate-800 border-slate-200/80' :
+                            'bg-amber-50 text-amber-800 border-amber-200/80'
                           }`}>
                             {selectedTicket.status === 'resolved' ? 'Resolvido' : selectedTicket.status === 'in_progress' ? 'Em Atendimento' : 'Aberto'}
                           </span>
@@ -1415,21 +1414,21 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                       </div>
 
                       {/* Thread de Mensagens */}
-                      <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/50">
+                      <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/40">
                         {selectedTicket.messages.map((msg, i) => {
                           const isClient = msg.sender_role === 'client';
                           return (
                             <div key={msg.id || i} className={`flex flex-col ${isClient ? 'items-end' : 'items-start'}`}>
-                              <span className="text-[10px] font-bold text-slate-400 mb-1 px-1">
+                              <span className="text-[10px] font-semibold text-slate-400 mb-1 px-1 font-display">
                                 {msg.sender_name} ({isClient ? 'Você' : msg.sender_role === 'partner' ? 'Parceiro' : 'Equipa Kivora'})
                               </span>
-                              <div className={`p-3 rounded-2xl text-xs max-w-sm sm:max-w-md ${
+                              <div className={`p-3.5 rounded-2xl text-xs max-w-sm sm:max-w-md ${
                                 isClient
-                                  ? 'bg-blue-600 text-white rounded-br-xs shadow-xs'
-                                  : 'bg-white text-slate-900 border border-slate-200 rounded-bl-xs shadow-xs'
+                                  ? 'bg-slate-950 text-white rounded-br-xs shadow-xs'
+                                  : 'bg-white text-slate-900 border border-slate-200/80 rounded-bl-xs shadow-xs'
                               }`}>
-                                <p className="whitespace-pre-wrap">{msg.text}</p>
-                                <span className={`text-[9px] font-medium mt-1 block text-right ${isClient ? 'text-blue-200' : 'text-slate-400'}`}>
+                                <p className="whitespace-pre-wrap font-sans leading-relaxed">{msg.text}</p>
+                                <span className={`text-[9px] font-mono-num mt-1 block text-right ${isClient ? 'text-slate-400' : 'text-slate-400'}`}>
                                   {new Date(msg.timestamp).toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                               </div>
@@ -1439,18 +1438,18 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                       </div>
 
                       {/* Form Envio Mensagem */}
-                      <form onSubmit={handleSendChatMessage} className="p-3 border-t border-slate-200 bg-white flex items-center gap-2">
+                      <form onSubmit={handleSendChatMessage} className="p-3 border-t border-slate-200/80 bg-white flex items-center gap-2">
                         <input
                           type="text"
                           placeholder="Escreva a sua mensagem para a equipa..."
                           value={chatReply}
                           onChange={(e) => setChatReply(e.target.value)}
-                          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white font-medium"
+                          className="flex-1 bg-slate-50/70 border border-slate-200/80 rounded-xl px-4 py-2.5 text-xs text-slate-900 font-sans focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 focus:bg-white transition-all"
                         />
                         <button
                           type="submit"
                           disabled={!chatReply.trim() || sendingReply}
-                          className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white p-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
+                          className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white p-2.5 rounded-xl shadow-xs transition-all cursor-pointer active:scale-[0.98]"
                         >
                           <Send className="w-4 h-4" />
                         </button>
@@ -1459,8 +1458,8 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                   ) : (
                     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400">
                       <MessageSquare className="w-10 h-10 text-slate-300 mb-2" />
-                      <h4 className="font-bold text-slate-700 text-sm">Selecione um chamado ao lado</h4>
-                      <p className="text-xs text-slate-400 mt-1 max-w-xs">
+                      <h4 className="font-semibold font-display text-slate-700 text-sm">Selecione um chamado ao lado</h4>
+                      <p className="text-xs text-slate-400 mt-1 max-w-xs font-sans">
                         Veja as respostas e interaja diretamente com o suporte técnico.
                       </p>
                     </div>
@@ -1472,28 +1471,28 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
           {/* SECTION: DADOS DA EMPRESA */}
           {activeSection === 'empresa' && (
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6 max-w-2xl">
+            <div className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 max-w-2xl">
               <div>
-                <h2 className="text-lg font-black text-slate-900">Dados Fiscais & Registo da Empresa</h2>
-                <p className="text-xs text-slate-500 mt-0.5">Informações cadastrais associadas à sua conta no sistema Kivora.</p>
+                <h2 className="text-lg font-semibold font-display text-slate-900 tracking-tight">Dados Fiscais & Registo da Empresa</h2>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">Informações cadastrais associadas à sua conta no sistema Kivora.</p>
               </div>
 
               <div className="space-y-3 text-xs">
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
-                  <span className="text-slate-400 font-bold">Denominação Social:</span>
-                  <strong className="font-black text-slate-900 text-sm">{clientLicense.company_name}</strong>
+                <div className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/70 flex justify-between items-center">
+                  <span className="text-slate-500 font-semibold uppercase text-[10px] tracking-wider font-display">Denominação Social:</span>
+                  <strong className="font-semibold font-display text-slate-900 text-sm">{clientLicense.company_name}</strong>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
-                  <span className="text-slate-400 font-bold">NIF do Contribuinte:</span>
-                  <strong className="font-mono font-black text-slate-900">{clientLicense.nif}</strong>
+                <div className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/70 flex justify-between items-center">
+                  <span className="text-slate-500 font-semibold uppercase text-[10px] tracking-wider font-display">NIF do Contribuinte:</span>
+                  <strong className="font-mono-num font-bold text-slate-900">{clientLicense.nif}</strong>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
-                  <span className="text-slate-400 font-bold">Email de Notificação:</span>
-                  <span className="font-medium text-slate-700">{session?.email || clientLicense.client_email}</span>
+                <div className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/70 flex justify-between items-center">
+                  <span className="text-slate-500 font-semibold uppercase text-[10px] tracking-wider font-display">Email de Notificação:</span>
+                  <span className="font-medium text-slate-700 font-sans">{session?.email || clientLicense.client_email}</span>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
-                  <span className="text-slate-400 font-bold">Parceiro Emissor:</span>
-                  <span className="font-mono font-bold text-blue-600">{clientLicense.partner_id || 'Kivora Central'}</span>
+                <div className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/70 flex justify-between items-center">
+                  <span className="text-slate-500 font-semibold uppercase text-[10px] tracking-wider font-display">Parceiro Emissor:</span>
+                  <span className="font-mono-num font-semibold text-slate-800">{clientLicense.partner_id || 'Kivora Central'}</span>
                 </div>
               </div>
             </div>

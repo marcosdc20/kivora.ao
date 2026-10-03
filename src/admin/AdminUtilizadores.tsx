@@ -115,7 +115,7 @@ export const AdminUtilizadores: React.FC = () => {
         actions={
           <button
             onClick={() => setModalNovo(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md shadow-blue-600/20"
+            className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold font-display text-xs px-4 py-2.5 rounded-xl transition-all shadow-md shadow-brand-600/20 cursor-pointer"
           >
             <UserPlus className="w-4 h-4" strokeWidth={2.5} />
             Novo Administrador
@@ -129,7 +129,7 @@ export const AdminUtilizadores: React.FC = () => {
             label="Total Administradores"
             value={users.length.toString()}
             icon={<Users className="w-4 h-4" strokeWidth={2} />}
-            iconBg="bg-blue-50 text-blue-600"
+            iconBg="bg-brand-50 text-brand-600"
             sub="Equipa ativa"
           />
           <StatCard
@@ -150,18 +150,18 @@ export const AdminUtilizadores: React.FC = () => {
         </div>
 
         {/* Users Table */}
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-          <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div className="surface-card rounded-2xl overflow-hidden">
+          <div className="p-5 border-b border-slate-200/80 flex items-center justify-between">
             <div>
-              <h3 className="font-extrabold text-slate-900 text-sm">Administradores do Painel Kivora</h3>
-              <p className="text-slate-500 text-xs mt-0.5">Membros da equipa com credenciais autorizadas</p>
+              <h3 className="font-bold text-slate-950 text-sm font-display tracking-tight">Administradores do Painel Kivora</h3>
+              <p className="text-slate-500 text-xs mt-0.5 font-sans">Membros da equipa com credenciais autorizadas</p>
             </div>
           </div>
 
           <div className="overflow-x-auto w-full">
             <table className="w-full text-xs min-w-[600px]">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50 text-slate-400 font-black uppercase text-[10px] tracking-wider text-left">
+              <tr className="border-b border-slate-200/80 bg-slate-50/80 text-slate-500 font-semibold uppercase text-[11px] tracking-wider text-left font-display">
                 <th className="px-5 py-3.5">Nome / E-mail</th>
                 <th className="px-4 py-3.5">Cargo / Função</th>
                 <th className="px-4 py-3.5">Nível de Acesso</th>
@@ -172,8 +172,8 @@ export const AdminUtilizadores: React.FC = () => {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-400">
-                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
+                  <td colSpan={5} className="p-8 text-center text-slate-400 font-sans">
+                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-brand-600" />
                     <span>A carregar administradores do Firebase...</span>
                   </td>
                 </tr>
@@ -181,35 +181,35 @@ export const AdminUtilizadores: React.FC = () => {
                 users.map((u) => {
                   const badge = NIVEL_BADGES[u.nivel];
                   return (
-                    <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={u.id} className="hover:bg-slate-50/70 transition-colors">
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-black text-xs flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-full bg-slate-950 text-white font-bold text-xs flex items-center justify-center font-display">
                             {u.nome.charAt(0)}
                           </div>
                           <div>
-                            <p className="font-bold text-slate-900">{u.nome}</p>
-                            <p className="text-slate-400 text-[11px] flex items-center gap-1">
+                            <p className="font-bold text-slate-900 font-display">{u.nome}</p>
+                            <p className="text-slate-400 text-[11px] flex items-center gap-1 font-sans">
                               <Mail className="w-3 h-3 text-slate-400" /> {u.email}
                             </p>
                           </div>
                         </div>
                       </td>
-                    <td className="px-4 py-3.5 text-slate-700 font-semibold">{u.funcao}</td>
+                    <td className="px-4 py-3.5 text-slate-700 font-medium font-sans">{u.funcao}</td>
                     <td className="px-4 py-3.5">
-                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${badge.color}`}>
+                      <span className={`text-[10px] font-semibold uppercase tracking-wider font-display px-2.5 py-1 rounded-full border ${badge.color}`}>
                         {badge.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-slate-500 font-mono">{u.ultimoAcesso}</td>
+                    <td className="px-4 py-3.5 text-slate-500 font-mono-num">{u.ultimoAcesso}</td>
                     <td className="px-4 py-3.5 text-right">
                       {u.status === 'ativo' ? (
-                        <span className="inline-flex items-center gap-1 text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 text-[10px]">
-                          <CheckCircle className="w-3 h-3" /> Ativo
+                        <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold font-display bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 text-[10px] uppercase tracking-wider">
+                          <CheckCircle className="w-3 h-3 text-emerald-600" /> Ativo
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-slate-400 font-bold bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200 text-[10px]">
-                          <XCircle className="w-3 h-3" /> Inativo
+                        <span className="inline-flex items-center gap-1 text-slate-500 font-semibold font-display bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200 text-[10px] uppercase tracking-wider">
+                          <XCircle className="w-3 h-3 text-slate-400" /> Inativo
                         </span>
                       )}
                     </td>
@@ -225,52 +225,52 @@ export const AdminUtilizadores: React.FC = () => {
 
       {/* Modal Add Admin User */}
       {modalNovo && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
-            <h3 className="text-lg font-black text-slate-900">Novo Administrador Kivora</h3>
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-scaleUp">
+            <h3 className="text-lg font-black text-slate-950 font-display tracking-tight">Novo Administrador Kivora</h3>
 
             <form onSubmit={handleAddUser} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700 uppercase">Nome Completo</label>
+                <label className="text-[11px] font-semibold text-slate-700 uppercase font-display">Nome Completo</label>
                 <input
                   type="text"
                   required
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
                   placeholder="Ex: Carlos Alberto"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-medium"
+                  className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-brand-500 focus:bg-white font-medium transition-all"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700 uppercase">E-mail Corporativo</label>
+                <label className="text-[11px] font-semibold text-slate-700 uppercase font-display">E-mail Corporativo</label>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="carlos@kivora.ao"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-medium"
+                  className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-brand-500 focus:bg-white font-medium transition-all"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700 uppercase">Cargo / Função</label>
+                <label className="text-[11px] font-semibold text-slate-700 uppercase font-display">Cargo / Função</label>
                 <input
                   type="text"
                   value={funcao}
                   onChange={(e) => setFuncao(e.target.value)}
                   placeholder="Ex: Especialista de Suporte AGT"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-medium"
+                  className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-brand-500 focus:bg-white font-medium transition-all"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700 uppercase">Nível de Permissão (RBAC)</label>
+                <label className="text-[11px] font-semibold text-slate-700 uppercase font-display">Nível de Permissão (RBAC)</label>
                 <select
                   value={nivel}
                   onChange={(e) => setNivel(e.target.value as any)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-bold"
+                  className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-brand-500 font-semibold font-display cursor-pointer"
                 >
                   <option value="super_admin">Super Admin (Acesso Total)</option>
                   <option value="financeiro">Financeiro & Pagamentos</option>
@@ -283,13 +283,13 @@ export const AdminUtilizadores: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setModalNovo(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100"
+                  className="px-4 py-2.5 rounded-xl text-xs font-semibold font-display text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20"
+                  className="px-5 py-2.5 rounded-xl text-xs font-semibold font-display bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/20 transition-all cursor-pointer"
                 >
                   Criar Credenciais
                 </button>

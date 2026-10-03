@@ -59,93 +59,104 @@ export const AdminInstalacoes: React.FC = () => {
         subtitle={`${installations.length} computadores vinculados com Hardware ID no Firebase`}
       />
 
-      <div className="p-6 space-y-5">
+      <div className="p-6 space-y-6">
         {/* Search Bar */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-          <Search className="w-4 h-4 text-slate-400" />
+        <div className="surface-card p-4 rounded-2xl flex items-center gap-3">
+          <Search className="w-4 h-4 text-slate-400 shrink-0" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Pesquisar por nome do PC, empresa, chave de licença ou Hardware ID..."
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
+            className="w-full bg-slate-50/80 border border-slate-200/80 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white transition-all placeholder-slate-400"
           />
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <p className="text-2xl font-black text-emerald-600">{installations.filter(i => i.status === 'ativo').length}</p>
-            <p className="text-xs text-slate-500 font-semibold mt-0.5">Computadores Ativos Online</p>
+          <div className="surface-card p-5">
+            <p className="text-2xl sm:text-3xl font-black text-emerald-600 font-display font-mono-num tracking-tight">
+              {installations.filter(i => i.status === 'ativo').length}
+            </p>
+            <p className="text-xs text-slate-500 font-semibold mt-1">Computadores Ativos Online</p>
           </div>
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <p className="text-2xl font-black text-slate-900">{licenses.length - installations.length}</p>
-            <p className="text-xs text-slate-500 font-semibold mt-0.5">Licenças Disponíveis p/ Ativação</p>
+          <div className="surface-card p-5">
+            <p className="text-2xl sm:text-3xl font-black text-slate-900 font-display font-mono-num tracking-tight">
+              {licenses.length - installations.length}
+            </p>
+            <p className="text-xs text-slate-500 font-semibold mt-1">Licenças Disponíveis p/ Ativação</p>
           </div>
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <p className="text-2xl font-black text-red-600">{installations.filter(i => i.status === 'bloqueado').length}</p>
-            <p className="text-xs text-slate-500 font-semibold mt-0.5">Equipamentos Bloqueados</p>
+          <div className="surface-card p-5">
+            <p className="text-2xl sm:text-3xl font-black text-red-600 font-display font-mono-num tracking-tight">
+              {installations.filter(i => i.status === 'bloqueado').length}
+            </p>
+            <p className="text-xs text-slate-500 font-semibold mt-1">Equipamentos Bloqueados</p>
           </div>
         </div>
 
         {/* Instalações Grid */}
         {loading ? (
-          <div className="p-12 text-center text-slate-400">
-            <p className="text-xs font-bold">A carregar instalações ativas do Firebase...</p>
+          <div className="p-16 text-center text-slate-400 surface-card">
+            <div className="w-8 h-8 border-3 border-slate-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-3" />
+            <p className="text-xs font-bold text-slate-600">A carregar instalações ativas do Firebase...</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
-            <Monitor className="w-10 h-10 mx-auto text-slate-300 mb-2" />
-            <p className="text-sm font-bold text-slate-700">Nenhum computador ativado encontrado</p>
-            <p className="text-xs text-slate-400">Os computadores são registados automaticamente quando o cliente insere a chave KVRA no Kivora ERP.</p>
+          <div className="p-16 text-center text-slate-400 surface-card">
+            <Monitor className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+            <p className="text-sm font-bold text-slate-800 font-display">Nenhum computador ativado encontrado</p>
+            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              Os computadores são registados automaticamente quando o cliente insere a chave KVRA no Kivora ERP.
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {filtered.map((inst) => (
               <div
                 key={inst.id}
-                className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-blue-400/40 hover:shadow-md transition-all space-y-4"
+                className="surface-card p-5.5 hover:border-blue-400/40 hover:shadow-card transition-all space-y-4 flex flex-col justify-between"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-blue-50 text-blue-600">
-                      <Monitor className="w-5 h-5" strokeWidth={1.75} />
+                <div className="space-y-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-blue-50 text-blue-600 border border-blue-100 shrink-0">
+                        <Monitor className="w-5 h-5" strokeWidth={1.75} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-950 text-sm font-display truncate">{inst.nomePC}</p>
+                        <p className="text-xs text-slate-500 truncate">{inst.empresaNome}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-black text-slate-950 text-sm">{inst.nomePC}</p>
-                      <p className="text-xs text-slate-500">{inst.empresaNome}</p>
-                    </div>
+                    <StatusBadge status={inst.status} />
                   </div>
-                  <StatusBadge status={inst.status} />
-                </div>
 
-                <div className="space-y-1.5 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400 font-medium">Chave Licença</span>
-                    <span className="font-mono font-bold text-blue-600">{inst.licencaId}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400 font-medium">Hardware Fingerprint</span>
-                    <span className="font-mono text-slate-700 text-[10px] truncate max-w-[150px]" title={inst.hardwareId}>
-                      {inst.hardwareId}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400 font-medium">Sistema Operativo</span>
-                    <span className="font-semibold text-slate-700">{inst.so}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400 font-medium">Data de Ativação</span>
-                    <span className="font-mono text-slate-600">{inst.dataAtivacao}</span>
+                  <div className="space-y-2 text-xs pt-1">
+                    <div className="flex justify-between items-center py-1 border-b border-slate-100">
+                      <span className="text-slate-400 font-medium">Chave Licença</span>
+                      <span className="font-mono-num font-bold text-blue-600">{inst.licencaId}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-b border-slate-100">
+                      <span className="text-slate-400 font-medium">Hardware Fingerprint</span>
+                      <span className="font-mono-num text-slate-700 text-[10px] truncate max-w-[150px]" title={inst.hardwareId}>
+                        {inst.hardwareId}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-b border-slate-100">
+                      <span className="text-slate-400 font-medium">Sistema Operativo</span>
+                      <span className="font-semibold text-slate-700">{inst.so}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-slate-400 font-medium">Data de Ativação</span>
+                      <span className="font-mono-num text-slate-600">{inst.dataAtivacao}</span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="pt-3 border-t border-slate-100 flex justify-end">
+                <div className="pt-3 border-t border-slate-100">
                   <button
                     onClick={() => handleUnlink(inst.licencaId)}
                     disabled={actionLoading === inst.licencaId}
-                    className="w-full flex items-center justify-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 py-2 rounded-xl transition-colors border border-amber-200"
+                    className="w-full flex items-center justify-center gap-1.5 text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 py-2.5 rounded-xl transition-colors border border-amber-200/80 cursor-pointer disabled:opacity-50"
                   >
                     <Unlink className="w-3.5 h-3.5" />
                     <span>Desvincular Computador (Troca de PC)</span>

@@ -87,20 +87,20 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Inputs do Simulador (Esquerda) */}
-          <div className="lg:col-span-6 bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
+          <div className="lg:col-span-6 surface-card p-8 sm:p-10 space-y-6">
             <div className="border-b border-slate-100 pb-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold mb-2">
                 <Calculator className="w-3.5 h-3.5" />
                 <span>Dados da Sua Operação</span>
               </div>
-              <h2 className="text-xl font-black text-slate-950">
+              <h2 className="text-xl font-bold font-display text-slate-950">
                 Parâmetros do Seu Negócio
               </h2>
             </div>
 
             {/* 1. Setor de Atividade */}
             <div className="space-y-2">
-              <label className="text-xs font-black text-slate-900 uppercase tracking-wider">
+              <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                 1. Setor de Atividade
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -108,9 +108,9 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
                   <button
                     key={s.id}
                     onClick={() => setSetor(s.id)}
-                    className={`p-3 rounded-xl text-left text-xs font-bold transition-all cursor-pointer border ${
+                    className={`p-3 rounded-xl text-left text-xs font-semibold transition-all cursor-pointer border ${
                       setor === s.id
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                        ? 'bg-[#0B192C] text-white border-[#0B192C] shadow-sm'
                         : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
@@ -124,7 +124,7 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
             <div className="space-y-2">
               <div className="flex justify-between items-center text-xs font-bold text-slate-800">
                 <span className="uppercase tracking-wider">2. Postos de Trabalho / Caixas:</span>
-                <span className="text-blue-600 font-black text-sm">{postos} postos</span>
+                <span className="text-blue-600 font-bold font-mono-num text-sm">{postos} {postos === 1 ? 'posto' : 'postos'}</span>
               </div>
               <input
                 type="range"
@@ -140,7 +140,7 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
             <div className="space-y-2">
               <div className="flex justify-between items-center text-xs font-bold text-slate-800">
                 <span className="uppercase tracking-wider">3. Faturação Mensal Média:</span>
-                <span className="text-emerald-600 font-black text-sm">{formatAOA(faturacaoMensal)}</span>
+                <span className="text-emerald-600 font-bold font-mono-num text-sm">{formatAOA(faturacaoMensal)}</span>
               </div>
               <input
                 type="range"
@@ -151,7 +151,7 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
                 onChange={(e) => setFaturacaoMensal(Number(e.target.value))}
                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
               />
-              <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
+              <div className="flex justify-between text-[10px] text-slate-400 font-mono-num font-semibold">
                 <span>1.000.000 AOA</span>
                 <span>20.000.000 AOA</span>
                 <span>40.000.000 AOA</span>
@@ -162,7 +162,7 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
             <div className="space-y-2">
               <div className="flex justify-between items-center text-xs font-bold text-slate-800">
                 <span className="uppercase tracking-wider">4. Tempo Semanal em Fechos Manuais:</span>
-                <span className="text-amber-600 font-black text-sm">{horasFechoSemana} horas / semana</span>
+                <span className="text-amber-600 font-bold font-mono-num text-sm">{horasFechoSemana} horas / semana</span>
               </div>
               <input
                 type="range"
@@ -176,23 +176,21 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
           </div>
 
           {/* Resultados Financeiros do ROI (Direita) */}
-          <div className="lg:col-span-6 bg-mesh-dark text-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-slate-800 space-y-8 sticky top-24 relative overflow-hidden">
-            <div className="orb orb-blue w-64 h-64 -top-16 -left-16 opacity-30" />
-            <div className="orb orb-green w-48 h-48 -bottom-12 -right-12 opacity-25" />
+          <div className="lg:col-span-6 bg-[#0B192C] text-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-slate-800 space-y-8 sticky top-24 relative overflow-hidden">
             
             <div className="space-y-1 border-b border-white/10 pb-4 relative z-10">
-              <div className="flex items-center gap-2 text-emerald-400 text-xs font-black uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
                 <TrendingUp className="w-4 h-4" />
                 <span>Impacto Financeiro Estimado</span>
               </div>
-              <h3 className="text-2xl font-black text-white">
+              <h3 className="text-2xl font-bold font-display text-white">
                 Poupança Estimada Anual
               </h3>
             </div>
 
             {/* Grande Destaque do Valor em Kwanzas */}
-            <div className="bg-white/8 backdrop-blur-md rounded-2xl p-6 border border-white/15 text-center space-y-2 relative z-10 shadow-inner">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 text-center space-y-2 relative z-10 shadow-inner">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Poupança Direta Estimada (AOA)
               </span>
               <div className="text-3xl sm:text-4xl font-black text-emerald-400 tracking-tight font-mono-num drop-shadow-sm">
@@ -207,39 +205,39 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 relative z-10">
               
               <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1 hover:bg-white/10 transition-all">
-                <div className="text-[10px] font-bold uppercase text-slate-300">Tempo Fecho</div>
-                <div className="text-sm font-black text-white font-mono-num">
+                <div className="text-[10px] font-bold uppercase text-slate-400">Tempo Fecho</div>
+                <div className="text-sm font-bold text-white font-mono-num">
                   {formatAOA(resultados.poupancaTempoMensal)} / mês
                 </div>
-                <p className="text-[10px] text-slate-300">
+                <p className="text-[10px] text-slate-300 leading-tight">
                   {resultados.horasPoupadasMes}h libertadas por mês da gerência.
                 </p>
               </div>
 
               <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1 hover:bg-white/10 transition-all">
-                <div className="text-[10px] font-bold uppercase text-slate-300">Erros Faturação</div>
-                <div className="text-sm font-black text-white font-mono-num">
+                <div className="text-[10px] font-bold uppercase text-slate-400">Erros Faturação</div>
+                <div className="text-sm font-bold text-white font-mono-num">
                   {formatAOA(resultados.poupancaErrosMensal)} / mês
                 </div>
-                <p className="text-[10px] text-slate-300">
+                <p className="text-[10px] text-slate-300 leading-tight">
                   Eliminação de falhas manuais e descontos errados.
                 </p>
               </div>
 
               <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1 hover:bg-white/10 transition-all">
-                <div className="text-[10px] font-bold uppercase text-slate-300">Quebras Stock</div>
-                <div className="text-sm font-black text-white font-mono-num">
+                <div className="text-[10px] font-bold uppercase text-slate-400">Quebras Stock</div>
+                <div className="text-sm font-bold text-white font-mono-num">
                   {formatAOA(resultados.poupancaStockMensal)} / mês
                 </div>
-                <p className="text-[10px] text-slate-300">
-                  Redução imediata de extravios e quebras com auditoria cega de caixa.
+                <p className="text-[10px] text-slate-300 leading-tight">
+                  Auditoria cega de caixa e prevenção de extravios.
                 </p>
               </div>
             </div>
 
             {/* Blindagem AGT */}
-            <div className="p-4 rounded-2xl bg-blue-500/15 border border-blue-400/30 flex items-start gap-3 relative z-10">
-              <ShieldCheck className="w-5 h-5 text-blue-300 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-400/20 flex items-start gap-3 relative z-10">
+              <ShieldCheck className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
               <div className="text-xs text-slate-300">
                 <strong className="text-white block mb-0.5">Zero Risco de Multas da AGT:</strong>
                 Garante 100% de conformidade com o Decreto 71/25 e evita coimas fiscais que podem ascender a milhões de Kwanzas.
@@ -247,10 +245,10 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
             </div>
 
             {/* CTA Final */}
-            <div className="pt-2 space-y-2.5 relative z-10">
+            <div className="pt-2 space-y-3 relative z-10">
               <button
                 onClick={() => onOpenDemoModal(`Estudo de ROI: ${setores.find((s) => s.id === setor)?.nome}`)}
-                className="w-full bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-orange-600/40 transition-all cursor-pointer hover:-translate-y-1 shimmer-button"
+                className="w-full btn-cta py-4 px-6 rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-orange-600/30 transition-all cursor-pointer font-bold text-sm"
               >
                 <span>Agendar Demonstração VIP & Implementação</span>
                 <ArrowRight className="w-4 h-4" />
@@ -258,7 +256,7 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
 
               <button
                 onClick={() => onNavigatePage('planos')}
-                className="w-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs py-3 px-4 rounded-xl transition-all border border-white/20 hover:border-white/40 flex items-center justify-center gap-2 cursor-pointer backdrop-blur-xs hover:-translate-y-0.5"
+                className="w-full bg-white/10 hover:bg-white/15 text-white font-semibold text-xs py-3 px-4 rounded-xl transition-all border border-white/15 hover:border-white/30 flex items-center justify-center gap-2 cursor-pointer backdrop-blur-xs"
               >
                 <span>Consultar Tabela de Preços de Licenças</span>
                 <ArrowRight className="w-3.5 h-3.5" />

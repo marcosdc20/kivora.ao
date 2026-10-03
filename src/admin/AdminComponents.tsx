@@ -307,14 +307,14 @@ export const AdminTopbar: React.FC<TopbarProps> = ({ title, subtitle, onMenuTogg
           {onMenuToggle && (
             <button
               onClick={onMenuToggle}
-              className="lg:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+              className="lg:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
               title="Abrir Menu Lateral"
             >
               <Menu className="w-5 h-5" />
             </button>
           )}
           <div className="space-y-0.5">
-            <h1 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">{title}</h1>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight font-display">{title}</h1>
             {subtitle && <p className="text-xs sm:text-sm text-slate-500 font-medium">{subtitle}</p>}
           </div>
         </div>
@@ -375,15 +375,15 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, sub, subColor 
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 p-5 hover:border-slate-300 hover:shadow-xs transition-all flex flex-col justify-between">
+    <div className="surface-card p-5 hover:border-slate-300 hover:shadow-card transition-all flex flex-col justify-between">
       <div>
         <div className="flex items-start justify-between gap-2 mb-3">
           <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">{label}</p>
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-current/10 ${iconBg}`}>
             {icon}
           </div>
         </div>
-        <p className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight font-mono">{value}</p>
+        <p className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight font-display font-mono-num">{value}</p>
       </div>
       {sub && <p className={`text-xs mt-2 font-semibold ${subColors[subColor]}`}>{sub}</p>}
     </div>
@@ -396,7 +396,7 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, sub, subColor 
 export const EmptyState: React.FC<{ title: string; sub?: string; icon?: React.ReactNode }> = ({ title, sub, icon }) => (
   <div className="flex flex-col items-center justify-center py-20 text-center">
     {icon && <div className="mb-4 text-slate-300">{icon}</div>}
-    <p className="text-slate-500 font-semibold text-sm">{title}</p>
+    <p className="text-slate-600 font-bold text-sm font-display">{title}</p>
     {sub && <p className="text-slate-400 text-xs mt-1">{sub}</p>}
   </div>
 );

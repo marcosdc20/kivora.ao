@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { KivoraLogo } from './KivoraLogo';
 import { PageId } from './Header';
-import { Phone, Mail, MapPin, ShieldCheck, Download } from 'lucide-react';
+import {
+  Phone, Mail, MapPin, ShieldCheck, Download,
+  ChevronRight, MessageCircle
+} from 'lucide-react';
+import { FaFacebookF, FaLinkedinIn, FaInstagram, FaWhatsapp } from 'react-icons/fa';
 import { subscribeSystemSettings, getCachedSystemSettings, SystemCompanySettings } from '../services/systemSettingsService';
 
 interface FooterProps {
@@ -26,315 +30,229 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
   };
 
   return (
-    <footer className="bg-slate-950 text-slate-300 border-t border-slate-800 text-xs print:hidden">
+    <footer className="bg-[#0B1528] text-slate-300 border-t border-slate-800 text-xs print:hidden font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
 
-          {/* Col 1: Brand & Official AGT Cert */}
-          <div className="sm:col-span-2 lg:col-span-1 space-y-4">
+          {/* Col 1: Brand & Social Links (Padrão XTRA das Imagens) */}
+          <div className="space-y-5">
             <div className="flex items-center">
               <KivoraLogo variant="light" size="md" useOfficialImage={true} />
             </div>
 
-            <p className="text-slate-300 text-xs leading-relaxed">
-              {settings.fullName}. Software executivo de faturação eletrónica certificado pela AGT em Angola ao abrigo do Decreto Presidencial n.º 71/25.
+            <p className="text-slate-400 text-xs leading-relaxed font-normal">
+              {settings.fullName || 'Visual Software & Kivora Soft'}. Desenvolvemos software executivo de faturação eletrónica certificado pela AGT em Angola (Decreto Presidencial n.º 71/25), com base de dados local offline e rede LAN.
             </p>
 
-            <div className="flex items-center gap-2 p-3 bg-slate-900 rounded-xl border border-slate-800 text-slate-200 w-fit">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" strokeWidth={2} />
-              <span className="text-[11px] font-bold font-mono text-emerald-400">Certificação AGT: FE/440/AGT/2026</span>
+            <div className="inline-flex items-center gap-2 p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 text-slate-200 shadow-xs">
+              <ShieldCheck className="w-4 h-4 text-[#FF6500] shrink-0" strokeWidth={2.2} />
+              <span className="text-[11px] font-bold font-mono-num text-orange-400">Homologação AGT: FE/387/AGT/2026</span>
+            </div>
+
+            {/* Redes Sociais com Botões Circulares Laranja (Padrão das Imagens) */}
+            <div className="pt-2 flex items-center gap-2.5">
+              <a
+                href={settings.facebookUrl || 'https://facebook.com'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-[#FF6500] hover:bg-[#EB5B00] text-white flex items-center justify-center transition-all shadow-sm shadow-orange-500/20 hover:scale-105"
+                aria-label="Facebook"
+              >
+                <FaFacebookF className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href={settings.whatsappUrl || 'https://wa.me/244974855494'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-[#FF6500] hover:bg-[#EB5B00] text-white flex items-center justify-center transition-all shadow-sm shadow-orange-500/20 hover:scale-105"
+                aria-label="WhatsApp"
+              >
+                <FaWhatsapp className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href={settings.linkedinUrl || 'https://linkedin.com'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-[#FF6500] hover:bg-[#EB5B00] text-white flex items-center justify-center transition-all shadow-sm shadow-orange-500/20 hover:scale-105"
+                aria-label="LinkedIn"
+              >
+                <FaLinkedinIn className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href={settings.instagramUrl || 'https://instagram.com'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-[#FF6500] hover:bg-[#EB5B00] text-white flex items-center justify-center transition-all shadow-sm shadow-orange-500/20 hover:scale-105"
+                aria-label="Instagram"
+              >
+                <FaInstagram className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
 
-          {/* Col 2: Produtos & Módulos */}
-          <div className="space-y-3">
-            <h4 className="font-extrabold text-white uppercase tracking-wider text-[11px]">
-              Produtos & Módulos
+          {/* Col 2: Useful Links (Links Úteis com Marcadores em Seta Laranja - Padrão XTRA) */}
+          <div className="space-y-4">
+            <h4 className="font-bold font-display text-white text-sm tracking-tight border-b border-slate-800 pb-2.5 flex items-center gap-2">
+              <span className="w-1.5 h-3.5 bg-[#FF6500] rounded-full inline-block" />
+              <span>Links Úteis</span>
             </h4>
-            <ul className="space-y-2 text-slate-400">
-              <li>
-                <a
-                  href="#faturacao"
-                  onClick={(e) => handleLinkClick(e, 'faturacao')}
-                  className="hover:text-white transition-colors"
-                >
-                  Faturação Eletrónica AGT
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#pos"
-                  onClick={(e) => handleLinkClick(e, 'pos')}
-                  className="hover:text-white transition-colors"
-                >
-                  Ponto de Venda (POS) Caixa
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#stock"
-                  onClick={(e) => handleLinkClick(e, 'stock')}
-                  className="hover:text-white transition-colors"
-                >
-                  Gestão de Stocks & Armazém
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#rh"
-                  onClick={(e) => handleLinkClick(e, 'rh')}
-                  className="hover:text-white transition-colors"
-                >
-                  Recursos Humanos & IRT 2026
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#contabilidade"
-                  onClick={(e) => handleLinkClick(e, 'contabilidade')}
-                  className="hover:text-white transition-colors"
-                >
-                  Contabilidade & SAF-T AO
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#hardware"
-                  onClick={(e) => handleLinkClick(e, 'hardware')}
-                  className="hover:text-white transition-colors"
-                >
-                  Hardware & Impressoras 80mm
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#download"
-                  onClick={(e) => handleLinkClick(e, 'download')}
-                  className="text-blue-400 font-bold hover:text-blue-300 transition-colors flex items-center gap-1 mt-1"
-                >
-                  <Download className="w-3.5 h-3.5" strokeWidth={1.75} />
-                  <span>Baixar Instalador Windows</span>
-                </a>
-              </li>
+            <ul className="space-y-2.5 text-slate-300">
+              {[
+                { name: 'Sobre a Empresa', page: 'sobre' },
+                { name: 'Tabela de Preços & Planos', page: 'planos' },
+                { name: 'Validador de Licença Oficial', page: 'validar-licenca' },
+                { name: 'Guia Fiscal Decreto 71/25', page: 'guia-agt' },
+                { name: 'Calculadora Fiscal IRT & IVA', page: 'calculadora-fiscal' },
+                { name: 'Simulador de Poupança (ROI)', page: 'simulador-roi' },
+                { name: 'Casos de Sucesso em Angola', page: 'casos-sucesso' },
+                { name: 'Programa de Parceiros', page: 'parceiros' },
+              ].map((item, idx) => (
+                <li key={idx}>
+                  <a
+                    href={`#${item.page}`}
+                    onClick={(e) => handleLinkClick(e, item.page as PageId)}
+                    className="hover:text-orange-400 transition-colors flex items-center gap-2 group"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5 text-[#FF6500] group-hover:translate-x-1 transition-transform shrink-0" />
+                    <span>{item.name}</span>
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Col 3: Setores & Soluções */}
-          <div className="space-y-3">
-            <h4 className="font-extrabold text-white uppercase tracking-wider text-[11px]">
-              Setores & Casos Reais
+          {/* Col 3: Soluções & Módulos Integrados */}
+          <div className="space-y-4">
+            <h4 className="font-bold font-display text-white text-sm tracking-tight border-b border-slate-800 pb-2.5 flex items-center gap-2">
+              <span className="w-1.5 h-3.5 bg-[#FF6500] rounded-full inline-block" />
+              <span>Módulos KIVORA</span>
             </h4>
-            <ul className="space-y-2 text-slate-400">
-              <li>
-                <a
-                  href="#retalho"
-                  onClick={(e) => handleLinkClick(e, 'retalho')}
-                  className="hover:text-white transition-colors"
-                >
-                  Retalho & Supermercados
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#restauracao"
-                  onClick={(e) => handleLinkClick(e, 'restauracao')}
-                  className="hover:text-white transition-colors"
-                >
-                  Restauração & Bares
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#farmacia"
-                  onClick={(e) => handleLinkClick(e, 'farmacia')}
-                  className="hover:text-white transition-colors"
-                >
-                  Farmácias & Saúde
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#servicos"
-                  onClick={(e) => handleLinkClick(e, 'servicos')}
-                  className="hover:text-white transition-colors"
-                >
-                  Prestação de Serviços
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#casos-sucesso"
-                  onClick={(e) => handleLinkClick(e, 'casos-sucesso')}
-                  className="hover:text-white text-emerald-400 font-medium transition-colors"
-                >
-                  Casos de Sucesso em Angola
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#seguranca"
-                  onClick={(e) => handleLinkClick(e, 'seguranca')}
-                  className="hover:text-white transition-colors"
-                >
-                  Centro de Cibersegurança
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#sobre"
-                  onClick={(e) => handleLinkClick(e, 'sobre')}
-                  className="hover:text-white transition-colors"
-                >
-                  Sobre a Visual Software
-                </a>
-              </li>
+            <ul className="space-y-2.5 text-slate-300">
+              {[
+                { name: 'Faturação Eletrónica AGT DS.120', page: 'faturacao' },
+                { name: 'Ponto de Venda (POS) Caixa', page: 'pos' },
+                { name: 'Gestão de Stocks & Multi-Armazém', page: 'stock' },
+                { name: 'Recursos Humanos & IRT 2026', page: 'rh' },
+                { name: 'Contabilidade & SAF-T AO', page: 'contabilidade' },
+                { name: 'Hardware & Impressoras 80mm', page: 'hardware' },
+                { name: 'Loja Oficial de Equipamentos', page: 'loja' },
+                { name: 'Central de Suporte & Manuais', page: 'suporte' },
+              ].map((item, idx) => (
+                <li key={idx}>
+                  <a
+                    href={`#${item.page}`}
+                    onClick={(e) => handleLinkClick(e, item.page as PageId)}
+                    className="hover:text-orange-400 transition-colors flex items-center gap-2 group"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5 text-[#FF6500] group-hover:translate-x-1 transition-transform shrink-0" />
+                    <span>{item.name}</span>
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Col 4: Preços & Recursos Fiscais */}
-          <div className="space-y-3">
-            <h4 className="font-extrabold text-white uppercase tracking-wider text-[11px]">
-              Preços & Fisco AGT
+          {/* Col 4: Escritório & Contactos Oficiais (Ícones Circulares Laranja - Padrão XTRA) */}
+          <div className="space-y-4">
+            <h4 className="font-bold font-display text-white text-sm tracking-tight border-b border-slate-800 pb-2.5 flex items-center gap-2">
+              <span className="w-1.5 h-3.5 bg-[#FF6500] rounded-full inline-block" />
+              <span>Escritório & Suporte</span>
             </h4>
-            <ul className="space-y-2 text-slate-400">
-              <li>
-                <a
-                  href="#planos"
-                  onClick={(e) => handleLinkClick(e, 'planos')}
-                  className="hover:text-white font-semibold text-slate-200 transition-colors"
-                >
-                  Licenças e Preços em Kwanzas
-                </a>
+            
+            <ul className="space-y-3.5 text-slate-300">
+              {/* Morada */}
+              <li className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#FF6500] text-white flex items-center justify-center shrink-0 shadow-sm shadow-orange-500/20 mt-0.5">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-[11px] text-slate-400 block font-medium">Sede Principal:</span>
+                  <span className="text-white text-xs leading-snug">{settings.address || 'Edifício Kivora, Luanda, Angola'}</span>
+                </div>
               </li>
-              <li>
-                <a
-                  href="#simulador-roi"
-                  onClick={(e) => handleLinkClick(e, 'simulador-roi')}
-                  className="hover:text-white transition-colors"
-                >
-                  Simulador de Poupança (ROI)
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#comparativo"
-                  onClick={(e) => handleLinkClick(e, 'comparativo')}
-                  className="hover:text-white transition-colors"
-                >
-                  Comparativo vs Nuvem / Dólar
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#guia-agt"
-                  onClick={(e) => handleLinkClick(e, 'guia-agt')}
-                  className="hover:text-white text-emerald-400 font-medium transition-colors"
-                >
-                  Guia Oficial Decreto 71/25
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#calculadora-fiscal"
-                  onClick={(e) => handleLinkClick(e, 'calculadora-fiscal')}
-                  className="hover:text-white transition-colors"
-                >
-                  Calculadora Fiscal IRT & IVA
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#manuais"
-                  onClick={(e) => handleLinkClick(e, 'manuais')}
-                  className="hover:text-white transition-colors"
-                >
-                  Central de Manuais & Tutoriais
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#validar-licenca"
-                  onClick={(e) => handleLinkClick(e, 'validar-licenca')}
-                  className="hover:text-white text-emerald-400 font-semibold transition-colors flex items-center gap-1"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Validar Licença Oficial</span>
-                </a>
-              </li>
-            </ul>
-          </div>
 
-          {/* Col 5: Atendimento & Rede Nacional */}
-          <div className="space-y-3">
-            <h4 className="font-extrabold text-white uppercase tracking-wider text-[11px]">
-              Rede Nacional & Contactos
-            </h4>
-            <ul className="space-y-2 text-slate-400">
-              <li>
-                <a
-                  href="#diretorio-parceiros"
-                  onClick={(e) => handleLinkClick(e, 'diretorio-parceiros')}
-                  className="hover:text-white transition-colors"
-                >
-                  Diretório de Técnicos & Parceiros
-                </a>
+              {/* Telefone */}
+              <li className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#FF6500] text-white flex items-center justify-center shrink-0 shadow-sm shadow-orange-500/20">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-[11px] text-slate-400 block font-medium">Linha Telefónica:</span>
+                  <a
+                    href={`tel:${settings.phoneRaw || '+244974855494'}`}
+                    className="text-white hover:text-orange-400 font-bold font-mono-num transition-colors text-xs"
+                  >
+                    {settings.phoneDisplay || '+244 974 855 494'}
+                  </a>
+                </div>
               </li>
-              <li>
-                <a
-                  href="#provincias"
-                  onClick={(e) => handleLinkClick(e, 'provincias')}
-                  className="hover:text-white transition-colors"
-                >
-                  Presença nas 18 Províncias
-                </a>
+
+              {/* Email */}
+              <li className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#FF6500] text-white flex items-center justify-center shrink-0 shadow-sm shadow-orange-500/20">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-[11px] text-slate-400 block font-medium">Email Comercial:</span>
+                  <a
+                    href={`mailto:${settings.email || 'comercial@kivora.ao'}`}
+                    className="text-white hover:text-orange-400 transition-colors text-xs font-medium"
+                  >
+                    {settings.email || 'comercial@kivora.ao'}
+                  </a>
+                </div>
               </li>
-              <li>
-                <a
-                  href="#parceiros"
-                  onClick={(e) => handleLinkClick(e, 'parceiros')}
-                  className="hover:text-white transition-colors"
-                >
-                  Programa de Parceiros & Revenda
-                </a>
-              </li>
-              <li className="pt-2 border-t border-slate-900 flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5 text-blue-400 shrink-0" strokeWidth={1.75} />
-                <a href={settings.whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:text-blue-400 font-semibold transition-colors">
-                  {settings.phoneDisplay}
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-blue-400 shrink-0" strokeWidth={1.75} />
-                <a href={`mailto:${settings.email}`} className="hover:text-white transition-colors">
-                  {settings.email}
-                </a>
-              </li>
-              <li className="flex items-start gap-2">
-                <MapPin className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" strokeWidth={1.75} />
-                <span>{settings.address}</span>
+
+              {/* WhatsApp */}
+              <li className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <MessageCircle className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-[11px] text-slate-400 block font-medium">Atendimento WhatsApp:</span>
+                  <a
+                    href={settings.whatsappUrl || 'https://wa.me/244974855494'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white hover:text-emerald-400 font-bold transition-colors text-xs"
+                  >
+                    Assistência Imediata
+                  </a>
+                </div>
               </li>
             </ul>
+
+            <div className="pt-2">
+              <a
+                href="#download"
+                onClick={(e) => handleLinkClick(e, 'download')}
+                className="w-full inline-flex items-center justify-center gap-2 bg-[#FF6500] hover:bg-[#EB5B00] active:scale-95 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-md shadow-orange-500/20 transition-all cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Baixar Instalador KIVORA</span>
+              </a>
+            </div>
           </div>
 
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-10 mt-10 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400 text-[11px]">
+        {/* Bottom Bar: Copyright & Legal */}
+        <div className="pt-8 mt-12 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400 text-[11px]">
           <p>
-            © {currentYear} {settings.company}. Todos os direitos reservados. Certificação AGT N.º FE/440/AGT/2026.
+            © {currentYear} {settings.company || 'KIVORA SOFT'}. Todos os direitos reservados. Software Homologado AGT N.º <span className="font-mono-num text-orange-400 font-bold">FE/387/AGT/2026</span>.
           </p>
           <div className="flex items-center gap-6">
             <a
               href="#privacidade"
               onClick={(e) => handleLinkClick(e, 'privacidade')}
-              className="hover:text-white transition-colors"
+              className="hover:text-orange-400 transition-colors"
             >
               Privacidade (Lei n.º 22/11)
             </a>
             <a
               href="#termos"
               onClick={(e) => handleLinkClick(e, 'termos')}
-              className="hover:text-white transition-colors"
+              className="hover:text-orange-400 transition-colors"
             >
               Termos de Licenciamento
             </a>
@@ -345,3 +263,4 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
     </footer>
   );
 };
+

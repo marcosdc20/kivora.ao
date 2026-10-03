@@ -267,7 +267,7 @@ export const AdminLoja: React.FC = () => {
           <div className="flex items-center gap-2 text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">
             <ShoppingBag className="w-4 h-4" /> Gestão da Loja Oficial & Vendas
           </div>
-          <h1 className="text-2xl font-black text-slate-950">Loja, Encomendas & Taxas de Deslocação</h1>
+          <h1 className="text-2xl font-black text-slate-950 font-display tracking-tight">Loja, Encomendas & Taxas de Deslocação</h1>
           <p className="text-xs text-slate-500 mt-1">
             Cadastre produtos com fotos em URL, controle vendas, gere proformas e configure taxas por província em tempo real.
           </p>
@@ -277,16 +277,16 @@ export const AdminLoja: React.FC = () => {
           <button
             onClick={loadData}
             disabled={loading}
-            className="p-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-xl transition-colors cursor-pointer"
+            className="p-2.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-xl transition-colors cursor-pointer shadow-xs"
             title="Atualizar dados do Firebase"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-blue-600' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-brand-600' : ''}`} />
           </button>
 
           {activeTab === 'produtos' && (
             <button
               onClick={handleOpenNewProduct}
-              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 cursor-pointer"
+              className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold font-display shadow-md shadow-brand-600/20 transition-all flex items-center gap-2 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               Cadastrar Produto / Serviço
@@ -295,43 +295,43 @@ export const AdminLoja: React.FC = () => {
         </div>
       </div>
 
-      {/* ─── CARDS DE MÉTRICAS RÁPIDAS (TEMA CLARO) ──────────────────────── */}
+      {/* ─── CARDS DE MÉTRICAS RÁPIDAS ──────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Faturação da Loja</p>
-          <p className="text-2xl font-black text-emerald-600">
-            {totalSalesAOA.toLocaleString('pt-AO')} <span className="text-xs font-bold text-slate-500">Kz</span>
+        <div className="surface-card p-5 rounded-2xl">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1 font-display">Faturação da Loja</p>
+          <p className="text-2xl font-black text-emerald-600 font-mono-num">
+            {totalSalesAOA.toLocaleString('pt-AO')} <span className="text-xs font-bold text-slate-500 font-sans">Kz</span>
           </p>
           <p className="text-[11px] text-slate-500 mt-1">Vendas confirmadas e pagas</p>
         </div>
 
-        <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Pedidos Pendentes</p>
-          <p className="text-2xl font-black text-amber-600">{pendingOrdersCount}</p>
+        <div className="surface-card p-5 rounded-2xl">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1 font-display">Pedidos Pendentes</p>
+          <p className="text-2xl font-black text-amber-600 font-mono-num">{pendingOrdersCount}</p>
           <p className="text-[11px] text-slate-500 mt-1">Aguardando confirmação/envio</p>
         </div>
 
-        <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Produtos Ativos</p>
-          <p className="text-2xl font-black text-blue-600">{activeProductsCount}</p>
+        <div className="surface-card p-5 rounded-2xl">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1 font-display">Produtos Ativos</p>
+          <p className="text-2xl font-black text-brand-600 font-mono-num">{activeProductsCount}</p>
           <p className="text-[11px] text-slate-500 mt-1">Exibidos na Loja Pública</p>
         </div>
 
-        <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Rotas de Deslocação</p>
-          <p className="text-2xl font-black text-purple-600">{deliveryRates.length}</p>
+        <div className="surface-card p-5 rounded-2xl">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1 font-display">Rotas de Deslocação</p>
+          <p className="text-2xl font-black text-purple-600 font-mono-num">{deliveryRates.length}</p>
           <p className="text-[11px] text-slate-500 mt-1">Províncias e zonas ativas</p>
         </div>
       </div>
 
-      {/* ─── NAVEGAÇÃO DE ABAS (TEMA CLARO) ──────────────────────────────── */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+      {/* ─── NAVEGAÇÃO DE ABAS ──────────────────────────────── */}
+      <div className="flex items-center gap-2 border-b border-slate-200/80 pb-2">
         <button
           onClick={() => setActiveTab('produtos')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold font-display transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === 'produtos'
-              ? 'bg-blue-600 text-white shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
+              ? 'bg-slate-950 text-white shadow-sm border border-slate-950'
+              : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:border-slate-300'
           }`}
         >
           <Package className="w-4 h-4" />
@@ -340,10 +340,10 @@ export const AdminLoja: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('encomendas')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold font-display transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === 'encomendas'
-              ? 'bg-blue-600 text-white shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
+              ? 'bg-slate-950 text-white shadow-sm border border-slate-950'
+              : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:border-slate-300'
           }`}
         >
           <ShoppingBag className="w-4 h-4" />
@@ -352,10 +352,10 @@ export const AdminLoja: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('taxas')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold font-display transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === 'taxas'
-              ? 'bg-blue-600 text-white shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
+              ? 'bg-slate-950 text-white shadow-sm border border-slate-950'
+              : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:border-slate-300'
           }`}
         >
           <Truck className="w-4 h-4" />
@@ -370,7 +370,7 @@ export const AdminLoja: React.FC = () => {
         <div className="space-y-4">
           
           {/* Filtros e Pesquisa */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 surface-card p-4 rounded-2xl">
             <div className="relative flex-1 w-full sm:max-w-md">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -378,7 +378,7 @@ export const AdminLoja: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Pesquisar por nome, SKU ou marca..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 text-xs text-slate-900 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 focus:bg-white"
+                className="w-full pl-10 pr-4 py-2 bg-slate-50/70 text-xs text-slate-900 rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500 focus:bg-white font-sans transition-all"
               />
             </div>
 
@@ -386,7 +386,7 @@ export const AdminLoja: React.FC = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-700 rounded-xl focus:outline-none focus:bg-white cursor-pointer"
+                className="px-3 py-2 bg-slate-50/70 border border-slate-200 text-xs font-display text-slate-700 rounded-xl focus:outline-none focus:bg-white cursor-pointer"
               >
                 <option value="todas">Todas as Categorias</option>
                 <option value="kits">Kits Completos POS</option>
@@ -401,10 +401,10 @@ export const AdminLoja: React.FC = () => {
           </div>
 
           {/* Tabela de Produtos */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="surface-card rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs text-slate-700">
-                <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
+                <thead className="bg-slate-50/80 text-slate-500 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-200/80 font-display">
                   <tr>
                     <th className="py-3.5 px-4">Produto</th>
                     <th className="py-3.5 px-4">SKU / Marca</th>
@@ -418,7 +418,7 @@ export const AdminLoja: React.FC = () => {
                 <tbody className="divide-y divide-slate-100">
                   {filteredProducts.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-10 text-slate-400">
+                      <td colSpan={7} className="text-center py-10 text-slate-400 font-sans">
                         Nenhum produto encontrado.
                       </td>
                     </tr>
@@ -436,38 +436,38 @@ export const AdminLoja: React.FC = () => {
                               />
                             </div>
                             <div>
-                              <p className="font-bold text-slate-900 line-clamp-1">{prod.name}</p>
-                              <p className="text-[11px] text-slate-500">{prod.warranty}</p>
+                              <p className="font-bold text-slate-900 font-display line-clamp-1">{prod.name}</p>
+                              <p className="text-[11px] text-slate-500 font-sans">{prod.warranty}</p>
                             </div>
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <span className="font-mono text-xs text-blue-600 font-bold">{prod.sku}</span>
-                          <p className="text-[11px] text-slate-500">{prod.brand}</p>
+                          <span className="font-mono text-xs text-brand-600 font-semibold">{prod.sku}</span>
+                          <p className="text-[11px] text-slate-500 font-sans">{prod.brand}</p>
                         </td>
                         <td className="py-3 px-4">
-                          <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold text-[11px] border border-slate-200">
+                          <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium text-[11px] border border-slate-200 font-display">
                             {prod.categoryLabel}
                           </span>
                         </td>
                         <td className="py-3 px-4">
-                          <span className="font-bold text-slate-900 text-sm">
+                          <span className="font-bold text-slate-950 text-sm font-mono-num">
                             {prod.priceAOA.toLocaleString('pt-AO')} Kz
                           </span>
                           {prod.originalPriceAOA && (
-                            <p className="text-[11px] text-slate-400 line-through">
+                            <p className="text-[11px] text-slate-400 line-through font-mono-num">
                               {prod.originalPriceAOA.toLocaleString('pt-AO')} Kz
                             </p>
                           )}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 font-display">
                           {prod.inStock ? (
-                            <span className="text-emerald-700 font-bold flex items-center gap-1">
+                            <span className="text-emerald-700 font-semibold flex items-center gap-1">
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                               {prod.stockLocation}
                             </span>
                           ) : (
-                            <span className="text-rose-600 font-bold flex items-center gap-1">
+                            <span className="text-rose-600 font-semibold flex items-center gap-1">
                               <XCircle className="w-3.5 h-3.5" />
                               Esgotado
                             </span>
@@ -476,7 +476,7 @@ export const AdminLoja: React.FC = () => {
                         <td className="py-3 px-4">
                           <button
                             onClick={() => handleToggleActive(prod.id, prod.active)}
-                            className={`px-2.5 py-1 rounded-full text-[11px] font-bold cursor-pointer transition-colors ${
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-semibold font-display cursor-pointer transition-colors ${
                               prod.active !== false
                                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                 : 'bg-slate-100 text-slate-500 border border-slate-200'
@@ -489,7 +489,7 @@ export const AdminLoja: React.FC = () => {
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => handleEditProduct(prod)}
-                              className="p-1.5 bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-600 rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 bg-slate-100 hover:bg-brand-600 hover:text-white text-slate-600 rounded-lg transition-colors cursor-pointer"
                               title="Editar Produto"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
@@ -521,7 +521,7 @@ export const AdminLoja: React.FC = () => {
         <div className="space-y-4">
           
           {/* Filtros de Encomendas */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 surface-card p-4 rounded-2xl">
             <div className="relative flex-1 w-full sm:max-w-md">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -529,14 +529,14 @@ export const AdminLoja: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Pesquisar por N.º pedido, Cliente ou NIF..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 text-xs text-slate-900 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 focus:bg-white"
+                className="w-full pl-10 pr-4 py-2 bg-slate-50/70 text-xs text-slate-900 rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500 focus:bg-white font-sans transition-all"
               />
             </div>
 
             <select
               value={selectedOrderStatus}
               onChange={(e) => setSelectedOrderStatus(e.target.value)}
-              className="px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-700 rounded-xl focus:outline-none focus:bg-white cursor-pointer"
+              className="px-3 py-2 bg-slate-50/70 border border-slate-200 text-xs font-display text-slate-700 rounded-xl focus:outline-none focus:bg-white cursor-pointer"
             >
               <option value="todos">Todos os Estados</option>
               <option value="pending">Pendente</option>
@@ -549,10 +549,10 @@ export const AdminLoja: React.FC = () => {
           </div>
 
           {/* Tabela de Encomendas */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="surface-card rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs text-slate-700">
-                <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
+                <thead className="bg-slate-50/80 text-slate-500 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-200/80 font-display">
                   <tr>
                     <th className="py-3.5 px-4">Pedido / Data</th>
                     <th className="py-3.5 px-4">Cliente & NIF</th>
@@ -566,7 +566,7 @@ export const AdminLoja: React.FC = () => {
                 <tbody className="divide-y divide-slate-100">
                   {filteredOrders.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-10 text-slate-400">
+                      <td colSpan={7} className="text-center py-10 text-slate-400 font-sans">
                         Nenhuma encomenda registada ainda.
                       </td>
                     </tr>
@@ -574,34 +574,34 @@ export const AdminLoja: React.FC = () => {
                     filteredOrders.map((order) => (
                       <tr key={order.id} className="hover:bg-slate-50/70 transition-colors">
                         <td className="py-3 px-4">
-                          <p className="font-bold font-mono text-blue-600 text-xs">{order.orderNumber}</p>
-                          <p className="text-[11px] text-slate-500">
+                          <p className="font-semibold font-mono text-brand-600 text-xs">{order.orderNumber}</p>
+                          <p className="text-[11px] text-slate-500 font-mono-num">
                             {new Date(order.createdAt).toLocaleDateString('pt-AO')} {new Date(order.createdAt).toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </td>
                         <td className="py-3 px-4">
-                          <p className="font-bold text-slate-900">{order.clientName}</p>
-                          <p className="text-[11px] text-slate-500">NIF: {order.clientNif || 'Consumidor Final'}</p>
+                          <p className="font-bold text-slate-900 font-display">{order.clientName}</p>
+                          <p className="text-[11px] text-slate-500 font-mono-num">NIF: {order.clientNif || 'Consumidor Final'}</p>
                         </td>
                         <td className="py-3 px-4">
                           <button
                             onClick={() => handleSendWhatsAppUpdate(order)}
-                            className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-bold hover:underline cursor-pointer"
+                            className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-semibold hover:underline cursor-pointer font-mono-num"
                           >
                             <MessageCircle className="w-3.5 h-3.5" />
                             {order.clientPhone}
                           </button>
                         </td>
                         <td className="py-3 px-4">
-                          <span className="font-medium text-slate-800">{order.deliveryProvince}</span>
+                          <span className="font-medium text-slate-800 font-display">{order.deliveryProvince}</span>
                         </td>
                         <td className="py-3 px-4">
-                          <span className="font-bold text-slate-900 text-sm">
+                          <span className="font-bold text-slate-950 text-sm font-mono-num">
                             {order.totalAOA.toLocaleString('pt-AO')} Kz
                           </span>
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider font-display ${
                             order.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                             order.status === 'shipped' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
                             order.status === 'delivered' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
@@ -621,7 +621,7 @@ export const AdminLoja: React.FC = () => {
                               setSelectedOrder(order);
                               setIsOrderModalOpen(true);
                             }}
-                            className="px-3 py-1.5 bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-700 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                            className="px-3 py-1.5 bg-slate-100 hover:bg-brand-600 hover:text-white text-slate-700 rounded-lg text-xs font-semibold font-display transition-colors cursor-pointer"
                           >
                             Ver Detalhes
                           </button>
@@ -642,18 +642,18 @@ export const AdminLoja: React.FC = () => {
       ══════════════════════════════════════════════════════════════════════ */}
       {activeTab === 'taxas' && (
         <div className="space-y-4">
-          <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-slate-900 flex items-center justify-between">
+          <div className="surface-card p-5 rounded-2xl text-slate-900 flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-sm text-slate-950">Tabela Oficial de Taxas de Envio e Deslocação</h3>
+              <h3 className="font-bold text-sm text-slate-950 font-display">Tabela Oficial de Taxas de Envio e Deslocação</h3>
               <p className="text-xs text-slate-500 mt-0.5">
                 Valores cobrados automaticamente na Loja Pública ao cliente selecionar a respetiva província de entrega.
               </p>
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="surface-card rounded-2xl overflow-hidden">
             <table className="w-full text-left text-xs text-slate-700">
-              <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
+              <thead className="bg-slate-50/80 text-slate-500 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-200/80 font-display">
                 <tr>
                   <th className="py-3.5 px-4">Província</th>
                   <th className="py-3.5 px-4">Região / Zonas Cobertas</th>
@@ -666,27 +666,27 @@ export const AdminLoja: React.FC = () => {
               <tbody className="divide-y divide-slate-100">
                 {deliveryRates.map((rate) => (
                   <tr key={rate.id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
-                      <Truck className="w-3.5 h-3.5 text-blue-600" />
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2 font-display">
+                      <Truck className="w-3.5 h-3.5 text-brand-600" />
                       {rate.province}
                     </td>
-                    <td className="py-3 px-4 text-slate-700">
+                    <td className="py-3 px-4 text-slate-700 font-sans">
                       {rate.regionOrCity}
                     </td>
                     <td className="py-3 px-4">
                       {rate.feeAOA === 0 ? (
-                        <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 font-display">
                           Grátis (0 Kz)
                         </span>
                       ) : (
-                        <span className="font-bold text-slate-900">{rate.feeAOA.toLocaleString('pt-AO')} Kz</span>
+                        <span className="font-bold text-slate-950 font-mono-num">{rate.feeAOA.toLocaleString('pt-AO')} Kz</span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-slate-600">
+                    <td className="py-3 px-4 text-slate-600 font-sans">
                       {rate.estimatedDays}
                     </td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                    <td className="py-3 px-4 font-display">
+                      <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold ${
                         rate.active
                           ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                           : 'bg-slate-100 text-slate-500 border border-slate-200'
@@ -700,7 +700,7 @@ export const AdminLoja: React.FC = () => {
                           setEditingRate(rate);
                           setIsRateModalOpen(true);
                         }}
-                        className="px-3 py-1 bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-700 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                        className="px-3 py-1 bg-slate-100 hover:bg-brand-600 hover:text-white text-slate-700 rounded-lg text-xs font-semibold font-display transition-colors cursor-pointer"
                       >
                         Configurar
                       </button>
@@ -723,7 +723,7 @@ export const AdminLoja: React.FC = () => {
             {/* Header Modal */}
             <div className="p-6 bg-slate-900 text-white flex items-center justify-between shrink-0">
               <div>
-                <h3 className="text-lg font-black">
+                <h3 className="text-lg font-black font-display tracking-tight">
                   {editingProduct.id ? 'Editar Produto / Serviço' : 'Novo Produto para a Loja'}
                 </h3>
                 <p className="text-xs text-slate-400">
@@ -979,13 +979,13 @@ export const AdminLoja: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsProductModalOpen(false)}
-                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-colors cursor-pointer"
+                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold font-display rounded-xl text-xs transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold font-display rounded-xl text-xs shadow-md shadow-brand-600/20 transition-all flex items-center gap-2 cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   Gravar Produto no Firebase
@@ -1006,10 +1006,10 @@ export const AdminLoja: React.FC = () => {
             
             <div className="p-6 bg-slate-900 text-white flex items-center justify-between shrink-0">
               <div>
-                <h3 className="text-lg font-black">
+                <h3 className="text-lg font-black font-display tracking-tight">
                   Pedido #{selectedOrder.orderNumber}
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-400 font-mono-num">
                   {new Date(selectedOrder.createdAt).toLocaleDateString('pt-AO')} às {new Date(selectedOrder.createdAt).toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
@@ -1024,49 +1024,49 @@ export const AdminLoja: React.FC = () => {
             <div className="p-6 overflow-y-auto space-y-6 flex-1 text-slate-800">
               
               {/* Dados do Cliente */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 surface-card rounded-2xl text-xs">
                 <div>
-                  <p className="text-slate-500 font-bold uppercase text-[10px]">Cliente / Empresa</p>
-                  <p className="font-bold text-slate-900 text-sm mt-0.5">{selectedOrder.clientName}</p>
-                  <p className="text-slate-600 mt-1">NIF: {selectedOrder.clientNif || 'Consumidor Final'}</p>
+                  <p className="text-slate-500 font-bold uppercase text-[10px] font-display">Cliente / Empresa</p>
+                  <p className="font-bold text-slate-950 text-sm mt-0.5 font-display">{selectedOrder.clientName}</p>
+                  <p className="text-slate-600 mt-1 font-mono-num">NIF: {selectedOrder.clientNif || 'Consumidor Final'}</p>
                 </div>
                 <div>
-                  <p className="text-slate-500 font-bold uppercase text-[10px]">Contacto & Entrega</p>
-                  <p className="font-bold text-emerald-700 text-sm mt-0.5">{selectedOrder.clientPhone}</p>
-                  <p className="text-slate-600 mt-1">Província: <span className="font-bold text-slate-900">{selectedOrder.deliveryProvince}</span></p>
+                  <p className="text-slate-500 font-bold uppercase text-[10px] font-display">Contacto & Entrega</p>
+                  <p className="font-bold text-emerald-700 text-sm mt-0.5 font-mono-num">{selectedOrder.clientPhone}</p>
+                  <p className="text-slate-600 mt-1 font-sans">Província: <span className="font-bold text-slate-900 font-display">{selectedOrder.deliveryProvince}</span></p>
                 </div>
               </div>
 
               {/* Itens do Pedido */}
               <div className="space-y-3">
-                <p className="text-xs font-bold text-slate-700 uppercase">Equipamentos e Serviços Solicitados</p>
+                <p className="text-xs font-bold text-slate-700 uppercase font-display">Equipamentos e Serviços Solicitados</p>
                 <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden bg-white">
                   {selectedOrder.items.map((item, idx) => (
                     <div key={idx} className="p-3.5 flex items-center justify-between text-xs">
                       <div>
-                        <p className="font-bold text-slate-900">{item.productName}</p>
-                        <p className="text-[11px] text-slate-500">{item.quantity}x @ {item.unitPriceAOA.toLocaleString('pt-AO')} Kz</p>
+                        <p className="font-bold text-slate-900 font-display">{item.productName}</p>
+                        <p className="text-[11px] text-slate-500 font-mono-num">{item.quantity}x @ {item.unitPriceAOA.toLocaleString('pt-AO')} Kz</p>
                       </div>
-                      <p className="font-bold text-slate-900 text-sm">{item.subtotalAOA.toLocaleString('pt-AO')} Kz</p>
+                      <p className="font-bold text-slate-950 text-sm font-mono-num">{item.subtotalAOA.toLocaleString('pt-AO')} Kz</p>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Totalizador */}
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl flex items-center justify-between text-slate-900">
+              <div className="p-4 bg-brand-50 border border-brand-200 rounded-2xl flex items-center justify-between text-slate-900">
                 <div>
-                  <p className="text-xs text-blue-700 font-bold uppercase">Total da Fatura Proforma</p>
+                  <p className="text-xs text-brand-700 font-bold uppercase font-display">Total da Fatura Proforma</p>
                   <p className="text-[11px] text-slate-600">Inclui taxa de deslocação para {selectedOrder.deliveryProvince}</p>
                 </div>
-                <p className="text-2xl font-black text-blue-900">
-                  {selectedOrder.totalAOA.toLocaleString('pt-AO')} <span className="text-xs">Kz</span>
+                <p className="text-2xl font-black text-brand-900 font-mono-num">
+                  {selectedOrder.totalAOA.toLocaleString('pt-AO')} <span className="text-xs font-sans">Kz</span>
                 </p>
               </div>
 
               {/* Atualização de Estado */}
               <div className="space-y-2 pt-2 border-t border-slate-200">
-                <label className="block text-xs font-bold text-slate-700 uppercase">Alterar Estado da Encomenda</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase font-display">Alterar Estado da Encomenda</label>
                 <div className="flex flex-wrap gap-2">
                   {[
                     { id: 'pending', label: 'Pendente' },
@@ -1080,9 +1080,9 @@ export const AdminLoja: React.FC = () => {
                       key={st.id}
                       type="button"
                       onClick={() => handleUpdateOrderStatus(selectedOrder.id, st.id as any)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold font-display transition-all cursor-pointer ${
                         selectedOrder.status === st.id
-                          ? 'bg-blue-600 text-white shadow-sm'
+                          ? 'bg-slate-950 text-white shadow-sm'
                           : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                       }`}
                     >
@@ -1097,7 +1097,7 @@ export const AdminLoja: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleSendWhatsAppUpdate(selectedOrder)}
-                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold font-display rounded-xl text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <MessageCircle className="w-4 h-4" />
                   Enviar Mensagem e Proforma via WhatsApp
@@ -1118,8 +1118,8 @@ export const AdminLoja: React.FC = () => {
             
             <div className="p-5 bg-slate-900 text-white flex items-center justify-between">
               <div>
-                <h3 className="text-base font-black">Taxa de Deslocação</h3>
-                <p className="text-xs text-slate-400">{editingRate.province}</p>
+                <h3 className="text-base font-black font-display tracking-tight">Taxa de Deslocação</h3>
+                <p className="text-xs text-slate-400 font-display">{editingRate.province}</p>
               </div>
               <button
                 onClick={() => setIsRateModalOpen(false)}
@@ -1131,48 +1131,48 @@ export const AdminLoja: React.FC = () => {
 
             <form onSubmit={handleSaveRate} className="p-6 space-y-4 text-slate-800">
               <div className="space-y-1">
-                <label className="block text-xs font-bold text-slate-700 uppercase">Região / Zonas Cobertas *</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase font-display">Região / Zonas Cobertas *</label>
                 <input
                   type="text"
                   required
                   value={editingRate.regionOrCity}
                   onChange={(e) => setEditingRate({ ...editingRate, regionOrCity: e.target.value })}
                   placeholder="Ex: Luanda Cidade, Talatona, Viana"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 font-sans"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs font-bold text-slate-700 uppercase">Taxa de Envio (AOA) *</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase font-display">Taxa de Envio (AOA) *</label>
                 <input
                   type="number"
                   required
                   value={editingRate.feeAOA}
                   onChange={(e) => setEditingRate({ ...editingRate, feeAOA: Number(e.target.value) })}
                   placeholder="0 para Grátis"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 font-mono-num"
                 />
-                <p className="text-[11px] text-slate-500">Coloque 0 para entrega gratuita nesta província.</p>
+                <p className="text-[11px] text-slate-500 font-sans">Coloque 0 para entrega gratuita nesta província.</p>
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs font-bold text-slate-700 uppercase">Tempo Estimado de Entrega</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase font-display">Tempo Estimado de Entrega</label>
                 <input
                   type="text"
                   value={editingRate.estimatedDays || ''}
                   onChange={(e) => setEditingRate({ ...editingRate, estimatedDays: e.target.value })}
                   placeholder="Ex: 24h a 48h úteis"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-sans"
                 />
               </div>
 
               <div className="pt-2">
-                <label className="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer">
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer font-display">
                   <input
                     type="checkbox"
                     checked={editingRate.active}
                     onChange={(e) => setEditingRate({ ...editingRate, active: e.target.checked })}
-                    className="rounded text-blue-600"
+                    className="rounded text-brand-600"
                   />
                   <span>Rota de Entrega Ativa na Loja</span>
                 </label>
@@ -1182,13 +1182,13 @@ export const AdminLoja: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsRateModalOpen(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold font-display rounded-xl text-xs"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-600/20"
+                  className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold font-display rounded-xl text-xs shadow-md shadow-brand-600/20"
                 >
                   Gravar Taxa
                 </button>

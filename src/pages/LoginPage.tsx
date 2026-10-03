@@ -68,14 +68,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
         </div>
 
         {/* Card Form */}
-        <div className="card-premium rounded-3xl p-8 sm:p-10 space-y-6">
+        <div className="surface-card p-8 sm:p-10 space-y-6">
           
           {/* Header with official logo without duplicate "KIVORA" text */}
           <div className="text-center space-y-2">
             <div className="flex justify-center mb-1">
               <KivoraLogo variant="dark" size="lg" useOfficialImage={true} />
             </div>
-            <h1 className="text-2xl font-black text-slate-950 tracking-tight">
+            <h1 className="font-display text-2xl font-black text-slate-950 tracking-tight">
               Iniciar Sessão no Portal Kivora
             </h1>
             <p className="text-xs text-slate-600 font-medium">
@@ -84,7 +84,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
           </div>
 
           {/* Smart routing badge */}
-          <div className="p-3.5 bg-blue-50/80 rounded-2xl border border-blue-200/80 text-[11px] text-blue-950 leading-relaxed flex items-start gap-2.5">
+          <div className="p-3.5 bg-blue-50/80 rounded-2xl border border-blue-200/60 text-[11px] text-blue-950 leading-relaxed flex items-start gap-2.5">
             <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
             <span>
               <strong>Identificação Automática:</strong> O sistema reconhece o seu perfil e direciona-o para o respetivo painel.
@@ -106,7 +106,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
                   placeholder="Ex: seuemail@empresa.ao ou NIF"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none font-medium transition-all"
+                  className="w-full pl-10 pr-3.5 py-3 bg-slate-50/50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none font-medium transition-all shadow-xs"
                 />
               </div>
             </div>
@@ -123,7 +123,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
                   placeholder="••••••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none font-medium transition-all"
+                  className="w-full pl-10 pr-3.5 py-3 bg-slate-50/50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none font-medium transition-all shadow-xs"
                 />
               </div>
             </div>
@@ -137,7 +137,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
             <button
               type="submit"
               disabled={loading}
-              className="btn-premium-primary w-full py-4 rounded-xl text-xs flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer mt-2"
+              className="btn-cta w-full py-3.5 text-xs sm:text-sm flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
             >
               {loading ? (
                 <>
@@ -146,7 +146,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBackToHome, onNavigatePa
                 </>
               ) : (
                 <>
-                  <ShieldCheck className="w-4 h-4 text-blue-100" />
+                  <ShieldCheck className="w-4 h-4 text-white" />
                   <span>Entrar no Portal</span>
                   <ArrowRight className="w-4 h-4" />
                 </>

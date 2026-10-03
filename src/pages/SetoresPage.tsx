@@ -139,20 +139,20 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
 
       {/* Tabs de Seleção de Setor */}
       <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 -mt-8 relative z-20" data-reveal>
-        <div className="bg-white/95 backdrop-blur-md p-2 sm:p-3 rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-2xl shadow-slate-900/10 flex flex-wrap gap-2 justify-center">
+        <div className="surface-card bg-white/95 backdrop-blur-md p-2 rounded-2xl border border-slate-200/90 shadow-card flex flex-wrap gap-2 justify-center">
           {SECTORS.map((sec) => {
             const isActive = sec.id === activeSectorId;
             return (
               <button
                 key={sec.id}
                 onClick={() => setActiveSectorId(sec.id)}
-                className={`flex items-center gap-2.5 px-4 sm:px-6 py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer font-tight ${
                   isActive
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 -translate-y-0.5'
+                    ? 'bg-[#1746A2] text-white shadow-xs'
                     : 'bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-950 border border-transparent hover:border-slate-200'
                 }`}
               >
-                <span className={isActive ? 'text-white' : 'text-blue-600'}>
+                <span className={isActive ? 'text-white' : 'text-[#1746A2]'}>
                   {sec.icon}
                 </span>
                 <span>{sec.name}</span>
@@ -168,10 +168,10 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
         {/* Bloco de Apresentação */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           <div className="lg:col-span-6 space-y-6" data-reveal data-reveal-dir="left">
-            <span className="inline-block text-xs font-black uppercase tracking-widest text-blue-600 bg-blue-50 border border-blue-200/80 px-3.5 py-1 rounded-full">
+            <span className="inline-block text-xs font-semibold uppercase tracking-wider text-[#1746A2] bg-blue-50 border border-blue-200/80 px-3.5 py-1 rounded-full font-tight">
               {currentSector.tagline}
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-950 leading-tight">
+            <h2 className="text-3xl sm:text-4xl font-semibold font-display text-slate-900 leading-tight tracking-tight">
               Especializado para as exigências de {currentSector.name}
             </h2>
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
@@ -180,15 +180,14 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               {currentSector.highlights.map((hl, i) => (
-                <div key={i} data-reveal data-delay={(i + 1) * 100} className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/60 via-white to-white border border-slate-200/90 shadow-sm space-y-1 relative overflow-hidden group hover:border-blue-400 hover:shadow-md transition-all">
-                  <Zap className="icon-watermark wm-blue w-20 h-20" strokeWidth={1.25} />
-                  <strong className="text-xs font-bold text-slate-900 flex items-center gap-1.5 relative z-10">
-                    <div className="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                <div key={i} data-reveal data-delay={(i + 1) * 100} className="surface-card p-4 space-y-1 bg-white hover:border-slate-300 transition-all">
+                  <strong className="text-xs font-semibold text-slate-900 flex items-center gap-1.5 font-display">
+                    <div className="w-6 h-6 rounded-lg bg-blue-50 text-[#1746A2] flex items-center justify-center shrink-0">
                       <Zap className="w-3.5 h-3.5" />
                     </div>
                     <span>{hl.title}</span>
                   </strong>
-                  <p className="text-xs text-slate-600 leading-relaxed relative z-10">
+                  <p className="text-xs text-slate-600 leading-relaxed">
                     {hl.desc}
                   </p>
                 </div>
@@ -198,32 +197,32 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
             <div className="pt-3 flex flex-wrap gap-3">
               <button
                 onClick={() => onOpenDemoModal(currentSector.name)}
-                className="inline-flex items-center gap-2 bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-2xl shadow-xl shadow-orange-600/30 transition-all hover:-translate-y-1 cursor-pointer shimmer-button"
+                className="btn-cta text-xs sm:text-sm px-7 py-3.5 inline-flex items-center gap-2 cursor-pointer"
               >
                 <span>{currentSector.ctaText}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button
                 onClick={() => onNavigatePage('download')}
-                className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm px-6 py-3.5 rounded-2xl transition-all cursor-pointer border border-slate-200 hover:border-slate-300"
+                className="btn-secondary text-xs sm:text-sm px-6 py-3.5 inline-flex items-center gap-2 cursor-pointer"
               >
-                <Download className="w-4 h-4 text-blue-600" />
+                <Download className="w-4 h-4 text-[#1746A2]" />
                 <span>Baixar Instalador</span>
               </button>
             </div>
           </div>
 
           <div className="lg:col-span-6" data-reveal data-reveal-dir="right">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200 bg-slate-100 p-2 sm:p-3 group">
+            <div className="relative rounded-3xl overflow-hidden shadow-card border border-slate-200/90 bg-slate-100 p-2 sm:p-3 group">
               <img
                 src={currentSector.image}
                 alt={currentSector.name}
-                className="w-full h-auto max-h-[420px] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-102"
+                className="w-full h-auto max-h-[420px] object-cover rounded-2xl transition-transform duration-500 group-hover:scale-102"
               />
               <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-white/10 text-white flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-black uppercase text-blue-400 font-mono-num">Certificação Oficial AGT</span>
-                  <p className="text-xs font-bold text-slate-200">Decreto Presidencial n.º 71/25</p>
+                  <span className="text-[10px] font-bold uppercase text-blue-400 font-mono-num font-tight">Certificação Oficial AGT</span>
+                  <p className="text-xs font-semibold text-slate-200">Decreto Presidencial n.º 71/25</p>
                 </div>
                 <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0" />
               </div>
@@ -232,20 +231,19 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
         </div>
 
         {/* Grelha de Funcionalidades Técnicas */}
-        <div className="bg-mesh border border-slate-200/80 rounded-3xl p-8 sm:p-12 space-y-6 relative overflow-hidden" data-reveal>
-          <div className="absolute -top-10 -right-10 w-44 h-44 orb orb-blue opacity-20" />
-          <div className="space-y-2 relative z-10">
-            <span className="text-blue-600 text-xs font-black uppercase tracking-widest bg-blue-100/60 px-3 py-1 rounded-full border border-blue-200">Recursos Inclusos</span>
-            <h3 className="text-2xl font-black text-slate-950">
+        <div className="surface-card bg-slate-50/50 border border-slate-200/80 rounded-3xl p-8 sm:p-12 space-y-6 shadow-card" data-reveal>
+          <div className="space-y-2">
+            <span className="text-[#1746A2] text-xs font-semibold uppercase tracking-wider bg-blue-100/60 px-3 py-1 rounded-full border border-blue-200/60 font-tight">Recursos Inclusos</span>
+            <h3 className="text-2xl font-semibold font-display tracking-tight text-slate-900">
               Funcionalidades Essenciais para {currentSector.name}
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
             {currentSector.features.map((feat, idx) => (
-              <div key={idx} data-reveal data-delay={((idx % 3) + 1) * 100} className="bg-gradient-to-br from-blue-50/40 via-white to-white border border-slate-200/90 shadow-sm p-5 rounded-2xl flex items-start gap-3 hover:shadow-md hover:-translate-y-1 hover:border-blue-400 transition-all duration-300 group">
-                <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-emerald-600 transition-colors">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 group-hover:text-white transition-colors" strokeWidth={2.5} />
+              <div key={idx} data-reveal data-delay={((idx % 3) + 1) * 100} className="surface-card p-5 rounded-2xl flex items-start gap-3 bg-white hover:border-slate-300 transition-all duration-200 group">
+                <div className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={2.5} />
                 </div>
                 <span className="text-xs text-slate-700 font-medium leading-relaxed">{feat}</span>
               </div>
@@ -256,14 +254,12 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
       </section>
 
       {/* CTA Final */}
-      <section className="bg-mesh-dark py-20 px-6 sm:px-10 lg:px-16 text-white text-center border-t border-slate-800 relative overflow-hidden" data-reveal>
-        <div className="orb orb-blue w-80 h-80 -top-20 -left-20" />
-        <div className="orb orb-orange w-48 h-48 -bottom-10 right-10" />
+      <section className="bg-[#0B192C] py-20 px-6 sm:px-10 lg:px-16 text-white text-center border-t border-slate-800 relative overflow-hidden" data-reveal>
         <div className="max-w-3xl mx-auto space-y-5 relative z-10">
-          <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mx-auto shadow-inner">
-            <Monitor className="w-8 h-8 text-blue-300" strokeWidth={1.75} />
+          <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center mx-auto">
+            <Monitor className="w-7 h-7 text-blue-300" strokeWidth={1.75} />
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+          <h2 className="text-3xl sm:text-4xl font-semibold font-display text-white tracking-tight leading-tight">
             Pronto para testar o KIVORA na sua empresa?
           </h2>
           <p className="text-slate-300 text-sm leading-relaxed max-w-lg mx-auto font-normal">
@@ -272,14 +268,14 @@ export const SetoresPage: React.FC<SetoresPageProps> = ({
           <div className="flex flex-wrap justify-center gap-4 pt-2">
             <button
               onClick={() => onOpenDemoModal(`Apresentação: ${currentSector.name}`)}
-              className="inline-flex items-center gap-2 bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-sm px-8 py-4 rounded-2xl shadow-xl shadow-orange-600/40 transition-all hover:-translate-y-1 cursor-pointer shimmer-button"
+              className="btn-cta text-sm px-8 py-3.5 cursor-pointer inline-flex items-center gap-2"
             >
               <span>Agendar Apresentação Gratuita</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <button
               onClick={() => onNavigatePage('solucoes')}
-              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold text-sm px-7 py-4 rounded-2xl border border-white/20 hover:border-white/40 transition-all cursor-pointer backdrop-blur-xs"
+              className="btn-secondary text-sm px-7 py-3.5 cursor-pointer inline-flex items-center gap-2 border-white/20 text-white bg-white/10 hover:bg-white/15"
             >
               <span>Ver Arquitetura de Rede</span>
             </button>

@@ -160,9 +160,8 @@ export const RecursosPage: React.FC<RecursosPageProps> = ({ onNavigatePage }) =>
       <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-24 space-y-12">
         
         {/* Search & Category Filter */}
-        <div className="bg-mesh border border-slate-200/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm relative overflow-hidden">
-          <div className="absolute -top-12 -right-12 w-36 h-36 orb orb-blue opacity-20" />
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between relative z-10">
+        <div className="surface-card p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="relative flex-1 w-full">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
               <input
@@ -170,13 +169,13 @@ export const RecursosPage: React.FC<RecursosPageProps> = ({ onNavigatePage }) =>
                 placeholder="Pesquisar por assunto (ex: SAF-T, Relatório Z, Rede LAN, Isenção de IVA, IRT)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 shadow-sm"
+                className="w-full pl-10 pr-4 py-3 bg-slate-50/50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
               />
             </div>
           </div>
 
           {/* Category Chips */}
-          <div className="flex flex-wrap items-center gap-2 border-t border-slate-200/60 pt-4 relative z-10">
+          <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
             {[
               { id: 'todos', label: 'Todos os Guias' },
               { id: 'faturacao', label: 'Faturação AGT' },
@@ -190,8 +189,8 @@ export const RecursosPage: React.FC<RecursosPageProps> = ({ onNavigatePage }) =>
                 onClick={() => setActiveCategory(cat.id)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   activeCategory === cat.id
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                    : 'bg-white text-blue-600 border border-slate-200 hover:border-blue-400 hover:shadow-sm'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80 border border-transparent'
                 }`}
               >
                 {cat.label}
@@ -203,31 +202,29 @@ export const RecursosPage: React.FC<RecursosPageProps> = ({ onNavigatePage }) =>
         {/* Guides Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {filteredGuides.map((guide) => {
-            const catColorMap: Record<string, { from: string; badge: string; glow: string }> = {
-              faturacao: { from: 'from-blue-50/50',   badge: 'bg-blue-50 text-blue-800 border-blue-200',   glow: 'hover:border-blue-400 card-glow-blue' },
-              saft:      { from: 'from-amber-50/50',  badge: 'bg-amber-50 text-amber-800 border-amber-200', glow: 'hover:border-amber-400 card-glow-amber' },
-              redes:     { from: 'from-emerald-50/50',badge: 'bg-emerald-50 text-emerald-800 border-emerald-200', glow: 'hover:border-emerald-400 card-glow-green' },
-              pos:       { from: 'from-purple-50/50', badge: 'bg-purple-50 text-purple-800 border-purple-200', glow: 'hover:border-purple-400 card-glow-purple' },
-              rh:        { from: 'from-rose-50/50',   badge: 'bg-rose-50 text-rose-800 border-rose-200',   glow: 'hover:border-rose-400' },
+            const catBadgeMap: Record<string, string> = {
+              faturacao: 'bg-blue-50 text-blue-700 border-blue-200/60',
+              saft:      'bg-amber-50 text-amber-800 border-amber-200/60',
+              redes:     'bg-emerald-50 text-emerald-800 border-emerald-200/60',
+              pos:       'bg-purple-50 text-purple-800 border-purple-200/60',
+              rh:        'bg-rose-50 text-rose-800 border-rose-200/60',
             };
-            const cc = catColorMap[guide.category] || catColorMap['faturacao'];
+            const badgeCls = catBadgeMap[guide.category] || catBadgeMap['faturacao'];
             return (
               <div
                 key={guide.id}
                 onClick={() => setSelectedGuide(guide)}
-                className={`bg-gradient-to-br ${cc.from} via-white to-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-sm ${cc.glow} hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between space-y-6 group relative overflow-hidden`}
+                className="surface-card p-6 sm:p-7 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card transition-all duration-300 cursor-pointer flex flex-col justify-between space-y-6 group"
               >
-                <HelpCircle className="icon-watermark text-slate-300 w-32 h-32" strokeWidth={1.25} />
-
-                <div className="relative z-10 space-y-3.5">
-                  <div className="flex items-center justify-between text-[10px] font-black uppercase">
-                    <span className={`border px-2.5 py-0.5 rounded-md ${cc.badge}`}>
+                <div className="space-y-3.5">
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider">
+                    <span className={`border px-2.5 py-0.5 rounded-lg ${badgeCls}`}>
                       {guide.categoryLabel}
                     </span>
-                    <span className="text-slate-400 font-bold">{guide.readTime} leitura</span>
+                    <span className="text-slate-400 font-mono-num">{guide.readTime} leitura</span>
                   </div>
 
-                  <h3 className="text-base font-black text-slate-950 group-hover:text-blue-600 transition-colors leading-snug">
+                  <h3 className="font-display text-base font-bold text-slate-950 group-hover:text-blue-600 transition-colors leading-snug">
                     {guide.title}
                   </h3>
 
@@ -236,7 +233,7 @@ export const RecursosPage: React.FC<RecursosPageProps> = ({ onNavigatePage }) =>
                   </p>
                 </div>
 
-                <div className="relative z-10 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600 group-hover:text-blue-700">
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600 group-hover:text-blue-700">
                   <span>Abrir Manual Completo</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -246,28 +243,28 @@ export const RecursosPage: React.FC<RecursosPageProps> = ({ onNavigatePage }) =>
         </div>
 
         {/* Quick Links Section */}
-        <div className="bg-mesh-dark text-white rounded-3xl p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl relative overflow-hidden">
-          <div className="orb orb-blue w-64 h-64 -top-16 -left-16" />
-          <div className="orb orb-orange w-32 h-32 -bottom-8 right-10" />
-          <div className="space-y-2 text-center md:text-left relative z-10">
-            <span className="text-xs font-bold uppercase text-orange-300 bg-orange-500/20 px-3 py-1 rounded-full border border-orange-400/30">Apoio Adicional</span>
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-white">Não encontrou a resposta que procura?</h3>
+        <div className="bg-[#0B192C] text-white rounded-3xl p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-8 border border-slate-800 shadow-xl">
+          <div className="space-y-2 text-center md:text-left">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-orange-400 bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20 inline-block">
+              Apoio Técnico Oficial
+            </span>
+            <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-white">Não encontrou a resposta que procura?</h3>
             <p className="text-sm text-slate-300 max-w-lg leading-relaxed font-normal">
-              A nossa equipa de suporte técnico e consultoria fiscal está disponível para ajudar no seu negócio.
+              A nossa equipa de consultoria fiscal e suporte técnico em Angola está disponível para ajudar no seu negócio.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 relative z-10">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => onNavigatePage('suporte')}
-              className="bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-2xl transition-all shadow-lg shadow-orange-600/40 cursor-pointer flex items-center gap-2 hover:-translate-y-1 shimmer-button"
+              className="btn-cta text-xs sm:text-sm px-6 py-3.5 flex items-center gap-2"
             >
               <HelpCircle className="w-4 h-4" />
               <span>Contactar Suporte Técnico</span>
             </button>
             <button
               onClick={() => onNavigatePage('download')}
-              className="bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-2xl transition-all border border-white/20 hover:border-white/40 cursor-pointer flex items-center gap-2 hover:-translate-y-1"
+              className="btn-secondary text-xs sm:text-sm px-6 py-3.5 flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               <span>Baixar KIVORA Setup</span>
