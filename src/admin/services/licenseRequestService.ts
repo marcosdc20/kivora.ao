@@ -242,7 +242,7 @@ export async function approveLicenseRequest(
       amount: reqData.price_aoa,
       totalAOA: reqData.price_aoa,
       status: 'paid',
-      payment_method: isPaid ? 'Carteira Parceiro Kivora' : 'Crédito Homologado Admin',
+      payment_method: isPaid ? 'Carteira Parceiro Kivora' : 'Crédito Aprovado Admin',
       issue_date: new Date(nowTs).toISOString().split('T')[0],
       due_date: new Date(expiresAt || (nowTs + 365 * 86400000)).toISOString().split('T')[0],
       partner_id: resolvedPartnerId,

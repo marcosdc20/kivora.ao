@@ -63,7 +63,7 @@
     <priority>0.9</priority>
   </url>
 
-  <!-- 8. Hardware & Periféricos Homologados -->
+  <!-- 8. Hardware & Periféricos Certificados e Compatíveis -->
   <url>
     <loc>https://kivora.ao/hardware</loc>
     <lastmod>2026-08-17</lastmod>
@@ -87,7 +87,7 @@
     <priority>0.9</priority>
   </url>
 
-  <!-- 11. Módulos do Sistema ERP -->
+  <!-- 11. Módulos do KIVORA SOFT -->
   <url>
     <loc>https://kivora.ao/modulos</loc>
     <lastmod>2026-08-17</lastmod>

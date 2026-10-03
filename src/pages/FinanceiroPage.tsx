@@ -93,7 +93,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
         '5 Postos de Trabalho em Rede Local / Servidor Dedicado',
         'Licença perpétua sem expiração',
         'Instalação e parametrização presencial ou remota assistida',
-        'Todos os módulos do Kivora ERP desbloqueados',
+        'Todos os módulos do Kivora Soft desbloqueados',
         'Formação presencial certificada para operadores e gerentes',
         'Gestor de conta executivo e canal VIP de atendimento',
         'Cópia de segurança automática local e em Pen USB',
@@ -134,7 +134,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
 
   const calculatedPrice = calculatePrice();
 
-  // Comparação com Cloud ERP (USD $80/mês + Internet Fibra 40.000 Kz/mês)
+  // Comparação com Softwares Cloud (USD $80/mês + Internet Fibra 40.000 Kz/mês)
   const cloudErpAnnualCost = 1344000;
   const kivoraAnnualEquivalent = selectedPlanType === 'anual' ? calculatedPrice : calculatedPrice * 12;
   const realSavingsAoa = Math.max(0, cloudErpAnnualCost - kivoraAnnualEquivalent);
@@ -399,7 +399,7 @@ export const FinanceiroPage: React.FC<FinanceiroPageProps> = ({ onOpenDemoModal,
                 <span>Comparativo de Custo & Confiabilidade com Sistemas na Nuvem</span>
               </div>
               <p className="text-slate-700 leading-relaxed">
-                Ao contrário de softwares baseados na nuvem internacional (que cobram mensalidades em USD e bloqueiam as vendas se a internet fibra falhar), o <strong>KIVORA ERP funciona 100% offline</strong> no computador da sua loja.
+                Ao contrário de softwares baseados na nuvem internacional (que cobram mensalidades em USD e bloqueiam as vendas se a internet fibra falhar), o <strong>KIVORA SOFT funciona 100% offline</strong> no computador da sua loja.
               </p>
               <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-blue-200/80 text-[11px] font-semibold text-slate-900">
                 <span className="flex items-center gap-1.5">

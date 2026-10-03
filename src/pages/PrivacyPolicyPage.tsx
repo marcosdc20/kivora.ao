@@ -26,18 +26,18 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onBack }) 
             </div>
             <div>
               <h1 className="font-display text-2xl sm:text-3xl font-black text-slate-950">Política de Privacidade & Protecção de Dados</h1>
-              <p className="text-xs text-slate-500 font-medium">KIVORA ERP • Em conformidade com a Lei n.º 22/11 da República de Angola • Luanda, Angola</p>
+              <p className="text-xs text-slate-500 font-medium">KIVORA SOFT • Em conformidade com a Lei n.º 22/11 da República de Angola • Luanda, Angola</p>
             </div>
           </div>
 
           <div className="space-y-6 text-xs sm:text-sm text-slate-700 leading-relaxed">
             <div className="p-4 bg-blue-50/70 rounded-2xl border border-blue-200/60 text-xs text-blue-950 font-medium">
-              A presente Política de Privacidade regula o tratamento de dados pelo <strong>KIVORA ERP</strong> em estrito cumprimento da <strong>Lei n.º 22/11, de 27 de Junho (Lei da Protecção de Dados Pessoais da República de Angola)</strong> e das normas da Agência de Protecção de Dados (APD), bem como do <strong>Decreto Presidencial n.º 71/25</strong> e Certificação AGT n.º <strong>FE/387/AGT/2026</strong>.
+              A presente Política de Privacidade regula o tratamento de dados pelo <strong>KIVORA SOFT</strong> em estrito cumprimento da <strong>Lei n.º 22/11, de 27 de Junho (Lei da Protecção de Dados Pessoais da República de Angola)</strong> e das normas da Agência de Protecção de Dados (APD), bem como do <strong>Decreto Presidencial n.º 71/25</strong> e Certificação AGT n.º <strong>FE/387/AGT/2026</strong>.
             </div>
 
             <h2 className="text-base font-extrabold text-slate-950">1. Princípio da Soberania dos Dados & Armazenamento Local (Offline-First)</h2>
             <p>
-              O KIVORA ERP opera prioritariamente em regime desktop local. Os bancos de dados operacionais, cadastros de clientes e fechos de caixa residem diretamente na infraestrutura física do cliente (computador ou servidor local LAN). A <strong>Visual Software / Kivora Tecnologias, Lda.</strong> não possui acesso não autorizado nem efetua cópias remotas dos seus dados comerciais e fiscais.
+              O KIVORA SOFT opera prioritariamente em regime desktop local. Os bancos de dados operacionais, cadastros de clientes e fechos de caixa residem diretamente na infraestrutura física do cliente (computador ou servidor local LAN). A <strong>Visual Software / Kivora Tecnologias, Lda.</strong> não possui acesso não autorizado nem efetua cópias remotas dos seus dados comerciais e fiscais.
             </p>
 
             <h2 className="text-base font-extrabold text-slate-950">2. Tratamento de Dados e Finalidades (Lei n.º 22/11)</h2>

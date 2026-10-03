@@ -32,7 +32,7 @@ export const KivoraLogo: React.FC<KivoraLogoProps> = ({
         {/* Transparent Official Logo - No awkward white box */}
         <img
           src="/imagens/logo_sem_fundo.png"
-          alt="Kivora ERP"
+          alt="KIVORA SOFT"
           className={`${currentSize.height} w-auto object-contain transition-transform duration-300 group-hover:scale-105`}
         />
       </div>

@@ -81,7 +81,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        notify.success('Download do instalador oficial Kivora ERP iniciado!');
+        notify.success('Download do instalador oficial Kivora Soft iniciado!');
       } else {
         alertDialog({
           title: 'Download Indisponível',
@@ -151,7 +151,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ onOpenDemoModal, onN
                 </span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-semibold font-display text-white tracking-tight">
-                KIVORA ERP Desktop <span className="text-blue-300 font-mono-num font-bold">v{cleanVersion}</span>
+                KIVORA SOFT Desktop <span className="text-blue-300 font-mono-num font-bold">v{cleanVersion}</span>
               </h2>
               <p className="text-sm text-slate-300">
                 Lançamento oficial: <span className="font-semibold text-white">{activeReleaseDate}</span> • Arquitetura 64-bit Windows

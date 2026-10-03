@@ -245,7 +245,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-5 text-[11px]">
             <span className="flex items-center gap-1.5 text-slate-300">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span>Homologação AGT: <strong className="text-white font-mono-num font-bold">FE/387/AGT/2026</strong></span>
+              <span>Certificação AGT: <strong className="text-white font-mono-num font-bold">FE/387/AGT/2026</strong></span>
             </span>
 
             <span className="w-px h-3 bg-slate-700/80" />

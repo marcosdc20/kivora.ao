@@ -130,7 +130,7 @@ export const InvoicePrintModal: React.FC<InvoicePrintModalProps> = ({
 
                 <div className="space-y-1 text-left sm:text-right">
                   <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Detalhes da Subscrição</span>
-                  <p className="font-black text-slate-950">Kivora Desktop ERP — {getPlanLabel(license.plan_type)}</p>
+                  <p className="font-black text-slate-950">Kivora Soft Desktop — {getPlanLabel(license.plan_type)}</p>
                   <p className="text-slate-600">Modalidade: <strong>{license.plan_type === 'lifetime' ? 'Licença Vitalícia' : 'Subscrição Anual'}</strong></p>
                   <p className="text-slate-600">Forma de Pagamento: <strong className="text-slate-900">{paymentMethod}</strong></p>
                   <p className="text-slate-600">Estado: <span className="font-bold text-emerald-700">● Regularizado / Ativo</span></p>
@@ -152,7 +152,7 @@ export const InvoicePrintModal: React.FC<InvoicePrintModalProps> = ({
                   <tbody className="divide-y divide-slate-200 text-slate-800">
                     <tr>
                       <td className="p-3.5 space-y-0.5">
-                        <p className="font-bold text-slate-950">Licenciamento Kivora Desktop ERP ({getPlanLabel(license.plan_type)})</p>
+                        <p className="font-bold text-slate-950">Licenciamento Kivora Soft Desktop ({getPlanLabel(license.plan_type)})</p>
                         <p className="text-[10px] text-slate-500">
                           Módulo de Faturação Certificada AGT (FE/387/AGT/2026), Base de Dados Local e Sincronização Cloud.
                         </p>
@@ -214,7 +214,7 @@ export const InvoicePrintModal: React.FC<InvoicePrintModalProps> = ({
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0" />
                 <span className="text-[11px] font-medium text-slate-600">
-                  Processado por Software Certificado pela AGT n.º FE/387/AGT/2026 • Kivora Desktop ERP
+                  Processado por Software Certificado pela AGT n.º FE/387/AGT/2026 • Kivora Soft Desktop
                 </span>
               </div>
               <div className="text-right font-mono text-[10px] text-slate-500 font-bold">

@@ -36,13 +36,13 @@ const MONITORED_COLLECTIONS = [
   { id: 'store_orders', name: 'Encomendas da Loja', category: 'Loja Hardware', description: 'Pedidos de hardware e periféricos feitos por clientes', icon: <ShoppingBag className="w-4 h-4 text-blue-500" />, securityRule: 'Criação Aberta / Gestão Admin' },
   { id: 'store_delivery_rates', name: 'Taxas de Entrega Províncias', category: 'Loja Hardware', description: 'Tabela de deslocação e prazos para as 18 províncias', icon: <Globe className="w-4 h-4 text-indigo-500" />, securityRule: 'Leitura Pública / Gestão Admin' },
   { id: 'partner_debts', name: 'Extrato de Débitos Parceiros', category: 'Financeiro', description: 'Registos de transações a crédito e liquidações de licenças', icon: <HardDrive className="w-4 h-4 text-amber-500" />, securityRule: 'Isolado por Parceiro / Admin' },
-  { id: 'partner_pricing', name: 'Tabela de Preços Atacado', category: 'Financeiro', description: 'Matriz de preços de revenda para parceiros homologados', icon: <Layers className="w-4 h-4 text-teal-500" />, securityRule: 'Leitura Aberta / Gestão Admin' },
+  { id: 'partner_pricing', name: 'Tabela de Preços Atacado', category: 'Financeiro', description: 'Matriz de preços de revenda para parceiros credenciados', icon: <Layers className="w-4 h-4 text-teal-500" />, securityRule: 'Leitura Aberta / Gestão Admin' },
   { id: 'audit_logs', name: 'Logs de Auditoria AGT', category: 'Segurança & Compliance', description: 'Registo imutável de eventos operacionais, login e alterações críticas', icon: <ShieldCheck className="w-4 h-4 text-emerald-600" />, securityRule: 'Imutável (Append-Only)' },
   { id: 'trials', name: 'Controlo Anti-Fraude Trials', category: 'Segurança & Compliance', description: 'Impressões digitais de hardware para impedir reutilização de trial', icon: <Lock className="w-4 h-4 text-red-500" />, securityRule: 'Imutável (Anti-Reset)' },
   { id: 'video_support_accounts', name: 'Contas de Assistência Vídeo', category: 'Vídeo Suporte', description: 'Saldos de minutos de videoconferência de clientes e parceiros', icon: <Video className="w-4 h-4 text-blue-500" />, securityRule: 'Leitura e Gestão de Sessões' },
   { id: 'video_support_sessions', name: 'Salas de Videochamada', category: 'Vídeo Suporte', description: 'Salas ativas e registo de duração de chamadas WebRTC', icon: <Video className="w-4 h-4 text-indigo-500" />, securityRule: 'Sessão Temporária' },
   { id: 'system_settings', name: 'Definições do Sistema', category: 'Configurações', description: 'Dados fiscais AGT, contactos, links de download e IBANs', icon: <Sliders className="w-4 h-4 text-slate-500" />, securityRule: 'Leitura Pública / Gestão Admin' },
-  { id: 'announcements', name: 'Comunicados & Avisos', category: 'Comunicação', description: 'Mensagens broadcast exibidas no site e no desktop ERP', icon: <Bell className="w-4 h-4 text-yellow-500" />, securityRule: 'Leitura Aberta / Gestão Admin' },
+  { id: 'announcements', name: 'Comunicados & Avisos', category: 'Comunicação', description: 'Mensagens broadcast exibidas no site e no Kivora Soft Desktop', icon: <Bell className="w-4 h-4 text-yellow-500" />, securityRule: 'Leitura Aberta / Gestão Admin' },
   { id: 'admins', name: 'Utilizadores Administrativos', category: 'Segurança & Controlo', description: 'Credenciais de acesso master ao painel executivo', icon: <ShieldCheck className="w-4 h-4 text-red-600" />, securityRule: 'Restrito SuperAdmin' },
 ];
 
@@ -253,7 +253,7 @@ export const AdminFirebaseMonitor: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-950 text-base font-display tracking-tight">Utilização do Armazenamento Cloud</h3>
-                  <p className="text-xs text-slate-500 font-sans">Google Cloud Firestore — Projeto Oficial KIVORA ERP</p>
+                  <p className="text-xs text-slate-500 font-sans">Google Cloud Firestore — Projeto Oficial KIVORA SOFT</p>
                 </div>
               </div>
               <button

@@ -480,7 +480,7 @@ export async function loginUser(
     }
 
     // B) Verificar na coleção `partners` por código, email, NIF, protocolo ou docId
-    // Fornece resiliência completa para parceiros homologados com palavra-passe inicial
+    // Fornece resiliência completa para parceiros credenciados com palavra-passe inicial
     const partnersRef = collection(db, 'partners');
     const snapPartners = await getDocs(partnersRef);
     

@@ -12,7 +12,6 @@ import { getStoredSession } from './admin/services/authService';
 import { useScrollReveal } from './hooks/useScrollReveal';
 import { NotificationContainer } from './components/ui/NotificationContainer';
 import { KivoraAssistantBot } from './components/KivoraAssistantBot';
-import Lenis from 'lenis';
 
 // Lazy loading for subpages & portals to minimize initial bundle size
 const ModulosPage = lazy(() => import('./pages/ModulosPage').then(m => ({ default: m.ModulosPage })));
@@ -54,7 +53,7 @@ const PartnerPortalApp = lazy(() => import('./partner-portal/PartnerPortalApp').
 const PageLoadingFallback = () => (
   <div role="status" aria-live="polite" className="min-h-[50vh] flex flex-col items-center justify-center p-8 text-center">
     <div className="w-10 h-10 border-4 border-slate-200 border-t-[#FF6500] rounded-full animate-spin mb-3" />
-    <p className="text-slate-600 font-medium text-xs">A carregar o KIVORA ERP...</p>
+    <p className="text-slate-600 font-medium text-xs">A carregar o KIVORA SOFT...</p>
     <span className="sr-only">A carregar conteúdo</span>
   </div>
 );
@@ -66,32 +65,32 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     path: '/',
   },
   funcionalidades: {
-    title: 'Funcionalidades KIVORA ERP | Faturação, POS, Stock & Finanças Angola',
+    title: 'Funcionalidades KIVORA SOFT | Faturação, POS, Stock & Finanças Angola',
     desc: 'Recursos avançados de gestão empresarial para Windows: emissão com QR Code AGT, controlo de caixas e multi-armazém.',
     path: '/modulos',
   },
   modulos: {
-    title: 'Módulos KIVORA ERP | POS, Stock, Faturação, Salários & SAF-T AO',
+    title: 'Módulos KIVORA SOFT | POS, Stock, Faturação, Salários & SAF-T AO',
     desc: 'Conheça os módulos integrados do KIVORA: POS Caixa Rápido, Faturação Certificada AGT, Gestão de Stock Multi-Armazém, Recursos Humanos & IRT 2026.',
     path: '/modulos',
   },
   'modulo-detalhe': {
-    title: 'Módulo Kivora ERP | Software de Gestão Angola',
-    desc: 'Detalhes operacionais e fiscais do módulo KIVORA ERP para empresas em Angola.',
+    title: 'Módulo Kivora Soft | Software de Gestão Angola',
+    desc: 'Detalhes operacionais e fiscais do módulo KIVORA SOFT para empresas em Angola.',
     path: '/modulos',
   },
   faturacao: {
-    title: 'Faturação Eletrónica AGT DS.120 | KIVORA ERP Angola',
+    title: 'Faturação Eletrónica AGT DS.120 | KIVORA SOFT Angola',
     desc: 'Emissão certificada de faturas, faturas-recibo, notas de crédito e débito com assinatura digital RS256 e SAF-T AO.',
     path: '/modulos',
   },
   pos: {
-    title: 'Software POS para Caixa e Balcão | KIVORA ERP Luanda',
+    title: 'Software POS para Caixa e Balcão | KIVORA SOFT Luanda',
     desc: 'Ponto de venda ágil com abertura e fecho de turno, relatório Z, integração com gavetas RJ11 e impressoras térmicas.',
     path: '/modulos',
   },
   stock: {
-    title: 'Gestão de Stocks & Inventário Multi-Armazém | KIVORA ERP',
+    title: 'Gestão de Stocks & Inventário Multi-Armazém | KIVORA SOFT',
     desc: 'Controlo rigoroso de entradas, saídas, transferências, lotes, validade e alertas de rutura de stock.',
     path: '/modulos',
   },
@@ -101,7 +100,7 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     path: '/modulos',
   },
   contabilidade: {
-    title: 'Contabilidade & Relatórios Financeiros | KIVORA ERP',
+    title: 'Contabilidade & Relatórios Financeiros | KIVORA SOFT',
     desc: 'Balanços, demonstrações de resultados, fluxo de caixa e mapa de impostos em conformidade com a lei.',
     path: '/modulos',
   },
@@ -111,8 +110,8 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     path: '/solucoes',
   },
   setores: {
-    title: 'Setores de Atividade | KIVORA ERP Angola',
-    desc: 'Descubra como o KIVORA ERP atende as necessidades operacionais e fiscais específicas do seu setor de negócio.',
+    title: 'Setores de Atividade | KIVORA SOFT Angola',
+    desc: 'Descubra como o KIVORA SOFT atende as necessidades operacionais e fiscais específicas do seu setor de negócio.',
     path: '/setores',
   },
   retalho: {
@@ -126,7 +125,7 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     path: '/setores',
   },
   farmacia: {
-    title: 'Software para Farmácias e Drogarias | KIVORA ERP Angola',
+    title: 'Software para Farmácias e Drogarias | KIVORA SOFT Angola',
     desc: 'Controlo de medicamentos por lote, validade, substância ativa e conformidade com a regulamentação do MinSaúde.',
     path: '/setores',
   },
@@ -141,18 +140,18 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     path: '/hardware',
   },
   'diretorio-parceiros': {
-    title: 'Diretório Nacional de Parceiros & Técnicos em Angola | KIVORA ERP',
+    title: 'Diretório Nacional de Parceiros & Técnicos em Angola | KIVORA SOFT',
     desc: 'Encontre consultores e técnicos de software de faturação certificados em Luanda, Benguela, Huambo, Huíla, Cabinda e em todo o território nacional.',
     path: '/diretorio-parceiros',
   },
   planos: {
-    title: 'Preços & Planos KIVORA ERP | Mensal, Anual e Vitalício em Kwanzas (AOA)',
+    title: 'Preços & Planos KIVORA SOFT | Mensal, Anual e Vitalício em Kwanzas (AOA)',
     desc: 'Consulte a tabela oficial de preços e utilize o simulador de ROI multi-postos. Sem surpresas com câmbio em dólares.',
     path: '/precos',
   },
   download: {
-    title: 'Baixar KIVORA ERP para Windows | Instalador Oficial & Chave de Teste 15 Dias',
-    desc: 'Download do instalador oficial do KIVORA Desktop ERP para Windows 10/11 com chave de avaliação gratuita de 15 dias e verificação SHA-256.',
+    title: 'Baixar KIVORA SOFT para Windows | Instalador Oficial & Chave de Teste 15 Dias',
+    desc: 'Download do instalador oficial do KIVORA SOFT Desktop para Windows 10/11 com chave de avaliação gratuita de 15 dias e verificação SHA-256.',
     path: '/download',
   },
   recursos: {
@@ -162,11 +161,11 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
   },
   noticias: {
     title: 'Notícias, Legislação Fiscal AGT & Faturação Eletrónica Angola | KIVORA',
-    desc: 'Fique a par das atualizações fiscais da AGT, Decreto Presidencial 71/25, prazos de conformidade e novidades do KIVORA ERP.',
+    desc: 'Fique a par das atualizações fiscais da AGT, Decreto Presidencial 71/25, prazos de conformidade e novidades do KIVORA SOFT.',
     path: '/noticias',
   },
   'noticia-post': {
-    title: 'Artigo & Notícia Fiscal AGT | KIVORA ERP',
+    title: 'Artigo & Notícia Fiscal AGT | KIVORA SOFT',
     desc: 'Artigo informativo sobre conformidade fiscal, faturação eletrónica e gestão de empresas em Angola.',
     path: '/noticias',
   },
@@ -177,16 +176,16 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
   },
   sobre: {
     title: 'Sobre a KIVORA & Visual Software | Inovação em Software de Gestão em Angola',
-    desc: 'Conheça a história da Visual Software e o compromisso do KIVORA ERP em impulsionar o comércio e a indústria em Angola.',
+    desc: 'Conheça a história da Visual Software e o compromisso do KIVORA SOFT em impulsionar o comércio e a indústria em Angola.',
     path: '/sobre',
   },
   'validar-licenca': {
-    title: 'Validador Oficial de Licenças de Software | KIVORA ERP',
-    desc: 'Verifique a autenticidade e validade da sua licença KIVORA ERP emitida pela Visual Software.',
+    title: 'Validador Oficial de Licenças de Software | KIVORA SOFT',
+    desc: 'Verifique a autenticidade e validade da sua licença KIVORA SOFT emitida pela Visual Software.',
     path: '/validar',
   },
   parceiros: {
-    title: 'Programa de Parceiros & Revendedores Autorizados | KIVORA ERP Angola',
+    title: 'Programa de Parceiros & Revendedores Autorizados | KIVORA SOFT Angola',
     desc: 'Torne-se um parceiro credenciado KIVORA. Margens de até 60%, suporte nível 2 direto e carteira de crédito flexível.',
     path: '/parceiros',
   },
@@ -196,7 +195,7 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     path: '/candidatura-parceiro',
   },
   termos: {
-    title: 'Termos de Uso e Condições de Licenciamento | KIVORA ERP',
+    title: 'Termos de Uso e Condições de Licenciamento | KIVORA SOFT',
     desc: 'Termos legais de licenciamento de software, garantias e condições de suporte técnico da Visual Software.',
     path: '/termos',
   },
@@ -211,23 +210,23 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     path: '/login',
   },
   admin: {
-    title: 'Painel de Administração Central | KIVORA ERP',
+    title: 'Painel de Administração Central | KIVORA SOFT',
     desc: 'Gestão executiva de licenças, empresas, parceiros e políticas.',
     path: '/admin',
   },
   'casos-sucesso': {
-    title: 'Casos de Sucesso em Angola | Clientes e Empresas KIVORA ERP',
-    desc: 'Conheça empresas reais em Luanda, Benguela, Huambo e em todo o país que transformaram as suas operações com o KIVORA ERP.',
+    title: 'Casos de Sucesso em Angola | Clientes e Empresas KIVORA SOFT',
+    desc: 'Conheça empresas reais em Luanda, Benguela, Huambo e em todo o país que transformaram as suas operações com o KIVORA SOFT.',
     path: '/casos-sucesso',
   },
   seguranca: {
-    title: 'Centro de Cibersegurança & Proteção de Dados Militar | KIVORA ERP',
+    title: 'Centro de Cibersegurança & Proteção de Dados Militar | KIVORA SOFT',
     desc: 'Arquitetura criptográfica RSA-2048, base local cifrada SQLCipher AES-256 e conformidade integral com a legislação fiscal da AGT.',
     path: '/seguranca',
   },
   comparativo: {
     title: 'Comparativo de Mercado: KIVORA vs Softwares em Nuvem vs Dólar',
-    desc: 'Veja a comparação transparente entre o KIVORA ERP, softwares SaaS internacionais e soluções locais.',
+    desc: 'Veja a comparação transparente entre o KIVORA SOFT, softwares SaaS internacionais e soluções locais.',
     path: '/comparativo',
   },
   'calculadora-fiscal': {
@@ -236,27 +235,27 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     path: '/calculadora-fiscal',
   },
   investidores: {
-    title: 'Relações com Investidores & Governança Corporativa | KIVORA ERP & Visual Software',
+    title: 'Relações com Investidores & Governança Corporativa | KIVORA SOFT & Visual Software',
     desc: 'Conheça a solidez financeira, modelo de negócio local, indicadores de crescimento e conformidade regulatória da Visual Software em Angola.',
     path: '/investidores',
   },
   provincias: {
-    title: 'Presença nas 18 Províncias de Angola | Cobertura Nacional - KIVORA ERP',
+    title: 'Presença nas 18 Províncias de Angola | Cobertura Nacional - KIVORA SOFT',
     desc: 'Consulte os parceiros credenciados, postos instalados e capacidade de suporte presencial nas 18 províncias de Angola.',
     path: '/provincias',
   },
   'guia-agt': {
-    title: 'Guia Oficial de Conformidade AGT & Decreto 71/25 | KIVORA ERP',
+    title: 'Guia Oficial de Conformidade AGT & Decreto 71/25 | KIVORA SOFT',
     desc: 'Guia de regras de faturação eletrónica, regimes de IVA, prazos de envio do SAF-T AO e checklist de auditoria tributária da AGT em Angola.',
     path: '/guia-agt',
   },
   manuais: {
-    title: 'Central de Manuais & Tutoriais Rápidos | KIVORA ERP',
+    title: 'Central de Manuais & Tutoriais Rápidos | KIVORA SOFT',
     desc: 'Base de conhecimento e manuais passo a passo para operadores de caixa, gerentes de stock, contabilistas e equipas de TI.',
     path: '/manuais',
   },
   'simulador-roi': {
-    title: 'Simulador de Poupança & Retorno de Investimento (ROI) | KIVORA ERP',
+    title: 'Simulador de Poupança & Retorno de Investimento (ROI) | KIVORA SOFT',
     desc: 'Calcule em Kwanzas quanto a sua empresa pode poupar por ano ao eliminar quebras de stock e automatizar a conformidade fiscal da AGT.',
     path: '/simulador-roi',
   },
@@ -271,12 +270,12 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     path: '/calculadora-fiscal',
   },
   'area-cliente': {
-    title: 'Portal do Cliente | KIVORA ERP',
+    title: 'Portal do Cliente | KIVORA SOFT',
     desc: 'Acompanhamento de licenças, filiais, faturação e suporte.',
     path: '/area-cliente',
   },
   'area-parceiro': {
-    title: 'Portal do Parceiro Credenciado | KIVORA ERP',
+    title: 'Portal do Parceiro Credenciado | KIVORA SOFT',
     desc: 'Emissão de licenças, gestão de clientes, carteira pré-paga e comissões.',
     path: '/area-parceiro',
   },
@@ -328,32 +327,6 @@ export function App() {
     return unsub;
   }, []);
 
-  // Smooth scroll ultra-fluído de alta fidelidade (Lenis)
-  useEffect(() => {
-    // Manter o scroll natural e responsivo em smartphones e touchpads tácteis
-    if (typeof window === 'undefined') return;
-    const isTouch = window.matchMedia('(pointer: coarse)').matches;
-    if (isTouch) return;
-
-    const lenis = new Lenis({
-      duration: 1.15,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      smoothWheel: true,
-    });
-
-    let rafId: number;
-    function raf(time: number) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
-    rafId = requestAnimationFrame(raf);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      lenis.destroy();
-    };
-  }, []);
 
   // Ativação global de Scroll Reveal em todas as páginas
   useScrollReveal(undefined, [activePage, selectedModule, selectedNewsPost]);
@@ -365,7 +338,7 @@ export function App() {
     let pageDesc = meta.desc;
 
     if (activePage === 'modulo-detalhe' && selectedModule) {
-      pageTitle = `${selectedModule.title} | KIVORA ERP Angola`;
+      pageTitle = `${selectedModule.title} | KIVORA SOFT Angola`;
       pageDesc = selectedModule.description || meta.desc;
     } else if (activePage === 'noticia-post' && selectedNewsPost) {
       pageTitle = `${selectedNewsPost.title} | KIVORA Notícias`;
@@ -536,7 +509,7 @@ export function App() {
         onOpenLogin={() => handleNavigatePage('login')}
       />
 
-      {/* Roteamento de Conteúdo de Páginas Kivora Desktop ERP */}
+      {/* Roteamento de Conteúdo de Páginas KIVORA SOFT Desktop */}
       <main id="main-content" className="flex-grow">
         <Suspense fallback={<PageLoadingFallback />}>
         {activePage === 'home' && (
@@ -810,7 +783,7 @@ export function App() {
       {/* Botão flutuante WhatsApp (configurável pelo Admin no Firebase) */}
       <WhatsAppButton
         phoneNumber={appSettings.phoneRaw || '244923456789'}
-        message={appSettings.whatsappDefaultMessage || 'Olá! Gostaria de saber mais sobre o KIVORA ERP.'}
+        message={appSettings.whatsappDefaultMessage || 'Olá! Gostaria de saber mais sobre o KIVORA SOFT.'}
       />
 
       {/* Banner de Consentimento de Cookies & Privacidade (controlado pelo Admin) */}

@@ -123,7 +123,7 @@ export const PURGE_TARGETS: PurgeTarget[] = [
   },
   {
     id: 'trials',
-    name: 'Histórico de Testes de 14 Dias (ERP)',
+    name: 'Histórico de Testes de 14 Dias (Kivora Soft)',
     description: 'Apaga a base de hardware_id para permitir que computadores de teste reativem os 14 dias.',
     collectionName: 'trials',
     recommended: true,
@@ -155,7 +155,7 @@ export const PURGE_TARGETS: PurgeTarget[] = [
   },
   {
     id: 'cloud_backups',
-    name: 'Backups Nuvem do Kivora ERP Desktop',
+    name: 'Backups Nuvem do Kivora Soft Desktop',
     description: 'Apaga os arquivos de backup enviados para a nuvem pelo software desktop.',
     collectionName: 'cloud_backups',
     recommended: true,

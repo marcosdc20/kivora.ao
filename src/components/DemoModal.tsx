@@ -148,7 +148,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
             <div className="w-16 h-16 rounded-full overflow-hidden border border-slate-200 shrink-0 hidden sm:block bg-slate-50">
               <img
                 src={welcomeImg}
-                alt="Consultor Kivora ERP"
+                alt="Consultor Kivora Soft"
                 width="64"
                 height="64"
                 className="w-full h-full object-contain"
@@ -157,7 +157,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
             <div>
               <div className="inline-flex items-center gap-1.5 text-blue-700 text-xs font-black uppercase tracking-widest bg-blue-50 border border-blue-200 px-3 py-1 rounded-full mb-2">
                 <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-                <span>Demonstração Oficial Kivora ERP</span>
+                <span>Demonstração Oficial KIVORA SOFT</span>
               </div>
               
               <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight text-slate-950 font-display">
@@ -182,7 +182,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
                   Pedido Enviado com Sucesso!
                 </h4>
                 <p className="text-slate-600 max-w-md mx-auto text-xs sm:text-sm leading-relaxed mt-2">
-                  Obrigado pelo seu interesse no <strong>KIVORA ERP</strong>. A sua solicitação foi registada e um dos nossos consultores entrará em contacto muito em breve.
+                  Obrigado pelo seu interesse no <strong>KIVORA SOFT</strong>. A sua solicitação foi registada e um dos nossos consultores entrará em contacto muito em breve.
                 </p>
               </div>
               
@@ -389,7 +389,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="btn-cta text-white font-bold text-xs sm:text-sm px-7 py-3 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="btn-cta bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-xs sm:text-sm px-7 py-3 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {submitting ? (
                     <>

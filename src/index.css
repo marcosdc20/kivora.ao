@@ -56,7 +56,6 @@
     text-rendering: optimizeLegibility;
     min-height: 100%;
     overflow-x: hidden;
-    touch-action: pan-y;
   }
 
   body {
@@ -67,7 +66,6 @@
     background: #fff;
     overflow-x: hidden;
     min-height: 100%;
-    touch-action: pan-y;
     font-optical-sizing: auto;
   }
 
@@ -76,7 +74,6 @@
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
-    touch-action: pan-y;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -264,20 +261,82 @@
   margin-bottom: 0.75rem;
 }
 
-/* Card System */
+/* Button System Oficial KIVORA — Contraste Garantido WCAG AAA (Sem botões brancos invisíveis) */
+.btn-cta {
+  background-color: #FF6500 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-radius: 0.75rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px 0 rgba(255, 101, 0, 0.35);
+  border: 1px solid transparent;
+}
+.btn-cta:hover {
+  background-color: #EB5B00 !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px 0 rgba(235, 91, 0, 0.45);
+}
+.btn-cta:active {
+  transform: scale(0.98);
+}
+.btn-cta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-primary {
+  background-color: #1746A2 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.btn-primary:hover {
+  background-color: #1E40AF !important;
+  color: #ffffff !important;
+}
+
+.btn-secondary {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  border: 1px solid #CBD5E1 !important;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background-color: #F1F5F9 !important;
+  color: #020617 !important;
+  border-color: #94A3B8 !important;
+}
+
+/* Card System — Design Limpo, Flat e Sóbrio (Sem saltos ou sobras de IA) */
 .card-premium, .surface-card {
   background: #ffffff;
-  border: 1px solid rgba(226,232,240,0.8);
-  border-radius: var(--r-xl);
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), border-color var(--dur-base);
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   position: relative;
-  overflow: hidden;
 }
 .card-premium:hover, .surface-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(203,213,225,0.95);
-  box-shadow: var(--shadow-lg);
+  transform: none !important;
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 }
 
 .card-glass {
@@ -481,32 +540,45 @@
   .avoid-break { page-break-inside: avoid !important; break-inside: avoid !important; }
 }
 
-/* Portal scroll */
+/* Portal scroll — Rolagem nativa ultra-fluida com roda do mouse e trackpad */
 .portal-scroll-container {
-  touch-action: pan-y !important; overscroll-behavior-y: contain !important;
-  overscroll-behavior-x: none !important; -webkit-overflow-scrolling: touch !important;
-  scrollbar-gutter: stable; scroll-behavior: smooth;
-}
-.portal-scroll-container * { touch-action: pan-y; }
-.portal-scroll-container::-webkit-scrollbar        { width: 8px; height: 8px; }
-.portal-scroll-container::-webkit-scrollbar-track  { background: rgba(241,245,249,0.5); }
-.portal-scroll-container::-webkit-scrollbar-thumb  { background: rgba(148,163,184,0.5); border-radius: 9999px; }
-.portal-scroll-container::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,0.8); }
-
-/* Lenis Smooth Scroll Rules */
-html.lenis, html.lenis body {
-  height: auto;
-}
-.lenis.lenis-smooth {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
   scroll-behavior: auto !important;
+  overscroll-behavior-y: auto !important;
 }
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
+.portal-scroll-container::-webkit-scrollbar        { width: 6px; height: 6px; }
+.portal-scroll-container::-webkit-scrollbar-track  { background: transparent; }
+.portal-scroll-container::-webkit-scrollbar-thumb  { background: #cbd5e1; border-radius: 9999px; }
+.portal-scroll-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Neutralização total de animações artificiais e sombras exageradas nos painéis (estilo limpo, sóbrio e sem cara de IA) */
+.portal-scroll-container .animate-fadeIn,
+.portal-scroll-container .animate-fadeInUp,
+.portal-scroll-container .animate-scaleUp,
+.portal-scroll-container .animate-scaleIn,
+.portal-scroll-container .animate-pulse:not([class*="animate-spin"]),
+.portal-scroll-container .animate-ping,
+.portal-scroll-container .animate-bounce {
+  animation: none !important;
+  transform: none !important;
 }
-.lenis.lenis-stopped {
-  overflow: hidden;
+
+.portal-scroll-container [class*="hover:-translate-y"],
+.portal-scroll-container [class*="hover:scale-"] {
+  transform: none !important;
 }
-.lenis.lenis-scrolling iframe {
-  pointer-events: none;
+
+/* Sombras limpas e discretas sem brilhos coloridos artificiais */
+.portal-scroll-container .shadow-2xl,
+.portal-scroll-container .shadow-xl,
+.portal-scroll-container .shadow-lg,
+.portal-scroll-container .shadow-card,
+.portal-scroll-container [class*="shadow-blue-"],
+.portal-scroll-container [class*="shadow-emerald-"],
+.portal-scroll-container [class*="shadow-amber-"] {
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.05) !important;
 }
+
 

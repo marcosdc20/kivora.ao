@@ -64,7 +64,7 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
 
           return {
             id: docSnap.id,
-            name: (d.empresa || d.company_name || d.name || d.nome || 'Parceiro Homologado').trim(),
+            name: (d.empresa || d.company_name || d.name || d.nome || 'Parceiro Credenciado').trim(),
             code: pCode,
             provincia: d.region || d.provincia || 'Luanda',
             cidade: d.city || d.cidade || d.region || 'Luanda',
@@ -185,7 +185,7 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
             <div className="space-y-1 max-w-md mx-auto">
               <h3 className="font-display text-base font-bold text-slate-900">Nenhum parceiro encontrado nesta região</h3>
               <p className="text-xs text-slate-500 font-normal">
-                Seja o distribuidor credenciado da sua província e comece a fornecer o KIVORA ERP.
+                Seja o distribuidor credenciado da sua província e comece a fornecer o KIVORA SOFT.
               </p>
             </div>
             <button

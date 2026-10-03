@@ -77,7 +77,7 @@ export const SimuladorRoiPage: React.FC<SimuladorRoiPageProps> = ({ onOpenDemoMo
         image={welcomeImg}
         tag="Inteligência Financeira & Otimização de Custos"
         title="Simulador de Poupança & Retorno de Investimento (ROI)"
-        sub="Calcule em tempo real quanto a sua empresa em Angola pode poupar por ano ao eliminar quebras de stock, acelerar fechos de caixa e automatizar a conformidade fiscal da AGT com o KIVORA ERP."
+        sub="Calcule em tempo real quanto a sua empresa em Angola pode poupar por ano ao eliminar quebras de stock, acelerar fechos de caixa e automatizar a conformidade fiscal da AGT com o KIVORA SOFT."
       />
 
       {/* Main Container */}

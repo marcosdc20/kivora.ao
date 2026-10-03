@@ -112,7 +112,7 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
         {/* Search Box — Oculto na Impressão */}
         <div className="print-hide surface-card bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-card space-y-5">
           <div className="text-center max-w-xl mx-auto">
-            <h1 className="text-2xl sm:text-3xl font-semibold font-display tracking-tight text-slate-900">Validar Licença Kivora ERP</h1>
+            <h1 className="text-2xl sm:text-3xl font-semibold font-display tracking-tight text-slate-900">Validar Licença Kivora Soft</h1>
             <p className="text-xs text-slate-600 mt-1">
               Introduza a chave de ativação ou número de série para verificar a autenticidade fiscal e emitir o certificado oficial.
             </p>
@@ -153,7 +153,7 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
                 Validação de Licenças por Hardware Fingerprint
               </h2>
               <p className="text-xs text-slate-600 leading-relaxed">
-                As licenças do KIVORA ERP são vinculadas com segurança aos computadores da sua empresa. Aqui pode consultar o estado fiscal, a validade e emitir o Certificado Oficial de Conformidade.
+                As licenças do KIVORA SOFT são vinculadas com segurança aos computadores da sua empresa. Aqui pode consultar o estado fiscal, a validade e emitir o Certificado Oficial de Conformidade.
               </p>
             </div>
             <div className="md:col-span-5 flex justify-center">
@@ -221,7 +221,7 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
                 <div className="space-y-1">
                   <img
                     src="/imagens/logo_sem_fundo.png"
-                    alt="Kivora ERP"
+                    alt="Kivora Soft"
                     className="h-10 w-auto object-contain mb-1.5"
                   />
                   <span className="font-black text-lg tracking-tight text-slate-950 block leading-tight">
@@ -257,7 +257,7 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
                   Certificado de Licenciamento de Software
                 </h2>
                 <p className="text-xs text-slate-600 font-semibold uppercase tracking-wider">
-                  Kivora ERP • Sistema de Gestão Comercial e Facturação Certificada
+                  Kivora Soft • Sistema de Gestão Comercial e Facturação Certificada
                 </p>
               </div>
 
@@ -272,7 +272,7 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
                   </h3>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed text-justify">
-                  Inscrita sob o NIF n.º <strong>{licenseData.nif}</strong>, é titular legítima da licença de uso do software <strong>Kivora ERP</strong>, devidamente registada no servidor central de licenciamento e autorizada para emissão de faturas e gestão de operações em conformidade com as normas tributárias em vigor na República de Angola.
+                  Inscrita sob o NIF n.º <strong>{licenseData.nif}</strong>, é titular legítima da licença de uso do software <strong>Kivora Soft</strong>, devidamente registada no servidor central de licenciamento e autorizada para emissão de faturas e gestão de operações em conformidade com as normas tributárias em vigor na República de Angola.
                 </p>
               </div>
 
@@ -297,7 +297,7 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
                     </tr>
                     <tr>
                       <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Produto & Versão:</td>
-                      <td className="py-3 px-4 text-slate-900 font-bold">Kivora ERP v2.4 (Edição Comercial & Multi-posto)</td>
+                      <td className="py-3 px-4 text-slate-900 font-bold">Kivora Soft v2.4 (Edição Comercial & Multi-posto)</td>
                     </tr>
                     <tr>
                       <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Plano / Modalidade:</td>
@@ -333,7 +333,7 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
                   Conformidade Legal & Fiscal AGT:
                 </p>
                 <p>
-                  O software Kivora ERP cumpre integralmente os requisitos de assinatura digital de faturas por chave criptográfica RSA-2048 e exportação do ficheiro SAF-T (AO), nos termos do Regime Jurídico das Facturas e do Decreto Presidencial n.º 71/25 da República de Angola.
+                  O software Kivora Soft cumpre integralmente os requisitos de assinatura digital de faturas por chave criptográfica RSA-2048 e exportação do ficheiro SAF-T (AO), nos termos do Regime Jurídico das Facturas e do Decreto Presidencial n.º 71/25 da República de Angola.
                 </p>
               </div>
             </div>

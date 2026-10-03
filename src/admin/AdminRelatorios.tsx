@@ -191,10 +191,10 @@ export const AdminRelatorios: React.FC = () => {
         actions={
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold font-display text-xs px-4 py-2.5 rounded-xl transition-all shadow-md shadow-brand-600/20 cursor-pointer"
+            className="flex items-center gap-2 bg-[#1746A2] hover:bg-[#1E40AF] text-white font-bold font-display text-xs px-4 py-2.5 rounded-xl transition-all shadow-md shadow-blue-900/20 cursor-pointer"
           >
-            <Download className="w-4 h-4" strokeWidth={2} />
-            Exportar CSV
+            <Download className="w-4 h-4 text-white" strokeWidth={2} />
+            <span className="text-white font-bold">Exportar CSV</span>
           </button>
         }
       />

@@ -103,7 +103,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
             </h1>
 
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-              Fundada em Luanda, a <strong>Kivora Tecnologias</strong> é uma software house dedicada a fornecer soluções corporativas robustas, desenhadas especificamente para o contexto angolano. O nosso software KIVORA ERP combina certificação rigorosa da AGT, arquitetura local independente da internet e suporte técnico presencial.
+              Fundada em Luanda, a <strong>Kivora Tecnologias</strong> é uma software house dedicada a fornecer soluções corporativas robustas, desenhadas especificamente para o contexto angolano. O nosso software KIVORA SOFT combina certificação rigorosa da AGT, arquitetura local independente da internet e suporte técnico presencial.
             </p>
 
             <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
@@ -307,7 +307,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
             </div>
             <h2 className="text-2xl sm:text-3xl font-black">Clientes Satisfeitos</h2>
             <p className="text-xs sm:text-sm text-orange-100">
-              Mais de 2.800 empresas confiam diariamente no KIVORA ERP em Angola
+              Mais de 2.800 empresas confiam diariamente no KIVORA SOFT em Angola
             </p>
           </div>
 
@@ -440,7 +440,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
               Demonstração Gratuita
             </span>
             <h3 className="text-2xl sm:text-3xl font-black text-white">
-              Quer ver o KIVORA ERP a funcionar na sua empresa?
+              Quer ver o KIVORA SOFT a funcionar na sua empresa?
             </h3>
             <p className="text-orange-100 text-xs sm:text-sm max-w-xl">
               Agende uma apresentação no seu escritório em Luanda ou teste gratuitamente por 15 dias sem compromisso.

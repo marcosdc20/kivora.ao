@@ -1,6 +1,6 @@
 /**
  * issue-credit-license.ts — Vercel Serverless Function
- * Endpoint seguro para parceiros homologados com privilégio 'auto_instant'
+ * Endpoint seguro para parceiros credenciados com privilégio 'auto_instant'
  * emitirem licenças a crédito sem necessidade de aprovação manual do Admin.
  *
  * Invariantes rigorosos:
@@ -333,11 +333,11 @@ export default async function handler(req: any, res: any) {
         license_id: { stringValue: key },
         company_name: { stringValue: companyName.trim() },
         nif: { stringValue: cleanNif },
-        plan_label: { stringValue: `Kivora ERP - ${planType.toUpperCase()}` },
+        plan_label: { stringValue: `KIVORA SOFT - ${planType.toUpperCase()}` },
         amount: { integerValue: String(priceAoa || 0) },
         totalAOA: { integerValue: String(priceAoa || 0) },
         status: { stringValue: 'paid' },
-        payment_method: { stringValue: isWallet ? 'Carteira Parceiro Kivora' : (isProv ? 'Crédito Provisório Parceiro' : 'Parceiro Homologado Kivora') },
+        payment_method: { stringValue: isWallet ? 'Carteira Parceiro Kivora' : (isProv ? 'Crédito Provisório Parceiro' : 'Parceiro Credenciado Kivora') },
         issue_date: { stringValue: new Date(now).toISOString().split('T')[0] },
         due_date: { stringValue: new Date(expiresAt).toISOString().split('T')[0] },
         partner_id: { stringValue: targetPartnerId },

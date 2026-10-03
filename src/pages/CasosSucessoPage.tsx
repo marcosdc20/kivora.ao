@@ -57,7 +57,7 @@ const CASE_STUDIES: CaseStudy[] = [
       { metric: '100%', label: 'Conformidade SAF-T AO à primeira' },
     ],
     challenge: 'A constante instabilidade na ligação de fibra ótica travava os caixas de pagamento, gerando filas longas e insatisfação dos clientes com softwares em nuvem.',
-    solution: 'Implementação do KIVORA ERP em rede local LAN multi-postos com base de dados local de alta performance e sincronização contínua entre os 12 caixas.',
+    solution: 'Implementação do KIVORA SOFT em rede local LAN multi-postos com base de dados local de alta performance e sincronização contínua entre os 12 caixas.',
     quote: 'Com o Kivora, a internet pode ir abaixo que os nossos 12 caixas continuam a faturar e emitir com QR Code AGT a velocidade máxima. Foi a melhor decisão técnica que tomámos.',
     author: 'Eng. Manuel Domingos',
     role: 'Diretor de Operações e TI',
@@ -120,7 +120,7 @@ const CASE_STUDIES: CaseStudy[] = [
       { metric: '24/7', label: 'Operação sem falhas de conexão' },
     ],
     challenge: 'Volume massivo de emissão de faturas no período da manhã e necessidade de gerir transferências entre três armazéns distintos com rapidez.',
-    solution: 'KIVORA ERP com base de dados local otimizada e gestão multi-armazém com leitura rápida por código de barras.',
+    solution: 'KIVORA SOFT com base de dados local otimizada e gestão multi-armazém com leitura rápida por código de barras.',
     quote: 'No mercado grossista o tempo é ouro. O Kivora imprime faturas e recibos em menos de 1 segundo sem travar mesmo com milhares de linhas por dia.',
     author: 'Mateus Kanhanga',
     role: 'Responsável de Logística',
@@ -152,7 +152,7 @@ export const CasosSucessoPage: React.FC<CasosSucessoPageProps> = ({
             Histórias de Sucesso em Angola
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
-            <AnimatedText text="Como Empresas Reais Crescem com o KIVORA ERP" el="span" mode="letter-stagger" highlightWords={['KIVORA', 'ERP']} highlightClass="text-blue-600 font-black" />
+            <AnimatedText text="Como Empresas Reais Crescem com o KIVORA SOFT" el="span" mode="letter-stagger" highlightWords={['KIVORA', 'SOFT']} highlightClass="text-blue-600 font-black" />
           </h1>
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
             Conheça as experiências de gestores e proprietários que eliminaram problemas de faturação, filas e paragens por quebra de internet em Angola.
@@ -211,7 +211,7 @@ export const CasosSucessoPage: React.FC<CasosSucessoPageProps> = ({
                 História de Liderança & Eficiência
               </div>
               <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 leading-tight">
-                "Com o KIVORA ERP, tenho controlo total dos 5 postos da minha loja em tempo real."
+                "Com o KIVORA SOFT, tenho controlo total dos 5 postos da minha loja em tempo real."
               </h2>
               <p className="text-slate-600 text-xs sm:text-sm leading-relaxed font-normal">
                 Gestão simplificada de stock, relatórios de fecho de caixa sem discrepâncias e emissão de faturas certificadas pela AGT sem depender da instabilidade da internet.

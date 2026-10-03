@@ -200,7 +200,7 @@ export const AdminComunicacao: React.FC = () => {
       const html = generateBroadcastTemplate({
         title: titulo,
         body: mensagem,
-        senderTitle: 'Administração Geral KIVORA Cloud ERP'
+        senderTitle: 'Administração Geral KIVORA SOFT'
       });
 
       const res = await sendSiteEmail({
@@ -252,7 +252,7 @@ export const AdminComunicacao: React.FC = () => {
           const html = generateBroadcastTemplate({
             title: titulo,
             body: mensagem,
-            senderTitle: 'Administração Geral KIVORA Cloud ERP'
+            senderTitle: 'Administração Geral KIVORA SOFT'
           });
 
           const res = await sendSiteEmail({
@@ -305,7 +305,7 @@ export const AdminComunicacao: React.FC = () => {
       const html = generateBroadcastTemplate({
         title: com.titulo,
         body: com.mensagem,
-        senderTitle: 'Administração Geral KIVORA Cloud ERP'
+        senderTitle: 'Administração Geral KIVORA SOFT'
       });
 
       const res = await sendSiteEmail({
@@ -343,10 +343,10 @@ export const AdminComunicacao: React.FC = () => {
         actions={
           <button
             onClick={() => setModalNovo(true)}
-            className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold font-display text-xs px-4 py-2.5 rounded-xl transition-all shadow-md shadow-brand-600/20 cursor-pointer"
+            className="flex items-center gap-2 bg-[#1746A2] hover:bg-[#1E40AF] text-white font-semibold font-display text-xs px-4 py-2.5 rounded-xl transition-all shadow-md shadow-blue-900/20 cursor-pointer"
           >
-            <Plus className="w-4 h-4" strokeWidth={2.5} />
-            Novo Comunicado
+            <Plus className="w-4 h-4 text-white" strokeWidth={2.5} />
+            <span className="text-white font-bold">Novo Comunicado</span>
           </button>
         }
       />
@@ -577,10 +577,10 @@ export const AdminComunicacao: React.FC = () => {
                 <button
                   type="submit"
                   disabled={sendingBroadcast}
-                  className="px-5 py-2.5 rounded-xl text-xs font-semibold font-display bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white shadow-md shadow-brand-600/20 flex items-center gap-2 cursor-pointer transition-all"
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold font-display bg-[#1746A2] hover:bg-[#1E40AF] disabled:opacity-50 text-white shadow-md shadow-blue-900/25 flex items-center gap-2 cursor-pointer transition-all"
                 >
-                  {sendingBroadcast ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                  <span>{sendingBroadcast ? 'A Disparar...' : 'Disparar Comunicado'}</span>
+                  {sendingBroadcast ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : <Send className="w-3.5 h-3.5 text-white" />}
+                  <span className="text-white font-bold">{sendingBroadcast ? 'A Disparar...' : 'Disparar Comunicado'}</span>
                 </button>
               </div>
             </form>

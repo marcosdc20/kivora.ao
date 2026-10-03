@@ -33,7 +33,7 @@ export const DEFAULT_SITE_EMAIL_CONFIG: SiteEmailConfig = {
   provider: 'gmail',
   apiKey: (import.meta.env.VITE_SMTP_PASS as string) || '',
   senderEmail: 'kivora.angola@gmail.com',
-  senderName: 'KIVORA Cloud ERP',
+  senderName: 'KIVORA SOFT',
   smtpHost: 'smtp.gmail.com',
   smtpPort: 465,
   smtpUser: 'kivora.angola@gmail.com',
@@ -131,7 +131,7 @@ export const sendSiteEmail = async (options: {
 
   const recipients = Array.isArray(options.to) ? options.to : [options.to];
   const senderEmail = cfg.senderEmail || 'kivora.angola@gmail.com';
-  const fromAddress = `"${cfg.senderName || 'KIVORA ERP'}" <${senderEmail}>`;
+  const fromAddress = `"${cfg.senderName || 'KIVORA SOFT'}" <${senderEmail}>`;
 
   // 1. Tentar o endpoint de envio seguro (/api/send-email)
   try {
@@ -207,7 +207,7 @@ export const sendSiteEmail = async (options: {
     try {
       const payload = {
         personalizations: [{ to: recipients.map(e => ({ email: e })) }],
-        from: { email: cfg.senderEmail, name: cfg.senderName || 'KIVORA ERP' },
+        from: { email: cfg.senderEmail, name: cfg.senderName || 'KIVORA SOFT' },
         subject: options.subject,
         content: [{ type: 'text/html', value: options.html }],
       };
@@ -252,7 +252,7 @@ export const sendClientWelcomeEmail = async (params: {
   const html = generateClientCredentialsTemplate(params);
   return sendSiteEmail({
     to: params.email,
-    subject: `Credenciais de Acesso ao KIVORA ERP — ${params.companyName}`,
+    subject: `Credenciais de Acesso ao KIVORA SOFT — ${params.companyName}`,
     html,
   });
 };
@@ -273,7 +273,7 @@ export const sendLicenseToClientEmail = async (params: {
   const html = generateLicenseDeliveryTemplate(params);
   return sendSiteEmail({
     to: params.clientEmail,
-    subject: `Emissão de Licença Oficial KIVORA ERP — ${params.companyName}`,
+    subject: `Emissão de Licença Oficial KIVORA SOFT — ${params.companyName}`,
     html,
   });
 };
@@ -381,7 +381,7 @@ export const testSiteEmailConnection = async (
 
   return sendSiteEmail({
     to: targetEmail,
-    subject: 'Teste de Comunicação do Servidor de E-mails — KIVORA Cloud ERP',
+    subject: 'Teste de Comunicação do Servidor de E-mails — KIVORA SOFT',
     html,
     configOverride,
   });

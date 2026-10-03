@@ -23,9 +23,9 @@ export interface ProductModule {
 const OFFICIAL_MODULES: ProductModule[] = [
   {
     id: '1',
-    code: 'MOD-ERP-CORE',
-    name: 'Kivora ERP Core Multiloja',
-    category: 'ERP Core',
+    code: 'MOD-SOFT-CORE',
+    name: 'Kivora Soft Core Multiloja',
+    category: 'Software Core',
     version: '1.1.0-PROD',
     price_monthly_aoa: 25000,
     active_tenants: 48,
@@ -41,7 +41,7 @@ const OFFICIAL_MODULES: ProductModule[] = [
     id: '2',
     code: 'MOD-AGT-FISCAL',
     name: 'Módulo AGT Faturação & SAFT-AO',
-    category: 'ERP Core',
+    category: 'Software Core',
     version: '1.1.0-PROD',
     price_monthly_aoa: 15000,
     active_tenants: 45,
@@ -128,7 +128,7 @@ export const AdminPlanos: React.FC = () => {
   // Form State
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
-  const [category, setCategory] = useState('ERP Core');
+  const [category, setCategory] = useState('Software Core');
   const [price, setPrice] = useState<number>(20000);
   const [featureText, setFeatureText] = useState('');
 
@@ -144,7 +144,7 @@ export const AdminPlanos: React.FC = () => {
               id: docSnap.id,
               code: d.code || 'MOD-CUSTOM',
               name: d.name || 'Módulo Customizado',
-              category: d.category || 'ERP Core',
+              category: d.category || 'Software Core',
               version: d.version || '1.0.0-PROD',
               price_monthly_aoa: Number(d.price_monthly_aoa) || 20000,
               active_tenants: Number(d.active_tenants) || 0,
@@ -211,15 +211,15 @@ export const AdminPlanos: React.FC = () => {
   return (
     <div className="w-full min-w-0 flex flex-col font-sans pb-12">
       <AdminTopbar
-        title="Catálogo Oficial de Módulos & Produtos Kivora ERP"
+        title="Catálogo Oficial de Módulos & Produtos Kivora Soft"
         subtitle="Configuração de pacotes, módulos setoriais e preços oficiais em Kwanzas (Kz)"
         actions={
           <button
             onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold font-display px-4 py-2.5 rounded-xl shadow-md shadow-brand-600/20 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 bg-[#1746A2] hover:bg-[#1E40AF] text-white text-xs font-bold font-display px-4 py-2.5 rounded-xl shadow-md shadow-blue-900/20 transition-all cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
-            <span>Adicionar Novo Módulo</span>
+            <Plus className="w-4 h-4 text-white" />
+            <span className="text-white font-bold">Adicionar Novo Módulo</span>
           </button>
         }
       />
@@ -245,7 +245,7 @@ export const AdminPlanos: React.FC = () => {
           />
           <StatCard
             label="Certificação Fiscal AGT"
-            value="100% Homologado"
+            value="100% Certificado AGT"
             sub="SAFT-AO e RSA DP 71/25"
             subColor="green"
             icon={<CheckCircle2 className="w-4 h-4" />}
@@ -324,7 +324,7 @@ export const AdminPlanos: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-scaleUp">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-slate-950 font-display tracking-tight">Novo Módulo para o Kivora ERP</h3>
+              <h3 className="text-base font-black text-slate-950 font-display tracking-tight">Novo Módulo para o Kivora Soft</h3>
               <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900 cursor-pointer p-1">
                 <X className="w-4 h-4" />
               </button>
@@ -373,7 +373,7 @@ export const AdminPlanos: React.FC = () => {
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-white font-semibold font-display text-slate-800 focus:border-brand-500 focus:outline-none cursor-pointer"
                 >
-                  <option value="ERP Core">ERP Core</option>
+                  <option value="Software Core">Software Core</option>
                   <option value="POS & Retalho">POS & Retalho</option>
                   <option value="Saúde">Saúde / Farmácia</option>
                   <option value="Restauração">Restauração / Bares</option>
@@ -403,9 +403,9 @@ export const AdminPlanos: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs font-semibold font-display bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/20 transition-all cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold font-display bg-[#1746A2] hover:bg-[#1E40AF] text-white shadow-md shadow-blue-900/20 transition-all cursor-pointer"
                 >
-                  Criar Módulo
+                  <span className="text-white font-bold">Criar Módulo</span>
                 </button>
               </div>
             </form>

@@ -14,7 +14,7 @@ interface WhatsAppButtonProps {
 
 const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
   phoneNumber,
-  message = 'Olá! Gostaria de saber mais sobre o KIVORA ERP.',
+  message = 'Olá! Gostaria de saber mais sobre o KIVORA SOFT.',
 }) => {
   const [visible, setVisible] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);

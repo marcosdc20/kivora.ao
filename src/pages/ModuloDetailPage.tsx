@@ -32,7 +32,7 @@ export const ModuloDetailPage: React.FC<ModuloDetailPageProps> = ({
 
           <div className="space-y-2">
             <span className="text-blue-700 font-bold text-xs uppercase tracking-wider bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200/60 inline-block font-display">
-              {module.badge || 'Módulo KIVORA ERP'}
+              {module.badge || 'Módulo KIVORA SOFT'}
             </span>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
               {module.title}

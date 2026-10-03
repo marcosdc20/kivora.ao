@@ -18,7 +18,8 @@ import { AdminLoja } from './AdminLoja';
 import { AdminFirebaseMonitor } from './AdminFirebaseMonitor';
 import { AdminSection } from './types';
 import { Empresa } from './types';
-import { ArrowLeft, Lock, Menu, LogOut } from 'lucide-react';
+import { KivoraLogo } from '../components/KivoraLogo';
+import { Lock, Menu, ArrowRight, Loader2, UserCheck, Eye, EyeOff } from 'lucide-react';
 
 import { getStoredSession, loginUser, logoutUser, KivoraUserSession } from './services/authService';
 
@@ -32,6 +33,7 @@ interface LoginProps {
 const AdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
+  const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -64,51 +66,121 @@ const AdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-10">
-          <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/30 border border-blue-400/30">
-            <Lock className="w-7 h-7 text-white" strokeWidth={1.75} />
-          </div>
-          <h1 className="text-2xl font-black text-white font-display tracking-tight">KIVORA Admin</h1>
-          <p className="text-slate-400 text-sm mt-1">Acesso Executivo & Gestão Cloud (Firebase)</p>
+    <div className="min-h-screen min-h-[100dvh] w-full bg-white flex flex-col lg:grid lg:grid-cols-12 selection:bg-orange-500 selection:text-white">
+      {/* ── LADO ESQUERDO: IMAGEM LIMPA ── */}
+      <div className="hidden lg:flex lg:col-span-6 xl:col-span-7 relative overflow-hidden bg-[#0B1528] text-white flex-col justify-between p-12 xl:p-16 select-none">
+        <img
+          src="/imagens/imagem para a tela de loguin.webp"
+          alt="Kivora Admin"
+          className="absolute inset-0 w-full h-full object-cover object-center opacity-40 mix-blend-luminosity"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0B1528] via-[#0B1528]/80 to-[#0B1528]/40" />
+
+        <div className="relative z-10">
+          <KivoraLogo variant="white" size="lg" useOfficialImage={true} />
         </div>
 
-        <form onSubmit={handleSubmit} className="surface-card bg-slate-900/95 border-slate-800 rounded-3xl p-8 space-y-5 shadow-2xl">
+        <div className="relative z-10 max-w-lg space-y-3">
+          <h2 className="text-3xl font-extrabold text-white tracking-tight leading-snug font-display">
+            Painel Executivo de Administração
+          </h2>
+          <p className="text-slate-300 text-sm leading-relaxed">
+            Gestão de licenças, auditoria fiscal e controlo global do ecossistema Kivora.
+          </p>
+        </div>
+      </div>
+
+      {/* ── LADO DIREITO: FORMULÁRIO LIMPO ── */}
+      <div className="flex-1 lg:col-span-6 xl:col-span-5 flex flex-col justify-between p-6 sm:p-10 lg:p-14 bg-white">
+        <div className="flex items-center justify-end w-full">
+          <span className="text-xs text-slate-400 font-medium">Acesso Restrito</span>
+        </div>
+
+        <div className="w-full max-w-sm mx-auto my-auto py-8 space-y-6">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider font-display">Email de Administrador</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@kivora.ao"
-              className="w-full bg-slate-800/90 border border-slate-700/80 text-white rounded-xl px-4 py-3 text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
-            />
+            <div className="lg:hidden mb-4">
+              <KivoraLogo variant="dark" size="sm" useOfficialImage={true} />
+            </div>
+            <h1 className="font-display text-2xl font-bold text-slate-900 tracking-tight">
+              Acesso Administrativo
+            </h1>
+            <p className="text-xs text-slate-500">
+              Inicie sessão com as suas credenciais de administrador.
+            </p>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider font-display">Palavra-passe</label>
-            <input
-              type="password"
-              required
-              value={pass}
-              onChange={(e) => setPass(e.target.value)}
-              placeholder="••••••••"
-              className="w-full bg-slate-800/90 border border-slate-700/80 text-white rounded-xl px-4 py-3 text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
-            />
-          </div>
-          {error && (
-            <p className="text-xs text-red-400 bg-red-950/50 border border-red-900 rounded-xl px-3 py-2">{error}</p>
-          )}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-sm py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/30 hover:-translate-y-0.5 disabled:opacity-50 font-display cursor-pointer"
-          >
-            {loading ? 'A autenticar no Firebase...' : 'Entrar no Painel Admin'}
-          </button>
-        </form>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-700">
+                Email
+              </label>
+              <div className="relative">
+                <UserCheck className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="email"
+                  required
+                  placeholder="admin@kivora.ao"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-lg text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:border-[#FF6500] focus:ring-1 focus:ring-[#FF6500] outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-700">
+                Palavra-passe
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••"
+                  value={pass}
+                  onChange={(e) => setPass(e.target.value)}
+                  className="w-full pl-10 pr-10 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-lg text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:border-[#FF6500] focus:ring-1 focus:ring-[#FF6500] outline-none transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer transition-colors"
+                  aria-label={showPass ? 'Ocultar' : 'Mostrar'}
+                >
+                  {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 font-medium">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2.5 px-4 bg-[#FF6500] hover:bg-[#EB5B00] text-white font-semibold text-xs sm:text-sm rounded-lg flex items-center justify-center gap-2 transition-colors active:scale-[0.99] cursor-pointer disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>A entrar...</span>
+                </>
+              ) : (
+                <>
+                  <span>Entrar no Painel</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+
+        <div className="text-center text-[11px] text-slate-400">
+          KIVORA SOFT • Gestão Administrativa
+        </div>
       </div>
     </div>
   );
@@ -275,7 +347,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
             className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileSidebarOpen(false)}
           />
-          <div className="relative w-72 max-w-[85vw] h-full z-10 shadow-2xl">
+          <div className="relative w-64 max-w-[85vw] h-full z-10 shadow-2xl">
             <AdminSidebar
               activeSection={activeSection}
               onNavigate={navigate}
@@ -290,69 +362,28 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onExitAdmin }) => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden w-full min-w-0 bg-slate-50">
-        {/* Modern Unified SaaS Topbar Header */}
-        <header className="h-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/90 flex items-center justify-between shrink-0 shadow-2xs z-20 sticky top-0">
+        {/* Topbar mínima: contexto (breadcrumb) + certificação AGT uma única vez */}
+        <header className="h-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200 flex items-center justify-between gap-3 shrink-0 z-20 sticky top-0">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer shrink-0"
-              title="Abrir Menu Lateral"
+              className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+              aria-label="Abrir menu"
             >
               <Menu className="w-5 h-5" />
             </button>
 
-            {/* Breadcrumb Navigation */}
-            <div className="flex items-center gap-2 text-xs truncate">
-              <span className="text-slate-400 font-semibold hidden md:inline">Kivora ERP</span>
-              <span className="text-slate-300 hidden md:inline">/</span>
-              <span className="text-slate-500 font-medium hidden sm:inline">{SECTION_METAS[activeSection]?.category || 'Administração'}</span>
+            <div className="flex items-center gap-2 text-sm min-w-0">
+              <span className="text-slate-400 hidden sm:inline">{SECTION_METAS[activeSection]?.category || 'Administração'}</span>
               <span className="text-slate-300 hidden sm:inline">/</span>
-              <span className="text-slate-900 font-black truncate">{SECTION_METAS[activeSection]?.title || 'Painel'}</span>
-            </div>
-
-            {/* AGT Certification Live Pill */}
-            <div className="hidden xl:flex items-center gap-1.5 ml-2 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Homologação AGT FE/387/AGT/2026</span>
+              <span className="text-slate-900 font-semibold truncate">{SECTION_METAS[activeSection]?.title || 'Painel'}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Voltar ao Site Público */}
-            {onExitAdmin && (
-              <button
-                onClick={onExitAdmin}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all border border-slate-200/80 cursor-pointer shadow-2xs"
-                title="Acessar o site público Kivora"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Ver Site Público</span>
-                <span className="sm:hidden">Site</span>
-              </button>
-            )}
-
-            {/* User Profile Pill & Logout */}
-            <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xs flex items-center justify-center shadow-xs">
-                {session?.email ? session.email.slice(0, 2).toUpperCase() : 'AD'}
-              </div>
-
-              <div className="hidden md:flex flex-col text-left leading-tight">
-                <span className="text-xs font-bold text-slate-800 truncate max-w-[150px]">
-                  {session?.email || 'admin@kivora.ao'}
-                </span>
-                <span className="text-[10px] font-bold text-blue-600">SuperAdmin</span>
-              </div>
-
-              <button
-                onClick={handleLogout}
-                className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer ml-1"
-                title="Terminar Sessão Segura"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+          <span className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-[11px] font-medium text-slate-500 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            Certificado AGT FE/387/AGT/2026
+          </span>
         </header>
 
         {/* Section Main Scroll Container */}

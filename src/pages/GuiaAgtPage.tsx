@@ -219,7 +219,7 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
               Demonstrador de Faturação Eletrónica com QR Code e Hash AGT
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Experimente abaixo o motor fiscal do KIVORA ERP. Alterne entre setores comerciais e veja o cálculo de IVA, o QR Code de autenticação e a assinatura inviolável em ação.
+              Experimente abaixo o motor fiscal do KIVORA SOFT. Alterne entre setores comerciais e veja o cálculo de IVA, o QR Code de autenticação e a assinatura inviolável em ação.
             </p>
           </div>
 
@@ -235,7 +235,7 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
               Enquadramento nos Regimes de IVA em Angola
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              O KIVORA ERP suporta todos os regimes tributários previstos no Código do IVA angolano, aplicando automaticamente as taxas e isenções legais.
+              O KIVORA SOFT suporta todos os regimes tributários previstos no Código do IVA angolano, aplicando automaticamente as taxas e isenções legais.
             </p>
           </div>
 
@@ -389,13 +389,13 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800/80 text-xs text-slate-300 relative z-10">
             <p>
-              <strong className="text-white">Recomendação KIVORA:</strong> Com o KIVORA ERP instalado, a sua empresa cumpre 100% dos requisitos de forma nativa e automática desde o primeiro dia.
+              <strong className="text-white">Recomendação KIVORA:</strong> Com o KIVORA SOFT instalado, a sua empresa cumpre 100% dos requisitos de forma nativa e automática desde o primeiro dia.
             </p>
             <button
               onClick={() => onOpenDemoModal('Instalação Certificada AGT')}
               className="btn-cta text-xs py-3 px-6 shrink-0 cursor-pointer"
             >
-              Garantir Conformidade com KIVORA ERP
+              Garantir Conformidade com KIVORA SOFT
             </button>
           </div>
         </section>

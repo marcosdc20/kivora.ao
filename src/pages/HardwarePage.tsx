@@ -175,7 +175,7 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
       <PageHero
         image={posImg}
         tag="Periféricos & Equipamentos"
-        title="Equipamentos Compatíveis com KIVORA ERP"
+        title="Equipamentos Compatíveis com KIVORA SOFT"
         sub="Configuração direta de impressoras de talões, leitores de código de barras, gavetas e balanças para garantir um checkout rápido e sem falhas."
       />
 
@@ -191,7 +191,7 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
             </div>
             <h2 className="text-2xl sm:text-3xl font-semibold font-display text-white">Já tem equipamentos na sua loja?</h2>
             <p className="text-slate-300 text-xs sm:text-sm max-w-xl leading-relaxed font-normal">
-              O Kivora ERP suporta os drivers padrão do Windows (ESC/POS, OPOS e COM Serial), sendo compatível com <strong>mais de 95% dos periféricos de ponto de venda</strong> existentes em Angola.
+              O Kivora Soft suporta os drivers padrão do Windows (ESC/POS, OPOS e COM Serial), sendo compatível com <strong>mais de 95% dos periféricos de ponto de venda</strong> existentes em Angola.
             </p>
           </div>
 
@@ -268,7 +268,7 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
               </p>
             </div>
 
-            {/* Grelha de Modelos Homologados */}
+            {/* Grelha de Modelos Compatíveis */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {currentCategory.models.map((model, idx) => (
                 <div
@@ -362,7 +362,7 @@ export const HardwarePage: React.FC<HardwarePageProps> = ({ onOpenDemoModal, onN
               Pronto para configurar o seu posto de venda?
             </h3>
             <p className="text-slate-300 text-xs sm:text-sm max-w-xl">
-              Descarregue o KIVORA ERP e teste a impressão e os leitores no seu próprio computador gratuitamente.
+              Descarregue o KIVORA SOFT e teste a impressão e os leitores no seu próprio computador gratuitamente.
             </p>
           </div>
 

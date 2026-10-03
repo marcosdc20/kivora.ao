@@ -97,7 +97,7 @@ export const AdminLoja: React.FC = () => {
       rating: 5.0,
       reviewsCount: 1,
       salesCount: 0,
-      shortDesc: 'Equipamento de alta robustez homologado para o KIVORA ERP.',
+      shortDesc: 'Equipamento de alta robustez compatível com o KIVORA SOFT.',
       specsTable: [
         { label: 'Garantia', value: '12 Meses' },
         { label: 'Compatibilidade', value: 'Windows 10 / 11 e AGT' },
@@ -286,10 +286,10 @@ export const AdminLoja: React.FC = () => {
           {activeTab === 'produtos' && (
             <button
               onClick={handleOpenNewProduct}
-              className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold font-display shadow-md shadow-brand-600/20 transition-all flex items-center gap-2 cursor-pointer"
+              className="px-4 py-2.5 bg-[#1746A2] hover:bg-[#1E40AF] text-white rounded-xl text-xs font-bold font-display shadow-md shadow-blue-900/20 transition-all flex items-center gap-2 cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
-              Cadastrar Produto / Serviço
+              <Plus className="w-4 h-4 text-white" />
+              <span className="text-white font-bold">Cadastrar Produto / Serviço</span>
             </button>
           )}
         </div>
@@ -985,10 +985,10 @@ export const AdminLoja: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold font-display rounded-xl text-xs shadow-md shadow-brand-600/20 transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-6 py-2.5 bg-[#1746A2] hover:bg-[#1E40AF] text-white font-bold font-display rounded-xl text-xs shadow-md shadow-blue-900/20 transition-all flex items-center gap-2 cursor-pointer"
                 >
-                  <Save className="w-4 h-4" />
-                  Gravar Produto no Firebase
+                  <Save className="w-4 h-4 text-white" />
+                  <span className="text-white font-bold">Gravar Produto no Firebase</span>
                 </button>
               </div>
 

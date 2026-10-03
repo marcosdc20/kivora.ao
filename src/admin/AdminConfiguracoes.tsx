@@ -5,7 +5,7 @@ import {
   X, GitBranch, CreditCard, Building2, ExternalLink, Plus, Tag,
   TrendingUp, Award, Briefcase, MapPin, Trash2, Monitor,
   Bell, Megaphone, Video, Youtube, Mail, Send, CheckCircle2, AlertTriangle,
-  Bot, Sparkles, Eye, EyeOff, Key
+  Bot, Sparkles, Eye, EyeOff, Key, Image as ImageIcon, Upload
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -251,6 +251,68 @@ export const AdminConfiguracoes: React.FC = () => {
     setSettings(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleImageFileLoad = (fieldKey: keyof SystemCompanySettings, file: File) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      notify.warning('Ficheiro Grande', 'A imagem tem mais de 2MB. O carregamento pode ser mais lento; considere comprimir.');
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      if (result) {
+        handleChange(fieldKey, result);
+        notify.success('Imagem Carregada do PC', 'Imagem importada com sucesso do seu computador. Clique em "Guardar" para publicar.');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const renderImageField = (
+    label: string,
+    fieldKey: keyof SystemCompanySettings,
+    placeholder: string,
+    hint: string
+  ) => {
+    const val = (settings[fieldKey] as string) || '';
+    return (
+      <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider block truncate">
+            {label}
+          </label>
+          <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-[10px] font-semibold transition-colors cursor-pointer shadow-2xs shrink-0">
+            <Upload className="w-3 h-3 text-[#FF6500]" />
+            <span>Carregar do PC</span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleImageFileLoad(fieldKey, file);
+              }}
+            />
+          </label>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={val}
+            onChange={(e) => handleChange(fieldKey, e.target.value)}
+            placeholder={placeholder}
+            className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-mono-num text-xs text-slate-900 focus:border-slate-900 outline-none truncate"
+          />
+          {val && (
+            <div className="w-9 h-9 rounded-lg border border-slate-200 bg-white overflow-hidden shrink-0 flex items-center justify-center p-0.5">
+              <img src={val} alt="Preview" className="w-full h-full object-contain" />
+            </div>
+          )}
+        </div>
+        <p className="text-[10px] text-slate-500 font-sans">{hint}</p>
+      </div>
+    );
+  };
+
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -288,7 +350,7 @@ export const AdminConfiguracoes: React.FC = () => {
 
       const backupData = {
         version: '1.0',
-        system: 'KIVORA ERP & ADMIN CLOUD',
+        system: 'KIVORA SOFT & ADMIN CLOUD',
         timestamp: new Date().toISOString(),
         collections: {
           licenses,
@@ -580,7 +642,7 @@ export const AdminConfiguracoes: React.FC = () => {
             { id: 'emails', label: 'Serviço de E-mails & API', icon: <Mail className="w-4 h-4" /> },
             { id: 'precos', label: 'Planos & Preços', icon: <Tag className="w-4 h-4" /> },
             { id: 'videochamada', label: 'Videochamada & Tarifas/Min', icon: <Video className="w-4 h-4" /> },
-            { id: 'videos', label: 'Vídeos YouTube', icon: <Video className="w-4 h-4" /> },
+            { id: 'videos', label: 'Imagens, Vídeos & Mídias', icon: <Video className="w-4 h-4 text-[#FF6500]" /> },
             { id: 'notificacoes', label: 'Notificações & Webhook', icon: <Bell className="w-4 h-4" /> },
             { id: 'comunicados', label: 'Avisos & Comunicados', icon: <Megaphone className="w-4 h-4" /> },
             { id: 'metricas', label: 'Métricas & Números', icon: <TrendingUp className="w-4 h-4" /> },
@@ -664,7 +726,7 @@ export const AdminConfiguracoes: React.FC = () => {
                   value={settings.fullName}
                   onChange={(e) => handleChange('fullName', e.target.value)}
                   className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 transition-all outline-none"
-                  placeholder="Kivora Desktop ERP & POS"
+                  placeholder="Kivora Soft Desktop & POS"
                 />
               </div>
 
@@ -706,7 +768,7 @@ export const AdminConfiguracoes: React.FC = () => {
                     <h3 className="text-base font-display font-bold text-slate-950 tracking-tight">Assistente Virtual de IA (Website 24/7)</h3>
                   </div>
                   <p className="text-xs text-slate-500 font-sans mt-1">
-                    Configure a chave de API de qualquer provedor de IA para atender visitantes com conhecimento certificado sobre o KIVORA ERP.
+                    Configure a chave de API de qualquer provedor de IA para atender visitantes com conhecimento certificado sobre o KIVORA SOFT.
                   </p>
                 </div>
                 <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 text-xs font-display font-semibold">
@@ -954,7 +1016,7 @@ export const AdminConfiguracoes: React.FC = () => {
                         ...prev,
                         provider: 'gmail',
                         senderEmail: 'kivora.angola@gmail.com',
-                        senderName: 'KIVORA Cloud ERP',
+                        senderName: 'KIVORA SOFT',
                         smtpHost: 'smtp.gmail.com',
                         smtpPort: 465,
                         smtpUser: 'kivora.angola@gmail.com',
@@ -976,7 +1038,7 @@ export const AdminConfiguracoes: React.FC = () => {
                         ...prev,
                         provider: 'resend',
                         senderEmail: prev.senderEmail || 'kivora.angola@gmail.com',
-                        senderName: prev.senderName || 'KIVORA ERP',
+                        senderName: prev.senderName || 'KIVORA SOFT',
                       }));
                       notify.info('Predefinição Resend API selecionada.');
                     }}
@@ -994,7 +1056,7 @@ export const AdminConfiguracoes: React.FC = () => {
                       setEmailConfig(prev => ({
                         ...prev,
                         provider: 'sendgrid',
-                        senderName: prev.senderName || 'KIVORA ERP',
+                        senderName: prev.senderName || 'KIVORA SOFT',
                       }));
                       notify.info('Predefinição SendGrid selecionada.');
                     }}
@@ -1072,8 +1134,8 @@ export const AdminConfiguracoes: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="KIVORA Cloud ERP"
-                    value={emailConfig.senderName || 'KIVORA Cloud ERP'}
+                    placeholder="KIVORA SOFT"
+                    value={emailConfig.senderName || 'KIVORA SOFT'}
                     onChange={(e) => setEmailConfig(prev => ({ ...prev, senderName: e.target.value }))}
                     className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-slate-400 focus:ring-2 focus:ring-slate-950/5 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 outline-none"
                   />
@@ -1749,10 +1811,143 @@ export const AdminConfiguracoes: React.FC = () => {
           </form>
         )}
 
-        {/* TAB: VÍDEOS & MULTIMÉDIA DO YOUTUBE */}
+        {/* TAB: IMAGENS, VÍDEOS & MULTIMÉDIA */}
         {activeTab === 'videos' && (
           <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 sm:space-y-8">
+            
+            {/* SECÇÃO 1: IMAGENS DAS PÁGINAS & MÓDULOS */}
             <div className="border-b border-slate-200/70 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-base font-display font-bold text-slate-900 flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-[#FF6500]" />
+                  <span>Imagens do Site Público & Módulos Oficiais</span>
+                </h3>
+                <p className="text-xs font-display text-slate-500 mt-0.5">
+                  Substitua caminhos locais (ex: /imagens/pc-descktop-kivora.webp) ou insira URLs externas para todas as páginas e menus
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs font-display">
+              {renderImageField(
+                '1. Imagem Principal do Topo (Hero Desktop)',
+                'heroImageUrl',
+                '/imagens/pc-descktop-kivora.webp',
+                'Exibida no topo da página inicial com os postos de trabalho'
+              )}
+              {renderImageField(
+                '2. Imagem dos 4 Passos de Ativação',
+                'stepsImageUrl',
+                '/imagens/jovem-empresaria-com-tablet.webp',
+                'Ilustração da secção de passos de implementação e download'
+              )}
+              {renderImageField(
+                '3. Imagem "Sobre a Kivora Soft" (Equipa / Consultores)',
+                'aboutImageUrl',
+                '/imagens/executivos-kivora.jpg',
+                'Fotografia institucional exibida na secção Sobre a Kivora'
+              )}
+              {renderImageField(
+                '4. Imagem Módulo POS (Frente de Caixa)',
+                'modulePosImageUrl',
+                '/imagens/pc-pos-kivora.webp',
+                'Captura do ecrã de vendas rápidas e touch'
+              )}
+              {renderImageField(
+                '5. Imagem Módulo Faturação AGT',
+                'moduleFaturacaoImageUrl',
+                '/imagens/pc-laptop-kivora.webp',
+                'Captura do ecrã de emissão de faturas e certificados'
+              )}
+              {renderImageField(
+                '6. Imagem Módulo Restauração & Mesas',
+                'moduleRestauranteImageUrl',
+                '/imagens/pc-descktop-kivora.webp',
+                'Captura do ecrã de gestão de salas e pedidos'
+              )}
+              {renderImageField(
+                '7. Imagem Módulo Oficina Mecânica & Stand',
+                'moduleOficinaImageUrl',
+                '/imagens/pc-descktop-kivora.webp',
+                'Captura do ecrã de ordens de serviço de oficina'
+              )}
+              {renderImageField(
+                '8. Imagem Módulo Lavandaria Têxtil',
+                'moduleLavandariaImageUrl',
+                '/imagens/pc-laptop-kivora.webp',
+                'Captura do ecrã do balcão e fases de lavagem'
+              )}
+              {renderImageField(
+                '9. Imagem Módulo Gestão de Stocks & Armazéns',
+                'moduleStockImageUrl',
+                '/imagens/pos_touch_terminal.webp',
+                'Captura do ecrã de inventário e armazéns'
+              )}
+            </div>
+
+            {/* SECÇÃO 2: MÍDIAS DOS PAINÉIS DE PARCEIROS E CLIENTES */}
+            <div className="border-b border-slate-200/70 pb-4 pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-base font-display font-bold text-slate-900 flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                  <span>Mídias & Vídeos dos Portais de Parceiros e Clientes</span>
+                </h3>
+                <p className="text-xs font-display text-slate-500 mt-0.5">
+                  Vídeos de capacitação técnica e banners informativos exibidos dentro dos painéis internos
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs font-display">
+              {/* Parceiro Vídeo */}
+              <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider block">
+                  Vídeo de Onboarding (Portal do Parceiro)
+                </label>
+                <input
+                  type="url"
+                  value={settings.partnerPortalVideoUrl || ''}
+                  onChange={(e) => handleChange('partnerPortalVideoUrl', e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-mono-num text-slate-900 focus:border-slate-900 outline-none"
+                />
+                <p className="text-[10px] text-slate-500 font-sans">Vídeo de capacitação sobre emissão de licenças e carteira virtual</p>
+              </div>
+
+              {/* Parceiro Banner */}
+              {renderImageField(
+                'Banner Promocional / Avisos (Portal do Parceiro)',
+                'partnerPortalBannerUrl',
+                '/imagens/parceiros-kivora.webp',
+                'Banner em destaque exibido no topo do painel do parceiro'
+              )}
+
+              {/* Cliente Vídeo */}
+              <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider block">
+                  Vídeo de Primeiros Passos (Portal do Cliente)
+                </label>
+                <input
+                  type="url"
+                  value={settings.clientPortalVideoUrl || ''}
+                  onChange={(e) => handleChange('clientPortalVideoUrl', e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-mono-num text-slate-900 focus:border-slate-900 outline-none"
+                />
+                <p className="text-[10px] text-slate-500 font-sans">Tutorial de ativação da licença e configuração inicial do software</p>
+              </div>
+
+              {/* Cliente Banner */}
+              {renderImageField(
+                'Banner Informativo (Portal do Cliente)',
+                'clientPortalBannerUrl',
+                '/imagens/pacote.webp',
+                'Banner de suporte e novidades exibido no painel do cliente'
+              )}
+            </div>
+
+            {/* SECÇÃO 3: VÍDEOS DO YOUTUBE NO SITE OFICIAL */}
+            <div className="border-b border-slate-200/70 pb-4 pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="text-base font-display font-bold text-slate-900 flex items-center gap-2">
                   <Youtube className="w-5 h-5 text-red-600" />
@@ -1805,7 +2000,7 @@ export const AdminConfiguracoes: React.FC = () => {
                       value={settings.videoHomeTitle || ''}
                       onChange={(e) => handleChange('videoHomeTitle', e.target.value)}
                       className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 font-display font-semibold text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
-                      placeholder="Conheça o KIVORA ERP em Ação"
+                      placeholder="Conheça o KIVORA SOFT em Ação"
                     />
                   </div>
 
@@ -2082,7 +2277,7 @@ export const AdminConfiguracoes: React.FC = () => {
                   value={settings.whatsappDefaultMessage || ''}
                   onChange={(e) => handleChange('whatsappDefaultMessage', e.target.value)}
                   className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-medium text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
-                  placeholder="Olá! Gostaria de agendar uma demonstração do KIVORA ERP para a minha empresa."
+                  placeholder="Olá! Gostaria de agendar uma demonstração do KIVORA SOFT para a minha empresa."
                 />
                 <p className="text-[11px] text-slate-400">Texto pré-preenchido quando o visitante clica no botão de WhatsApp do site.</p>
               </div>
@@ -2500,7 +2695,7 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Auditoria & Homologação</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Auditoria & Certificação AGT</label>
                 <input
                   type="text"
                   value={settings.investorInfo?.auditedBy || DEFAULT_INVESTOR_SETTINGS.auditedBy}
@@ -3175,7 +3370,7 @@ export const AdminConfiguracoes: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs font-display">
               <div className="space-y-1.5 md:col-span-2">
-                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Selo de Homologação / Certificado AGT</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Selo de Certificação AGT</label>
                 <input
                   type="text"
                   value={settings.agtCertificate}

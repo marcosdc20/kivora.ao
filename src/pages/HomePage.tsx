@@ -218,7 +218,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="lg:col-span-6 relative">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200">
               <img
-                src={executivosImg}
+                src={settings.aboutImageUrl || executivosImg}
                 alt="Equipa e Consultores Kivora Soft"
                 className="w-full h-[380px] sm:h-[460px] object-cover"
               />
@@ -363,7 +363,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Faturação Eletrónica AGT
               </h3>
               <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-normal mb-4">
-                Emissão homologada de Faturas (FT), Faturas-Recibo (FR), Notas de Crédito (NC) e Débito (ND) com chave RS256, QR Code fiscal e ficheiro SAF-T AO.
+                Emissão certificada de Faturas (FT), Faturas-Recibo (FR), Notas de Crédito (NC) e Débito (ND) com chave RS256, QR Code fiscal e ficheiro SAF-T AO.
               </p>
             </div>
             <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-bold text-[#FF6500] gap-1 group-hover:gap-2 transition-all">
@@ -521,7 +521,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         {/* Imagem de Fundo com Overlay Escuro Gradiente */}
         <div className="absolute inset-0 z-0">
           <img
-            src={supermercadoImg}
+            src={settings.stepsImageUrl || settings.heroImageUrl || supermercadoImg}
             alt="Operação Comercial KIVORA"
             className="w-full h-full object-cover opacity-20 filter saturate-50"
           />
@@ -591,7 +591,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Demonstração
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Apresentação prática e sem compromisso das ferramentas do ERP, alinhada com as necessidades específicas do seu negócio.
+                Apresentação prática e sem compromisso das ferramentas do KIVORA SOFT, alinhada com as necessidades específicas do seu negócio.
               </p>
             </div>
 
@@ -680,7 +680,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               A Escolha de Líderes em Angola
             </h2>
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-              Números reais de quem confia na robustez do KIVORA ERP para faturar com tranquilidade e sem interrupções.
+              Números reais de quem confia na robustez do KIVORA SOFT para faturar com tranquilidade e sem interrupções.
             </p>
           </div>
 
@@ -1106,7 +1106,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          10. HARDWARE & EQUIPAMENTOS POS HOMOLOGADOS
+          10. HARDWARE & EQUIPAMENTOS POS COMPATÍVEIS
           ══════════════════════════════════════════════════════════════════ */}
       <section className="py-24 sm:py-32 bg-slate-50/70 border-t border-slate-200/80 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
@@ -1116,7 +1116,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
-            Periféricos POS Homologados para o Balcão
+            Periféricos POS Recomendados para o Balcão
           </h2>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
             Fornecemos e configuramos periféricos comerciais testados para suportar o ritmo diário e intenso de caixas de retalho e restauração.
@@ -1271,7 +1271,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               className="bg-slate-950 hover:bg-slate-900 active:scale-95 text-white font-bold text-sm px-8 py-4 rounded-full shadow-2xl flex items-center gap-2.5 cursor-pointer transition-all"
             >
               <Download className="w-5 h-5 text-orange-400" />
-              <span>Baixar KIVORA ERP Setup</span>
+              <span>Baixar KIVORA SOFT Setup</span>
             </button>
             <button
               onClick={() => onOpenDemoModal('Demonstração VIP')}

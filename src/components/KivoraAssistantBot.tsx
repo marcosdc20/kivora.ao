@@ -1,6 +1,6 @@
 /**
  * KivoraAssistantBot.tsx
- * Atendimento Virtual & Suporte Oficial KIVORA ERP
+ * Atendimento Virtual & Suporte Oficial KIVORA SOFT
  * Flutuante no canto inferior direito do site, responde a dúvidas de visitantes 24/7
  * sobre AGT, modo 100% offline, planos, preços, parceiros e demonstrações.
  */
@@ -69,7 +69,7 @@ export const KivoraAssistantBot: React.FC<KivoraAssistantBotProps> = ({
           role: 'assistant',
           content:
             config.welcomeMessage ||
-            'Olá! Bem-vindo ao suporte e atendimento oficial do KIVORA ERP. Como podemos ajudar a sua empresa hoje? Pode consultar sobre certificação AGT (Decreto 71/25), funcionamento 100% offline em rede local (LAN), planos de preços ou o nosso programa oficial de parceiros.',
+            'Olá! Bem-vindo ao suporte e atendimento oficial do KIVORA SOFT. Como podemos ajudar a sua empresa hoje? Pode consultar sobre certificação AGT (Decreto 71/25), funcionamento 100% offline em rede local (LAN), planos de preços ou o nosso programa oficial de parceiros.',
           timestamp: Date.now(),
         },
       ]);
@@ -353,7 +353,7 @@ export const KivoraAssistantBot: React.FC<KivoraAssistantBotProps> = ({
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Escreva a sua dúvida sobre o KIVORA ERP..."
+              placeholder="Escreva a sua dúvida sobre o KIVORA SOFT..."
               disabled={isTyping}
               className="flex-1 bg-slate-100 text-slate-900 placeholder:text-slate-500 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:bg-white border border-slate-300 focus:border-blue-600 transition-all font-medium"
             />

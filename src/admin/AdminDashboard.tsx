@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import {
-  TrendingUp, Shield, CheckCircle2, AlertCircle,
-  Ban, RotateCcw, Key, Users, Wallet, TrendingDown,
+  TrendingUp, Shield, AlertCircle,
+  RotateCcw, Key, Users,
   UserCheck, ArrowRight, PhoneCall, Lock
 } from 'lucide-react';
 import { useLicenses } from './hooks/useFirebase';
@@ -13,7 +13,6 @@ import {
 } from 'recharts';
 import { getPlanLabel, formatLicenseDate } from './services/licenseService';
 import { subscribeAllDebts, PartnerDebtEntry } from './services/partnerDebtService';
-import { AdminTopbar } from './AdminComponents';
 import { db } from '../lib/firebase';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { AdminSection } from './types';
@@ -138,44 +137,42 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
   }
 
   return (
-    <div className="w-full min-w-0 flex flex-col font-sans pb-12">
-      <AdminTopbar
-        title="Painel de Gestão & Controlo"
-        subtitle="Métricas em tempo real de licenças, clientes, parceiros e faturamento"
-        actions={
-          <button
-            onClick={() => refresh()}
-            disabled={loading}
-            className="bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer"
-          >
-            <RotateCcw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : ''}`} />
-            <span>Atualizar Dados</span>
-          </button>
-        }
-      />
-
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 flex flex-col min-w-0">
+    <div className="w-full min-w-0 flex flex-col font-sans p-4 sm:p-6 lg:p-8 space-y-6 pb-12">
+      {/* Cabeçalho da Secção — Limpo, único e sem sobreposição */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Visão Geral</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Indicadores em tempo real de licenças, faturação e parceiros.</p>
+        </div>
+        <button
+          onClick={() => refresh()}
+          disabled={loading}
+          className="self-start sm:self-auto bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold px-3.5 py-2 rounded-lg flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
+        >
+          <RotateCcw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : ''}`} />
+          <span>Atualizar Dados</span>
+        </button>
+      </div>
 
       {error && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
           <div>
-            <p className="font-bold flex items-center gap-1.5 text-amber-900">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+            <p className="font-semibold text-amber-900">
               Aviso de Sincronização com o Firestore:
             </p>
-            <p className="text-[11px] text-amber-800 mt-1">{error}</p>
+            <p className="text-[11px] text-amber-800 mt-0.5">{error}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setModalAuth(true)}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-sm transition-all flex items-center gap-1.5"
+              className="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg shadow-xs transition-colors flex items-center gap-1.5"
             >
               <Lock className="w-3.5 h-3.5" />
               <span>Autenticar Firebase</span>
             </button>
             <button
               onClick={() => refresh()}
-              className="bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold text-xs px-3 py-2 rounded-xl"
+              className="bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 font-semibold text-xs px-3 py-2 rounded-lg transition-colors"
             >
               Recarregar
             </button>
@@ -183,180 +180,121 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
         </div>
       )}
 
-      {/* Top Metrics Row — Valores Reais */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="surface-card p-5 space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
-              <TrendingUp className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-lg font-black text-slate-900 font-display font-mono-num truncate">{fmt(revenueAoa)} Kz</div>
-              <div className="text-[11px] font-bold text-slate-400">Faturação Ativa</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="surface-card p-5 space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shrink-0">
-              <Shield className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-lg font-black text-slate-900 font-display font-mono-num">{licenses.length}</div>
-              <div className="text-[11px] font-bold text-slate-400">Total de Licenças</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="surface-card p-5 space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
-              <CheckCircle2 className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-lg font-black text-emerald-600 font-display font-mono-num">{activeLicenses.length}</div>
-              <div className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
-                Ativas Online
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="surface-card p-5 space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100 shrink-0">
-              <AlertCircle className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-lg font-black text-amber-600 font-display font-mono-num">{expiredLicenses.length}</div>
-              <div className="text-[11px] font-bold text-slate-400">Expiradas</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="surface-card p-5 space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center border border-red-100 shrink-0">
-              <Ban className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-lg font-black text-red-600 font-display font-mono-num">{revokedLicenses.length}</div>
-              <div className="text-[11px] font-bold text-slate-400">Revogadas</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Plan Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="surface-card p-5 flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center font-black text-sm shrink-0">
-            M
+      {/* 4 Cards de Métricas Principais — Simples, Limpos e Organizados */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Faturação Ativa */}
+        <div className="p-5 rounded-xl border border-slate-200 bg-white flex flex-col justify-between space-y-3 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-500">Faturação Ativa</span>
+            <TrendingUp className="w-4 h-4 text-emerald-600" />
           </div>
           <div>
-            <div className="text-base font-black text-slate-900 font-display font-mono-num">{monthlyPlanCount} Licenças</div>
-            <div className="text-[11px] font-bold text-slate-400">Plano Mensal (30 Dias)</div>
-          </div>
-        </div>
-
-        <div className="surface-card p-5 flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 border border-purple-100 flex items-center justify-center font-black text-sm shrink-0">
-            A
-          </div>
-          <div>
-            <div className="text-base font-black text-slate-900 font-display font-mono-num">{annualPlanCount} Licenças</div>
-            <div className="text-[11px] font-bold text-slate-400">Plano Anual (365 Dias)</div>
-          </div>
-        </div>
-
-        <div className="surface-card p-5 flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-black text-sm shrink-0">
-            ∞
-          </div>
-          <div>
-            <div className="text-base font-black text-slate-900 font-display font-mono-num">{lifetimePlanCount} Licenças</div>
-            <div className="text-[11px] font-bold text-slate-400">Plano Vitalício</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Partner Network & Debt Metrics */}
-      <div className="bg-[#0B192C] p-6 rounded-3xl text-white shadow-card border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-        <div className="flex items-center gap-4">
-          <div className="w-11 h-11 rounded-2xl bg-blue-500/20 border border-blue-400/30 text-blue-400 flex items-center justify-center shrink-0">
-            <Users className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-xs font-black uppercase tracking-wider text-blue-400 font-display">Rede de Parceiros & Revenda</div>
-            <div className="text-sm text-slate-300 mt-0.5">
-              <strong className="text-white font-bold font-mono-num">{partnerDebts.length}</strong> licenças emitidas por parceiros no portal
+            <div className="text-2xl font-bold text-slate-900 font-mono-num tracking-tight truncate">
+              {fmt(revenueAoa)} Kz
             </div>
+            <span className="text-xs text-slate-400 mt-1 block">Total em licenças ativas</span>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-4 sm:gap-8 border-t sm:border-t-0 sm:border-l border-slate-800 pt-3 sm:pt-0 sm:pl-8 w-full sm:w-auto justify-between sm:justify-end">
+        {/* Licenças */}
+        <div className="p-5 rounded-xl border border-slate-200 bg-white flex flex-col justify-between space-y-3 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-500">Licenças</span>
+            <Shield className="w-4 h-4 text-blue-600" />
+          </div>
           <div>
-            <span className="text-[10px] uppercase font-bold text-slate-400 block">Dívidas de Parceiros a Receber</span>
-            <span className="text-base font-black font-mono-num text-amber-400 flex items-center gap-1">
-              <TrendingDown className="w-4 h-4 text-amber-400" />
-              {fmt(totalPartnerDebtPending)} Kz
+            <div className="text-2xl font-bold text-slate-900 font-mono-num tracking-tight">
+              {activeLicenses.length} <span className="text-sm font-normal text-slate-400">/ {licenses.length}</span>
+            </div>
+            <span className="text-xs text-slate-400 mt-1 block">
+              {activeLicenses.length} ativas • {expiredLicenses.length + revokedLicenses.length} inativas
             </span>
           </div>
+        </div>
+
+        {/* Rede de Parceiros */}
+        <div className="p-5 rounded-xl border border-slate-200 bg-white flex flex-col justify-between space-y-3 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-500">Rede de Parceiros</span>
+            <Users className="w-4 h-4 text-indigo-600" />
+          </div>
           <div>
-            <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Recebido de Parceiros</span>
-            <span className="text-base font-black font-mono-num text-emerald-400 flex items-center gap-1">
-              <Wallet className="w-4 h-4 text-emerald-400" />
-              {fmt(totalPartnerDebtPaid)} Kz
+            <div className="text-2xl font-bold text-slate-900 font-mono-num tracking-tight">
+              {partnerDebts.length} <span className="text-sm font-normal text-slate-400">licenças</span>
+            </div>
+            <span className="text-xs text-slate-400 mt-1 block">
+              {totalPartnerDebtPending > 0 ? (
+                <span className="text-amber-600 font-medium">{fmt(totalPartnerDebtPending)} Kz a receber</span>
+              ) : (
+                <span className="text-emerald-600 font-medium">{fmt(totalPartnerDebtPaid)} Kz recebidos</span>
+              )}
+            </span>
+          </div>
+        </div>
+
+        {/* Pendências de Ação */}
+        <div className="p-5 rounded-xl border border-slate-200 bg-white flex flex-col justify-between space-y-3 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-500">Pendências de Ação</span>
+            <AlertCircle className="w-4 h-4 text-amber-600" />
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-slate-900 font-mono-num tracking-tight">
+              {pendingCandidaturasCount + pendingDemoLeadsCount}
+            </div>
+            <span className="text-xs text-slate-400 mt-1 block">
+              {pendingCandidaturasCount + pendingDemoLeadsCount === 0
+                ? 'Nenhuma pendência'
+                : `${pendingCandidaturasCount} parceiros • ${pendingDemoLeadsCount} demos`}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Action Center — Pendências de Candidaturas & Leads de Demonstração */}
+      {/* Ações Pendentes (apenas se houver itens aguardando aprovação) */}
       {(pendingCandidaturasCount > 0 || pendingDemoLeadsCount > 0) && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {pendingCandidaturasCount > 0 && (
-            <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black">
-                  <UserCheck className="w-5 h-5" />
+            <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/60 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0">
+                  <UserCheck className="w-4 h-4" />
                 </div>
-                <div>
-                  <h4 className="text-xs font-black text-amber-950">
+                <div className="min-w-0">
+                  <h4 className="text-xs font-bold text-amber-950 truncate">
                     {pendingCandidaturasCount} {pendingCandidaturasCount === 1 ? 'Candidatura de Parceiro' : 'Candidaturas de Parceiros'}
                   </h4>
-                  <p className="text-[11px] text-amber-800">Aguardam homologação e atribuição de quotas</p>
+                  <p className="text-[11px] text-amber-800/80 truncate">Aguardam aprovação e quotas</p>
                 </div>
               </div>
               <button
                 onClick={() => onNavigate?.('parceiros-candidaturas')}
-                className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all shrink-0 cursor-pointer shadow-xs"
+                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1 shrink-0 cursor-pointer transition-colors"
               >
-                <span>Homologar</span>
+                <span>Revisar</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
 
           {pendingDemoLeadsCount > 0 && (
-            <div className="bg-blue-500/10 border border-blue-500/30 p-4 rounded-2xl flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">
-                  <PhoneCall className="w-5 h-5" />
+            <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/60 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0">
+                  <PhoneCall className="w-4 h-4" />
                 </div>
-                <div>
-                  <h4 className="text-xs font-black text-blue-950">
+                <div className="min-w-0">
+                  <h4 className="text-xs font-bold text-blue-950 truncate">
                     {pendingDemoLeadsCount} {pendingDemoLeadsCount === 1 ? 'Pedido de Demonstração' : 'Pedidos de Demonstração'}
                   </h4>
-                  <p className="text-[11px] text-blue-800">Clientes aguardam agendamento pelo suporte comercial</p>
+                  <p className="text-[11px] text-blue-800/80 truncate">Aguardam agendamento comercial</p>
                 </div>
               </div>
               <button
                 onClick={() => onNavigate?.('suporte')}
-                className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all shrink-0 cursor-pointer shadow-xs"
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1 shrink-0 cursor-pointer transition-colors"
               >
-                <span>Ver Contactos</span>
+                <span>Ver Leads</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -364,36 +302,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
         </div>
       )}
 
-      {/* Charts Row */}
+      {/* Linha de Gráficos — Minimalista e Sóbrio */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="surface-card p-6 lg:col-span-2">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-sm font-black text-slate-900 font-display">Licenças Criadas — Últimos 6 Meses</h3>
+              <h3 className="text-sm font-semibold text-slate-900">Licenças Criadas — Últimos 6 Meses</h3>
               <p className="text-xs text-slate-400">Criadas vs. Ativas por mês</p>
             </div>
           </div>
-          <div style={{ height: 260 }}>
+          <div style={{ height: 240 }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: '11px' }} />
-                <Line type="monotone" dataKey="Criadas" stroke="#8b5cf6" strokeWidth={2.5} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                <Line type="monotone" dataKey="Ativas" stroke="#10b981" strokeWidth={2.5} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                <RechartsTooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
+                <Line type="monotone" dataKey="Criadas" stroke="#0F172A" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                <Line type="monotone" dataKey="Ativas" stroke="#2563EB" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="surface-card p-6">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
           <div className="mb-2">
-            <h3 className="text-sm font-black text-slate-900 font-display">Distribuição por Plano</h3>
+            <h3 className="text-sm font-semibold text-slate-900">Distribuição por Plano</h3>
             <p className="text-xs text-slate-400">Proporção atual de clientes</p>
           </div>
-          <div className="flex items-center justify-center" style={{ height: 260 }}>
+          <div className="flex items-center justify-center" style={{ height: 240 }}>
             {pieData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -401,9 +339,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                     data={pieData}
                     cx="50%"
                     cy="45%"
-                    innerRadius={55}
-                    outerRadius={85}
-                    paddingAngle={5}
+                    innerRadius={50}
+                    outerRadius={75}
+                    paddingAngle={4}
                     dataKey="value"
                     stroke="none"
                   >
@@ -411,7 +349,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none' }} />
+                  <RechartsTooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }} />
                   <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '11px' }} />
                 </PieChart>
               </ResponsiveContainer>
@@ -423,7 +361,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
       </div>
 
       {/* Recent Licenses Table — Dados Reais do Firestore */}
-      <div className="surface-card overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
         <div className="p-5 border-b border-slate-100 flex items-center justify-between">
           <div>
             <h3 className="text-sm font-black text-slate-900 font-display">Últimas Licenças Emitidas</h3>
@@ -479,7 +417,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
         </div>
       </div>
 
-      </div>
 
       <FirebaseAuthModal
         isOpen={modalAuth}

@@ -2,11 +2,15 @@ import React from 'react';
 import {
   LayoutDashboard, Building2, Key, Monitor, Handshake,
   CreditCard, Package, HeadphonesIcon, BarChart3,
-  Bell, Users, ScrollText, Settings, ChevronDown,
-  ChevronRight, LogOut, Shield, X, Menu, ShoppingBag,
-  ExternalLink, Activity
+  Bell, Users, ScrollText, Settings, LogOut, Menu,
+  ShoppingBag, ExternalLink, Activity
 } from 'lucide-react';
 import { AdminSection } from './types';
+import {
+  PortalSidebar,
+  PortalFooterButton,
+  PortalNavGroup,
+} from '../components/portal/PortalSidebar';
 
 interface SidebarProps {
   activeSection: AdminSection;
@@ -18,94 +22,62 @@ interface SidebarProps {
   collapsed?: boolean;
 }
 
-interface NavItem {
-  id: AdminSection;
-  label: string;
-  icon: React.ReactNode;
-  children?: { id: AdminSection; label: string }[];
-  badge?: string;
-  badgeColor?: string;
-}
+const ICON = 'w-[18px] h-[18px]';
 
-interface NavGroup {
-  groupTitle: string;
-  items: NavItem[];
-}
-
-const NAV_GROUPS: NavGroup[] = [
+const NAV_GROUPS: PortalNavGroup<AdminSection>[] = [
   {
-    groupTitle: 'Visão Geral & Controlo',
+    title: 'Visão Geral',
     items: [
-      { id: 'dashboard', label: 'Dashboard Executivo', icon: <LayoutDashboard className="w-4 h-4" strokeWidth={1.75} /> },
-      { id: 'relatorios', label: 'Relatórios & Vendas', icon: <BarChart3 className="w-4 h-4" strokeWidth={1.75} /> },
-      { id: 'auditoria', label: 'Auditoria & Logs', icon: <ScrollText className="w-4 h-4" strokeWidth={1.75} /> },
+      { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className={ICON} strokeWidth={1.75} /> },
+      { id: 'relatorios', label: 'Relatórios & Vendas', icon: <BarChart3 className={ICON} strokeWidth={1.75} /> },
+      { id: 'auditoria', label: 'Auditoria & Logs', icon: <ScrollText className={ICON} strokeWidth={1.75} /> },
     ]
   },
   {
-    groupTitle: 'Gestão Comercial & AGT',
+    title: 'Gestão Comercial',
     items: [
       {
-        id: 'licencas', label: 'Licenças de Software', icon: <Key className="w-4 h-4" strokeWidth={1.75} />,
+        id: 'licencas', label: 'Licenças', icon: <Key className={ICON} strokeWidth={1.75} />,
         children: [
           { id: 'licencas', label: 'Todas as Licenças' },
-          { id: 'licenca-criar', label: '+ Emitir Nova Licença' },
+          { id: 'licenca-criar', label: 'Emitir Nova Licença' },
         ]
       },
-      { id: 'empresas', label: 'Empresas Clientes', icon: <Building2 className="w-4 h-4" strokeWidth={1.75} /> },
-      { id: 'instalacoes', label: 'Postos & Caixas LAN', icon: <Monitor className="w-4 h-4" strokeWidth={1.75} /> },
-      { id: 'planos', label: 'Planos & Produtos', icon: <Package className="w-4 h-4" strokeWidth={1.75} /> },
-      { id: 'pagamentos', label: 'Pagamentos & Faturas', icon: <CreditCard className="w-4 h-4" strokeWidth={1.75} /> },
+      { id: 'empresas', label: 'Empresas Clientes', icon: <Building2 className={ICON} strokeWidth={1.75} /> },
+      { id: 'instalacoes', label: 'Postos & Caixas', icon: <Monitor className={ICON} strokeWidth={1.75} /> },
+      { id: 'planos', label: 'Planos & Produtos', icon: <Package className={ICON} strokeWidth={1.75} /> },
+      { id: 'pagamentos', label: 'Pagamentos & Faturas', icon: <CreditCard className={ICON} strokeWidth={1.75} /> },
     ]
   },
   {
-    groupTitle: 'Rede de Canais & Loja POS',
+    title: 'Canais & Loja',
     items: [
       {
-        id: 'parceiros', label: 'Rede de Parceiros', icon: <Handshake className="w-4 h-4" strokeWidth={1.75} />,
+        id: 'parceiros', label: 'Parceiros', icon: <Handshake className={ICON} strokeWidth={1.75} />,
         children: [
           { id: 'parceiros', label: 'Todos os Parceiros' },
-          { id: 'parceiros-candidaturas', label: 'Candidaturas (25k)' },
+          { id: 'parceiros-candidaturas', label: 'Candidaturas' },
         ]
       },
-      {
-        id: 'loja',
-        label: 'Loja Hardware & Pedidos',
-        icon: <ShoppingBag className="w-4 h-4 text-emerald-400" strokeWidth={1.75} />,
-        badge: 'Loja POS',
-        badgeColor: 'emerald'
-      },
+      { id: 'loja', label: 'Loja & Pedidos', icon: <ShoppingBag className={ICON} strokeWidth={1.75} /> },
     ]
   },
   {
-    groupTitle: 'Atendimento & Mensagens',
+    title: 'Atendimento',
     items: [
-      { id: 'suporte', label: 'Central de Suporte & SLA', icon: <HeadphonesIcon className="w-4 h-4" strokeWidth={1.75} /> },
-      { id: 'comunicacao', label: 'Comunicação & Avisos', icon: <Bell className="w-4 h-4" strokeWidth={1.75} /> },
+      { id: 'suporte', label: 'Suporte & SLA', icon: <HeadphonesIcon className={ICON} strokeWidth={1.75} /> },
+      { id: 'comunicacao', label: 'Comunicação & Avisos', icon: <Bell className={ICON} strokeWidth={1.75} /> },
     ]
   },
   {
-    groupTitle: 'Sistema & Definições',
+    title: 'Sistema',
     items: [
-      { id: 'utilizadores', label: 'Utilizadores Admin', icon: <Users className="w-4 h-4" strokeWidth={1.75} /> },
-      {
-        id: 'firebase-monitor',
-        label: 'Monitorização Firebase & Cloud',
-        icon: <Activity className="w-4 h-4 text-emerald-400" strokeWidth={1.75} />,
-        badge: 'Live',
-        badgeColor: 'emerald'
-      },
-      { id: 'configuracoes', label: 'Definições do Sistema', icon: <Settings className="w-4 h-4" strokeWidth={1.75} /> },
+      { id: 'utilizadores', label: 'Utilizadores Admin', icon: <Users className={ICON} strokeWidth={1.75} /> },
+      { id: 'firebase-monitor', label: 'Monitorização Cloud', icon: <Activity className={ICON} strokeWidth={1.75} /> },
+      { id: 'configuracoes', label: 'Definições', icon: <Settings className={ICON} strokeWidth={1.75} /> },
     ]
   },
 ];
-
-const BADGE_COLORS: Record<string, string> = {
-  amber: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  emerald: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  blue: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  orange: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-  red: 'bg-red-500/20 text-red-300 border-red-500/30',
-};
 
 export const AdminSidebar: React.FC<SidebarProps> = ({
   activeSection,
@@ -115,177 +87,44 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
   onExitAdmin,
   userEmail = 'admin@kivora.ao'
 }) => {
-  const [expanded, setExpanded] = React.useState<Set<string>>(
-    new Set(['licencas', 'empresas', 'parceiros'])
-  );
-
-  const toggle = (id: string) => {
-    setExpanded(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
   return (
-    <aside className="w-68 h-full flex flex-col bg-slate-950 border-r border-slate-800/80 flex-shrink-0 select-none overflow-hidden">
-      {/* Header Corporativo Executivo Fixo */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80 bg-slate-950 flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-md shadow-blue-600/30 border border-blue-400/30">
-            <Shield className="w-5 h-5 text-white" strokeWidth={2} />
+    <PortalSidebar<AdminSection>
+      portalLabel="Administração"
+      groups={NAV_GROUPS}
+      activeId={activeSection}
+      onSelect={onNavigate}
+      onClose={onClose}
+      identity={
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/[0.06] border border-white/[0.1]">
+          <div className="w-8 h-8 rounded-lg bg-[#FF6500] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
+            {userEmail.slice(0, 2).toUpperCase()}
           </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-white font-black text-sm tracking-tight">KIVORA SOFT</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Cloud Ativa" />
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="text-blue-400 text-[10px] font-bold tracking-wider uppercase">Painel Executivo</span>
-              <span className="text-slate-600 text-[9px] font-mono">v2.4</span>
-            </div>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-white truncate">Super Admin</p>
+            <p className="text-[11px] text-slate-400 truncate">{userEmail}</p>
           </div>
         </div>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="lg:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        )}
-      </div>
-
-      {/* Navegação Categorizada com Scroll Nativo Independente */}
-      <nav className="flex-1 py-3 px-3 space-y-4 overflow-y-auto overscroll-contain">
-        {NAV_GROUPS.map((group, gIdx) => (
-          <div key={gIdx} className="space-y-1">
-            <div className="px-3 pt-2 pb-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                {group.groupTitle}
-              </span>
-            </div>
-
-            <div className="space-y-0.5">
-              {group.items.map((item) => {
-                const isDirectActive = activeSection === item.id;
-                const isChildActive = item.children?.some(c => c.id === activeSection);
-                const isActive = isDirectActive || isChildActive;
-                const isExpanded = expanded.has(item.id);
-
-                if (item.children) {
-                  return (
-                    <div key={item.id} className="space-y-0.5">
-                      <button
-                        onClick={() => toggle(item.id)}
-                        className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                          isActive
-                            ? 'bg-blue-600/15 text-blue-300 font-bold border-l-2 border-blue-500 pl-2.5'
-                            : 'text-slate-300 hover:text-white hover:bg-white/5'
-                        }`}
-                      >
-                        <span className="flex items-center gap-2.5 min-w-0">
-                          <span className={isActive ? 'text-blue-400' : 'text-slate-400'}>
-                            {item.icon}
-                          </span>
-                          <span className="truncate">{item.label}</span>
-                        </span>
-                        <span className="flex items-center gap-1.5 shrink-0">
-                          {item.badge && (
-                            <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full border ${BADGE_COLORS[item.badgeColor || 'blue']}`}>
-                              {item.badge}
-                            </span>
-                          )}
-                          {isExpanded
-                            ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" strokeWidth={2} />
-                            : <ChevronRight className="w-3.5 h-3.5 text-slate-400" strokeWidth={2} />
-                          }
-                        </span>
-                      </button>
-
-                      {isExpanded && (
-                        <div className="ml-3.5 border-l border-slate-800/80 pl-2.5 space-y-0.5 pt-0.5">
-                          {item.children.map((child) => (
-                            <button
-                              key={child.id}
-                              onClick={() => onNavigate(child.id)}
-                              className={`w-full text-left text-xs px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
-                                activeSection === child.id
-                                  ? 'bg-blue-600 text-white font-bold shadow-xs shadow-blue-600/30'
-                                  : 'text-slate-400 hover:text-slate-100 hover:bg-white/5 font-medium'
-                              }`}
-                            >
-                              {child.label}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => onNavigate(item.id)}
-                    className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                      isActive
-                        ? 'bg-blue-600/15 text-blue-300 font-bold border-l-2 border-blue-500 pl-2.5'
-                        : 'text-slate-300 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2.5 min-w-0">
-                      <span className={isActive ? 'text-blue-400' : 'text-slate-400'}>
-                        {item.icon}
-                      </span>
-                      <span className="truncate">{item.label}</span>
-                    </span>
-                    {item.badge && (
-                      <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full border shrink-0 ${BADGE_COLORS[item.badgeColor || 'blue']}`}>
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </nav>
-
-      {/* Footer com Perfil do Utilizador & Acesso Rápido */}
-      <div className="p-3 border-t border-slate-800/80 bg-slate-950 flex-shrink-0 space-y-2">
-        {onExitAdmin && (
-          <button
-            onClick={onExitAdmin}
-            className="w-full flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-[11px] font-bold py-2 rounded-xl border border-slate-800 transition-all cursor-pointer"
-          >
-            <ExternalLink className="w-3.5 h-3.5 text-blue-400" />
-            <span>Ver Site Público</span>
-          </button>
-        )}
-
-        <div className="flex items-center gap-2.5 p-2 bg-slate-900/60 rounded-xl border border-slate-800/60">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-700 to-slate-800 text-white font-black text-xs flex items-center justify-center border border-slate-700">
-            VS
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white text-xs font-bold truncate">Visual Software</p>
-            <p className="text-slate-400 text-[10px] truncate font-mono">{userEmail}</p>
-          </div>
-          {onLogout && (
-            <button
-              onClick={onLogout}
-              className="text-slate-400 hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
-              title="Terminar Sessão"
-            >
-              <LogOut className="w-4 h-4" strokeWidth={1.75} />
-            </button>
+      }
+      footer={
+        <>
+          {onExitAdmin && (
+            <PortalFooterButton
+              icon={<ExternalLink className="w-[18px] h-[18px]" strokeWidth={1.75} />}
+              label="Ver site público"
+              onClick={onExitAdmin}
+            />
           )}
-        </div>
-      </div>
-    </aside>
+          {onLogout && (
+            <PortalFooterButton
+              icon={<LogOut className="w-[18px] h-[18px]" strokeWidth={1.75} />}
+              label="Terminar sessão"
+              onClick={onLogout}
+              tone="danger"
+            />
+          )}
+        </>
+      }
+    />
   );
 };
 
@@ -301,7 +140,7 @@ interface TopbarProps {
 
 export const AdminTopbar: React.FC<TopbarProps> = ({ title, subtitle, onMenuToggle, actions }) => {
   return (
-    <div className="bg-white border-b border-slate-200/90 px-4 sm:px-6 lg:px-8 py-5 flex-shrink-0 w-full transition-all">
+    <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-2 flex-shrink-0 w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           {onMenuToggle && (
@@ -314,8 +153,8 @@ export const AdminTopbar: React.FC<TopbarProps> = ({ title, subtitle, onMenuTogg
             </button>
           )}
           <div className="space-y-0.5">
-            <h1 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight font-display">{title}</h1>
-            {subtitle && <p className="text-xs sm:text-sm text-slate-500 font-medium">{subtitle}</p>}
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight font-display">{title}</h1>
+            {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
           </div>
         </div>
         {actions && <div className="flex items-center gap-2.5 flex-wrap">{actions}</div>}
@@ -375,7 +214,7 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, sub, subColor 
   };
 
   return (
-    <div className="surface-card p-5 hover:border-slate-300 hover:shadow-card transition-all flex flex-col justify-between">
+    <div className="bg-white border border-slate-200 rounded-xl p-5 flex flex-col justify-between">
       <div>
         <div className="flex items-start justify-between gap-2 mb-3">
           <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">{label}</p>

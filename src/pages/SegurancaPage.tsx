@@ -29,7 +29,7 @@ export const SegurancaPage: React.FC<SegurancaPageProps> = ({ onNavigatePage }) 
             Arquitetura de Segurança de <span className="text-[#1746A2]">Nível Empresarial</span>
           </h1>
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
-            Como o KIVORA ERP protege os dados financeiros, fiscais e operacionais da sua empresa contra intrusões, vazamentos e adulteração.
+            Como o KIVORA SOFT protege os dados financeiros, fiscais e operacionais da sua empresa contra intrusões, vazamentos e adulteração.
           </p>
         </div>
 

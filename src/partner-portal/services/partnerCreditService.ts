@@ -1,6 +1,6 @@
 /**
  * partnerCreditService.ts — Kivora Partner Autonomous License Service
- * Emissão direta, instantânea e atómica de licenças por parceiros homologados.
+ * Emissão direta, instantânea e atómica de licenças por parceiros credenciados.
  * Suporta Carteira Pré-paga (Wallet) e Linha de Crédito (Slots).
  * Política estrita: NUNCA envia e-mails ou WhatsApp aos clientes finais.
  */
@@ -199,7 +199,7 @@ export async function issueInstantPartnerLicense(
       amount: priceAoa,
       totalAOA: priceAoa,
       status: 'paid',
-      payment_method: isProvisional ? 'Crédito Provisório Parceiro' : 'Parceiro Homologado Kivora',
+      payment_method: isProvisional ? 'Crédito Provisório Parceiro' : 'Parceiro Credenciado Kivora',
       issue_date: new Date(now).toISOString().split('T')[0],
       due_date: new Date(expiresAt || (now + 30 * 86400000)).toISOString().split('T')[0],
       partner_id: partnerDocId,

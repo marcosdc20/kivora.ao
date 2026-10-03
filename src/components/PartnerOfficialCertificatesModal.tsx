@@ -223,7 +223,7 @@ export const PartnerOfficialCertificatesModal: React.FC<PartnerOfficialCertifica
         <div className="p-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-950 shrink-0 print:hidden text-xs">
           <div className="text-slate-400 text-[11px] flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Documento oficial formatado em <strong>A4 Standard</strong> com homologação legal.</span>
+            <span>Documento oficial formatado em <strong>A4 Standard</strong> com certificação legal.</span>
           </div>
 
           <div className="flex items-center gap-2">

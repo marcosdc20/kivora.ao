@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, ArrowRight, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight, Download, Play, X } from 'lucide-react';
+import { subscribeSystemSettings, getCachedSystemSettings, SystemCompanySettings } from '../services/systemSettingsService';
 
 import laptopImg from '../assets/kivora/pc-laptop-kivora.png';
 import posImg from '../assets/kivora/pc-pos-kivora.png';
@@ -30,13 +31,13 @@ interface HeroCarouselProps {
 const SLIDES: SlideProps[] = [
   {
     image: executivosImg,
-    tagline: 'Faturação Eletrónica Homologada AGT',
+    tagline: 'Faturação Eletrónica Certificada AGT',
     headline: 'Emita faturas legais em Angola\ncom assinatura digital e QR Code.',
     sub: 'Conformidade plena com o Decreto Presidencial n.º 71/25. Assinatura criptográfica RSA-SHA256 e exportação mensal de SAF-T (AO) sem divergências.',
     cta: { label: 'Descarregar KIVORA Grátis', action: 'download' },
     deviceImage: laptopImg,
-    deviceAlt: 'Portátil Laptop KIVORA ERP',
-    pill1: { text: 'Homologação AGT FE/387', sub: 'DS.120 Certificado' },
+    deviceAlt: 'Portátil Laptop KIVORA SOFT',
+    pill1: { text: 'Certificação AGT FE/387', sub: 'Software Certificado' },
     pill2: { text: 'SAF-T AO 100% Válido', sub: 'Sem erros de submissão' },
     ambientColor: 'rgba(23, 70, 162, 0.45)',
   },
@@ -47,7 +48,7 @@ const SLIDES: SlideProps[] = [
     sub: 'Interface tátil otimizada para caixas rápidos, leitores de código de barras, impressoras térmicas de 80mm e gestão rigorosa de sangrias e reforços.',
     cta: { label: 'Solicitar Demonstração VIP', action: 'demo' },
     deviceImage: posImg,
-    deviceAlt: 'Terminal Touch POS KIVORA ERP',
+    deviceAlt: 'Terminal Touch POS KIVORA SOFT',
     pill1: { text: 'Turnos e Caixa Z', sub: 'Diferença de caixa 0 Kz' },
     pill2: { text: 'Talões Térmicos 80mm', sub: 'Impressão instantânea' },
     ambientColor: 'rgba(5, 150, 105, 0.45)',
@@ -55,11 +56,11 @@ const SLIDES: SlideProps[] = [
   {
     image: restauranteImg,
     tagline: 'Rede Local LAN • Soberania de Dados',
-    headline: 'O ERP completo para a sua empresa,\n100% funcional mesmo sem internet.',
+    headline: 'O software completo para a sua empresa,\n100% funcional mesmo sem internet.',
     sub: 'A instabilidade da fibra ou dados móveis nunca paralisa as suas vendas. Base de dados SQLite local no seu próprio computador ou servidor LAN multi-postos.',
     cta: { label: 'Conhecer Arquitetura LAN', action: 'demo' },
     deviceImage: desktopImg,
-    deviceAlt: 'Computador Desktop KIVORA ERP',
+    deviceAlt: 'Computador Desktop KIVORA SOFT',
     pill1: { text: 'Base Local Offline', sub: 'Zero dependência da cloud' },
     pill2: { text: 'Multi-Postos em Rede', sub: 'Até 20 caixas simultâneos' },
     ambientColor: 'rgba(255, 101, 0, 0.4)',
@@ -69,11 +70,27 @@ const SLIDES: SlideProps[] = [
 const AUTOPLAY_DURATION = 7500;
 
 export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOpenDemoModal }) => {
+  const [settings, setSettings] = useState<SystemCompanySettings>(getCachedSystemSettings());
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState<number>(1);
   const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(0);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const unsub = subscribeSystemSettings(setSettings);
+    return () => unsub();
+  }, []);
+
+  const effectiveSlides = useMemo(() => {
+    return SLIDES.map((s, idx) => {
+      if (idx === 0 && settings.heroImageUrl) {
+        return { ...s, image: settings.heroImageUrl };
+      }
+      return s;
+    });
+  }, [settings.heroImageUrl]);
 
   const goTo = useCallback((nextIdx: number, newDir: number) => {
     setDirection(newDir);
@@ -121,7 +138,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
     return () => window.removeEventListener('keydown', handleKey);
   }, [next, prev]);
 
-  const slide = SLIDES[current];
+  const slide = effectiveSlides[current] || effectiveSlides[0];
 
   // Motion variants for text container
   const slideVariants = {
@@ -177,13 +194,13 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
 
   return (
     <section
-      aria-label="Kivora ERP Hero Showcase"
+      aria-label="KIVORA SOFT Hero Showcase"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       className="relative w-full min-h-[640px] sm:min-h-[700px] lg:min-h-[800px] xl:min-h-[860px] overflow-hidden bg-[#060D19] flex items-center select-none"
     >
       {/* ─── BACKGROUND AMBIENT GRADIENTS & PHOTO CAROUSEL ─────────────────── */}
-      {SLIDES.map((s, idx) => (
+      {effectiveSlides.map((s, idx) => (
         <div
           key={`bg-slide-${idx}`}
           className={`absolute inset-0 transition-opacity duration-1000 ease-out ${
@@ -288,11 +305,22 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                       <span>Explorar Módulos</span>
                       <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
                     </button>
+
+                    {settings.heroVideoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setShowVideoModal(true)}
+                        className="inline-flex items-center justify-center gap-2 bg-[#FF6500]/20 hover:bg-[#FF6500]/35 active:scale-[0.98] border border-[#FF6500]/40 text-[#FFA726] text-sm font-semibold px-6 py-4 rounded-full backdrop-blur-md transition-all cursor-pointer group"
+                      >
+                        <Play className="w-4 h-4 fill-current text-[#FF6500] group-hover:scale-110 transition-transform" />
+                        <span>Ver Vídeo Demonstrativo</span>
+                      </button>
+                    )}
                   </div>
 
                   {/* Indicadores de Slide Elegantes no Fluxo do Conteúdo */}
                   <div className="pt-6 sm:pt-7 flex items-center gap-2.5 max-w-lg">
-                    {SLIDES.map((s, idx) => {
+                    {effectiveSlides.map((s, idx) => {
                       const isActive = idx === current;
                       return (
                         <button
@@ -380,6 +408,51 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
       >
         <ChevronRight className="w-5 h-5" strokeWidth={2.2} />
       </button>
+
+      {/* ─── VIDEO DEMO MODAL ─────────────────────────────────────────────────── */}
+      {showVideoModal && settings.heroVideoUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-fadeIn">
+          <div className="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/60">
+              <div className="flex items-center gap-2.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#FF6500] animate-pulse" />
+                <h3 className="text-sm font-bold text-white font-display">Apresentação Oficial KIVORA SOFT</h3>
+              </div>
+              <button
+                onClick={() => setShowVideoModal(false)}
+                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Fechar vídeo"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="relative w-full aspect-video bg-black flex items-center justify-center">
+              {settings.heroVideoUrl.endsWith('.mp4') || settings.heroVideoUrl.endsWith('.webm') ? (
+                <video
+                  src={settings.heroVideoUrl}
+                  controls
+                  autoPlay
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <iframe
+                  src={
+                    settings.heroVideoUrl.includes('youtube.com/watch?v=')
+                      ? settings.heroVideoUrl.replace('watch?v=', 'embed/')
+                      : settings.heroVideoUrl.includes('youtu.be/')
+                      ? settings.heroVideoUrl.replace('youtu.be/', 'www.youtube.com/embed/')
+                      : settings.heroVideoUrl
+                  }
+                  title="KIVORA SOFT Vídeo Oficial"
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

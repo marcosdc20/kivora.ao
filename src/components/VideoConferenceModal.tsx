@@ -172,7 +172,7 @@ export const VideoConferenceModal: React.FC<VideoConferenceModalProps> = ({
   const handleShareWhatsApp = () => {
     const link = provider === 'jitsi' ? `https://meet.jit.si/${sanitizedRoom}` : googleMeetUrl;
     const msg = encodeURIComponent(
-      `*KIVORA ERP — Convite de Videochamada de Assistência Remota*\n\n` +
+      `*KIVORA SOFT — Convite de Videochamada de Assistência Remota*\n\n` +
       `Olá! Foi aberta uma sala de videoconferência para assistência técnica.\n` +
       `🏢 *Empresa:* ${companyName}\n` +
       `${ticketNumber ? `🎫 *Ticket:* ${ticketNumber}\n` : ''}` +
@@ -447,7 +447,7 @@ export const VideoConferenceModal: React.FC<VideoConferenceModalProps> = ({
                     <div>
                       <h4 className="text-lg font-bold text-white">Sala de Assistência Pronta</h4>
                       <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                        Sessão encriptada de ponta a ponta com suporte para áudio HD, câmara e <strong className="text-blue-400">partilha de ecrã</strong> para diagnóstico do KIVORA ERP.
+                        Sessão encriptada de ponta a ponta com suporte para áudio HD, câmara e <strong className="text-blue-400">partilha de ecrã</strong> para diagnóstico do KIVORA SOFT.
                       </p>
                     </div>
 

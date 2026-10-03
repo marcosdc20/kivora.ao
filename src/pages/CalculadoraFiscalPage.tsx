@@ -183,7 +183,7 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
               <div className="mt-8 p-4 bg-blue-50/60 rounded-2xl border border-blue-100 flex items-start gap-3">
                 <Info className="w-5 h-5 text-[#1d4ed8] shrink-0 mt-0.5" />
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  O módulo de <strong>Recursos Humanos do KIVORA ERP</strong> processa automaticamente folhas de salário, recibos de vencimento timbrados, ficheiro de transferência bancária PS2 e mapas de IRT/INSS.
+                  O módulo de <strong>Recursos Humanos do KIVORA SOFT</strong> processa automaticamente folhas de salário, recibos de vencimento timbrados, ficheiro de transferência bancária PS2 e mapas de IRT/INSS.
                 </p>
               </div>
             </div>
@@ -388,7 +388,7 @@ export const CalculadoraFiscalPage: React.FC<CalculadoraFiscalPageProps> = ({ on
               {/* CTA para o Software */}
               <div className="mt-8 pt-6 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4 print:hidden">
                 <p className="text-xs text-slate-500">
-                  Emita faturas com QR Code AGT e cálculo automático no <strong>KIVORA ERP</strong>.
+                  Emita faturas com QR Code AGT e cálculo automático no <strong>KIVORA SOFT</strong>.
                 </p>
                 <button
                   onClick={() => onNavigatePage('download')}

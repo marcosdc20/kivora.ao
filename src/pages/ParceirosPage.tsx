@@ -68,7 +68,7 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
       <section className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16 py-20 space-y-16">
         <div data-reveal className="sr-init text-center max-w-2xl mx-auto space-y-3">
           <span className="text-xs font-bold uppercase tracking-wider text-[#FF6500] bg-orange-50 border border-orange-200/60 px-3.5 py-1.5 rounded-full">
-            Homologação & Certificação
+            Credenciamento & Parceria Oficial
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-slate-950">Por que ser parceiro oficial?</h2>
           <p className="text-slate-500 text-sm font-normal">Benefícios exclusivos, emissão instantânea e reconhecimento institucional em todo o território nacional.</p>
@@ -132,7 +132,7 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-bold font-display text-slate-950">
-                Documento Oficial Recebido na Homologação
+                Documento Oficial Recebido no Credenciamento
               </h3>
               <p className="text-xs text-slate-600 font-normal">Documentação jurídica séria com selo de autenticidade para apresentar aos seus clientes empresariais:</p>
             </div>
@@ -153,7 +153,7 @@ export const ParceirosPage: React.FC<ParceirosPageProps> = ({ onNavigatePage }) 
             </p>
           </div>
 
-          {/* Taxa de Homologação e Botões Oficiais */}
+          {/* Taxa de Credenciamento e Botões Oficiais */}
           <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100 text-xs">
             <div className="flex items-center gap-2 text-slate-700">
               <CreditCard className="w-4 h-4 text-emerald-600" />

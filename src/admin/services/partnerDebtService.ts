@@ -122,7 +122,7 @@ export const DEFAULT_PARTNER_POLICY: PartnerLicensingPolicy = {
   min_wallet_topup_aoa: 50000,
   partner_membership_fee_aoa: 25000,
   partner_requirements: [
-    'Taxa de Adesão & Homologação Técnica de 25.000 Kz',
+    'Taxa de Adesão & Credenciamento de 25.000 Kz',
     'NIF Comercial ou Declaração de Actividade de TI / Consultoria',
     'Conhecimento básico de informática e sistemas Windows 10/11',
     'Compromisso com o código de ética e suporte de qualidade ao cliente final',

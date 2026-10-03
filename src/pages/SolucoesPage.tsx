@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PageHero } from '../components/PageHero';
 import { CheckCircle2, Monitor, Network, Server, ArrowRight, Download } from 'lucide-react';
 import { PageId } from '../components/Header';
+import { subscribeSystemSettings, getCachedSystemSettings } from '../services/systemSettingsService';
 
 import supermercadoImg from '../assets/kivora/supermercado-kivora.jpg';
 import executivosImg from '../assets/kivora/executivos-kivora.jpg';
@@ -26,13 +27,19 @@ function useScrollReveal() {
 
 export const SolucoesPage: React.FC<SolucoesPageProps> = ({ onOpenDemoModal, onNavigatePage }) => {
   useScrollReveal();
+  const [settings, setSettings] = useState(getCachedSystemSettings());
+
+  useEffect(() => {
+    const unsub = subscribeSystemSettings(setSettings);
+    return () => unsub();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 page-enter">
 
       {/* Hero com imagem */}
       <PageHero
-        image={executivosImg}
+        image={settings.heroImageUrl || executivosImg}
         tag="Arquitetura Local"
         title="Soluções para cada tipo de empresa"
         sub="PC único ou rede com múltiplos postos — o KIVORA adapta-se à sua estrutura sem depender de internet."
@@ -76,7 +83,7 @@ export const SolucoesPage: React.FC<SolucoesPageProps> = ({ onOpenDemoModal, onN
         </div>
         <div data-reveal className="sr-init sr-right">
           <div className="surface-card overflow-hidden p-2.5 bg-slate-100/80">
-            <img src={supermercadoImg} alt="KIVORA Standalone" className="w-full h-auto object-cover rounded-2xl shadow-sm" />
+            <img src={settings.moduleStockImageUrl || supermercadoImg} alt="KIVORA Standalone" className="w-full h-auto object-cover rounded-2xl shadow-sm" />
           </div>
         </div>
       </section>
@@ -86,7 +93,7 @@ export const SolucoesPage: React.FC<SolucoesPageProps> = ({ onOpenDemoModal, onN
         <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16 grid grid-cols-1 lg:grid-cols-2 gap-14 items-center relative z-10">
           <div data-reveal className="sr-init sr-left order-2 lg:order-1">
             <div className="rounded-3xl overflow-hidden border border-white/15 shadow-2xl p-2.5 bg-white/5 backdrop-blur-md">
-              <img src={restauranteImg} alt="Rede LAN KIVORA" className="w-full h-auto object-cover rounded-2xl" />
+              <img src={settings.moduleRestauranteImageUrl || restauranteImg} alt="Rede LAN KIVORA" className="w-full h-auto object-cover rounded-2xl" />
             </div>
           </div>
           <div data-reveal className="sr-init order-1 lg:order-2 space-y-6">

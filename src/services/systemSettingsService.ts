@@ -149,6 +149,23 @@ export interface SystemCompanySettings {
   videoHardwareTitle?: string;
   videoHardwareDesc?: string;
 
+  // Imagens & Mídias do Site e Portais (Configuráveis no Admin)
+  heroImageUrl?: string;
+  heroVideoUrl?: string;
+  aboutImageUrl?: string;
+  agtBannerUrl?: string;
+  stepsImageUrl?: string;
+  modulePosImageUrl?: string;
+  moduleFaturacaoImageUrl?: string;
+  moduleRestauranteImageUrl?: string;
+  moduleOficinaImageUrl?: string;
+  moduleLavandariaImageUrl?: string;
+  moduleStockImageUrl?: string;
+  partnerPortalBannerUrl?: string;
+  partnerPortalVideoUrl?: string;
+  clientPortalBannerUrl?: string;
+  clientPortalVideoUrl?: string;
+
   // Parâmetros Fiscais AGT
   agtDecretoRef?: string;
   saftSubmissionDeadlineDay?: number;
@@ -272,11 +289,11 @@ export const DEFAULT_PARTNER_LOGOS: PartnerBrandLogo[] = [];
 export const DEFAULT_INVESTOR_SETTINGS: InvestorSettings = {
   title: 'Relações com Investidores & Governança',
   subtitle: 'Visual Software, Lda — Pioneirismo e Sustentabilidade Financeira em Software de Gestão em Angola',
-  summary: 'A Visual Software é uma empresa 100% angolana de tecnologia focada em soluções críticas de faturação, automação fiscal AGT e ERP offline-first para empresas em todo o território nacional.',
+  summary: 'A Visual Software é uma empresa 100% angolana de tecnologia focada em soluções críticas de faturação, automação fiscal AGT e software de gestão comercial offline-first para empresas em todo o território nacional.',
   annualGrowth: '+128% ao ano',
   legalEntity: 'VISUAL SOFTWARE LIMITADA (NIF: 5417089123)',
   shareCapital: '150.000.000 Kz (Capital Integralmente Realizado)',
-  auditedBy: 'Auditoria Fiscal Independente & Homologação AGT n.º 384/2024',
+  auditedBy: 'Auditoria Fiscal Independente & Certificação AGT n.º 384/2024',
   contactEmail: 'investidores@kivora.ao',
 };
 
@@ -408,11 +425,11 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   webhookUrl: '',
   notifyEmailLeads: 'comercial@kivora.ao',
   notifyEmailPartners: 'parceiros@kivora.ao',
-  whatsappDefaultMessage: 'Olá! Gostaria de saber mais sobre o KIVORA ERP.',
+  whatsappDefaultMessage: 'Olá! Gostaria de saber mais sobre o KIVORA SOFT.',
 
   // Vídeos do YouTube (Configuráveis no Admin & Firebase)
   videoHomeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', // Link configurável no Admin
-  videoHomeTitle: 'Conheça o KIVORA ERP em Ação',
+  videoHomeTitle: 'Conheça o KIVORA SOFT em Ação',
   videoHomeDesc: 'Demonstração rápida da interface do POS, emissão com QR Code AGT e funcionamento 100% offline.',
 
   videoManuaisUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
@@ -421,7 +438,7 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
 
   videoParceirosUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
   videoParceirosTitle: 'Programa Oficial de Parceiros & Revendedores',
-  videoParceirosDesc: 'Descubra como lucrar até 50% de margem com a distribuição e implantação do KIVORA ERP na sua província.',
+  videoParceirosDesc: 'Descubra como lucrar até 50% de margem com a distribuição e implantação do KIVORA SOFT na sua província.',
 
   videoAgtUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
   videoAgtTitle: 'Exigências do Decreto 71/25 & Faturação AGT',
@@ -430,6 +447,23 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   videoHardwareUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
   videoHardwareTitle: 'Instalação Rápida de Impressoras Térmicas 80mm',
   videoHardwareDesc: 'Configuração plug-and-play de impressoras ESC/POS USB, gavetas elétricas RJ11 e leitores 2D.',
+
+  // Mídias & Imagens Padrão Configuráveis no Admin
+  heroImageUrl: '/imagens/pc-descktop-kivora.webp',
+  heroVideoUrl: '',
+  aboutImageUrl: '',
+  agtBannerUrl: '',
+  stepsImageUrl: '/imagens/jovem-empresaria-com-tablet.webp',
+  modulePosImageUrl: '/imagens/pc-pos-kivora.webp',
+  moduleFaturacaoImageUrl: '/imagens/pc-laptop-kivora.webp',
+  moduleRestauranteImageUrl: '/imagens/pc-descktop-kivora.webp',
+  moduleOficinaImageUrl: '/imagens/pc-descktop-kivora.webp',
+  moduleLavandariaImageUrl: '/imagens/pc-laptop-kivora.webp',
+  moduleStockImageUrl: '/imagens/pos_touch_terminal.webp',
+  partnerPortalBannerUrl: '',
+  partnerPortalVideoUrl: '',
+  clientPortalBannerUrl: '',
+  clientPortalVideoUrl: '',
 
   // Assistência por Videochamada Tarifada por Minuto
   videoCallPricePerMinute: 300, // 300 Kz / minuto por padrão
@@ -580,7 +614,7 @@ export function subscribeAllRegisteredBrands(callback: (brands: PartnerBrandLogo
       }
     });
 
-    // 2. Parceiros homologados no Firebase ('partners')
+    // 2. Parceiros credenciados no Firebase ('partners')
     partnersList.forEach((p) => {
       if (p.name && p.active !== false) {
         const key = p.name.toLowerCase().trim();

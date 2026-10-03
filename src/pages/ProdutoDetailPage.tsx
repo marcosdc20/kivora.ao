@@ -72,7 +72,7 @@ export const ProdutoDetailPage: React.FC<ProdutoDetailPageProps> = ({
       console.warn('Erro ao registar encomenda no Firestore:', e);
     }
 
-    const msg = `*COMPRA DIRETA — LOJA KIVORA ERP*\n\n` +
+    const msg = `*COMPRA DIRETA — LOJA KIVORA SOFT*\n\n` +
       `*Produto:* ${product.name}\n` +
       `*SKU:* ${product.sku}\n` +
       `*Quantidade:* ${quantity} unidade(s)\n` +
@@ -215,7 +215,7 @@ export const ProdutoDetailPage: React.FC<ProdutoDetailPageProps> = ({
                     )}
                   </div>
                   <p className="text-xs text-slate-600 font-normal">
-                    Fatura com IVA dedutível emitida pela Visual Software (Homologada AGT).
+                    Fatura com IVA dedutível emitida pela Visual Software (Certificada pela AGT).
                   </p>
                 </div>
 
@@ -298,7 +298,7 @@ export const ProdutoDetailPage: React.FC<ProdutoDetailPageProps> = ({
           <div className="flex items-center gap-2 border-b border-slate-200 pb-3 mb-6 overflow-x-auto">
             {[
               { id: 'specs', label: 'Ficha Técnica Completa' },
-              { id: 'compat', label: 'Compatibilidade com KIVORA ERP' },
+              { id: 'compat', label: 'Compatibilidade com KIVORA SOFT' },
               { id: 'package', label: 'Conteúdo da Caixa' },
               { id: 'shipping', label: 'Prazos de Envio em Angola' },
             ].map((tab) => (
@@ -339,12 +339,12 @@ export const ProdutoDetailPage: React.FC<ProdutoDetailPageProps> = ({
             </div>
           )}
 
-          {/* Aba 2: Homologação KIVORA */}
+          {/* Aba 2: Compatibilidade KIVORA SOFT */}
           {activeTab === 'compat' && (
             <div className="space-y-3 text-xs text-slate-600">
-              <h3 className="text-sm font-bold text-slate-900">Homologação Oficial KIVORA ERP</h3>
+              <h3 className="text-sm font-bold text-slate-900">Compatibilidade Oficial KIVORA SOFT</h3>
               <p>
-                Este equipamento foi exaustivamente homologado pelo departamento técnico da Visual Software para operação contínua com o KIVORA ERP:
+                Este equipamento foi exaustivamente testado e certificado pelo departamento técnico da Visual Software para operação contínua com o KIVORA SOFT:
               </p>
               <ul className="space-y-1.5 list-disc pl-5 font-medium text-slate-700">
                 <li>Impressão instantânea de QR Code fiscal em conformidade com as regras da AGT.</li>

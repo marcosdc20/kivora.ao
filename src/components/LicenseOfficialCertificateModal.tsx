@@ -80,7 +80,7 @@ export const LicenseOfficialCertificateModal: React.FC<LicenseOfficialCertificat
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-950/70 flex justify-center print:p-0 print:m-0 print:bg-transparent print:overflow-visible">
           
           {/* =========================================================================
-              DOCUMENTO A4: CERTIFICADO DE LICENCIAMENTO DE SOFTWARE (KIVORA ERP)
+              DOCUMENTO A4: CERTIFICADO DE LICENCIAMENTO DE SOFTWARE (KIVORA SOFT)
               ========================================================================= */}
           <div className="printable-document certificate-document a4-document bg-white text-slate-900 w-full max-w-[800px] min-h-[1050px] p-5 sm:p-12 md:p-14 shadow-2xl flex flex-col justify-between relative print:shadow-none print:p-0 print:m-0 print:w-full print:max-w-none print:min-h-[265mm] font-sans">
             
@@ -88,12 +88,12 @@ export const LicenseOfficialCertificateModal: React.FC<LicenseOfficialCertificat
             <div className="w-full h-1.5 bg-slate-900 mb-6 print:mb-6 shrink-0" />
 
             <div className="space-y-6 sm:space-y-7 flex-1">
-              {/* Header Oficial: Kivora ERP */}
+              {/* Header Oficial: Kivora Soft */}
               <div className="flex items-start justify-between border-b-2 border-slate-900 pb-5">
                 <div className="space-y-1">
                   <img
                     src="/imagens/logo_sem_fundo.png"
-                    alt="Kivora ERP"
+                    alt="Kivora Soft"
                     className="h-10 w-auto object-contain mb-1.5"
                   />
                   <span className="font-black text-lg tracking-tight text-slate-950 block leading-tight">
@@ -128,7 +128,7 @@ export const LicenseOfficialCertificateModal: React.FC<LicenseOfficialCertificat
                   Certificado de Licenciamento de Software
                 </h1>
                 <p className="text-xs text-slate-600 font-semibold uppercase tracking-wider">
-                  Kivora ERP • Sistema de Gestão Comercial e Facturação Certificada
+                  Kivora Soft • Sistema de Gestão Comercial e Facturação Certificada
                 </p>
               </div>
 
@@ -143,7 +143,7 @@ export const LicenseOfficialCertificateModal: React.FC<LicenseOfficialCertificat
                   </h2>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed text-justify">
-                  Inscrita sob o NIF n.º <strong>{license.nif}</strong>, é titular legítima da licença de uso do software <strong>Kivora ERP</strong>, devidamente registada no servidor central de licenciamento e autorizada para emissão de faturas e gestão de operações em conformidade com as normas tributárias em vigor na República de Angola.
+                  Inscrita sob o NIF n.º <strong>{license.nif}</strong>, é titular legítima da licença de uso do software <strong>Kivora Soft</strong>, devidamente registada no servidor central de licenciamento e autorizada para emissão de faturas e gestão de operações em conformidade com as normas tributárias em vigor na República de Angola.
                 </p>
               </div>
 
@@ -168,7 +168,7 @@ export const LicenseOfficialCertificateModal: React.FC<LicenseOfficialCertificat
                     </tr>
                     <tr>
                       <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Produto & Edição:</td>
-                      <td className="py-3 px-4 text-slate-900 font-bold">Kivora ERP v2.4 (Edição Comercial & Multi-posto)</td>
+                      <td className="py-3 px-4 text-slate-900 font-bold">Kivora Soft v2.4 (Edição Comercial & Multi-posto)</td>
                     </tr>
                     <tr>
                       <td className="py-3 px-4 font-semibold text-slate-600 bg-slate-50/60">Plano / Modalidade:</td>
@@ -212,7 +212,7 @@ export const LicenseOfficialCertificateModal: React.FC<LicenseOfficialCertificat
                   Conformidade Legal & Fiscal AGT:
                 </p>
                 <p>
-                  O software Kivora ERP cumpre integralmente os requisitos de assinatura digital de faturas por chave criptográfica RSA-2048 e exportação do ficheiro SAF-T (AO), nos termos do Regime Jurídico das Facturas e do Decreto Presidencial n.º 71/25 da República de Angola.
+                  O software Kivora Soft cumpre integralmente os requisitos de assinatura digital de faturas por chave criptográfica RSA-2048 e exportação do ficheiro SAF-T (AO), nos termos do Regime Jurídico das Facturas e do Decreto Presidencial n.º 71/25 da República de Angola.
                 </p>
               </div>
             </div>

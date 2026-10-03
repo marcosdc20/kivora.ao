@@ -3,11 +3,16 @@ import { usePortalTrackpadScroll } from '../hooks/usePortalTrackpadScroll';
 import {
   LayoutDashboard, Key, Download, Cloud, FileText,
   Headphones, Building2, LogOut, Monitor, Copy,
-  CheckCircle2, ShieldCheck, Loader2, Send, Menu, X,
+  CheckCircle2, ShieldCheck, Loader2, Send, Menu,
   MessageSquare, Receipt, Printer, AlertTriangle, Ban,
-  Video, ShoppingBag, Truck, Package, ExternalLink
+  Video, ShoppingBag, Truck, Package, ExternalLink, Play
 } from 'lucide-react';
-import { KivoraLogo } from '../components/KivoraLogo';
+import {
+  PortalSidebar,
+  PortalNavItem,
+  PortalNavGroup,
+  PortalFooterButton,
+} from '../components/portal/PortalSidebar';
 import { CURRENT_RELEASE, KIVORA_INFO } from '../data/kivoraData';
 import { InvoicePrintModal } from '../components/InvoicePrintModal';
 import { VideoConferenceModal } from '../components/VideoConferenceModal';
@@ -313,6 +318,69 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
     { id: 'empresa', label: 'Minha Empresa & NIF', icon: Building2 },
   ];
 
+  /** Sidebar partilhada: uma única renderização para desktop e drawer móvel. */
+  const renderClientSidebar = (closeDrawer?: () => void): React.ReactElement => {
+    const toNavItem = (item: (typeof navItems)[number]): PortalNavItem<ClientSection> => {
+      const Icon = item.icon;
+      const base = {
+        id: item.id as ClientSection,
+        label: item.label,
+        icon: <Icon className="w-[18px] h-[18px]" strokeWidth={1.75} />,
+      };
+      if (item.badge !== undefined && item.badge > 0) {
+        return { ...base, badge: item.badge, badgeTone: 'slate' as const };
+      }
+      return base;
+    };
+
+    const groups: PortalNavGroup<ClientSection>[] = [
+      { title: 'Visão Geral', items: navItems.slice(0, 4).map(toNavItem) },
+      { title: 'Serviços & Gestão', items: navItems.slice(4).map(toNavItem) },
+    ];
+
+    return (
+      <PortalSidebar<ClientSection>
+        portalLabel="Área do Cliente"
+        groups={groups}
+        activeId={activeSection}
+        onSelect={(id: ClientSection) => {
+          setActiveSection(id);
+          closeDrawer?.();
+        }}
+        onClose={closeDrawer}
+        identity={
+          <div className="rounded-xl bg-white/[0.06] border border-white/[0.1] p-3 space-y-2">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-[#FF6500] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                {clientLicense.company_name ? clientLicense.company_name.slice(0, 2).toUpperCase() : 'CL'}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-white truncate">{clientLicense.company_name}</p>
+                <p className="text-[11px] text-slate-400 font-mono-num truncate">NIF: {clientLicense.nif}</p>
+              </div>
+            </div>
+            {clientLicense.is_provisional && (
+              <span className="text-[10px] font-semibold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30 block text-center">
+                Licença Provisória (7 Dias)
+              </span>
+            )}
+          </div>
+        }
+        footer={
+          <>
+            <PortalFooterButton
+              icon={<LogOut className="w-[18px] h-[18px]" strokeWidth={1.75} />}
+              label="Terminar sessão"
+              onClick={handleLogout}
+              tone="danger"
+            />
+            <p className="px-3 pt-2 text-[10px] text-slate-400">Certificado AGT FE/387/AGT/2026</p>
+          </>
+        }
+      />
+    );
+  };
+
   if (session?.status === 'suspended') {
     const whatsAppMessage = `Olá Suporte Kivora. A conta de acesso da minha empresa (${clientLicense.company_name}, NIF: ${clientLicense.nif}) encontra-se suspensa e pretendo solicitar o esclarecimento e regularização.`;
     const effectivePhoneRaw = (systemSettings.phoneRaw || KIVORA_INFO.phoneRaw || '').replace(/\D/g, '');
@@ -389,154 +457,38 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
         </div>
       )}
 
-      {/* Desktop Sidebar Executiva do Cliente */}
-      <aside className="hidden lg:flex w-64 bg-slate-950 text-white flex-col shrink-0 border-r border-slate-800/80">
-        <div className="p-5 border-b border-slate-800/80">
-          <KivoraLogo variant="light" size="sm" />
-          <div className="mt-3 flex items-center justify-between">
-            <span className="text-[10px] font-mono-num font-semibold uppercase tracking-wider text-slate-300 bg-slate-900 px-2.5 py-1 rounded-md border border-slate-800 flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Área do Cliente</span>
-            </span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Sincronizado com o Firebase Cloud" />
-          </div>
-        </div>
+      {/* Desktop Sidebar (componente partilhado entre painéis) */}
+      <div className="hidden lg:flex h-full shrink-0">
+        {renderClientSidebar()}
+      </div>
 
-        {/* Info Empresa */}
-        <div className="p-4 bg-slate-900/50 border-b border-slate-800/80 space-y-1">
-          <p className="text-xs font-semibold font-display text-white truncate">{clientLicense.company_name}</p>
-          <p className="text-[10px] text-slate-400 font-mono-num">NIF: {clientLicense.nif}</p>
-          {clientLicense.is_provisional && (
-            <span className="text-[9px] font-semibold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800/60 block mt-1">
-              ⏳ Licença Provisória (7 Dias)
-            </span>
-          )}
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto overscroll-contain">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = activeSection === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id as ClientSection)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-display font-medium transition-all text-left cursor-pointer ${
-                  active
-                    ? 'bg-white/10 text-white font-semibold border border-white/10 shadow-xs'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-900/80'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Icon className="w-4 h-4 shrink-0" />
-                  <span>{item.label}</span>
-                </div>
-                {item.badge !== undefined && item.badge > 0 && (
-                  <span className="bg-slate-800 text-slate-300 text-[10px] font-mono-num font-semibold px-2 py-0.5 rounded-full border border-slate-700/80">
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Logout Footer */}
-        <div className="p-4 border-t border-slate-800/80 space-y-2">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 bg-slate-900/80 hover:bg-rose-950/40 hover:text-rose-400 hover:border-rose-900/40 text-slate-400 text-xs font-display font-semibold py-2.5 rounded-xl transition-all border border-slate-800/80 cursor-pointer"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Terminar Sessão</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Mobile Drawer */}
+      {/* Drawer Mobile */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div
-            className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <aside className="relative w-72 max-w-[85vw] h-full bg-slate-950 text-white flex flex-col z-10 shadow-2xl border-r border-slate-800/80">
-            <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
-              <div>
-                <KivoraLogo variant="light" size="sm" />
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="text-[10px] font-mono-num font-semibold uppercase tracking-wider text-slate-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
-                    Área do Cliente
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="p-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-4 bg-slate-900/50 border-b border-slate-800/80">
-              <p className="text-xs font-semibold font-display text-white truncate">{clientLicense.company_name}</p>
-              <p className="text-[10px] text-slate-400 font-mono-num">NIF: {clientLicense.nif}</p>
-            </div>
-
-            <nav className="flex-1 p-3 space-y-1 overflow-y-auto overscroll-contain">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const active = activeSection === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveSection(item.id as ClientSection);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-display font-medium transition-all text-left cursor-pointer ${
-                      active
-                        ? 'bg-white/10 text-white font-semibold border border-white/10 shadow-xs'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-900/80'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Icon className="w-4 h-4 shrink-0" />
-                      <span>{item.label}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </nav>
-
-            <div className="p-4 border-t border-slate-800/80">
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-2 bg-slate-900/80 hover:bg-rose-950/40 hover:text-rose-400 text-slate-400 text-xs font-display font-semibold py-2.5 rounded-xl transition-all border border-slate-800/80 cursor-pointer"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Terminar Sessão</span>
-              </button>
-            </div>
-          </aside>
+          <div className="relative w-64 max-w-[85vw] h-full z-10 shadow-2xl">
+            {renderClientSidebar(() => setMobileMenuOpen(false))}
+          </div>
         </div>
       )}
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden w-full">
 
-        {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between shrink-0 shadow-xs gap-2">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        {/* Topbar unificada e limpa */}
+        <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 flex items-center justify-between shrink-0 gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden flex items-center justify-center p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer shrink-0"
-              title="Abrir Menu"
+              className="lg:hidden flex items-center justify-center p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+              aria-label="Abrir menu"
             >
-              <Menu className="w-4 h-4" />
+              <Menu className="w-5 h-5" />
             </button>
-            <h1 className="text-xs sm:text-base font-semibold font-display text-slate-900 tracking-tight truncate">
+            <h1 className="text-base sm:text-lg font-semibold font-display text-slate-900 tracking-tight truncate">
               {activeSection === 'dashboard' && 'Painel do Cliente'}
               {activeSection === 'licenca' && 'Minha Licença'}
               {activeSection === 'downloads' && 'Instaladores'}
@@ -548,12 +500,9 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
             </h1>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <div className="hidden xs:flex bg-emerald-50/80 border border-emerald-200/80 text-emerald-800 text-[10px] sm:text-[11px] font-semibold px-2.5 py-1 rounded-full items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span className="hidden sm:inline">Homologação AGT FE/387/AGT/2026</span>
-              <span className="sm:hidden font-mono">FE/387/AGT/2026</span>
-            </div>
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-[11px] font-medium text-slate-500 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            Certificado AGT FE/387/AGT/2026
           </div>
         </header>
 
@@ -568,9 +517,44 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
           {activeSection === 'dashboard' && (
             <div className="space-y-6">
 
+              {/* Banner Oficial do Cliente Configurado no Admin */}
+              {systemSettings.clientPortalBannerUrl && (
+                <div className="rounded-2xl overflow-hidden border border-slate-200/90 shadow-xs bg-slate-900 relative">
+                  <img
+                    src={systemSettings.clientPortalBannerUrl}
+                    alt="Banner Oficial da Empresa Cliente"
+                    className="w-full max-h-56 object-cover"
+                  />
+                </div>
+              )}
+
+              {/* Vídeo / Tutorial para o Cliente Configurado no Admin */}
+              {systemSettings.clientPortalVideoUrl && (
+                <div className="bg-gradient-to-r from-[#0B1528] to-[#1746A2] rounded-2xl p-5 border border-slate-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-orange-500/20 text-[#FF6500] border border-orange-500/30 flex items-center justify-center shrink-0">
+                      <Play className="w-5 h-5 fill-current" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white font-display">Tutorial em Vídeo & Primeiros Passos</h4>
+                      <p className="text-xs text-slate-300">Aprenda a operar o KIVORA SOFT, emitir faturas certificadas e gerir caixas com agilidade.</p>
+                    </div>
+                  </div>
+                  <a
+                    href={systemSettings.clientPortalVideoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#FF6500] hover:bg-[#EB5B00] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-2 transition-colors shrink-0 self-start sm:self-auto cursor-pointer"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>Assistir Vídeo</span>
+                  </a>
+                </div>
+              )}
+
               {/* Alerta de Expiração Próxima ou Licença Provisória */}
               {((clientLicense.expires_at && clientLicense.expires_at - Date.now() < 7 * 86400000) || clientLicense.is_provisional) && (
-                <div className="surface-card bg-amber-50/80 text-slate-950 p-5 rounded-2xl border border-amber-300/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fadeIn">
+                <div className="bg-amber-50 text-slate-950 p-5 rounded-xl border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-900 border border-amber-400/40 flex items-center justify-center shrink-0">
                       <AlertTriangle className="w-5 h-5 text-amber-700" />
@@ -596,9 +580,9 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
               {/* Seletor de Licenças (para empresas com múltiplos postos ou filiais) */}
               {matchedLicenses.length > 1 && (
-                <div className="surface-card p-4 rounded-2xl border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/80 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
                       <ShieldCheck className="w-4 h-4 text-slate-700" />
                     </div>
                     <div>
@@ -617,10 +601,10 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                         <button
                           key={lic.id}
                           onClick={() => setSelectedLicenseId(lic.id)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-display font-semibold transition-all cursor-pointer whitespace-nowrap border ${
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap border ${
                             isSel
-                              ? 'bg-slate-950 text-white border-slate-950 shadow-xs'
-                              : 'bg-slate-50 text-slate-700 border-slate-200/80 hover:bg-slate-100'
+                              ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                              : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                           }`}
                         >
                           Posto {idx + 1} ({getPlanLabel(lic.plan_type)})
@@ -631,98 +615,97 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                 </div>
               )}
 
-              {/* Banner Licença */}
-              <div className="surface-card bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white rounded-2xl p-6 sm:p-8 shadow-xs relative overflow-hidden border border-slate-800 space-y-4">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[10px] font-mono-num font-semibold uppercase tracking-wider text-slate-300 bg-white/10 px-2.5 py-1 rounded-md border border-white/10">
+              {/* Cartão de Identificação da Licença - Limpo e Claro */}
+              <div className="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 space-y-4 shadow-xs">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
                         {getPlanLabel(clientLicense.plan_type)}
                       </span>
                       {clientLicense.is_provisional && (
-                        <span className="text-[10px] font-mono-num font-semibold uppercase tracking-wider text-amber-300 bg-amber-950/80 px-2.5 py-1 rounded-md border border-amber-700/60">
-                          ⏳ Provisória (7 Dias)
+                        <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                          Provisória (7 Dias)
                         </span>
                       )}
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-semibold font-display tracking-tight">{clientLicense.company_name}</h2>
-                    <p className="text-xs text-slate-300 font-sans">
-                      Validade da Licença: <strong className="text-white font-mono-num font-semibold">{formatLicenseDate(clientLicense.expires_at)}</strong> • Base de Dados Local & Nuvem
+                    <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+                      {clientLicense.company_name}
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      NIF: <span className="font-mono-num font-semibold text-slate-700">{clientLicense.nif}</span> • Validade: <span className="font-mono-num font-semibold text-slate-700">{formatLicenseDate(clientLicense.expires_at)}</span>
                     </p>
                   </div>
 
-                  <div className="bg-white/5 backdrop-blur-md p-4 rounded-xl border border-white/10 space-y-2 text-left md:text-right">
-                    <p className="text-[10px] text-slate-400 uppercase font-semibold font-display tracking-wider">Chave de Ativação do Software</p>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono-num text-sm sm:text-base font-bold text-slate-100 select-all">{clientLicense.id}</span>
-                      <button
-                        onClick={handleCopyKey}
-                        className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors cursor-pointer"
-                        title="Copiar Chave"
-                      >
-                        {copiedKey ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
+                  <div className="flex items-center gap-2 bg-slate-50 px-3.5 py-2 rounded-lg border border-slate-200">
+                    <span className="font-mono-num text-xs sm:text-sm font-bold text-slate-800 select-all">{clientLicense.id}</span>
+                    <button
+                      onClick={handleCopyKey}
+                      className="p-1 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                      title="Copiar Chave"
+                    >
+                      {copiedKey ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
               </div>
 
               {/* Grid de Métricas */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="surface-card p-5 space-y-1 rounded-2xl border border-slate-200/80">
-                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider font-display">Estado Operacional</span>
-                  <p className="text-xl font-bold text-emerald-600 font-display flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span>{clientLicense.status === 'active' ? 'ATIVO' : 'SUSPENSO'}</span>
+                <div className="bg-white p-5 space-y-1 rounded-xl border border-slate-200 shadow-xs">
+                  <span className="text-xs font-medium text-slate-500">Estado Operacional</span>
+                  <p className="text-xl font-bold text-emerald-600 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span>{clientLicense.status === 'active' ? 'Ativo' : 'Suspenso'}</span>
                   </p>
-                  <span className="text-[11px] text-slate-500 font-sans">Validação online em dia</span>
+                  <span className="text-xs text-slate-400 block mt-1">Validação online em dia</span>
                 </div>
 
-                <div className="surface-card p-5 space-y-1 rounded-2xl border border-slate-200/80">
-                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider font-display">Terminais Licenciados</span>
+                <div className="bg-white p-5 space-y-1 rounded-xl border border-slate-200 shadow-xs">
+                  <span className="text-xs font-medium text-slate-500">Terminais Licenciados</span>
                   <p className="text-xl font-bold text-slate-900 font-mono-num">
                     {clientLicense.hardware_id ? 1 : 0} de {1 + (clientLicense.extra_seats || 0)} PC(s)
                   </p>
-                  <span className="text-[11px] text-slate-500 font-sans">Rede Local com SQLite/PostgreSQL</span>
+                  <span className="text-xs text-slate-400 block mt-1">Rede Local com SQLite</span>
                 </div>
 
-                <div className="surface-card p-5 space-y-1 rounded-2xl border border-slate-200/80">
-                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider font-display">Versão Oficial Kivora</span>
+                <div className="bg-white p-5 space-y-1 rounded-xl border border-slate-200 shadow-xs">
+                  <span className="text-xs font-medium text-slate-500">Versão Oficial Kivora</span>
                   <p className="text-xl font-bold text-slate-900 font-mono-num">v{CURRENT_RELEASE.version}</p>
-                  <span className="text-[11px] text-emerald-600 font-semibold font-sans">Motor Fiscal AGT Atualizado</span>
+                  <span className="text-xs text-emerald-600 font-medium block mt-1">Motor Fiscal AGT Atualizado</span>
                 </div>
 
-                <div className="surface-card p-5 space-y-1 rounded-2xl border border-slate-200/80">
-                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider font-display">Chamados de Suporte</span>
+                <div className="bg-white p-5 space-y-1 rounded-xl border border-slate-200 shadow-xs">
+                  <span className="text-xs font-medium text-slate-500">Chamados de Suporte</span>
                   <p className="text-xl font-bold text-slate-900 font-mono-num">{myTickets.length}</p>
-                  <span className="text-[11px] text-slate-500 font-sans">Atendimento direto</span>
+                  <span className="text-xs text-slate-400 block mt-1">Atendimento direto</span>
                 </div>
               </div>
 
               {/* Ações Rápidas */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="surface-card p-6 rounded-2xl border border-slate-200/80 space-y-4">
-                  <h3 className="text-sm font-semibold font-display text-slate-900 flex items-center gap-2">
-                    <Download className="w-4 h-4 text-slate-800" />
-                    <span>Instalar Kivora Desktop ERP</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white p-5 rounded-xl border border-slate-200 space-y-4 shadow-xs">
+                  <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                    <Download className="w-4 h-4 text-slate-700" />
+                    <span>Instalar Kivora Soft Desktop</span>
                   </h3>
                   <p className="text-xs text-slate-500 leading-relaxed font-sans">
                     Descarregue o instalador oficial completo para configurar um novo terminal ou formatar o computador de caixa.
                   </p>
-                  <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200/70 flex items-center justify-between text-xs font-semibold">
-                    <span className="font-display text-slate-800">Setup Kivora v{CURRENT_RELEASE.version} (64-bit)</span>
+                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-between text-xs font-semibold">
+                    <span className="text-slate-800">Setup Kivora v{CURRENT_RELEASE.version} (64-bit)</span>
                     <span className="text-slate-500 font-mono-num text-[11px]">{CURRENT_RELEASE.fileSize}</span>
                   </div>
                   <button
                     onClick={() => setActiveSection('downloads')}
-                    className="w-full bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs py-2.5 rounded-xl shadow-xs transition-all cursor-pointer text-center block active:scale-[0.98]"
+                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-2 rounded-lg transition-colors cursor-pointer text-center block"
                   >
                     Aceder aos Downloads Oficiais
                   </button>
                 </div>
 
-                <div className="surface-card p-6 rounded-2xl border border-slate-200/80 space-y-4">
-                  <h3 className="text-sm font-semibold font-display text-slate-900 flex items-center gap-2">
+                <div className="bg-white p-5 rounded-xl border border-slate-200 space-y-4 shadow-xs">
+                  <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                     <Headphones className="w-4 h-4 text-emerald-600" />
                     <span>Apoio Técnico & Suporte Fiscal</span>
                   </h3>
@@ -731,7 +714,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                   </p>
                   <button
                     onClick={() => setActiveSection('suporte')}
-                    className="w-full bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs py-2.5 rounded-xl shadow-xs transition-all cursor-pointer text-center block active:scale-[0.98]"
+                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-2 rounded-lg transition-colors cursor-pointer text-center block"
                   >
                     Abrir Chamado de Assistência
                   </button>
@@ -743,19 +726,19 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
           {/* SECTION: MINHA LICENÇA */}
           {activeSection === 'licenca' && (
-            <div className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 max-w-3xl">
+            <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6 max-w-3xl shadow-xs">
               <div>
-                <h2 className="text-lg font-semibold font-display text-slate-900 tracking-tight">Detalhes da Licença & Computadores</h2>
+                <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Detalhes da Licença & Computadores</h2>
                 <p className="text-xs text-slate-500 font-sans mt-0.5">Informações técnicas de ativação do software no seu computador.</p>
               </div>
 
-              <div className="surface-card bg-slate-950 text-white p-6 rounded-xl space-y-3 border border-slate-800">
-                <p className="text-xs text-slate-400 uppercase font-semibold font-display tracking-wider">Chave de Ativação do Software</p>
+              <div className="bg-slate-900 text-white p-5 rounded-xl space-y-3 border border-slate-800">
+                <p className="text-xs text-slate-400 uppercase font-semibold tracking-wider">Chave de Ativação do Software</p>
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <span className="font-mono-num text-xl font-bold text-slate-100 select-all">{clientLicense.id}</span>
                   <button
                     onClick={handleCopyKey}
-                    className="bg-white/10 hover:bg-white/20 text-white text-xs font-display font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+                    className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     {copiedKey ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                     <span>{copiedKey ? 'Copiada!' : 'Copiar Chave'}</span>
@@ -787,7 +770,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                     <div>
                       <p className="font-semibold font-display text-slate-900">PC Principal de Caixa / Servidor</p>
                       <p className="text-[10px] text-slate-500 font-mono-num truncate max-w-xs sm:max-w-md">
-                        {clientLicense.hardware_id ? `ID: ${clientLicense.hardware_id}` : 'Aguardando 1º uso no ERP'}
+                        {clientLicense.hardware_id ? `ID: ${clientLicense.hardware_id}` : 'Aguardando 1º uso no software'}
                       </p>
                     </div>
                   </div>
@@ -796,7 +779,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 font-sans leading-relaxed">
-                  Para trocar de computador, solicite a desvinculação através da Central de Suporte ou diretamente com o seu parceiro Kivora homologado.
+                  Para trocar de computador, solicite a desvinculação através da Central de Suporte ou diretamente com o seu parceiro Kivora credenciado.
                 </p>
               </div>
             </div>
@@ -806,7 +789,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
           {activeSection === 'downloads' && (
             <div className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6">
               <div>
-                <h2 className="text-lg font-semibold font-display text-slate-900 tracking-tight">Instaladores Oficiais Kivora ERP</h2>
+                <h2 className="text-lg font-semibold font-display text-slate-900 tracking-tight">Instaladores Oficiais Kivora Soft</h2>
                 <p className="text-xs text-slate-500 font-sans mt-0.5">
                   Descarregue os instaladores oficiais para Windows e os drivers de periféricos de caixa.
                 </p>
@@ -821,7 +804,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                       </span>
                       <span className="text-xs text-slate-500 font-mono-num">{CURRENT_RELEASE.fileSize}</span>
                     </div>
-                    <h3 className="text-base font-semibold font-display text-slate-900">Kivora ERP — Setup Windows (x64)</h3>
+                    <h3 className="text-base font-semibold font-display text-slate-900">Kivora Soft — Setup Windows (x64)</h3>
                     <p className="text-xs text-slate-500 leading-relaxed font-sans">
                       Instalador completo que inclui o motor de faturação certificada AGT, gestão de stock, fecho de caixa POS e base de dados local.
                     </p>
@@ -1011,7 +994,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                   <span>Proteção Total Contra Falhas de Hardware & Ransomware</span>
                 </div>
                 <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
-                  O Kivora ERP no seu computador realiza backups automáticos da base de dados local sempre que efetua o fecho de turno ou de caixa, protegendo os seus dados fiscais, clientes e existências de stock.
+                  O Kivora Soft no seu computador realiza backups automáticos da base de dados local sempre que efetua o fecho de turno ou de caixa, protegendo os seus dados fiscais, clientes e existências de stock.
                 </p>
               </div>
 
@@ -1063,7 +1046,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                   <span>Como restaurar uma cópia de segurança em caso de troca de computador:</span>
                 </h4>
                 <ol className="list-decimal list-inside space-y-1 text-slate-600 text-[11px] leading-relaxed font-sans">
-                  <li>Instale o Kivora ERP no novo computador a partir do menu <strong>Downloads</strong>.</li>
+                  <li>Instale o Kivora Soft no novo computador a partir do menu <strong>Downloads</strong>.</li>
                   <li>Inicie o software e introduza a sua chave de ativação <strong className="font-mono-num">{clientLicense.id}</strong>.</li>
                   <li>No menu <em>Definições &gt; Manutenção &gt; Restaurar Cópia</em>, selecione o ficheiro <code className="font-mono-num">.db</code> ou <code className="font-mono-num">.kvr</code> guardado no seu pendrive ou disco externo.</li>
                 </ol>
@@ -1091,7 +1074,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-mono-num font-semibold text-slate-900">{inv.invoice_number || inv.id}</span>
-                            <span className="font-medium text-slate-700 font-display">— {inv.plan_label || 'Subscrição Kivora ERP'}</span>
+                            <span className="font-medium text-slate-700 font-display">— {inv.plan_label || 'Subscrição Kivora Soft'}</span>
                             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
                               inv.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' : 'bg-amber-50 text-amber-700 border-amber-200/80'
                             }`}>
@@ -1148,7 +1131,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                       <div key={lic.id} className="p-4 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50/80 transition-colors">
                         <div>
                           <div className="flex items-center gap-2">
-                            <p className="font-semibold font-display text-slate-900">{getPlanLabel(lic.plan_type)} — Kivora Desktop ERP</p>
+                            <p className="font-semibold font-display text-slate-900">{getPlanLabel(lic.plan_type)} — Kivora Soft Desktop</p>
                             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
                               lic.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' : 'bg-rose-50 text-rose-700 border-rose-200/80'
                             }`}>

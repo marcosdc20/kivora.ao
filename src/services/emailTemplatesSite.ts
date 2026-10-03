@@ -1,5 +1,5 @@
 /**
- * Motor de Templates HTML para E-mails Corporativos — KIVORA Cloud ERP
+ * Motor de Templates HTML para E-mails Corporativos — KIVORA SOFT
  * Padrão Executivo, Moderno e Profissional (Sem emojis informais / Sem estética genérica de IA)
  * Desenvolvido pela Visual Software, Lda
  */
@@ -201,7 +201,7 @@ const getEmailBaseLayout = (title: string, contentHtml: string, footerNote?: str
       <tr>
         <td class="header">
           <a href="https://kivora.ao" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-            <img src="${LOGO_URL}" alt="KIVORA ERP" width="140" border="0" style="display: block; margin: 0 auto 12px auto; max-width: 140px; height: auto;" />
+            <img src="${LOGO_URL}" alt="KIVORA SOFT" width="140" border="0" style="display: block; margin: 0 auto 12px auto; max-width: 140px; height: auto;" />
           </a>
           <p class="header-tagline">Sistema de Gestão Empresarial Certificado pela AGT</p>
         </td>
@@ -217,7 +217,7 @@ const getEmailBaseLayout = (title: string, contentHtml: string, footerNote?: str
       <!-- FOOTER -->
       <tr>
         <td class="footer">
-          <p><strong>KIVORA Cloud ERP • VISUAL SOFTWARE, LDA</strong></p>
+          <p><strong>KIVORA SOFT • VISUAL SOFTWARE, LDA</strong></p>
           <p>Software de Faturação e Gestão Comercial Certificado pela AGT • Angola</p>
           <p>Suporte Técnico: <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a> | Geral: <a href="mailto:${COMMERCIAL_EMAIL}">${COMMERCIAL_EMAIL}</a></p>
           ${footerNote ? `<p style="margin-top: 12px; color: #94a3b8; font-size: 10.5px; border-top: 1px solid #e2e8f0; padding-top: 10px;">${footerNote}</p>` : ''}
@@ -249,7 +249,7 @@ export const generateClientCredentialsTemplate = (data: {
   const content = `
     <h1>Ativação de Conta e Credenciais de Acesso</h1>
     <p>Prezado(a) <strong>${data.adminName}</strong>,</p>
-    <p>Confirmamos a ativação da conta da sua empresa <strong>${data.companyName}</strong> (NIF: ${data.nif}) na infraestrutura KIVORA Cloud ERP.</p>
+    <p>Confirmamos a ativação da conta da sua empresa <strong>${data.companyName}</strong> (NIF: ${data.nif}) na infraestrutura KIVORA SOFT.</p>
     
     <div class="card-highlight">
       <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-bottom: 8px;">Dados da Conta e Licença</div>
@@ -283,13 +283,13 @@ export const generateClientCredentialsTemplate = (data: {
 
     <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-top: 24px; margin-bottom: 8px;">Procedimento de Inicialização:</div>
     <ol style="padding-left: 20px; color: #334155; font-size: 13.5px; line-height: 1.7; margin: 0 0 20px 0;">
-      <li>Efetue o download do instalador oficial do KIVORA ERP.</li>
+      <li>Efetue o download do instalador oficial do KIVORA SOFT.</li>
       <li>Abra o aplicativo no seu computador e introduza a <strong>Chave de Ativação</strong> e o NIF da empresa.</li>
       <li>Inicie sessão com o seu e-mail e configure as tabelas iniciais de produtos e operadores.</li>
     </ol>
 
     <div style="text-align: center; margin: 24px 0 10px 0;">
-      <a href="${downloadLink}" class="btn-blue">Descarregar KIVORA ERP (Instalador Oficial)</a>
+      <a href="${downloadLink}" class="btn-blue">Descarregar KIVORA SOFT (Instalador Oficial)</a>
       <div style="margin-top: 12px;">
         <a href="${portalLink}" style="color: #2563eb; font-weight: 600; font-size: 13px; text-decoration: underline;">Aceder ao Portal do Cliente Web</a>
       </div>
@@ -314,7 +314,7 @@ export const generateLicenseDeliveryTemplate = (data: {
   const content = `
     <h1>Emissão de Licença de Utilização</h1>
     <p>Prezada equipa da <strong>${data.companyName}</strong>,</p>
-    <p>Apresentamos os parâmetros oficiais da licença emitida para a sua entidade no sistema KIVORA ERP:</p>
+    <p>Apresentamos os parâmetros oficiais da licença emitida para a sua entidade no sistema KIVORA SOFT:</p>
 
     <div class="card-box">
       <table class="table-data">
@@ -352,11 +352,11 @@ export const generateLicenseDeliveryTemplate = (data: {
     <p style="font-size: 13px; color: #64748b;">Para registar ou renovar a licença, abra a aplicação no terminal, aceda ao menu <strong>Configurações &rarr; Licenciamento</strong> e insira o código fornecido.</p>
   `;
 
-  return getEmailBaseLayout('Emissão de Licença KIVORA ERP', content);
+  return getEmailBaseLayout('Emissão de Licença KIVORA SOFT', content);
 };
 
 /**
- * 3. Template: Credenciais de Parceiro Homologado
+ * 3. Template: Credenciais de Parceiro Credenciado
  */
 export const generatePartnerCredentialsTemplate = (data: {
   partnerName: string;
@@ -367,9 +367,9 @@ export const generatePartnerCredentialsTemplate = (data: {
 }): string => {
   const portalLink = data.portalUrl || PORTAL_URL;
   const content = `
-    <h1>Homologação de Parceria e Credenciais de Acesso</h1>
+    <h1>Credenciamento de Parceria e Credenciais de Acesso</h1>
     <p>Prezado(a) <strong>${data.partnerName}</strong>,</p>
-    <p>Temos a satisfação de confirmar que a sua entidade foi formalmente homologada como <strong>Canal Credenciado de Distribuição e Suporte Técnico</strong> do KIVORA ERP.</p>
+    <p>Temos a satisfação de confirmar que a sua entidade foi formalmente credenciada como <strong>Canal Credenciado de Distribuição e Suporte Técnico</strong> do KIVORA SOFT.</p>
     
     <div class="card-highlight">
       <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-bottom: 8px;">Credenciais do Portal do Parceiro</div>
@@ -398,7 +398,7 @@ export const generatePartnerCredentialsTemplate = (data: {
     <ul style="padding-left: 20px; color: #334155; font-size: 13.5px; line-height: 1.7; margin: 0 0 20px 0;">
       <li>Emissão e ativação autónoma de licenças oficiais em tempo real para os seus clientes.</li>
       <li>Consulta da tabela escalonada de preços de atacado e margens de revenda.</li>
-      <li>Emissão de Certificados Oficiais de Homologação Técnica perante a Visual Software.</li>
+      <li>Emissão de Certificados Oficiais de Credenciamento Técnico perante a Visual Software.</li>
       <li>Acompanhamento de quotas de crédito operacional e extrato de liquidações.</li>
     </ul>
 
@@ -407,7 +407,7 @@ export const generatePartnerCredentialsTemplate = (data: {
     </div>
   `;
 
-  return getEmailBaseLayout('Credenciais de Parceiro Homologado KIVORA', content, 'Recomendamos a alteração da palavra-passe provisória no primeiro acesso.');
+  return getEmailBaseLayout('Credenciais de Parceiro Credenciado KIVORA SOFT', content, 'Recomendamos a alteração da palavra-passe provisória no primeiro acesso.');
 };
 
 /**
@@ -461,7 +461,7 @@ export const generatePartnerApplicationCandidateTemplate = (data: {
   const content = `
     <h1>Confirmação de Receção de Candidatura</h1>
     <p>Prezado(a) <strong>${data.nome}</strong>,</p>
-    <p>Agradecemos a submissão da proposta de parceria para a sua entidade <strong>${data.empresa}</strong> perante o programa de canais da KIVORA ERP.</p>
+    <p>Agradecemos a submissão da proposta de parceria para a sua entidade <strong>${data.empresa}</strong> perante o programa de canais do KIVORA SOFT.</p>
     
     <div class="card-highlight">
       <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-bottom: 8px;">Protocolo de Candidatura Registado</div>
@@ -482,7 +482,7 @@ export const generatePartnerApplicationCandidateTemplate = (data: {
       </table>
     </div>
 
-    <p style="font-size: 13.5px; color: #475569;">A nossa Direção de Canais analisará a conformidade técnica e documental do processo. O parecer formal e as credenciais de homologação serão comunicados no prazo de 24 a 48 horas úteis.</p>
+    <p style="font-size: 13.5px; color: #475569;">A nossa Direção de Canais analisará a conformidade técnica e documental do processo. O parecer formal e as credenciais de acesso serão comunicados no prazo de 24 a 48 horas úteis.</p>
   `;
 
   return getEmailBaseLayout(`Candidatura a Parceiro KIVORA — ${data.protocol}`, content);
@@ -530,7 +530,7 @@ export const generateDemoLeadCustomerTemplate = (data: {
     <p style="font-size: 13px; color: #64748b;">Caso necessite de esclarecimentos adicionais, poderá contactar a nossa linha direta comercial através do endereço <a href="mailto:${COMMERCIAL_EMAIL}">${COMMERCIAL_EMAIL}</a>.</p>
   `;
 
-  return getEmailBaseLayout(`Demonstração KIVORA ERP — ${data.companyName}`, content);
+  return getEmailBaseLayout(`Demonstração KIVORA SOFT — ${data.companyName}`, content);
 };
 
 /**
@@ -654,7 +654,7 @@ export const generateBroadcastTemplate = (data: {
     </div>
     <div style="margin-top: 24px; font-size: 13.5px; color: #475569;">
       Atenciosamente,<br>
-      <strong style="color: #0f172a;">${data.senderTitle || 'Direção de Operações & Suporte KIVORA ERP'}</strong><br>
+      <strong style="color: #0f172a;">${data.senderTitle || 'Direção de Operações & Suporte KIVORA SOFT'}</strong><br>
       <span style="font-size: 12px; color: #64748b;">VISUAL SOFTWARE, LDA</span>
     </div>
   `;
@@ -673,7 +673,7 @@ export const generateSiteTestEmailTemplate = (providerName: string): string => {
       </div>
       <h1>Verificação do Servidor de Envio de E-mails</h1>
       <p style="color: #334155; font-size: 14px; max-width: 480px; margin: 0 auto 20px auto;">
-        O motor de mensageria e notificações do <strong>KIVORA Cloud ERP</strong> está operacional e apto a expedir credenciais, licenças e comunicações corporativas.
+        O motor de mensageria e notificações do <strong>KIVORA SOFT</strong> está operacional e apto a expedir credenciais, licenças e comunicações corporativas.
       </p>
       
       <div class="card-box" style="display: inline-block; text-align: left; max-width: 420px; width: 100%; margin: 10px auto;">

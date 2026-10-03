@@ -175,7 +175,7 @@ export const ManuaisPage: React.FC<ManuaisPageProps> = ({ onOpenDemoModal, onNav
       tempoLeitura: '4 min',
       passos: [
         'Ligue o cabo USB ou cabo de rede Ethernet da impressora ao computador ou router.',
-        'No KIVORA ERP, vá a Definições > Dispositivos & Periféricos > Impressora de Talões.',
+        'No KIVORA SOFT, vá a Definições > Dispositivos & Periféricos > Impressora de Talões.',
         'Selecione o modelo (ESC/POS Genérico 80mm, Epson TM-T20, Bixolon ou Xprinter).',
         'Clique em "Imprimir Talão de Teste". A impressora imprimirá o logotipo da KIVORA e efetuará o corte automático de papel.',
       ],

@@ -118,7 +118,7 @@ export default async function handler(req: any, res: any) {
       });
 
       const mailOptions: any = {
-        from: typeof from === 'string' && from.includes('@') ? from : `"KIVORA ERP" <${user}>`,
+        from: typeof from === 'string' && from.includes('@') ? from : `"KIVORA SOFT" <${user}>`,
         subject,
         html,
         text,
@@ -164,7 +164,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // ── PROVEDOR 3: RESEND API ──────────────────────────────────────────────────
-    const fromResend = typeof from === 'string' ? from : `${from?.name || 'KIVORA ERP'} <${from?.email || 'kivora.angola@gmail.com'}>`;
+    const fromResend = typeof from === 'string' ? from : `${from?.name || 'KIVORA SOFT'} <${from?.email || 'kivora.angola@gmail.com'}>`;
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {

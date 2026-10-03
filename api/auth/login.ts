@@ -448,7 +448,7 @@ export default async function handler(req: any, res: any) {
       id: uid,
       email: u.email || cleanId,
       role,
-      nome: u.nome || u.name || (foundUser.isPartner ? 'Parceiro Homologado' : 'Cliente Kivora'),
+      nome: u.nome || u.name || (foundUser.isPartner ? 'Parceiro Credenciado' : 'Cliente Kivora'),
       nif: u.nif || undefined,
       partnerCode: u.code || u.partnerCode || undefined,
       companyName: u.companyName || u.empresa || undefined,

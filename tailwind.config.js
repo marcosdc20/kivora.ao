@@ -33,6 +33,17 @@ export default {
           dark: '#0F172A',
         },
         brand: {
+          50: '#EFF6FF',
+          100: '#DBEAFE',
+          200: '#BFDBFE',
+          300: '#93C5FD',
+          400: '#60A5FA',
+          500: '#2563EB',
+          600: '#1746A2', // Kivora Blue Oficial
+          700: '#1E40AF',
+          800: '#1E3A8A',
+          900: '#172554',
+          950: '#0A192F', // Kivora Navy Oficial
           navy: '#0A192F',
           'navy-dark': '#071120',
           blue: '#1746A2',

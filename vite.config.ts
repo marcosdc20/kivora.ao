@@ -89,7 +89,7 @@ function devEmailPlugin(): Plugin {
               });
 
               const mailOptions: any = {
-                from: typeof from === 'string' && from.includes('@') ? from : `"KIVORA ERP" <${user}>`,
+                from: typeof from === 'string' && from.includes('@') ? from : `"KIVORA SOFT" <${user}>`,
                 subject,
                 html,
                 text,
@@ -145,7 +145,7 @@ function devEmailPlugin(): Plugin {
             // 3. Resend API
             const fromStr = typeof from === 'string'
               ? from
-              : `${from?.name || 'KIVORA ERP'} <${from?.email || 'kivora.angola@gmail.com'}>`;
+              : `${from?.name || 'KIVORA SOFT'} <${from?.email || 'kivora.angola@gmail.com'}>`;
 
             const resendRes = await fetch('https://api.resend.com/emails', {
               method: 'POST',

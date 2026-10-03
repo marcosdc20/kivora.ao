@@ -177,7 +177,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
   const handleRevoke = async (key: string) => {
     const confirmed = await confirmDialog({
       title: 'Revogar Licença',
-      message: `Tem certeza que deseja revogar a licença ${key}? Ela será imediatamente bloqueada no Kivora ERP.`,
+      message: `Tem certeza que deseja revogar a licença ${key}? Ela será imediatamente bloqueada no KIVORA SOFT.`,
       confirmText: 'Sim, Revogar',
       variant: 'danger',
     });
@@ -301,7 +301,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
     <div className="w-full min-w-0 flex flex-col font-sans pb-12">
       <AdminTopbar
         title="Gestão de Licenças (Firebase Cloud)"
-        subtitle="Emissão, aumento de terminais e controlo em tempo real de licenças do software Kivora ERP"
+        subtitle="Emissão, aumento de terminais e controlo em tempo real de licenças do software KIVORA SOFT"
         actions={
           <div className="flex items-center gap-2">
             <button
@@ -1144,7 +1144,7 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
           </div>
           <div>
             <h2 className="text-2xl font-black text-slate-950">Chave de Licença Gravada no Firebase!</h2>
-            <p className="text-xs text-slate-500 mt-1">O cliente já pode inserir esta chave no Kivora ERP para ativar online.</p>
+            <p className="text-xs text-slate-500 mt-1">O cliente já pode inserir esta chave no KIVORA SOFT para ativar online.</p>
           </div>
           <div className="bg-slate-950 text-white rounded-3xl p-6 space-y-3 shadow-xl">
             <p className="text-slate-400 text-[10px] uppercase tracking-widest font-bold">Chave de Licença Oficial</p>
@@ -1182,7 +1182,7 @@ export const AdminCriarLicenca: React.FC<CriarLicencaProps> = ({ onBack }) => {
             <button
               type="button"
               onClick={() => {
-                const text = `*KIVORA ERP — Dados de Ativação*\n\n` +
+                const text = `*KIVORA SOFT — Dados de Ativação*\n\n` +
                   `Empresa: ${createdLicense.company_name}\n` +
                   `NIF: ${createdLicense.nif}\n` +
                   `Plano: ${getPlanLabel(createdLicense.plan_type)}\n` +

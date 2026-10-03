@@ -1,7 +1,7 @@
 import confetti from 'canvas-confetti';
 
 /**
- * Disparo de confetes elegante e institucional com as cores da identidade Kivora ERP
+ * Disparo de confetes elegante e institucional com as cores da identidade KIVORA SOFT
  * (Azul Royal, Ciano Tecnológico, Dourado Ouro e Esmeralda)
  */
 export function triggerKivoraConfetti() {

@@ -32,7 +32,7 @@ const GUIDES: GuideItem[] = [
     title: 'Guia de Emissão de Faturas Eletrónicas com QR Code & Hash RS256',
     readTime: '4 min',
     summary: 'Passo a passo para emitir Faturas, Faturas-Recibo e Notas de Crédito em conformidade com o Decreto Presidencial n.º 71/25.',
-    overview: 'O Kivora ERP assegura a assinatura criptográfica sequencial em cada documento emitido, gerando o Hash RS256 e o QR Code de autenticação fiscal imediata.',
+    overview: 'O Kivora Soft assegura a assinatura criptográfica sequencial em cada documento emitido, gerando o Hash RS256 e o QR Code de autenticação fiscal imediata.',
     steps: [
       { title: '1. Aceder ao Módulo de Vendas', desc: 'No menu principal do Kivora, clique em Faturação ou pressione a tecla de atalho F3.' },
       { title: '2. Selecionar o Tipo de Documento', desc: 'Escolha Fatura (FT), Fatura-Recibo (FR) ou Fatura Pró-forma (FP) consoante a transação comercial.' },
@@ -68,7 +68,7 @@ const GUIDES: GuideItem[] = [
     title: 'Configuração de Rede Local (LAN) sem Depender de Internet',
     readTime: '6 min',
     summary: 'Como ligar múltiplos postos de trabalho (caixas e gerência) em rede local partilhando a mesma base de dados.',
-    overview: 'O Kivora ERP opera de forma ultrarrápida em rede local. Um computador assume o papel de Servidor e os postos clientes conectam-se por cabo de rede ou Wi-Fi interno.',
+    overview: 'O Kivora Soft opera de forma ultrarrápida em rede local. Um computador assume o papel de Servidor e os postos clientes conectam-se por cabo de rede ou Wi-Fi interno.',
     steps: [
       { title: '1. Instalar o Servidor Central', desc: 'No computador principal (servidor da loja), execute o setup e marque a opção "Criar Servidor Local".' },
       { title: '2. Obter o Endereço IP do Servidor', desc: 'No computador servidor, abra a aplicação Kivora e anote o IP exibido em Configurações > Rede (ex: 192.168.1.100).' },
@@ -85,7 +85,7 @@ const GUIDES: GuideItem[] = [
     title: 'Fecho de Turno de Caixa e Emissão do Relatório Z',
     readTime: '3 min',
     summary: 'Como realizar a contagem física de valores, conferir vendas por TPA/Numerário e fechar o turno com rigor.',
-    overview: 'O fecho de caixa cego do Kivora ERP assegura que o operador insere o montante real apurado sem visualizar previamente os totais do sistema.',
+    overview: 'O fecho de caixa cego do Kivora Soft assegura que o operador insere o montante real apurado sem visualizar previamente os totais do sistema.',
     steps: [
       { title: '1. Aceder a Gestão de Caixa > Fechar Turno', desc: 'No ecrã do POS, clique no botão "Fechar Caixa" ou use o atalho F12.' },
       { title: '2. Contagem Cega das Moedas e Notas', desc: 'Insira o montante apurado em numerário na gaveta e os totais emitidos pelos terminais TPA Multicaixa.' },
@@ -334,7 +334,7 @@ export const RecursosPage: React.FC<RecursosPageProps> = ({ onNavigatePage }) =>
             {/* Footer Modal */}
             <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
               <span className="text-[11px] text-slate-500 font-medium">
-                Documentação Oficial KIVORA ERP v2026.08
+                Documentação Oficial KIVORA SOFT v2026.08
               </span>
               <button
                 onClick={() => setSelectedGuide(null)}

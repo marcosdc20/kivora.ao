@@ -8,9 +8,14 @@ import {
   RefreshCw, Ban, ShieldCheck, Printer, Calculator,
   ExternalLink, Lock, Check, Share2, Award,
   Unlink, UserPlus, Receipt, ArrowRight, PhoneCall,
-  Wallet, CreditCard, Clock, Save, Video, Eye, EyeOff, Loader2
+  Wallet, CreditCard, Clock, Save, Video, Eye, EyeOff, Loader2, Play
 } from 'lucide-react';
-import { KivoraLogo } from '../components/KivoraLogo';
+import {
+  PortalSidebar,
+  PortalNavItem,
+  PortalNavGroup,
+  PortalFooterButton,
+} from '../components/portal/PortalSidebar';
 import { CURRENT_RELEASE, KIVORA_INFO } from '../data/kivoraData';
 import { InvoicePrintModal } from '../components/InvoicePrintModal';
 import { VideoConferenceModal } from '../components/VideoConferenceModal';
@@ -44,7 +49,7 @@ import {
 import {
   subscribePartnerPricing, subscribePartnerDebts, recordPartnerDebt,
   subscribePartnerAccount, deductPartnerWallet, getActiveCreditSlots,
-  hasOverdueDebts, getOldestUnpaidDebtDays, reconcilePartnerDebtsWithLicenses,
+  hasOverdueDebts, reconcilePartnerDebtsWithLicenses,
   subscribePartnerPolicy, DEFAULT_PARTNER_POLICY,
   DEFAULT_PARTNER_PRICING, PartnerPricingPlan, PartnerDebtEntry, PartnerAccount, PartnerLicensingPolicy,
   getPartnerSeatCost
@@ -781,7 +786,6 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   const availableCreditSlots = Math.max(0, creditSlotsLimit - activeSlotsInUse);
   const overdueDaysLimit = partnerAccount?.overdue_days_limit || policy.overdue_tolerance_days || 15;
   const isOverdue = hasOverdueDebts(effectiveDebts, overdueDaysLimit);
-  const oldestDebtDays = getOldestUnpaidDebtDays(effectiveDebts);
 
   const totalPendingDebt = effectiveDebts.filter((d) => !d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
   const totalPaidToKivora = effectiveDebts.filter((d) => d.paid).reduce((acc, d) => acc + d.cost_aoa, 0);
@@ -1018,7 +1022,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
   };
 
   const handleShareWhatsapp = (lic: KivoraLicense) => {
-    const text = `*KIVORA DESKTOP ERP — Dados de Ativação*\n\n` +
+    const text = `*KIVORA SOFT DESKTOP — Dados de Ativação*\n\n` +
       `Olá *${lic.company_name}*,\n` +
       `A sua licença oficial Kivora foi gerada com sucesso!\n\n` +
       `• *Chave de Ativação:* \`${lic.id}\`\n` +
@@ -1026,7 +1030,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
       `• *Validade:* ${formatLicenseDate(lic.expires_at)}\n` +
       `• *Terminais Incluídos:* ${1 + (lic.extra_seats || 0)} Computador(es)\n\n` +
       `• *Download do Instalador:* ${window.location.origin}/#download\n\n` +
-      `Para ativar: Abra o Kivora ERP no seu PC, aceda a Menu > Licenciamento e cole a chave acima.\n` +
+      `Para ativar: Abra o Kivora Soft no seu PC, aceda a Menu > Licenciamento e cole a chave acima.\n` +
       `Em caso de dúvidas, estamos à sua disposição!`;
 
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
@@ -1458,6 +1462,87 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     );
   }
 
+  /** Sidebar partilhada: uma única renderização para desktop e drawer móvel. */
+  const renderPartnerSidebar = (closeDrawer?: () => void): React.ReactElement => {
+    const toNavItem = (item: (typeof navItems)[number]): PortalNavItem<PartnerSection> => {
+      const Icon = item.icon;
+      const base = {
+        id: item.id as PartnerSection,
+        label: item.label,
+        icon: <Icon className="w-[18px] h-[18px]" strokeWidth={1.75} />,
+      };
+      if (item.alertBadge) return { ...base, badge: 'Pendente', badgeTone: 'amber' };
+      if (item.badge !== undefined && item.badge > 0) return { ...base, badge: item.badge, badgeTone: 'slate' };
+      return base;
+    };
+
+    const groups: PortalNavGroup<PartnerSection>[] = [
+      { title: 'Operação', items: navItems.slice(0, 4).map(toNavItem) },
+      { title: 'Gestão', items: navItems.slice(4).map(toNavItem) },
+    ];
+
+    return (
+      <PortalSidebar<PartnerSection>
+        portalLabel="Portal do Parceiro"
+        groups={groups}
+        activeId={activeSection}
+        onSelect={(id: PartnerSection) => {
+          setActiveSection(id);
+          closeDrawer?.();
+        }}
+        onClose={closeDrawer}
+        identity={
+          <div className="rounded-xl bg-white/[0.06] border border-white/[0.1] p-3 space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-[#FF6500] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                {partnerName.slice(0, 2).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-white truncate">{displayPartnerName}</p>
+                <p className="text-[11px] text-slate-400 font-mono-num truncate">{displayPartnerCode}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-white/[0.08]">
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-wide text-slate-400 font-semibold">Saldo Wallet</p>
+                <p className="text-sm font-bold text-white font-mono-num truncate">{fmt(walletBalance)} Kz</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowTopUpWalletModal(true);
+                  closeDrawer?.();
+                }}
+                className="shrink-0 px-3 py-1.5 rounded-full bg-[#FF6500] hover:bg-[#EB5B00] text-white text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Recarregar</span>
+              </button>
+            </div>
+          </div>
+        }
+        footer={
+          <>
+            <PortalFooterButton
+              icon={<Video className="w-[18px] h-[18px]" strokeWidth={1.75} />}
+              label="Apoio em vídeo"
+              onClick={() => {
+                setShowVideoModal(true);
+                closeDrawer?.();
+              }}
+            />
+            <PortalFooterButton
+              icon={<LogOut className="w-[18px] h-[18px]" strokeWidth={1.75} />}
+              label="Terminar sessão"
+              onClick={handleLogout}
+              tone="danger"
+            />
+            <p className="px-3 pt-2 text-[10px] text-slate-400">Certificado AGT FE/387/AGT/2026</p>
+          </>
+        }
+      />
+    );
+  };
+
   return (
     <div className="flex h-screen h-[100dvh] overflow-hidden bg-slate-50 font-sans selection:bg-slate-900 selection:text-white">
 
@@ -1469,187 +1554,38 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         </div>
       )}
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 bg-slate-950 text-white flex-col shrink-0 border-r border-slate-800/80">
-        <div className="p-5 border-b border-white/10">
-          <KivoraLogo variant="light" size="sm" />
-          <div className="mt-3 flex items-center justify-between">
-            <span className="text-[10px] font-semibold font-display uppercase tracking-wider text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 flex items-center gap-1.5">
-              <ShieldCheck className="w-3 h-3 text-emerald-400" />
-              <span>Portal do Parceiro</span>
-            </span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Ligado ao Firebase Firestore em Tempo Real" />
-          </div>
-        </div>
+      {/* Sidebar Desktop (componente partilhado entre painéis) */}
+      <div className="hidden lg:flex h-full shrink-0">
+        {renderPartnerSidebar()}
+      </div>
 
-        {/* Info Parceiro com Wallet & Tier */}
-        <div className="p-3 mx-3 my-2 rounded-xl bg-white/5 border border-white/10 space-y-2">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 flex items-center justify-center font-bold font-display text-xs">
-              {partnerName.slice(0, 2).toUpperCase()}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold font-display text-white truncate">{displayPartnerName}</p>
-              <p className="text-[10px] text-emerald-400 font-mono-num font-semibold mt-0.5">{displayPartnerCode}</p>
-            </div>
-          </div>
-
-          {/* Mini Card de Wallet */}
-          <div className="p-2 bg-slate-950/80 rounded-lg border border-white/5 flex items-center justify-between text-xs">
-            <div className="flex items-center gap-1.5">
-              <Wallet className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-[10px] text-slate-400 font-medium">Saldo Wallet:</span>
-            </div>
-            <strong className="text-emerald-400 font-mono-num font-bold text-xs">{fmt(walletBalance)} Kz</strong>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto overscroll-contain">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = activeSection === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id as PartnerSection)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-display transition-all text-left cursor-pointer ${
-                  active
-                    ? 'bg-white/10 text-white font-semibold border border-white/10 shadow-xs'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium'
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Icon className="w-4 h-4 shrink-0" />
-                  <span>{item.label}</span>
-                </div>
-                {item.alertBadge && (
-                  <span className="bg-amber-500 text-slate-950 text-[9px] font-bold px-1.5 py-0.5 rounded-full" title="Dívida pendente">
-                    Pendente
-                  </span>
-                )}
-                {!item.alertBadge && item.badge !== undefined && item.badge > 0 && (
-                  <span className="bg-white/10 text-slate-300 text-[10px] font-mono-num font-semibold px-2 py-0.5 rounded-full border border-white/10">
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Footer Sidebar */}
-        <div className="p-3 border-t border-white/10 space-y-1.5">
-          <button
-            onClick={() => setShowTopUpWalletModal(true)}
-            className="w-full bg-white/10 hover:bg-white/15 text-white border border-white/10 text-xs font-display font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Recarregar Saldo Wallet</span>
-          </button>
-
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-display font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all cursor-pointer"
-          >
-            <LogOut className="w-4 h-4 text-slate-400" />
-            <span>Terminar Sessão</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Mobile Drawer */}
+      {/* Drawer Mobile */}
       {mobileSidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div
-            className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileSidebarOpen(false)}
           />
-          <aside className="relative w-72 max-w-[85vw] h-full bg-slate-950 text-white flex flex-col z-10 shadow-2xl border-r border-slate-800">
-            <div className="p-5 border-b border-white/10 flex items-center justify-between">
-              <div>
-                <KivoraLogo variant="light" size="sm" />
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-display">
-                    Portal do Parceiro
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={() => setMobileSidebarOpen(false)}
-                className="p-1.5 rounded-lg bg-white/5 text-slate-400 hover:text-white cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-3 mx-3 my-2 rounded-xl bg-white/5 border border-white/10">
-              <p className="text-xs font-semibold font-display text-white truncate">{displayPartnerName}</p>
-              <p className="text-[10px] text-emerald-400 font-mono-num font-semibold mt-0.5">{displayPartnerCode}</p>
-              <div className="mt-2 flex items-center justify-between text-xs text-slate-300">
-                <span>Wallet:</span>
-                <strong className="text-emerald-400 font-mono-num">{fmt(walletBalance)} Kz</strong>
-              </div>
-            </div>
-
-            <nav className="flex-1 p-3 space-y-1 overflow-y-auto overscroll-contain">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const active = activeSection === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveSection(item.id as PartnerSection);
-                      setMobileSidebarOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-display transition-all text-left cursor-pointer ${
-                      active
-                        ? 'bg-white/10 text-white font-semibold border border-white/10 shadow-xs'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Icon className="w-4 h-4 shrink-0" />
-                      <span>{item.label}</span>
-                    </div>
-                    {item.alertBadge && (
-                      <span className="bg-amber-500 text-slate-950 text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-                        Pendente
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-
-            <div className="p-3 border-t border-white/10">
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-display font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all cursor-pointer"
-              >
-                <LogOut className="w-4 h-4 text-slate-400" />
-                <span>Terminar Sessão</span>
-              </button>
-            </div>
-          </aside>
+          <div className="relative w-64 max-w-[85vw] h-full z-10 shadow-2xl">
+            {renderPartnerSidebar(() => setMobileSidebarOpen(false))}
+          </div>
         </div>
       )}
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden w-full">
 
-        {/* Top Header */}
-        <header className="h-14 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between shrink-0 shadow-xs gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
+        {/* Topbar mínima: título da secção + acção principal */}
+        <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 flex items-center justify-between shrink-0 gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              className="lg:hidden flex items-center justify-center p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer shrink-0"
-              title="Abrir Menu"
+              className="lg:hidden flex items-center justify-center p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+              aria-label="Abrir menu"
             >
-              <Menu className="w-4 h-4" />
+              <Menu className="w-5 h-5" />
             </button>
-            <h1 className="text-xs sm:text-sm font-semibold font-display text-slate-900 tracking-tight truncate">
+            <h1 className="text-base sm:text-lg font-semibold font-display text-slate-900 tracking-tight truncate">
               {activeSection === 'dashboard' && 'Visão Geral'}
               {activeSection === 'licencas' && 'Minhas Licenças'}
               {activeSection === 'clientes' && 'Carteira de Clientes'}
@@ -1663,45 +1599,13 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
             </h1>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => setShowOfficialCertificatesModal(true)}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-display font-medium text-slate-700 transition-all shadow-xs cursor-pointer"
-              title="Ver Certificados Oficiais (Visual Software & Kivora)"
-            >
-              <Award className="w-3.5 h-3.5 text-amber-600" />
-              <span>Certificados Oficiais</span>
-            </button>
-
-            {/* Badge Saldo Wallet */}
-            <button
-              onClick={() => setShowTopUpWalletModal(true)}
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-display font-medium text-slate-700 transition-all shadow-xs cursor-pointer"
-              title="Clique para Recarregar Saldo"
-            >
-              <Wallet className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Wallet: <strong className="text-emerald-700 font-mono-num font-semibold">{fmt(walletBalance)} Kz</strong></span>
-              <span className="text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded font-display font-semibold">+ Recarga</span>
-            </button>
-
-            <button
-              onClick={() => setShowVideoModal(true)}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-display font-medium text-slate-700 transition-all shadow-xs cursor-pointer"
-              title="Entrar em videochamada de suporte com a equipa Kivora"
-            >
-              <Video className="w-3.5 h-3.5 text-blue-600" />
-              <span>Apoio em Vídeo</span>
-            </button>
-
-            <button
-              onClick={() => setActiveSection('emitir-licenca')}
-              className="bg-slate-950 hover:bg-slate-800 text-white text-xs font-display font-semibold px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98] cursor-pointer whitespace-nowrap"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span className="hidden xs:inline sm:inline">Emitir Licença</span>
-              <span className="xs:hidden sm:hidden">Emitir</span>
-            </button>
-          </div>
+          <button
+            onClick={() => setActiveSection('emitir-licenca')}
+            className="bg-[#FF6500] hover:bg-[#EB5B00] text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-full flex items-center gap-1.5 transition-colors active:scale-[0.98] cursor-pointer whitespace-nowrap shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Emitir Licença</span>
+          </button>
         </header>
 
         {/* Content Scrollable */}
@@ -1745,120 +1649,111 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
           {activeSection === 'dashboard' && (
             <div className="space-y-6">
 
-              {/* Banner de Saldo & Linha de Crédito Híbrida */}
-              <div className="surface-card p-6 bg-slate-950 text-white rounded-2xl border border-slate-800/80 shadow-xs space-y-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 px-2.5 py-0.5 rounded-md border border-emerald-800/50 inline-block mb-1 font-display">
-                      Modelo Híbrido de Cobrança — Kivora Tech
-                    </span>
-                    <h3 className="text-lg font-bold font-display tracking-tight text-white">
-                      Carteira Pré-Paga & Linha de Crédito Operacional
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Emissão instantânea com débito em carteira ou dentro do seu teto de crédito homologado.
-                    </p>
-                  </div>
+              {/* Banner Institucional Configurado no Admin */}
+              {systemSettings.partnerPortalBannerUrl && (
+                <div className="rounded-2xl overflow-hidden border border-slate-200/90 shadow-xs bg-slate-900 relative">
+                  <img
+                    src={systemSettings.partnerPortalBannerUrl}
+                    alt="Banner Oficial do Parceiro"
+                    className="w-full max-h-56 object-cover"
+                  />
+                </div>
+              )}
 
-                  <div className="flex items-center gap-2">
+              {/* Vídeo de Treinamento e Orientação Configurado no Admin */}
+              {systemSettings.partnerPortalVideoUrl && (
+                <div className="bg-gradient-to-r from-[#0B1528] to-[#1746A2] rounded-2xl p-5 border border-slate-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-orange-500/20 text-[#FF6500] border border-orange-500/30 flex items-center justify-center shrink-0">
+                      <Play className="w-5 h-5 fill-current" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white font-display">Vídeo de Treinamento & Orientação Oficial</h4>
+                      <p className="text-xs text-slate-300">Consulte o guia audiovisual oficial com as melhores práticas de revenda e ativação.</p>
+                    </div>
+                  </div>
+                  <a
+                    href={systemSettings.partnerPortalVideoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#FF6500] hover:bg-[#EB5B00] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-2 transition-colors shrink-0 self-start sm:self-auto cursor-pointer"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>Assistir Vídeo</span>
+                  </a>
+                </div>
+              )}
+
+              {/* 4 Cards de Métricas Principais — Limpos e Minimalistas */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white p-5 rounded-xl border border-slate-200 flex flex-col justify-between space-y-3 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-slate-500">Saldo da Wallet</span>
                     <button
                       onClick={() => setShowTopUpWalletModal(true)}
-                      className="bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs px-4 py-2 rounded-xl shadow-xs border border-white/10 flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98]"
+                      className="text-xs font-semibold text-[#FF6500] hover:text-[#EB5B00] cursor-pointer"
                     >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Recarregar Wallet</span>
+                      + Recarregar
                     </button>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                    <span className="text-[10px] uppercase font-semibold text-slate-400 block tracking-wider font-display">Saldo na Carteira (Wallet)</span>
-                    <span className="text-xl font-bold font-display font-mono-num text-emerald-400">{fmt(walletBalance)} Kz</span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">Ativação instantânea 24/7</span>
-                  </div>
-
-                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-semibold text-slate-400 block tracking-wider font-display">Slots de Crédito Livres</span>
-                      {isOverdue && (
-                        <span className="text-[9px] bg-red-500/20 text-red-300 border border-red-500/40 px-1.5 py-0.5 rounded font-bold font-display uppercase">Vencido</span>
-                      )}
-                    </div>
-                    <span className={`text-xl font-bold font-display font-mono-num ${availableCreditSlots > 0 && !isOverdue ? 'text-blue-400' : 'text-amber-400'}`}>
-                      {availableCreditSlots} / {creditSlotsLimit} Slots
-                    </span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5 font-mono-num">
-                      {activeSlotsInUse} licenças a crédito em aberto
-                    </span>
-                  </div>
-
-                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                    <span className="text-[10px] uppercase font-semibold text-slate-400 block tracking-wider font-display">Dívida Atual à Kivora</span>
-                    <span className={`text-xl font-bold font-display font-mono-num ${totalPendingDebt > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                      {fmt(totalPendingDebt)} Kz
-                    </span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5 font-mono-num">
-                      {oldestDebtDays > 0 ? `Mais antiga: há ${oldestDebtDays} dias` : 'Sem pendências'}
-                    </span>
+                  <div>
+                    <p className="text-2xl font-bold text-slate-900 font-mono-num tracking-tight">{fmt(walletBalance)} Kz</p>
+                    <span className="text-xs text-slate-400 block mt-1">Pronto para emissões</span>
                   </div>
                 </div>
-              </div>
 
-              {/* Top Stats Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="surface-card p-5 rounded-2xl border border-slate-200/80 space-y-1">
-                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block font-display">Licenças Emitidas</span>
-                  <p className="text-2xl font-bold text-slate-900 font-display font-mono-num">{allPartnerLicenses.length}</p>
-                  <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md inline-block border border-emerald-200/80 font-display">
-                    Conectado ao Firebase
+                <div className="bg-white p-5 rounded-xl border border-slate-200 flex flex-col justify-between space-y-3 shadow-xs">
+                  <span className="text-xs font-medium text-slate-500">Licenças Emitidas</span>
+                  <div>
+                    <p className="text-2xl font-bold text-slate-900 font-mono-num tracking-tight">{allPartnerLicenses.length}</p>
+                    <span className="text-xs text-slate-400 block mt-1">Total gerado</span>
+                  </div>
+                </div>
+
+                <div className="bg-white p-5 rounded-xl border border-slate-200 flex flex-col justify-between space-y-3 shadow-xs">
+                  <span className="text-xs font-medium text-slate-500">Clientes Ativos</span>
+                  <div>
+                    <p className="text-2xl font-bold text-slate-900 font-mono-num tracking-tight">{partnerClients.length}</p>
+                    <span className="text-xs text-slate-400 block mt-1">Empresas na carteira</span>
+                  </div>
+                </div>
+
+                <div className="bg-white p-5 rounded-xl border border-slate-200 flex flex-col justify-between space-y-3 shadow-xs">
+                  <span className="text-xs font-medium text-slate-500">
+                    {totalPendingDebt > 0 ? 'Dívida Pendente' : 'Margem Obtida'}
                   </span>
-                </div>
-
-                <div className="surface-card p-5 rounded-2xl border border-slate-200/80 space-y-1">
-                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block font-display">Empresas Clientes</span>
-                  <p className="text-2xl font-bold text-slate-900 font-display font-mono-num">{partnerClients.length}</p>
-                  <span className="text-[10px] text-slate-500 font-medium block">Carteira ativa</span>
-                </div>
-
-                <div className="surface-card p-5 rounded-2xl border border-slate-200/80 space-y-1">
-                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block font-display">Total Liquidado</span>
-                  <p className="text-xl font-bold text-emerald-600 font-display font-mono-num">
-                    {fmt(totalPaidToKivora)} Kz
-                  </p>
-                  <span className="text-[10px] text-slate-500 font-medium block">Pago à Kivora</span>
-                </div>
-
-                <div className="surface-card p-5 rounded-2xl border border-slate-200/80 space-y-1">
-                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block font-display">Margem / Lucro Estimado</span>
-                  <p className="text-xl font-bold text-emerald-600 font-display font-mono-num">
-                    +{fmt(totalPartnerProfit)} Kz
-                  </p>
-                  <span className="text-[10px] text-emerald-700 font-medium block">Lucro bruto obtido</span>
+                  <div>
+                    <p className={`text-2xl font-bold font-mono-num tracking-tight ${totalPendingDebt > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                      {totalPendingDebt > 0 ? `${fmt(totalPendingDebt)} Kz` : `+${fmt(totalPartnerProfit)} Kz`}
+                    </p>
+                    <span className="text-xs text-slate-400 block mt-1">
+                      {totalPendingDebt > 0 ? 'Valor em aberto' : 'Lucro acumulado'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {/* Card Destaque: Licenças Aprovadas Prontas para Entrega */}
               {approvedRequestsReady.length > 0 && (
-                <div className="surface-card p-6 bg-emerald-500/5 border border-emerald-500/30 rounded-2xl space-y-4 shadow-xs">
+                <div className="p-5 bg-white border border-slate-200 rounded-xl space-y-4 shadow-xs">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center shrink-0">
                         <CheckCircle2 className="w-5 h-5" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-bold text-slate-900 text-sm sm:text-base font-display">
+                          <h4 className="font-bold text-slate-900 text-sm">
                             {approvedRequestsReady.length === 1
-                              ? '1 Licença Oficial Aprovada pela Kivora!'
-                              : `${approvedRequestsReady.length} Licenças Oficiais Aprovadas pela Kivora!`}
+                              ? '1 Licença Oficial Aprovada pela Kivora'
+                              : `${approvedRequestsReady.length} Licenças Oficiais Aprovadas pela Kivora`}
                           </h4>
-                          <span className="text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full uppercase tracking-wider font-display">
+                          <span className="text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full uppercase tracking-wider">
                             Pronta para Entrega
                           </span>
                         </div>
-                        <p className="text-slate-600 text-xs mt-0.5">
-                          As chaves abaixo foram homologadas pela Kivora e já se encontram ativas. Copie e entregue diretamente aos clientes.
+                        <p className="text-slate-500 text-xs mt-0.5">
+                          As chaves abaixo foram emitidas e ativadas pela Kivora e já se encontram ativas. Copie e entregue diretamente aos clientes.
                         </p>
                       </div>
                     </div>
@@ -1867,7 +1762,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         setActiveSection('licencas');
                         setActiveLicensesTab('solicitacoes');
                       }}
-                      className="bg-slate-950 hover:bg-slate-800 text-white text-xs font-display font-semibold px-3.5 py-2 rounded-xl shrink-0 cursor-pointer shadow-xs flex items-center gap-1.5 self-start sm:self-auto transition-all active:scale-[0.98]"
+                      className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shrink-0 cursor-pointer shadow-xs flex items-center gap-1.5 self-start sm:self-auto transition-colors"
                     >
                       <Key className="w-3.5 h-3.5 text-emerald-400" />
                       <span>Ver Todas as Solicitações</span>
@@ -1880,24 +1775,24 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       const licKey = (req.license_id || (req as any).licenseId || (req as any).licenseKey || '').trim();
                       const associatedLic = allPartnerLicenses.find(l => l.id.toUpperCase() === licKey.toUpperCase());
                       return (
-                        <div key={req.id} className="surface-card p-4 bg-white rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between gap-3">
+                        <div key={req.id} className="p-4 bg-slate-50/60 rounded-lg border border-slate-200 flex flex-col justify-between gap-3">
                           <div>
                             <div className="flex items-center justify-between gap-2">
-                              <span className="font-mono-num text-xs font-bold text-emerald-900 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/80">
+                              <span className="font-mono-num text-xs font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
                                 {licKey}
                               </span>
-                              <span className="text-[10px] font-semibold text-slate-500 uppercase font-display">
+                              <span className="text-[10px] font-semibold text-slate-500 uppercase">
                                 {getPlanLabel(req.plan_type)}
                               </span>
                             </div>
-                            <h5 className="font-semibold text-slate-900 text-sm mt-2 font-display">{req.company_name}</h5>
+                            <h5 className="font-semibold text-slate-900 text-sm mt-2">{req.company_name}</h5>
                             <p className="text-[11px] text-slate-500 font-mono-num">NIF: {req.nif}</p>
                           </div>
 
-                          <div className="flex items-center gap-2 pt-2 border-t border-slate-100 flex-wrap">
+                          <div className="flex items-center gap-2 pt-2 border-t border-slate-200/60 flex-wrap">
                             <button
                               onClick={() => handleCopyKey(licKey)}
-                              className="px-3 py-1.5 bg-slate-950 hover:bg-slate-800 text-white rounded-xl text-xs font-display font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-all active:scale-[0.98]"
+                              className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
                             >
                               {copiedKey === licKey ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                               <span>{copiedKey === licKey ? 'Copiada!' : 'Copiar Chave'}</span>
@@ -1906,7 +1801,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                             {associatedLic && (
                               <button
                                 onClick={() => handleShareWhatsapp(associatedLic)}
-                                className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-display font-medium flex items-center gap-1.5 border border-slate-200/80 cursor-pointer transition-all"
+                                className="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-medium flex items-center gap-1.5 border border-slate-200 cursor-pointer transition-colors"
                               >
                                 <Share2 className="w-3.5 h-3.5 text-emerald-600" />
                                 <span>WhatsApp</span>
@@ -1934,7 +1829,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                                 };
                                 setSelectedLicenseForCert(licToCert);
                               }}
-                              className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-display font-medium flex items-center gap-1.5 border border-slate-200/80 cursor-pointer transition-all"
+                              className="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-medium flex items-center gap-1.5 border border-slate-200 cursor-pointer transition-colors"
                             >
                               <Printer className="w-3.5 h-3.5 text-blue-600" />
                               <span>Certificado AGT</span>
@@ -1949,27 +1844,27 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
 
               {/* Dívida Alert se houver pendência */}
               {totalPendingDebt > 0 && (
-                <div className="surface-card p-5 bg-amber-50/50 border border-amber-200/80 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs shadow-xs">
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs shadow-xs">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
-                      <AlertCircle className="w-5 h-5 text-amber-600" />
+                    <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                      <AlertCircle className="w-4 h-4 text-amber-600" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-amber-950 text-sm font-display">Saldo Devedor de {fmt(totalPendingDebt)} Kz referente a licenças emitidas a crédito</h4>
+                      <h4 className="font-semibold text-amber-950 text-sm">Saldo Devedor de {fmt(totalPendingDebt)} Kz referente a licenças emitidas a crédito</h4>
                       <p className="text-amber-900/80 text-[11px] mt-0.5">Efetue a transferência para as contas oficiais Kivora e envie o comprovativo para regularização do crédito.</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setShowProofPaymentModal(true)}
-                      className="bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold px-3.5 py-2 rounded-xl shrink-0 cursor-pointer shadow-xs flex items-center gap-1.5 active:scale-[0.98]"
+                      className="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-3 py-2 rounded-lg shrink-0 cursor-pointer shadow-xs flex items-center gap-1.5 transition-colors"
                     >
                       <Receipt className="w-3.5 h-3.5" />
                       <span>Notificar Pagamento</span>
                     </button>
                     <button
                       onClick={() => setActiveSection('extrato')}
-                      className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 font-display font-medium px-3.5 py-2 rounded-xl shrink-0 cursor-pointer shadow-xs"
+                      className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium px-3 py-2 rounded-lg shrink-0 cursor-pointer shadow-xs transition-colors"
                     >
                       Ver Extrato
                     </button>
@@ -1977,52 +1872,16 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 </div>
               )}
 
-              {/* Atalhos Rápidos */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div
-                  onClick={() => setActiveSection('emitir-licenca')}
-                  className="surface-card bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-slate-400 hover:shadow-xs transition-all cursor-pointer space-y-2 group"
-                >
-                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:bg-slate-950 group-hover:text-white transition-colors">
-                    <Plus className="w-4 h-4" />
-                  </div>
-                  <h4 className="font-semibold font-display text-slate-900 text-sm">Emitir Nova Licença</h4>
-                  <p className="text-xs text-slate-500">Gere uma chave KVRA instantânea para o seu cliente.</p>
-                </div>
-
-                <div
-                  onClick={() => setShowAddClientModal(true)}
-                  className="surface-card bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-slate-400 hover:shadow-xs transition-all cursor-pointer space-y-2 group"
-                >
-                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:bg-slate-950 group-hover:text-white transition-colors">
-                    <UserPlus className="w-4 h-4" />
-                  </div>
-                  <h4 className="font-semibold font-display text-slate-900 text-sm">Cadastrar Novo Cliente</h4>
-                  <p className="text-xs text-slate-500">Adicione uma empresa à sua carteira comercial.</p>
-                </div>
-
-                <div
-                  onClick={() => setActiveSection('simulador')}
-                  className="surface-card bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-slate-400 hover:shadow-xs transition-all cursor-pointer space-y-2 group"
-                >
-                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:bg-slate-950 group-hover:text-white transition-colors">
-                    <Calculator className="w-4 h-4" />
-                  </div>
-                  <h4 className="font-semibold font-display text-slate-900 text-sm">Simular Lucros</h4>
-                  <p className="text-xs text-slate-500">Calcule o seu potencial de faturamento mensal e anual.</p>
-                </div>
-              </div>
-
               {/* Licenças Recentes */}
-              <div className="surface-card bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
+              <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold font-display text-slate-900 text-sm">Últimas Licenças Emitidas pela sua Conta</h3>
+                    <h3 className="font-semibold text-slate-900 text-sm">Últimas Licenças Emitidas pela sua Conta</h3>
                     <p className="text-xs text-slate-500">Histórico de chaves KVRA geradas para a sua carteira.</p>
                   </div>
                   <button
                     onClick={() => setActiveSection('licencas')}
-                    className="text-xs font-semibold font-display text-slate-900 hover:text-slate-600 cursor-pointer flex items-center gap-1"
+                    className="text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer flex items-center gap-1 transition-colors"
                   >
                     <span>Ver Todas ({allPartnerLicenses.length})</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -2032,11 +1891,12 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 {allPartnerLicenses.length === 0 ? (
                   <div className="p-8 text-center text-slate-400 space-y-2">
                     <Key className="w-8 h-8 mx-auto text-slate-300" />
-                    <p className="font-semibold text-xs text-slate-700 font-display">Ainda não emitiu licenças</p>
+                    <p className="font-semibold text-xs text-slate-700">Ainda não emitiu licenças</p>
                     <p className="text-[11px]">Clique no botão "Emitir Licença" para gerar a primeira chave para o seu cliente.</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-slate-100 border border-slate-100 rounded-xl overflow-hidden text-xs">
+                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden text-xs">
+
                     {allPartnerLicenses.slice(0, 5).map((lic) => {
                       const isApprovedFromReq = myLicenseRequests.some(
                         (r) => r.status === 'approved' && r.license_id?.toUpperCase() === lic.id.toUpperCase()
@@ -2666,7 +2526,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <strong className="text-slate-900 font-display font-bold">
-                      {canPayWithWallet ? 'Pagamento Direto via Saldo Wallet' : canPayWithCredit ? 'Pagamento via Linha de Crédito Homologada' : 'Emissão Provisória (7 Dias de Graça / Grace Period)'}
+                      {canPayWithWallet ? 'Pagamento Direto via Saldo Wallet' : canPayWithCredit ? 'Pagamento via Linha de Crédito Autorizada' : 'Emissão Provisória (7 Dias de Graça / Grace Period)'}
                     </strong>
                     <span className={`text-[10px] font-display font-semibold px-2 py-0.5 rounded-full border ${
                       canPayWithWallet ? 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20' :
@@ -3429,7 +3289,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <div>
                   <h2 className="text-lg font-display font-bold text-slate-900">Kits de Venda, Manuais & Downloads Oficiais</h2>
                   <p className="text-xs text-slate-500 font-sans mt-0.5">
-                    Materiais comerciais e técnicos para apresentar e instalar o Kivora Desktop ERP nos seus clientes.
+                    Materiais comerciais e técnicos para apresentar e instalar o Kivora Soft Desktop nos seus clientes.
                   </p>
                 </div>
 
@@ -3802,7 +3662,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               <div>
                 <h2 className="text-lg font-display font-bold text-slate-900">Conta do Parceiro & Segurança</h2>
                 <p className="text-xs text-slate-500 font-sans mt-0.5">
-                  Informações da sua credencial de parceiro homologado e alteração de palavra-passe.
+                  Informações da sua credencial de parceiro credenciado e alteração de palavra-passe.
                 </p>
               </div>
 
@@ -3827,7 +3687,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                     <span className="text-slate-400 text-[10px] uppercase font-display font-bold tracking-wider block">Nível de Parceria</span>
                     <span className="font-display font-semibold text-emerald-700 flex items-center gap-1">
                       <Award className="w-3.5 h-3.5" />
-                      <span>{partnerAccount?.tier?.toUpperCase() || 'HOMOLOGADO'}</span>
+                      <span>{partnerAccount?.tier?.toUpperCase() || 'CREDENCIADO'}</span>
                     </span>
                   </div>
                   <div>
@@ -3952,7 +3812,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
           )}
 
           {/* =========================================================================
-              SECÇÃO: MEUS CERTIFICADOS OFICIAIS (VISUAL SOFTWARE & KIVORA ERP)
+              SECÇÃO: MEUS CERTIFICADOS OFICIAIS (VISUAL SOFTWARE & KIVORA SOFT)
               ========================================================================= */}
           {activeSection === 'certificados' && (
             <div className="space-y-6 animate-fadeIn">
@@ -3964,7 +3824,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       <span>Documentação Institucional & Credenciação Oficial</span>
                     </div>
                     <h2 className="text-xl sm:text-2xl font-display font-bold text-slate-900 mt-2">
-                      Comprovativo Oficial de Parceiro Revendedor
+                       Comprovativo Oficial de Parceiro Revendedor
                     </h2>
                     <p className="text-xs sm:text-sm font-sans text-slate-500 mt-1">
                       Aceda e imprima o seu comprovativo oficial de revenda credenciada emitido pela <strong>VISUAL SOFTWARE, LDA.</strong> com validade perante clientes e instituições de Angola.
@@ -3993,7 +3853,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                             Certificação Oficial de Parceiro
                           </span>
                           <span className="text-[10px] font-display font-bold uppercase text-emerald-700 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                            ● HOMOLOGADO
+                            ● CREDENCIADO
                           </span>
                         </div>
                         <h3 className="font-display font-bold text-slate-950 text-lg sm:text-xl">
@@ -4024,7 +3884,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                       <p className="font-mono-num font-bold text-slate-900 mt-0.5">{partnerCode}</p>
                     </div>
                     <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
-                      <p className="text-[10px] font-display font-bold text-slate-500 uppercase tracking-wider">Homologação de Software</p>
+                      <p className="text-[10px] font-display font-bold text-slate-500 uppercase tracking-wider">Certificação de Software</p>
                       <p className="font-mono-num font-bold text-slate-900 mt-0.5">FE/387/AGT/2026</p>
                     </div>
                   </div>
@@ -4521,7 +4381,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   <span className="font-display font-bold text-slate-800">{1 + (addSeatsModalLic.extra_seats || 0)} Computador(es)</span>
                 </div>
                 <div className="flex justify-between items-center text-slate-600 font-sans">
-                  <span>Seu Nível de Homologação:</span>
+                  <span>Seu Nível de Credenciamento:</span>
                   <span className="font-display font-semibold text-blue-700 uppercase bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20">
                     {partnerAccount?.tier || 'Bronze'}
                   </span>
@@ -4630,7 +4490,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         license={selectedLicenseForInvoice}
       />
 
-      {/* Modal dos 2 Certificados Oficiais (Visual Software & Kivora ERP) */}
+      {/* Modal dos 2 Certificados Oficiais (Visual Software & Kivora Soft) */}
       {showOfficialCertificatesModal && (
         <PartnerOfficialCertificatesModal
           partner={{

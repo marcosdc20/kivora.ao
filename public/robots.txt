@@ -1,4 +1,4 @@
-# robots.txt for KIVORA ERP (kivora.ao)
+# robots.txt for KIVORA SOFT (kivora.ao)
 # https://www.robotstxt.org/
 
 User-agent: *

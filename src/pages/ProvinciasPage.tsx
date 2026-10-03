@@ -208,7 +208,7 @@ export const ProvinciasPage: React.FC<ProvinciasPageProps> = ({
               É Técnico ou Empresa de TI na Sua Província?
             </h3>
             <p className="text-slate-300 text-xs sm:text-sm leading-relaxed font-normal">
-              Torne-se o distribuidor oficial do KIVORA ERP na sua região. Lucros com margem livre em hardware e licenças, formação técnica direta da Kivora Tecnologias e credenciamento oficial.
+              Torne-se o distribuidor oficial do KIVORA SOFT na sua região. Lucros com margem livre em hardware e licenças, formação técnica direta da Kivora Tecnologias e credenciamento oficial.
             </p>
           </div>
 

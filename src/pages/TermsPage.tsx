@@ -26,14 +26,14 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onBack }) => {
             </div>
             <div>
               <h1 className="font-display text-2xl sm:text-3xl font-black text-slate-950">Termos e Condições de Licenciamento</h1>
-              <p className="text-xs text-slate-500 font-medium">KIVORA ERP • Kivora Tecnologias, Lda. • Luanda, Angola</p>
+              <p className="text-xs text-slate-500 font-medium">KIVORA SOFT • Kivora Tecnologias, Lda. • Luanda, Angola</p>
             </div>
           </div>
 
           <div className="space-y-6 text-xs sm:text-sm text-slate-700 leading-relaxed">
             <h2 className="text-base font-extrabold text-slate-950">1. Licenciamento e Uso do Software</h2>
             <p>
-              O KIVORA ERP é um software executivo de gestão empresarial e faturação eletrónica certificado pela Administração Geral Tributária (AGT) com o número de homologação oficial <strong>FE/387/AGT/2026</strong> ao abrigo do <strong>Decreto Presidencial n.º 71/25</strong> e Regime Jurídico das Faturas. A utilização da plataforma é concedida mediante subscrição de planos ou aquisição de licença vitalícia para execução local (Desktop Offline-First).
+              O KIVORA SOFT é um software executivo de gestão empresarial e faturação eletrónica certificado pela Administração Geral Tributária (AGT) com o certificado oficial n.º <strong>FE/387/AGT/2026</strong> ao abrigo do <strong>Decreto Presidencial n.º 71/25</strong> e Regime Jurídico das Faturas. A utilização da plataforma é concedida mediante subscrição de planos ou aquisição de licença vitalícia para execução local (Desktop Offline-First).
             </p>
 
             <h2 className="text-base font-extrabold text-slate-950">2. Responsabilidade sobre Dados Fiscais e Comerciais</h2>
@@ -43,7 +43,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onBack }) => {
 
             <h2 className="text-base font-extrabold text-slate-950">3. Operação Offline-First & Soberania Local</h2>
             <p>
-              Em caso de indisponibilidade ou corte na ligação à internet, o KIVORA ERP opera 100% offline em posto individual ou em rede local (LAN) multi-caixas, armazenando de forma blindada todas as transações fiscais e stocks sem perda de produtividade.
+              Em caso de indisponibilidade ou corte na ligação à internet, o KIVORA SOFT opera 100% offline em posto individual ou em rede local (LAN) multi-caixas, armazenando de forma blindada todas as transações fiscais e stocks sem perda de produtividade.
             </p>
 
             <h2 className="text-base font-extrabold text-slate-950">4. Suporte Técnico e Atualizações Normativas</h2>

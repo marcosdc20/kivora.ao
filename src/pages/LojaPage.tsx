@@ -81,7 +81,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
       { label: 'Impressora', value: 'Térmica 80mm USB/Rede, Corte Automático, 250 mm/s' },
       { label: 'Leitor', value: 'Imager 1D/2D QR Code com suporte automático' },
       { label: 'Gaveta', value: 'Aço pesado, 5 notas / 8 moedas, abertura RJ11' },
-      { label: 'Software', value: 'Compatível com KIVORA ERP' },
+      { label: 'Software', value: 'Compatível com KIVORA SOFT' },
     ],
     inStock: true,
     stockLocation: 'Armazém Luanda (Pronto para entrega)',
@@ -178,7 +178,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
       { label: 'Largura', value: '80mm' },
       { label: 'Velocidade', value: '160 mm/s' },
       { label: 'Conectividade', value: 'USB + Conexão Gaveta RJ11' },
-      { label: 'Compatibilidade', value: 'Windows 10, 11 e KIVORA ERP' },
+      { label: 'Compatibilidade', value: 'Windows 10, 11 e KIVORA SOFT' },
     ],
     inStock: true,
     stockLocation: 'Armazém Luanda',
@@ -343,8 +343,8 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     id: 'licenca-vitalicia',
     category: 'licenses',
     categoryLabel: 'Licenças de Software',
-    name: 'Licença KIVORA ERP Vitalícia (5 Postos de Trabalho LAN)',
-    brand: 'KIVORA ERP',
+    name: 'Licença KIVORA SOFT Vitalícia (5 Postos de Trabalho LAN)',
+    brand: 'KIVORA SOFT',
     image: kivoraLogoImg,
     galleryImages: [
       kivoraLogoImg,
@@ -358,11 +358,11 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     specsTable: [
       { label: 'Tipo', value: 'Licença Perpétua (Sem mensalidades)' },
       { label: 'Postos LAN', value: '5 Computadores em rede local incluídos' },
-      { label: 'Homologação', value: 'Certificado AGT e SAF-T AO incluídos' },
+      { label: 'Conformidade Fiscal', value: 'Certificado AGT e SAF-T AO incluídos' },
     ],
     inStock: true,
     stockLocation: 'Entrega Imediata por Email / Chave Digital',
-    warranty: 'Suporte e Atualizações Homologadas',
+    warranty: 'Suporte e Atualizações Oficiais',
     sku: 'KV-LIC-VIT-5P',
     active: true,
   },
@@ -525,7 +525,7 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
       const orderRef = res.orderNumber || `KV-PED-${Date.now().toString().slice(-4)}`;
 
       // 2. Abrir mensagem pré-formatada no WhatsApp Oficial
-      let msg = `*PEDIDO OFICIAL — LOJA KIVORA ERP*\n`;
+      let msg = `*PEDIDO OFICIAL — LOJA KIVORA SOFT*\n`;
       msg += `*Ref. Encomenda:* ${orderRef}\n\n`;
       if (companyName) msg += `*Empresa / Cliente:* ${companyName}\n`;
       if (companyNif) msg += `*NIF:* ${companyNif}\n`;
@@ -665,7 +665,7 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
             Loja de Equipamentos POS & Periféricos
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 mt-1 font-normal">
-            Equipamentos comerciais e periféricos homologados para o KIVORA ERP com garantia oficial em Angola.
+            Equipamentos comerciais e periféricos testados e certificados para o KIVORA SOFT com garantia oficial em Angola.
           </p>
         </div>
 
@@ -681,7 +681,7 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
             <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center justify-center shrink-0 shadow-xs font-bold">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <span>Equipamentos 100% Homologados com <strong>12 Meses de Garantia Oficial</strong>.</span>
+            <span>Equipamentos 100% Compatíveis com <strong>12 Meses de Garantia Oficial</strong>.</span>
           </div>
         </div>
 

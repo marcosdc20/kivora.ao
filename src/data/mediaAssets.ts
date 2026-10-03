@@ -1,5 +1,5 @@
 /**
- * Catálogo Central de Mídias, Imagens, GIFs e Ilustrações do KIVORA ERP
+ * Catálogo Central de Mídias, Imagens, GIFs e Ilustrações do KIVORA SOFT
  * Organizado por categorias para uso consistente em todo o site e portais.
  */
 
@@ -48,7 +48,7 @@ export const KIVORA_MEDIA = {
     executiveLeadership: '/imagens/9169.jpg',
   },
 
-  // ─── MÓDULOS KIVORA ERP ───────────────────────────────────────────────────
+  // ─── MÓDULOS KIVORA SOFT ───────────────────────────────────────────────────
   modules: {
     faturacao: {
       image: '/imagens/136227.jpg',

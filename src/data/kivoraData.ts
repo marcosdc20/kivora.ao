@@ -139,7 +139,7 @@ export const LOCAL_DB_ARGUMENTS = [
 ];
 
 // ============================
-// MÓDULOS DE GESTÃO DO ERP KIVORA
+// MÓDULOS DE GESTÃO DO KIVORA SOFT
 // ============================
 export const KIVORA_MODULES: KivoraModule[] = [
   {
@@ -409,7 +409,7 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
 export const AGT_RULES_INFO: AGTRuleInfo[] = [
   {
     code: 'DS.120 SETIC-FP',
-    title: 'Faturação Eletrónica Homologada',
+    title: 'Faturação Eletrónica Certificada',
     description: 'O Kivora cumpre rigorosamente todos os requisitos de validação, formato JSON/XML e integração com os webservices da AGT.',
     legalReference: 'Decreto Presidencial n.º 71/25',
   },
@@ -487,7 +487,7 @@ export const KIVORA_NEWS: NewsPost[] = [
     excerpt: 'Entenda as principais exigências da AGT para a obrigatoriedade da faturação eletrónica e como manter o seu programa local em conformidade.',
     content: [
       'A Administração Geral Tributária (AGT) intensificou a transição para a Faturação Eletrónica obrigatória em Angola. O novo quadro regulatório exige que os softwares emitam documentos com assinatura digital e validação prévia de séries.',
-      'Com o Kivora ERP instalado no seu computador, a sua empresa beneficia de automatização completa: desde a validação local até à emissão instantânea com QR Code.',
+      'Com o Kivora Soft instalado no seu computador, a sua empresa beneficia de automatização completa: desde a validação local até à emissão instantânea com QR Code.',
       'Evite bloqueios no NIF e multas fiscais garantindo que o seu sistema comercial atende a 100% dos requisitos legais.',
     ],
     image: '/imagens/9169.jpg',

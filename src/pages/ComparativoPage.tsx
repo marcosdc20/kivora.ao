@@ -122,10 +122,10 @@ export const ComparativoPage: React.FC<ComparativoPageProps> = ({ onNavigatePage
             <span>Comparativo de Mercado Transparente</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-bold font-display text-slate-950 tracking-tight leading-tight">
-            Por Que o <span className="text-[#1746A2]">KIVORA ERP</span> é a Escolha Certa?
+            Por Que o <span className="text-[#1746A2]">KIVORA SOFT</span> é a Escolha Certa?
           </h1>
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
-            Compare o KIVORA com softwares internacionais 100% em nuvem e softwares não homologados. Entenda porque somos a solução ideal para o ambiente de negócios em Angola.
+            Compare o KIVORA SOFT com softwares internacionais 100% em nuvem e programas sem certificação legal. Entenda porque somos a solução ideal para o ambiente de negócios em Angola.
           </p>
         </div>
 
@@ -138,7 +138,7 @@ export const ComparativoPage: React.FC<ComparativoPageProps> = ({ onNavigatePage
               <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full text-[11px] font-bold uppercase tracking-wider inline-block">
                 Solução Recomendada
               </span>
-              <h3 className="text-2xl font-bold font-display text-white">KIVORA ERP</h3>
+              <h3 className="text-2xl font-bold font-display text-white">KIVORA SOFT</h3>
               <p className="text-slate-300 text-xs sm:text-sm leading-relaxed font-normal">
                 Base de dados local segura, não trava sem internet, preços em Kwanzas e certificação AGT vitalícia.
               </p>
@@ -204,7 +204,7 @@ export const ComparativoPage: React.FC<ComparativoPageProps> = ({ onNavigatePage
               <span className="px-3 py-1 bg-rose-100 text-rose-800 border border-rose-200 rounded-full text-[11px] font-bold uppercase tracking-wider inline-block">
                 Softwares Não Certificados
               </span>
-              <h3 className="text-2xl font-bold font-display text-slate-900">Cópias / Não Homologados</h3>
+              <h3 className="text-2xl font-bold font-display text-slate-900">Cópias / Não Certificados</h3>
               <p className="text-slate-500 text-xs sm:text-sm leading-relaxed font-normal">
                 Programas crackeados ou sem certificação oficial pela AGT. Alto risco jurídico e técnico.
               </p>
@@ -260,7 +260,7 @@ export const ComparativoPage: React.FC<ComparativoPageProps> = ({ onNavigatePage
                     Critério / Funcionalidade
                   </th>
                   <th className="p-4 sm:p-6 text-xs font-bold font-display uppercase tracking-wider text-blue-700 bg-blue-50/60 w-1/5 text-center">
-                    KIVORA ERP
+                    KIVORA SOFT
                   </th>
                   <th className="p-4 sm:p-6 text-xs font-bold font-display uppercase tracking-wider text-slate-700 w-1/5 text-center">
                     SaaS em Nuvem

@@ -49,7 +49,7 @@ export const AdminPagamentos: React.FC = () => {
   // Form de Fatura
   const [companyName, setCompanyName] = useState('');
   const [companyNif, setCompanyNif] = useState('');
-  const [planLabel, setPlanLabel] = useState('Plano Anual - ERP Core');
+  const [planLabel, setPlanLabel] = useState('Plano Anual - KIVORA SOFT');
   const [amount, setAmount] = useState<number>(250000);
   const [method, setMethod] = useState<'Multicaixa Express' | 'Transferência Bancária (IBAN)' | 'Numerário'>('Transferência Bancária (IBAN)');
   const [status, setStatus] = useState<'paid' | 'pending'>('paid');
@@ -84,7 +84,7 @@ export const AdminPagamentos: React.FC = () => {
             invoice_number: `FT-2026/${num}`,
             company_name: d.company_name || d.client_email || 'Empresa Cliente',
             nif: d.nif || '5400000000',
-            plan_label: `${planStr} - Kivora ERP`,
+            plan_label: `${planStr} - KIVORA SOFT`,
             amount_aoa: price,
             status: isPaid ? 'paid' : isOverdue ? 'overdue' : 'pending',
             issue_date: d.created_at ? new Date(typeof d.created_at === 'number' ? d.created_at : Date.now()).toISOString().split('T')[0] : '2026-08-01',
@@ -713,10 +713,10 @@ export const AdminPagamentos: React.FC = () => {
                   onChange={(e) => setPlanLabel(e.target.value)}
                   className="w-full border border-slate-200 rounded-xl px-4 py-2.5 bg-white font-bold"
                 >
-                  <option value="Plano Mensal - ERP Core">Plano Mensal - ERP Core</option>
-                  <option value="Plano Anual - ERP Core (Recomendado)">Plano Anual - ERP Core</option>
+                  <option value="Plano Mensal - KIVORA SOFT">Plano Mensal - KIVORA SOFT</option>
+                  <option value="Plano Anual - KIVORA SOFT (Recomendado)">Plano Anual - KIVORA SOFT</option>
                   <option value="Plano Anual - Multiloja (5 Filiais)">Plano Anual - Multiloja (5 Filiais)</option>
-                  <option value="Plano Vitalício - Enterprise ERP">Plano Vitalício - Enterprise ERP</option>
+                  <option value="Plano Vitalício - Enterprise KIVORA SOFT">Plano Vitalício - Enterprise KIVORA SOFT</option>
                 </select>
               </div>
 

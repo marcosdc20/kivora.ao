@@ -105,7 +105,7 @@ export const AdminInstalacoes: React.FC = () => {
             <Monitor className="w-12 h-12 mx-auto text-slate-300 mb-3" />
             <p className="text-sm font-bold text-slate-800 font-display">Nenhum computador ativado encontrado</p>
             <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-              Os computadores são registados automaticamente quando o cliente insere a chave KVRA no Kivora ERP.
+              Os computadores são registados automaticamente quando o cliente insere a chave KVRA no KIVORA SOFT.
             </p>
           </div>
         ) : (

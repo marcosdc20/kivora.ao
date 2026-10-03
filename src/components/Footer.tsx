@@ -46,7 +46,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
 
             <div className="inline-flex items-center gap-2 p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 text-slate-200 shadow-xs">
               <ShieldCheck className="w-4 h-4 text-[#FF6500] shrink-0" strokeWidth={2.2} />
-              <span className="text-[11px] font-bold font-mono-num text-orange-400">Homologação AGT: FE/387/AGT/2026</span>
+              <span className="text-[11px] font-bold font-mono-num text-orange-400">Certificação AGT: FE/387/AGT/2026</span>
             </div>
 
             {/* Redes Sociais com Botões Circulares Laranja (Padrão das Imagens) */}
@@ -239,7 +239,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
         {/* Bottom Bar: Copyright & Legal */}
         <div className="pt-8 mt-12 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400 text-[11px] text-center sm:text-left">
           <p>
-            © {currentYear} {settings.company || 'KIVORA SOFT'}. Todos os direitos reservados. Software Homologado AGT N.º <span className="font-mono-num text-orange-400 font-bold">FE/387/AGT/2026</span>.
+            © {currentYear} {settings.company || 'KIVORA SOFT'}. Todos os direitos reservados. Software Certificado pela AGT N.º <span className="font-mono-num text-orange-400 font-bold">FE/387/AGT/2026</span>.
           </p>
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-4 sm:gap-6">
             <a

@@ -36,10 +36,10 @@ export interface ChatMessage {
 }
 
 export const KIVORA_SYSTEM_KNOWLEDGE = `
-És o Assistente Virtual Oficial do KIVORA ERP, desenvolvido pela equipa da Kivora em Luanda, Angola.
+És o Assistente Virtual Oficial do KIVORA SOFT, desenvolvido pela equipa da Kivora em Luanda, Angola.
 O teu tom de voz é profissional, cordial, seguro, executivo e acolhedor. Responde sempre em português de Angola / europeu com clareza.
 
-CONHECIMENTO ESSENCIAL DO KIVORA ERP:
+CONHECIMENTO ESSENCIAL DO KIVORA SOFT:
 1. O QUE É O KIVORA:
    - É um software completo de faturação eletrónica e gestão empresarial desktop para Windows.
    - 100% Certificado pela Administração Geral Tributária (AGT) em conformidade com o Decreto Presidencial n.º 71/25.
@@ -91,7 +91,7 @@ export const DEFAULT_AI_CONFIG: AIAssistantConfig = {
   model: 'gemini-1.5-flash',
   temperature: 0.7,
   welcomeMessage:
-    'Olá! Sou o Assistente Virtual do KIVORA ERP. Como posso ajudar o seu negócio hoje? Pode perguntar sobre certificação AGT, funcionamento offline, planos de preços ou o nosso programa de parceiros.',
+    'Olá! Sou o Assistente Virtual do KIVORA SOFT. Como posso ajudar o seu negócio hoje? Pode perguntar sobre certificação AGT, funcionamento offline, planos de preços ou o nosso programa de parceiros.',
   systemPrompt: KIVORA_SYSTEM_KNOWLEDGE,
   updated_at: Date.now(),
 };
@@ -350,7 +350,7 @@ async function callAIProvider(
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
         'HTTP-Referer': 'https://kivora.ao',
-        'X-Title': 'Kivora ERP Assistant',
+        'X-Title': 'Kivora Soft Assistant',
       },
       body: JSON.stringify({
         model,
@@ -460,7 +460,7 @@ export function getLocalKnowledgeResponse(userQuery: string): string {
     q.includes('vitalicio') ||
     q.includes('vitalício')
   ) {
-    return `O **KIVORA ERP** disponibiliza planos transparentes em Kwanzas (Kz), sem taxas ocultas:
+    return `O **KIVORA SOFT** disponibiliza planos transparentes em Kwanzas (Kz), sem taxas ocultas:
 
 • **Plano Mensal:** 25.000 Kz / mês (ideal para começar)
 • **Plano Semestral:** 130.000 Kz / semestre
@@ -481,7 +481,7 @@ Todos os planos incluem suporte técnico e atualizações fiscais da AGT. Deseja
     q.includes('71/25') ||
     q.includes('qr code')
   ) {
-    return `Sim! O **KIVORA ERP** é um software de faturação eletrónica **100% certificado pela Administração Geral Tributária (AGT)** em Angola, cumprindo escrupulosamente com o **Decreto Presidencial n.º 71/25**.
+    return `Sim! O **KIVORA SOFT** é um software de faturação eletrónica **100% certificado pela Administração Geral Tributária (AGT)** em Angola, cumprindo escrupulosamente com o **Decreto Presidencial n.º 71/25**.
 
 Garantias Fiscais:
 • Assinatura digital criptográfica RSA-SHA256 em cada documento emitido;
@@ -502,7 +502,7 @@ A sua empresa fica totalmente blindada contra coimas e fiscalizações.`;
     q.includes('rede local') ||
     q.includes('lan')
   ) {
-    return `Excelente pergunta! O **KIVORA ERP funciona 100% OFFLINE**.
+    return `Excelente pergunta! O **KIVORA SOFT funciona 100% OFFLINE**.
 
 Diferente de sistemas exclusivamente em nuvem que bloqueiam quando a internet falha, o Kivora armazena os dados numa base local ultrarrápida no seu computador:
 • A sua equipa continua a emitir faturas e a passar artigos no POS sem interrupção;
@@ -557,7 +557,7 @@ Estamos disponíveis de segunda a sexta das 08h às 18h e sábados das 08h às 1
     q.includes('requisito') ||
     q.includes('windows')
   ) {
-    return `O instalador do **KIVORA ERP** está disponível na secção **"Download"** do nosso site.
+    return `O instalador do **KIVORA SOFT** está disponível na secção **"Download"** do nosso site.
 
 Requisitos Mínimos Recomendados:
 • Sistema Operativo: Windows 10 ou Windows 11 (64-bit);
@@ -574,7 +574,7 @@ Requisitos Mínimos Recomendados:
     q.includes('testar') ||
     q.includes('ver o sistema')
   ) {
-    return `Pode agendar uma demonstração gratuita e personalizada do KIVORA ERP!
+    return `Pode agendar uma demonstração gratuita e personalizada do KIVORA SOFT!
 
 Os nossos consultores podem:
 1. Apresentar o sistema em funcionamento real no seu setor (retalho, armazém, serviços ou restauração);
@@ -585,7 +585,7 @@ Basta clicar no botão **"Solicitar Demonstração"** no topo da página ou escr
   }
 
   // Resposta padrão caso nenhuma intenção específica coincida
-  return `O **KIVORA ERP** é a solução definitiva em Angola para faturação eletrónica certificada pela AGT (Decreto 71/25), ponto de venda (POS), controlo rigoroso de stocks e processamento de salários com IRT 2026.
+  return `O **KIVORA SOFT** é a solução definitiva em Angola para faturação eletrónica certificada pela AGT (Decreto 71/25), ponto de venda (POS), controlo rigoroso de stocks e processamento de salários com IRT 2026.
 
 Funciona **100% offline**, com preços acessíveis a partir de **25.000 Kz/mês** ou licença perpétua vitalícia.
 

@@ -104,7 +104,7 @@ export const InvestidoresPage: React.FC<InvestidoresPageProps> = ({
               <AnimatedText text="Software Crítico Adaptado à Realidade do Mercado Angolano" el="span" mode="letter-stagger" />
             </h2>
             <p className="text-slate-600 leading-relaxed text-sm sm:text-base font-normal">
-              Ao contrário das soluções em nuvem que falham constantemente devido a interrupções de fibra ótica ou cobranças em moeda estrangeira (USD/EUR), o <strong>KIVORA ERP</strong> foi projetado com arquitetura <em>Local-First / Offline-Resilient</em>.
+              Ao contrário das soluções em nuvem que falham constantemente devido a interrupções de fibra ótica ou cobranças em moeda estrangeira (USD/EUR), o <strong>KIVORA SOFT</strong> foi projetado com arquitetura <em>Local-First / Offline-Resilient</em>.
             </p>
             <div className="space-y-3 pt-2">
               {[

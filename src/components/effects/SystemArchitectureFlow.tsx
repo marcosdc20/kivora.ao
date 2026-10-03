@@ -71,7 +71,7 @@ export const SystemArchitectureFlow: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="font-bold text-sm text-white">2. Núcleo KIVORA ERP</h4>
+            <h4 className="font-bold text-sm text-white">2. Núcleo KIVORA SOFT</h4>
             <p className="text-xs text-slate-400 mt-1">
               Gera a chave hash sequencial, calcula o IRT 2026 e grava cada venda sem duplicidade no fecho.
             </p>
@@ -104,7 +104,7 @@ export const SystemArchitectureFlow: React.FC = () => {
 
           <div className="pt-2 border-t border-slate-700/50 flex items-center justify-between text-[11px] text-slate-400">
             <span>Certificado:</span>
-            <span className="font-bold text-emerald-400">Homologação Oficial</span>
+            <span className="font-bold text-emerald-400">Certificação Oficial</span>
           </div>
         </div>
 
