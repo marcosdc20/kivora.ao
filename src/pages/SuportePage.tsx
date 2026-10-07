@@ -72,15 +72,19 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
       setTicketProtocol(ticketNum);
 
       // Disparar e-mails automáticos de suporte (confirmação ao cliente + alerta à equipa de suporte)
-      sendSupportTicketEmails({
-        nome,
-        email: email || undefined,
-        telefone,
-        ticketNumber: ticketNum,
-        assunto: assunto || 'Pedido de Assistência Técnica',
-        departamento,
-        mensagem
-      }).catch((err) => console.warn('Erro ao disparar e-mails do ticket:', err));
+      try {
+        await sendSupportTicketEmails({
+          nome,
+          email: email || undefined,
+          telefone,
+          ticketNumber: ticketNum,
+          assunto: assunto || 'Pedido de Assistência Técnica',
+          departamento,
+          mensagem
+        });
+      } catch (err) {
+        console.warn('Erro ao disparar e-mails do ticket:', err);
+      }
 
       // Disparo para Webhook configurado no Firebase
       if (settings.webhookUrl) {

@@ -255,16 +255,20 @@ export const CandidaturaParceiroPage: React.FC<CandidaturaParceiroPageProps> = (
       await addDoc(collection(db, 'partner_applications'), cleanFirestoreData(applicationData));
 
       // 2. Disparo de e-mails automáticos
-      sendPartnerApplicationEmails({
-        nome: nome.trim(),
-        empresa: empresa.trim(),
-        nif: nif.trim().toUpperCase(),
-        email: email.toLowerCase().trim(),
-        telefone: telefone.trim(),
-        protocol: protocolCode,
-        provincia,
-        tipoParceria,
-      }).catch((err) => console.warn('Erro ao enviar e-mails de candidatura:', err));
+      try {
+        await sendPartnerApplicationEmails({
+          nome: nome.trim(),
+          empresa: empresa.trim(),
+          nif: nif.trim().toUpperCase(),
+          email: email.toLowerCase().trim(),
+          telefone: telefone.trim(),
+          protocol: protocolCode,
+          provincia,
+          tipoParceria,
+        });
+      } catch (err) {
+        console.warn('Erro ao enviar e-mails de candidatura:', err);
+      }
 
       // 3. Disparo opcional de webhook externo
       if (settings.webhookUrl && settings.webhookUrl.startsWith('http')) {

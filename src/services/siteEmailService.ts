@@ -255,10 +255,13 @@ export const sendClientWelcomeEmail = async (params: {
   planName: string;
 }): Promise<{ success: boolean; error?: string }> => {
   const html = generateClientCredentialsTemplate(params);
+  const text = `Prezado(a) ${params.adminName},\n\nA sua conta no ecossistema KIVORA SOFT para a empresa ${params.companyName} (NIF: ${params.nif}) foi ativada com sucesso.\n\nPlano: ${params.planName}\nChave de Licença: ${params.licenseKey}\nE-mail de Acesso: ${params.email}${params.tempPassword ? `\nPalavra-passe Provisória: ${params.tempPassword}` : ''}\n\nPara aceder ao portal e descarregar o software, visite: https://kivora.visualsoftware.dev\n\nRecomendamos alterar a sua palavra-passe no primeiro acesso.\n\nKIVORA SOFT • Visual Software, Lda.`;
+
   return sendSiteEmail({
     to: params.email,
     subject: `Credenciais de Acesso ao KIVORA SOFT — ${params.companyName}`,
     html,
+    text,
   });
 };
 
@@ -276,10 +279,13 @@ export const sendLicenseToClientEmail = async (params: {
   partnerName?: string;
 }): Promise<{ success: boolean; error?: string }> => {
   const html = generateLicenseDeliveryTemplate(params);
+  const text = `Prezada equipa da ${params.companyName},\n\nA sua licença oficial do KIVORA SOFT está pronta para ativação.\n\nEmpresa: ${params.companyName}\nNIF: ${params.nif}\nPlano: ${params.planName}\nChave de Ativação: ${params.licenseKey}\nValidade: ${params.validUntil}\nPostos / Terminais: ${params.seatsCount}${params.partnerName ? `\nParceiro Certificado: ${params.partnerName}` : ''}\n\nPara ativar no software, abra o KIVORA SOFT Desktop, aceda a Menu > Configurações > Ativação de Licença e insira a chave acima.\n\nKIVORA SOFT • Suporte e Licenciamento`;
+
   return sendSiteEmail({
     to: params.clientEmail,
     subject: `Emissão de Licença Oficial KIVORA SOFT — ${params.companyName}`,
     html,
+    text,
   });
 };
 
@@ -296,10 +302,13 @@ export const sendPartnerNotificationEmail = async (params: {
   amount?: string;
 }): Promise<{ success: boolean; error?: string }> => {
   const html = generatePartnerNotificationTemplate(params);
+  const text = `Olá, Parceiro(a) ${params.partnerName}!\n\n${params.title}\n\n${params.description}${params.clientName ? `\nCliente Associado: ${params.clientName}` : ''}${params.amount ? `\nValor: ${params.amount}` : ''}\n\nAceda ao Portal do Parceiro para conferir os detalhes: https://kivora.visualsoftware.dev/parceiro/login\n\nKIVORA SOFT • Direção de Canais`;
+
   return sendSiteEmail({
     to: params.partnerEmail,
     subject: `[Parceiro KIVORA] ${params.title}`,
     html,
+    text,
   });
 };
 
@@ -318,10 +327,13 @@ export const sendPartnerCredentialsEmail = async (params: {
     email: params.partnerEmail,
     password: params.password,
   });
+  const text = `Prezado(a) ${params.partnerName},\n\nA sua conta no Portal Oficial de Parceiros KIVORA SOFT foi ativada com sucesso.\n\nCódigo de Parceiro: ${params.partnerCode}\nE-mail de Acesso: ${params.partnerEmail}${params.password ? `\nPalavra-passe Provisória: ${params.password}` : ''}\nLink do Portal: https://kivora.visualsoftware.dev/parceiro/login\n\nPor favor, altere a sua palavra-passe no primeiro acesso no menu de perfil.\n\nKIVORA SOFT • Programa Oficial de Parcerias`;
+
   return sendSiteEmail({
     to: params.partnerEmail,
     subject: `Credenciais de Acesso ao Portal do Parceiro — ${params.partnerName}`,
     html,
+    text,
   });
 };
 
@@ -339,10 +351,13 @@ export const sendPasswordResetEmail = async (params: {
     resetLink: params.resetLink,
     expirationMinutes: params.expirationMinutes || 30,
   });
+  const text = `Prezado(a) ${params.userName},\n\nRecebemos um pedido de redefinição de palavra-passe para a sua conta no Portal KIVORA.\n\nPara redefinir a sua palavra-passe com segurança, utilize o seguinte link:\n${params.resetLink}\n\nEste link é válido por ${params.expirationMinutes || 30} minutos.\nSe não solicitou esta alteração, ignore este e-mail.\n\nKIVORA SOFT • Segurança de Contas`;
+
   return sendSiteEmail({
     to: params.email,
     subject: 'Recuperação de Palavra-passe — Portal KIVORA',
     html,
+    text,
   });
 };
 
@@ -360,10 +375,13 @@ export const sendBroadcastEmail = async (params: {
     body: params.body,
     senderTitle: params.senderTitle,
   });
+  const text = `Comunicado Oficial KIVORA SOFT\n\n${params.title}\n\n${params.body}\n\n${params.senderTitle || 'Direção Executiva • KIVORA SOFT'}`;
+
   return sendSiteEmail({
     to: params.recipients,
     subject: `[KIVORA] ${params.title}`,
     html,
+    text,
   });
 };
 
@@ -383,11 +401,13 @@ export const testSiteEmailConnection = async (
         ? 'SendGrid API' 
         : 'Servidor SMTP';
   const html = generateSiteTestEmailTemplate(providerLabel);
+  const text = `Teste de Comunicação do Servidor de E-mails — KIVORA SOFT\n\nEste é um e-mail de teste disparado com sucesso através do canal: ${providerLabel}.\nSe recebeu esta mensagem, o seu serviço de e-mails está operacional e pronto para emissão.\n\nKIVORA SOFT • Visual Software, Lda.`;
 
   return sendSiteEmail({
     to: targetEmail,
     subject: 'Teste de Comunicação do Servidor de E-mails — KIVORA SOFT',
     html,
+    text,
     configOverride,
   });
 };

@@ -222,11 +222,22 @@ export default async function handler(req: any, res: any) {
   const effectiveUser = (smtpUser || serverConfig.smtpUser || effectiveSenderEmail).trim();
 
   if (!effectiveKey && effectiveProvider !== 'smtp') {
-    return res.status(500).json({ error: 'Credenciais de e-mail não configuradas no servidor.' });
+    return res.status(500).json({ error: 'Credenciais de e-mail não configuradas no servidor Vercel. Configure SMTP_PASS e SMTP_USER nas variáveis de ambiente do projeto.' });
   }
 
   // 6. Geração de Texto Puro para Prevenção de Filtro Anti-Spam (MIME Multipart Completo)
-  const plainText = text || (html ? html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '');
+  const plainText = text || (html ? html
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<br\s*[\/]?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<\/tr>/gi, '\n')
+    .replace(/<\/h[1-6]>/gi, '\n\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n\s+\n/g, '\n\n')
+    .trim() : '');
 
   try {
     // ── PROVEDOR 1: GOOGLE GMAIL OFICIAL OU SMTP DIRETO COM POOLING DE CONEXÃO ──
@@ -262,9 +273,8 @@ export default async function handler(req: any, res: any) {
         text: plainText,
         replyTo: (typeof body.replyTo === 'string' && body.replyTo.includes('@')) ? body.replyTo : effectiveUser,
         headers: {
-          'X-Mailer': 'KIVORA Soft Mailer v2.1',
-          'X-Priority': '1',
-          'Importance': 'high',
+          'Auto-Submitted': 'auto-generated',
+          'X-Auto-Response-Suppress': 'OOF, AutoReply',
         }
       };
 

@@ -81,7 +81,18 @@ function devEmailPlugin(): Plugin {
               return;
             }
 
-            const plainText = text || (html ? html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '');
+            const plainText = text || (html ? html
+              .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+              .replace(/<br\s*[\/]?>/gi, '\n')
+              .replace(/<\/p>/gi, '\n\n')
+              .replace(/<\/tr>/gi, '\n')
+              .replace(/<\/h[1-6]>/gi, '\n\n')
+              .replace(/<[^>]+>/g, ' ')
+              .replace(/&nbsp;/gi, ' ')
+              .replace(/&amp;/gi, '&')
+              .replace(/[ \t]+/g, ' ')
+              .replace(/\n\s+\n/g, '\n\n')
+              .trim() : '');
 
             // 1. Google Gmail Oficial ou SMTP com Pooling
             if (effectiveProvider === 'gmail' || effectiveProvider === 'smtp') {
@@ -116,9 +127,8 @@ function devEmailPlugin(): Plugin {
                 text: plainText,
                 replyTo: effectiveUser,
                 headers: {
-                  'X-Mailer': 'KIVORA Soft Mailer v2.1',
-                  'X-Priority': '1',
-                  'Importance': 'high',
+                  'Auto-Submitted': 'auto-generated',
+                  'X-Auto-Response-Suppress': 'OOF, AutoReply',
                 }
               };
 

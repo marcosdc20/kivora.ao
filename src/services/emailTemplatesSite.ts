@@ -4,7 +4,7 @@
  * Desenvolvido pela Visual Software, Lda
  */
 
-const LOGO_URL = 'https://raw.githubusercontent.com/marcosdc20/kivora.ao/main/public/logo.png';
+const LOGO_URL = 'https://kivora.visualsoftware.dev/logo.png';
 const PORTAL_URL = 'https://kivora.visualsoftware.dev/login';
 const DOWNLOAD_URL = 'https://kivora.ao/#download';
 const SUPPORT_EMAIL = 'suporte@kivora.ao';
@@ -221,6 +221,7 @@ const getEmailBaseLayout = (title: string, contentHtml: string, footerNote?: str
           <p>Software de Faturação e Gestão Comercial Certificado pela AGT • Angola</p>
           <p>Suporte Técnico: <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a> | Geral: <a href="mailto:${COMMERCIAL_EMAIL}">${COMMERCIAL_EMAIL}</a></p>
           ${footerNote ? `<p style="margin-top: 12px; color: #94a3b8; font-size: 10.5px; border-top: 1px solid #e2e8f0; padding-top: 10px;">${footerNote}</p>` : ''}
+          <p style="margin-top: 10px; color: #94a3b8; font-size: 10px;">Notificação oficial gerada pelo sistema de gestão e licenciamento KIVORA SOFT. Para garantir a receção das mensagens na Caixa de Entrada, adicione ${COMMERCIAL_EMAIL} aos seus contactos seguros.</p>
         </td>
       </tr>
     </table>

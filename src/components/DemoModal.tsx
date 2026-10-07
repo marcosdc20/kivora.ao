@@ -89,9 +89,11 @@ export const DemoModal: React.FC<DemoModalProps> = ({
       });
 
       // Disparar e-mails automáticos (confirmação ao cliente + alerta à equipa comercial)
-      sendDemoLeadEmails(formData).catch((err) => {
+      try {
+        await sendDemoLeadEmails(formData);
+      } catch (err) {
         console.warn('Erro no envio de e-mails do lead demo:', err);
-      });
+      }
 
       // Disparo opcional de webhook externo se configurado no Admin
       if (settings.webhookUrl && settings.webhookUrl.startsWith('http')) {
