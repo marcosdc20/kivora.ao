@@ -34,4 +34,4 @@ Disallow: /login/
 Disallow: /login
 
 # Declaração do Sitemap Oficial para os motores de busca (Google, Bing, Yandex)
-Sitemap: https://kivora.ao/sitemap.xml
+Sitemap: https://kivora.visualsoftware.dev/sitemap.xml
