@@ -98,6 +98,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
             </h4>
             <ul className="space-y-2.5 text-slate-300">
               {[
+                { name: 'Certificação & Documentos', page: 'certificacao-documentos' },
                 { name: 'Sobre a Empresa', page: 'sobre' },
                 { name: 'Tabela de Preços & Planos', page: 'planos' },
                 { name: 'Validador de Licença Oficial', page: 'validar-licenca' },

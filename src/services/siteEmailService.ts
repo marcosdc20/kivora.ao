@@ -1,5 +1,6 @@
 import { db } from '../lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { getCachedSystemSettings } from './systemSettingsService';
 import {
   generateClientCredentialsTemplate,
   generateLicenseDeliveryTemplate,
@@ -120,20 +121,17 @@ export const sendSiteEmail = async (options: {
   subject: string;
   html: string;
   text?: string;
+  replyTo?: string;
   configOverride?: SiteEmailConfig;
 }): Promise<{ success: boolean; messageId?: string; error?: string }> => {
   const cfg = options.configOverride || await getSiteEmailConfig();
-
-  const appPassword = cfg.apiKey || cfg.smtpPass;
-  if (!appPassword && cfg.provider !== 'resend' && cfg.provider !== 'sendgrid') {
-    return { success: false, error: 'Palavra-passe de aplicação ou credencial de e-mail não configurada no Painel Admin.' };
-  }
 
   const recipients = Array.isArray(options.to) ? options.to : [options.to];
   const senderEmail = cfg.senderEmail || 'kivora.angola@gmail.com';
   const fromAddress = `"${cfg.senderName || 'KIVORA SOFT'}" <${senderEmail}>`;
 
   // 1. Tentar o endpoint de envio seguro (/api/send-email)
+  // O endpoint /api/send-email resolve as credenciais no servidor caso o cliente não tenha acesso direto
   try {
     const serverlessRes = await fetch('/api/send-email', {
       method: 'POST',
@@ -144,11 +142,13 @@ export const sendSiteEmail = async (options: {
         provider: cfg.provider,
         apiKey: cfg.apiKey || cfg.smtpPass,
         senderEmail,
+        senderName: cfg.senderName || 'KIVORA SOFT',
         from: fromAddress,
         to: recipients,
         subject: options.subject,
         html: options.html,
         text: options.text,
+        replyTo: options.replyTo,
         smtpHost: cfg.smtpHost || (cfg.provider === 'gmail' ? 'smtp.gmail.com' : undefined),
         smtpPort: cfg.smtpPort || (cfg.provider === 'gmail' ? 465 : 587),
         smtpUser: cfg.smtpUser || senderEmail,
@@ -167,7 +167,12 @@ export const sendSiteEmail = async (options: {
     console.warn('Endpoint /api/send-email indisponível, tentando fallback:', err);
   }
 
-  // 2. Fallback direto via fetch (para ambientes sem /api/send-email)
+  // 2. Fallback direto via fetch (para provedores REST em ambientes sem /api/send-email)
+  const appPassword = cfg.apiKey || cfg.smtpPass;
+  if (!appPassword && cfg.provider !== 'resend' && cfg.provider !== 'sendgrid') {
+    return { success: false, error: 'Falha no endpoint /api/send-email e credenciais locais não disponíveis.' };
+  }
+
   if (cfg.provider === 'resend') {
     try {
       const res = await fetch('https://api.resend.com/emails', {
@@ -387,6 +392,10 @@ export const testSiteEmailConnection = async (
   });
 };
 
+function isSettledSuccess(res?: PromiseSettledResult<{ success: boolean }>): boolean {
+  return !!res && res.status === 'fulfilled' && !!res.value?.success;
+}
+
 /**
  * 7. Enviar E-mails de Lead de Demonstração (Confirmação ao Cliente + Alerta à Equipa KIVORA)
  */
@@ -401,28 +410,57 @@ export const sendDemoLeadEmails = async (data: {
   interestedModule: string;
   installationMode: string;
   notes?: string;
-}): Promise<void> => {
-  try {
-    // 1. Enviar confirmação ao cliente (se forneceu e-mail válido)
-    if (data.email && data.email.includes('@')) {
-      const customerHtml = generateDemoLeadCustomerTemplate(data);
+}): Promise<{ customerSent: boolean; adminSent: boolean }> => {
+  const promises: Promise<{ success: boolean }>[] = [];
+
+  // 1. Enviar confirmação ao cliente (se forneceu e-mail válido)
+  if (data.email && data.email.includes('@')) {
+    const customerHtml = generateDemoLeadCustomerTemplate(data);
+    const customerText = `Prezado(a) ${data.contactName},\n\nConfirmamos a receção do seu pedido de demonstração para a entidade ${data.companyName}.\nUm consultor especialista da nossa equipa comercial entrará em contacto através do número ${data.phone} para apresentar o software KIVORA SOFT.\n\nMódulo Solicitado: ${data.interestedModule}\nModalidade: ${data.installationMode}\n\nKIVORA SOFT • Visual Software, Lda.`;
+
+    promises.push(
       sendSiteEmail({
         to: data.email.trim(),
         subject: `Confirmação de Solicitação de Demonstração — ${data.companyName}`,
         html: customerHtml,
-      }).catch((e) => console.warn('Aviso no envio de e-mail ao cliente lead:', e));
-    }
-
-    // 2. Enviar alerta à equipa comercial KIVORA
-    const adminHtml = generateDemoLeadAdminAlertTemplate(data);
-    sendSiteEmail({
-      to: ADMIN_ALERT_EMAIL,
-      subject: `[Demonstração] ${data.companyName} (${data.contactName})`,
-      html: adminHtml,
-    }).catch((e) => console.warn('Aviso no envio de alerta de lead:', e));
-  } catch (err) {
-    console.warn('Erro ao disparar e-mails de demonstração:', err);
+        text: customerText,
+      })
+    );
   }
+
+  // 2. Enviar alerta à equipa comercial KIVORA (Admin principal + e-mails configurados)
+  const adminHtml = generateDemoLeadAdminAlertTemplate(data);
+  const adminText = `Nova Solicitação de Demonstração Recebida via Website:\n\nEmpresa: ${data.companyName}\nResponsável: ${data.contactName}\nTelefone/WhatsApp: ${data.phone}\nE-mail: ${data.email}\n${data.nif ? `NIF: ${data.nif}\n` : ''}Setor: ${data.businessSector}\nTerminais: ${data.storesCount}\nMódulo: ${data.interestedModule}\nInstalação: ${data.installationMode}${data.notes ? `\nObservações: ${data.notes}` : ''}`;
+
+  const settings = getCachedSystemSettings();
+  const configuredLeadEmails = (settings.notifyEmailLeads || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s.includes('@'));
+
+  const leadAdminRecipients = Array.from(new Set([
+    'narcisomarcos826@gmail.com',
+    ADMIN_ALERT_EMAIL,
+    ...configuredLeadEmails,
+  ]));
+
+  for (const adminTo of leadAdminRecipients) {
+    promises.push(
+      sendSiteEmail({
+        to: adminTo,
+        subject: `[Demonstração] ${data.companyName} (${data.contactName})`,
+        html: adminHtml,
+        text: adminText,
+        replyTo: data.email,
+      })
+    );
+  }
+
+  const results = await Promise.allSettled(promises);
+  const customerSent = isSettledSuccess(results[0]);
+  const adminSent = results.slice(1).some(isSettledSuccess);
+
+  return { customerSent, adminSent };
 };
 
 /**
@@ -437,46 +475,77 @@ export const sendPartnerApplicationEmails = async (data: {
   protocol: string;
   provincia: string;
   tipoParceria: string;
-}): Promise<void> => {
-  try {
-    // 1. Enviar confirmação ao candidato
-    if (data.email && data.email.includes('@')) {
-      const candHtml = generatePartnerApplicationCandidateTemplate({
-        nome: data.nome,
-        empresa: data.empresa,
-        protocol: data.protocol,
-        provincia: data.provincia,
-      });
+}): Promise<{ candidateSent: boolean; adminSent: boolean }> => {
+  const promises: Promise<{ success: boolean }>[] = [];
+
+  // 1. Enviar confirmação ao candidato
+  if (data.email && data.email.includes('@')) {
+    const candHtml = generatePartnerApplicationCandidateTemplate({
+      nome: data.nome,
+      empresa: data.empresa,
+      protocol: data.protocol,
+      provincia: data.provincia,
+    });
+    const candText = `Prezado(a) ${data.nome},\n\nAgradecemos a submissão da proposta de parceria para a sua entidade ${data.empresa} perante o programa de canais do KIVORA SOFT.\n\nProtocolo de Candidatura Registado: ${data.protocol}\nEntidade: ${data.empresa} (${data.nome})\nProvíncia: ${data.provincia}\nEstado Atual: Em Análise Técnica\n\nA nossa Direção de Canais analisará a documentação e comunicará o parecer no prazo de 24 a 48 horas úteis.\n\nKIVORA SOFT • Visual Software, Lda.`;
+
+    promises.push(
       sendSiteEmail({
         to: data.email.trim(),
         subject: `Candidatura a Parceiro KIVORA — Protocolo ${data.protocol}`,
         html: candHtml,
-      }).catch((e) => console.warn('Aviso no envio de e-mail de candidatura:', e));
-    }
-
-    // 2. Enviar alerta à equipa de parceiros KIVORA
-    sendSiteEmail({
-      to: ADMIN_ALERT_EMAIL,
-      subject: `[Candidatura Parceiro] ${data.protocol} — ${data.empresa} (${data.provincia})`,
-      html: `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; padding: 20px;">
-          <h2 style="color: #0f172a; margin-top: 0;">Nova Candidatura a Parceiro KIVORA</h2>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
-            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 160px;">Protocolo:</td><td><strong>${data.protocol}</strong></td></tr>
-            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Responsável:</td><td>${data.nome}</td></tr>
-            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Empresa:</td><td><strong>${data.empresa}</strong></td></tr>
-            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">NIF:</td><td>${data.nif}</td></tr>
-            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Província:</td><td>${data.provincia}</td></tr>
-            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Telefone:</td><td><a href="https://wa.me/${data.telefone.replace(/[^0-9]/g, '')}">${data.telefone}</a></td></tr>
-            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">E-mail:</td><td><a href="mailto:${data.email}">${data.email}</a></td></tr>
-            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Tipo de Parceria:</td><td>${data.tipoParceria}</td></tr>
-          </table>
-        </div>
-      `,
-    }).catch((e) => console.warn('Aviso no alerta de parceiro:', e));
-  } catch (err) {
-    console.warn('Erro ao disparar e-mails de parceiro:', err);
+        text: candText,
+        replyTo: 'parceiros@kivora.ao',
+      })
+    );
   }
+
+  // 2. Enviar alerta à direção / equipa de parceiros KIVORA (Admin principal + configurados)
+  const adminHtml = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; padding: 20px;">
+      <h2 style="color: #0f172a; margin-top: 0;">Nova Candidatura a Parceiro KIVORA</h2>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 160px;">Protocolo:</td><td><strong>${data.protocol}</strong></td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Responsável:</td><td>${data.nome}</td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Empresa:</td><td><strong>${data.empresa}</strong></td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">NIF:</td><td>${data.nif}</td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Província:</td><td>${data.provincia}</td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Telefone:</td><td><a href="https://wa.me/${data.telefone.replace(/[^0-9]/g, '')}">${data.telefone}</a></td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">E-mail:</td><td><a href="mailto:${data.email}">${data.email}</a></td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Tipo de Parceria:</td><td>${data.tipoParceria}</td></tr>
+      </table>
+    </div>
+  `;
+  const adminText = `Nova Candidatura a Parceiro KIVORA Registada:\n\nProtocolo: ${data.protocol}\nResponsável: ${data.nome}\nEmpresa: ${data.empresa}\nNIF: ${data.nif}\nProvíncia: ${data.provincia}\nTelefone: ${data.telefone}\nE-mail: ${data.email}\nTipo de Parceria: ${data.tipoParceria}`;
+
+  const settings = getCachedSystemSettings();
+  const configuredPartnerEmails = (settings.notifyEmailPartners || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s.includes('@'));
+
+  const partnerAdminRecipients = Array.from(new Set([
+    'narcisomarcos826@gmail.com',
+    ADMIN_ALERT_EMAIL,
+    ...configuredPartnerEmails,
+  ]));
+
+  for (const adminTo of partnerAdminRecipients) {
+    promises.push(
+      sendSiteEmail({
+        to: adminTo,
+        subject: `[Candidatura Parceiro] ${data.protocol} — ${data.empresa} (${data.provincia})`,
+        html: adminHtml,
+        text: adminText,
+        replyTo: data.email,
+      })
+    );
+  }
+
+  const results = await Promise.allSettled(promises);
+  const candidateSent = isSettledSuccess(results[0]);
+  const adminSent = results.slice(1).some(isSettledSuccess);
+
+  return { candidateSent, adminSent };
 };
 
 /**
@@ -490,39 +559,69 @@ export const sendSupportTicketEmails = async (data: {
   assunto: string;
   departamento: string;
   mensagem: string;
-}): Promise<void> => {
-  try {
-    if (data.email && data.email.includes('@')) {
-      const custHtml = generateSupportTicketCustomerTemplate(data);
+}): Promise<{ customerSent: boolean; adminSent: boolean }> => {
+  const promises: Promise<{ success: boolean }>[] = [];
+
+  if (data.email && data.email.includes('@')) {
+    const custHtml = generateSupportTicketCustomerTemplate(data);
+    const custText = `Prezado(a) ${data.nome},\n\nConfirmamos a receção e o registo do seu chamado de assistência técnica no Centro de Suporte KIVORA.\nProtocolo do Ticket: ${data.ticketNumber}\nAssunto: ${data.assunto}\nDepartamento: ${data.departamento.toUpperCase()}\nEstado: Em Fila de Atendimento\n\nA nossa equipa técnica responderá através desta mesma conversa com brevidade.\n\nKIVORA SOFT • Suporte Técnico`;
+
+    promises.push(
       sendSiteEmail({
         to: data.email.trim(),
         subject: `Suporte KIVORA — Chamado #${data.ticketNumber}`,
         html: custHtml,
-      }).catch((e) => console.warn('Aviso no envio de confirmação de ticket:', e));
-    }
-
-    sendSiteEmail({
-      to: ADMIN_ALERT_EMAIL,
-      subject: `[Suporte #${data.ticketNumber}] ${data.assunto} — ${data.nome}`,
-      html: `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; padding: 20px;">
-          <h2 style="color: #0f172a; margin-top: 0;">Novo Chamado de Suporte Registado</h2>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
-            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 160px;">Protocolo:</td><td><strong>${data.ticketNumber}</strong></td></tr>
-            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Cliente / Empresa:</td><td>${data.nome}</td></tr>
-            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Contacto:</td><td>${data.telefone} | ${data.email || 'N/D'}</td></tr>
-            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Departamento:</td><td>${data.departamento.toUpperCase()}</td></tr>
-            <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Assunto:</td><td>${data.assunto}</td></tr>
-          </table>
-          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px; margin-top: 14px; color: #334155;">
-            <strong style="color: #0f172a;">Descrição do Chamado:</strong><br>${data.mensagem.replace(/\n/g, '<br>')}
-          </div>
-        </div>
-      `,
-    }).catch((e) => console.warn('Aviso no alerta de ticket:', e));
-  } catch (err) {
-    console.warn('Erro ao disparar e-mails de suporte:', err);
+        text: custText,
+      })
+    );
   }
+
+  const adminHtml = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; padding: 20px;">
+      <h2 style="color: #0f172a; margin-top: 0;">Novo Chamado de Suporte Registado</h2>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 160px;">Protocolo:</td><td><strong>${data.ticketNumber}</strong></td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Cliente / Empresa:</td><td>${data.nome}</td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Contacto:</td><td>${data.telefone} | ${data.email || 'N/D'}</td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Departamento:</td><td>${data.departamento.toUpperCase()}</td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Assunto:</td><td>${data.assunto}</td></tr>
+      </table>
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px; margin-top: 14px; color: #334155;">
+        <strong style="color: #0f172a;">Descrição do Chamado:</strong><br>${data.mensagem.replace(/\n/g, '<br>')}
+      </div>
+    </div>
+  `;
+  const adminText = `Novo Chamado de Suporte #${data.ticketNumber} Registado:\nCliente/Empresa: ${data.nome}\nContacto: ${data.telefone} | ${data.email || 'N/D'}\nDepartamento: ${data.departamento.toUpperCase()}\nAssunto: ${data.assunto}\n\nDescrição do Chamado:\n${data.mensagem}`;
+
+  const settings = getCachedSystemSettings();
+  const configuredSupportEmails = (settings.supportEmail || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s.includes('@'));
+
+  const supportAdminRecipients = Array.from(new Set([
+    'narcisomarcos826@gmail.com',
+    ADMIN_ALERT_EMAIL,
+    ...configuredSupportEmails,
+  ]));
+
+  for (const adminTo of supportAdminRecipients) {
+    promises.push(
+      sendSiteEmail({
+        to: adminTo,
+        subject: `[Suporte #${data.ticketNumber}] ${data.assunto} — ${data.nome}`,
+        html: adminHtml,
+        text: adminText,
+        replyTo: data.email,
+      })
+    );
+  }
+
+  const results = await Promise.allSettled(promises);
+  const customerSent = isSettledSuccess(results[0]);
+  const adminSent = results.slice(1).some(isSettledSuccess);
+
+  return { customerSent, adminSent };
 };
 
 

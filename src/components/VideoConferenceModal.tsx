@@ -184,49 +184,61 @@ export const VideoConferenceModal: React.FC<VideoConferenceModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-slate-950/90 backdrop-blur-md animate-fade-in">
         <div
-          className={`bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ${
+          className={`bg-slate-900 border border-slate-800 sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ${
             isFullscreen
               ? 'w-full h-full rounded-none'
-              : 'w-full max-w-5xl h-[92vh] max-h-[850px]'
+              : 'w-full h-full sm:h-[92vh] sm:max-h-[850px] max-w-5xl'
           }`}
         >
-          {/* ── BARRA SUPERIOR (HEADER DA VIDEOCHAMADA) ── */}
-          <div className="bg-slate-950/90 px-4 py-3 border-b border-slate-800 flex items-center justify-between gap-3 shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
-                <Video className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-white tracking-tight">
-                    Assistência Remota por Videochamada
-                  </h3>
-                  {callActive && (
-                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-bold text-emerald-400 font-mono">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      EM DIRETO • {formatTime(callDuration)}
-                    </span>
-                  )}
+          {/* ── BARRA SUPERIOR (HEADER DA VIDEOCHAMADA RESPONSIVO) ── */}
+          <div className="bg-slate-950/95 px-3 sm:px-4 py-2.5 sm:py-3 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-2.5 shrink-0">
+            {/* Lado Esquerdo: Identificação da Sala */}
+            <div className="flex items-center justify-between md:justify-start gap-2.5 min-w-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+                  <Video className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  {companyName} {ticketNumber ? `• Ticket ${ticketNumber}` : ''} • Sala: <span className="font-mono text-slate-300">{sanitizedRoom}</span>
-                </p>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-xs sm:text-sm font-bold text-white tracking-tight truncate">
+                      Assistência por Videochamada
+                    </h3>
+                    {callActive && (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-bold text-emerald-400 font-mono">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>EM DIRETO • {formatTime(callDuration)}</span>
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-slate-400 truncate">
+                    {companyName} {ticketNumber ? `• #${ticketNumber}` : ''} • Sala: <span className="font-mono text-slate-300">{sanitizedRoom}</span>
+                  </p>
+                </div>
               </div>
+
+              {/* Botão de Fechar no Mobile */}
+              <button
+                onClick={handleCloseModal}
+                title="Fechar janela"
+                className="md:hidden p-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 transition-colors shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            {/* Ações e HUD de Minutos */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            {/* Lado Direito: Ações e HUD de Minutos */}
+            <div className="flex items-center justify-between md:justify-end gap-2 sm:gap-2.5 flex-wrap">
               {/* HUD de Saldo de Minutos */}
               {userRole !== 'admin' ? (
-                <div className="flex items-center gap-2 bg-slate-900 border border-slate-700/90 px-3 py-1.5 rounded-xl shadow-xs">
-                  <div className="flex flex-col text-right">
-                    <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider">
-                      Saldo Restante
+                <div className="flex items-center gap-2 bg-slate-900 border border-slate-700/80 px-2.5 py-1 rounded-xl shadow-xs">
+                  <div className="flex flex-col text-left sm:text-right">
+                    <span className="text-[8px] sm:text-[9px] text-slate-400 uppercase font-bold tracking-wider">
+                      Saldo
                     </span>
                     <span
-                      className={`font-mono text-xs font-black ${
+                      className={`font-mono text-[11px] sm:text-xs font-black ${
                         remainingSecondsTotal <= 60
                           ? 'text-rose-400 animate-pulse'
                           : remainingSecondsTotal <= 180
@@ -240,40 +252,40 @@ export const VideoConferenceModal: React.FC<VideoConferenceModalProps> = ({
 
                   <button
                     onClick={() => setShowPurchaseModal(true)}
-                    className="p-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1 shadow-sm cursor-pointer"
-                    title="Adquirir mais minutos de assistência"
+                    className="p-1 sm:px-2 sm:py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer"
+                    title="Adquirir mais minutos"
                   >
                     <PlusCircle className="w-3.5 h-3.5" />
-                    <span className="hidden md:inline">Recarregar</span>
+                    <span className="hidden sm:inline">Recarregar</span>
                   </button>
                 </div>
               ) : (
-                <span className="bg-purple-950/80 border border-purple-500/40 text-purple-300 text-[10px] font-mono font-bold px-2.5 py-1 rounded-xl hidden sm:inline">
-                  MODO ADMINISTRADOR (ILIMITADO)
+                <span className="bg-purple-950/80 border border-purple-500/40 text-purple-300 text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg hidden sm:inline">
+                  ADMIN (ILIMITADO)
                 </span>
               )}
 
               {/* Seletor de Provedor */}
-              <div className="hidden lg:flex items-center bg-slate-800/80 p-0.5 rounded-lg border border-slate-700 text-xs font-semibold">
+              <div className="flex items-center bg-slate-800/80 p-0.5 rounded-lg border border-slate-700 text-[11px] font-semibold">
                 <button
                   onClick={() => setProvider('jitsi')}
-                  className={`px-2.5 py-1 rounded-md transition-all ${
+                  className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
                     provider === 'jitsi'
                       ? 'bg-blue-600 text-white shadow-xs'
                       : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
-                  Jitsi Integrado
+                  Jitsi
                 </button>
                 <button
                   onClick={() => setProvider('google_meet')}
-                  className={`px-2.5 py-1 rounded-md transition-all ${
+                  className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
                     provider === 'google_meet'
                       ? 'bg-blue-600 text-white shadow-xs'
                       : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
-                  Google Meet
+                  Meet
                 </button>
               </div>
 
@@ -281,36 +293,36 @@ export const VideoConferenceModal: React.FC<VideoConferenceModalProps> = ({
               <button
                 onClick={handleCopyLink}
                 title="Copiar link da reunião"
-                className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors flex items-center gap-1 text-xs"
+                className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors flex items-center gap-1 text-[11px] cursor-pointer"
               >
-                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                <span className="hidden md:inline">{copied ? 'Copiado!' : 'Copiar Link'}</span>
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                <span className="hidden lg:inline">{copied ? 'Copiado!' : 'Copiar'}</span>
               </button>
 
               {/* Partilhar WhatsApp */}
               <button
                 onClick={handleShareWhatsApp}
                 title="Convidar via WhatsApp"
-                className="p-2 rounded-lg bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] border border-[#25D366]/30 transition-colors flex items-center gap-1 text-xs font-bold"
+                className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] border border-[#25D366]/30 transition-colors flex items-center gap-1 text-[11px] font-bold cursor-pointer"
               >
-                <Share2 className="w-4 h-4" />
-                <span className="hidden md:inline">WhatsApp</span>
+                <Share2 className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline">WhatsApp</span>
               </button>
 
-              {/* Maximizar */}
+              {/* Maximizar (desktop) */}
               <button
                 onClick={() => setIsFullscreen(!isFullscreen)}
                 title={isFullscreen ? 'Sair de ecrã inteiro' : 'Ecrã inteiro'}
-                className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors"
+                className="hidden sm:flex p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors cursor-pointer"
               >
-                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
               </button>
 
-              {/* Fechar */}
+              {/* Fechar (desktop) */}
               <button
                 onClick={handleCloseModal}
                 title="Fechar janela"
-                className="p-2 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 hover:text-rose-200 border border-rose-500/30 transition-colors"
+                className="hidden md:flex p-1.5 sm:p-2 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 hover:text-rose-200 border border-rose-500/30 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -542,26 +554,24 @@ export const VideoConferenceModal: React.FC<VideoConferenceModalProps> = ({
             )}
           </div>
 
-          {/* ── BARRA INFERIOR DE INFORMAÇÕES & ATALHOS ── */}
-          <div className="bg-slate-950 px-4 py-2.5 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400 shrink-0">
-            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1.5 text-slate-300">
-                <Monitor className="w-3.5 h-3.5 text-blue-400" />
-                <span>Para partilhar o ecrã, clique no ícone de ecrã dentro da chamada.</span>
-              </span>
+          {/* ── BARRA INFERIOR DE INFORMAÇÕES & ATALHOS RESPONSIVA ── */}
+          <div className="bg-slate-950 px-3 sm:px-4 py-2 sm:py-2.5 border-t border-slate-800 flex items-center justify-between gap-2.5 text-xs text-slate-400 shrink-0 flex-wrap">
+            <div className="flex items-center gap-2 text-[11px] sm:text-xs text-slate-300 min-w-0">
+              <Monitor className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+              <span className="truncate">Partilha de ecrã disponível no menu da chamada.</span>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 shrink-0 ml-auto">
               {callActive && (
                 <button
                   onClick={handleHangupCall}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all shadow-md shadow-rose-600/30 cursor-pointer active:scale-95"
                 >
                   <PhoneOff className="w-3.5 h-3.5" />
                   <span>Desconectar Chamada</span>
                 </button>
               )}
-              <span className="text-[11px] text-slate-500 font-mono">
+              <span className="text-[10px] sm:text-[11px] text-slate-500 font-mono hidden sm:inline">
                 Suporte KIVORA 24/7
               </span>
             </div>

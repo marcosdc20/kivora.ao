@@ -1,7 +1,10 @@
-import { defineConfig, Plugin } from 'vite';
+import { defineConfig, loadEnv, Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 import nodemailer from 'nodemailer';
+
+let devCachedTransporter: any = null;
+let devLastTransporterKey = '';
 
 function devEmailPlugin(): Plugin {
   return {
@@ -32,13 +35,24 @@ function devEmailPlugin(): Plugin {
         req.on('end', async () => {
           try {
             const body = JSON.parse(bodyRaw || '{}');
-            const { provider, apiKey, from, to, subject, html, text, smtpHost, smtpPort, smtpUser, smtpPass, senderEmail } = body;
+            const { provider, apiKey, from, to, subject, html, text, smtpHost, smtpPort, smtpUser, smtpPass, senderEmail, senderName } = body;
 
-            const effectiveKey = (apiKey || smtpPass || '').trim();
-            if (!effectiveKey && provider !== 'smtp') {
+            const loadedEnv = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '');
+            const envPass = (loadedEnv.SMTP_PASS || loadedEnv.VITE_SMTP_PASS || process.env.SMTP_PASS || process.env.VITE_SMTP_PASS || '').trim();
+            const envUser = (loadedEnv.SMTP_USER || loadedEnv.VITE_SMTP_USER || process.env.SMTP_USER || 'kivora.angola@gmail.com').trim();
+
+            const effectiveProvider = provider || 'gmail';
+            const effectiveKey = (apiKey || smtpPass || envPass).trim();
+            const effectiveSenderEmail = (senderEmail || envUser).trim();
+            const effectiveSenderName = (senderName || 'KIVORA SOFT').trim();
+            const effectiveHost = smtpHost || (effectiveProvider === 'gmail' ? 'smtp.gmail.com' : 'smtp.gmail.com');
+            const effectivePort = Number(smtpPort) || 465;
+            const effectiveUser = (smtpUser || effectiveSenderEmail || envUser).trim();
+
+            if (!effectiveKey && effectiveProvider !== 'smtp') {
               res.statusCode = 400;
               res.setHeader('Content-Type', 'application/json');
-              res.end(JSON.stringify({ error: 'Chave de API ou palavra-passe do e-mail não configurada.' }));
+              res.end(JSON.stringify({ error: 'Chave de API ou palavra-passe do e-mail não configurada no servidor.' }));
               return;
             }
 
@@ -67,43 +81,55 @@ function devEmailPlugin(): Plugin {
               return;
             }
 
-            // 1. Google Gmail Oficial ou SMTP
-            if (provider === 'gmail' || provider === 'smtp') {
-              const host = smtpHost || (provider === 'gmail' ? 'smtp.gmail.com' : 'smtp.gmail.com');
-              const port = Number(smtpPort) || 465;
-              const isSecure = port === 465;
-              const user = (smtpUser || senderEmail || 'kivora.angola@gmail.com').trim();
-              const pass = (smtpPass || apiKey || '').replace(/\s+/g, '');
+            const plainText = text || (html ? html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '');
 
-              const transporter = nodemailer.createTransport({
-                host,
-                port,
-                secure: isSecure,
-                auth: {
-                  user,
-                  pass,
-                },
-                tls: {
-                  rejectUnauthorized: false
-                }
-              });
+            // 1. Google Gmail Oficial ou SMTP com Pooling
+            if (effectiveProvider === 'gmail' || effectiveProvider === 'smtp') {
+              const isSecure = effectivePort === 465;
+              const cleanPass = effectiveKey.replace(/\s+/g, '');
+              const transporterKey = `${effectiveHost}:${effectivePort}:${effectiveUser}:${cleanPass}`;
+
+              if (!devCachedTransporter || devLastTransporterKey !== transporterKey) {
+                devCachedTransporter = nodemailer.createTransport({
+                  pool: true,
+                  maxConnections: 3,
+                  maxMessages: 100,
+                  rateLimit: 5,
+                  host: effectiveHost,
+                  port: effectivePort,
+                  secure: isSecure,
+                  auth: {
+                    user: effectiveUser,
+                    pass: cleanPass,
+                  },
+                  tls: {
+                    rejectUnauthorized: false
+                  }
+                });
+                devLastTransporterKey = transporterKey;
+              }
 
               const mailOptions: any = {
-                from: typeof from === 'string' && from.includes('@') ? from : `"KIVORA SOFT" <${user}>`,
+                from: typeof from === 'string' && from.includes('@') ? from : `"${effectiveSenderName}" <${effectiveUser}>`,
                 subject,
                 html,
-                text,
-                replyTo: user,
+                text: plainText,
+                replyTo: effectiveUser,
+                headers: {
+                  'X-Mailer': 'KIVORA Soft Mailer v2.1',
+                  'X-Priority': '1',
+                  'Importance': 'high',
+                }
               };
 
               if (recipients.length === 1) {
                 mailOptions.to = recipients[0];
               } else {
-                mailOptions.to = user;
+                mailOptions.to = effectiveUser;
                 mailOptions.bcc = recipients;
               }
 
-              const info = await transporter.sendMail(mailOptions);
+              const info = await devCachedTransporter.sendMail(mailOptions);
 
               res.statusCode = 200;
               res.setHeader('Content-Type', 'application/json');
@@ -112,7 +138,7 @@ function devEmailPlugin(): Plugin {
             }
 
             // 2. SendGrid
-            if (provider === 'sendgrid') {
+            if (effectiveProvider === 'sendgrid') {
               const sgRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
                 method: 'POST',
                 headers: {
@@ -121,10 +147,13 @@ function devEmailPlugin(): Plugin {
                 },
                 body: JSON.stringify({
                   personalizations: [{ to: recipients.map((e: string) => ({ email: e })) }],
-                  from: typeof from === 'string' ? { email: from } : from,
-                  reply_to: { email: senderEmail || 'kivora.angola@gmail.com' },
+                  from: typeof from === 'string' ? { email: from } : { email: effectiveSenderEmail, name: effectiveSenderName },
+                  reply_to: { email: effectiveUser },
                   subject,
-                  content: [{ type: 'text/html', value: html }],
+                  content: [
+                    { type: 'text/plain', value: plainText },
+                    { type: 'text/html', value: html }
+                  ],
                 }),
               });
 
@@ -145,7 +174,7 @@ function devEmailPlugin(): Plugin {
             // 3. Resend API
             const fromStr = typeof from === 'string'
               ? from
-              : `${from?.name || 'KIVORA SOFT'} <${from?.email || 'kivora.angola@gmail.com'}>`;
+              : `"${effectiveSenderName}" <${effectiveSenderEmail}>`;
 
             const resendRes = await fetch('https://api.resend.com/emails', {
               method: 'POST',
@@ -156,10 +185,10 @@ function devEmailPlugin(): Plugin {
               body: JSON.stringify({
                 from: fromStr,
                 to: recipients,
-                reply_to: senderEmail || 'kivora.angola@gmail.com',
+                reply_to: effectiveUser,
                 subject,
                 html,
-                text,
+                text: plainText,
               }),
             });
 

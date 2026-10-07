@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Menu, X, Download, User, ChevronDown, ChevronRight, ArrowRight,
-  FileCheck, ShoppingCart, Boxes, Users, ShieldCheck, Utensils, Pill,
-  Briefcase, Calculator, Key, CreditCard, Award, BookOpen, Newspaper,
-  Building2, HelpCircle, ShoppingBag, Printer, MapPin, Shield, Phone
+  FileCheck, ShoppingCart, Boxes, Users, ShieldCheck,
+  Calculator, Key, CreditCard, Award, BookOpen,
+  Building2, HelpCircle, ShoppingBag, Printer, MapPin, Phone
 } from 'lucide-react';
 import { KivoraLogo } from './KivoraLogo';
 import { subscribeSystemSettings, DEFAULT_SETTINGS, SystemCompanySettings } from '../services/systemSettingsService';
@@ -11,6 +11,7 @@ import { subscribeSystemSettings, DEFAULT_SETTINGS, SystemCompanySettings } from
 export type PageId =
   | 'home'
   | 'funcionalidades'
+  | 'certificacao-documentos'
   | 'solucoes'
   | 'planos'
   | 'ferramentas'
@@ -148,66 +149,57 @@ export const Header: React.FC<HeaderProps> = ({
       name: 'Módulos',
       mainPage: 'funcionalidades',
       items: [
-        { name: 'Faturação Eletrónica', desc: 'Assinatura digital RSA-SHA256 e QR Code fiscal', page: 'faturacao', icon: <FileCheck className="w-4 h-4" /> },
+        { name: 'Faturação Eletrónica AGT', desc: 'Assinatura digital RSA-SHA256 e QR Code fiscal', page: 'faturacao', icon: <FileCheck className="w-4 h-4" /> },
         { name: 'Ponto de Venda (POS)', desc: 'Faturação rápida de balcão, talões térmicos e fecho Z', page: 'pos', icon: <ShoppingCart className="w-4 h-4" /> },
         { name: 'Stock & Armazéns', desc: 'Inventário em tempo real, lotes, validades e multidepósito', page: 'stock', icon: <Boxes className="w-4 h-4" /> },
         { name: 'Recursos Humanos & IRT', desc: 'Processamento de salários, mapas INSS e tabelas de IRT', page: 'rh', icon: <Users className="w-4 h-4" /> },
-        { name: 'Contabilidade & SAF-T AO', desc: 'Plano Geral de Contas PGC e ficheiro SAF-T mensal', page: 'contabilidade', icon: <ShieldCheck className="w-4 h-4" /> },
-        { name: 'Hardware & Periféricos', desc: 'Impressoras térmicas 80mm, leitores 2D e terminais touch', page: 'hardware', icon: <Printer className="w-4 h-4" /> },
+        { name: 'Hardware & Periféricos', desc: 'Impressoras térmicas 80mm, leitores 2D e gavetas', page: 'hardware', icon: <Printer className="w-4 h-4" /> },
       ],
       footerLink: { label: 'Ver todos os módulos e funcionalidades', page: 'funcionalidades' }
-    },
-    {
-      id: 'setores',
-      name: 'Setores',
-      mainPage: 'setores',
-      items: [
-        { name: 'Retalho & Supermercados', desc: 'Caixas rápidos, pesagem direta e leitura de códigos de barras', page: 'retalho', icon: <ShoppingCart className="w-4 h-4" /> },
-        { name: 'Restauração & Bares', desc: 'Gestão de mesas, pedidos de sala e impressão na cozinha', page: 'restauracao', icon: <Utensils className="w-4 h-4" /> },
-        { name: 'Farmácias & Clínicas', desc: 'Controlo rigoroso de validades, lotes e dosagens', page: 'farmacia', icon: <Pill className="w-4 h-4" /> },
-        { name: 'Prestação de Serviços', desc: 'Faturas-proforma, retenção na fonte 6.5% e avenças', page: 'servicos', icon: <Briefcase className="w-4 h-4" /> },
-      ],
-      footerLink: { label: 'Ver soluções por setor de atividade', page: 'setores' }
     },
     {
       id: 'planos',
       name: 'Preços & Planos',
       mainPage: 'planos',
       items: [
-        { name: 'Tabela Oficial de Preços', desc: 'Planos mensais, anuais e licença vitalícia', page: 'planos', icon: <CreditCard className="w-4 h-4" /> },
-        { name: 'Simulador de Postos LAN', desc: 'Calcule custos de computadores e caixas adicionais', page: 'simulador-roi', icon: <Calculator className="w-4 h-4" /> },
-        { name: 'Comparativo de Soluções', desc: 'Análise de custos e funcionamento offline', page: 'comparativo', icon: <Boxes className="w-4 h-4" /> },
-        { name: 'Loja de Equipamentos POS', desc: 'Impressoras, gavetas e terminais com garantia', page: 'loja', icon: <ShoppingBag className="w-4 h-4" /> },
+        { name: 'Tabela Oficial de Preços', desc: 'Planos mensais, anuais e vitalício em Kwanzas (AOA)', page: 'planos', icon: <CreditCard className="w-4 h-4" /> },
+        { name: 'Loja de Equipamentos POS', desc: 'Impressoras térmicas, gavetas e terminais com garantia', page: 'loja', icon: <ShoppingBag className="w-4 h-4" /> },
+        { name: 'Simulador de Postos LAN', desc: 'Calcule custos de caixas e postos adicionais de rede', page: 'simulador-roi', icon: <Calculator className="w-4 h-4" /> },
       ],
       footerLink: { label: 'Consultar tabela completa de licenciamento', page: 'planos' }
     },
     {
-      id: 'conformidade',
-      name: 'Conformidade Fiscal',
-      mainPage: 'guia-agt',
+      id: 'certificacao',
+      name: 'Certificação e Documentos',
+      mainPage: 'certificacao-documentos',
       items: [
-        { name: 'Guia Decreto 71/25', desc: 'Regras fiscais, prazos de SAF-T e requisitos legais', page: 'guia-agt', icon: <FileCheck className="w-4 h-4" /> },
-        { name: 'Calculadora Fiscal IRT & IVA', desc: 'Simulador gratuito de salários e retenções', page: 'calculadora-fiscal', icon: <Calculator className="w-4 h-4" /> },
-        { name: 'Validador de Licença', desc: 'Verificação instantânea de autenticidade de licenças', page: 'validar-licenca', icon: <Key className="w-4 h-4" /> },
-        { name: 'Manuais & Tutoriais', desc: 'Guias práticos para operadores e administradores', page: 'manuais', icon: <BookOpen className="w-4 h-4" /> },
-        { name: 'Notícias & Legislação', desc: 'Atualizações tributárias e decretos em Angola', page: 'noticias', icon: <Newspaper className="w-4 h-4" /> },
+        { name: 'Certificação Oficial AGT', desc: 'Software certificado pela AGT sob o n.º FE/387/AGT/2026', page: 'certificacao-documentos', icon: <Award className="w-4 h-4" /> },
+        { name: 'Decreto Presidencial 71/25', desc: 'Regras fiscais, prazos e requisitos legais de faturação', page: 'guia-agt', icon: <FileCheck className="w-4 h-4" /> },
+        { name: 'Validador de Licenças', desc: 'Verificação instantânea de autenticidade de licenças', page: 'validar-licenca', icon: <Key className="w-4 h-4" /> },
+        { name: 'Regulamentos & Ficha Técnica', desc: 'Regulamento de revenda e declaração de segurança', page: 'certificacao-documentos', icon: <BookOpen className="w-4 h-4" /> },
       ],
-      footerLink: { label: 'Aceder ao Guia Completo de Regras AGT', page: 'guia-agt' }
+      footerLink: { label: 'Consultar todos os documentos e certificados', page: 'certificacao-documentos' }
     },
     {
-      id: 'empresa',
-      name: 'Empresa & Parceiros',
-      mainPage: 'sobre',
+      id: 'parceiros',
+      name: 'Parceiros',
+      mainPage: 'parceiros',
       items: [
-        { name: 'Sobre a Kivora', desc: 'História, missão e equipa da Visual Software', page: 'sobre', icon: <Building2 className="w-4 h-4" /> },
-        { name: 'Casos de Sucesso', desc: 'Empresas em Angola que utilizam o KIVORA', page: 'casos-sucesso', icon: <Award className="w-4 h-4" /> },
-        { name: 'Segurança & Criptografia', desc: 'Base de dados local encriptada e proteção de dados', page: 'seguranca', icon: <Shield className="w-4 h-4" /> },
-        { name: 'Presença Nacional', desc: 'Cobertura e assistência técnica nas 18 províncias', page: 'provincias', icon: <MapPin className="w-4 h-4" /> },
-        { name: 'Programa de Parceiros', desc: 'Margens de revenda e certificação técnica', page: 'parceiros', icon: <Award className="w-4 h-4" /> },
-        { name: 'Diretório de Consultores', desc: 'Encontre técnicos credenciados na sua região', page: 'diretorio-parceiros', icon: <Building2 className="w-4 h-4" /> },
-        { name: 'Central de Suporte', desc: 'Atendimento presencial e remoto em Luanda', page: 'suporte', icon: <HelpCircle className="w-4 h-4" /> },
+        { name: 'Programa de Parceiros', desc: 'Margens de revenda até 60% e certificação técnica', page: 'parceiros', icon: <Award className="w-4 h-4" /> },
+        { name: 'Candidatura de Parceiro', desc: 'Submeta o formulário oficial de credenciamento', page: 'candidatura-parceiro', icon: <Building2 className="w-4 h-4" /> },
+        { name: 'Diretório de Consultores', desc: 'Encontre técnicos credenciados na sua região', page: 'diretorio-parceiros', icon: <MapPin className="w-4 h-4" /> },
       ],
-      footerLink: { label: 'Conhecer mais sobre a Visual Software', page: 'sobre' }
+      footerLink: { label: 'Candidatar-se ao Programa de Parceiros', page: 'candidatura-parceiro' }
+    },
+    {
+      id: 'suporte',
+      name: 'Suporte',
+      mainPage: 'suporte',
+      items: [
+        { name: 'Central de Suporte', desc: 'Abertura de chamados e assistência técnica em Luanda', page: 'suporte', icon: <HelpCircle className="w-4 h-4" /> },
+        { name: 'Manuais & Tutoriais', desc: 'Guias práticos para operadores e administradores', page: 'manuais', icon: <BookOpen className="w-4 h-4" /> },
+      ],
+      footerLink: { label: 'Falar com a equipa de apoio técnico', page: 'suporte' }
     }
   ];
 
@@ -370,9 +362,9 @@ export const Header: React.FC<HeaderProps> = ({
                       className={`absolute top-full mt-2 bg-white rounded-2xl shadow-[0_20px_50px_-10px_rgba(15,23,42,0.15)] border border-slate-200/90 p-3 z-[100] dropdown-premium ring-1 ring-black/[0.04] transition-all ${
                         group.items.length > 4
                           ? 'w-[520px] -left-12 sm:left-0'
-                          : ['conformidade', 'empresa', 'planos'].includes(group.id)
-                          ? 'right-0 w-[320px]'
-                          : 'left-0 w-[320px]'
+                          : ['certificacao', 'parceiros', 'suporte', 'planos'].includes(group.id)
+                          ? 'right-0 w-[340px]'
+                          : 'left-0 w-[340px]'
                       }`}
                     >
                       {/* Group header */}
@@ -385,7 +377,7 @@ export const Header: React.FC<HeaderProps> = ({
                         </span>
                       </div>
 
-                      <div className={group.items.length > 4 ? 'grid grid-cols-2 gap-1' : 'space-y-1'}>
+                      <div className="space-y-1">
                         {group.items.map((item, idx) => (
                           <button
                             key={idx}
@@ -426,34 +418,26 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
               );
             })}
-
-
-            {/* Direct Quick Link */}
-            <button
-              onClick={() => handleNavClick('loja')}
-              className={`whitespace-nowrap text-xs xl:text-[13px] font-semibold transition-all px-2.5 xl:px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 ${
-                activePage === 'loja'
-                  ? 'text-[#FF6500] font-bold bg-orange-50/90'
-                  : 'text-slate-700 hover:text-[#FF6500] hover:bg-slate-50/90'
-              }`}
-            >
-              <ShoppingBag className="w-3.5 h-3.5 text-slate-500" />
-              <span>Loja POS</span>
-            </button>
           </nav>
 
           {/* Right Action Buttons — Rounded pill buttons matching reference layout */}
           <div className="hidden lg:flex items-center space-x-2.5 shrink-0">
-            <button
-              onClick={() => {
-                if (onOpenLogin) onOpenLogin();
-                else if (onNavigatePage) onNavigatePage('login');
+            <a
+              href="https://kivora.visualsoftware.dev/login"
+              onClick={(e) => {
+                if (onOpenLogin) {
+                  e.preventDefault();
+                  onOpenLogin();
+                } else if (onNavigatePage) {
+                  e.preventDefault();
+                  onNavigatePage('login');
+                }
               }}
               className="whitespace-nowrap bg-slate-100/80 hover:bg-slate-200 active:bg-slate-300 text-slate-800 border border-slate-200/90 text-xs font-bold px-4 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs hover:-translate-y-0.5"
             >
               <User className="w-3.5 h-3.5 text-slate-700" strokeWidth={2.2} />
               <span>Portal / Entrar</span>
-            </button>
+            </a>
 
             <button
               onClick={() => handleNavClick('download')}
@@ -547,29 +531,25 @@ export const Header: React.FC<HeaderProps> = ({
             );
           })}
 
-          <button
-            onClick={() => handleNavClick('loja')}
-            className={`w-full text-sm font-semibold py-2 px-3 rounded-xl transition-colors text-left flex items-center justify-between ${
-              activePage === 'loja' ? 'bg-orange-50 text-[#FF6500] font-bold' : 'text-slate-800 hover:bg-slate-50'
-            }`}
-          >
-            <span>Loja Hardware POS</span>
-            <ShoppingBag className="w-4 h-4 text-slate-400" />
-          </button>
-
           <div className="pt-3 space-y-2 border-t border-slate-100 mt-2">
             <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => {
+              <a
+                href="https://kivora.visualsoftware.dev/login"
+                onClick={(e) => {
                   setMobileMenuOpen(false);
-                  if (onOpenLogin) onOpenLogin();
-                  else if (onNavigatePage) onNavigatePage('login');
+                  if (onOpenLogin) {
+                    e.preventDefault();
+                    onOpenLogin();
+                  } else if (onNavigatePage) {
+                    e.preventDefault();
+                    onNavigatePage('login');
+                  }
                 }}
                 className="w-full bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 border border-slate-200 font-bold text-center py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs"
               >
                 <User className="w-3.5 h-3.5 text-slate-700" strokeWidth={2} />
                 <span>Portal / Entrar</span>
-              </button>
+              </a>
 
               <button
                 onClick={() => {

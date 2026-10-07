@@ -5,7 +5,7 @@ import {
   X, GitBranch, CreditCard, Building2, ExternalLink, Plus, Tag,
   TrendingUp, Award, Briefcase, MapPin, Trash2, Monitor,
   Bell, Megaphone, Video, Youtube, Mail, Send, CheckCircle2, AlertTriangle,
-  Bot, Sparkles, Eye, EyeOff, Key, Image as ImageIcon, Upload
+  Bot, Sparkles, Eye, EyeOff, Key, Image as ImageIcon, Upload, FileText
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -15,7 +15,8 @@ import {
   subscribeSystemSettings, saveSystemSettings,
   getDirectDownloadUrl, PartnerBrandLogo, InvestorSettings,
   DEFAULT_PROVINCES, DEFAULT_INVESTOR_SETTINGS,
-  VideoCallPackage, DEFAULT_VIDEO_PACKAGES
+  VideoCallPackage, DEFAULT_VIDEO_PACKAGES,
+  OfficialDocumentItem
 } from '../services/systemSettingsService';
 import {
   SiteEmailConfig, DEFAULT_SITE_EMAIL_CONFIG,
@@ -176,6 +177,116 @@ export const AdminConfiguracoes: React.FC = () => {
   const [newBrandSector, setNewBrandSector] = useState('');
   const [newBrandProvince, setNewBrandProvince] = useState('Luanda');
   const [newBrandLogoUrl, setNewBrandLogoUrl] = useState('');
+
+  // Official Documents & Certification Form State
+  const [newDocTitle, setNewDocTitle] = useState('');
+  const [newDocCategory, setNewDocCategory] = useState('Certificação Fiscal');
+  const [newDocDescription, setNewDocDescription] = useState('');
+  const [newDocFileUrl, setNewDocFileUrl] = useState('');
+  const [newDocFileName, setNewDocFileName] = useState('');
+  const [newDocFileSize, setNewDocFileSize] = useState('');
+  const [newDocIssueDate, setNewDocIssueDate] = useState(new Date().getFullYear().toString());
+  const [uploadingDocFile, setUploadingDocFile] = useState(false);
+
+  const handleDocFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      notify.error('O ficheiro selecionado é demasiado grande (máximo 8 MB).');
+      return;
+    }
+
+    setUploadingDocFile(true);
+    setNewDocFileName(file.name);
+    const sizeStr = file.size > 1024 * 1024 
+      ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` 
+      : `${Math.round(file.size / 1024)} KB`;
+    setNewDocFileSize(sizeStr);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setNewDocFileUrl(reader.result);
+        notify.success(`Ficheiro "${file.name}" carregado com sucesso!`);
+      }
+      setUploadingDocFile(false);
+    };
+    reader.onerror = () => {
+      notify.error('Erro ao ler ficheiro local.');
+      setUploadingDocFile(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAddOfficialDocument = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newDocTitle.trim()) {
+      notify.warning('Insira o título do documento.');
+      return;
+    }
+
+    const newDoc: OfficialDocumentItem = {
+      id: `doc-${Date.now()}`,
+      title: newDocTitle.trim(),
+      category: newDocCategory.trim() || 'Geral',
+      description: newDocDescription.trim(),
+      fileUrl: newDocFileUrl.trim(),
+      fileName: newDocFileName.trim() || undefined,
+      fileSize: newDocFileSize.trim() || undefined,
+      issueDate: newDocIssueDate.trim() || undefined,
+      active: true,
+    };
+
+    const currentDocs = settings.officialDocuments || [];
+    setSettings(prev => ({
+      ...prev,
+      officialDocuments: [newDoc, ...currentDocs]
+    }));
+
+    setNewDocTitle('');
+    setNewDocDescription('');
+    setNewDocFileUrl('');
+    setNewDocFileName('');
+    setNewDocFileSize('');
+    notify.success('Documento adicionado à lista! Clique em "Guardar Parâmetros AGT" para sincronizar com o site.');
+  };
+
+  const handleToggleDocActive = (docId: string) => {
+    const currentDocs = settings.officialDocuments || [];
+    setSettings(prev => ({
+      ...prev,
+      officialDocuments: currentDocs.map(d => d.id === docId ? { ...d, active: !d.active } : d)
+    }));
+  };
+
+  const handleDeleteDoc = (docId: string) => {
+    const currentDocs = settings.officialDocuments || [];
+    setSettings(prev => ({
+      ...prev,
+      officialDocuments: currentDocs.filter(d => d.id !== docId)
+    }));
+    notify.info('Documento removido da lista.');
+  };
+
+  const handleCertificateUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      notify.error('O certificado é demasiado grande (máximo 8 MB).');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        handleChange('agtCertificateDocUrl', reader.result);
+        notify.success('Certificado digital anexado com sucesso!');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleAddBrand = (e: React.FormEvent) => {
     e.preventDefault();
@@ -652,7 +763,7 @@ export const AdminConfiguracoes: React.FC = () => {
             { id: 'contactos', label: 'Telefones & WhatsApp', icon: <Smartphone className="w-4 h-4" /> },
             { id: 'links', label: 'Links, GitHub & Download', icon: <GitBranch className="w-4 h-4" /> },
             { id: 'bancos', label: 'Contas Bancárias (IBANs)', icon: <CreditCard className="w-4 h-4" /> },
-            { id: 'agt', label: 'Certificação AGT & Fiscal', icon: <ShieldCheck className="w-4 h-4" /> },
+            { id: 'agt', label: 'Certificação & Documentos', icon: <ShieldCheck className="w-4 h-4 text-emerald-600" /> },
             { id: 'updates', label: 'Atualizações OTA', icon: <Rocket className="w-4 h-4" /> },
             { id: 'backups', label: 'Backups Nuvem', icon: <Database className="w-4 h-4" /> },
             { id: 'zona-perigo', label: '🔄 Reinicialização (Reset)', icon: <RotateCcw className="w-4 h-4 text-rose-500" /> },
@@ -2247,27 +2358,27 @@ export const AdminConfiguracoes: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Email de Recepção de Leads (Demonstrações)</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Email(s) para Alerta de Demonstrações (Leads)</label>
                 <input
-                  type="email"
+                  type="text"
                   value={settings.notifyEmailLeads || ''}
                   onChange={(e) => handleChange('notifyEmailLeads', e.target.value)}
                   className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
-                  placeholder="comercial@kivora.ao"
+                  placeholder="comercial@kivora.ao, narcisomarcos826@gmail.com"
                 />
-                <p className="text-[11px] text-slate-400">Caixa de correio alertada quando um cliente solicita uma demonstração.</p>
+                <p className="text-[11px] text-slate-400">Suporta múltiplos e-mails separados por vírgula. Todos receberão o alerta.</p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Email de Recepção de Candidaturas de Parceiros</label>
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Email(s) para Alerta de Candidaturas de Parceiros</label>
                 <input
-                  type="email"
+                  type="text"
                   value={settings.notifyEmailPartners || ''}
                   onChange={(e) => handleChange('notifyEmailPartners', e.target.value)}
                   className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
-                  placeholder="parceiros@kivora.ao"
+                  placeholder="parceiros@kivora.ao, narcisomarcos826@gmail.com"
                 />
-                <p className="text-[11px] text-slate-400">Caixa de correio alertada quando um revendedor envia candidatura.</p>
+                <p className="text-[11px] text-slate-400">Suporta múltiplos e-mails separados por vírgula. Todos receberão a ficha de candidatura.</p>
               </div>
 
               <div className="space-y-1.5 md:col-span-2">
@@ -3360,65 +3471,427 @@ export const AdminConfiguracoes: React.FC = () => {
           </form>
         )}
 
-        {/* TAB: AGT */}
+        {/* TAB: CERTIFICAÇÃO AGT & DOCUMENTOS OFICIAIS */}
         {activeTab === 'agt' && (
-          <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6 sm:space-y-8">
-            <div className="border-b border-slate-200/70 pb-4">
-              <h3 className="text-base font-display font-bold text-slate-900">Parâmetros de Validação Fiscal AGT</h3>
-              <p className="text-xs font-display text-slate-500 mt-0.5">Certificado oficial e número de registo emitido pela Administração Geral Tributária</p>
-            </div>
+          <div className="space-y-6">
+            {/* 1. Parâmetros da Homologação Fiscal AGT */}
+            <form onSubmit={handleSaveSettings} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-6">
+              <div className="border-b border-slate-200/70 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-base font-display font-bold text-slate-900 flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                    <span>Homologação Fiscal Oficial AGT</span>
+                  </h3>
+                  <p className="text-xs font-display text-slate-500 mt-0.5">
+                    Configure os parâmetros oficiais emitidos pela Administração Geral Tributária (AGT) exibidos no site e portais
+                  </p>
+                </div>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-4 py-2 rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98] self-start sm:self-auto shrink-0"
+                >
+                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  <span>Salvar Dados AGT</span>
+                </button>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs font-display">
-              <div className="space-y-1.5 md:col-span-2">
-                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Selo de Certificação AGT</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs font-display">
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Número Oficial de Certificação AGT *</label>
+                  <input
+                    type="text"
+                    required
+                    value={settings.agtCertificate}
+                    onChange={(e) => handleChange('agtCertificate', e.target.value)}
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
+                    placeholder="Certificação AGT N.º FE/387/AGT/2026"
+                  />
+                  <p className="text-[11px] text-slate-400">Exibido na página de certificação, rodapé e nos documentos de venda.</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Data de Emissão / Homologação</label>
+                  <input
+                    type="text"
+                    value={settings.agtIssueDate || ''}
+                    onChange={(e) => handleChange('agtIssueDate', e.target.value)}
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
+                    placeholder="15 de Janeiro de 2026"
+                  />
+                  <p className="text-[11px] text-slate-400">Data de registo do despacho na Direção de Tributação.</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Decreto Presidencial Principal</label>
+                  <input
+                    type="text"
+                    value={settings.agtDecretoRef || ''}
+                    onChange={(e) => handleChange('agtDecretoRef', e.target.value)}
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
+                    placeholder="Decreto Presidencial n.º 71/25"
+                  />
+                  <p className="text-[11px] text-slate-400">Marco regulatório principal das faturas eletrónicas.</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Base Jurídica Complementar</label>
+                  <input
+                    type="text"
+                    value={settings.agtLegalBasis || ''}
+                    onChange={(e) => handleChange('agtLegalBasis', e.target.value)}
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
+                    placeholder="Decreto Presidencial n.º 292/18 e CIVA Art. 47º"
+                  />
+                  <p className="text-[11px] text-slate-400">Leis e decretos adicionais aplicáveis.</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Entidade Titular / Produtora</label>
+                  <input
+                    type="text"
+                    value={settings.agtProducerEntity || settings.company || ''}
+                    onChange={(e) => handleChange('agtProducerEntity', e.target.value)}
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
+                    placeholder="Visual Software, Lda."
+                  />
+                  <p className="text-[11px] text-slate-400">Empresa proprietária do código-fonte homologado.</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">NIF da Entidade Titular</label>
+                  <input
+                    type="text"
+                    value={settings.agtProducerNif || settings.nif || ''}
+                    onChange={(e) => handleChange('agtProducerNif', e.target.value)}
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
+                    placeholder="5417088920"
+                  />
+                  <p className="text-[11px] text-slate-400">NIF fiscal registado no despacho de certificação.</p>
+                </div>
+
+                <div className="space-y-1.5 md:col-span-2">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Chave de Assinatura Digital / Criptografia</label>
+                  <input
+                    type="text"
+                    value={settings.agtKeyHash || ''}
+                    onChange={(e) => handleChange('agtKeyHash', e.target.value)}
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num text-xs text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
+                    placeholder="RSA-2048 / SHA-256 (Chave Pública Homologada pela AGT)"
+                  />
+                  <p className="text-[11px] text-slate-400">Algoritmo de encriptação e hash das faturas e ficheiro SAF-T.</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Dia Limite SAF-T (Mensal)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={31}
+                    value={settings.saftSubmissionDeadlineDay ?? 15}
+                    onChange={(e) => handleChange('saftSubmissionDeadlineDay', Number(e.target.value))}
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
+                    placeholder="15"
+                  />
+                  <p className="text-[11px] text-slate-400">Dia limite do mês seguinte para envio do XML à AGT.</p>
+                </div>
+              </div>
+
+              {/* Anexo do Certificado Digital Oficial */}
+              <div className="pt-4 border-t border-slate-200/70">
+                <div className="bg-emerald-50/60 rounded-xl p-4 sm:p-5 border border-emerald-200/70 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <span className="text-xs font-display font-bold text-emerald-950 flex items-center gap-1.5 uppercase tracking-wider">
+                      <FileText className="w-4 h-4 text-emerald-700" />
+                      <span>Documento Digital do Certificado AGT (PDF ou Imagem)</span>
+                    </span>
+                    {settings.agtCertificateDocUrl && (
+                      <span className="text-[11px] text-emerald-800 bg-emerald-100 font-semibold px-2 py-0.5 rounded-md border border-emerald-300/60">
+                        Documento Anexado
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-emerald-900/80">
+                    Anexe o ficheiro original do certificado em PDF ou imagem para que os clientes e parceiros possam visualizá-lo e imprimi-lo no site.
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
+                    <label className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold cursor-pointer transition-all shadow-xs">
+                      <Upload className="w-4 h-4" />
+                      <span>{settings.agtCertificateDocUrl ? 'Substituir Certificado' : 'Anexar Ficheiro do Certificado'}</span>
+                      <input
+                        type="file"
+                        accept="application/pdf,image/*"
+                        onChange={handleCertificateUpload}
+                        className="hidden"
+                      />
+                    </label>
+
+                    {settings.agtCertificateDocUrl && (
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={settings.agtCertificateDocUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-white text-emerald-800 hover:text-emerald-950 border border-emerald-300 rounded-xl text-xs font-semibold transition-all"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Ver Certificado</span>
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => handleChange('agtCertificateDocUrl', '')}
+                          className="px-3 py-2 text-rose-700 hover:bg-rose-50 border border-rose-200 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                        >
+                          Remover Anexo
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="pt-1">
+                    <label className="text-[11px] font-semibold text-emerald-950 uppercase tracking-wider block mb-1">Ou cole uma URL externa direta do certificado:</label>
+                    <input
+                      type="url"
+                      value={settings.agtCertificateDocUrl && !settings.agtCertificateDocUrl.startsWith('data:') ? settings.agtCertificateDocUrl : ''}
+                      onChange={(e) => handleChange('agtCertificateDocUrl', e.target.value)}
+                      placeholder="https://exemplo.ao/documentos/certificado-agt.pdf"
+                      className="w-full bg-white border border-emerald-200 rounded-xl px-3.5 py-2 font-mono-num text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-700 placeholder:text-slate-400"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-200/70 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>Guardar Parâmetros da Homologação</span>
+                </button>
+              </div>
+            </form>
+
+            {/* 2. Formulário para Adicionar Novo Documento Oficial */}
+            <form onSubmit={handleAddOfficialDocument} className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-5">
+              <div className="border-b border-slate-200/70 pb-4">
+                <h3 className="text-base font-display font-bold text-slate-900 flex items-center gap-2">
+                  <Plus className="w-5 h-5 text-[#FF6500]" />
+                  <span>Anexar Novo Documento para o Site</span>
+                </h3>
+                <p className="text-xs font-display text-slate-500 mt-0.5">
+                  Publique decretos, regulamentos de parceiros, fichas técnicas ou termos oficiais para download livre pelos visitantes
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-display">
+                <div className="space-y-1.5 sm:col-span-2">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Título do Documento *</label>
+                  <input
+                    type="text"
+                    required
+                    value={newDocTitle}
+                    onChange={(e) => setNewDocTitle(e.target.value)}
+                    placeholder="Ex: Regulamento de Canais e Margens de Revenda"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Categoria do Documento</label>
+                  <select
+                    value={newDocCategory}
+                    onChange={(e) => setNewDocCategory(e.target.value)}
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all"
+                  >
+                    <option value="Certificação Fiscal">Certificação Fiscal</option>
+                    <option value="Legislação & Decretos">Legislação & Decretos</option>
+                    <option value="Regulamentos & Termos">Regulamentos & Termos</option>
+                    <option value="Fichas Técnicas">Fichas Técnicas</option>
+                    <option value="Manuais & Guias">Manuais & Guias</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Ano / Data de Publicação</label>
+                  <input
+                    type="text"
+                    value={newDocIssueDate}
+                    onChange={(e) => setNewDocIssueDate(e.target.value)}
+                    placeholder="2026"
+                    className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5 text-xs font-display">
+                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Descrição Curta / Finalidade</label>
                 <input
                   type="text"
-                  value={settings.agtCertificate}
-                  onChange={(e) => handleChange('agtCertificate', e.target.value)}
-                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
-                  placeholder="Certificação AGT N.º FE/387/AGT/2026"
+                  value={newDocDescription}
+                  onChange={(e) => setNewDocDescription(e.target.value)}
+                  placeholder="Ex: Condições comerciais, requisitos de credenciamento e política de margens de lucro."
+                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
                 />
-                <p className="text-[11px] text-slate-400">Este texto é exibido no topo do portal do cliente e no rodapé do site.</p>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Referência do Decreto Presidencial</label>
-                <input
-                  type="text"
-                  value={settings.agtDecretoRef || ''}
-                  onChange={(e) => handleChange('agtDecretoRef', e.target.value)}
-                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-display font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
-                  placeholder="Decreto Presidencial n.º 71/25"
-                />
-                <p className="text-[11px] text-slate-400">Marco regulatório exibido nas páginas fiscais e rodapé.</p>
+              {/* Anexo de Ficheiro Local ou URL */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-display bg-slate-50/60 p-4 rounded-xl border border-slate-200/70">
+                <div className="space-y-2">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider block">
+                    1. Carregar Arquivo do Computador (PDF, Imagem, DOC)
+                  </label>
+                  <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-300 hover:border-slate-400 text-slate-800 rounded-xl font-semibold cursor-pointer transition-all shadow-2xs">
+                    <Upload className="w-4 h-4 text-[#FF6500]" />
+                    <span>{uploadingDocFile ? 'A processar arquivo...' : (newDocFileName ? `Arquivo: ${newDocFileName}` : 'Selecionar Documento')}</span>
+                    <input
+                      type="file"
+                      accept="application/pdf,image/*,.doc,.docx"
+                      onChange={handleDocFileUpload}
+                      className="hidden"
+                    />
+                  </label>
+                  {newDocFileSize && (
+                    <span className="text-[11px] text-slate-500 font-mono-num block">
+                      Tamanho detetado: <strong>{newDocFileSize}</strong>
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider block">
+                    2. Ou Link / URL de Download Direto
+                  </label>
+                  <input
+                    type="url"
+                    value={newDocFileUrl && !newDocFileUrl.startsWith('data:') ? newDocFileUrl : ''}
+                    onChange={(e) => {
+                      setNewDocFileUrl(e.target.value);
+                      if (!newDocFileName && e.target.value) {
+                        const parts = e.target.value.split('/');
+                        setNewDocFileName(parts[parts.length - 1] || 'documento.pdf');
+                      }
+                    }}
+                    placeholder="https://seusite.ao/documento.pdf"
+                    className="w-full bg-white border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num text-xs text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
+                  />
+                  <span className="text-[11px] text-slate-400 block">Link direto no servidor, GitHub Raw ou Google Drive.</span>
+                </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">Dia Limite de Submissão do SAF-T AO</label>
-                <input
-                  type="number"
-                  min={1}
-                  max={31}
-                  value={settings.saftSubmissionDeadlineDay ?? 15}
-                  onChange={(e) => handleChange('saftSubmissionDeadlineDay', Number(e.target.value))}
-                  className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2.5 font-mono-num font-bold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all placeholder:text-slate-400"
-                  placeholder="15"
-                />
-                <p className="text-[11px] text-slate-400">Dia limite do mês subsequente para submissão do XML à AGT.</p>
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  className="bg-[#FF6500] hover:bg-[#EB5B00] text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Adicionar à Lista de Documentos</span>
+                </button>
               </div>
+            </form>
+
+            {/* 3. Lista de Documentos Cadastrados */}
+            <div className="surface-card rounded-2xl border border-slate-200/80 p-6 sm:p-8 space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/70 pb-4">
+                <div>
+                  <h3 className="text-base font-display font-bold text-slate-900">
+                    Documentos Publicados no Site <span className="font-mono-num text-sm text-slate-500 font-semibold">({(settings.officialDocuments || []).length})</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 font-display mt-0.5">
+                    Os documentos ativos são exibidos automaticamente na nova página "Certificação e Documentos"
+                  </p>
+                </div>
+                <button
+                  onClick={handleSaveSettings}
+                  disabled={saving}
+                  className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-4 py-2 rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98] self-start sm:self-auto"
+                >
+                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  <span>Salvar Alterações</span>
+                </button>
+              </div>
+
+              {(settings.officialDocuments || []).length === 0 ? (
+                <div className="p-8 text-center bg-slate-50/70 rounded-xl border border-dashed border-slate-300 space-y-2">
+                  <FileText className="w-8 h-8 text-slate-400 mx-auto" />
+                  <p className="text-xs font-semibold text-slate-700">Nenhum documento customizado cadastrado ainda.</p>
+                  <p className="text-[11px] text-slate-500 max-w-md mx-auto">
+                    O site exibirá os 5 documentos oficiais padrão até que adicione documentos customizados acima.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {(settings.officialDocuments || []).map((doc) => (
+                    <div
+                      key={doc.id}
+                      className={`p-4 rounded-xl border flex flex-col justify-between gap-3 transition-all ${
+                        doc.active ? 'bg-white border-slate-200/80 shadow-2xs hover:border-slate-300' : 'bg-slate-100/60 border-slate-200/60 opacity-60'
+                      }`}
+                    >
+                      <div className="space-y-2 font-display">
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="font-bold text-xs text-slate-900 leading-snug line-clamp-1">{doc.title}</span>
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold tracking-wider shrink-0 bg-blue-50 text-blue-700 border border-blue-200/60">
+                            {doc.category}
+                          </span>
+                        </div>
+                        {doc.description && (
+                          <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
+                            {doc.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-3 text-[10px] font-mono-num text-slate-400 pt-1 border-t border-slate-100">
+                          {doc.fileName && <span>Ficheiro: <strong>{doc.fileName}</strong></span>}
+                          {doc.fileSize && <span>• {doc.fileSize}</span>}
+                          {doc.issueDate && <span>• {doc.issueDate}</span>}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleDocActive(doc.id)}
+                            className={`px-2.5 py-1 rounded-lg text-[10px] font-display font-semibold transition-colors cursor-pointer border ${
+                              doc.active ? 'text-emerald-700 bg-emerald-50 border-emerald-200/60' : 'text-slate-600 bg-slate-100 border-slate-200'
+                            }`}
+                            title={doc.active ? 'Ativo (clique para ocultar)' : 'Oculto (clique para exibir)'}
+                          >
+                            {doc.active ? 'Visível no Site' : 'Oculto'}
+                          </button>
+
+                          {doc.fileUrl && (
+                            <a
+                              href={doc.fileUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              download={doc.fileName || 'documento.pdf'}
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 hover:text-slate-950 px-2 py-1 rounded-lg hover:bg-slate-100 transition-colors"
+                              title="Testar Download"
+                            >
+                              <Download className="w-3 h-3 text-[#FF6500]" />
+                              <span>Testar</span>
+                            </a>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteDoc(doc.id)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Remover Documento"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-
-            <div className="pt-2 border-t border-slate-200/70 flex justify-end">
-              <button
-                type="submit"
-                disabled={saving}
-                className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                <span>Guardar Parâmetros AGT</span>
-              </button>
-            </div>
-          </form>
+          </div>
         )}
 
         {/* TAB 6: UPDATES OTA */}

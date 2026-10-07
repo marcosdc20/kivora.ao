@@ -2676,7 +2676,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 ['Código', credentialsModal.partnerCode, 'text-emerald-400 font-bold'],
                 ['Email', credentialsModal.email, 'text-blue-300'],
                 ['Palavra-passe', credentialsModal.password, 'text-amber-300 font-bold'],
-                ['Portal', 'https://kivora.ao/#login', 'text-slate-400 text-[11px]'],
+                ['Portal', 'https://kivora.visualsoftware.dev/login', 'text-slate-400 text-[11px]'],
               ] as [string, string, string][]).map(([label, value, cls]) => (
                 <div key={label} className="flex justify-between items-center border-b border-slate-800/80 pb-2 last:border-0 last:pb-0">
                   <span className="text-slate-400 font-sans text-xs">{label}:</span>
@@ -2736,14 +2736,14 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
             </div>
             <div className="flex gap-2">
               <button onClick={() => {
-                navigator.clipboard.writeText(`*Portal do Parceiro KIVORA*\n\n• Email: ${credentialsModal.email}\n• Palavra-passe: ${credentialsModal.password}\n• Código de Parceiro: ${credentialsModal.partnerCode}\n• Acesso: https://kivora.ao/#login`);
+                navigator.clipboard.writeText(`*Portal do Parceiro KIVORA*\n\n• Email: ${credentialsModal.email}\n• Palavra-passe: ${credentialsModal.password}\n• Código de Parceiro: ${credentialsModal.partnerCode}\n• Acesso: https://kivora.visualsoftware.dev/login`);
                 setCopiedCredentials(true); setTimeout(() => setCopiedCredentials(false), 2500);
               }} className="flex-1 bg-slate-950 hover:bg-slate-800 text-white font-semibold font-display text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                 {copiedCredentials ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                 <span>{copiedCredentials ? 'Copiado!' : 'Copiar Mensagem'}</span>
               </button>
               {credentialsModal.phone && (
-                <a href={`https://wa.me/${credentialsModal.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`*Portal do Parceiro KIVORA*\n• Email: ${credentialsModal.email}\n• Palavra-passe: ${credentialsModal.password}\n• Código de Parceiro: ${credentialsModal.partnerCode}\n• Acesso: https://kivora.ao/#login`)}`}
+                <a href={`https://wa.me/${credentialsModal.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`*Portal do Parceiro KIVORA*\n• Email: ${credentialsModal.email}\n• Palavra-passe: ${credentialsModal.password}\n• Código de Parceiro: ${credentialsModal.partnerCode}\n• Acesso: https://kivora.visualsoftware.dev/login`)}`}
                   target="_blank" rel="noreferrer"
                   className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold font-display text-xs px-4 py-3 rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-600/20 shrink-0 transition-all">
                   <MessageSquare className="w-4 h-4" /><span>WhatsApp</span>

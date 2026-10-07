@@ -12,6 +12,19 @@ export interface PartnerBrandLogo {
   active: boolean;
 }
 
+export interface OfficialDocumentItem {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  fileUrl: string;
+  fileName?: string;
+  fileSize?: string;
+  fileType?: string;
+  issueDate?: string;
+  active: boolean;
+}
+
 export interface ProvinceStat {
   id: string;
   name: string;
@@ -166,8 +179,15 @@ export interface SystemCompanySettings {
   clientPortalBannerUrl?: string;
   clientPortalVideoUrl?: string;
 
-  // Parâmetros Fiscais AGT
+  // Parâmetros Fiscais AGT & Documentação Oficial
   agtDecretoRef?: string;
+  agtIssueDate?: string;
+  agtLegalBasis?: string;
+  agtKeyHash?: string;
+  agtProducerEntity?: string;
+  agtProducerNif?: string;
+  agtCertificateDocUrl?: string;
+  officialDocuments?: OfficialDocumentItem[];
   saftSubmissionDeadlineDay?: number;
 
   // Assistência por Videochamada Tarifada por Minuto
@@ -332,6 +352,69 @@ export const DEFAULT_VIDEO_PACKAGES: VideoCallPackage[] = [
   },
 ];
 
+export const DEFAULT_OFFICIAL_DOCUMENTS: OfficialDocumentItem[] = [
+  {
+    id: 'doc-agt-cert',
+    title: 'Certificado de Homologação AGT FE/387/AGT/2026',
+    category: 'Certificação Fiscal',
+    description: 'Certificado oficial e definitivo emitido pela Administração Geral Tributária (AGT) da República de Angola.',
+    fileUrl: '',
+    fileName: 'Certificado_AGT_FE387_2026.pdf',
+    fileSize: '1.4 MB',
+    fileType: 'pdf',
+    issueDate: '15/01/2026',
+    active: true,
+  },
+  {
+    id: 'doc-decreto-71-25',
+    title: 'Decreto Presidencial n.º 71/25 — Regime Jurídico das Faturas',
+    category: 'Legislação & Decretos',
+    description: 'Diploma legal que estabelece as regras de emissão, conservação e comunicação eletrónica de faturas em Angola.',
+    fileUrl: '',
+    fileName: 'Decreto_Presidencial_71_25.pdf',
+    fileSize: '820 KB',
+    fileType: 'pdf',
+    issueDate: '2025/2026',
+    active: true,
+  },
+  {
+    id: 'doc-decreto-292-18',
+    title: 'Decreto Presidencial n.º 292/18 — Regime de Faturação Eletrónica',
+    category: 'Legislação & Decretos',
+    description: 'Regulamentação que aprova a obrigatoriedade de software certificado e normas técnicas de validação fiscal.',
+    fileUrl: '',
+    fileName: 'Decreto_Presidencial_292_18.pdf',
+    fileSize: '950 KB',
+    fileType: 'pdf',
+    issueDate: '2018',
+    active: true,
+  },
+  {
+    id: 'doc-reg-parceiros',
+    title: 'Regulamento Oficial do Programa de Parceiros e Canais',
+    category: 'Regulamentos & Termos',
+    description: 'Condições comerciais, margens de revenda de 30% a 50%, credenciamento técnico e termos de representação.',
+    fileUrl: '',
+    fileName: 'Regulamento_Parceiros_Kivora.pdf',
+    fileSize: '640 KB',
+    fileType: 'pdf',
+    issueDate: '2026',
+    active: true,
+  },
+  {
+    id: 'doc-ficha-tecnica',
+    title: 'Ficha Técnica e Especificação de Arquitetura KIVORA SOFT',
+    category: 'Fichas Técnicas',
+    description: 'Especificações de segurança, banco de dados local SQLite, encriptação AES-256 e compatibilidade de rede LAN.',
+    fileUrl: '',
+    fileName: 'Ficha_Tecnica_Kivora_Soft.pdf',
+    fileSize: '512 KB',
+    fileType: 'pdf',
+    issueDate: '2026',
+    active: true,
+  },
+];
+
 export const DEFAULT_SETTINGS: SystemCompanySettings = {
   name: KIVORA_INFO.name,
   fullName: KIVORA_INFO.fullName,
@@ -349,6 +432,15 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   supportHoursSunday: 'Domingos e Feriados: Plantão para Urgências',
   address: KIVORA_INFO.address,
   agtCertificate: 'Certificação AGT N.º FE/387/AGT/2026',
+  agtIssueDate: '15 de Janeiro de 2026',
+  agtDecretoRef: 'Decreto Presidencial n.º 71/25',
+  agtLegalBasis: 'Decreto Presidencial n.º 292/18 e CIVA Art. 47º',
+  agtKeyHash: 'RSA-2048 / SHA-256 (Chave Pública Homologada)',
+  agtProducerEntity: 'Visual Software, Lda.',
+  agtProducerNif: '5417088920',
+  agtCertificateDocUrl: '',
+  officialDocuments: DEFAULT_OFFICIAL_DOCUMENTS,
+  saftSubmissionDeadlineDay: 15,
   githubUrl: 'https://github.com/marcosdc20/kivora-setup-vers-o',
   downloadUrl: 'https://github.com/marcosdc20/kivora-setup-vers-o/raw/main/KIVORA_1.1.0_x64-setup.exe',
   releaseVersion: '1.1.0',

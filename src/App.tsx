@@ -43,6 +43,7 @@ const ProvinciasPage = lazy(() => import('./pages/ProvinciasPage').then(m => ({ 
 const GuiaAgtPage = lazy(() => import('./pages/GuiaAgtPage').then(m => ({ default: m.GuiaAgtPage })));
 const ManuaisPage = lazy(() => import('./pages/ManuaisPage').then(m => ({ default: m.ManuaisPage })));
 const SimuladorRoiPage = lazy(() => import('./pages/SimuladorRoiPage').then(m => ({ default: m.SimuladorRoiPage })));
+const CertificacaoDocumentosPage = lazy(() => import('./pages/CertificacaoDocumentosPage').then(m => ({ default: m.CertificacaoDocumentosPage })));
 
 // Portais
 const AdminApp = lazy(() => import('./admin/AdminApp').then(m => ({ default: m.AdminApp })));
@@ -279,11 +280,26 @@ const PAGE_SEO_METADATA: Record<PageId, { title: string; desc: string; path: str
     desc: 'Emissão de licenças, gestão de clientes, carteira pré-paga e comissões.',
     path: '/area-parceiro',
   },
+  'certificacao-documentos': {
+    title: 'Certificação AGT & Documentos Oficiais | KIVORA SOFT FE/387/AGT/2026',
+    desc: 'Consulte a certificação oficial da AGT (FE/387/AGT/2026), Decreto Presidencial n.º 71/25 e documentos legais do software KIVORA SOFT em Angola.',
+    path: '/certificacao-documentos',
+  },
 };
 
 function getPageFromPathname(): PageId {
+  const hash = window.location.hash.toLowerCase();
+  if (hash === '#login' || hash.startsWith('#login?')) return 'login';
+  if (hash === '#download') return 'download';
+  if (hash === '#precos' || hash === '#planos') return 'planos';
+  if (hash === '#suporte') return 'suporte';
+  if (hash === '#candidatura-parceiro') return 'candidatura-parceiro';
+  if (hash === '#validar-licenca') return 'validar-licenca';
+  if (hash === '#certificacao-documentos' || hash === '#certificados') return 'certificacao-documentos';
+
   const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
   if (!path || path === '') return 'home';
+  if (path === '/certificacao-documentos' || path === '/certificacao' || path === '/certificados') return 'certificacao-documentos';
   if (path === '/admin') return 'admin';
   if (path === '/area-cliente' || path === '/cliente') return 'area-cliente';
   if (path === '/area-parceiro' || path === '/parceiro') return 'area-parceiro';
@@ -701,6 +717,13 @@ export function App() {
 
         {activePage === 'validar-licenca' && (
           <ValidarLicencaPage onBackToHome={() => handleNavigatePage('home')} />
+        )}
+
+        {activePage === 'certificacao-documentos' && (
+          <CertificacaoDocumentosPage
+            onNavigatePage={handleNavigatePage}
+            onOpenDemoModal={handleOpenDemoModal}
+          />
         )}
 
         {activePage === 'casos-sucesso' && (

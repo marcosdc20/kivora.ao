@@ -5,7 +5,7 @@
  */
 
 const LOGO_URL = 'https://raw.githubusercontent.com/marcosdc20/kivora.ao/main/public/logo.png';
-const PORTAL_URL = 'https://kivora.ao/#login';
+const PORTAL_URL = 'https://kivora.visualsoftware.dev/login';
 const DOWNLOAD_URL = 'https://kivora.ao/#download';
 const SUPPORT_EMAIL = 'suporte@kivora.ao';
 const COMMERCIAL_EMAIL = 'kivora.angola@gmail.com';
