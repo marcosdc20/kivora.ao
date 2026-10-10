@@ -81,7 +81,7 @@ export const ProdutoDetailPage: React.FC<ProdutoDetailPageProps> = ({
       `Olá, gostaria de confirmar a disponibilidade e receber o IBAN para emissão da Fatura Proforma e pagamento.`;
 
     const encoded = encodeURIComponent(msg);
-    const targetPhone = getCachedSystemSettings().phoneRaw || '244923456789';
+    const targetPhone = getCachedSystemSettings().phoneRaw || '244974855494';
     window.open(`https://wa.me/${targetPhone}?text=${encoded}`, '_blank');
   };
 

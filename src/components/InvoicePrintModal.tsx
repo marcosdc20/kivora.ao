@@ -98,7 +98,7 @@ export const InvoicePrintModal: React.FC<InvoicePrintModalProps> = ({
                     <p className="font-black text-slate-950 text-sm">Kivora Tecnologias & Software, Lda.</p>
                     <p>NIF: <strong>5417088920</strong> • Conservatória de Luanda</p>
                     <p>{KIVORA_INFO.address || 'Luanda, República de Angola'}</p>
-                    <p>Email: comercial@kivora.ao • Tel: +244 923 000 000</p>
+                    <p>Email: {KIVORA_INFO.email || 'comercial@kivora.ao'} • Tel: {KIVORA_INFO.phoneDisplay || '+244 974 855 494'}</p>
                   </div>
                 </div>
 

@@ -6,14 +6,14 @@
 
 const LOGO_URL = 'https://kivora.visualsoftware.dev/logo.png';
 const PORTAL_URL = 'https://kivora.visualsoftware.dev/login';
-const DOWNLOAD_URL = 'https://kivora.ao/#download';
+const DOWNLOAD_URL = 'https://kivora.visualsoftware.dev/download';
 const SUPPORT_EMAIL = 'suporte@kivora.ao';
 const COMMERCIAL_EMAIL = 'kivora.angola@gmail.com';
 
 /**
  * Layout Base Executivo Corporativo
  */
-const getEmailBaseLayout = (title: string, contentHtml: string, footerNote?: string): string => `
+export const getEmailBaseLayout = (title: string, contentHtml: string, footerNote?: string): string => `
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -200,7 +200,7 @@ const getEmailBaseLayout = (title: string, contentHtml: string, footerNote?: str
       <!-- HEADER -->
       <tr>
         <td class="header">
-          <a href="https://kivora.ao" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+          <a href="https://kivora.visualsoftware.dev" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
             <img src="${LOGO_URL}" alt="KIVORA SOFT" width="140" border="0" style="display: block; margin: 0 auto 12px auto; max-width: 140px; height: auto;" />
           </a>
           <p class="header-tagline">Sistema de Gestão Empresarial Certificado pela AGT</p>
@@ -218,10 +218,11 @@ const getEmailBaseLayout = (title: string, contentHtml: string, footerNote?: str
       <tr>
         <td class="footer">
           <p><strong>KIVORA SOFT • VISUAL SOFTWARE, LDA</strong></p>
-          <p>Software de Faturação e Gestão Comercial Certificado pela AGT • Angola</p>
+          <p>Software de Faturação e Gestão Comercial Certificado pela AGT (FE/387/AGT/2026) • Luanda, Angola</p>
+          <p>Sede: Edifício Kivora, Luanda, Angola • NIF Comercial: 5417240324</p>
           <p>Suporte Técnico: <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a> | Geral: <a href="mailto:${COMMERCIAL_EMAIL}">${COMMERCIAL_EMAIL}</a></p>
           ${footerNote ? `<p style="margin-top: 12px; color: #94a3b8; font-size: 10.5px; border-top: 1px solid #e2e8f0; padding-top: 10px;">${footerNote}</p>` : ''}
-          <p style="margin-top: 10px; color: #94a3b8; font-size: 10px;">Notificação oficial gerada pelo sistema de gestão e licenciamento KIVORA SOFT. Para garantir a receção das mensagens na Caixa de Entrada, adicione ${COMMERCIAL_EMAIL} aos seus contactos seguros.</p>
+          <p style="margin-top: 10px; color: #94a3b8; font-size: 10px;">Notificação oficial gerada pelo sistema de gestão e licenciamento KIVORA SOFT nos termos da Lei n.º 22/11 de Proteção de Dados de Angola. Se deseja gerir as suas preferências, contacte <a href="mailto:${SUPPORT_EMAIL}?subject=unsubscribe">${SUPPORT_EMAIL}</a>.</p>
         </td>
       </tr>
     </table>
@@ -698,3 +699,80 @@ export const generateSiteTestEmailTemplate = (providerName: string): string => {
 
   return getEmailBaseLayout('Teste de Conexão do Servidor de E-mails — KIVORA', content);
 };
+
+/**
+ * 12. Template: Alerta de Nova Candidatura a Parceiro para Administração
+ */
+export const generatePartnerApplicationAdminAlertTemplate = (data: {
+  nome: string;
+  empresa: string;
+  nif: string;
+  email: string;
+  telefone: string;
+  protocol: string;
+  provincia: string;
+  tipoParceria: string;
+}): string => {
+  const content = `
+    <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-weight: 700; color: #1e40af; font-size: 13.5px;">
+      Notificação: Nova Candidatura a Parceiro Registada via Portal
+    </div>
+
+    <table class="table-data">
+      <tr><td class="label">Protocolo:</td><td class="val"><strong style="color: #2563eb;">${data.protocol}</strong></td></tr>
+      <tr><td class="label">Empresa / Entidade:</td><td class="val"><strong>${data.empresa}</strong></td></tr>
+      <tr><td class="label">Responsável / Solicitante:</td><td class="val">${data.nome}</td></tr>
+      <tr><td class="label">NIF:</td><td class="val">${data.nif}</td></tr>
+      <tr><td class="label">Província:</td><td class="val">${data.provincia}</td></tr>
+      <tr><td class="label">Telefone:</td><td class="val"><strong>${data.telefone}</strong></td></tr>
+      <tr><td class="label">E-mail:</td><td class="val">${data.email}</td></tr>
+      <tr><td class="label">Modalidade de Parceria:</td><td class="val">${data.tipoParceria}</td></tr>
+    </table>
+
+    <div style="text-align: center; margin-top: 24px;">
+      <a href="https://wa.me/${data.telefone.replace(/[^0-9]/g, '')}" class="btn-primary">Contactar Solicitante via WhatsApp</a>
+    </div>
+  `;
+
+  return getEmailBaseLayout(`[Candidatura Parceiro] ${data.protocol} — ${data.empresa}`, content);
+};
+
+/**
+ * 13. Template: Alerta de Novo Chamado de Suporte para a Equipa Técnica
+ */
+export const generateSupportTicketAdminAlertTemplate = (data: {
+  nome: string;
+  email?: string;
+  telefone: string;
+  ticketNumber: string;
+  assunto: string;
+  departamento: string;
+  mensagem: string;
+}): string => {
+  const content = `
+    <div style="background-color: #fef2f2; border: 1px solid #fecaca; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-weight: 700; color: #991b1b; font-size: 13.5px;">
+      Alerta Técnico: Novo Chamado de Suporte Aberto
+    </div>
+
+    <table class="table-data">
+      <tr><td class="label">Ticket N.º:</td><td class="val"><strong style="color: #dc2626;">${data.ticketNumber}</strong></td></tr>
+      <tr><td class="label">Cliente / Entidade:</td><td class="val"><strong>${data.nome}</strong></td></tr>
+      <tr><td class="label">Contacto Telefónico:</td><td class="val">${data.telefone}</td></tr>
+      <tr><td class="label">E-mail:</td><td class="val">${data.email || 'Não informado'}</td></tr>
+      <tr><td class="label">Departamento:</td><td class="val">${data.departamento.toUpperCase()}</td></tr>
+      <tr><td class="label">Assunto:</td><td class="val"><strong>${data.assunto}</strong></td></tr>
+    </table>
+
+    <div class="card-box" style="margin-top: 16px;">
+      <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px; font-size: 13px;">Mensagem do Cliente:</div>
+      <div style="font-size: 13.5px; color: #334155; line-height: 1.6; white-space: pre-wrap;">${data.mensagem}</div>
+    </div>
+
+    <div style="text-align: center; margin-top: 24px;">
+      <a href="https://wa.me/${data.telefone.replace(/[^0-9]/g, '')}" class="btn-primary">Responder via WhatsApp</a>
+    </div>
+  `;
+
+  return getEmailBaseLayout(`[Suporte #${data.ticketNumber}] ${data.assunto} — ${data.nome}`, content);
+};
+

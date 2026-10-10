@@ -49,7 +49,7 @@ export const PartnerOfficialCertificatesModal: React.FC<PartnerOfficialCertifica
   validUntilObj.setFullYear(validUntilObj.getFullYear() + 1);
   const validUntilFormatted = formatDateDDMMAAAA(validUntilObj);
 
-  const validationUrl = `https://kivora.ao/#validar-licenca?p=${encodeURIComponent(partnerCode)}`;
+  const validationUrl = `https://kivora.visualsoftware.dev/#validar-licenca?p=${encodeURIComponent(partnerCode)}`;
 
   const handlePrint = () => {
     window.print();

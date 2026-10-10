@@ -122,7 +122,7 @@ export const DemoModal: React.FC<DemoModalProps> = ({
   };
 
   const getWhatsAppLink = () => {
-    const phoneRaw = settings.phoneRaw || (settings.phoneDisplay || '').replace(/\D/g, '') || '244923456789';
+    const phoneRaw = settings.phoneRaw || (settings.phoneDisplay || '').replace(/\D/g, '') || '244974855494';
     const msg = `Olá Equipa ${settings.name}! Gostaria de agendar uma demonstração do ${settings.fullName}.%0A%0A*Empresa:* ${formData.companyName}%0A*Contacto:* ${formData.contactName} (${formData.phone})%0A*Email:* ${formData.email}%0A*Ramo:* ${formData.businessSector}%0A*Módulo:* ${formData.interestedModule}%0A*Modalidade:* ${formData.installationMode}${formData.notes ? `%0A*Notas:* ${formData.notes}` : ''}`;
     return `https://wa.me/${phoneRaw}?text=${msg}`;
   };

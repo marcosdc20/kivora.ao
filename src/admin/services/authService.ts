@@ -293,7 +293,6 @@ export async function loginUser(
         return { success: true, session };
       }
     } catch (authError: any) {
-      console.log('Firebase Auth direto não logou ou é perfil de cliente/parceiro:', authError.code);
       const masterAdmins = ['admin@kivora.ao', 'kivora.angola@gmail.com', 'narcisomarcos826@gmail.com', 'comercial@kivora.ao', 'suporte@kivora.ao'];
       // Auto-provisionar admin no Firebase Auth caso a conta não exista ainda (Firebase v10+ retorna auth/invalid-credential)
       if ((authError.code === 'auth/user-not-found' || authError.code === 'auth/invalid-credential') && (masterAdmins.includes(cleanId) || cleanId.endsWith('@kivora.ao')) && cleanPass.length >= 6) {

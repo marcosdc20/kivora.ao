@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { HeroCarousel } from '../components/HeroCarousel';
+import { TestimonialsCarousel } from '../components/TestimonialsCarousel';
 import { CountUp } from '../components/CountUp';
 import {
   ArrowRight, Download, Wifi,
   Check, ShieldCheck,
   Phone,
   FileCheck, ShoppingCart, Boxes, Users,
-  HardDrive, ChevronRight, Star,
+  HardDrive, ChevronRight,
   Award, CheckCircle2
 } from 'lucide-react';
 import { PageId } from '../components/Header';
@@ -86,11 +87,11 @@ export const HomePage: React.FC<HomePageProps> = ({
           2. FAIXA DE DESTAQUE TRIPLA (3-PART OVERLAPPING STRIP — EXECUTIVO & ESPAÇOSO)
           Card 1 (Slate Escuro), Card 2 (Laranja Vibrante), Card 3 (Branco Executivo)
           ══════════════════════════════════════════════════════════════════ */}
-      <section className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 sm:-mt-14 mb-14">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <section id="solucoes-rapidas" className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 sm:-mt-14 mb-14">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5" data-stagger>
           
           {/* Card 1: Slate Escuro (#0B1528) */}
-          <div className="bg-[#0B1528] rounded-3xl p-6 sm:p-7 shadow-xl border border-slate-800 text-white flex items-center justify-between gap-5 group hover:border-orange-500/40 transition-all">
+          <div data-reveal className="bg-[#0B1528] rounded-3xl p-6 sm:p-7 shadow-xl border border-slate-800 text-white flex items-center justify-between gap-5 group hover:border-orange-500/40 transition-all">
             <div className="flex items-center gap-4">
               <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display tracking-tight shrink-0">
                 12+
@@ -114,6 +115,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           {/* Card 2: Laranja Vibrante (#FF6500) */}
           <div
+            data-reveal
             onClick={() => onOpenDemoModal('Diagnóstico Fiscal Gratuito')}
             className="bg-gradient-to-r from-[#FF6500] to-[#EB5B00] rounded-3xl p-6 sm:p-7 shadow-xl shadow-orange-500/25 text-white flex items-center justify-between gap-4 cursor-pointer hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all group"
           >
@@ -134,7 +136,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Card 3: Branco Executivo */}
-          <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-xl border border-slate-200/90 text-slate-900 flex items-center justify-between gap-4 group hover:border-orange-300 transition-all">
+          <div data-reveal className="bg-white rounded-3xl p-6 sm:p-7 shadow-xl border border-slate-200/90 text-slate-900 flex items-center justify-between gap-4 group hover:border-orange-300 transition-all">
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block font-display">
                 Atendimento Imediato
@@ -162,7 +164,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ══════════════════════════════════════════════════════════════════
           3. LOGOTIPOS DE PARCEIROS & CLIENTES (MARQUEE INFINITO)
           ══════════════════════════════════════════════════════════════════ */}
-      <section className="py-7 bg-slate-50/70 border-y border-slate-200/60 overflow-hidden">
+      <section data-reveal className="py-7 bg-slate-50/70 border-y border-slate-200/60 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <span className="text-[11px] font-bold uppercase tracking-widest text-slate-500 font-display flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#FF6500] shrink-0" />
@@ -215,7 +217,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           
           {/* Coluna Esquerda: Imagem com Badge Flutuante */}
-          <div className="lg:col-span-6 relative">
+          <div data-reveal data-reveal-dir="left" className="lg:col-span-6 relative">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200">
               <img
                 src={settings.aboutImageUrl || executivosImg}
@@ -243,7 +245,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Coluna Direita: Informações & 2 Cards com Ícones Circulares */}
-          <div className="lg:col-span-6 space-y-6">
+          <div data-reveal data-reveal-dir="right" className="lg:col-span-6 space-y-6">
             <div className="space-y-3">
               <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
                 <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
@@ -258,8 +260,8 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* 2 Cards de Destaque com Ícones Circulares Laranja (Padrão Imagens 1 e 4) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 space-y-2 hover:border-orange-300 transition-colors">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2" data-stagger>
+              <div data-reveal className="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 space-y-2 hover:border-orange-300 transition-colors">
                 <div className="w-11 h-11 rounded-full bg-orange-50 border border-orange-200/60 text-[#FF6500] flex items-center justify-center font-bold shadow-xs">
                   <Wifi className="w-5 h-5" />
                 </div>
@@ -271,7 +273,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </p>
               </div>
 
-              <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 space-y-2 hover:border-orange-300 transition-colors">
+              <div data-reveal className="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 space-y-2 hover:border-orange-300 transition-colors">
                 <div className="w-11 h-11 rounded-full bg-orange-50 border border-orange-200/60 text-[#FF6500] flex items-center justify-center font-bold shadow-xs">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
@@ -333,7 +335,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       <section id="o-que-fazemos" className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         
         {/* Marcador Superior Laranja & Título Padrão XTRA */}
-        <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
+        <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
           <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
             <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
             <span>O Que Fazemos?</span>
@@ -348,10 +350,11 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         {/* Grade 3x2 com os 6 Cartões com Ícones Circulares Gradiente Laranja */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div data-stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
           {/* Card 1: Faturação Eletrónica AGT */}
           <div
+            data-reveal
             onClick={() => onNavigatePage('faturacao')}
             className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
           >
@@ -374,6 +377,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           {/* Card 2: Ponto de Venda & POS Rápido */}
           <div
+            data-reveal
             onClick={() => onNavigatePage('pos')}
             className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
           >
@@ -396,6 +400,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           {/* Card 3: Gestão de Stock Multi-Armazém */}
           <div
+            data-reveal
             onClick={() => onNavigatePage('stock')}
             className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
           >
@@ -418,6 +423,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           {/* Card 4: Recursos Humanos & IRT 2026 */}
           <div
+            data-reveal
             onClick={() => onNavigatePage('rh')}
             className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
           >
@@ -440,6 +446,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           {/* Card 5: Contabilidade & SAF-T AO */}
           <div
+            data-reveal
             onClick={() => onNavigatePage('contabilidade')}
             className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
           >
@@ -462,6 +469,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           {/* Card 6: Hardware & Terminais de Balcão */}
           <div
+            data-reveal
             onClick={() => onNavigatePage('hardware')}
             className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
           >
@@ -485,7 +493,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         {/* ── BARRA DE CHAMADA LARANJA (CALLOUT BAR — EXATAMENTE COMO NA IMAGEM 1 E 4) ── */}
-        <div className="mt-12 bg-gradient-to-r from-[#FF6500] via-[#FF7A1A] to-[#FF8C38] rounded-3xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-orange-500/25">
+        <div data-reveal className="mt-12 bg-gradient-to-r from-[#FF6500] via-[#FF7A1A] to-[#FF8C38] rounded-3xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-orange-500/25">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0 border border-white/25">
               <Phone className="w-6 h-6" />
@@ -517,7 +525,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           BANNER DE IMPACTO FOTOGRÁFICO (PADRÃO IMAGEM 4)
           "Mais do que Faturação: É a Segurança e Continuidade do Seu Negócio"
           ══════════════════════════════════════════════════════════════════ */}
-      <section className="relative py-24 sm:py-28 px-4 sm:px-6 lg:px-8 text-white overflow-hidden bg-[#0B1528]">
+      <section data-reveal className="relative py-24 sm:py-28 px-4 sm:px-6 lg:px-8 text-white overflow-hidden bg-[#0B1528]">
         {/* Imagem de Fundo com Overlay Escuro Gradiente */}
         <div className="absolute inset-0 z-0">
           <img
@@ -565,7 +573,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       <section id="como-trabalhamos" className="py-24 sm:py-32 bg-slate-50/80 border-y border-slate-200/70 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           
-          <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
+          <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
             <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
               <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
               <span>Como Trabalhamos?</span>
@@ -580,10 +588,10 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* 4 Colunas Numeradas (1, 2, 3, 4 em Laranja Padrão das Imagens) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div data-stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             
             {/* Passo 1 */}
-            <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
+            <div data-reveal className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
               <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display block leading-none">
                 1.
               </span>
@@ -596,7 +604,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* Passo 2 */}
-            <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
+            <div data-reveal className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
               <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display block leading-none">
                 2.
               </span>
@@ -609,7 +617,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* Passo 3 */}
-            <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
+            <div data-reveal className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
               <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display block leading-none">
                 3.
               </span>
@@ -622,7 +630,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* Passo 4 */}
-            <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
+            <div data-reveal className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
               <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display block leading-none">
                 4.
               </span>
@@ -637,7 +645,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Botões de Ação Redondos (Padrão das Imagens) */}
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
+          <div data-reveal className="mt-12 flex flex-wrap items-center justify-center gap-4">
             <button
               onClick={() => onOpenDemoModal('Demonstração 4 Passos')}
               className="bg-[#FF6500] hover:bg-[#EB5B00] active:scale-95 text-white font-bold text-xs sm:text-sm px-8 py-4 rounded-full shadow-lg shadow-orange-500/25 transition-all cursor-pointer"
@@ -670,7 +678,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
-          <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
+          <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
             <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
               <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
               <span>Resultados Comprovados</span>
@@ -685,9 +693,9 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* 4 Grandes Métricas no Estilo das Imagens 2 e 4 */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div data-stagger className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             
-            <div className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
+            <div data-reveal className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
               <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-white font-mono-num tracking-tight">
                 <CountUp end={12} suffix="+" type="odometer" duration={1.5} />
               </div>
@@ -699,7 +707,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </p>
             </div>
 
-            <div className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
+            <div data-reveal className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
               <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-white font-mono-num tracking-tight">
                 <CountUp end={2800} suffix="+" type="odometer" duration={1.5} />
               </div>
@@ -711,7 +719,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </p>
             </div>
 
-            <div className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
+            <div data-reveal className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
               <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-white font-mono-num tracking-tight">
                 100%
               </div>
@@ -723,7 +731,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </p>
             </div>
 
-            <div className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
+            <div data-reveal className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
               <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-white font-mono-num tracking-tight">
                 <CountUp end={18} type="odometer" duration={1.5} />
               </div>
@@ -746,7 +754,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           ══════════════════════════════════════════════════════════════════ */}
       <section id="equipa-consultores" className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         
-        <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
+        <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
           <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
             <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
             <span>Consultores & Especialistas</span>
@@ -761,10 +769,10 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         {/* Grade de 4 Consultores com Fotos Circulares e Aro Laranja (Padrão das Imagens) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div data-stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           
           {/* Consultor 1 */}
-          <div className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
+          <div data-reveal className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
             <div className="w-24 h-24 rounded-full border-2 border-[#FF6500] p-1 mx-auto mb-4 shadow-sm">
               <img
                 src="/imagens/1085.webp"
@@ -784,7 +792,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Consultor 2 */}
-          <div className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
+          <div data-reveal className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
             <div className="w-24 h-24 rounded-full border-2 border-[#FF6500] p-1 mx-auto mb-4 shadow-sm">
               <img
                 src="/imagens/2149153824.webp"
@@ -804,7 +812,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Consultor 3 */}
-          <div className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
+          <div data-reveal className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
             <div className="w-24 h-24 rounded-full border-2 border-[#FF6500] p-1 mx-auto mb-4 shadow-sm">
               <img
                 src="/imagens/1163.webp"
@@ -824,7 +832,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Consultor 4 */}
-          <div className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
+          <div data-reveal className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
             <div className="w-24 h-24 rounded-full border-2 border-[#FF6500] p-1 mx-auto mb-4 shadow-sm">
               <img
                 src="/imagens/2150690165.webp"
@@ -848,91 +856,10 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          8. TESTEMUNHOS DE GESTORES (TESTIMONIALS — IMAGENS 2 E 4)
-          Balões de Fala em Tons Quentes com Citações e Avatares
+          8. CARROSSEL DE TESTEMUNHOS DE GESTORES (AUTOPLAY & SWIPE)
           ══════════════════════════════════════════════════════════════════ */}
-      <section id="testemunhos" className="py-24 sm:py-32 bg-slate-50/70 border-y border-slate-200/70 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          
-          <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
-            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
-              <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-              <span>Testemunhos</span>
-              <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
-              O Que Dizem os Nossos Clientes
-            </h2>
-            <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-              Empresas reais em Luanda, Benguela e Huambo que transformaram a sua gestão diária com o KIVORA.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            
-            {/* Testemunho 1 (Estilo Balão Quente/Laranja da Imagem 2) */}
-            <div className="space-y-4">
-              <div className="bg-gradient-to-br from-[#FF7A1A] to-[#FF6500] text-white p-7 rounded-3xl shadow-lg shadow-orange-500/20 relative">
-                <div className="flex items-center gap-1 mb-3 text-amber-200">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
-                </div>
-                <p className="text-xs sm:text-sm leading-relaxed font-normal text-white">
-                  "A estabilidade offline do KIVORA mudou a nossa operação. Em Luanda, as falhas de rede costumavam parar o caixa. Agora a loja não pára e as faturas saem imediatamente com o QR Code oficial da AGT."
-                </p>
-                {/* Triângulo do balão */}
-                <div className="absolute -bottom-2.5 left-10 w-5 h-5 bg-[#FF6500] rotate-45" />
-              </div>
-
-              <div className="flex items-center gap-3.5 pl-6 pt-2">
-                <div className="w-12 h-12 rounded-full border-2 border-[#FF6500] p-0.5">
-                  <img
-                    src="/imagens/2206.webp"
-                    alt="Mateus Kiala"
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-slate-950 font-display">Mateus Kiala</h4>
-                  <p className="text-[11px] text-slate-500">Diretor Comercial, Supermercados Kiala (Luanda)</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Testemunho 2 (Estilo Balão Quente/Laranja da Imagem 2) */}
-            <div className="space-y-4">
-              <div className="bg-gradient-to-br from-[#FF7A1A] to-[#FF6500] text-white p-7 rounded-3xl shadow-lg shadow-orange-500/20 relative">
-                <div className="flex items-center gap-1 mb-3 text-amber-200">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
-                </div>
-                <p className="text-xs sm:text-sm leading-relaxed font-normal text-white">
-                  "O módulo de stock e o cálculo automático de IRT poupam-nos dias inteiros de trabalho ao fim do mês. A assistência presencial foi exemplar e o software é incrivelmente simples de usar."
-                </p>
-                {/* Triângulo do balão */}
-                <div className="absolute -bottom-2.5 left-10 w-5 h-5 bg-[#FF6500] rotate-45" />
-              </div>
-
-              <div className="flex items-center gap-3.5 pl-6 pt-2">
-                <div className="w-12 h-12 rounded-full border-2 border-[#FF6500] p-0.5">
-                  <img
-                    src="/imagens/2148708903.webp"
-                    alt="Esperança Domingos"
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-slate-950 font-display">Esperança Domingos</h4>
-                  <p className="text-[11px] text-slate-500">Gerente Geral, Farmácia & Clínica Esperança (Benguela)</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
+      <section id="testemunhos" data-reveal className="py-24 sm:py-32 bg-slate-50/70 border-y border-slate-200/70 px-4 sm:px-6 lg:px-8">
+        <TestimonialsCarousel />
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
@@ -941,7 +868,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           ══════════════════════════════════════════════════════════════════ */}
       <section id="precos-planos" className="py-24 sm:py-32 bg-white px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         
-        <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
+        <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
           <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
             <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
             <span>Tabela Oficial</span>
@@ -955,10 +882,10 @@ export const HomePage: React.FC<HomePageProps> = ({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch">
+        <div data-stagger className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch">
           
           {/* Card 1: Mensal (Padrão Imagem 1) */}
-          <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group">
+          <div data-reveal className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group">
             {/* Top Header Laranja */}
             <div className="bg-gradient-to-r from-amber-500 to-[#FF6500] p-6 text-white text-center">
               <span className="text-[11px] font-bold uppercase tracking-wider block opacity-90">
@@ -1005,7 +932,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Card 2: Anual LAN (DESTACADO NO MEIO COM TOPO ESCURO — IMAGEM 1) */}
-          <div className="bg-white rounded-3xl border-2 border-[#FF6500] overflow-hidden shadow-2xl scale-103 sm:-translate-y-3 flex flex-col justify-between relative group z-10">
+          <div data-reveal className="bg-white rounded-3xl border-2 border-[#FF6500] overflow-hidden shadow-2xl scale-103 sm:-translate-y-3 flex flex-col justify-between relative group z-10">
             {/* Top Header Escuro/Charcoal das Imagens */}
             <div className="bg-[#0B1528] p-7 text-white text-center relative">
               <span className="inline-block bg-[#FF6500] text-white text-[10px] font-black uppercase px-3 py-0.5 rounded-full mb-2 tracking-wider">
@@ -1055,7 +982,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Card 3: Licença Vitalícia (Padrão Imagem 1) */}
-          <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group">
+          <div data-reveal className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group">
             {/* Top Header Laranja */}
             <div className="bg-gradient-to-r from-amber-500 to-[#FF6500] p-6 text-white text-center">
               <span className="text-[11px] font-bold uppercase tracking-wider block opacity-90">
@@ -1109,7 +1036,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           10. HARDWARE & EQUIPAMENTOS POS COMPATÍVEIS
           ══════════════════════════════════════════════════════════════════ */}
       <section className="py-24 sm:py-32 bg-slate-50/70 border-t border-slate-200/80 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
+        <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
           <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
             <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
             <span>Equipamentos Oficiais</span>
@@ -1123,10 +1050,10 @@ export const HomePage: React.FC<HomePageProps> = ({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+        <div data-stagger className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
           
           {/* Terminal POS Touch */}
-          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
+          <div data-reveal className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
             <div>
               <div className="h-56 mb-6 flex items-center justify-center bg-slate-50 rounded-2xl p-4 border border-slate-100 select-none">
                 <img
@@ -1166,7 +1093,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Computador Desktop LAN */}
-          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
+          <div data-reveal className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
             <div>
               <div className="h-56 mb-6 flex items-center justify-center bg-slate-50 rounded-2xl p-4 border border-slate-100 select-none">
                 <img
@@ -1206,7 +1133,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Portátil Laptop */}
-          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
+          <div data-reveal className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
             <div>
               <div className="h-56 mb-6 flex items-center justify-center bg-slate-50 rounded-2xl p-4 border border-slate-100 select-none">
                 <img
@@ -1251,7 +1178,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ══════════════════════════════════════════════════════════════════
           11. BANNER FINAL DE ALTA CONVERSÃO (PADRÃO XTRA DAS IMAGENS)
           ══════════════════════════════════════════════════════════════════ */}
-      <section className="py-24 sm:py-32 bg-gradient-to-br from-[#FF6500] via-[#EB5B00] to-[#D94F00] text-white relative overflow-hidden">
+      <section data-reveal className="py-24 sm:py-32 bg-gradient-to-br from-[#FF6500] via-[#EB5B00] to-[#D94F00] text-white relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-7 relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 border border-white/30 text-white text-xs font-bold uppercase tracking-wider font-display">
             <span>Comece a Faturar Hoje Mesmo</span>

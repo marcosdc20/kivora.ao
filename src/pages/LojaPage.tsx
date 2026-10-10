@@ -541,7 +541,7 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
       msg += `Gostaria de confirmar a encomenda e receber a Fatura Proforma oficial para pagamento via Transferência Bancária / Multicaixa.`;
 
       const encoded = encodeURIComponent(msg);
-      const targetPhone = getCachedSystemSettings().phoneRaw || '244923456789';
+      const targetPhone = getCachedSystemSettings().phoneRaw || '244974855494';
       window.open(`https://wa.me/${targetPhone}?text=${encoded}`, '_blank');
       setIsCartOpen(false);
     } catch (err) {
@@ -660,7 +660,7 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         
         {/* Título Principal da Loja */}
-        <div className="mb-6">
+        <div data-reveal className="mb-6">
           <h1 className="font-display text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
             Loja de Equipamentos POS & Periféricos
           </h1>
@@ -670,7 +670,7 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
         </div>
 
         {/* Banner Informativo de Entrega */}
-        <div className="surface-card p-5 sm:p-6 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-700">
+        <div data-reveal className="surface-card p-5 sm:p-6 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-700">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center shrink-0 shadow-xs font-bold">
               <Truck className="w-5 h-5" />
@@ -693,10 +693,11 @@ export const LojaPage: React.FC<LojaPageProps> = ({ onNavigatePage }) => {
         </div>
 
         {/* Grelha de Produtos Estilo E-Commerce Autêntico */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-16">
+        <div data-stagger className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-16">
           {filteredProducts.map((prod) => (
             <div
               key={prod.id}
+              data-reveal
               onClick={() => {
                 setSelectedProduct(prod);
                 window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 
 interface WhatsAppButtonProps {
-  /** Número de telefone com código de país, ex: "244923456789" */
+  /** Número de telefone com código de país, ex: "244974855494" */
   phoneNumber: string;
   /** Mensagem pré-preenchida */
   message?: string;

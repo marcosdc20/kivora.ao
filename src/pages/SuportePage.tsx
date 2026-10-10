@@ -141,7 +141,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
     },
   ];
 
-  const whatsappHref = settings.whatsappUrl || `https://wa.me/${settings.phoneRaw || '244923456789'}`;
+  const whatsappHref = settings.whatsappUrl || `https://wa.me/${settings.phoneRaw || '244974855494'}`;
 
   return (
     <div className="min-h-screen bg-slate-50/50 text-slate-900 page-enter font-sans">
@@ -158,10 +158,10 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
       <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-20 space-y-16">
         
         {/* Canais Diretos de Contacto Corporativos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div data-stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           
           {/* Card 1: WhatsApp */}
-          <div className="surface-card p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-emerald-300 transition-all duration-300">
+          <div data-reveal className="surface-card p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-emerald-300 transition-all duration-300">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-xs">
@@ -200,7 +200,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
           </div>
 
           {/* Card 2: Videochamada & Partilha de Ecrã */}
-          <div className="surface-card p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-blue-300 transition-all duration-300">
+          <div data-reveal className="surface-card p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-blue-300 transition-all duration-300">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-xs">
@@ -236,7 +236,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
           </div>
 
           {/* Card 3: Telefone Central */}
-          <div className="surface-card p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-indigo-300 transition-all duration-300">
+          <div data-reveal className="surface-card p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-indigo-300 transition-all duration-300">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shadow-xs">
@@ -263,7 +263,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
             </div>
 
             <a
-              href={`tel:${settings.phoneRaw || '244923456789'}`}
+              href={`tel:${settings.phoneRaw || '244974855494'}`}
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
             >
               <Phone className="w-4 h-4" />
@@ -272,7 +272,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
           </div>
 
           {/* Card 4: Email Suporte */}
-          <div className="surface-card p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-slate-300 transition-all duration-300">
+          <div data-reveal className="surface-card p-6 sm:p-7 flex flex-col justify-between space-y-6 group hover:border-slate-300 transition-all duration-300">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all duration-300 shadow-xs">
@@ -309,7 +309,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
         </div>
 
         {/* Formulário Interativo de Abertura de Ticket com Protocolo */}
-        <div className="surface-card p-8 sm:p-12 space-y-8 relative overflow-hidden bg-white">
+        <div data-reveal className="surface-card p-8 sm:p-12 space-y-8 relative overflow-hidden bg-white">
           <div className="max-w-2xl mx-auto text-center space-y-3">
             <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-3.5 py-1.5 rounded-full border border-blue-200">
               <Headphones className="w-3.5 h-3.5" />
@@ -482,14 +482,14 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
 
         {/* Perguntas Frequentes Expandidas */}
         <div className="space-y-8">
-          <div className="text-center max-w-xl mx-auto space-y-2">
+          <div data-reveal className="text-center max-w-xl mx-auto space-y-2">
             <h3 className="text-2xl font-bold font-display text-slate-950">Perguntas Frequentes (FAQ)</h3>
             <p className="text-xs text-slate-500">Respostas rápidas às principais dúvidas operacionais e fiscais.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div data-stagger className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="surface-card p-6 sm:p-7 space-y-2.5 hover:border-slate-300 transition-all">
+              <div key={idx} data-reveal className="surface-card p-6 sm:p-7 space-y-2.5 hover:border-slate-300 transition-all">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-100">
                   {faq.categoria}
                 </span>

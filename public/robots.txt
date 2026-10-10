@@ -1,4 +1,4 @@
-# robots.txt for KIVORA SOFT (kivora.ao)
+# robots.txt for KIVORA SOFT (kivora.visualsoftware.dev)
 # https://www.robotstxt.org/
 
 User-agent: *
@@ -7,6 +7,8 @@ Allow: /precos
 Allow: /modulos
 Allow: /loja
 Allow: /hardware
+Allow: /solucoes
+Allow: /setores
 Allow: /diretorio-parceiros
 Allow: /download
 Allow: /recursos

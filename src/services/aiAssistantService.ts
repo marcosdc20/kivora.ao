@@ -349,7 +349,7 @@ async function callAIProvider(
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://kivora.ao',
+        'HTTP-Referer': 'https://kivora.visualsoftware.dev',
         'X-Title': 'Kivora Soft Assistant',
       },
       body: JSON.stringify({

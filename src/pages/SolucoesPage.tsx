@@ -13,17 +13,7 @@ interface SolucoesPageProps {
   onNavigatePage: (page: PageId) => void;
 }
 
-function useScrollReveal() {
-  useEffect(() => {
-    const els = document.querySelectorAll('[data-reveal]');
-    const obs = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('sr-visible'); obs.unobserve(e.target); } }),
-      { threshold: 0.1 }
-    );
-    els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
-}
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 export const SolucoesPage: React.FC<SolucoesPageProps> = ({ onOpenDemoModal, onNavigatePage }) => {
   useScrollReveal();

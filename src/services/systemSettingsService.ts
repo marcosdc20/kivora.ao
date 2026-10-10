@@ -423,7 +423,7 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   phone: KIVORA_INFO.phone,
   phoneRaw: KIVORA_INFO.phoneRaw,
   phoneDisplay: KIVORA_INFO.phoneDisplay,
-  phoneCommercial: '+244 923 456 789',
+  phoneCommercial: '+244 974 855 494',
   email: KIVORA_INFO.email,
   supportEmail: KIVORA_INFO.supportEmail,
   partnerEmail: 'parceiros@kivora.ao',

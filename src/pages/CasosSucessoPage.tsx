@@ -8,6 +8,7 @@ import { PageId } from '../components/Header';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { CountUp } from '../components/CountUp';
 import { AnimatedText } from '../components/AnimatedText';
+import { TestimonialsCarousel } from '../components/TestimonialsCarousel';
 
 import tabletImg from '../assets/kivora/jovem-empresaria-com-tablet.png';
 import supermercadoImg from '../assets/kivora/supermercado-kivora.jpg';
@@ -363,6 +364,11 @@ export const CasosSucessoPage: React.FC<CasosSucessoPageProps> = ({
             </div>
           </div>
           ))}
+        </div>
+
+        {/* Carrossel Interativo de Testemunhos de Clientes */}
+        <div data-reveal className="my-16 bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/90 shadow-sm">
+          <TestimonialsCarousel />
         </div>
 
         {/* Banner de Chamada para Ação */}

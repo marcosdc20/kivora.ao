@@ -12,7 +12,9 @@ import {
   generateDemoLeadCustomerTemplate,
   generateDemoLeadAdminAlertTemplate,
   generatePartnerApplicationCandidateTemplate,
-  generateSupportTicketCustomerTemplate
+  generatePartnerApplicationAdminAlertTemplate,
+  generateSupportTicketCustomerTemplate,
+  generateSupportTicketAdminAlertTemplate
 } from './emailTemplatesSite';
 
 export interface SiteEmailConfig {
@@ -255,7 +257,7 @@ export const sendClientWelcomeEmail = async (params: {
   planName: string;
 }): Promise<{ success: boolean; error?: string }> => {
   const html = generateClientCredentialsTemplate(params);
-  const text = `Prezado(a) ${params.adminName},\n\nA sua conta no ecossistema KIVORA SOFT para a empresa ${params.companyName} (NIF: ${params.nif}) foi ativada com sucesso.\n\nPlano: ${params.planName}\nChave de Licença: ${params.licenseKey}\nE-mail de Acesso: ${params.email}${params.tempPassword ? `\nPalavra-passe Provisória: ${params.tempPassword}` : ''}\n\nPara aceder ao portal e descarregar o software, visite: https://kivora.visualsoftware.dev\n\nRecomendamos alterar a sua palavra-passe no primeiro acesso.\n\nKIVORA SOFT • Visual Software, Lda.`;
+  const text = `Prezado(a) ${params.adminName},\n\nA sua conta no ecossistema KIVORA SOFT para a empresa ${params.companyName} (NIF: ${params.nif}) foi ativada com sucesso.\n\nPlano: ${params.planName}\nChave de Licença: ${params.licenseKey}\nE-mail de Acesso: ${params.email}${params.tempPassword ? `\nPalavra-passe Provisória: ${params.tempPassword}` : ''}\n\nPara aceder ao portal e descarregar o software, visite: https://kivora.visualsoftware.dev/login\n\nRecomendamos alterar a sua palavra-passe no primeiro acesso.\n\nKIVORA SOFT • Visual Software, Lda.`;
 
   return sendSiteEmail({
     to: params.email,
@@ -302,7 +304,7 @@ export const sendPartnerNotificationEmail = async (params: {
   amount?: string;
 }): Promise<{ success: boolean; error?: string }> => {
   const html = generatePartnerNotificationTemplate(params);
-  const text = `Olá, Parceiro(a) ${params.partnerName}!\n\n${params.title}\n\n${params.description}${params.clientName ? `\nCliente Associado: ${params.clientName}` : ''}${params.amount ? `\nValor: ${params.amount}` : ''}\n\nAceda ao Portal do Parceiro para conferir os detalhes: https://kivora.visualsoftware.dev/parceiro/login\n\nKIVORA SOFT • Direção de Canais`;
+  const text = `Olá, Parceiro(a) ${params.partnerName}!\n\n${params.title}\n\n${params.description}${params.clientName ? `\nCliente Associado: ${params.clientName}` : ''}${params.amount ? `\nValor: ${params.amount}` : ''}\n\nAceda ao Portal do Parceiro para conferir os detalhes: https://kivora.visualsoftware.dev/area-parceiro\n\nKIVORA SOFT • Direção de Canais`;
 
   return sendSiteEmail({
     to: params.partnerEmail,
@@ -327,7 +329,7 @@ export const sendPartnerCredentialsEmail = async (params: {
     email: params.partnerEmail,
     password: params.password,
   });
-  const text = `Prezado(a) ${params.partnerName},\n\nA sua conta no Portal Oficial de Parceiros KIVORA SOFT foi ativada com sucesso.\n\nCódigo de Parceiro: ${params.partnerCode}\nE-mail de Acesso: ${params.partnerEmail}${params.password ? `\nPalavra-passe Provisória: ${params.password}` : ''}\nLink do Portal: https://kivora.visualsoftware.dev/parceiro/login\n\nPor favor, altere a sua palavra-passe no primeiro acesso no menu de perfil.\n\nKIVORA SOFT • Programa Oficial de Parcerias`;
+  const text = `Prezado(a) ${params.partnerName},\n\nA sua conta no Portal Oficial de Parceiros KIVORA SOFT foi ativada com sucesso.\n\nCódigo de Parceiro: ${params.partnerCode}\nE-mail de Acesso: ${params.partnerEmail}${params.password ? `\nPalavra-passe Provisória: ${params.password}` : ''}\nLink do Portal: https://kivora.visualsoftware.dev/area-parceiro\n\nPor favor, altere a sua palavra-passe no primeiro acesso no menu de perfil.\n\nKIVORA SOFT • Programa Oficial de Parcerias`;
 
   return sendSiteEmail({
     to: params.partnerEmail,
@@ -520,21 +522,7 @@ export const sendPartnerApplicationEmails = async (data: {
   }
 
   // 2. Enviar alerta à direção / equipa de parceiros KIVORA (Admin principal + configurados)
-  const adminHtml = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; padding: 20px;">
-      <h2 style="color: #0f172a; margin-top: 0;">Nova Candidatura a Parceiro KIVORA</h2>
-      <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 160px;">Protocolo:</td><td><strong>${data.protocol}</strong></td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Responsável:</td><td>${data.nome}</td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Empresa:</td><td><strong>${data.empresa}</strong></td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">NIF:</td><td>${data.nif}</td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Província:</td><td>${data.provincia}</td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Telefone:</td><td><a href="https://wa.me/${data.telefone.replace(/[^0-9]/g, '')}">${data.telefone}</a></td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">E-mail:</td><td><a href="mailto:${data.email}">${data.email}</a></td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Tipo de Parceria:</td><td>${data.tipoParceria}</td></tr>
-      </table>
-    </div>
-  `;
+  const adminHtml = generatePartnerApplicationAdminAlertTemplate(data);
   const adminText = `Nova Candidatura a Parceiro KIVORA Registada:\n\nProtocolo: ${data.protocol}\nResponsável: ${data.nome}\nEmpresa: ${data.empresa}\nNIF: ${data.nif}\nProvíncia: ${data.provincia}\nTelefone: ${data.telefone}\nE-mail: ${data.email}\nTipo de Parceria: ${data.tipoParceria}`;
 
   const settings = getCachedSystemSettings();
@@ -596,21 +584,7 @@ export const sendSupportTicketEmails = async (data: {
     );
   }
 
-  const adminHtml = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; padding: 20px;">
-      <h2 style="color: #0f172a; margin-top: 0;">Novo Chamado de Suporte Registado</h2>
-      <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 160px;">Protocolo:</td><td><strong>${data.ticketNumber}</strong></td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Cliente / Empresa:</td><td>${data.nome}</td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Contacto:</td><td>${data.telefone} | ${data.email || 'N/D'}</td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Departamento:</td><td>${data.departamento.toUpperCase()}</td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Assunto:</td><td>${data.assunto}</td></tr>
-      </table>
-      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px; margin-top: 14px; color: #334155;">
-        <strong style="color: #0f172a;">Descrição do Chamado:</strong><br>${data.mensagem.replace(/\n/g, '<br>')}
-      </div>
-    </div>
-  `;
+  const adminHtml = generateSupportTicketAdminAlertTemplate(data);
   const adminText = `Novo Chamado de Suporte #${data.ticketNumber} Registado:\nCliente/Empresa: ${data.nome}\nContacto: ${data.telefone} | ${data.email || 'N/D'}\nDepartamento: ${data.departamento.toUpperCase()}\nAssunto: ${data.assunto}\n\nDescrição do Chamado:\n${data.mensagem}`;
 
   const settings = getCachedSystemSettings();

@@ -137,6 +137,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
                 { name: 'Contabilidade & SAF-T AO', page: 'contabilidade' },
                 { name: 'Hardware & Impressoras 80mm', page: 'hardware' },
                 { name: 'Loja Oficial de Equipamentos', page: 'loja' },
+                { name: 'Soluções por Setor de Atividade', page: 'solucoes' },
                 { name: 'Central de Suporte & Manuais', page: 'suporte' },
               ].map((item, idx) => (
                 <li key={idx}>

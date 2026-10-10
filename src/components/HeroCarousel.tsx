@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ArrowRight, Download, Play, X } from 'lucide-react';
+import { ScrollDownIndicator } from './ScrollDownIndicator';
 import { subscribeSystemSettings, getCachedSystemSettings, SystemCompanySettings } from '../services/systemSettingsService';
 
 import laptopImg from '../assets/kivora/pc-laptop-kivora.png';
@@ -390,6 +391,15 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
 
           </div>
         </div>
+      </div>
+
+      {/* ─── INDICADOR DE SCROLL SUAVE PARA BAIXO ─────────────────────── */}
+      <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 hidden sm:block">
+        <ScrollDownIndicator
+          targetId="solucoes-rapidas"
+          label="Rolar para baixo"
+          variant="glass"
+        />
       </div>
 
       {/* ─── NAVIGATION CONTROLS: ARROWS ─────────────────────────────────── */}

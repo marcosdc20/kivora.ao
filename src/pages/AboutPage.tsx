@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
   CheckCircle, MapPin, Phone, Mail, ArrowRight,
-  ChevronRight, Star, Quote
+  ChevronRight
 } from 'lucide-react';
 import {
   subscribeSystemSettings, getCachedSystemSettings,
   SystemCompanySettings
 } from '../services/systemSettingsService';
 import { CountUp } from '../components/CountUp';
+import { TestimonialsCarousel } from '../components/TestimonialsCarousel';
 
 import executivosImg from '../assets/kivora/executivos-kivora.jpg';
 
@@ -47,25 +48,6 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
       role: 'Consultora Contabilística & SAF-T AO',
       image: '/imagens/2150690165.webp',
       badge: 'Contabilidade PGC',
-    },
-  ];
-
-  const testimonials = [
-    {
-      text: 'O KIVORA revolucionou os nossos supermercados em Luanda e Benguela. Conseguimos emitir milhares de talões por dia mesmo sem sinal de internet e a exportação do SAF-T AO para a AGT nunca teve uma única inconformidade.',
-      author: 'Alexandre Sarkovic',
-      role: 'Diretor de Operações de Retalho',
-      location: 'Luanda, Angola',
-      image: '/imagens/1085.webp',
-      rating: 5,
-    },
-    {
-      text: 'A formação presencial e o acompanhamento dos técnicos foram excecionais. Toda a equipa de caixas adaptou-se em menos de 2 horas. Recomendo vivamente a qualquer empresa que procure estabilidade e conformidade legal.',
-      author: 'Marcos Silva',
-      role: 'Sócio-Gerente e Auditor',
-      location: 'Benguela, Angola',
-      image: '/imagens/2149153824.webp',
-      rating: 5,
     },
   ];
 
@@ -336,63 +318,12 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
         </div>
       </section>
 
-      {/* Testimonials Section with Speech Bubbles — Exact match Image 2 */}
-      <section className="py-16 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        
-        <div className="text-center space-y-2 max-w-xl mx-auto">
-          <div className="flex items-center justify-center gap-2">
-            <svg className="w-6 h-3 text-[#FF6500]" viewBox="0 0 40 16" fill="currentColor">
-              <path d="M0 8 L10 0 L20 8 L30 0 L40 8 L30 16 L20 8 L10 16 Z" />
-            </svg>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Testemunhos
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-500">
-            Veja o que os gestores e parceiros dizem sobre a estabilidade do KIVORA
-          </p>
-        </div>
-
-        {/* Speech Bubbles Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {testimonials.map((t, idx) => (
-            <div key={idx} className="flex flex-col items-center">
-              
-              {/* Speech Bubble with Orange Background & Downward Pointer */}
-              <div className="relative bg-gradient-to-br from-[#FF6500] to-[#FFA726] text-white p-7 rounded-3xl shadow-xl space-y-3">
-                <Quote className="w-6 h-6 text-white/40" />
-                <p className="text-xs sm:text-sm leading-relaxed text-white/95 font-medium">
-                  "{t.text}"
-                </p>
-                
-                {/* 5 Stars */}
-                <div className="flex items-center gap-1 pt-1">
-                  {[...Array(t.rating)].map((_, s) => (
-                    <Star key={s} className="w-3.5 h-3.5 fill-white text-white" />
-                  ))}
-                </div>
-
-                {/* Downward triangle indicator */}
-                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[14px] border-t-[#FFA726]" />
-              </div>
-
-              {/* Author Info Below Bubble with Circular Avatar */}
-              <div className="mt-6 flex flex-col items-center text-center">
-                <div className="w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-[#FF6500] to-[#FFA726] shadow-sm mb-2">
-                  <img
-                    src={t.image}
-                    alt={t.author}
-                    className="w-full h-full object-cover rounded-full bg-slate-100"
-                  />
-                </div>
-                <h4 className="text-sm font-bold text-slate-900">{t.author}</h4>
-                <p className="text-[11px] text-slate-500">{t.role} • {t.location}</p>
-              </div>
-
-            </div>
-          ))}
-        </div>
-
+      {/* Testimonials Section with Speech Bubbles — Carrossel Interativo */}
+      <section data-reveal className="py-16 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <TestimonialsCarousel
+          badgeText="Avaliações Verificadas"
+          subtitle="Veja o que os gestores e parceiros dizem sobre a estabilidade do KIVORA em Angola"
+        />
       </section>
 
       {/* Office & Contacts Strip */}

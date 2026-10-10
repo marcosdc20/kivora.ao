@@ -855,7 +855,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                 </div>
                 <button
                   onClick={() => {
-                    const phone = getCachedSystemSettings().phoneRaw || '244923456789';
+                    const phone = getCachedSystemSettings().phoneRaw || '244974855494';
                     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(`Olá Suporte Comercial Kivora, pretendo encomendar novos equipamentos POS para a empresa ${clientLicense.company_name} (NIF: ${clientLicense.nif}).`)}`, '_blank');
                   }}
                   className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-950 hover:bg-slate-800 text-white text-xs font-display font-semibold rounded-xl shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-[0.98]"
@@ -943,7 +943,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                           </span>
                           <button
                             onClick={() => {
-                              const phone = getCachedSystemSettings().phoneRaw || '244923456789';
+                              const phone = getCachedSystemSettings().phoneRaw || '244974855494';
                               const text = `Olá, pretendo informações sobre a encomenda ${order.orderNumber} para a empresa ${clientLicense.company_name}.`;
                               window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
                             }}

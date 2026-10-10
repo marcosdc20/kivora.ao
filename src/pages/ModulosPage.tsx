@@ -24,9 +24,9 @@ const CATEGORIES = [
 ];
 
 export const ModulosPage: React.FC<ModulosPageProps> = ({ onSelectModule, onOpenDemoModal }) => {
-  useScrollReveal();
   const [search, setSearch] = useState('');
   const [cat, setCat] = useState('todos');
+  useScrollReveal(undefined, [search, cat]);
 
   const modules = KIVORA_MODULES.filter((m) => {
     const matchSearch =
@@ -85,7 +85,7 @@ export const ModulosPage: React.FC<ModulosPageProps> = ({ onSelectModule, onOpen
             Nenhum módulo encontrado. Tente outro termo de pesquisa.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div data-stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {modules.map((mod, i) => {
               const colorMap: Record<string, { badge: string; borderAccent: string }> = {
                 faturacao: { badge: 'bg-blue-50 text-blue-700 border-blue-200/80', borderAccent: 'hover:border-blue-300' },

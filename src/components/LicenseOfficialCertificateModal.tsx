@@ -20,7 +20,7 @@ export const LicenseOfficialCertificateModal: React.FC<LicenseOfficialCertificat
 
   if (!license) return null;
 
-  const validationUrl = `https://kivora.ao/#validar-licenca?key=${encodeURIComponent(license.id)}`;
+  const validationUrl = `https://kivora.visualsoftware.dev/#validar-licenca?key=${encodeURIComponent(license.id)}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(validationUrl)}&margin=0`;
   const isLicenseActive = !license.expires_at || new Date(license.expires_at).getTime() > Date.now();
   const certRegNum = `KVRA-LIC-${license.id.slice(-6).toUpperCase()}-${new Date(license.created_at).getFullYear()}`;

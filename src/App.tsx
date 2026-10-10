@@ -9,7 +9,7 @@ import { DemoModal } from './components/DemoModal';
 import { KIVORA_MODULES } from './data/kivoraData';
 import { KivoraModule, NewsPost } from './types/kivora';
 import { getStoredSession } from './admin/services/authService';
-import { useScrollReveal } from './hooks/useScrollReveal';
+import { useGlobalScrollReveal } from './hooks/useGlobalScrollReveal';
 import { NotificationContainer } from './components/ui/NotificationContainer';
 import { KivoraAssistantBot } from './components/KivoraAssistantBot';
 
@@ -294,8 +294,23 @@ function getPageFromPathname(): PageId {
   if (hash === '#precos' || hash === '#planos') return 'planos';
   if (hash === '#suporte') return 'suporte';
   if (hash === '#candidatura-parceiro') return 'candidatura-parceiro';
-  if (hash === '#validar-licenca') return 'validar-licenca';
-  if (hash === '#certificacao-documentos' || hash === '#certificados') return 'certificacao-documentos';
+  if (hash === '#validar-licenca' || hash === '#validar') return 'validar-licenca';
+  if (hash === '#certificacao-documentos' || hash === '#certificados' || hash === '#certificacao') return 'certificacao-documentos';
+  if (hash === '#modulos' || hash === '#funcionalidades') return 'funcionalidades';
+  if (hash === '#solucoes') return 'solucoes';
+  if (hash === '#setores') return 'setores';
+  if (hash === '#retalho') return 'retalho';
+  if (hash === '#restauracao') return 'restauracao';
+  if (hash === '#farmacia') return 'farmacia';
+  if (hash === '#servicos') return 'servicos';
+  if (hash === '#faturacao') return 'faturacao';
+  if (hash === '#pos') return 'pos';
+  if (hash === '#stock') return 'stock';
+  if (hash === '#rh') return 'rh';
+  if (hash === '#contabilidade') return 'contabilidade';
+  if (hash === '#parceiros') return 'parceiros';
+  if (hash === '#recursos') return 'recursos';
+  if (hash === '#ferramentas') return 'ferramentas';
 
   const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
   if (!path || path === '') return 'home';
@@ -305,13 +320,28 @@ function getPageFromPathname(): PageId {
   if (path === '/area-parceiro' || path === '/parceiro') return 'area-parceiro';
   if (path === '/login') return 'login';
   if (path === '/loja') return 'loja';
-  if (path === '/modulos') return 'modulos';
+  if (path === '/modulos' || path === '/funcionalidades') return 'funcionalidades';
+  if (path === '/download') return 'download';
+  if (path === '/faturacao') return 'faturacao';
+  if (path === '/pos') return 'pos';
+  if (path === '/stock') return 'stock';
+  if (path === '/rh') return 'rh';
+  if (path === '/contabilidade') return 'contabilidade';
+  if (path === '/solucoes') return 'solucoes';
+  if (path === '/setores') return 'setores';
+  if (path === '/retalho') return 'retalho';
+  if (path === '/restauracao') return 'restauracao';
+  if (path === '/farmacia') return 'farmacia';
+  if (path === '/servicos') return 'servicos';
+  if (path === '/parceiros') return 'parceiros';
+  if (path === '/recursos') return 'recursos';
+  if (path === '/ferramentas') return 'ferramentas';
   if (path === '/precos' || path === '/planos') return 'planos';
   if (path === '/contacto' || path === '/suporte') return 'suporte';
   if (path === '/sobre') return 'sobre';
   if (path === '/noticias') return 'noticias';
   if (path === '/hardware') return 'hardware';
-  if (path === '/validar-licenca') return 'validar-licenca';
+  if (path === '/validar' || path === '/validar-licenca') return 'validar-licenca';
   if (path === '/candidatura-parceiro') return 'candidatura-parceiro';
   if (path === '/diretorio-parceiros') return 'diretorio-parceiros';
   if (path === '/casos-sucesso') return 'casos-sucesso';
@@ -344,8 +374,8 @@ export function App() {
   }, []);
 
 
-  // Ativação global de Scroll Reveal em todas as páginas
-  useScrollReveal(undefined, [activePage, selectedModule, selectedNewsPost]);
+  // Ativação global de Scroll Reveal em todas as páginas e rotas
+  useGlobalScrollReveal([activePage, selectedModule, selectedNewsPost]);
 
   // ─── Sincronização Dinâmica de SEO & Metadados ──────────────────────────────
   useEffect(() => {
@@ -375,11 +405,11 @@ export function App() {
     if (ogDescTag) ogDescTag.setAttribute('content', pageDesc);
 
     const ogUrlTag = document.querySelector('meta[property="og:url"]');
-    if (ogUrlTag) ogUrlTag.setAttribute('content', `https://kivora.ao${meta.path}`);
+    if (ogUrlTag) ogUrlTag.setAttribute('content', `https://kivora.visualsoftware.dev${meta.path}`);
 
     // Atualizar Canonical
     const canonicalTag = document.querySelector('link[rel="canonical"]');
-    if (canonicalTag) canonicalTag.setAttribute('href', `https://kivora.ao${meta.path}`);
+    if (canonicalTag) canonicalTag.setAttribute('href', `https://kivora.visualsoftware.dev${meta.path}`);
   }, [activePage, selectedModule, selectedNewsPost]);
 
   // Scroll nativo com aceleração por hardware GPU e suporte a inércia de touchpad (120Hz/60Hz)
@@ -805,7 +835,7 @@ export function App() {
 
       {/* Botão flutuante WhatsApp (configurável pelo Admin no Firebase) */}
       <WhatsAppButton
-        phoneNumber={appSettings.phoneRaw || '244923456789'}
+        phoneNumber={appSettings.phoneRaw || '244974855494'}
         message={appSettings.whatsappDefaultMessage || 'Olá! Gostaria de saber mais sobre o KIVORA SOFT.'}
       />
 

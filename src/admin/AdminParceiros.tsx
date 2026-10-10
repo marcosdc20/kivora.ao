@@ -956,7 +956,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   };
 
   const copyRefLink = (p: Partner) => {
-    navigator.clipboard.writeText(`https://kivora.ao/?ref=${p.code}`);
+    navigator.clipboard.writeText(`https://kivora.visualsoftware.dev/?ref=${p.code}`);
     setCopiedCode(p.code); setTimeout(() => setCopiedCode(null), 2500);
   };
 

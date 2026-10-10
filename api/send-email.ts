@@ -266,27 +266,39 @@ export default async function handler(req: any, res: any) {
         lastTransporterKey = transporterKey;
       }
 
-      const mailOptions: any = {
-        from: typeof from === 'string' && from.includes('@') ? from : `"${effectiveSenderName}" <${effectiveUser}>`,
-        subject,
-        html,
-        text: plainText,
-        replyTo: (typeof body.replyTo === 'string' && body.replyTo.includes('@')) ? body.replyTo : effectiveUser,
-        headers: {
-          'Auto-Submitted': 'auto-generated',
-          'X-Auto-Response-Suppress': 'OOF, AutoReply',
-        }
+      const domain = 'kivora.ao';
+      const cleanHeaders: Record<string, string> = {
+        'X-Mailer': 'KIVORA Soft Mail Engine 2.1',
+        'List-Unsubscribe': `<mailto:suporte@${domain}?subject=unsubscribe>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      };
+
+      const sendSingle = async (recipientEmail: string) => {
+        const uniqueMsgId = `<${Date.now()}.${Math.random().toString(36).substring(2, 9)}@${domain}>`;
+        return cachedTransporter.sendMail({
+          from: typeof from === 'string' && from.includes('@') ? from : `"${effectiveSenderName}" <${effectiveUser}>`,
+          to: recipientEmail,
+          subject,
+          html,
+          text: plainText,
+          replyTo: (typeof body.replyTo === 'string' && body.replyTo.includes('@')) ? body.replyTo : effectiveUser,
+          messageId: uniqueMsgId,
+          headers: cleanHeaders,
+        });
       };
 
       if (recipients.length === 1) {
-        mailOptions.to = recipients[0];
+        const info = await sendSingle(recipients[0]);
+        return res.status(200).json({ success: true, messageId: info.messageId || `gmail-${Date.now()}` });
       } else {
-        mailOptions.to = effectiveUser;
-        mailOptions.bcc = recipients;
+        const results = await Promise.allSettled(recipients.map(sendSingle));
+        const successCount = results.filter((r) => r.status === 'fulfilled').length;
+        if (successCount === 0) {
+          const firstErr: any = results.find((r) => r.status === 'rejected');
+          throw firstErr?.reason || new Error('Falha no envio de e-mails para todos os destinatários.');
+        }
+        return res.status(200).json({ success: true, count: successCount });
       }
-
-      const info = await cachedTransporter.sendMail(mailOptions);
-      return res.status(200).json({ success: true, messageId: info.messageId || `gmail-${Date.now()}` });
     }
 
     // ── PROVEDOR 2: SENDGRID API ────────────────────────────────────────────────
@@ -298,7 +310,7 @@ export default async function handler(req: any, res: any) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          personalizations: [{ to: recipients.map((e: string) => ({ email: e })) }],
+          personalizations: recipients.map((e: string) => ({ to: [{ email: e }] })),
           from: typeof from === 'string' ? { email: from } : { email: effectiveSenderEmail, name: effectiveSenderName },
           reply_to: { email: effectiveUser },
           subject,

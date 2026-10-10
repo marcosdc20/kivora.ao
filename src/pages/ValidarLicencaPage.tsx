@@ -87,7 +87,7 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
 
   const isExpired = licenseData?.expires_at && licenseData.expires_at < Date.now();
   const isLicenseActive = licenseData && licenseData.status === 'active' && !isExpired;
-  const validationUrl = licenseData ? `https://kivora.ao/#validar-licenca?k=${encodeURIComponent(licenseData.id)}` : 'https://kivora.ao';
+  const validationUrl = licenseData ? `https://kivora.visualsoftware.dev/#validar-licenca?k=${encodeURIComponent(licenseData.id)}` : 'https://kivora.visualsoftware.dev';
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(validationUrl)}&margin=0`;
 
   return (
@@ -343,7 +343,7 @@ export const ValidarLicencaPage: React.FC<ValidarLicencaPageProps> = ({ onBackTo
               <div className="text-center sm:text-left space-y-0.5">
                 <p className="font-black text-slate-950 text-xs">KIVORA TECNOLOGIAS, LDA.</p>
                 <p className="text-slate-500 text-[10px]">Departamento de Licenciamento & Sistemas</p>
-                <p className="text-slate-400 text-[9px]">Verificação online disponível em https://kivora.ao</p>
+                <p className="text-slate-400 text-[9px]">Verificação online disponível em https://kivora.visualsoftware.dev</p>
               </div>
 
               <div className="text-center sm:text-right border-t sm:border-t-0 sm:border-l border-slate-200 pt-4 sm:pt-0 sm:pl-6 space-y-1">

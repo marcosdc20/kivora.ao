@@ -153,9 +153,10 @@ export const Header: React.FC<HeaderProps> = ({
         { name: 'Ponto de Venda (POS)', desc: 'Faturação rápida de balcão, talões térmicos e fecho Z', page: 'pos', icon: <ShoppingCart className="w-4 h-4" /> },
         { name: 'Stock & Armazéns', desc: 'Inventário em tempo real, lotes, validades e multidepósito', page: 'stock', icon: <Boxes className="w-4 h-4" /> },
         { name: 'Recursos Humanos & IRT', desc: 'Processamento de salários, mapas INSS e tabelas de IRT', page: 'rh', icon: <Users className="w-4 h-4" /> },
+        { name: 'Soluções por Setor', desc: 'Retalho, Restauração, Supermercados e Farmácias', page: 'solucoes', icon: <Building2 className="w-4 h-4" /> },
         { name: 'Hardware & Periféricos', desc: 'Impressoras térmicas 80mm, leitores 2D e gavetas', page: 'hardware', icon: <Printer className="w-4 h-4" /> },
       ],
-      footerLink: { label: 'Ver todos os módulos e funcionalidades', page: 'funcionalidades' }
+      footerLink: { label: 'Ver todos os módulos e soluções por setor', page: 'funcionalidades' }
     },
     {
       id: 'planos',
@@ -382,9 +383,9 @@ export const Header: React.FC<HeaderProps> = ({
                           <button
                             key={idx}
                             onClick={() => handleNavClick(item.page)}
-                            className="w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-50 active:bg-orange-50/50 transition-all text-left group/item cursor-pointer"
+                            className="w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-50 active:bg-orange-50/50 hover:translate-x-1 transition-all duration-200 text-left group/item cursor-pointer"
                           >
-                            <div className="w-7 h-7 rounded-lg bg-orange-50 text-[#FF6500] border border-orange-200/50 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:bg-[#FF6500] group-hover/item:text-white transition-colors">
+                            <div className="w-7 h-7 rounded-lg bg-orange-50 text-[#FF6500] border border-orange-200/50 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:bg-[#FF6500] group-hover/item:text-white group-hover/item:scale-105 transition-all duration-200">
                               {item.icon}
                             </div>
                             <div className="min-w-0 flex-1">
@@ -409,7 +410,7 @@ export const Header: React.FC<HeaderProps> = ({
                             className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[#FF6500] hover:text-[#EB5B00] hover:bg-orange-50/60 transition-colors text-left cursor-pointer group/ft font-display"
                           >
                             <span>{group.footerLink.label}</span>
-                            <ChevronRight className="w-3.5 h-3.5 text-[#FF6500] group-hover/ft:translate-x-0.5 transition-transform" />
+                            <ChevronRight className="w-3.5 h-3.5 text-[#FF6500] group-hover/ft:translate-x-1 transition-transform duration-200" />
                           </button>
                         </div>
                       )}
@@ -423,7 +424,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Right Action Buttons — Rounded pill buttons matching reference layout */}
           <div className="hidden lg:flex items-center space-x-2.5 shrink-0">
             <a
-              href="https://kivora.visualsoftware.dev/login"
+              href="/login"
               onClick={(e) => {
                 if (onOpenLogin) {
                   e.preventDefault();
@@ -534,7 +535,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="pt-3 space-y-2 border-t border-slate-100 mt-2">
             <div className="grid grid-cols-2 gap-2">
               <a
-                href="https://kivora.visualsoftware.dev/login"
+                href="/login"
                 onClick={(e) => {
                   setMobileMenuOpen(false);
                   if (onOpenLogin) {
