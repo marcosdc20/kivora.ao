@@ -516,7 +516,7 @@ export const sendPartnerApplicationEmails = async (data: {
         subject: `Candidatura a Parceiro KIVORA — Protocolo ${data.protocol}`,
         html: candHtml,
         text: candText,
-        replyTo: 'parceiros@kivora.ao',
+        replyTo: 'kivora.angola@gmail.com',
       })
     );
   }

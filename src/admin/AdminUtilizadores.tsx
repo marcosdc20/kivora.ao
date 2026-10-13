@@ -46,7 +46,7 @@ export const AdminUtilizadores: React.FC = () => {
           fireAdmins.push({
             id: 'admin-master',
             nome: 'Administrador Kivora',
-            email: 'admin@kivora.ao',
+            email: 'kivora.angola@gmail.com',
             funcao: 'Administrador de Sistemas & Licenças',
             nivel: 'super_admin',
             status: 'ativo',

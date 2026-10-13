@@ -634,14 +634,18 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     // REGRA DE OURO ZERO-LEAK: Nunca incluir uma empresa que pertença a outro parceiro!
     companies.forEach((c) => {
       const cPartner = (c.partner_id || '').trim().toLowerCase();
+      const cPartnerCode = ((c as any).partner_code || '').trim().toLowerCase();
 
       // Se a empresa possui explicitamente um parceiro diferente deste parceiro, NUNCA expor!
-      if (cPartner.length > 0 && !cleanIdentifiers.has(cPartner)) {
+      const hasOtherPartner = (cPartner.length > 0 && !cleanIdentifiers.has(cPartner)) &&
+                              (cPartnerCode.length > 0 ? !cleanIdentifiers.has(cPartnerCode) : true);
+      if (hasOtherPartner) {
         return;
       }
 
-      // Pertence diretamente a este parceiro pelo partner_id
-      const matchesDirectPartner = cPartner.length > 0 && cleanIdentifiers.has(cPartner);
+      // Pertence diretamente a este parceiro pelo partner_id ou partner_code
+      const matchesDirectPartner = (cPartner.length > 0 && cleanIdentifiers.has(cPartner)) ||
+                                   (cPartnerCode.length > 0 && cleanIdentifiers.has(cPartnerCode));
 
       // Ou corresponde a uma licença OU solicitação deste parceiro com NIF específico (não genérico) ou email
       const cNif = (c.nif || '').trim().toUpperCase();
@@ -1160,7 +1164,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     try {
       await createSupportTicket({
         company_name: partnerName,
-        contact_email: session?.email || 'parceiro@kivora.ao',
+        contact_email: session?.email || 'kivora.angola@gmail.com',
         contact_phone: '+244 923 000 000',
         subject: `[LIQUIDAÇÃO DE DÍVIDAS] Pagamento de ${fmt(paymentAmount)} Kz via ${paymentBank}`,
         category: 'faturacao',
@@ -1197,7 +1201,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     try {
       await createSupportTicket({
         company_name: partnerName,
-        contact_email: session?.email || 'parceiro@kivora.ao',
+        contact_email: session?.email || 'kivora.angola@gmail.com',
         contact_phone: '+244 923 000 000',
         subject: `[RECARGA DE WALLET] Depósito de ${fmt(paymentAmount)} Kz via ${paymentBank}`,
         category: 'faturacao',
@@ -1265,7 +1269,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     try {
       const newTk = await createSupportTicket({
         company_name: partnerName,
-        contact_email: session?.email || 'parceiro@kivora.ao',
+        contact_email: session?.email || 'kivora.angola@gmail.com',
         contact_phone: '+244 923 000 000',
         subject: `[PARCEIRO] ${adminTicketSubject}`,
         category: adminTicketCategory,
@@ -3681,7 +3685,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-200/80 text-xs">
                   <div>
                     <span className="text-slate-400 text-[10px] uppercase font-display font-bold tracking-wider block">Email de Acesso</span>
-                    <span className="font-sans font-medium text-slate-800">{session?.email || 'parceiro@kivora.ao'}</span>
+                    <span className="font-sans font-medium text-slate-800">{session?.email || 'kivora.angola@gmail.com'}</span>
                   </div>
                   <div>
                     <span className="text-slate-400 text-[10px] uppercase font-display font-bold tracking-wider block">Nível de Parceria</span>

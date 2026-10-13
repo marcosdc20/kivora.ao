@@ -101,7 +101,7 @@ export const AdminLicencas: React.FC<LicencasProps> = ({ onCriarLicenca }) => {
 
     setActionLoading(req.id);
     try {
-      const reviewer = auth.currentUser?.email || 'admin@kivora.ao';
+      const reviewer = auth.currentUser?.email || 'kivora.angola@gmail.com';
       const res = await approveLicenseRequest(req.id, reviewer);
       if (res.success && res.licenseId) {
         notify.success(`Licença oficial ${res.licenseId} emitida com sucesso!`);

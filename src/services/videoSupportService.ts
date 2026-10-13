@@ -359,7 +359,7 @@ export async function grantBonusMinutes(params: {
     amountAoa: 0,
     paymentMethod: 'cortesia_admin',
     reference: `BONUS-ADM-${Date.now().toString().slice(-6)}`,
-    notes: `Bónus de ${params.minutes} min atribuído pelo Admin (${params.adminEmail || 'admin@kivora.ao'}): ${params.reason}`,
+    notes: `Bónus de ${params.minutes} min atribuído pelo Admin (${params.adminEmail || 'kivora.angola@gmail.com'}): ${params.reason}`,
   });
   return result.account;
 }

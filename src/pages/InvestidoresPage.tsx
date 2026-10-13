@@ -160,7 +160,7 @@ export const InvestidoresPage: React.FC<InvestidoresPageProps> = ({
 
             <div className="pt-4 border-t border-white/10">
               <a
-                href={`mailto:${inv.contactEmail || settings.salesEmail || 'investidores@kivora.ao'}?subject=Contacto%20de%20Relações%20com%20Investidores%20-%20KIVORA`}
+                href={`mailto:${inv.contactEmail || settings.salesEmail || 'kivora.angola@gmail.com'}?subject=Contacto%20de%20Relações%20com%20Investidores%20-%20KIVORA`}
                 className="w-full btn-cta py-4 px-6 flex items-center justify-center gap-2 text-xs sm:text-sm"
               >
                 <Mail className="w-4 h-4" />

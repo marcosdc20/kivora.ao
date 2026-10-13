@@ -314,7 +314,7 @@ export const DEFAULT_INVESTOR_SETTINGS: InvestorSettings = {
   legalEntity: 'VISUAL SOFTWARE LIMITADA (NIF: 5417089123)',
   shareCapital: '150.000.000 Kz (Capital Integralmente Realizado)',
   auditedBy: 'Auditoria Fiscal Independente & Certificação AGT n.º 384/2024',
-  contactEmail: 'investidores@kivora.ao',
+  contactEmail: 'kivora.angola@gmail.com',
 };
 
 export const DEFAULT_VIDEO_PACKAGES: VideoCallPackage[] = [
@@ -426,8 +426,8 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
   phoneCommercial: '+244 974 855 494',
   email: KIVORA_INFO.email,
   supportEmail: KIVORA_INFO.supportEmail,
-  partnerEmail: 'parceiros@kivora.ao',
-  salesEmail: 'comercial@kivora.ao',
+  partnerEmail: 'kivora.angola@gmail.com',
+  salesEmail: 'kivora.angola@gmail.com',
   supportHours: 'Segunda a Sábado: 08h00 – 19h00',
   supportHoursSunday: 'Domingos e Feriados: Plantão para Urgências',
   address: KIVORA_INFO.address,
@@ -515,8 +515,8 @@ export const DEFAULT_SETTINGS: SystemCompanySettings = {
 
   // Notificações & Webhook
   webhookUrl: '',
-  notifyEmailLeads: 'comercial@kivora.ao',
-  notifyEmailPartners: 'parceiros@kivora.ao',
+  notifyEmailLeads: 'kivora.angola@gmail.com',
+  notifyEmailPartners: 'kivora.angola@gmail.com',
   whatsappDefaultMessage: 'Olá! Gostaria de saber mais sobre o KIVORA SOFT.',
 
   // Vídeos do YouTube (Configuráveis no Admin & Firebase)

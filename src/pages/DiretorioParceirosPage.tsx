@@ -72,7 +72,7 @@ export const DiretorioParceirosPage: React.FC<DiretorioParceirosPageProps> = ({ 
             responsible: d.responsible || d.nome_responsavel || d.nome || 'Direção Comercial',
             phone: phone,
             whatsapp: d.whatsapp || `https://wa.me/${cleanPhone}`,
-            email: d.email || 'parceiro@kivora.ao',
+            email: d.email || 'kivora.angola@gmail.com',
             specialties: Array.isArray(d.specialties) ? d.specialties : ['Instalação de Redes LAN', 'Faturação Certificada AGT', 'Suporte Técnico Local'],
             certifiedSince: d.certifiedSince || (d.createdAt ? new Date(d.createdAt).getFullYear().toString() : '2025'),
             address: d.address || d.endereco || `${d.provincia || 'Luanda'}, Angola`,

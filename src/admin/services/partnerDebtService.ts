@@ -384,7 +384,8 @@ export async function reconcilePartnerDebtsWithLicenses(
 
   for (const lic of licenses) {
     const licPartnerId = (lic.partner_id || '').trim().toLowerCase();
-    const licMatches = licPartnerId === clean || (lic.notes && lic.notes.toLowerCase().includes(clean));
+    const licPartnerCode = ((lic as any).partner_code || '').trim().toLowerCase();
+    const licMatches = licPartnerId === clean || licPartnerCode === clean || (lic.notes && lic.notes.toLowerCase().includes(clean));
 
     if (licMatches && !existingLicenseIds.has(lic.id.toLowerCase())) {
       const baseCost = pricingPlans.find((p) => p.plan_type === lic.plan_type)?.cost_aoa ?? 120000;

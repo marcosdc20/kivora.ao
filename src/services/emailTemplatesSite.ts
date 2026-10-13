@@ -4,10 +4,10 @@
  * Desenvolvido pela Visual Software, Lda
  */
 
-const LOGO_URL = 'https://kivora.visualsoftware.dev/logo.png';
+const LOGO_URL = 'https://kivora.visualsoftware.dev/imagens/logo_kivora.png';
 const PORTAL_URL = 'https://kivora.visualsoftware.dev/login';
 const DOWNLOAD_URL = 'https://kivora.visualsoftware.dev/download';
-const SUPPORT_EMAIL = 'suporte@kivora.ao';
+const SUPPORT_EMAIL = 'kivora.angola@gmail.com';
 const COMMERCIAL_EMAIL = 'kivora.angola@gmail.com';
 
 /**

@@ -266,25 +266,32 @@ export default async function handler(req: any, res: any) {
         lastTransporterKey = transporterKey;
       }
 
-      const domain = 'kivora.ao';
+      const isBulk = Boolean(body.isBulk || body.isNewsletter);
       const cleanHeaders: Record<string, string> = {
-        'X-Mailer': 'KIVORA Soft Mail Engine 2.1',
-        'List-Unsubscribe': `<mailto:suporte@${domain}?subject=unsubscribe>`,
-        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        'X-Mailer': 'KIVORA Soft Mail Engine 2.2',
+        'X-Entity-Ref-ID': `kvra-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        'X-Auto-Response-Suppress': 'All',
+        'Auto-Submitted': 'auto-generated',
       };
 
+      if (isBulk) {
+        cleanHeaders['List-Unsubscribe'] = '<mailto:kivora.angola@gmail.com?subject=unsubscribe>';
+        cleanHeaders['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click';
+        cleanHeaders['Precedence'] = 'bulk';
+      }
+
       const sendSingle = async (recipientEmail: string) => {
-        const uniqueMsgId = `<${Date.now()}.${Math.random().toString(36).substring(2, 9)}@${domain}>`;
-        return cachedTransporter.sendMail({
-          from: typeof from === 'string' && from.includes('@') ? from : `"${effectiveSenderName}" <${effectiveUser}>`,
+        const mailOptions: any = {
+          from: typeof from === 'string' && from.includes('@') && from.includes(effectiveUser) ? from : `"${effectiveSenderName}" <${effectiveUser}>`,
           to: recipientEmail,
           subject,
           html,
           text: plainText,
-          replyTo: (typeof body.replyTo === 'string' && body.replyTo.includes('@')) ? body.replyTo : effectiveUser,
-          messageId: uniqueMsgId,
+          replyTo: (typeof body.replyTo === 'string' && body.replyTo.includes('@')) ? body.replyTo : 'kivora.angola@gmail.com',
           headers: cleanHeaders,
-        });
+        };
+
+        return cachedTransporter.sendMail(mailOptions);
       };
 
       if (recipients.length === 1) {

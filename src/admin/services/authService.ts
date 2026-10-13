@@ -628,12 +628,28 @@ export async function loginUser(
     if (matchedLicense) {
       const lic = matchedLicense.data();
 
-      const hasLicCred = Boolean(lic.passwordHash || lic.password);
+      // AUTO-HEALING & SUPORTE AO PRIMEIRO ACESSO DO CLIENTE COM A CHAVE
+      // Se a licença estiver ativa e ainda não tiver senha gravada, permite autenticar com a palavra-passe inicial fornecida
+      if (!lic.password && !lic.passwordHash && !lic.tempPassword && lic.status === 'active' && cleanPass.length >= 4) {
+        const newHash = await hashKivoraPassword(cleanPass);
+        lic.passwordHash = newHash;
+        try {
+          await setDoc(matchedLicense.ref, {
+            passwordHash: newHash,
+            passwordSetAt: Date.now(),
+            updatedAt: Date.now(),
+          }, { merge: true });
+        } catch (e) {
+          console.warn('Erro ao auto-atribuir senha na licença do cliente:', e);
+        }
+      }
+
+      const hasLicCred = Boolean(lic.passwordHash || lic.password || lic.tempPassword);
       if (!hasLicCred) {
         recordFailedAttempt(cleanId);
         return {
           success: false,
-          error: 'A sua conta de cliente ainda não tem palavra-passe definida. Por favor contacte o seu revendedor Kivora ou o suporte para ativar o acesso ao portal.',
+          error: 'A sua conta de cliente ainda não tem palavra-passe definida. Defina uma palavra-passe com pelo menos 4 caracteres para o primeiro acesso.',
         };
       }
 

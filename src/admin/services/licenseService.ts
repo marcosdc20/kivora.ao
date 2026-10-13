@@ -215,7 +215,7 @@ export async function createFullAdminLicenseAtomic(
   }
 
   // 3. Criar Conta de Acesso do Cliente
-  const userEmail = cleanEmail || `${cleanNif.toLowerCase()}@kivora.ao`;
+  const userEmail = cleanEmail || `${cleanNif.toLowerCase()}@kivora.visualsoftware.dev`;
   const userId = userEmail.replace(/[^a-z0-9]/g, '_');
   const userRef = doc(db, 'users', userId);
   batch.set(userRef, cleanFirestoreData({
@@ -327,47 +327,74 @@ export function subscribeToLicenses(
   );
 }
 
-/** Assina apenas as licenças vinculadas a um parceiro específico (Segregação Multi-Tenant Resiliente) */
+/** Assina todas as licenças vinculadas a um parceiro específico (Multi-Chunk & Zero-Data-Loss) */
 export function subscribePartnerLicenses(
   partnerIdentifiers: string | string[],
   onUpdate: (licenses: KivoraLicense[]) => void,
   onError?: (error: any) => void
 ): () => void {
   const rawList = Array.isArray(partnerIdentifiers) ? partnerIdentifiers : [partnerIdentifiers];
-  const exacts = Array.from(new Set(
-    rawList
-      .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
-      .map((s) => s.trim())
-  ));
+  const uniqueSet = new Set<string>();
+  rawList.forEach((s) => {
+    if (typeof s === 'string' && s.trim().length > 0) {
+      const clean = s.trim();
+      uniqueSet.add(clean);
+      uniqueSet.add(clean.toUpperCase());
+      uniqueSet.add(clean.toLowerCase());
+    }
+  });
 
-  // Prioriza correspondências exatas em primeiro lugar para evitar descarte pelo slice
-  const variants = new Set<string>(exacts);
-  for (const s of exacts) {
-    variants.add(s.toUpperCase());
-    variants.add(s.toLowerCase());
-  }
-  const cleanList = Array.from(variants).slice(0, 30);
-
-  if (cleanList.length === 0) {
+  const allIds = Array.from(uniqueSet);
+  if (allIds.length === 0) {
     onUpdate([]);
     return () => {};
   }
 
-  const q = cleanList.length === 1
-    ? query(collection(db, 'licenses'), where('partner_id', '==', cleanList[0]))
-    : query(collection(db, 'licenses'), where('partner_id', 'in', cleanList));
+  // Divide em chunks seguros de no máximo 25 itens (o limite do Firestore 'in' é 30)
+  const chunkSize = 25;
+  const chunks: string[][] = [];
+  for (let i = 0; i < allIds.length; i += chunkSize) {
+    chunks.push(allIds.slice(i, i + chunkSize));
+  }
 
-  return onSnapshot(
-    q,
-    (snap) => {
-      const list: KivoraLicense[] = snap.docs.map((d) => mapDocToKivoraLicense(d.id, d.data()));
-      onUpdate(list);
-    },
-    (error) => {
-      console.warn('Erro ao escutar licenças do parceiro:', error);
-      if (onError) onError(error);
-    }
-  );
+  const chunkLicensesMap = new Map<number, KivoraLicense[]>();
+  const unsubs: Array<() => void> = [];
+
+  const emit = () => {
+    const unified = new Map<string, KivoraLicense>();
+    chunkLicensesMap.forEach((list) => {
+      list.forEach((lic) => {
+        unified.set(lic.id.toUpperCase(), lic);
+      });
+    });
+    const result = Array.from(unified.values());
+    result.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+    onUpdate(result);
+  };
+
+  chunks.forEach((chunk, index) => {
+    const q = chunk.length === 1
+      ? query(collection(db, 'licenses'), where('partner_id', '==', chunk[0]))
+      : query(collection(db, 'licenses'), where('partner_id', 'in', chunk));
+
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const list = snap.docs.map((d) => mapDocToKivoraLicense(d.id, d.data()));
+        chunkLicensesMap.set(index, list);
+        emit();
+      },
+      (error) => {
+        console.warn(`Erro no listener de licenças do parceiro (chunk ${index}):`, error);
+        if (onError) onError(error);
+      }
+    );
+    unsubs.push(unsub);
+  });
+
+  return () => {
+    unsubs.forEach((u) => u());
+  };
 }
 
 /** Assina todas as licenças pertencentes a um cliente por NIF, email ou chave (Segregação Multi-Tenant Estrita) */

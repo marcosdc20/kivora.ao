@@ -98,14 +98,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
             </h4>
             <ul className="space-y-2.5 text-slate-300">
               {[
+                { name: 'Área do Cliente (Portal da Empresa)', page: 'area-cliente' },
+                { name: 'Portal do Parceiro Revendedor', page: 'area-parceiro' },
                 { name: 'Certificação & Documentos', page: 'certificacao-documentos' },
                 { name: 'Sobre a Empresa', page: 'sobre' },
                 { name: 'Tabela de Preços & Planos', page: 'planos' },
                 { name: 'Validador de Licença Oficial', page: 'validar-licenca' },
                 { name: 'Guia Fiscal Decreto 71/25', page: 'guia-agt' },
                 { name: 'Calculadora Fiscal IRT & IVA', page: 'calculadora-fiscal' },
-                { name: 'Simulador de Poupança (ROI)', page: 'simulador-roi' },
-                { name: 'Casos de Sucesso em Angola', page: 'casos-sucesso' },
                 { name: 'Programa de Parceiros', page: 'parceiros' },
               ].map((item, idx) => (
                 <li key={idx}>
@@ -197,10 +197,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
                 <div>
                   <span className="text-[11px] text-slate-400 block font-medium">Email Comercial:</span>
                   <a
-                    href={`mailto:${settings.email || 'comercial@kivora.ao'}`}
+                    href={`mailto:${settings.email || 'kivora.angola@gmail.com'}`}
                     className="text-white hover:text-orange-400 transition-colors text-xs font-medium"
                   >
-                    {settings.email || 'comercial@kivora.ao'}
+                    {settings.email || 'kivora.angola@gmail.com'}
                   </a>
                 </div>
               </li>

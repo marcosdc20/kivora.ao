@@ -356,7 +356,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenDemoModal }) => {
             </div>
             <div>
               <h4 className="font-bold text-sm text-white">Email Corporativo</h4>
-              <p className="text-xs text-slate-300 mt-1">{settings.email || 'comercial@kivora.ao'}</p>
+              <p className="text-xs text-slate-300 mt-1">{settings.email || 'kivora.angola@gmail.com'}</p>
             </div>
           </div>
 

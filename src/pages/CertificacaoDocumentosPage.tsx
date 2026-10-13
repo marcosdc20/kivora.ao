@@ -348,7 +348,7 @@ export const CertificacaoDocumentosPage: React.FC<CertificacaoDocumentosPageProp
           </div>
           <div className="flex items-center gap-4 font-semibold text-slate-600">
             <span>Linha Direta: +244 974 855 494</span>
-            <span>Email: suporte@kivora.ao</span>
+            <span>Email: kivora.angola@gmail.com</span>
           </div>
         </div>
       </div>

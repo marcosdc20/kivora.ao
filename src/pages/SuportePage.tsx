@@ -57,7 +57,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
       const newTicket = await createSupportTicket({
         company_name: nome,
         nif: nif || undefined,
-        contact_email: email || `${telefone.replace(/[^0-9]/g, '')}@kivora.ao`,
+        contact_email: email || 'kivora.angola@gmail.com',
         contact_phone: telefone,
         subject: assunto || 'Pedido de Assistência Técnica',
         category: departamento,
@@ -289,7 +289,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
                 </p>
               </div>
               <div className="text-xs font-mono-num font-bold text-slate-950 pt-3 border-t border-slate-100 truncate">
-                {settings.supportEmail || 'suporte@kivora.ao'}
+                {settings.supportEmail || 'kivora.angola@gmail.com'}
               </div>
               <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
                 <Building2 className="w-3.5 h-3.5 text-slate-600 shrink-0" />
@@ -298,7 +298,7 @@ export const SuportePage: React.FC<SuportePageProps> = ({ initialSubject }) => {
             </div>
 
             <a
-              href={`mailto:${settings.supportEmail || 'suporte@kivora.ao'}`}
+              href={`mailto:${settings.supportEmail || 'kivora.angola@gmail.com'}`}
               className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-slate-900/20 cursor-pointer"
             >
               <Mail className="w-4 h-4" />

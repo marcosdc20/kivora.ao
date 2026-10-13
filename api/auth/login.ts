@@ -415,7 +415,137 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    // 3. Validação de resultado
+    // 3. Se não encontrou em /users nem em /partners, pesquisa na coleção /licenses
+    if (!foundUser) {
+      const isKeyFormat = cleanId.startsWith('kvra-') || cleanId.includes('-');
+      let licItem: any = null;
+
+      if (isKeyFormat) {
+        // Busca direta pelo ID da licença (KVRA-XXXX-XXXX-XXXX)
+        const licDocUrl = `${firestoreBase}/licenses/${cleanId.toUpperCase()}`;
+        const licDocRes = await fetch(licDocUrl, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (licDocRes.ok) {
+          const licDoc = await licDocRes.json();
+          if (licDoc.fields) {
+            licItem = {
+              id: cleanId.toUpperCase(),
+              fields: parseFirestoreFields(licDoc.fields),
+            };
+          }
+        }
+      }
+
+      if (!licItem) {
+        // Busca estruturada por nif ou client_email na coleção licenses
+        const licQueryBody = {
+          structuredQuery: {
+            from: [{ collectionId: 'licenses' }],
+            where: {
+              compositeFilter: {
+                op: 'OR',
+                filters: [
+                  { fieldFilter: { field: { fieldPath: 'nif' }, op: 'EQUAL', value: { stringValue: cleanId.toUpperCase() } } },
+                  { fieldFilter: { field: { fieldPath: 'client_email' }, op: 'EQUAL', value: { stringValue: cleanId } } },
+                  { fieldFilter: { field: { fieldPath: 'id' }, op: 'EQUAL', value: { stringValue: cleanId.toUpperCase() } } },
+                ],
+              },
+            },
+            limit: 1,
+          },
+        };
+
+        const licRes = await fetch(`${firestoreBase}:runQuery`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(licQueryBody),
+        });
+
+        if (licRes.ok) {
+          const lData = await licRes.json();
+          if (Array.isArray(lData) && lData[0]?.document?.fields) {
+            const docId = lData[0].document.name.split('/').pop() || '';
+            licItem = {
+              id: docId,
+              fields: parseFirestoreFields(lData[0].document.fields),
+            };
+          }
+        }
+      }
+
+      if (licItem && licItem.fields) {
+        const lf = licItem.fields;
+        const licStatus = lf.status || 'active';
+        if (licStatus === 'revoked' || licStatus === 'suspended') {
+          return res.status(403).json({
+            success: false,
+            error: 'Esta licença foi suspensa ou revogada. Contacte o suporte Kivora.',
+          });
+        }
+
+        const hasAnyCred = Boolean(lf.passwordHash || lf.password || lf.tempPassword);
+
+        // Se tem credencial gravada, verifica se coincide
+        if (hasAnyCred) {
+          if (verifyPasswordMatch(lf, cleanPass)) {
+            foundUser = {
+              id: licItem.id,
+              data: {
+                ...lf,
+                role: 'cliente',
+                nome: lf.company_name || 'Empresa Cliente',
+                companyName: lf.company_name,
+                licenseKey: licItem.id,
+                nif: lf.nif,
+                email: lf.client_email || cleanId,
+              },
+              isPartner: false,
+            };
+          }
+        } else {
+          // PRIMEIRO ACESSO COM A CHAVE DE LICENÇA:
+          // Se a licença ainda não tinha senha gravada, mas o cliente forneceu a sua senha no login,
+          // gravamos a senha na licença e autorizamos o acesso imediatamente!
+          if (cleanPass.length >= 4) {
+            const newHash = hashKivoraPassword(cleanPass);
+            foundUser = {
+              id: licItem.id,
+              data: {
+                ...lf,
+                role: 'cliente',
+                nome: lf.company_name || 'Empresa Cliente',
+                companyName: lf.company_name,
+                licenseKey: licItem.id,
+                nif: lf.nif,
+                email: lf.client_email || cleanId,
+              },
+              isPartner: false,
+            };
+
+            // Atualiza a licença em background com o novo hash
+            fetch(`${firestoreBase}/licenses/${licItem.id}?updateMask.fieldPaths=passwordHash&updateMask.fieldPaths=passwordSetAt`, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`,
+              },
+              body: JSON.stringify({
+                fields: {
+                  passwordHash: { stringValue: newHash },
+                  passwordSetAt: { integerValue: String(Date.now()) },
+                },
+              }),
+            }).catch(console.warn);
+          }
+        }
+      }
+    }
+
+    // 4. Validação de resultado
     if (!foundUser) {
       return res.status(401).json({
         success: false,

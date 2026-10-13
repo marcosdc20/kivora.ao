@@ -8,7 +8,7 @@ import {
   X
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
-import { db } from '../lib/firebase';
+import { db, auth } from '../lib/firebase';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase/firestore';
 import {
   SupportTicket, createSupportTicket, sendTicketMessage, updateTicketStatus
@@ -249,7 +249,7 @@ export const AdminSuporte: React.FC = () => {
       id: `msg_${Date.now()}`,
       sender_name: 'Engenharia Kivora (Admin)',
       sender_role: 'admin' as const,
-      sender_email: 'admin@kivora.ao',
+      sender_email: auth.currentUser?.email || 'kivora.angola@gmail.com',
       text: replyText,
       timestamp: Date.now(),
     };
@@ -271,7 +271,7 @@ export const AdminSuporte: React.FC = () => {
       await sendTicketMessage(selectedTicket.id, {
         sender_name: 'Engenharia Kivora (Admin)',
         sender_role: 'admin',
-        sender_email: 'admin@kivora.ao',
+        sender_email: auth.currentUser?.email || 'kivora.angola@gmail.com',
         text: replyText,
       });
     } catch (err: any) {

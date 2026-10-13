@@ -1366,7 +1366,7 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                     : 'Nenhuma candidatura encontrada nesta categoria.'}
                 </p>
                 <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                  Novas solicitações de parceria preenchidas no site em <strong>kivora.ao/#parceiros</strong> aparecerão automaticamente aqui em tempo real.
+                  Novas solicitações de parceria preenchidas no site em <strong>kivora.visualsoftware.dev/#parceiros</strong> aparecerão automaticamente aqui em tempo real.
                 </p>
               </div>
             ) : (

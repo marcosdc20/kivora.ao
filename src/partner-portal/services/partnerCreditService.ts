@@ -19,6 +19,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { generateLicenseKey, calculateExpiresAt, getPlanLabel } from '../../admin/services/licenseService';
+import { generateTempPassword, hashKivoraPassword } from '../../admin/services/authService';
 import { cleanFirestoreData } from '../../lib/firestoreUtils';
 
 export interface IssueInstantLicenseParams {
@@ -41,6 +42,7 @@ export interface IssueInstantLicenseResponse {
   licenseId?: string;
   expiresAt?: number;
   isProvisional?: boolean;
+  tempPassword?: string;
   error?: string;
   requiresManualApproval?: boolean;
 }
@@ -122,15 +124,21 @@ export async function issueInstantPartnerLicense(
       expiresAt = normalExpires ?? (now + 36500 * 86_400_000);
     }
 
+    const cleanEmail = (clientEmail || '').trim().toLowerCase();
+    const cleanNif = nif.trim().toUpperCase();
+    const cleanCompany = companyName.trim();
+    const tempPassword = generateTempPassword();
+    const passwordHash = await hashKivoraPassword(tempPassword);
+
     const batch = writeBatch(db);
 
-    // 1. Gravar Licença em /licenses (usando o partnerDocId validado no Firestore)
+    // 1. Gravar Licença em /licenses (com credencial para o portal do cliente e partner_code explícito)
     const licenseRef = doc(db, 'licenses', key);
     const licensePayload = cleanFirestoreData({
       id: key,
-      company_name: companyName.trim(),
-      nif: nif.trim(),
-      client_email: (clientEmail || '').trim().toLowerCase(),
+      company_name: cleanCompany,
+      nif: cleanNif,
+      client_email: cleanEmail,
       plan_type: planType,
       status: 'active',
       hardware_id: null,
@@ -139,10 +147,15 @@ export async function issueInstantPartnerLicense(
       price_aoa: priceAoa,
       notes: `Emitida a Crédito pelo Parceiro ${cleanPartnerCode}.`,
       partner_id: partnerDocId,
+      partner_code: cleanPartnerCode,
+      partner_name: partnerName || partnerData.name || cleanPartnerCode,
       activated_at: null,
       extra_seats: extraSeats,
       is_provisional: Boolean(isProvisional),
       max_users: 1 + extraSeats,
+      passwordHash,
+      tempPassword,
+      passwordSetAt: now,
       _created_at_ts: Timestamp.fromMillis(now),
       _expires_at_ts: expiresAt ? Timestamp.fromMillis(expiresAt) : null,
     });
@@ -154,9 +167,10 @@ export async function issueInstantPartnerLicense(
     const debtPayload = cleanFirestoreData({
       id: debtId,
       partner_id: partnerDocId,
+      partner_code: cleanPartnerCode,
       partner_name: partnerName || partnerData.name || cleanPartnerCode,
       license_id: key,
-      company_name: companyName.trim(),
+      company_name: cleanCompany,
       plan_type: planType,
       cost_aoa: costAoa,
       client_price_aoa: priceAoa,
@@ -169,22 +183,43 @@ export async function issueInstantPartnerLicense(
     batch.set(debtRef, debtPayload);
 
     // 3. Registar / Atualizar Empresa Cliente em /companies no MESMO batch atómico único
-    const cleanNif = nif.trim().toUpperCase();
     const companyRef = doc(db, 'companies', cleanNif);
     batch.set(companyRef, cleanFirestoreData({
       id: cleanNif,
-      name: companyName.trim(),
+      name: cleanCompany,
       nif: cleanNif,
-      email: (clientEmail || '').trim().toLowerCase(),
+      email: cleanEmail,
       phone: '',
       address: `Parceiro: ${partnerDocId}`,
       partner_id: partnerDocId,
+      partner_code: cleanPartnerCode,
       status: 'active',
       createdAt: now,
       updated_at: now,
     }), { merge: true });
 
-    // 4. Registar Fatura de Subscrição Oficial em /subscription_invoices
+    // 4. Provisionar Conta de Acesso do Cliente em /users para o Portal do Cliente
+    const userDocId = cleanEmail
+      ? cleanEmail.replace(/[^a-z0-9]/g, '_')
+      : `cli_${cleanNif.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+    const userRef = doc(db, 'users', userDocId);
+    batch.set(userRef, cleanFirestoreData({
+      email: cleanEmail,
+      nome: cleanCompany,
+      nif: cleanNif,
+      role: 'cliente',
+      status: 'active',
+      licenseKey: key,
+      partner_id: partnerDocId,
+      partnerCode: cleanPartnerCode,
+      passwordHash,
+      tempPassword,
+      passwordSetAt: now,
+      createdAt: now,
+      updatedAt: now,
+    }), { merge: true });
+
+    // 5. Registar Fatura de Subscrição Oficial em /subscription_invoices
     const year = new Date(now).getFullYear();
     const invoiceDocId = `INV-PARTNER-${year}-${key.slice(-6).toUpperCase()}`;
     const invoiceRef = doc(db, 'subscription_invoices', invoiceDocId);
@@ -193,7 +228,7 @@ export async function issueInstantPartnerLicense(
       invoice_number: `FT KVRA/${year}/${key.slice(-5).toUpperCase()}`,
       licenseId: key,
       license_id: key,
-      company_name: companyName.trim(),
+      company_name: cleanCompany,
       nif: cleanNif,
       plan_label: getPlanLabel(planType),
       amount: priceAoa,
@@ -203,6 +238,7 @@ export async function issueInstantPartnerLicense(
       issue_date: new Date(now).toISOString().split('T')[0],
       due_date: new Date(expiresAt || (now + 30 * 86400000)).toISOString().split('T')[0],
       partner_id: partnerDocId,
+      partner_code: cleanPartnerCode,
       partner_name: partnerName || partnerData.name || cleanPartnerCode,
       created_at: now,
       updated_at: now,
@@ -217,6 +253,7 @@ export async function issueInstantPartnerLicense(
       licenseId: key,
       expiresAt,
       isProvisional: Boolean(isProvisional),
+      tempPassword,
     };
   } catch (err: any) {
     console.error('Erro na emissão direta no Firestore, a tentar fallback pela API:', err);

@@ -73,7 +73,7 @@ CONHECIMENTO ESSENCIAL DO KIVORA SOFT:
 
 6. CONTACTOS & LOCALIZAÇÃO:
    - WhatsApp / Telefone Comercial: +244 947 888 333
-   - E-mail Oficial: suporte@kivora.ao / comercial@kivora.ao
+   - E-mail Oficial: kivora.angola@gmail.com
    - Sede: Luanda, Angola.
 
 DIRETRIZES DE RESPOSTA:
@@ -543,8 +543,7 @@ Para se candidatar, basta aceder à secção **"Parceiros"** no menu do site ou 
     return `Pode entrar em contacto direto com a nossa equipa através dos seguintes canais:
 
 • **WhatsApp / Linha Comercial:** +244 947 888 333
-• **E-mail de Apoio ao Cliente:** suporte@kivora.ao
-• **E-mail Comercial:** comercial@kivora.ao
+• **E-mail Oficial:** kivora.angola@gmail.com
 • **Localização:** Luanda, Angola
 
 Estamos disponíveis de segunda a sexta das 08h às 18h e sábados das 08h às 13h.`;
