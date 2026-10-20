@@ -440,7 +440,7 @@ export const Header: React.FC<HeaderProps> = ({
                     onNavigatePage('login');
                   }
                 }}
-                className={`whitespace-nowrap transition-all text-xs font-bold px-4 py-2 rounded-full flex items-center gap-1.5 cursor-pointer shadow-2xs hover:-translate-y-0.5 ${
+                className={`whitespace-nowrap transition-all text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-2xs hover:-translate-y-0.5 ${
                   activeDropdown === 'portal_dropdown'
                     ? 'bg-orange-50 text-[#FF6500] border border-orange-200'
                     : 'bg-slate-100/80 hover:bg-slate-200 text-slate-800 border border-slate-200/90'
@@ -509,7 +509,7 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={() => handleNavClick('download')}
-              className="whitespace-nowrap bg-[#FF6500] hover:bg-[#EB5B00] active:scale-[0.98] text-white text-xs font-bold px-5 py-2 rounded-full transition-all flex items-center gap-1.5 shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 hover:-translate-y-0.5 cursor-pointer"
+              className="whitespace-nowrap bg-[#FF6500] hover:bg-[#EB5B00] active:scale-[0.98] text-white text-xs font-bold px-5 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-xs hover:shadow-sm hover:-translate-y-0.5 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Baixar KIVORA</span>

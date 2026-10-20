@@ -6,7 +6,7 @@ import {
   ArrowRight, Download, Wifi,
   Check, ShieldCheck,
   Phone,
-  FileCheck, ShoppingCart, Boxes, Users,
+  Boxes, Users,
   HardDrive, ChevronRight,
   Award, CheckCircle2
 } from 'lucide-react';
@@ -87,92 +87,108 @@ export const HomePage: React.FC<HomePageProps> = ({
           2. FAIXA DE DESTAQUE TRIPLA (3-PART OVERLAPPING STRIP — EXECUTIVO & ESPAÇOSO)
           Card 1 (Slate Escuro), Card 2 (Laranja Vibrante), Card 3 (Branco Executivo)
           ══════════════════════════════════════════════════════════════════ */}
-      <section id="solucoes-rapidas" className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 sm:-mt-14 mb-14">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5" data-stagger>
+      {/* ══════════════════════════════════════════════════════════════════
+          2. FAIXA DE DESTAQUE EXECUTIVA (COHESIVE COMMAND STRIP — ALTO REFINO & TACTILIDADE)
+          Substituição das 3 caixas destoantes por um strip executivo unificado
+          ══════════════════════════════════════════════════════════════════ */}
+      <section id="solucoes-rapidas" className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 sm:-mt-12 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5" data-stagger>
           
-          {/* Card 1: Slate Escuro (#0B1528) */}
-          <div data-reveal className="bg-[#0B1528] rounded-3xl p-6 sm:p-7 shadow-xl border border-slate-800 text-white flex items-center justify-between gap-5 group hover:border-orange-500/40 transition-all">
+          {/* Card 1: Tradição & Solidez em Angola */}
+          <div
+            data-reveal
+            className="bg-[#0A1322] rounded-2xl p-6 shadow-xl border border-slate-800 text-white flex items-center justify-between gap-4 group hover:border-slate-700 transition-all duration-200"
+          >
             <div className="flex items-center gap-4">
-              <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display tracking-tight shrink-0">
+              <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-mono-num tracking-tight shrink-0">
                 12+
               </span>
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 block font-display">
-                  Tradição & Solidez
+                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 block">
+                  Experiência Comprovada
                 </span>
-                <h3 className="text-base sm:text-lg font-black text-white font-display leading-tight">
-                  Anos em Angola
+                <h3 className="text-base sm:text-lg font-extrabold text-white font-display leading-tight">
+                  Anos no Mercado Angolano
                 </h3>
                 <span className="text-xs text-slate-300 font-medium block mt-0.5">
-                  +2.800 empresas ativas
+                  +2.800 empresas e postos ativos
                 </span>
               </div>
             </div>
-            <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-orange-400 flex items-center justify-center shrink-0 shadow-sm group-hover:bg-[#FF6500] group-hover:text-white transition-all">
+            <div className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/10 text-orange-400 flex items-center justify-center shrink-0">
               <Award className="w-5 h-5" />
             </div>
           </div>
 
-          {/* Card 2: Laranja Vibrante (#FF6500) */}
+          {/* Card 2: Apoio e Diagnóstico Fiscal */}
           <div
             data-reveal
             onClick={() => onOpenDemoModal('Diagnóstico Fiscal Gratuito')}
-            className="bg-gradient-to-r from-[#FF6500] to-[#EB5B00] rounded-3xl p-6 sm:p-7 shadow-xl shadow-orange-500/25 text-white flex items-center justify-between gap-4 cursor-pointer hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all group"
+            className="bg-[#0A1322] rounded-2xl p-6 shadow-xl border border-slate-800 text-white flex items-center justify-between gap-4 cursor-pointer hover:border-orange-500/50 hover:bg-[#0D1829] transition-all duration-200 group"
           >
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full inline-block mb-1 font-display">
-                Apoio Gratuito
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-orange-400 block">
+                Transição Decreto 71/25
               </span>
-              <h3 className="text-base sm:text-lg font-black text-white font-display leading-tight">
-                Precisa de Apoio Fiscal?
+              <h3 className="text-base sm:text-lg font-extrabold text-white font-display leading-tight group-hover:text-orange-400 transition-colors">
+                Precisa de Diagnóstico Fiscal?
               </h3>
-              <span className="text-xs text-white/90 font-medium block mt-0.5">
-                Diagnóstico & Demonstração VIP
+              <span className="text-xs text-slate-300 font-medium block mt-0.5">
+                Demonstração VIP & apoio presencial em Luanda
               </span>
             </div>
-            <div className="w-11 h-11 rounded-full bg-white text-[#FF6500] flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-[#FF6500] text-white flex items-center justify-center shrink-0 group-hover:bg-[#EB5B00] transition-colors shadow-sm">
               <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
             </div>
           </div>
 
-          {/* Card 3: Branco Executivo */}
-          <div data-reveal className="bg-white rounded-3xl p-6 sm:p-7 shadow-xl border border-slate-200/90 text-slate-900 flex items-center justify-between gap-4 group hover:border-orange-300 transition-all">
+          {/* Card 3: Linha Direta Luanda */}
+          <div
+            data-reveal
+            className="bg-[#0A1322] rounded-2xl p-6 shadow-xl border border-slate-800 text-white flex items-center justify-between gap-4 group hover:border-slate-700 transition-all duration-200"
+          >
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block font-display">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 block">
                 Atendimento Imediato
               </span>
               <a
                 href={settings.whatsappUrl || 'https://wa.me/244974855494'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-lg sm:text-xl font-black font-mono text-slate-950 hover:text-[#FF6500] block tracking-tight transition-colors"
+                className="text-lg sm:text-xl font-bold font-mono-num text-white hover:text-orange-400 block tracking-tight transition-colors"
               >
                 {settings.phoneDisplay || '+244 974 855 494'}
               </a>
-              <span className="text-xs text-slate-500 font-medium block mt-0.5">
-                Linha Direta Luanda • Seg - Sáb
+              <span className="text-xs text-slate-300 font-medium block mt-0.5">
+                Linha Direta Luanda • Seg a Sáb 08h-18h
               </span>
             </div>
-            <div className="w-11 h-11 rounded-full bg-[#0B1528] text-amber-400 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 group-hover:bg-[#FF6500] group-hover:text-white transition-all">
+            <a
+              href={settings.whatsappUrl || 'https://wa.me/244974855494'}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Contactar Linha Direta via WhatsApp"
+              className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/10 text-emerald-400 hover:bg-emerald-500 hover:text-white flex items-center justify-center shrink-0 transition-all"
+            >
               <Phone className="w-5 h-5" />
-            </div>
+            </a>
           </div>
 
         </div>
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          3. LOGOTIPOS DE PARCEIROS & CLIENTES (MARQUEE INFINITO)
+          3. LOGOTIPOS DE PARCEIROS & CLIENTES (MARQUEE SÓBRIO & AUTORITÁRIO)
           ══════════════════════════════════════════════════════════════════ */}
-      <section data-reveal className="py-7 bg-slate-50/70 border-y border-slate-200/60 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-slate-500 font-display flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#FF6500] shrink-0" />
+      <section data-reveal className="py-6 bg-slate-50/80 border-y border-slate-200/70 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
             <span className="truncate">Empresas e Parceiros Integrados ao Ecossistema KIVORA</span>
           </span>
           <button
             onClick={() => onNavigatePage('parceiros')}
-            className="text-xs font-semibold text-[#FF6500] hover:text-[#EB5B00] flex items-center gap-1 cursor-pointer transition-colors shrink-0 self-start sm:self-auto"
+            className="text-xs font-bold text-[#FF6500] hover:text-[#EB5B00] flex items-center gap-1 cursor-pointer transition-colors shrink-0 self-start sm:self-auto"
           >
             <span>Ver Rede de Parceiros</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -180,27 +196,27 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         <div className="relative w-full overflow-hidden">
-          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none" />
 
-          <div className="animate-marquee flex items-center gap-6 py-2">
+          <div className="animate-marquee flex items-center gap-5 py-2">
             {[...effectivePartnerLogos, ...effectivePartnerLogos].map((partner, idx) => (
               <div
                 key={`${partner.id}-${idx}`}
-                className="flex items-center gap-3 px-4 py-2.5 bg-white rounded-2xl border border-slate-200/80 shadow-xs shrink-0 select-none hover:border-orange-300 transition-colors"
+                className="flex items-center gap-3 px-4 py-2.5 bg-white rounded-xl border border-slate-200/70 shadow-xs shrink-0 select-none hover:border-slate-300 transition-colors"
               >
                 {partner.logoUrl ? (
                   <img
                     src={partner.logoUrl}
                     alt={partner.name}
-                    className="h-7 w-auto object-contain rounded"
+                    className="h-6 w-auto object-contain rounded"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-lg bg-orange-50 text-[#FF6500] flex items-center justify-center font-bold text-xs">
+                  <div className="w-6 h-6 rounded bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs font-mono">
                     {partner.name.substring(0, 2).toUpperCase()}
                   </div>
                 )}
-                <span className="text-xs font-bold text-slate-800">
+                <span className="text-xs font-semibold text-slate-700">
                   {partner.name}
                 </span>
               </div>
@@ -213,10 +229,14 @@ export const HomePage: React.FC<HomePageProps> = ({
           4. SOBRE A KIVORA SOFT (ABOUT SECTION — EXATAMENTE COMO NA IMAGEM 4)
           Layout Dividido: Imagem com Badge Flutuante + 2 Cards Circulares + Checklist
           ══════════════════════════════════════════════════════════════════ */}
+      {/* ══════════════════════════════════════════════════════════════════
+          4. SOBRE A KIVORA SOFT (ABOUT SECTION — EDITORIAL & AUTORITÁRIO)
+          Layout Dividido: Imagem com Selo Institucional + 2 Pilares Executivos + Checklist
+          ══════════════════════════════════════════════════════════════════ */}
       <section id="sobre-kivora" className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           
-          {/* Coluna Esquerda: Imagem com Badge Flutuante */}
+          {/* Coluna Esquerda: Imagem com Placa Oficial de Certificação */}
           <div data-reveal data-reveal-dir="left" className="lg:col-span-6 relative">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200">
               <img
@@ -227,30 +247,29 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
             </div>
 
-            {/* Badge Flutuante no Canto Inferior Direito (Padrão Imagem 4) */}
-            <div className="absolute -bottom-6 right-2 sm:-bottom-8 sm:right-6 bg-[#0B1528] text-white p-4 sm:p-6 rounded-3xl border border-slate-800 shadow-2xl max-w-[240px] sm:max-w-[280px]">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#FF6500] to-[#FFA726] text-white flex items-center justify-center font-black text-sm shadow-md">
-                  100%
+            {/* Placa Oficial de Certificação AGT no Canto Inferior Direito (Anti-Slop: Design sóbrio & institucional) */}
+            <div className="absolute -bottom-6 right-2 sm:-bottom-8 sm:right-6 bg-[#0A1322] text-white p-5 sm:p-6 rounded-2xl border border-slate-800 shadow-2xl max-w-[260px] sm:max-w-[300px]">
+              <div className="flex items-center gap-3 mb-2.5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
+                  <ShieldCheck className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-white block">Certificação AGT</span>
-                  <span className="text-[10px] text-orange-400 font-mono">FE/387/AGT/2026</span>
+                  <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 block">Certificação Oficial</span>
+                  <span className="text-xs font-bold text-white font-mono-num">FE/387/AGT/2026</span>
                 </div>
               </div>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Decreto Presidencial n.º 71/25 & Código do IVA plenamente integrados.
+              <p className="text-[11px] text-slate-300 leading-relaxed font-sans">
+                Decreto Presidencial n.º 71/25 & Código do IVA plenamente em vigor e auditados.
               </p>
             </div>
           </div>
 
-          {/* Coluna Direita: Informações & 2 Cards com Ícones Circulares */}
+          {/* Coluna Direita: Informações & 2 Pilares Estruturados */}
           <div data-reveal data-reveal-dir="right" className="lg:col-span-6 space-y-6">
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
-                <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-                <span>Sobre a Kivora Soft</span>
-              </div>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#FF6500] block">
+                01 // Sobre a Kivora Soft
+              </span>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display leading-[1.12]">
                 A Escolha de Confiança em Gestão Empresarial para Angola
               </h2>
@@ -259,35 +278,35 @@ export const HomePage: React.FC<HomePageProps> = ({
               </p>
             </div>
 
-            {/* 2 Cards de Destaque com Ícones Circulares Laranja (Padrão Imagens 1 e 4) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2" data-stagger>
-              <div data-reveal className="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 space-y-2 hover:border-orange-300 transition-colors">
-                <div className="w-11 h-11 rounded-full bg-orange-50 border border-orange-200/60 text-[#FF6500] flex items-center justify-center font-bold shadow-xs">
-                  <Wifi className="w-5 h-5" />
+            {/* 2 Pilares Executivos (Anti-Slop: Sem caixas redondas com gradientes artificiais) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1" data-stagger>
+              <div data-reveal className="bg-slate-50/90 rounded-2xl p-5 border border-slate-200/80 space-y-2 hover:border-slate-300 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold shadow-xs">
+                  <Wifi className="w-4 h-4 text-orange-400" />
                 </div>
                 <h4 className="text-sm font-bold text-slate-950 font-display">
-                  Estratégia & Faturação Offline
+                  Autonomia Total Offline
                 </h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Base de dados local SQLite. A sua loja continua a faturar e atender clientes sem qualquer interrupção.
+                  Base de dados local SQLite. A sua loja fatura e atende clientes sem depender de fibra ótica ou rede móvel.
                 </p>
               </div>
 
-              <div data-reveal className="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 space-y-2 hover:border-orange-300 transition-colors">
-                <div className="w-11 h-11 rounded-full bg-orange-50 border border-orange-200/60 text-[#FF6500] flex items-center justify-center font-bold shadow-xs">
-                  <ShieldCheck className="w-5 h-5" />
+              <div data-reveal className="bg-slate-50/90 rounded-2xl p-5 border border-slate-200/80 space-y-2 hover:border-slate-300 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold shadow-xs">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
                 </div>
                 <h4 className="text-sm font-bold text-slate-950 font-display">
-                  Conformidade & Metas AGT
+                  Conformidade AGT DP 71/25
                 </h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Assinatura digital RSA-SHA256 em cada documento fiscal e exportação mensal de ficheiro SAF-T (AO) 100% limpo.
+                  Assinatura digital RSA-SHA256 em cada documento fiscal e exportação mensal de ficheiro SAF-T AO sem falhas.
                 </p>
               </div>
             </div>
 
             {/* Checklist de 4 Pontos */}
-            <div className="space-y-2.5 pt-2 text-xs text-slate-700">
+            <div className="space-y-2.5 pt-1 text-xs text-slate-700">
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[#FF6500] shrink-0" />
                 <span>Instalação presencial rápida de postos de trabalho e servidores LAN em Luanda.</span>
@@ -306,18 +325,18 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
             </div>
 
-            {/* Botões de Ação Redondos */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 pt-3">
+            {/* Botões de Ação */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 pt-2">
               <button
                 onClick={() => onNavigatePage('sobre')}
-                className="w-full sm:w-auto justify-center bg-[#0B1528] hover:bg-slate-800 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-full transition-all cursor-pointer shadow-sm hover:shadow-md active:scale-98 flex items-center gap-2"
+                className="w-full sm:w-auto justify-center bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-md active:scale-98 flex items-center gap-2"
               >
                 <span>Conhecer a Nossa História</span>
                 <ArrowRight className="w-4 h-4 text-orange-400" />
               </button>
               <button
                 onClick={() => onOpenDemoModal('Demonstração Sobre Kivora')}
-                className="w-full sm:w-auto text-center bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs sm:text-sm px-7 py-3.5 rounded-full transition-all cursor-pointer shadow-xs active:scale-98"
+                className="w-full sm:w-auto text-center bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl transition-all cursor-pointer shadow-xs active:scale-98"
               >
                 Solicitar Apresentação
               </button>
@@ -329,72 +348,103 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          5. O QUE FAZEMOS? (WHAT WE DO? — EXATAMENTE COMO NAS IMAGENS 1 E 4)
-          6 Cards com Ícones Circulares Gradiente Âmbar/Laranja + Barra CTA
+          5. MÓDULOS E SOLUÇÕES CENTRAIS (ANTI-SLOP: GRID ASSIMÉTRICO E SUBSTANTIVO)
+          Substituição dos 6 cartões repetitivos por uma matriz editorial de alta densidade
           ══════════════════════════════════════════════════════════════════ */}
-      <section id="o-que-fazemos" className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <section id="o-que-fazemos" className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         
-        {/* Marcador Superior Laranja & Título Padrão XTRA */}
-        <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
-          <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
-            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-            <span>O Que Fazemos?</span>
-            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
+        {/* Cabeçalho Editorial com Hierarquia Real */}
+        <div data-reveal className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
+          <div className="max-w-2xl">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#FF6500] block mb-2">
+              02 // Soluções Centrais
+            </span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
+              Tecnologia Feita para o Ritmo Comercial de Angola
+            </h2>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
-            Soluções Integradas de Faturação & Gestão
-          </h2>
-          <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-            Fornecemos tecnologia de ponta desenvolvida especificamente para a realidade de Angola, unindo conformidade fiscal absoluta com facilidade de operação.
+          <p className="text-sm sm:text-base text-slate-600 max-w-md font-normal leading-relaxed">
+            Arquitetura modular de alta performance: da frente de caixa ao fecho contabilístico, com conformidade fiscal estrita perante a AGT e operação 100% offline.
           </p>
         </div>
 
-        {/* Grade 3x2 com os 6 Cartões com Ícones Circulares Gradiente Laranja */}
-        <div data-stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Grade Assimétrica de Módulos */}
+        <div data-stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           
-          {/* Card 1: Faturação Eletrónica AGT */}
+          {/* Card Principal de Destaque (Ocupa 2 Colunas em Telas Grandes): Faturação Eletrónica & POS */}
           <div
             data-reveal
             onClick={() => onNavigatePage('faturacao')}
-            className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
+            className="md:col-span-2 bg-[#0A1322] rounded-3xl p-8 sm:p-10 border border-slate-800 shadow-xl text-white flex flex-col justify-between group cursor-pointer hover:border-slate-700 transition-all duration-300 relative overflow-hidden"
           >
-            <div>
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-[#FF6500] text-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform">
-                <FileCheck className="w-8 h-8" strokeWidth={2} />
+            <div className="relative z-10 space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-white/[0.08] border border-white/10 text-orange-400 text-xs font-mono font-semibold">
+                  <span>Módulo Principal • Certificação Oficial</span>
+                </div>
+                <span className="text-xs font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
+                  FE/387/AGT/2026
+                </span>
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2 font-display group-hover:text-[#FF6500] transition-colors">
-                Faturação Eletrónica AGT
-              </h3>
-              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-normal mb-4">
-                Emissão certificada de Faturas (FT), Faturas-Recibo (FR), Notas de Crédito (NC) e Débito (ND) com chave RS256, QR Code fiscal e ficheiro SAF-T AO.
-              </p>
+
+              <div className="space-y-3">
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-white font-display tracking-tight group-hover:text-orange-400 transition-colors">
+                  Faturação Eletrónica AGT & Ponto de Venda POS
+                </h3>
+                <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl font-normal">
+                  Emissão em menos de 3 segundos de Faturas (FT), Faturas-Recibo (FR), Guias de Transporte e Notas de Crédito com assinatura criptográfica RSA-SHA256, QR Code fiscal da AGT e fecho cego de caixa Z. Operação contínua e segura mesmo em caso de falha de internet.
+                </p>
+              </div>
+
+              {/* Pílulas de Funcionalidades Reais */}
+              <div className="flex flex-wrap gap-2.5 pt-2 text-xs text-slate-300">
+                <span className="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/10">
+                  Assinatura Digital RSA-SHA256
+                </span>
+                <span className="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/10">
+                  Talões Térmicos 80mm e 58mm
+                </span>
+                <span className="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/10">
+                  Gestão de Sangrias & Gavetas RJ11
+                </span>
+                <span className="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/10">
+                  Ficheiro SAF-T (AO) sem divergências
+                </span>
+              </div>
             </div>
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-bold text-[#FF6500] gap-1 group-hover:gap-2 transition-all">
-              <span>Saber mais</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+
+            <div className="relative z-10 pt-8 mt-6 border-t border-slate-800/90 flex items-center justify-between text-xs font-bold text-orange-400">
+              <span className="text-slate-400 font-normal">Conformidade obrigatória com o Decreto Presidencial 71/25</span>
+              <div className="flex items-center gap-1.5 group-hover:translate-x-1 transition-transform">
+                <span>Explorar Faturação & POS</span>
+                <ArrowRight className="w-4 h-4" />
+              </div>
             </div>
           </div>
 
-          {/* Card 2: Ponto de Venda & POS Rápido */}
+          {/* Card 2: Hardware Comercial POS */}
           <div
             data-reveal
-            onClick={() => onNavigatePage('pos')}
-            className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
+            onClick={() => onNavigatePage('hardware')}
+            className="bg-white rounded-3xl p-7 border border-slate-200/90 shadow-xs hover:shadow-lg hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group cursor-pointer"
           >
-            <div>
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-[#FF6500] text-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform">
-                <ShoppingCart className="w-8 h-8" strokeWidth={2} />
+            <div className="space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-900 flex items-center justify-center font-bold">
+                <HardDrive className="w-5 h-5 text-[#FF6500]" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2 font-display group-hover:text-[#FF6500] transition-colors">
-                Ponto de Venda (POS Rápido)
+              <h3 className="text-lg font-bold text-slate-950 font-display group-hover:text-[#FF6500] transition-colors">
+                Hardware & Terminais POS
               </h3>
-              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-normal mb-4">
-                Atendimento de balcão veloz em menos de 3 segundos, impressão em talões de 80mm/58mm, fecho de caixa cego, sangrias e gavetas RJ11.
+              <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                Terminais touch all-in-one industriais, impressoras térmicas ESC/POS de 80mm, leitores 2D de código de barras e configuração presencial de rede LAN em Luanda.
               </p>
             </div>
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-bold text-[#FF6500] gap-1 group-hover:gap-2 transition-all">
-              <span>Saber mais</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+            <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#FF6500]">
+              <span className="text-slate-400 font-medium">Garantia Local 12 Meses</span>
+              <div className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span>Ver Loja</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
             </div>
           </div>
 
@@ -402,22 +452,25 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div
             data-reveal
             onClick={() => onNavigatePage('stock')}
-            className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
+            className="bg-white rounded-3xl p-7 border border-slate-200/90 shadow-xs hover:shadow-lg hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group cursor-pointer"
           >
-            <div>
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-[#FF6500] text-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform">
-                <Boxes className="w-8 h-8" strokeWidth={2} />
+            <div className="space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-900 flex items-center justify-center font-bold">
+                <Boxes className="w-5 h-5 text-[#FF6500]" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2 font-display group-hover:text-[#FF6500] transition-colors">
-                Gestão de Stock & Armazéns
+              <h3 className="text-lg font-bold text-slate-950 font-display group-hover:text-[#FF6500] transition-colors">
+                Stock & Armazéns
               </h3>
-              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-normal mb-4">
-                Controlo em tempo real de entradas, saídas, quebras e inventário. Rastreio rigoroso de lotes com validade e transferências entre filiais.
+              <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                Controlo em tempo real de entradas, saídas, quebras e inventário. Rastreio rigoroso de lotes e datas de validade para farmácias e supermercados, com transferências entre filiais.
               </p>
             </div>
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-bold text-[#FF6500] gap-1 group-hover:gap-2 transition-all">
-              <span>Saber mais</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+            <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#FF6500]">
+              <span className="text-slate-400 font-medium">Multi-Depósito</span>
+              <div className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span>Saber mais</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
             </div>
           </div>
 
@@ -425,22 +478,25 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div
             data-reveal
             onClick={() => onNavigatePage('rh')}
-            className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
+            className="bg-white rounded-3xl p-7 border border-slate-200/90 shadow-xs hover:shadow-lg hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group cursor-pointer"
           >
-            <div>
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-[#FF6500] text-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform">
-                <Users className="w-8 h-8" strokeWidth={2} />
+            <div className="space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-900 flex items-center justify-center font-bold">
+                <Users className="w-5 h-5 text-[#FF6500]" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2 font-display group-hover:text-[#FF6500] transition-colors">
+              <h3 className="text-lg font-bold text-slate-950 font-display group-hover:text-[#FF6500] transition-colors">
                 Recursos Humanos & IRT 2026
               </h3>
-              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-normal mb-4">
-                Processamento automático de salários segundo a LGT, tabelas escalonadas de IRT 2026, desconto INSS de 3%/8% e emissão de recibos em PDF.
+              <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                Processamento automático de salários segundo a LGT, aplicação das novas tabelas escalonadas de IRT 2026, retenções INSS de 3%/8% e emissão de recibos de vencimento em PDF.
               </p>
             </div>
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-bold text-[#FF6500] gap-1 group-hover:gap-2 transition-all">
-              <span>Saber mais</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+            <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#FF6500]">
+              <span className="text-slate-400 font-medium">Mapas INSS & IRT</span>
+              <div className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span>Saber mais</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
             </div>
           </div>
 
@@ -448,61 +504,41 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div
             data-reveal
             onClick={() => onNavigatePage('contabilidade')}
-            className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
+            className="bg-white rounded-3xl p-7 border border-slate-200/90 shadow-xs hover:shadow-lg hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group cursor-pointer"
           >
-            <div>
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-[#FF6500] text-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform">
-                <ShieldCheck className="w-8 h-8" strokeWidth={2} />
+            <div className="space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-900 flex items-center justify-center font-bold">
+                <ShieldCheck className="w-5 h-5 text-emerald-600" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2 font-display group-hover:text-[#FF6500] transition-colors">
+              <h3 className="text-lg font-bold text-slate-950 font-display group-hover:text-[#FF6500] transition-colors">
                 Contabilidade & SAF-T AO
               </h3>
-              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-normal mb-4">
-                Plano Geral de Contas (PGC), balanços, balancetes de verificação, mapa de impostos e exportação mensal do ficheiro SAF-T para validação AGT.
+              <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                Plano Geral de Contas (PGC-AO), diários de reconciliação, balancetes de verificação, mapa de impostos e exportação mensal do ficheiro SAF-T para validação AGT.
               </p>
             </div>
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-bold text-[#FF6500] gap-1 group-hover:gap-2 transition-all">
-              <span>Saber mais</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </div>
-
-          {/* Card 6: Hardware & Terminais de Balcão */}
-          <div
-            data-reveal
-            onClick={() => onNavigatePage('hardware')}
-            className="bg-white rounded-3xl p-8 border border-slate-150 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col justify-between group cursor-pointer"
-          >
-            <div>
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-[#FF6500] text-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform">
-                <HardDrive className="w-8 h-8" strokeWidth={2} />
+            <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#FF6500]">
+              <span className="text-slate-400 font-medium">PGC-AO Oficial</span>
+              <div className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span>Saber mais</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2 font-display group-hover:text-[#FF6500] transition-colors">
-                Hardware & Terminais POS
-              </h3>
-              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-normal mb-4">
-                Terminais touch all-in-one industriais, impressoras térmicas ESC/POS, leitores 2D de código de barras e configuração de rede local em Luanda.
-              </p>
-            </div>
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-bold text-[#FF6500] gap-1 group-hover:gap-2 transition-all">
-              <span>Saber mais</span>
-              <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>
 
         </div>
 
-        {/* ── BARRA DE CHAMADA LARANJA (CALLOUT BAR — EXATAMENTE COMO NA IMAGEM 1 E 4) ── */}
-        <div data-reveal className="mt-12 bg-gradient-to-r from-[#FF6500] via-[#FF7A1A] to-[#FF8C38] rounded-3xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-orange-500/25">
+        {/* ── BARRA DE CHAMADA EXECUTIVA (Anti-Slop: Substituição de gradientes neon por um strip executivo) ── */}
+        <div data-reveal className="mt-12 bg-[#0A1322] rounded-2xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800 shadow-xl">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0 border border-white/25">
-              <Phone className="w-6 h-6" />
+            <div className="w-11 h-11 rounded-xl bg-white/[0.08] border border-white/10 flex items-center justify-center text-orange-400 shrink-0">
+              <Phone className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-lg sm:text-xl font-bold font-display text-white tracking-tight">
-                Vamos falar sobre os seus planos e acelerar a sua faturação?
+              <h4 className="text-base sm:text-lg font-bold font-display text-white tracking-tight">
+                Deseja apoio para escolher o formato de licenciamento da sua empresa?
               </h4>
-              <p className="text-xs sm:text-sm text-white/90 font-normal">
+              <p className="text-xs sm:text-sm text-slate-300 font-normal mt-0.5">
                 Fale diretamente com os nossos consultores especializados em Luanda para um diagnóstico gratuito.
               </p>
             </div>
@@ -512,54 +548,54 @@ export const HomePage: React.FC<HomePageProps> = ({
             href={settings.whatsappUrl || 'https://wa.me/244974855494'}
             target="_blank"
             rel="noopener noreferrer"
-            className="whitespace-nowrap bg-slate-950 hover:bg-slate-900 active:scale-95 text-white font-black text-xs sm:text-sm px-7 py-3.5 rounded-full flex items-center gap-2.5 shadow-lg transition-all font-mono tracking-wide shrink-0"
+            className="whitespace-nowrap bg-[#FF6500] hover:bg-[#EB5B00] active:scale-95 text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md transition-all font-mono-num tracking-wide shrink-0"
           >
             <span>Falar Agora: {settings.phoneDisplay || '+244 974 855 494'}</span>
-            <ArrowRight className="w-4 h-4 text-orange-400" />
+            <ArrowRight className="w-4 h-4" />
           </a>
         </div>
 
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          BANNER DE IMPACTO FOTOGRÁFICO (PADRÃO IMAGEM 4)
+          BANNER DE IMPACTO FOTOGRÁFICO: CONTINUIDADE OPERACIONAL
           "Mais do que Faturação: É a Segurança e Continuidade do Seu Negócio"
           ══════════════════════════════════════════════════════════════════ */}
-      <section data-reveal className="relative py-24 sm:py-28 px-4 sm:px-6 lg:px-8 text-white overflow-hidden bg-[#0B1528]">
+      <section data-reveal className="relative py-24 sm:py-28 px-4 sm:px-6 lg:px-8 text-white overflow-hidden bg-[#0A1322] border-y border-slate-800">
         {/* Imagem de Fundo com Overlay Escuro Gradiente */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 pointer-events-none">
           <img
             src={settings.stepsImageUrl || settings.heroImageUrl || supermercadoImg}
             alt="Operação Comercial KIVORA"
-            className="w-full h-full object-cover opacity-20 filter saturate-50"
+            className="w-full h-full object-cover opacity-15 filter saturate-50"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0B1528] via-[#0B1528]/95 to-[#0B1528]/85" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0A1322] via-[#0A1322]/95 to-[#0A1322]/85" />
         </div>
 
         <div className="max-w-4xl mx-auto text-center space-y-6 relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase tracking-wider font-display">
-            <span>Soberania e Estabilidade</span>
-          </div>
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-orange-400 block">
+            03 // Continuidade Operacional
+          </span>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.12] font-display">
             Mais do que Faturação: É a Segurança e Continuidade do Seu Negócio em Angola
           </h2>
 
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto font-normal">
-            Elimine as paragens de caixa causadas por quebras de internet. Mantenha os seus clientes satisfeitos, as filas a andar e o seu fecho de caixa 100% rigoroso.
+            Elimine as paragens de caixa causadas por quebras de internet. Mantenha os seus clientes satisfeitos, as filas a andar e o seu fecho de caixa 100% rigoroso com a base SQLite local e auditoria AGT.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-3">
             <button
               onClick={() => onOpenDemoModal('Demonstração Impacto')}
-              className="bg-[#FF6500] hover:bg-[#EB5B00] active:scale-95 text-white font-bold text-xs sm:text-sm px-8 py-4 rounded-full shadow-lg shadow-orange-500/30 transition-all flex items-center gap-2 cursor-pointer"
+              className="bg-[#FF6500] hover:bg-[#EB5B00] active:scale-98 text-white font-bold text-xs sm:text-sm px-8 py-3.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer font-sans"
             >
               <span>Falar com um Especialista Agora</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <button
               onClick={() => onNavigatePage('faturacao')}
-              className="bg-white/10 hover:bg-white/20 active:scale-95 text-white border border-white/25 font-bold text-xs sm:text-sm px-8 py-4 rounded-full transition-all cursor-pointer backdrop-blur-md"
+              className="bg-white/10 hover:bg-white/20 active:scale-98 text-white border border-white/20 font-bold text-xs sm:text-sm px-8 py-3.5 rounded-xl transition-all cursor-pointer backdrop-blur-md"
             >
               Ver Módulo de Faturação
             </button>
@@ -568,93 +604,124 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          6. COMO TRABALHAMOS? (HOW WE WORK? — 4 PASSOS COMO NAS IMAGENS 1 E 4)
+          6. COMO TRABALHAMOS? (PIPELINE DE IMPLEMENTAÇÃO EM 4 ETAPAS)
+          Substituição dos números gigantes isolados por um roadmap cronológico corporativo
           ══════════════════════════════════════════════════════════════════ */}
-      <section id="como-trabalhamos" className="py-24 sm:py-32 bg-slate-50/80 border-y border-slate-200/70 px-4 sm:px-6 lg:px-8">
+      <section id="como-trabalhamos" className="py-24 sm:py-32 bg-slate-50/80 border-b border-slate-200/80 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           
-          <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
-            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
-              <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-              <span>Como Trabalhamos?</span>
-              <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-            </div>
+          <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#FF6500] block">
+              04 // Roteiro de Implementação
+            </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
-              Em Apenas 4 Passos Simples Ative o KIVORA
+              Do Primeiro Contacto ao Primeiro Talão Emitido no Próprio Dia
             </h2>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-              Um processo estruturado e sem burocracias para colocar a sua loja, supermercado ou escritório a faturar no próprio dia.
+              Um processo estruturado e sem burocracias para colocar a sua loja, supermercado ou escritório a faturar com certificação fiscal completa.
             </p>
           </div>
 
-          {/* 4 Colunas Numeradas (1, 2, 3, 4 em Laranja Padrão das Imagens) */}
-          <div data-stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* 4 Etapas Cronológicas Conectadas */}
+          <div data-stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
-            {/* Passo 1 */}
-            <div data-reveal className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
-              <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display block leading-none">
-                1.
-              </span>
-              <h3 className="text-lg font-bold text-slate-950 font-display">
-                Demonstração
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Apresentação prática e sem compromisso das ferramentas do KIVORA SOFT, alinhada com as necessidades específicas do seu negócio.
-              </p>
+            {/* Etapa 1 */}
+            <div data-reveal className="bg-white rounded-2xl p-7 border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-md transition-all flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-white bg-slate-950 px-2.5 py-1 rounded-md">
+                    ETAPA 01
+                  </span>
+                  <span className="text-[11px] font-mono text-slate-400 font-medium">Dia 1 • 30 Min</span>
+                </div>
+                <h3 className="text-base font-bold text-slate-950 font-display">
+                  Diagnóstico & Apresentação
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                  Análise do volume de vendas, número de postos de caixa e periféricos necessários. Apresentação prática das funcionalidades sem qualquer compromisso.
+                </p>
+              </div>
+              <div className="pt-4 mt-4 border-t border-slate-100 text-[11px] text-slate-500 font-mono">
+                ✓ Demonstração Guiada
+              </div>
             </div>
 
-            {/* Passo 2 */}
-            <div data-reveal className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
-              <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display block leading-none">
-                2.
-              </span>
-              <h3 className="text-lg font-bold text-slate-950 font-display">
-                Proposta & Plano
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Escolha do plano ideal (Mensal, Anual LAN ou Vitalício) com preços transparentes em Kwanzas, sem surpresas cambiais com o dólar.
-              </p>
+            {/* Etapa 2 */}
+            <div data-reveal className="bg-white rounded-2xl p-7 border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-md transition-all flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-white bg-slate-950 px-2.5 py-1 rounded-md">
+                    ETAPA 02
+                  </span>
+                  <span className="text-[11px] font-mono text-slate-400 font-medium">Imediato</span>
+                </div>
+                <h3 className="text-base font-bold text-slate-950 font-display">
+                  Proposta em Kwanzas
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                  Definição do modelo de licenciamento ideal (Mensal, Anual LAN ou Vitalício) com orçamento fixado em Kwanzas, sem indexação ao dólar.
+                </p>
+              </div>
+              <div className="pt-4 mt-4 border-t border-slate-100 text-[11px] text-slate-500 font-mono">
+                ✓ Preço Final em AOA
+              </div>
             </div>
 
-            {/* Passo 3 */}
-            <div data-reveal className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
-              <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display block leading-none">
-                3.
-              </span>
-              <h3 className="text-lg font-bold text-slate-950 font-display">
-                Instalação em Rede
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Instalação rápida em menos de 15 minutos nos seus computadores ou terminais POS, com base de dados local segura e rede LAN.
-              </p>
+            {/* Etapa 3 */}
+            <div data-reveal className="bg-white rounded-2xl p-7 border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-md transition-all flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-white bg-slate-950 px-2.5 py-1 rounded-md">
+                    ETAPA 03
+                  </span>
+                  <span className="text-[11px] font-mono text-slate-400 font-medium">Em 15 Minutos</span>
+                </div>
+                <h3 className="text-base font-bold text-slate-950 font-display">
+                  Instalação Presencial ou Remota
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                  Instalação técnica rápida nos seus computadores e terminais POS, configuração da base de dados local SQLite e calibração de impressoras de 80mm.
+                </p>
+              </div>
+              <div className="pt-4 mt-4 border-t border-slate-100 text-[11px] text-slate-500 font-mono">
+                ✓ Postos Operacionais
+              </div>
             </div>
 
-            {/* Passo 4 */}
-            <div data-reveal className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-3">
-              <span className="text-4xl sm:text-5xl font-black text-[#FF6500] font-display block leading-none">
-                4.
-              </span>
-              <h3 className="text-lg font-bold text-slate-950 font-display">
-                Formação & Suporte
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Capacitação imediata dos operadores de caixa e suporte técnico contínuo presencial em Luanda e remoto nas 18 províncias.
-              </p>
+            {/* Etapa 4 */}
+            <div data-reveal className="bg-white rounded-2xl p-7 border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-md transition-all flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-white bg-slate-950 px-2.5 py-1 rounded-md">
+                    ETAPA 04
+                  </span>
+                  <span className="text-[11px] font-mono text-emerald-600 font-bold">Contínuo</span>
+                </div>
+                <h3 className="text-base font-bold text-slate-950 font-display">
+                  Formação & Suporte Técnico
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                  Capacitação prática dos operadores de caixa e gerentes. Apoio técnico permanente em Luanda e suporte remoto em tempo real em todas as províncias.
+                </p>
+              </div>
+              <div className="pt-4 mt-4 border-t border-slate-100 text-[11px] text-slate-500 font-mono">
+                ✓ Suporte Ativo 24/7
+              </div>
             </div>
 
           </div>
 
-          {/* Botões de Ação Redondos (Padrão das Imagens) */}
-          <div data-reveal className="mt-12 flex flex-wrap items-center justify-center gap-4">
+          {/* Botões de Ação */}
+          <div data-reveal className="mt-12 flex flex-wrap items-center justify-center gap-3.5">
             <button
               onClick={() => onOpenDemoModal('Demonstração 4 Passos')}
-              className="bg-[#FF6500] hover:bg-[#EB5B00] active:scale-95 text-white font-bold text-xs sm:text-sm px-8 py-4 rounded-full shadow-lg shadow-orange-500/25 transition-all cursor-pointer"
+              className="bg-[#FF6500] hover:bg-[#EB5B00] active:scale-98 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl shadow-sm transition-all cursor-pointer"
             >
               Solicitar Demonstração Gratuita
             </button>
             <button
               onClick={() => onNavigatePage('download')}
-              className="bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 font-bold text-xs sm:text-sm px-8 py-4 rounded-full shadow-xs transition-all cursor-pointer"
+              className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-300 font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl shadow-xs transition-all cursor-pointer"
             >
               Baixar Versão de Teste (15 Dias)
             </button>
@@ -664,66 +731,55 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          6. RESULTADOS & MÉTRICAS (WHAT WE DONE? — FUNDO ESCURO DAS IMAGENS 2 E 4)
+          7. RESULTADOS & MÉTRICAS DE MERCADO (FUNDO ESCURO EXECUTIVO)
           ══════════════════════════════════════════════════════════════════ */}
-      <section className="py-24 sm:py-32 bg-[#0B1528] text-white relative overflow-hidden border-y border-slate-800">
-        {/* Subtle grid pattern */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
-          style={{
-            backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`,
-            backgroundSize: '40px 40px',
-          }}
-        />
-
+      <section className="py-24 sm:py-32 bg-[#0A1322] text-white relative overflow-hidden border-y border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
-          <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
-            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
-              <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-              <span>Resultados Comprovados</span>
-              <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-            </div>
+          <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-orange-400 block">
+              05 // Resultados & Presença no Mercado
+            </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight font-display">
-              A Escolha de Líderes em Angola
+              A Escolha de Líderes Empresariais em Angola
             </h2>
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-              Números reais de quem confia na robustez do KIVORA SOFT para faturar com tranquilidade e sem interrupções.
+              Números auditados de empresas que confiam diariamente na soberania e robustez do KIVORA SOFT para operar sem paragens.
             </p>
           </div>
 
-          {/* 4 Grandes Métricas no Estilo das Imagens 2 e 4 */}
-          <div data-stagger className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {/* 4 Métricas de Autoridade */}
+          <div data-stagger className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             
-            <div data-reveal className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
-              <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-white font-mono-num tracking-tight">
+            <div data-reveal className="space-y-2 p-6 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-slate-700 transition-colors">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white font-mono-num tracking-tight">
                 <CountUp end={12} suffix="+" type="odometer" duration={1.5} />
               </div>
               <p className="text-xs sm:text-sm font-bold text-orange-400 font-display">
-                Anos de Experiência
+                Anos no Mercado
               </p>
               <p className="text-[11px] text-slate-400">
-                Pioneirismo em software angolano
+                Soluções desenhadas para Angola
               </p>
             </div>
 
-            <div data-reveal className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
-              <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-white font-mono-num tracking-tight">
+            <div data-reveal className="space-y-2 p-6 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-slate-700 transition-colors">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white font-mono-num tracking-tight">
                 <CountUp end={2800} suffix="+" type="odometer" duration={1.5} />
               </div>
               <p className="text-xs sm:text-sm font-bold text-orange-400 font-display">
                 Empresas Ativas
               </p>
               <p className="text-[11px] text-slate-400">
-                Faturando diariamente
+                Operando e faturando diariamente
               </p>
             </div>
 
-            <div data-reveal className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
-              <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-white font-mono-num tracking-tight">
+            <div data-reveal className="space-y-2 p-6 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-slate-700 transition-colors">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-emerald-400 font-mono-num tracking-tight">
                 100%
               </div>
-              <p className="text-xs sm:text-sm font-bold text-orange-400 font-display">
+              <p className="text-xs sm:text-sm font-bold text-emerald-400 font-display">
                 Conformidade AGT
               </p>
               <p className="text-[11px] text-slate-400">
@@ -731,15 +787,15 @@ export const HomePage: React.FC<HomePageProps> = ({
               </p>
             </div>
 
-            <div data-reveal className="space-y-2 p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-orange-500/50 transition-colors">
-              <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-white font-mono-num tracking-tight">
+            <div data-reveal className="space-y-2 p-6 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-slate-700 transition-colors">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white font-mono-num tracking-tight">
                 <CountUp end={18} type="odometer" duration={1.5} />
               </div>
               <p className="text-xs sm:text-sm font-bold text-orange-400 font-display">
                 Províncias Cobertas
               </p>
               <p className="text-[11px] text-slate-400">
-                Assistência técnica nacional
+                Assistência presencial e remota
               </p>
             </div>
 
@@ -749,104 +805,101 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          7. EQUIPA DE CONSULTORES & ESPECIALISTAS (ADVISORS — IMAGENS 2 E 4)
-          Cartões Brancos com Foto Circular e Aro Laranja
+          8. EQUIPA DE CONSULTORES & ESPECIALISTAS (PRESENÇA REAL EM LUANDA)
           ══════════════════════════════════════════════════════════════════ */}
       <section id="equipa-consultores" className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         
-        <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
-          <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
-            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-            <span>Consultores & Especialistas</span>
-            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-          </div>
+        <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3">
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#FF6500] block">
+            06 // Consultoria & Suporte Presencial
+          </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
-            A Nossa Equipa de Apoio Técnico
+            A Nossa Equipa de Apoio Técnico e Fiscal
           </h2>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-            Especialistas dedicados prontos a intervir na sua loja, assegurar a conformidade fiscal e formar a sua equipa.
+            Especialistas dedicados prontos a intervir na sua loja, assegurar a conformidade fiscal com o Decreto 71/25 e formar a sua equipa.
           </p>
         </div>
 
-        {/* Grade de 4 Consultores com Fotos Circulares e Aro Laranja (Padrão das Imagens) */}
-        <div data-stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Grade de 4 Consultores com Molduras Executivas */}
+        <div data-stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           
           {/* Consultor 1 */}
-          <div data-reveal className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
-            <div className="w-24 h-24 rounded-full border-2 border-[#FF6500] p-1 mx-auto mb-4 shadow-sm">
+          <div data-reveal className="bg-white rounded-2xl p-6 text-center border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-md transition-all">
+            <div className="w-20 h-20 rounded-full mx-auto mb-4 p-0.5 ring-2 ring-slate-200 shadow-xs overflow-hidden bg-slate-100">
               <img
                 src="/imagens/1085.webp"
                 alt="Narciso da Costa"
                 className="w-full h-full object-cover rounded-full"
               />
             </div>
-            <h3 className="font-bold text-slate-900 text-base font-display">
+            <h3 className="font-bold text-slate-950 text-base font-display">
               Narciso da Costa
             </h3>
-            <p className="text-xs text-[#FF6500] font-semibold mt-0.5">
-              Consultor Principal de Sistemas
-            </p>
-            <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+            <span className="inline-block px-2.5 py-0.5 rounded-md bg-orange-50 text-[#FF6500] font-mono font-semibold text-[11px] mt-1">
+              Consultor de Sistemas
+            </span>
+            <p className="text-xs text-slate-500 mt-2.5 leading-relaxed font-normal">
               Arquiteto de software com mais de uma década de experiência em sistemas fiscais e bases de dados locais.
             </p>
           </div>
 
           {/* Consultor 2 */}
-          <div data-reveal className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
-            <div className="w-24 h-24 rounded-full border-2 border-[#FF6500] p-1 mx-auto mb-4 shadow-sm">
+          <div data-reveal className="bg-white rounded-2xl p-6 text-center border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-md transition-all">
+            <div className="w-20 h-20 rounded-full mx-auto mb-4 p-0.5 ring-2 ring-slate-200 shadow-xs overflow-hidden bg-slate-100">
               <img
                 src="/imagens/2149153824.webp"
                 alt="Sandra Miguel"
                 className="w-full h-full object-cover rounded-full"
               />
             </div>
-            <h3 className="font-bold text-slate-900 text-base font-display">
+            <h3 className="font-bold text-slate-950 text-base font-display">
               Sandra Miguel
             </h3>
-            <p className="text-xs text-[#FF6500] font-semibold mt-0.5">
+            <span className="inline-block px-2.5 py-0.5 rounded-md bg-orange-50 text-[#FF6500] font-mono font-semibold text-[11px] mt-1">
               Especialista Fiscal & SAF-T
-            </p>
-            <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+            </span>
+            <p className="text-xs text-slate-500 mt-2.5 leading-relaxed font-normal">
               Supervisão de conformidade tributária com as diretrizes do Decreto 71/25 e validação de relatórios AGT.
             </p>
           </div>
 
           {/* Consultor 3 */}
-          <div data-reveal className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
-            <div className="w-24 h-24 rounded-full border-2 border-[#FF6500] p-1 mx-auto mb-4 shadow-sm">
+          <div data-reveal className="bg-white rounded-2xl p-6 text-center border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-md transition-all">
+            <div className="w-20 h-20 rounded-full mx-auto mb-4 p-0.5 ring-2 ring-slate-200 shadow-xs overflow-hidden bg-slate-100">
               <img
                 src="/imagens/1163.webp"
                 alt="António Manuel"
                 className="w-full h-full object-cover rounded-full"
               />
             </div>
-            <h3 className="font-bold text-slate-900 text-base font-display">
+            <h3 className="font-bold text-slate-950 text-base font-display">
               António Manuel
             </h3>
-            <p className="text-xs text-[#FF6500] font-semibold mt-0.5">
-              Engenheiro de Redes & Hardware
-            </p>
-            <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+            <span className="inline-block px-2.5 py-0.5 rounded-md bg-orange-50 text-[#FF6500] font-mono font-semibold text-[11px] mt-1">
+              Redes & Hardware POS
+            </span>
+            <p className="text-xs text-slate-500 mt-2.5 leading-relaxed font-normal">
               Instalação presencial de servidores locais, sincronização multi-postos LAN e configuração de periféricos POS.
             </p>
           </div>
 
           {/* Consultor 4 */}
-          <div data-reveal className="bg-white rounded-3xl p-6 text-center border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
-            <div className="w-24 h-24 rounded-full border-2 border-[#FF6500] p-1 mx-auto mb-4 shadow-sm">
+          <div data-reveal className="bg-white rounded-2xl p-6 text-center border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-md transition-all">
+            <div className="w-20 h-20 rounded-full mx-auto mb-4 p-0.5 ring-2 ring-slate-200 shadow-xs overflow-hidden bg-slate-100">
               <img
                 src="/imagens/2150690165.webp"
                 alt="Helena Gaspar"
                 className="w-full h-full object-cover rounded-full"
               />
             </div>
-            <h3 className="font-bold text-slate-900 text-base font-display">
+            <h3 className="font-bold text-slate-950 text-base font-display">
               Helena Gaspar
             </h3>
-            <p className="text-xs text-[#FF6500] font-semibold mt-0.5">
-              Gestora de Suporte & Formação
-            </p>
-            <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+            <span className="inline-block px-2.5 py-0.5 rounded-md bg-orange-50 text-[#FF6500] font-mono font-semibold text-[11px] mt-1">
+              Suporte & Formação de Caixa
+            </span>
+            <p className="text-xs text-slate-500 mt-2.5 leading-relaxed font-normal">
               Apoio diário aos operadores de caixa, esclarecimento de dúvidas operacionais e assistência remota dedicada.
             </p>
           </div>
@@ -863,42 +916,39 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          9. TABELA DE PREÇOS & PLANOS (PRICING — EXATAMENTE COMO NA IMAGEM 1)
-          3 Cartões: Mensal, Anual Destacado no Meio com Topo Escuro, Vitalício
+          9. TABELA DE PREÇOS & PLANOS (TRANSPARÊNCIA TOTAL EM KWANZAS)
           ══════════════════════════════════════════════════════════════════ */}
       <section id="precos-planos" className="py-24 sm:py-32 bg-white px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         
-        <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
-          <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
-            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-            <span>Tabela Oficial</span>
-            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-          </div>
+        <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3">
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#FF6500] block">
+            07 // Investimento & Licenciamento
+          </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
-            Preços Claros Fixados em Kwanzas (AOA)
+            Preços Claros e Fixados em Kwanzas (AOA)
           </h2>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-            Sem custos escondidos, sem dependência do câmbio em dólares. Escolha o formato de licenciamento que melhor atende à sua empresa.
+            Sem custos escondidos, sem indexação cambial a moedas estrangeiras. Escolha o formato de licenciamento que melhor atende à escala da sua empresa.
           </p>
         </div>
 
-        <div data-stagger className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch">
+        <div data-stagger className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch">
           
-          {/* Card 1: Mensal (Padrão Imagem 1) */}
-          <div data-reveal className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group">
-            {/* Top Header Laranja */}
-            <div className="bg-gradient-to-r from-amber-500 to-[#FF6500] p-6 text-white text-center">
-              <span className="text-[11px] font-bold uppercase tracking-wider block opacity-90">
+          {/* Card 1: Mensal */}
+          <div data-reveal className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:border-slate-300 hover:shadow-md transition-all flex flex-col justify-between group">
+            {/* Top Header Sóbril */}
+            <div className="bg-slate-50 border-b border-slate-200/80 p-6 text-center">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider block text-slate-500">
                 {settings.planMensalCategory || 'Arranque Flexível'}
               </span>
-              <div className="mt-2 text-3xl font-extrabold font-mono-num">
-                {settings.planMensalPrice || '25.000'} <span className="text-sm font-normal">Kz / mês</span>
+              <div className="mt-2 text-3xl font-extrabold font-mono-num text-slate-950">
+                {settings.planMensalPrice || '25.000'} <span className="text-sm font-normal text-slate-500">Kz / mês</span>
               </div>
             </div>
 
-            <div className="p-8 flex flex-col justify-between flex-grow">
+            <div className="p-7 flex flex-col justify-between flex-grow">
               <div>
-                <h3 className="text-lg font-bold text-slate-950 mb-3 text-center font-display">
+                <h3 className="text-base font-bold text-slate-950 mb-2 text-center font-display">
                   {settings.planMensalName || 'Plano Mensal'}
                 </h3>
                 <p className="text-xs text-slate-500 text-center mb-6 leading-relaxed">
@@ -913,7 +963,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     'Suporte Técnico em Horário Comercial'
                   ]).map((feat, i) => (
                     <li key={i} className="flex items-center gap-2.5">
-                      <div className="w-5 h-5 rounded-full bg-orange-50 text-[#FF6500] flex items-center justify-center shrink-0">
+                      <div className="w-5 h-5 rounded-md bg-orange-50 text-[#FF6500] flex items-center justify-center shrink-0 border border-orange-100">
                         <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
                       </div>
                       <span>{feat}</span>
@@ -924,35 +974,35 @@ export const HomePage: React.FC<HomePageProps> = ({
 
               <button
                 onClick={() => onOpenDemoModal(settings.planMensalName || 'Plano Mensal')}
-                className="w-full py-3.5 rounded-full bg-[#FF6500] hover:bg-[#EB5B00] active:scale-95 text-white font-bold text-xs transition-all shadow-md shadow-orange-500/20 cursor-pointer"
+                className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs transition-all shadow-xs cursor-pointer"
               >
                 Aderir ao Plano Mensal
               </button>
             </div>
           </div>
 
-          {/* Card 2: Anual LAN (DESTACADO NO MEIO COM TOPO ESCURO — IMAGEM 1) */}
-          <div data-reveal className="bg-white rounded-3xl border-2 border-[#FF6500] overflow-hidden shadow-2xl scale-103 sm:-translate-y-3 flex flex-col justify-between relative group z-10">
-            {/* Top Header Escuro/Charcoal das Imagens */}
-            <div className="bg-[#0B1528] p-7 text-white text-center relative">
-              <span className="inline-block bg-[#FF6500] text-white text-[10px] font-black uppercase px-3 py-0.5 rounded-full mb-2 tracking-wider">
-                {settings.planAnualBadge || 'Mais Escolhido em Angola'}
-              </span>
-              <div className="text-3xl sm:text-4xl font-black font-mono-num text-white">
+          {/* Card 2: Anual LAN (Destaque Institucional em Marinho Executivo) */}
+          <div data-reveal className="bg-white rounded-2xl border-2 border-slate-950 overflow-hidden shadow-xl lg:-translate-y-2 flex flex-col justify-between relative group z-10">
+            {/* Top Header Escuro */}
+            <div className="bg-[#0A1322] p-7 text-white text-center relative">
+              <div className="inline-flex items-center gap-1.5 bg-[#FF6500] text-white text-[10px] font-mono font-bold uppercase px-3 py-1 rounded-md mb-2 tracking-wide">
+                <span>{settings.planAnualBadge || 'Mais Escolhido em Angola'}</span>
+              </div>
+              <div className="text-3xl sm:text-4xl font-extrabold font-mono-num text-white">
                 {settings.planAnualPrice || '250.000'} <span className="text-sm font-normal text-slate-300">Kz / ano</span>
               </div>
-              <span className="text-[11px] text-emerald-400 font-bold block mt-1">
+              <span className="text-[11px] text-emerald-400 font-mono font-bold block mt-1">
                 Poupança de 50.000 Kz (2 Meses Grátis)
               </span>
             </div>
 
-            <div className="p-8 flex flex-col justify-between flex-grow">
+            <div className="p-7 flex flex-col justify-between flex-grow">
               <div>
-                <h3 className="text-xl font-bold text-slate-950 mb-2 text-center font-display">
+                <h3 className="text-base font-bold text-slate-950 mb-2 text-center font-display">
                   {settings.planAnualName || 'Plano Anual LAN'}
                 </h3>
                 <p className="text-xs text-slate-500 text-center mb-6 leading-relaxed">
-                  Para supermercados, restaurantes, comércio geral e empresas com múltiplos caixas.
+                  Para supermercados, restaurantes, comércio geral e empresas com múltiplos caixas em rede local.
                 </p>
 
                 <ul className="space-y-3.5 text-xs text-slate-800 mb-8">
@@ -963,7 +1013,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     'Suporte Prioritário por WhatsApp e Remoto'
                   ]).map((feat, i) => (
                     <li key={i} className="flex items-center gap-2.5">
-                      <div className="w-5 h-5 rounded-full bg-[#0B1528] text-white flex items-center justify-center shrink-0">
+                      <div className="w-5 h-5 rounded-md bg-[#0A1322] text-white flex items-center justify-center shrink-0">
                         <Check className="w-3.5 h-3.5 text-orange-400" strokeWidth={2.5} />
                       </div>
                       <span className={i === 0 ? 'font-bold text-slate-950' : ''}>{feat}</span>
@@ -974,32 +1024,32 @@ export const HomePage: React.FC<HomePageProps> = ({
 
               <button
                 onClick={() => onOpenDemoModal(settings.planAnualName || 'Plano Anual LAN')}
-                className="w-full py-4 rounded-full bg-slate-950 hover:bg-[#FF6500] active:scale-95 text-white font-bold text-xs transition-all shadow-xl cursor-pointer"
+                className="w-full py-3.5 rounded-xl bg-[#FF6500] hover:bg-[#EB5B00] active:scale-98 text-white font-bold text-xs transition-all shadow-md cursor-pointer font-sans"
               >
                 Contratar Plano Anual
               </button>
             </div>
           </div>
 
-          {/* Card 3: Licença Vitalícia (Padrão Imagem 1) */}
-          <div data-reveal className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group">
-            {/* Top Header Laranja */}
-            <div className="bg-gradient-to-r from-amber-500 to-[#FF6500] p-6 text-white text-center">
-              <span className="text-[11px] font-bold uppercase tracking-wider block opacity-90">
+          {/* Card 3: Licença Vitalícia */}
+          <div data-reveal className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:border-slate-300 hover:shadow-md transition-all flex flex-col justify-between group">
+            {/* Top Header Sóbrio */}
+            <div className="bg-slate-50 border-b border-slate-200/80 p-6 text-center">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider block text-slate-500">
                 {settings.planVitalicioCategory || 'Pagamento Único'}
               </span>
-              <div className="mt-2 text-3xl font-extrabold font-mono-num">
-                {settings.planVitalicioPrice || '650.000'} <span className="text-sm font-normal">Kz / único</span>
+              <div className="mt-2 text-3xl font-extrabold font-mono-num text-slate-950">
+                {settings.planVitalicioPrice || '650.000'} <span className="text-sm font-normal text-slate-500">Kz / definitivo</span>
               </div>
             </div>
 
-            <div className="p-8 flex flex-col justify-between flex-grow">
+            <div className="p-7 flex flex-col justify-between flex-grow">
               <div>
-                <h3 className="text-lg font-bold text-slate-950 mb-3 text-center font-display">
+                <h3 className="text-base font-bold text-slate-950 mb-2 text-center font-display">
                   {settings.planVitalicioName || 'Licença Vitalícia'}
                 </h3>
                 <p className="text-xs text-slate-500 text-center mb-6 leading-relaxed">
-                  Para empresas que preferem adquirir o software de forma definitiva sem anuidades.
+                  Para empresas que preferem adquirir o software de forma definitiva sem anuidades ou mensalidades.
                 </p>
 
                 <ul className="space-y-3 text-xs text-slate-700 mb-8">
@@ -1010,7 +1060,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     'Certificado de Licenciamento Definitivo'
                   ]).map((feat, i) => (
                     <li key={i} className="flex items-center gap-2.5">
-                      <div className="w-5 h-5 rounded-full bg-orange-50 text-[#FF6500] flex items-center justify-center shrink-0">
+                      <div className="w-5 h-5 rounded-md bg-orange-50 text-[#FF6500] flex items-center justify-center shrink-0 border border-orange-100">
                         <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
                       </div>
                       <span>{feat}</span>
@@ -1021,7 +1071,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
               <button
                 onClick={() => onOpenDemoModal(settings.planVitalicioName || 'Licença Vitalícia')}
-                className="w-full py-3.5 rounded-full bg-[#FF6500] hover:bg-[#EB5B00] active:scale-95 text-white font-bold text-xs transition-all shadow-md shadow-orange-500/20 cursor-pointer"
+                className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs transition-all shadow-xs cursor-pointer"
               >
                 Solicitar Proposta Vitalícia
               </button>
@@ -1036,35 +1086,33 @@ export const HomePage: React.FC<HomePageProps> = ({
           10. HARDWARE & EQUIPAMENTOS POS COMPATÍVEIS
           ══════════════════════════════════════════════════════════════════ */}
       <section className="py-24 sm:py-32 bg-slate-50/70 border-t border-slate-200/80 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3.5">
-          <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
-            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-            <span>Equipamentos Oficiais</span>
-            <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-          </div>
+        <div data-reveal className="text-center max-w-2xl mx-auto mb-16 sm:mb-20 space-y-3">
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#FF6500] block">
+            08 // Hardware Comercial & POS
+          </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
             Periféricos POS Recomendados para o Balcão
           </h2>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-            Fornecemos e configuramos periféricos comerciais testados para suportar o ritmo diário e intenso de caixas de retalho e restauração.
+            Fornecemos e configuramos periféricos comerciais testados para suportar o ritmo diário e intenso de caixas de retalho, armazéns e restauração.
           </p>
         </div>
 
-        <div data-stagger className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+        <div data-stagger className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           
           {/* Terminal POS Touch */}
-          <div data-reveal className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
+          <div data-reveal className="bg-white rounded-2xl p-7 border border-slate-200/90 shadow-xs flex flex-col justify-between group hover:border-slate-300 hover:shadow-md transition-all">
             <div>
-              <div className="h-56 mb-6 flex items-center justify-center bg-slate-50 rounded-2xl p-4 border border-slate-100 select-none">
+              <div className="h-52 mb-6 flex items-center justify-center bg-slate-50/90 rounded-xl p-4 border border-slate-100 select-none">
                 <img
                   src={posImg}
                   alt="Terminal Touch POS Kivora"
-                  className="max-h-full max-w-full object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
+                  className="max-h-full max-w-full object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-103"
                 />
               </div>
 
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-bold text-[#FF6500] uppercase tracking-wider font-display">
+                <span className="text-[11px] font-mono font-bold text-[#FF6500] uppercase tracking-wider">
                   Ecrã Tátil 15.6" Capacitivo
                 </span>
                 <span className="text-xs font-bold text-slate-900 font-mono-num">
@@ -1072,10 +1120,10 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </span>
               </div>
 
-              <h3 className="text-xl font-bold text-slate-950 mb-2 group-hover:text-[#FF6500] transition-colors font-display">
+              <h3 className="text-lg font-bold text-slate-950 mb-2 group-hover:text-[#FF6500] transition-colors font-display">
                 Terminal POS Touch All-in-One
               </h3>
-              <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal mb-4">
+              <p className="text-xs text-slate-600 leading-relaxed font-normal mb-4">
                 Ecrã industrial de alta sensibilidade ao toque, processador rápido e chassis reforçado para balcões de alta rotatividade.
               </p>
             </div>
@@ -1093,18 +1141,18 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Computador Desktop LAN */}
-          <div data-reveal className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
+          <div data-reveal className="bg-white rounded-2xl p-7 border border-slate-200/90 shadow-xs flex flex-col justify-between group hover:border-slate-300 hover:shadow-md transition-all">
             <div>
-              <div className="h-56 mb-6 flex items-center justify-center bg-slate-50 rounded-2xl p-4 border border-slate-100 select-none">
+              <div className="h-52 mb-6 flex items-center justify-center bg-slate-50/90 rounded-xl p-4 border border-slate-100 select-none">
                 <img
                   src={desktopImg}
                   alt="Computador Desktop Kivora"
-                  className="max-h-full max-w-full object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
+                  className="max-h-full max-w-full object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-103"
                 />
               </div>
 
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-bold text-[#FF6500] uppercase tracking-wider font-display">
+                <span className="text-[11px] font-mono font-bold text-[#FF6500] uppercase tracking-wider">
                   Backoffice & Servidor LAN
                 </span>
                 <span className="text-xs font-bold text-slate-900 font-mono-num">
@@ -1112,10 +1160,10 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </span>
               </div>
 
-              <h3 className="text-xl font-bold text-slate-950 mb-2 group-hover:text-[#FF6500] transition-colors font-display">
+              <h3 className="text-lg font-bold text-slate-950 mb-2 group-hover:text-[#FF6500] transition-colors font-display">
                 Desktop Core i5 / SSD 256GB
               </h3>
-              <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal mb-4">
+              <p className="text-xs text-slate-600 leading-relaxed font-normal mb-4">
                 Configurado para operar como posto de retaguarda, servidor central de base de dados para múltiplos caixas e emissão de ficheiros SAF-T.
               </p>
             </div>
@@ -1133,18 +1181,18 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Portátil Laptop */}
-          <div data-reveal className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
+          <div data-reveal className="bg-white rounded-2xl p-7 border border-slate-200/90 shadow-xs flex flex-col justify-between group hover:border-slate-300 hover:shadow-md transition-all">
             <div>
-              <div className="h-56 mb-6 flex items-center justify-center bg-slate-50 rounded-2xl p-4 border border-slate-100 select-none">
+              <div className="h-52 mb-6 flex items-center justify-center bg-slate-50/90 rounded-xl p-4 border border-slate-100 select-none">
                 <img
                   src={laptopImg}
                   alt="Portátil Laptop Kivora"
-                  className="max-h-full max-w-full object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
+                  className="max-h-full max-w-full object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-103"
                 />
               </div>
 
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-bold text-[#FF6500] uppercase tracking-wider font-display">
+                <span className="text-[11px] font-mono font-bold text-[#FF6500] uppercase tracking-wider">
                   Vendas & Gerência Móvel
                 </span>
                 <span className="text-xs font-bold text-slate-900 font-mono-num">
@@ -1152,10 +1200,10 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </span>
               </div>
 
-              <h3 className="text-xl font-bold text-slate-950 mb-2 group-hover:text-[#FF6500] transition-colors font-display">
+              <h3 className="text-lg font-bold text-slate-950 mb-2 group-hover:text-[#FF6500] transition-colors font-display">
                 Laptop Comercial Executivo
               </h3>
-              <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal mb-4">
+              <p className="text-xs text-slate-600 leading-relaxed font-normal mb-4">
                 Excelente mobilidade para gestores e equipas comerciais externas. Permite faturar, registar notas de encomenda e consultar inventário em qualquer local.
               </p>
             </div>
@@ -1176,50 +1224,50 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          11. BANNER FINAL DE ALTA CONVERSÃO (PADRÃO XTRA DAS IMAGENS)
+          11. BANNER FINAL EXECUTIVO (SOFISTICADO, INSTITUCIONAL & DE ALTA CONVERSÃO)
           ══════════════════════════════════════════════════════════════════ */}
-      <section data-reveal className="py-24 sm:py-32 bg-gradient-to-br from-[#FF6500] via-[#EB5B00] to-[#D94F00] text-white relative overflow-hidden">
+      <section data-reveal className="py-24 sm:py-32 bg-[#0A1322] text-white relative overflow-hidden border-t border-slate-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-7 relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 border border-white/30 text-white text-xs font-bold uppercase tracking-wider font-display">
-            <span>Comece a Faturar Hoje Mesmo</span>
-          </div>
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-orange-400 block">
+            09 // Ativação Imediata
+          </span>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.12] font-display">
-            Modernize a faturação da sua empresa com segurança e conformidade AGT
+            Modernize a faturação da sua empresa com soberania offline e certificação AGT
           </h2>
 
-          <p className="text-white/90 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto font-normal">
-            Descarregue o instalador gratuito do KIVORA para Windows 10/11 e experimente todas as funcionalidades com a nossa licença de demonstração de 15 dias.
+          <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto font-normal">
+            Descarregue o instalador do KIVORA SOFT para computadores Windows 10/11 e experimente todas as funcionalidades com a nossa licença de avaliação de 15 dias sem compromisso.
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+          <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
             <button
               onClick={() => onNavigatePage('download')}
-              className="bg-slate-950 hover:bg-slate-900 active:scale-95 text-white font-bold text-sm px-8 py-4 rounded-full shadow-2xl flex items-center gap-2.5 cursor-pointer transition-all"
+              className="bg-[#FF6500] hover:bg-[#EB5B00] active:scale-98 text-white font-bold text-xs sm:text-sm px-8 py-3.5 rounded-xl shadow-lg flex items-center gap-2.5 cursor-pointer transition-all"
             >
-              <Download className="w-5 h-5 text-orange-400" />
+              <Download className="w-4 h-4" />
               <span>Baixar KIVORA SOFT Setup</span>
             </button>
             <button
               onClick={() => onOpenDemoModal('Demonstração VIP')}
-              className="bg-white/20 hover:bg-white/30 active:scale-95 text-white font-bold text-sm px-8 py-4 rounded-full border border-white/30 transition-all flex items-center gap-2 cursor-pointer"
+              className="bg-white/10 hover:bg-white/20 active:scale-98 text-white font-bold text-xs sm:text-sm px-8 py-3.5 rounded-xl border border-white/20 transition-all flex items-center gap-2 cursor-pointer backdrop-blur-md"
             >
               <span>Solicitar Demonstração VIP</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs text-white/90">
+          <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs text-slate-400">
             <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-amber-200" />
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span>Certificado AGT FE/387/AGT/2026</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <Check className="w-4 h-4 text-amber-200" />
+              <Check className="w-4 h-4 text-orange-400" />
               <span>15 Dias de Avaliação Gratuita</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <Check className="w-4 h-4 text-amber-200" />
+              <Check className="w-4 h-4 text-orange-400" />
               <span>Sem Fidelização nem Cartão de Crédito</span>
             </span>
           </div>

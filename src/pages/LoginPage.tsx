@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   HelpCircle,
   Building2,
-  Handshake,
   KeyRound,
   Sparkles,
 } from 'lucide-react';
@@ -25,14 +24,11 @@ interface LoginPageProps {
   onLoginSuccess?: (session: KivoraUserSession) => void;
 }
 
-type LoginTab = 'cliente' | 'parceiro' | 'admin';
-
 export const LoginPage: React.FC<LoginPageProps> = ({
   onBackToHome,
   onNavigatePage,
   onLoginSuccess,
 }) => {
-  const [activeTab, setActiveTab] = useState<LoginTab>('cliente');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -212,55 +208,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <p className="text-sm text-slate-500">
               {isFirstAccessMode
                 ? 'Insira os dados da sua licença oficial para definir a sua senha de primeiro acesso.'
-                : activeTab === 'cliente'
-                ? 'Aceda à Área do Cliente para consultar licenças, postos e faturas.'
-                : activeTab === 'parceiro'
-                ? 'Portal exclusivo para parceiros distribuidores e agentes credenciados.'
-                : 'Painel executivo de administração e fiscalização Kivora Soft.'}
+                : 'Insira as suas credenciais para aceder ao portal. O sistema encaminha-o automaticamente para a sua área de acordo com o seu perfil (Empresa, Parceiro ou Administração).'}
             </p>
           </div>
-
-          {/* Seletor Visual de Perfil (Tabs) */}
-          {!isFirstAccessMode && (
-            <div className="flex p-1 bg-slate-100 rounded-2xl border border-slate-200/80 text-xs font-bold font-display">
-              <button
-                type="button"
-                onClick={() => { setActiveTab('cliente'); setError(null); }}
-                className={`flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                  activeTab === 'cliente'
-                    ? 'bg-white text-[#FF6500] shadow-sm font-black'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Building2 className="w-3.5 h-3.5" />
-                <span>Cliente / Empresa</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => { setActiveTab('parceiro'); setError(null); }}
-                className={`flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                  activeTab === 'parceiro'
-                    ? 'bg-white text-[#FF6500] shadow-sm font-black'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Handshake className="w-3.5 h-3.5" />
-                <span>Parceiro</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => { setActiveTab('admin'); setError(null); }}
-                className={`flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                  activeTab === 'admin'
-                    ? 'bg-white text-[#FF6500] shadow-sm font-black'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Admin</span>
-              </button>
-            </div>
-          )}
 
           {/* MODO PRIMEIRO ACESSO DO CLIENTE */}
           {isFirstAccessMode ? (
@@ -365,28 +315,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </div>
             </form>
           ) : (
-            /* FORMULÁRIO PADRÃO DE LOGIN */
+            /* FORMULÁRIO PADRÃO UNIFICADO DE LOGIN */
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  {activeTab === 'cliente'
-                    ? 'Chave de Licença, NIF ou Email'
-                    : activeTab === 'parceiro'
-                    ? 'Código de Parceiro ou Email'
-                    : 'Email de Administrador'}
+                  Utilizador, Email, NIF ou Chave
                 </label>
                 <div className="relative">
                   <UserCheck className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="text"
                     required
-                    placeholder={
-                      activeTab === 'cliente'
-                        ? 'KVRA-XXXX-XXXX-XXXX, NIF ou Email'
-                        : activeTab === 'parceiro'
-                        ? 'PART-XXXX ou email@parceiro.ao'
-                        : 'kivora.angola@gmail.com'
-                    }
+                    placeholder="Email, NIF, código de parceiro ou KVRA-..."
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     className="w-full pl-11 pr-4 h-12 sm:h-13 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200 focus:border-[#FF6500] focus:ring-4 focus:ring-orange-500/10 rounded-xl text-sm text-slate-900 placeholder-slate-400 outline-none transition-all font-medium shadow-2xs"
@@ -447,22 +387,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </button>
 
               {/* Botão de Destaque: Primeiro Acesso com Chave de Licença */}
-              {activeTab === 'cliente' && (
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsFirstAccessMode(true);
-                      setFirstKey(identifier.startsWith('KVRA-') ? identifier : '');
-                      setFirstAccessError(null);
-                    }}
-                    className="w-full p-3 rounded-xl border border-dashed border-orange-300 bg-orange-50/60 hover:bg-orange-50 text-[#FF6500] flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer group"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-[#FF6500] group-hover:rotate-12 transition-transform" />
-                    <span>Primeiro acesso? Ativar com Chave de Licença</span>
-                  </button>
-                </div>
-              )}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsFirstAccessMode(true);
+                    setFirstKey(identifier.startsWith('KVRA-') ? identifier : '');
+                    setFirstAccessError(null);
+                  }}
+                  className="w-full p-3 rounded-xl border border-dashed border-slate-300 hover:border-orange-300 bg-slate-50/60 hover:bg-orange-50 text-slate-700 hover:text-[#FF6500] flex items-center justify-center gap-2 text-xs font-semibold transition-all cursor-pointer group"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#FF6500] group-hover:rotate-12 transition-transform" />
+                  <span>Primeiro acesso com licença oficial? Ativar aqui</span>
+                </button>
+              </div>
             </form>
           )}
 

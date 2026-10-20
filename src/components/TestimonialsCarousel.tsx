@@ -173,13 +173,11 @@ export const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Cabeçalho */}
-      <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16 space-y-3.5 px-4">
-        <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FF6500] font-display">
-          <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-          <span>{badgeText}</span>
-          <span className="w-4 h-0.5 bg-[#FF6500] rounded-full inline-block" />
-        </div>
+      {/* Cabeçalho Editorial */}
+      <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16 space-y-3 px-4">
+        <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#FF6500] block">
+          {badgeText}
+        </span>
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight font-display">
           {title}
         </h2>
@@ -190,7 +188,7 @@ export const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
 
       {/* Contentor do Carrossel */}
       <div className="relative max-w-5xl mx-auto px-4 sm:px-12">
-        <div className="overflow-hidden min-h-[360px] sm:min-h-[330px]">
+        <div className="overflow-hidden min-h-[340px] sm:min-h-[300px]">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={currentIndex}
@@ -199,7 +197,7 @@ export const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
               initial="enter"
               animate="center"
               exit="exit"
-              className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch"
+              className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch"
             >
               {/* Card 1 */}
               <TestimonialCard item={firstItem} />
@@ -216,23 +214,23 @@ export const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
         <button
           onClick={prevSlide}
           aria-label="Testemunho anterior"
-          className="absolute -left-2 sm:left-0 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-[#FF6500] hover:border-orange-300 shadow-md flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 z-10"
+          className="absolute -left-2 sm:left-0 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-[#FF6500] hover:border-slate-300 shadow-sm flex items-center justify-center transition-all cursor-pointer active:scale-95 z-10"
         >
-          <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
+          <ChevronLeft className="w-5 h-5" strokeWidth={2} />
         </button>
 
         {/* Botão Seguinte */}
         <button
           onClick={nextSlide}
           aria-label="Próximo testemunho"
-          className="absolute -right-2 sm:right-0 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-[#FF6500] hover:border-orange-300 shadow-md flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 z-10"
+          className="absolute -right-2 sm:right-0 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-[#FF6500] hover:border-slate-300 shadow-sm flex items-center justify-center transition-all cursor-pointer active:scale-95 z-10"
         >
-          <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
+          <ChevronRight className="w-5 h-5" strokeWidth={2} />
         </button>
       </div>
 
-      {/* Paginação por Pontos */}
-      <div className="flex items-center justify-center gap-2.5 mt-10">
+      {/* Paginação por Traços Monospace */}
+      <div className="flex items-center justify-center gap-2 mt-8">
         {testimonials.map((t, idx) => (
           <button
             key={t.id}
@@ -241,10 +239,10 @@ export const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
               setCurrentIndex(idx);
             }}
             aria-label={`Ir para testemunho de ${t.name}`}
-            className={`transition-all duration-300 rounded-full cursor-pointer ${
+            className={`transition-all duration-200 cursor-pointer h-1.5 rounded-full ${
               idx === currentIndex
-                ? 'w-8 h-2.5 bg-[#FF6500]'
-                : 'w-2.5 h-2.5 bg-slate-300 hover:bg-slate-400'
+                ? 'w-6 bg-[#FF6500]'
+                : 'w-2 bg-slate-300 hover:bg-slate-400'
             }`}
           />
         ))}
@@ -259,64 +257,56 @@ interface TestimonialCardProps {
 
 const TestimonialCard: React.FC<TestimonialCardProps> = ({ item }) => {
   return (
-    <div className="space-y-4 flex flex-col justify-between h-full">
-      {/* Balão de Fala Estilo Executivo com Gradiente Vibrante Laranja */}
-      <div className="bg-gradient-to-br from-[#FF7A1A] to-[#FF6500] text-white p-7 sm:p-8 rounded-3xl shadow-xl shadow-orange-500/20 relative flex flex-col justify-between flex-1">
-        <div>
-          {/* Header do Balão: Estrelas + Badge de Destaque */}
-          <div className="flex items-center justify-between gap-2 mb-4">
-            <div className="flex items-center gap-1 text-amber-200">
-              {[...Array(item.rating)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-current" />
-              ))}
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 text-white px-2.5 py-0.5 rounded-full backdrop-blur-xs font-display">
-              {item.badge}
-            </span>
+    <div className="bg-white rounded-2xl p-7 border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-md transition-all flex flex-col justify-between h-full space-y-6">
+      <div className="space-y-4">
+        {/* Topo do Card: Estrelas + Badge */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1 text-amber-500">
+            {[...Array(item.rating)].map((_, i) => (
+              <Star key={i} className="w-4 h-4 fill-current" />
+            ))}
           </div>
-
-          {/* Citação */}
-          <p className="text-xs sm:text-[13px] leading-relaxed font-normal text-white/95">
-            "{item.quote}"
-          </p>
-        </div>
-
-        <div className="mt-4 flex items-center justify-between text-[11px] text-white/80 pt-3 border-t border-white/20 font-medium">
-          <span className="flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-amber-200" />
-            <span>Cliente Verificado</span>
-          </span>
-          <span className="flex items-center gap-1">
-            <MapPin className="w-3.5 h-3.5" />
-            <span>{item.city}</span>
+          <span className="text-[11px] font-mono font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md border border-slate-200/70">
+            {item.badge}
           </span>
         </div>
 
-        {/* Triângulo apontador do balão de fala */}
-        <div className="absolute -bottom-2.5 left-10 w-5 h-5 bg-[#FF6500] rotate-45 pointer-events-none" />
+        {/* Citação */}
+        <p className="text-xs sm:text-sm leading-relaxed text-slate-700 font-normal">
+          "{item.quote}"
+        </p>
       </div>
 
-      {/* Informações do Autor Abaixo do Balão */}
-      <div className="flex items-center gap-3.5 pl-6 pt-1">
-        <div className="w-12 h-12 rounded-full border-2 border-[#FF6500] p-0.5 shrink-0 shadow-sm bg-white overflow-hidden">
-          <img
-            src={item.avatar}
-            alt={item.name}
-            className="w-full h-full object-cover rounded-full"
-            loading="lazy"
-            onError={(e) => {
-              // Fallback gracioso se a imagem não carregar
-              (e.target as HTMLElement).style.display = 'none';
-            }}
-          />
+      {/* Autor & Localização */}
+      <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-full ring-1 ring-slate-200 shadow-xs shrink-0 overflow-hidden bg-slate-100">
+            <img
+              src={item.avatar}
+              alt={item.name}
+              className="w-full h-full object-cover rounded-full"
+              loading="lazy"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = 'none';
+              }}
+            />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <h4 className="text-xs sm:text-sm font-bold text-slate-950 font-display truncate">
+                {item.name}
+              </h4>
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            </div>
+            <p className="text-[11px] text-slate-500 truncate font-normal">
+              {item.role} • <span className="font-semibold text-slate-700">{item.company}</span>
+            </p>
+          </div>
         </div>
-        <div className="min-w-0">
-          <h4 className="text-xs sm:text-sm font-bold text-slate-950 font-display truncate">
-            {item.name}
-          </h4>
-          <p className="text-[11px] text-slate-500 truncate font-medium">
-            {item.role} • <strong className="text-slate-700">{item.company}</strong>
-          </p>
+
+        <div className="hidden sm:flex items-center gap-1 text-[11px] text-slate-400 shrink-0 font-mono">
+          <MapPin className="w-3 h-3 text-slate-400" />
+          <span>{item.city}</span>
         </div>
       </div>
     </div>

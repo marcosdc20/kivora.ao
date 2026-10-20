@@ -258,19 +258,20 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                   exit="exit"
                   className="space-y-6"
                 >
-                  {/* Tagline Badge com micro-interação */}
-                  <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.08] hover:bg-white/[0.12] border border-white/[0.15] backdrop-blur-md shadow-xs transition-colors">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-                    </span>
-                    <span className="text-xs font-bold text-slate-200 uppercase tracking-wider font-display">
+                  {/* Selo Oficial de Certificação AGT & Legislação (Anti-Slop: Substituição de pulsing pill por selo institucional sóbrio) */}
+                  <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-lg bg-white/[0.06] border border-white/[0.12] backdrop-blur-md shadow-xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span className="text-[11px] font-bold text-slate-200 tracking-wide uppercase font-mono-num">
                       {slide.tagline}
+                    </span>
+                    <span className="text-white/20">|</span>
+                    <span className="text-[11px] text-orange-400 font-mono-num font-semibold">
+                      FE/387/AGT/2026
                     </span>
                   </div>
 
                   {/* Headline com Tipografia Geist / Display */}
-                  <h1 className="text-3xl sm:text-5xl lg:text-[54px] font-extrabold text-white leading-[1.12] sm:leading-[1.08] tracking-tight font-display whitespace-pre-line drop-shadow-sm">
+                  <h1 className="text-3xl sm:text-5xl lg:text-[54px] font-extrabold text-white leading-[1.12] sm:leading-[1.08] tracking-tight font-display whitespace-pre-line drop-shadow-xs">
                     {slide.headline}
                   </h1>
 
@@ -373,8 +374,8 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                     style={{ backgroundColor: slide.ambientColor }}
                   />
 
-                  {/* Imagem do Equipamento com Efeito Float Gentle */}
-                  <div className="relative z-10 w-full flex items-center justify-center animate-float-gentle">
+                  {/* Imagem do Equipamento Aterrada na Base com Sombra Realista (Anti-Slop: Sem rotações flutuantes no vácuo) */}
+                  <div className="relative z-10 w-full flex flex-col items-center justify-center">
                     <img
                       src={slide.deviceImage}
                       alt={slide.deviceAlt}
@@ -382,8 +383,10 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onNavigatePage, onOp
                       decoding="async"
                       width="680"
                       height="460"
-                      className="w-full h-auto max-h-[280px] sm:max-h-[380px] lg:max-h-[460px] object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.6)] select-none pointer-events-none"
+                      className="w-full h-auto max-h-[280px] sm:max-h-[380px] lg:max-h-[460px] object-contain drop-shadow-[0_25px_45px_rgba(0,0,0,0.7)] select-none pointer-events-none transition-transform duration-500"
                     />
+                    {/* Linha/Sombra elíptica de aterramento */}
+                    <div className="w-3/4 h-3 bg-black/40 rounded-full blur-md -mt-2 pointer-events-none" />
                   </div>
                 </motion.div>
               </AnimatePresence>

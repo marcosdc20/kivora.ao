@@ -208,18 +208,18 @@ export const GuiaAgtPage: React.FC<GuiaAgtPageProps> = ({ onOpenDemoModal, onNav
           </div>
         </section>
 
-        {/* 1.1 Demonstrador Interativo de Faturação Eletrónica AGT */}
+        {/* 1.1 Documento Fiscal Original AGT */}
         <section className="bg-gradient-to-br from-slate-50 via-blue-50/20 to-slate-50 p-8 sm:p-12 rounded-3xl border border-slate-200/90 shadow-sm space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2.5">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Simulação Prática em Tempo Real</span>
+              <span>Documento Fiscal Autêntico</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-950">
-              Demonstrador de Faturação Eletrónica com QR Code e Hash AGT
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-950 font-display">
+              Talão Fiscal Oficial de 80mm com QR Code e Certificação AGT
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Experimente abaixo o motor fiscal do KIVORA SOFT. Alterne entre setores comerciais e veja o cálculo de IVA, o QR Code de autenticação e a assinatura inviolável em ação.
+              Consulte abaixo um documento original emitido pelo KIVORA SOFT em impressora térmica ESC/POS. Cumpre integralmente as exigências do Decreto Presidencial 292/18 e DP 71/25, com assinatura criptográfica sequencial e QR Code oficial auditável pela AGT.
             </p>
           </div>
 

@@ -10,6 +10,7 @@ import {
   subscribeSystemSettings, getCachedSystemSettings,
   SystemCompanySettings, DEFAULT_OFFICIAL_DOCUMENTS
 } from '../services/systemSettingsService';
+import certificadoAgtImg from '../assets/certificado-oficial-agt.png';
 
 interface CertificacaoDocumentosPageProps {
   onNavigatePage: (page: any) => void;
@@ -105,92 +106,78 @@ export const CertificacaoDocumentosPage: React.FC<CertificacaoDocumentosPageProp
             Aceda aos comprovativos oficiais de homologação tributária, ao despacho da AGT e à documentação legal do software <strong className="text-slate-900 font-semibold">KIVORA SOFT</strong>.
           </p>
         </div>
-
-        {/* ── BANNER PRINCIPAL DO CERTIFICADO AGT ── */}
-        <div className="bg-gradient-to-br from-[#0B1528] via-[#111F38] to-[#0B1528] text-white rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-xl relative overflow-hidden">
-          <div className="absolute right-0 top-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-8 space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 border border-orange-500/40 text-orange-400 font-mono text-xs font-bold">
+        {/* ── CERTIFICADO OFICIAL AGT (DESTAQUE AMPLO, LEGÍVEL E INSTITUCIONAL) ── */}
+        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/90 shadow-sm space-y-8">
+          
+          {/* Cabeçalho de Homologação & Ações Oficiais */}
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-slate-100">
+            <div className="max-w-3xl space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-[#FF6500] font-mono text-xs font-bold">
                 <Award className="w-4 h-4" />
                 <span>{settings.agtCertificate || 'CERTIFICADO OFICIAL N.º FE/387/AGT/2026'}</span>
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug font-display">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-950 tracking-tight leading-snug font-display">
                 Software Homologado e Certificado pela AGT
               </h2>
 
-              <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                O KIVORA SOFT está formalmente certificado pela Administração Geral Tributária nos termos do <strong className="text-white">{settings.agtDecretoRef || 'Decreto Presidencial n.º 71/25'}</strong> e do Regime Jurídico das Faturas. Garante assinatura digital {settings.agtKeyHash || 'RSA-2048 / SHA-256'} em cadeia contínua, geração de QR Code fiscal oficial e ficheiro SAF-T AO com 100% de conformidade.
+              <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+                O KIVORA SOFT está formalmente certificado pela Administração Geral Tributária nos termos do <strong className="text-slate-900 font-semibold">{settings.agtDecretoRef || 'Decreto Presidencial n.º 71/25'}</strong> e do Regime Jurídico das Faturas. Garante assinatura digital {settings.agtKeyHash || 'RSA-2048 / SHA-256'} em cadeia contínua, geração de QR Code fiscal oficial e ficheiro SAF-T AO com 100% de conformidade.
               </p>
-
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <button
-                  onClick={() => setShowCertificateModal(true)}
-                  className="px-5 py-3 rounded-xl bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-orange-500/25 transition-all cursor-pointer active:scale-95"
-                >
-                  <Eye className="w-4 h-4" />
-                  <span>Visualizar Certificado Oficial</span>
-                </button>
-
-                {settings.agtCertificateDocUrl && (
-                  <a
-                    href={settings.agtCertificateDocUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    download="Certificado_Oficial_AGT_Kivora.pdf"
-                    className="px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-md transition-all cursor-pointer"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Baixar Documento Original</span>
-                  </a>
-                )}
-
-                <button
-                  onClick={handlePrintCertificate}
-                  className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 border border-white/15 transition-all cursor-pointer"
-                >
-                  <Printer className="w-4 h-4" />
-                  <span>Imprimir em A4</span>
-                </button>
-              </div>
             </div>
 
-            {/* Quadro resumo à direita */}
-            <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3.5 backdrop-blur-md">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block border-b border-white/10 pb-2">
-                Ficha de Conformidade
-              </span>
+            {/* Botões de Ação */}
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <button
+                onClick={() => setShowCertificateModal(true)}
+                className="px-5 py-3 rounded-xl bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-98"
+              >
+                <Eye className="w-4 h-4" />
+                <span>Ecrã Completo</span>
+              </button>
 
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between items-center text-slate-300">
-                  <span className="text-slate-400">Certificado AGT:</span>
-                  <span className="font-mono font-bold text-emerald-400">{settings.agtCertificate ? settings.agtCertificate.replace(/.*N[.]º\s*/i, '') : 'FE/387/AGT/2026'}</span>
-                </div>
-                <div className="flex justify-between items-center text-slate-300">
-                  <span className="text-slate-400">Decreto Aplicável:</span>
-                  <span className="font-semibold text-white">{settings.agtDecretoRef || 'DP 71/25 & DP 292/18'}</span>
-                </div>
-                <div className="flex justify-between items-center text-slate-300">
-                  <span className="text-slate-400">Algoritmo Fiscal:</span>
-                  <span className="font-mono text-slate-200">{settings.agtKeyHash || 'RSA-2048 / SHA-256'}</span>
-                </div>
-                <div className="flex justify-between items-center text-slate-300">
-                  <span className="text-slate-400">Exportação SAF-T:</span>
-                  <span className="font-semibold text-emerald-400">XML Validado AGT</span>
-                </div>
-                <div className="flex justify-between items-center text-slate-300">
-                  <span className="text-slate-400">Entidade Titular:</span>
-                  <span className="font-semibold text-white">{settings.agtProducerEntity || settings.company || 'Visual Software, Lda.'}</span>
-                </div>
-                <div className="flex justify-between items-center text-slate-300">
-                  <span className="text-slate-400">NIF da Empresa:</span>
-                  <span className="font-mono text-white">{settings.agtProducerNif || settings.nif || '5417088920'}</span>
-                </div>
+              <a
+                href={settings.agtCertificateDocUrl || certificadoAgtImg}
+                target="_blank"
+                rel="noreferrer"
+                download="Certificado_Oficial_AGT_Kivora.png"
+                className="px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-xs transition-all cursor-pointer active:scale-98"
+              >
+                <Download className="w-4 h-4" />
+                <span>Baixar Original</span>
+              </a>
+
+              <button
+                onClick={handlePrintCertificate}
+                className="px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs sm:text-sm flex items-center gap-2 border border-slate-200 transition-all cursor-pointer"
+              >
+                <Printer className="w-4 h-4" />
+                <span>Imprimir em A4</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Imagem Original do Certificado Oficial AGT em Tamanho Grande e Legível */}
+          <div className="flex justify-center w-full pt-2">
+            <div
+              onClick={() => setShowCertificateModal(true)}
+              className="relative rounded-2xl overflow-hidden border border-slate-200/90 shadow-2xl shadow-slate-900/10 bg-white p-3 sm:p-5 cursor-pointer group hover:border-[#FF6500] transition-all max-w-4xl w-full"
+              title="Clique para ampliar o Certificado Oficial da AGT em alta resolução"
+            >
+              <img
+                src={certificadoAgtImg}
+                alt="Certificado de Software para Facturação Electrónica - KIVORA SOFT N.º FE/387/AGT/2026"
+                className="w-full h-auto object-contain rounded-xl select-none group-hover:scale-[1.005] transition-transform"
+              />
+              <div className="absolute inset-0 bg-slate-950/10 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
+                <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-950/90 text-white text-xs sm:text-sm font-bold shadow-2xl border border-white/20">
+                  <Eye className="w-4 h-4 text-orange-400" />
+                  Clique para Visualizar em Ecrã Completo
+                </span>
               </div>
             </div>
           </div>
+
         </div>
 
         {/* ── GRELHA DE DOCUMENTOS OFICIAIS PARA CONSULTA & DOWNLOAD ── */}
@@ -356,80 +343,59 @@ export const CertificacaoDocumentosPage: React.FC<CertificacaoDocumentosPageProp
       {/* ── MODAL EM TELA CHEIA DO CERTIFICADO OFICIAL AGT ── */}
       {showCertificateModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-3xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] animate-fadeIn">
-            {/* Header do modal */}
-            <div className="p-4 sm:p-5 bg-slate-950 text-white flex items-center justify-between shrink-0">
+          <div className="bg-white rounded-3xl max-w-5xl lg:max-w-6xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] animate-fadeIn">
+            {/* Header do modal limpo e institucional */}
+            <div className="p-4 sm:p-5 bg-white border-b border-slate-200 text-slate-900 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-[#FF6500]">
+                <div className="w-9 h-9 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-[#FF6500]">
                   <Award className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-sm sm:text-base">Certificado de Homologação AGT</h3>
-                  <p className="text-[11px] text-slate-400">Software Certificado sob o n.º FE/387/AGT/2026</p>
+                  <h3 className="font-bold text-slate-950 text-sm sm:text-base font-display">
+                    Certificado de Homologação AGT Oficial
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    N.º FE/387/AGT/2026 · VISUAL SOFTWARE, LDA · NIF: 5002863944
+                  </p>
                 </div>
               </div>
               <button
                 onClick={() => setShowCertificateModal(false)}
-                className="p-2 text-slate-400 hover:text-white rounded-xl cursor-pointer"
+                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl cursor-pointer transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            {/* Conteúdo do Certificado (Estilo A4) */}
-            <div className="p-6 sm:p-10 overflow-y-auto space-y-6 text-slate-900 bg-white">
-              <div className="text-center space-y-2 border-b border-slate-200 pb-6">
-                <img src="/imagens/logo_sem_fundo.png" alt="Kivora Logo" className="h-10 mx-auto object-contain" />
-                <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                  República de Angola • Administração Geral Tributária
-                </h2>
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-950 uppercase font-display">
-                  Certificado de Faturação Eletrónica
-                </h1>
-                <div className="inline-block px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 font-mono font-bold text-xs">
-                  N.º FE/387/AGT/2026
-                </div>
-              </div>
+            {/* Imagem Original do Certificado Oficial em Alta Resolução */}
+            <div className="p-4 sm:p-8 overflow-y-auto flex flex-col items-center bg-slate-100/70">
+              <img
+                src={certificadoAgtImg}
+                alt="Certificado de Software para Facturação Electrónica - KIVORA SOFT N.º FE/387/AGT/2026"
+                className="w-full max-w-5xl h-auto object-contain rounded-2xl shadow-xl border border-slate-300 bg-white"
+              />
+            </div>
 
-              <div className="space-y-4 text-xs sm:text-sm text-slate-700 leading-relaxed text-justify">
-                <p>
-                  Certifica-se que o software executivo de faturação eletrónica e gestão empresarial <strong>KIVORA SOFT</strong>, desenvolvido pela sociedade <strong>VISUAL SOFTWARE, LDA.</strong> (NIF 5417088920), cumpre integralmente os requisitos funcionais, técnicos e fiscais estabelecidos pelo <strong>Decreto Presidencial n.º 71/25</strong> e pela legislação tributária angolana.
-                </p>
-
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2 font-mono text-xs text-slate-800">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Denominação:</span>
-                    <span className="font-bold">KIVORA SOFT</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Versão Homologada:</span>
-                    <span className="font-bold">2.1.0 Desktop Offline-First</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">N.º do Despacho AGT:</span>
-                    <span className="font-bold text-emerald-600">FE/387/AGT/2026</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Assinatura Digital:</span>
-                    <span className="font-bold">RSA-2048 com Hash Chaining</span>
-                  </div>
-                </div>
-
-                <p>
-                  O sistema está legalmente habilitado para emissão de Faturas, Faturas-Recibo, Notas de Crédito, Notas de Débito e Guias de Transporte com código bidimensional (QR Code) e geração do ficheiro de auditoria fiscal <strong>SAF-T AO</strong>.
-                </p>
-              </div>
-
-              <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
-                <button
-                  onClick={() => setShowCertificateModal(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs cursor-pointer"
+            {/* Rodapé de Ações do Modal */}
+            <div className="p-4 bg-white border-t border-slate-200 flex items-center justify-between">
+              <button
+                onClick={() => setShowCertificateModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs cursor-pointer"
+              >
+                Fechar Visualização
+              </button>
+              <div className="flex items-center gap-2">
+                <a
+                  href={certificadoAgtImg}
+                  download="Certificado_Oficial_AGT_FE387.png"
+                  className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 cursor-pointer shadow-sm transition-all"
                 >
-                  Fechar Visualização
-                </button>
+                  <Download className="w-4 h-4" />
+                  <span>Baixar Ficheiro</span>
+                </a>
                 <button
                   onClick={handlePrintCertificate}
-                  className="px-5 py-2.5 rounded-xl bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-xs flex items-center gap-2 cursor-pointer shadow-md shadow-orange-500/25"
+                  className="px-5 py-2.5 rounded-xl bg-[#FF6500] hover:bg-[#EB5B00] text-white font-bold text-xs flex items-center gap-2 cursor-pointer shadow-md shadow-orange-500/25 transition-all"
                 >
                   <Printer className="w-4 h-4" />
                   <span>Imprimir Certificado</span>
