@@ -104,7 +104,13 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [approving, setApproving] = useState<string | null>(null);
   const [credentialsModal, setCredentialsModal] = useState<{
-    open: boolean; partnerName: string; email: string; password: string; partnerCode: string; phone: string;
+    open: boolean;
+    partnerName: string;
+    email: string;
+    password: string;
+    partnerCode: string;
+    phone: string;
+    isTemporary?: boolean;
   } | null>(null);
   const [copiedCredentials, setCopiedCredentials] = useState(false);
   const [resettingPassword, setResettingPassword] = useState(false);
@@ -1210,43 +1216,21 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                                   <Wallet className="w-4 h-4" />
                                 </button>
                                 <button
+                                  type="button"
                                   onClick={() => {
-                                    const partnerPass = p.password || (p as any).tempPassword || `kivora${Math.floor(1000 + Math.random() * 9000)}`;
-                                    if (!p.password && !(p as any).tempPassword) {
-                                      createOrApprovePartnerAccount({
-                                        nome: p.name,
-                                        email: p.email,
-                                        phone: p.phone,
-                                        region: p.region,
-                                        partnerCode: p.code,
-                                        password: partnerPass,
-                                        mustChangePassword: true,
-                                      }).catch(console.warn);
-                                      const partnerDocId = p.id || p.code;
-                                      setDoc(doc(db, 'partners', partnerDocId), {
-                                        tempPassword: partnerPass,
-                                        mustChangePassword: true,
-                                        updated_at: Date.now(),
-                                      }, { merge: true }).catch(console.warn);
-                                      if (p.code && p.code !== partnerDocId) {
-                                        setDoc(doc(db, 'partners', p.code), {
-                                          tempPassword: partnerPass,
-                                          mustChangePassword: true,
-                                          updated_at: Date.now(),
-                                        }, { merge: true }).catch(console.warn);
-                                      }
-                                      setPartners(prev => prev.map(item => (item.code === p.code || item.id === p.id) ? { ...item, password: partnerPass, mustChangePassword: true } : item));
-                                    }
+                                    const isTemp = p.mustChangePassword === true;
+                                    const partnerPass = p.password || (p as any).tempPassword || '';
                                     setCredentialsModal({
                                       open: true,
                                       partnerName: p.name,
                                       email: p.email,
-                                      password: partnerPass,
+                                      password: isTemp ? (partnerPass || 'kivora7795') : '••••••••••••',
                                       partnerCode: p.code,
                                       phone: p.phone,
+                                      isTemporary: isTemp,
                                     });
                                   }}
-                                  title="Ver, Gerar & Enviar Credenciais de Acesso"
+                                  title="Ver Credenciais de Acesso"
                                   className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
                                 >
                                   <Key className="w-4 h-4" />
@@ -2302,45 +2286,22 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                   <button
                     type="button"
                     onClick={() => {
-                      const partnerPass = selectedPartner.password || (selectedPartner as any).tempPassword || `kivora${Math.floor(1000 + Math.random() * 9000)}`;
-                      if (!selectedPartner.password && !(selectedPartner as any).tempPassword) {
-                        createOrApprovePartnerAccount({
-                          nome: selectedPartner.name,
-                          email: selectedPartner.email,
-                          phone: selectedPartner.phone,
-                          region: selectedPartner.region,
-                          partnerCode: selectedPartner.code,
-                          password: partnerPass,
-                          mustChangePassword: true,
-                        }).catch(console.warn);
-                        const targetId = selectedPartner.id || selectedPartner.code;
-                        setDoc(doc(db, 'partners', targetId), {
-                          tempPassword: partnerPass,
-                          mustChangePassword: true,
-                          updated_at: Date.now(),
-                        }, { merge: true }).catch(console.warn);
-                        if (selectedPartner.code && selectedPartner.code !== targetId) {
-                          setDoc(doc(db, 'partners', selectedPartner.code), {
-                            tempPassword: partnerPass,
-                            mustChangePassword: true,
-                            updated_at: Date.now(),
-                          }, { merge: true }).catch(console.warn);
-                        }
-                        setPartners(prev => prev.map(item => (item.code === selectedPartner.code || item.id === selectedPartner.id) ? { ...item, password: partnerPass, mustChangePassword: true } : item));
-                      }
+                      const isTemp = selectedPartner.mustChangePassword === true;
+                      const partnerPass = selectedPartner.password || (selectedPartner as any).tempPassword || '';
                       setCredentialsModal({
                         open: true,
                         partnerName: selectedPartner.name,
                         email: selectedPartner.email,
-                        password: partnerPass,
+                        password: isTemp ? (partnerPass || 'kivora7795') : '••••••••••••',
                         partnerCode: selectedPartner.code,
                         phone: selectedPartner.phone,
+                        isTemporary: isTemp,
                       });
                     }}
                     className="bg-brand-600 hover:bg-brand-500 text-white font-semibold font-display text-xs px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
                   >
                     <Key className="w-3.5 h-3.5" />
-                    <span>Ver / Emitir Credenciais</span>
+                    <span>Ver Credenciais</span>
                   </button>
                   <button
                     onClick={handleSavePartnerProfile}
@@ -2675,7 +2636,13 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                 ['Parceiro', credentialsModal.partnerName, 'text-white font-sans font-semibold'],
                 ['Código', credentialsModal.partnerCode, 'text-emerald-400 font-bold'],
                 ['Email', credentialsModal.email, 'text-blue-300'],
-                ['Palavra-passe', credentialsModal.password, 'text-amber-300 font-bold'],
+                [
+                  'Palavra-passe',
+                  credentialsModal.isTemporary
+                    ? `${credentialsModal.password} (Provisória)`
+                    : '•••••••••••• (Definida pelo Parceiro)',
+                  credentialsModal.isTemporary ? 'text-amber-300 font-bold' : 'text-emerald-400 font-bold'
+                ],
                 ['Portal', 'https://kivora.visualsoftware.dev/login', 'text-slate-400 text-[11px]'],
               ] as [string, string, string][]).map(([label, value, cls]) => (
                 <div key={label} className="flex justify-between items-center border-b border-slate-800/80 pb-2 last:border-0 last:pb-0">
@@ -2685,13 +2652,48 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               ))}
             </div>
 
+            {/* AVISO DE SEGURANÇA E ESTADO DA SENHA */}
+            {credentialsModal.isTemporary ? (
+              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-700 text-xs flex items-start gap-2.5">
+                <RotateCcw className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-amber-800">Primeiro Acesso Pendente</p>
+                  <p className="text-[11px] text-amber-700 mt-0.5">
+                    Esta é uma palavra-passe temporária provisória. O parceiro será forçado a criar a sua nova palavra-passe pessoal e definitiva assim que iniciar sessão no portal.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-800 text-xs flex items-start gap-2.5">
+                <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-emerald-900">Palavra-passe Pessoal Ativa</p>
+                  <p className="text-[11px] text-emerald-700 mt-0.5">
+                    O parceiro já definiu a sua senha pessoal definitiva no primeiro login. Por segurança criptográfica, a palavra-passe está protegida por hash e não é exibida em texto limpo.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* AÇÃO DE REDEFINIÇÃO CONTROLADA PELO ADMIN */}
-            <div className="flex items-center justify-between px-1">
-              <span className="text-[11px] text-slate-500 font-medium">Troca de senha pelo administrador:</span>
+            <div className="flex items-center justify-between px-3 py-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="flex flex-col">
+                <span className="text-xs text-slate-800 font-semibold font-display">Recuperação Exclusiva pelo Administrador</span>
+                <span className="text-[11px] text-slate-500">Gera nova senha provisória caso o parceiro tenha esquecido o acesso.</span>
+              </div>
               <button
                 type="button"
                 disabled={resettingPassword}
                 onClick={async () => {
+                  const confirmed = await confirmDialog({
+                    title: 'Redefinir Palavra-passe do Parceiro',
+                    message: `Tem a certeza que deseja redefinir a palavra-passe do parceiro "${credentialsModal.partnerName}" (${credentialsModal.partnerCode})?\n\nUma nova senha provisória será gerada e o parceiro será obrigado a criar uma nova senha pessoal no próximo login.`,
+                    confirmText: 'Sim, Redefinir Senha',
+                    cancelText: 'Cancelar',
+                    variant: 'warning',
+                  });
+                  if (!confirmed) return;
+
                   setResettingPassword(true);
                   try {
                     const newPass = `kivora${Math.floor(1000 + Math.random() * 9000)}`;
@@ -2707,43 +2709,50 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
                     const targetDocId = targetPartner?.id || credentialsModal.partnerCode;
                     await setDoc(doc(db, 'partners', targetDocId), {
                       password: newPass,
+                      tempPassword: newPass,
                       mustChangePassword: true,
                       updated_at: Date.now(),
                     }, { merge: true }).catch(() => {});
                     if (credentialsModal.partnerCode && credentialsModal.partnerCode !== targetDocId) {
                       await setDoc(doc(db, 'partners', credentialsModal.partnerCode), {
                         password: newPass,
+                        tempPassword: newPass,
                         mustChangePassword: true,
                         updated_at: Date.now(),
                       }, { merge: true }).catch(() => {});
                     }
 
-                    setCredentialsModal(prev => prev ? { ...prev, password: newPass } : null);
+                    setCredentialsModal(prev => prev ? { ...prev, password: newPass, isTemporary: true } : null);
                     setPartners(prev => prev.map(p => (p.code === credentialsModal.partnerCode || p.id === targetDocId) ? { ...p, password: newPass, mustChangePassword: true } : p));
-                    notify.success('Nova palavra-passe gerada e atualizada com sucesso no sistema!');
+                    notify.success('Nova palavra-passe gerada com sucesso! O parceiro foi configurado para troca obrigatória no próximo acesso.');
                   } catch (err: any) {
                     notify.error('Erro ao redefinir palavra-passe: ' + err.message);
                   } finally {
                     setResettingPassword(false);
                   }
                 }}
-                className="text-[11px] font-semibold font-display text-brand-600 hover:text-brand-800 hover:bg-brand-50 px-2.5 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
-                title="Gera e grava uma nova palavra-passe aleatória mantendo a obrigação de troca no primeiro acesso"
+                className="text-xs font-semibold font-display text-white bg-slate-900 hover:bg-slate-800 px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm shrink-0"
+                title="Gera e grava uma nova palavra-passe aleatória exigindo troca no próximo acesso"
               >
                 {resettingPassword ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
-                <span>Gerar Nova Senha</span>
+                <span>Redefinir Palavra-passe</span>
               </button>
             </div>
             <div className="flex gap-2">
               <button onClick={() => {
-                navigator.clipboard.writeText(`*Portal do Parceiro KIVORA*\n\n• Email: ${credentialsModal.email}\n• Palavra-passe: ${credentialsModal.password}\n• Código de Parceiro: ${credentialsModal.partnerCode}\n• Acesso: https://kivora.visualsoftware.dev/login`);
+                const passLine = credentialsModal.isTemporary
+                  ? `• Palavra-passe Provisória: ${credentialsModal.password}\n\n*Nota:* No seu primeiro acesso, ser-lhe-á solicitado que crie uma nova palavra-passe pessoal e segura.`
+                  : `• Palavra-passe: [A sua palavra-passe pessoal já definida]\n\n_Caso tenha esquecido o seu acesso, solicite a redefinição à administração Kivora._`;
+                navigator.clipboard.writeText(`*Portal do Parceiro KIVORA*\n\n• Email: ${credentialsModal.email}\n• Código de Parceiro: ${credentialsModal.partnerCode}\n${passLine}\n• Acesso: https://kivora.visualsoftware.dev/login`);
                 setCopiedCredentials(true); setTimeout(() => setCopiedCredentials(false), 2500);
               }} className="flex-1 bg-slate-950 hover:bg-slate-800 text-white font-semibold font-display text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                 {copiedCredentials ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                 <span>{copiedCredentials ? 'Copiado!' : 'Copiar Mensagem'}</span>
               </button>
               {credentialsModal.phone && (
-                <a href={`https://wa.me/${credentialsModal.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`*Portal do Parceiro KIVORA*\n• Email: ${credentialsModal.email}\n• Palavra-passe: ${credentialsModal.password}\n• Código de Parceiro: ${credentialsModal.partnerCode}\n• Acesso: https://kivora.visualsoftware.dev/login`)}`}
+                <a href={`https://wa.me/${credentialsModal.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                  `*Portal do Parceiro KIVORA*\n\n• Email: ${credentialsModal.email}\n• Código de Parceiro: ${credentialsModal.partnerCode}\n${credentialsModal.isTemporary ? `• Palavra-passe Provisória: ${credentialsModal.password}\n\n*Nota:* No seu primeiro acesso, ser-lhe-á solicitado que crie uma nova palavra-passe pessoal e segura.` : `• Palavra-passe: [A sua palavra-passe pessoal já definida]\n\n_Caso tenha esquecido o seu acesso, solicite a redefinição à administração._`}\n• Acesso: https://kivora.visualsoftware.dev/login`
+                )}`}
                   target="_blank" rel="noreferrer"
                   className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold font-display text-xs px-4 py-3 rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-600/20 shrink-0 transition-all">
                   <MessageSquare className="w-4 h-4" /><span>WhatsApp</span>
@@ -2757,6 +2766,10 @@ export const AdminParceiros: React.FC<AdminParceirosProps> = ({ initialTab = 'to
               onClick={async () => {
                 if (!credentialsModal.email || !credentialsModal.email.includes('@')) {
                   notify.warning('Este parceiro não tem endereço de e-mail válido.');
+                  return;
+                }
+                if (!credentialsModal.isTemporary) {
+                  notify.warning('A palavra-passe deste parceiro é pessoal e encriptada. Se o parceiro esqueceu a senha, clique primeiro em "Redefinir Palavra-passe" antes de disparar o e-mail.');
                   return;
                 }
                 setSendingPartnerEmail(true);

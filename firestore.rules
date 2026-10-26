@@ -233,7 +233,7 @@ service cloud.firestore {
       allow update: if isAdmin() || (
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'id', 'name', 'nif', 'email', 'phone', 'address',
-          'partner_id', 'status', 'createdAt', 'updatedAt', 'updated_at'
+          'partner_id', 'partner_code', 'logo_url', 'status', 'createdAt', 'updatedAt', 'updated_at'
         ])
       );
       allow delete: if isAdmin();
@@ -375,7 +375,7 @@ service cloud.firestore {
     }
     match /admins/{adminId} {
       allow read: if true;
-      allow write: if isAdmin() || (isAuthenticated() && request.auth.uid == adminId);
+      allow write: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────

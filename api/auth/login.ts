@@ -254,6 +254,226 @@ function verifyPasswordMatch(
   return false;
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+ * Blindagem de autenticação (v2.1): identidade de parceiro inequívoca,
+ * verificação estrita de credenciais, bloqueio persistente anti força-bruta
+ * e token de sessão assinado pelo servidor.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+const MASTER_ADMIN_EMAILS = [
+  'admin@kivora.ao',
+  'kivora.angola@gmail.com',
+  'narcisomarcos826@gmail.com',
+  'comercial@kivora.ao',
+  'suporte@kivora.ao',
+  'investidores@kivora.ao',
+  'parceiros@kivora.ao',
+];
+
+const MAX_FAILED_ATTEMPTS = 7;
+const LOCKOUT_MS = 15 * 60 * 1000;
+const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+
+/** Identifica e-mails reservados à administração — nunca podem autenticar como cliente/parceiro. */
+function isAdminLikeEmail(value: string): boolean {
+  const v = value.trim().toLowerCase();
+  return MASTER_ADMIN_EMAILS.includes(v) || v.endsWith('@kivora.ao');
+}
+
+/** Comparação em tempo constante para evitar ataques de temporização sobre hashes/senhas. */
+function safeEqual(a: string, b: string): boolean {
+  const ba = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ba.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ba, bb);
+}
+
+/**
+ * Verificação ESTRITA de credencial de parceiro: se existe hash, só o hash conta
+ * (senhas em texto claro antigas/obsoletas deixam de ser aceites). Só quando não há
+ * hash é que se aceita o legado em texto claro, que é migrado para hash no login.
+ */
+function verifyCredentialStrict(
+  stored: { password?: string; passwordHash?: string; password_hash?: string; tempPassword?: string },
+  inputPass: string
+): boolean {
+  const clean = inputPass.trim();
+  if (!clean) return false;
+
+  const targetHash = stored.passwordHash || stored.password_hash;
+  if (targetHash) {
+    return safeEqual(String(targetHash), hashKivoraPassword(clean));
+  }
+
+  if (stored.tempPassword && safeEqual(String(stored.tempPassword), clean)) return true;
+  if (stored.password && safeEqual(String(stored.password), clean)) return true;
+  return false;
+}
+
+/** Segredo de assinatura de sessão derivado da chave privada do servidor (nunca exposta ao browser). */
+function getSessionSecret(): Buffer {
+  return crypto
+    .createHash('sha256')
+    .update('KIVORA_API_SESSION_V1|' + (process.env.FIREBASE_PRIVATE_KEY || ''))
+    .digest();
+}
+
+/** Emite token de sessão HMAC-SHA256 verificável pelos endpoints protegidos (emissão, troca de senha). */
+function signSessionToken(payload: { uid: string; role: string; pc: string }): string {
+  const now = Date.now();
+  const body = base64url(JSON.stringify({ v: 1, ...payload, iat: now, exp: now + SESSION_TTL_MS }));
+  const sig = base64url(crypto.createHmac('sha256', getSessionSecret()).update(body).digest());
+  return `${body}.${sig}`;
+}
+
+function fsFilter(field: string, value: string) {
+  return { fieldFilter: { field: { fieldPath: field }, op: 'EQUAL', value: { stringValue: value } } };
+}
+
+interface FsDoc {
+  id: string;
+  data: Record<string, any>;
+}
+
+/** Consulta OR numa coleção. Falha de forma FECHADA (lança) para nunca tratar erro de leitura como "não existe". */
+async function queryCollectionOr(
+  firestoreBase: string,
+  accessToken: string,
+  collectionId: string,
+  filters: any[]
+): Promise<FsDoc[]> {
+  const where = filters.length > 1 ? { compositeFilter: { op: 'OR', filters } } : filters[0];
+  const res = await fetch(`${firestoreBase}:runQuery`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+    body: JSON.stringify({ structuredQuery: { from: [{ collectionId }], where } }),
+  });
+  if (!res.ok) {
+    throw new Error(`Falha ao consultar ${collectionId} (HTTP ${res.status}).`);
+  }
+  const rows = await res.json();
+  const out: FsDoc[] = [];
+  if (Array.isArray(rows)) {
+    for (const row of rows) {
+      if (row.document && row.document.fields) {
+        out.push({
+          id: row.document.name.split('/').pop() || '',
+          data: parseFirestoreFields(row.document.fields),
+        });
+      }
+    }
+  }
+  return out;
+}
+
+async function getDocById(
+  firestoreBase: string,
+  accessToken: string,
+  collectionId: string,
+  docId: string
+): Promise<FsDoc | null> {
+  const res = await fetch(`${firestoreBase}/${collectionId}/${encodeURIComponent(docId)}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Falha ao ler ${collectionId}/${docId} (HTTP ${res.status}).`);
+  const json = await res.json();
+  return json.fields ? { id: docId, data: parseFirestoreFields(json.fields) } : null;
+}
+
+function dedupeDocs(docs: FsDoc[]): FsDoc[] {
+  const seen = new Set<string>();
+  return docs.filter((d) => (seen.has(d.id) ? false : (seen.add(d.id), true)));
+}
+
+/** Estado persistente de tentativas falhadas (colecção fechada às regras: só o servidor lê/escreve). */
+async function readAttempts(
+  firestoreBase: string,
+  accessToken: string,
+  key: string
+): Promise<{ count: number; lastAttempt: number; lockedUntil: number }> {
+  try {
+    const doc = await getDocById(firestoreBase, accessToken, 'auth_attempts', key);
+    if (!doc) return { count: 0, lastAttempt: 0, lockedUntil: 0 };
+    return {
+      count: Number(doc.data.count) || 0,
+      lastAttempt: Number(doc.data.lastAttempt) || 0,
+      lockedUntil: Number(doc.data.lockedUntil) || 0,
+    };
+  } catch (err) {
+    // Disponibilidade primeiro: se o registo de tentativas falhar, o login continua protegido pelo limite por IP.
+    console.error('auth_attempts leitura falhou:', err);
+    return { count: 0, lastAttempt: 0, lockedUntil: 0 };
+  }
+}
+
+async function recordFailedAttempt(
+  firestoreBase: string,
+  accessToken: string,
+  key: string,
+  previous: { count: number; lastAttempt: number }
+): Promise<void> {
+  const now = Date.now();
+  const baseCount = now - previous.lastAttempt > LOCKOUT_MS ? 0 : previous.count;
+  const count = baseCount + 1;
+  const lockedUntil = count >= MAX_FAILED_ATTEMPTS ? now + LOCKOUT_MS : 0;
+  try {
+    await fetch(`${firestoreBase}/auth_attempts/${key}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({
+        fields: {
+          count: { integerValue: String(count) },
+          lastAttempt: { integerValue: String(now) },
+          lockedUntil: { integerValue: String(lockedUntil) },
+        },
+      }),
+    });
+  } catch (err) {
+    console.error('auth_attempts escrita falhou:', err);
+  }
+}
+
+async function clearAttempts(firestoreBase: string, accessToken: string, key: string): Promise<void> {
+  try {
+    await fetch(`${firestoreBase}/auth_attempts/${key}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  } catch (err) {
+    console.error('auth_attempts limpeza falhou:', err);
+  }
+}
+
+/** Migra credencial legada em texto claro para hash e remove o texto claro (aguarda a gravação). */
+async function migrateLegacyCredential(
+  firestoreBase: string,
+  accessToken: string,
+  collectionId: string,
+  docId: string,
+  cleanPass: string
+): Promise<void> {
+  try {
+    await fetch(
+      `${firestoreBase}/${collectionId}/${encodeURIComponent(docId)}?updateMask.fieldPaths=passwordHash&updateMask.fieldPaths=password&updateMask.fieldPaths=tempPassword&updateMask.fieldPaths=updatedAt`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({
+          fields: {
+            passwordHash: { stringValue: hashKivoraPassword(cleanPass) },
+            updatedAt: { integerValue: String(Date.now()) },
+          },
+        }),
+      }
+    );
+  } catch (err) {
+    console.error('Migração de credencial legada falhou:', err);
+  }
+}
+
+
+
 function parseFirestoreFields(fields: Record<string, any> = {}): Record<string, any> {
   const result: Record<string, any> = {};
   for (const [key, val] of Object.entries(fields)) {
@@ -284,7 +504,7 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  res.setHeader('X-Kivora-Auth-Version', '2.0.9');
+  res.setHeader('X-Kivora-Auth-Version', '2.1.0');
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido.' });
@@ -328,95 +548,113 @@ export default async function handler(req: any, res: any) {
     const accessToken = await getGoogleAdminAccessToken(sa.clientEmail, sa.privateKey);
     const firestoreBase = `https://firestore.googleapis.com/v1/projects/${sa.projectId}/databases/(default)/documents`;
 
-    // 1. Pesquisa na coleção /users
-    const userQueryBody = {
-      structuredQuery: {
-        from: [{ collectionId: 'users' }],
-        where: {
-          compositeFilter: {
-            op: 'OR',
-            filters: [
-              { fieldFilter: { field: { fieldPath: 'email' }, op: 'EQUAL', value: { stringValue: cleanId } } },
-              { fieldFilter: { field: { fieldPath: 'nif' }, op: 'EQUAL', value: { stringValue: cleanId.toUpperCase() } } },
-            ],
-          },
-        },
-      },
+    // Chave do bloqueio persistente por identificador (hash para não guardar e-mails/NIF em claro)
+    const attemptKey = crypto.createHash('sha256').update(`attempt:${cleanId}`).digest('hex').slice(0, 40);
+    const attempts = await readAttempts(firestoreBase, accessToken, attemptKey);
+    if (attempts.lockedUntil > Date.now()) {
+      const minutes = Math.max(1, Math.ceil((attempts.lockedUntil - Date.now()) / 60000));
+      return res.status(429).json({
+        success: false,
+        error: `Demasiadas tentativas falhadas. Acesso temporariamente bloqueado. Tente novamente em ${minutes} minuto(s).`,
+      });
+    }
+
+    const rejectInvalid = async () => {
+      await recordFailedAttempt(firestoreBase, accessToken, attemptKey, attempts);
+      return res.status(401).json({
+        success: false,
+        error: 'Credenciais inválidas. Verifique o identificador e a palavra-passe.',
+      });
     };
 
-    const userRes = await fetch(`${firestoreBase}:runQuery`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify(userQueryBody),
-    });
+    // 1. Resolução INEQUÍVOCA de identidade: o identificador pertence a um parceiro?
+    //    Se pertencer, a autenticação é feita EXCLUSIVAMENTE como parceiro — nunca há queda
+    //    para clientes/licenças (elimina perfis fantasmas e entradas indevidas).
+    const upperId = cleanId.toUpperCase();
+    const partnerQueryDocs = await queryCollectionOr(firestoreBase, accessToken, 'partners', [
+      fsFilter('email', cleanId),
+      fsFilter('code', upperId),
+      fsFilter('nif', upperId),
+      fsFilter('alias_code', upperId),
+    ]);
+    const partnerByIdDoc = await getDocById(firestoreBase, accessToken, 'partners', upperId);
+    const partnerDocs = dedupeDocs([...partnerQueryDocs, ...(partnerByIdDoc ? [partnerByIdDoc] : [])]);
+
+    const userDocs = await queryCollectionOr(firestoreBase, accessToken, 'users', [
+      fsFilter('email', cleanId),
+      fsFilter('nif', upperId),
+    ]);
+    const partnerUserDocs = userDocs.filter((d) => d.data.role === 'parceiro');
 
     let foundUser: { id: string; data: Record<string, any>; isPartner?: boolean } | null = null;
 
-    if (userRes.ok) {
-      const uData = await userRes.json();
-      if (Array.isArray(uData)) {
-        for (const item of uData) {
-          if (item.document && item.document.fields) {
-            const fields = parseFirestoreFields(item.document.fields);
-            if (verifyPasswordMatch(fields, cleanPass)) {
-              const docId = item.document.name.split('/').pop() || '';
-              foundUser = { id: docId, data: fields, isPartner: fields.role === 'parceiro' };
-              break;
-            }
-          }
-        }
-      }
-    }
+    if (partnerDocs.length > 0 || partnerUserDocs.length > 0) {
+      // O documento em /partners é a fonte de verdade; /users só serve se não existir registo em /partners.
+      const pool = partnerDocs.length > 0 ? partnerDocs : partnerUserDocs;
+      const verified = pool.filter((c) => verifyCredentialStrict(c.data, cleanPass));
 
-    // 2. Se não encontrou em /users, pesquisa na coleção /partners
-    if (!foundUser) {
-      const partnerQueryBody = {
-        structuredQuery: {
-          from: [{ collectionId: 'partners' }],
-          where: {
-            compositeFilter: {
-              op: 'OR',
-              filters: [
-                { fieldFilter: { field: { fieldPath: 'email' }, op: 'EQUAL', value: { stringValue: cleanId } } },
-                { fieldFilter: { field: { fieldPath: 'code' }, op: 'EQUAL', value: { stringValue: cleanId.toUpperCase() } } },
-                { fieldFilter: { field: { fieldPath: 'nif' }, op: 'EQUAL', value: { stringValue: cleanId.toUpperCase() } } },
-              ],
-            },
-          },
+      if (verified.length === 0) {
+        return await rejectInvalid();
+      }
+
+      const chosen = verified.find((c) => (c.data.status || 'pending') === 'active') || verified[0];
+      const chosenStatus = chosen.data.status || 'pending';
+      const mirrorSuspended = partnerUserDocs.some((d) => d.data.status === 'suspended');
+
+      if (chosenStatus === 'suspended' || mirrorSuspended) {
+        return res.status(403).json({
+          success: false,
+          error: 'O seu acesso de parceiro está suspenso. Contacte o suporte Kivora para regularização.',
+        });
+      }
+      if (chosenStatus !== 'active') {
+        return res.status(403).json({
+          success: false,
+          error: 'A sua conta de parceiro ainda não está ativa. Aguarde a aprovação da equipa Kivora.',
+        });
+      }
+
+      const partnerCode = String(chosen.data.code || chosen.data.partnerCode || chosen.id).trim();
+
+      // Credencial legada em texto claro: migra para hash e elimina o texto claro
+      if (!(chosen.data.passwordHash || chosen.data.password_hash)) {
+        await migrateLegacyCredential(
+          firestoreBase,
+          accessToken,
+          partnerDocs.length > 0 ? 'partners' : 'users',
+          chosen.id,
+          cleanPass
+        );
+      }
+
+      foundUser = {
+        id: partnerCode.toLowerCase().replace(/[^a-z0-9]/g, '_'),
+        data: {
+          ...chosen.data,
+          role: 'parceiro',
+          code: partnerCode,
+          partnerCode,
+          status: 'active',
+          // Primeiro acesso: só deixa de ser obrigatório quando o parceiro definiu a sua própria senha
+          mustChangePassword: chosen.data.mustChangePassword !== false,
         },
+        isPartner: true,
       };
+    }
 
-      const partRes = await fetch(`${firestoreBase}:runQuery`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(partnerQueryBody),
-      });
-
-      if (partRes.ok) {
-        const pData = await partRes.json();
-        if (Array.isArray(pData)) {
-          for (const item of pData) {
-            if (item.document && item.document.fields) {
-              const fields = parseFirestoreFields(item.document.fields);
-              if (verifyPasswordMatch(fields, cleanPass)) {
-                const docId = item.document.name.split('/').pop() || '';
-                foundUser = { id: docId, data: fields, isPartner: true };
-                break;
-              }
-            }
-          }
+    // 2. Identificador NÃO pertence a nenhum parceiro → utilizadores comuns (clientes) em /users
+    if (!foundUser) {
+      for (const item of userDocs) {
+        if (verifyPasswordMatch(item.data, cleanPass)) {
+          foundUser = { id: item.id, data: item.data, isPartner: false };
+          break;
         }
       }
     }
 
-    // 3. Se não encontrou em /users nem em /partners, pesquisa na coleção /licenses
-    if (!foundUser) {
+    // 3. Portal do Cliente: pesquisa por licença (NIF, e-mail de licença ou chave)
+    //    E-mails reservados à administração nunca autenticam por esta via.
+    if (!foundUser && !isAdminLikeEmail(cleanId)) {
       const isKeyFormat = cleanId.startsWith('kvra-') || cleanId.includes('-');
       let licItem: any = null;
 
@@ -446,9 +684,9 @@ export default async function handler(req: any, res: any) {
               compositeFilter: {
                 op: 'OR',
                 filters: [
-                  { fieldFilter: { field: { fieldPath: 'nif' }, op: 'EQUAL', value: { stringValue: cleanId.toUpperCase() } } },
-                  { fieldFilter: { field: { fieldPath: 'client_email' }, op: 'EQUAL', value: { stringValue: cleanId } } },
-                  { fieldFilter: { field: { fieldPath: 'id' }, op: 'EQUAL', value: { stringValue: cleanId.toUpperCase() } } },
+                  fsFilter('nif', cleanId.toUpperCase()),
+                  fsFilter('client_email', cleanId),
+                  fsFilter('id', cleanId.toUpperCase()),
                 ],
               },
             },
@@ -506,51 +744,45 @@ export default async function handler(req: any, res: any) {
               isPartner: false,
             };
           }
-        } else {
-          // PRIMEIRO ACESSO COM A CHAVE DE LICENÇA:
-          // Se a licença ainda não tinha senha gravada, mas o cliente forneceu a sua senha no login,
-          // gravamos a senha na licença e autorizamos o acesso imediatamente!
-          if (cleanPass.length >= 4) {
-            const newHash = hashKivoraPassword(cleanPass);
-            foundUser = {
-              id: licItem.id,
-              data: {
-                ...lf,
-                role: 'cliente',
-                nome: lf.company_name || 'Empresa Cliente',
-                companyName: lf.company_name,
-                licenseKey: licItem.id,
-                nif: lf.nif,
-                email: lf.client_email || cleanId,
-              },
-              isPartner: false,
-            };
+        } else if (cleanPass.length >= 4) {
+          // PRIMEIRO ACESSO COM A CHAVE DE LICENÇA (fluxo do Portal do Cliente):
+          // a licença ainda não tinha senha, o cliente define-a no primeiro login.
+          const newHash = hashKivoraPassword(cleanPass);
+          foundUser = {
+            id: licItem.id,
+            data: {
+              ...lf,
+              role: 'cliente',
+              nome: lf.company_name || 'Empresa Cliente',
+              companyName: lf.company_name,
+              licenseKey: licItem.id,
+              nif: lf.nif,
+              email: lf.client_email || cleanId,
+            },
+            isPartner: false,
+          };
 
-            // Atualiza a licença em background com o novo hash
-            fetch(`${firestoreBase}/licenses/${licItem.id}?updateMask.fieldPaths=passwordHash&updateMask.fieldPaths=passwordSetAt`, {
-              method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`,
+          // Aguarda a gravação (em serverless um fetch não aguardado pode ser descartado ao terminar a função)
+          await fetch(`${firestoreBase}/licenses/${licItem.id}?updateMask.fieldPaths=passwordHash&updateMask.fieldPaths=passwordSetAt`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+              fields: {
+                passwordHash: { stringValue: newHash },
+                passwordSetAt: { integerValue: String(Date.now()) },
               },
-              body: JSON.stringify({
-                fields: {
-                  passwordHash: { stringValue: newHash },
-                  passwordSetAt: { integerValue: String(Date.now()) },
-                },
-              }),
-            }).catch(console.warn);
-          }
+            }),
+          }).catch(console.warn);
         }
       }
     }
 
     // 4. Validação de resultado
     if (!foundUser) {
-      return res.status(401).json({
-        success: false,
-        error: 'Credenciais inválidas. Verifique o identificador e a palavra-passe.',
-      });
+      return await rejectInvalid();
     }
 
     const u = foundUser.data;
@@ -561,22 +793,25 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const role = (u.role || (foundUser.isPartner ? 'parceiro' : 'cliente')) as string;
+    // O papel de parceiro é determinado pela resolução de identidade, nunca por campos de documentos de terceiros
+    const role = (foundUser.isPartner ? 'parceiro' : (u.role || 'cliente')) as string;
     const uid = foundUser.id;
+    const contactEmail = u.email || cleanId;
 
-    // 4. Emitir Firebase Custom Token oficial assinado pelo Google
+    // 5. Emitir Firebase Custom Token oficial assinado pelo Google.
+    //    NUNCA inclui a claim `email` (as regras do Firestore tratam e-mails @kivora.ao como administradores).
     const customToken = createFirebaseCustomToken(sa.clientEmail, sa.privateKey, uid, {
       role,
       nif: u.nif || '',
       partner_id: u.partner_id || u.code || '',
       companyName: u.companyName || u.name || '',
-      email: u.email || cleanId,
+      contact_email: contactEmail,
     });
 
-    // 5. Montar Sessão Kivora Segura
+    // 6. Montar Sessão Kivora Segura
     const session = {
       id: uid,
-      email: u.email || cleanId,
+      email: contactEmail,
       role,
       nome: u.nome || u.name || (foundUser.isPartner ? 'Parceiro Credenciado' : 'Cliente Kivora'),
       nif: u.nif || undefined,
@@ -587,16 +822,19 @@ export default async function handler(req: any, res: any) {
       mustChangePassword: Boolean(u.mustChangePassword),
     };
 
+    await clearAttempts(firestoreBase, accessToken, attemptKey);
+
     return res.status(200).json({
       success: true,
       customToken,
+      sessionToken: signSessionToken({ uid, role, pc: String(session.partnerCode || '') }),
       session,
     });
   } catch (err: any) {
     console.error('Erro interno no /api/auth/login:', err);
     return res.status(500).json({
       success: false,
-      error: 'Erro no servidor de autenticação segura: ' + (err.message || 'Erro desconhecido'),
+      error: 'Serviço de autenticação temporariamente indisponível. Tente novamente dentro de instantes.',
     });
   }
 }

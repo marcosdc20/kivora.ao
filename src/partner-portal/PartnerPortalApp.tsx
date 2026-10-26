@@ -4545,15 +4545,17 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
           <div className="surface-card rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 animate-scaleUp relative shadow-2xl">
             
-            {/* Fechar / Lembrar Depois */}
-            <button
-              type="button"
-              onClick={() => setShowFirstLoginPasswordModal(false)}
-              className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
-              title="Lembrar mais tarde"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {/* Fechar apenas se NÃO for alteração obrigatória de primeiro acesso */}
+            {!mustChangePassword && (
+              <button
+                type="button"
+                onClick={() => setShowFirstLoginPasswordModal(false)}
+                className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
+                title="Lembrar mais tarde"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
 
             {/* Cabeçalho do Modal */}
             <div className="text-center space-y-2">
@@ -4561,10 +4563,12 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                 <ShieldCheck className="w-6 h-6 text-amber-400" />
               </div>
               <h3 className="text-xl font-display font-bold text-slate-900 tracking-tight">
-                Proteja a sua Conta de Parceiro
+                {mustChangePassword ? 'Defina a sua Palavra-passe Definitiva' : 'Proteja a sua Conta de Parceiro'}
               </h3>
               <p className="text-xs text-slate-500 font-sans leading-relaxed px-2">
-                Detectámos que está a utilizar a palavra-passe padrão atribuída pelo sistema. Por motivos de segurança cibernética e proteção da sua carteira comercial, defina a sua nova palavra-passe pessoal.
+                {mustChangePassword
+                  ? 'Este é o seu primeiro acesso ao Portal do Parceiro com uma credencial provisória. Por razões de segurança cibernética e blindagem da sua carteira comercial, é obrigatório definir a sua palavra-passe pessoal e segura antes de continuar.'
+                  : 'Detectámos que está a utilizar uma palavra-passe provisória atribuída pela administração. Defina a sua palavra-passe pessoal.'}
               </p>
             </div>
 
@@ -4573,7 +4577,7 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               
               <div className="space-y-1.5">
                 <label className="text-[10px] font-display font-bold text-slate-700 uppercase tracking-wider block">
-                  Nova Palavra-passe Definitiva
+                  Nova Palavra-passe Pessoal
                 </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
@@ -4633,27 +4637,39 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
               )}
 
               <div className="flex items-center gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowFirstLoginPasswordModal(false)}
-                  className="w-1/3 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 font-display font-semibold text-xs rounded-xl transition-all cursor-pointer text-center shadow-xs"
-                >
-                  Depois
-                </button>
+                {mustChangePassword ? (
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-1/3 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 font-display font-semibold text-xs rounded-xl transition-all cursor-pointer text-center shadow-xs flex items-center justify-center gap-1.5"
+                    title="Terminar sessão"
+                  >
+                    <LogOut className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Sair</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowFirstLoginPasswordModal(false)}
+                    className="w-1/3 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 font-display font-semibold text-xs rounded-xl transition-all cursor-pointer text-center shadow-xs"
+                  >
+                    Depois
+                  </button>
+                )}
                 <button
                   type="submit"
                   disabled={firstPasswordSaving}
-                  className="w-2/3 py-2.5 bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98]"
+                  className={`${mustChangePassword ? 'w-2/3' : 'w-2/3'} py-2.5 bg-slate-950 hover:bg-slate-800 text-white font-display font-semibold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98]`}
                 >
                   {firstPasswordSaving ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>A proteger conta...</span>
+                      <span>A guardar nova palavra-passe...</span>
                     </>
                   ) : (
                     <>
-                      <ShieldCheck className="w-4 h-4" />
-                      <span>Guardar & Proteger Conta</span>
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <span>Guardar & Aceder ao Portal</span>
                     </>
                   )}
                 </button>
