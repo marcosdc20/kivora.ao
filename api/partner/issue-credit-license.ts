@@ -77,6 +77,49 @@ function hashKivoraPassword(cleanPass: string): string {
   return crypto.createHash('sha256').update(combined).digest('hex');
 }
 
+function computeSessionToken(id: string, email: string, role: string): string {
+  const salt = 'KIVORA_SESSION_INTEGRITY_TOKEN_v2_2026';
+  let h1 = 0xdeadbeef ^ 0;
+  let h2 = 0x41c6ce57 ^ 0;
+  const str = `${salt}:${id}:${email}:${role}`;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return `kvr_tok_${(h1 >>> 0).toString(16).padStart(8, '0')}${(h2 >>> 0).toString(16).padStart(8, '0')}`;
+}
+
+function getSessionSecret(): Buffer {
+  return crypto
+    .createHash('sha256')
+    .update('KIVORA_API_SESSION_V1|' + (process.env.FIREBASE_PRIVATE_KEY || ''))
+    .digest();
+}
+
+function verifyHmacSessionToken(token: string): { valid: boolean; uid?: string; role?: string; pc?: string } {
+  if (!token || !token.includes('.')) return { valid: false };
+  const parts = token.split('.');
+  if (parts.length !== 2) return { valid: false };
+  const [b64Body, b64Sig] = parts;
+  try {
+    const expectedSig = base64url(crypto.createHmac('sha256', getSessionSecret()).update(b64Body).digest());
+    const bSig = Buffer.from(b64Sig);
+    const bExp = Buffer.from(expectedSig);
+    if (bSig.length !== bExp.length || !crypto.timingSafeEqual(bSig, bExp)) {
+      return { valid: false };
+    }
+    const payload = JSON.parse(Buffer.from(b64Body, 'base64').toString('utf8'));
+    if (!payload || typeof payload !== 'object') return { valid: false };
+    if (payload.exp && payload.exp < Date.now()) return { valid: false };
+    return { valid: true, uid: payload.uid, role: payload.role, pc: payload.pc };
+  } catch {
+    return { valid: false };
+  }
+}
+
 async function getAdminToken(): Promise<string | null> {
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   let rawKey = process.env.FIREBASE_PRIVATE_KEY || '';
@@ -125,13 +168,32 @@ async function getAdminToken(): Promise<string | null> {
 }
 
 export default async function handler(req: any, res: any) {
-  // CORS headers
+  // Validação de Origem (Anti-CSRF / Anti-Third-Party Abuse) e CORS Seguro conforme W3C
+  const rawOrigin = (req.headers['origin'] || req.headers['referer'] || '').toLowerCase();
+  const isAllowedOrigin =
+    !rawOrigin ||
+    rawOrigin.includes('kivora.visualsoftware.dev') ||
+    rawOrigin.includes('visualsoftware.dev') ||
+    rawOrigin.includes('localhost') ||
+    rawOrigin.includes('127.0.0.1') ||
+    rawOrigin.startsWith('tauri://') ||
+    rawOrigin.startsWith('http://tauri.localhost');
+
+  if (!isAllowedOrigin) {
+    return res.status(403).json({ error: 'Acesso negado: Origem de requisição não autorizada.' });
+  }
+
+  const originHeader = isAllowedOrigin && req.headers['origin']
+    ? req.headers['origin']
+    : 'https://kivora.visualsoftware.dev';
+
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', originHeader);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, X-Kivora-Session-Token'
   );
 
   if (req.method === 'OPTIONS') {
@@ -186,8 +248,8 @@ export default async function handler(req: any, res: any) {
     const adminToken = await getAdminToken();
     const authHeaders: Record<string, string> = adminToken ? { Authorization: `Bearer ${adminToken}` } : {};
 
-    // 1. Consultar dados do parceiro no Firestore via REST API (usando partnerDocId prioritário)
-    const targetPartnerId = (body.partnerDocId || partnerCode).trim();
+    // 1. Consultar dados do parceiro no Firestore via REST API com resolução resiliente
+    let targetPartnerId = (body.partnerDocId || partnerCode).trim();
     let partnerRes = await fetch(`${FIRESTORE_BASE_URL}/partners/${encodeURIComponent(targetPartnerId)}`, {
       headers: { ...authHeaders }
     });
@@ -197,13 +259,59 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    if (!partnerRes.ok) {
+    let partnerDoc: any = null;
+    let actualPartnerDocId = targetPartnerId;
+
+    if (partnerRes.ok) {
+      partnerDoc = await partnerRes.json();
+    } else {
+      // Fallback resiliente: consultar por campo 'code', 'email' ou 'nif' na coleção 'partners'
+      const cleanUpperCode = String(partnerCode || '').trim().toUpperCase();
+      const cleanUpperId = String(targetPartnerId || '').trim().toUpperCase();
+      const cleanLowerEmail = String(body.sessionEmail || '').trim().toLowerCase();
+
+      const queryFilters: any[] = [];
+      if (cleanUpperCode) {
+        queryFilters.push({ fieldFilter: { field: { fieldPath: 'code' }, op: 'EQUAL', value: { stringValue: cleanUpperCode } } });
+      }
+      if (cleanUpperId && cleanUpperId !== cleanUpperCode) {
+        queryFilters.push({ fieldFilter: { field: { fieldPath: 'code' }, op: 'EQUAL', value: { stringValue: cleanUpperId } } });
+      }
+      if (cleanLowerEmail) {
+        queryFilters.push({ fieldFilter: { field: { fieldPath: 'email' }, op: 'EQUAL', value: { stringValue: cleanLowerEmail } } });
+      }
+
+      if (queryFilters.length > 0) {
+        const whereClause = queryFilters.length > 1 ? { compositeFilter: { op: 'OR', filters: queryFilters } } : queryFilters[0];
+        const pQueryRes = await fetch(`${FIRESTORE_BASE_URL}:runQuery`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders },
+          body: JSON.stringify({
+            structuredQuery: {
+              from: [{ collectionId: 'partners' }],
+              where: whereClause,
+              limit: 1
+            }
+          })
+        });
+
+        if (pQueryRes.ok) {
+          const rows = await pQueryRes.json();
+          if (Array.isArray(rows) && rows[0]?.document?.fields) {
+            partnerDoc = rows[0].document;
+            actualPartnerDocId = partnerDoc.name.split('/').pop() || targetPartnerId;
+            targetPartnerId = actualPartnerDocId;
+          }
+        }
+      }
+    }
+
+    if (!partnerDoc) {
       return res.status(404).json({
         error: `Parceiro com identificador ${targetPartnerId} não encontrado no sistema.`
       });
     }
 
-    const partnerDoc = await partnerRes.json();
     const pFields = partnerDoc.fields || {};
 
     const pStatus = pFields.status?.stringValue || 'pending';
@@ -211,6 +319,36 @@ export default async function handler(req: any, res: any) {
       return res.status(403).json({
         error: 'Conta de parceiro suspensa ou inativa. Emissão de licenças bloqueada.'
       });
+    }
+
+    // 1.1 Verificação Criptográfica de Sessão (Zero-Trust Anti-Impersonation)
+    const pEmail = (pFields.email?.stringValue || '').trim().toLowerCase();
+    const pCode = (pFields.code?.stringValue || targetPartnerId).trim().toUpperCase();
+    const incomingToken = (body.sessionToken || req.headers['x-kivora-session-token'] || '').trim();
+    const authHeader = (req.headers['authorization'] || '').trim();
+    const isAdminCaller = Boolean(authHeader && adminToken && authHeader === `Bearer ${adminToken}`);
+
+    if (!isAdminCaller) {
+      const hmacCheck = verifyHmacSessionToken(incomingToken);
+      const isHmacValid = hmacCheck.valid && (hmacCheck.role === 'parceiro' || hmacCheck.role === 'admin');
+
+      const validToken1 = computeSessionToken(actualPartnerDocId, pEmail, 'parceiro');
+      const validToken2 = computeSessionToken(pCode, pEmail, 'parceiro');
+      const validToken3 = body.sessionId && body.sessionEmail ? computeSessionToken(body.sessionId, String(body.sessionEmail).toLowerCase().trim(), 'parceiro') : '';
+      const validTokenAdmin = body.sessionId && body.sessionEmail ? computeSessionToken(body.sessionId, String(body.sessionEmail).toLowerCase().trim(), 'admin') : '';
+
+      const isSessionValid = isHmacValid || (incomingToken && (
+        incomingToken === validToken1 ||
+        incomingToken === validToken2 ||
+        incomingToken === validToken3 ||
+        incomingToken === validTokenAdmin
+      ));
+
+      if (!isSessionValid) {
+        return res.status(401).json({
+          error: 'Acesso não autorizado. Sessão de parceiro inválida ou não autenticada.'
+        });
+      }
     }
 
     const paymentMethod = body.paymentMethod || 'credit';
@@ -341,13 +479,14 @@ export default async function handler(req: any, res: any) {
         client_email: { stringValue: cleanEmail },
         plan_type: { stringValue: planType },
         status: { stringValue: 'active' },
+        hardware_id: { nullValue: null },
         created_at: { integerValue: String(now) },
         expires_at: { integerValue: String(expiresAt) },
         price_aoa: { integerValue: String(priceAoa || 0) },
-        notes: { stringValue: `Emitida via API Instantânea para Parceiro ${partnerCode}.` },
-        partner_id: { stringValue: targetPartnerId },
-        partner_code: { stringValue: partnerCode },
-        partner_name: { stringValue: pFields.name?.stringValue || partnerCode },
+        notes: { stringValue: `Emitida via API Instantânea para Parceiro ${pCode}.` },
+        partner_id: { stringValue: actualPartnerDocId },
+        partner_code: { stringValue: pCode },
+        partner_name: { stringValue: pFields.name?.stringValue || pCode },
         extra_seats: { integerValue: String(extraSeats || 0) },
         is_provisional: { booleanValue: Boolean(isProv) },
         max_users: { integerValue: String(1 + (extraSeats || 0)) },
@@ -379,9 +518,9 @@ export default async function handler(req: any, res: any) {
     const debtPayload = {
       fields: {
         id: { stringValue: debtId },
-        partner_id: { stringValue: targetPartnerId },
-        partner_code: { stringValue: partnerCode },
-        partner_name: { stringValue: pFields.name?.stringValue || partnerCode },
+        partner_id: { stringValue: actualPartnerDocId },
+        partner_code: { stringValue: pCode },
+        partner_name: { stringValue: pFields.name?.stringValue || pCode },
         license_id: { stringValue: key },
         company_name: { stringValue: cleanCompany },
         plan_type: { stringValue: planType },
@@ -412,9 +551,8 @@ export default async function handler(req: any, res: any) {
           nif: { stringValue: cleanNif },
           email: { stringValue: cleanEmail },
           phone: { stringValue: '' },
-          address: { stringValue: `Parceiro: ${targetPartnerId}` },
-          partner_id: { stringValue: targetPartnerId },
-          partner_code: { stringValue: partnerCode },
+          address: { stringValue: `Parceiro: ${actualPartnerDocId}` },
+          partner_id: { stringValue: actualPartnerDocId },
           status: { stringValue: 'active' },
           createdAt: { integerValue: String(now) },
           updated_at: { integerValue: String(now) },
@@ -425,26 +563,51 @@ export default async function handler(req: any, res: any) {
     // 8. Provisionar Conta de Acesso do Cliente em /users para o Portal do Cliente
     const userDocId = cleanEmail ? cleanEmail.replace(/[^a-z0-9]/g, '_') : `cli_${cleanNif.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
     const userDocUrl = `${FIRESTORE_BASE_URL}/users/${encodeURIComponent(userDocId)}`;
-    backgroundWrites.push(fetch(userDocUrl, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', ...authHeaders },
-      body: JSON.stringify({
-        fields: {
-          email: { stringValue: cleanEmail },
-          nome: { stringValue: cleanCompany },
-          nif: { stringValue: cleanNif },
-          role: { stringValue: 'cliente' },
-          status: { stringValue: 'active' },
-          licenseKey: { stringValue: key },
-          partner_id: { stringValue: targetPartnerId },
-          partnerCode: { stringValue: partnerCode },
-          passwordHash: { stringValue: passwordHash },
-          tempPassword: { stringValue: tempPassword },
-          createdAt: { integerValue: String(now) },
-          updatedAt: { integerValue: String(now) },
-        }
-      })
-    }).catch(console.warn));
+
+    // Verifica se já existe para respeitar as regras do Firestore (não alterar role/status se for existente)
+    const existingUserCheck = await fetch(userDocUrl, { headers: { ...authHeaders } }).catch(() => null);
+    const userAlreadyExists = existingUserCheck && existingUserCheck.ok;
+
+    if (userAlreadyExists) {
+      backgroundWrites.push(fetch(`${userDocUrl}?updateMask.fieldPaths=email&updateMask.fieldPaths=nome&updateMask.fieldPaths=nif&updateMask.fieldPaths=licenseKey&updateMask.fieldPaths=partner_id&updateMask.fieldPaths=partnerCode&updateMask.fieldPaths=passwordHash&updateMask.fieldPaths=tempPassword&updateMask.fieldPaths=updatedAt`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...authHeaders },
+        body: JSON.stringify({
+          fields: {
+            email: { stringValue: cleanEmail },
+            nome: { stringValue: cleanCompany },
+            nif: { stringValue: cleanNif },
+            licenseKey: { stringValue: key },
+            partner_id: { stringValue: actualPartnerDocId },
+            partnerCode: { stringValue: pCode },
+            passwordHash: { stringValue: passwordHash },
+            tempPassword: { stringValue: tempPassword },
+            updatedAt: { integerValue: String(now) },
+          }
+        })
+      }).catch(console.warn));
+    } else {
+      backgroundWrites.push(fetch(userDocUrl, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...authHeaders },
+        body: JSON.stringify({
+          fields: {
+            email: { stringValue: cleanEmail },
+            nome: { stringValue: cleanCompany },
+            nif: { stringValue: cleanNif },
+            role: { stringValue: 'cliente' },
+            status: { stringValue: 'active' },
+            licenseKey: { stringValue: key },
+            partner_id: { stringValue: actualPartnerDocId },
+            partnerCode: { stringValue: pCode },
+            passwordHash: { stringValue: passwordHash },
+            tempPassword: { stringValue: tempPassword },
+            createdAt: { integerValue: String(now) },
+            updatedAt: { integerValue: String(now) },
+          }
+        })
+      }).catch(console.warn));
+    }
 
     // 9. Registar Fatura de Subscrição Oficial em /subscription_invoices
     const year = new Date(now).getFullYear();
@@ -465,9 +628,9 @@ export default async function handler(req: any, res: any) {
         payment_method: { stringValue: isWallet ? 'Carteira Parceiro Kivora' : (isProv ? 'Crédito Provisório Parceiro' : 'Parceiro Credenciado Kivora') },
         issue_date: { stringValue: new Date(now).toISOString().split('T')[0] },
         due_date: { stringValue: new Date(expiresAt).toISOString().split('T')[0] },
-        partner_id: { stringValue: targetPartnerId },
-        partner_code: { stringValue: partnerCode },
-        partner_name: { stringValue: pFields.name?.stringValue || partnerCode },
+        partner_id: { stringValue: actualPartnerDocId },
+        partner_code: { stringValue: pCode },
+        partner_name: { stringValue: pFields.name?.stringValue || pCode },
         created_at: { integerValue: String(now) },
         updated_at: { integerValue: String(now) },
       }
@@ -481,7 +644,7 @@ export default async function handler(req: any, res: any) {
     if (isWallet) {
       const currentBal = Number(pFields.wallet_balance_aoa?.integerValue || pFields.wallet_balance_aoa?.doubleValue) || 0;
       const newBalance = Math.max(0, currentBal - Number(costAoa || 0));
-      backgroundWrites.push(fetch(`${FIRESTORE_BASE_URL}/partners/${encodeURIComponent(targetPartnerId)}?updateMask.fieldPaths=wallet_balance_aoa&updateMask.fieldPaths=updatedAt`, {
+      backgroundWrites.push(fetch(`${FIRESTORE_BASE_URL}/partners/${encodeURIComponent(actualPartnerDocId)}?updateMask.fieldPaths=wallet_balance_aoa&updateMask.fieldPaths=updatedAt`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify({

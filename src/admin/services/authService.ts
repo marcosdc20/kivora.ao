@@ -129,7 +129,9 @@ export function getStoredSession(): KivoraUserSession | null {
 
     // Validação estrita de integridade contra injeção arbitrária via DevTools/Inspecionar
     const expectedToken = computeSessionToken(session.id, session.email, session.role);
-    if (!session.token || session.token !== expectedToken) {
+    const isClientToken = session.token === expectedToken;
+    const isHmacToken = typeof session.token === 'string' && session.token.includes('.');
+    if (!session.token || (!isClientToken && !isHmacToken)) {
       console.warn('Alerta de Segurança: Sessão inválida ou adulterada via navegador. Acesso bloqueado.');
       localStorage.removeItem(SESSION_KEY);
       return null;
@@ -142,7 +144,7 @@ export function getStoredSession(): KivoraUserSession | null {
 }
 
 export function setStoredSession(session: KivoraUserSession): void {
-  const token = computeSessionToken(session.id, session.email, session.role);
+  const token = session.token || computeSessionToken(session.id, session.email, session.role);
   const secureSession: KivoraUserSession = { ...session, token };
   localStorage.setItem(SESSION_KEY, JSON.stringify(secureSession));
 }
@@ -341,8 +343,12 @@ export async function loginUser(
         }
 
         clearRateLimit(cleanId);
-        setStoredSession(apiData.session);
-        return { success: true, session: apiData.session };
+        const sessionWithToken: KivoraUserSession = {
+          ...apiData.session,
+          token: apiData.sessionToken || apiData.session.token,
+        };
+        setStoredSession(sessionWithToken);
+        return { success: true, session: sessionWithToken };
       }
     } else if (apiRes.status === 401 || apiRes.status === 403) {
       // Se a API validou explicitamente que a senha está incorreta ou conta suspensa

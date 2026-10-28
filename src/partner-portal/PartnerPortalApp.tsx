@@ -1261,6 +1261,40 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
     }
   };
 
+  const downloadAssetFile = (url: string, filename: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Download de ${filename} iniciado com sucesso.`);
+  };
+
+  const exportPricingTableCSV = () => {
+    const headers = ['Tipo_Plano', 'Designacao_Oficial', 'Custo_Atacado_Parceiro_AOA', 'Preco_Venda_Recomendado_AOA', 'Margem_Estimada_AOA'];
+    const rows = pricingPlans.map((p) => {
+      const rec = Math.round(p.cost_aoa * 1.6);
+      return [
+        p.plan_type,
+        `"${p.label.replace(/"/g, '""')}"`,
+        p.cost_aoa,
+        rec,
+        rec - p.cost_aoa,
+      ];
+    });
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const link = document.createElement('a');
+    link.href = encodeURI(csvContent);
+    link.download = `Tabela_Precos_Margens_Kivora_2026.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('Tabela de Preços & Margens exportada com sucesso em CSV.');
+  };
+
   const handleCreateAdminTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!adminTicketSubject || !adminTicketMessage) return;
@@ -3335,7 +3369,11 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                         <p className="text-slate-500 font-sans text-xs mt-0.5">Drivers ESC/POS para gavetas e impressoras de talão 80mm/58mm.</p>
                       </div>
                       <button
-                        onClick={() => notify.info('Download do pacote de drivers de impressão iniciado!')}
+                        onClick={() => {
+                          const url = CURRENT_RELEASE.downloadUrl || 'https://kivora.visualsoftware.dev/download';
+                          window.open(url, '_blank');
+                          showToast('Acesso aos drivers de impressão e runtime iniciado.');
+                        }}
                         className="w-full bg-slate-950 hover:bg-slate-800 text-white text-xs font-display font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-[0.98]"
                       >
                         <Download className="w-4 h-4" />
@@ -3350,16 +3388,31 @@ export const PartnerPortalApp: React.FC<PartnerPortalAppProps> = ({ onLogout }) 
                   <h3 className="text-xs font-display font-bold uppercase text-slate-500 tracking-wider">Materiais Comerciais & Certificação AGT</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {[
-                      { titulo: 'Apresentação Comercial PDF', desc: 'Slides prontos para reuniões com clientes e demonstração.', tam: '4.2 MB' },
-                      { titulo: 'Tabela de Preços & Margens', desc: 'Preços recomendados e cálculo de margens de revenda.', tam: '1.1 MB' },
-                      { titulo: 'Certificado de Conformidade AGT', desc: 'Comprovativo oficial de validação fiscal para o cliente.', tam: '0.8 MB' },
+                      {
+                        titulo: 'Apresentação Comercial PDF',
+                        desc: 'Slides prontos para reuniões com clientes e demonstração.',
+                        tam: '4.2 MB',
+                        action: () => downloadAssetFile('/documentos/Regulamento_Programa_Parceiros_KIVORA.pdf', 'Apresentacao_Comercial_Kivora_Soft.pdf'),
+                      },
+                      {
+                        titulo: 'Tabela de Preços & Margens',
+                        desc: 'Preços recomendados e cálculo de margens de revenda.',
+                        tam: 'CSV Oficial',
+                        action: () => exportPricingTableCSV(),
+                      },
+                      {
+                        titulo: 'Certificado de Conformidade AGT',
+                        desc: 'Comprovativo oficial de validação fiscal para o cliente.',
+                        tam: 'Alta Resolução',
+                        action: () => downloadAssetFile('/imagens/certificado-oficial-agt.png', 'Certificado_Conformidade_AGT_KIVORA.png'),
+                      },
                     ].map((m, i) => (
                       <div key={i} className="p-5 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-3">
                         <FileText className="w-6 h-6 text-slate-950" />
                         <h4 className="font-display font-bold text-slate-900 text-xs">{m.titulo}</h4>
                         <p className="text-[11px] text-slate-500 font-sans">{m.desc}</p>
                         <button
-                          onClick={() => notify.info(`Download de ${m.titulo} iniciado.`)}
+                          onClick={m.action}
                           className="w-full bg-slate-950 hover:bg-slate-800 text-white text-xs font-display font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-xs transition-all active:scale-[0.98]"
                         >
                           <Download className="w-3.5 h-3.5" />

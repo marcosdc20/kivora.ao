@@ -120,15 +120,26 @@ function devEmailPlugin(): Plugin {
                 devLastTransporterKey = transporterKey;
               }
 
+              const cleanSubject = String(subject).replace(/[\r\n]+/g, ' ').trim();
+              const senderDomain = effectiveUser.includes('@') ? effectiveUser.split('@')[1].toLowerCase().trim() : 'visualsoftware.dev';
+              const msgIdDomain = senderDomain === 'gmail.com' ? 'mail.gmail.com' : senderDomain;
+
               const mailOptions: any = {
                 from: typeof from === 'string' && from.includes('@') ? from : `"${effectiveSenderName}" <${effectiveUser}>`,
-                subject,
+                subject: cleanSubject,
                 html,
                 text: plainText,
                 replyTo: effectiveUser,
+                messageId: `<${Date.now()}.${Math.random().toString(36).substring(2, 10)}@${msgIdDomain}>`,
+                date: new Date(),
+                envelope: {
+                  from: effectiveUser,
+                  to: recipients.length === 1 ? recipients[0] : recipients,
+                },
                 headers: {
-                  'Auto-Submitted': 'auto-generated',
-                  'X-Auto-Response-Suppress': 'OOF, AutoReply',
+                  'X-Auto-Response-Suppress': 'All',
+                  'Priority': 'normal',
+                  'Importance': 'normal',
                 }
               };
 

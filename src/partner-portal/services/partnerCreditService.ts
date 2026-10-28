@@ -19,7 +19,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { generateLicenseKey, calculateExpiresAt, getPlanLabel } from '../../admin/services/licenseService';
-import { generateTempPassword, hashKivoraPassword } from '../../admin/services/authService';
+import { generateTempPassword, hashKivoraPassword, getStoredSession } from '../../admin/services/authService';
 import { cleanFirestoreData } from '../../lib/firestoreUtils';
 
 export interface IssueInstantLicenseParams {
@@ -35,6 +35,9 @@ export interface IssueInstantLicenseParams {
   costAoa: number;
   paymentMethod: 'wallet' | 'credit';
   isProvisional?: boolean;
+  sessionToken?: string;
+  sessionEmail?: string;
+  sessionId?: string;
 }
 
 export interface IssueInstantLicenseResponse {
@@ -192,7 +195,6 @@ export async function issueInstantPartnerLicense(
       phone: '',
       address: `Parceiro: ${partnerDocId}`,
       partner_id: partnerDocId,
-      partner_code: cleanPartnerCode,
       status: 'active',
       createdAt: now,
       updated_at: now,
@@ -203,21 +205,40 @@ export async function issueInstantPartnerLicense(
       ? cleanEmail.replace(/[^a-z0-9]/g, '_')
       : `cli_${cleanNif.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
     const userRef = doc(db, 'users', userDocId);
-    batch.set(userRef, cleanFirestoreData({
-      email: cleanEmail,
-      nome: cleanCompany,
-      nif: cleanNif,
-      role: 'cliente',
-      status: 'active',
-      licenseKey: key,
-      partner_id: partnerDocId,
-      partnerCode: cleanPartnerCode,
-      passwordHash,
-      tempPassword,
-      passwordSetAt: now,
-      createdAt: now,
-      updatedAt: now,
-    }), { merge: true });
+    const existingUserSnap = await getDoc(userRef).catch(() => null);
+
+    if (existingUserSnap && existingUserSnap.exists()) {
+      // Se a conta de utilizador já existe, atualiza apenas os campos permitidos pelas regras de segurança
+      batch.set(userRef, cleanFirestoreData({
+        email: cleanEmail,
+        nome: cleanCompany,
+        nif: cleanNif,
+        licenseKey: key,
+        partner_id: partnerDocId,
+        partnerCode: cleanPartnerCode,
+        passwordHash,
+        tempPassword,
+        passwordSetAt: now,
+        updatedAt: now,
+      }), { merge: true });
+    } else {
+      // Se é um utilizador novo, define role: 'cliente' e status: 'active' permitidos no create
+      batch.set(userRef, cleanFirestoreData({
+        email: cleanEmail,
+        nome: cleanCompany,
+        nif: cleanNif,
+        role: 'cliente',
+        status: 'active',
+        licenseKey: key,
+        partner_id: partnerDocId,
+        partnerCode: cleanPartnerCode,
+        passwordHash,
+        tempPassword,
+        passwordSetAt: now,
+        createdAt: now,
+        updatedAt: now,
+      }), { merge: true });
+    }
 
     // 5. Registar Fatura de Subscrição Oficial em /subscription_invoices
     const year = new Date(now).getFullYear();
@@ -280,12 +301,20 @@ export async function issueInstantCreditLicense(
   params: IssueInstantLicenseParams
 ): Promise<IssueInstantLicenseResponse> {
   try {
+    const session = getStoredSession();
+    const securePayload = {
+      ...params,
+      sessionToken: params.sessionToken || session?.token,
+      sessionEmail: params.sessionEmail || session?.email,
+      sessionId: params.sessionId || session?.id,
+    };
+
     const res = await fetch('/api/partner/issue-credit-license', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(params),
+      body: JSON.stringify(securePayload),
     });
 
     const data = await res.json().catch(() => ({}));

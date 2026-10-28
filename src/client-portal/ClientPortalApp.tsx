@@ -5,7 +5,7 @@ import {
   Headphones, Building2, LogOut, Monitor, Copy,
   CheckCircle2, ShieldCheck, Loader2, Send, Menu,
   MessageSquare, Receipt, Printer, AlertTriangle, Ban,
-  Video, ShoppingBag, Truck, Package, ExternalLink, Play
+  Video, ShoppingBag, Truck, Package, ExternalLink, Play, Lock, Save
 } from 'lucide-react';
 import {
   PortalSidebar,
@@ -22,7 +22,7 @@ import {
   getOrCreateVideoSupportAccount,
   subscribeVideoSupportAccount
 } from '../services/videoSupportService';
-import { getStoredSession, logoutUser, KivoraUserSession } from '../admin/services/authService';
+import { getStoredSession, logoutUser, KivoraUserSession, changeUserPassword } from '../admin/services/authService';
 import { formatLicenseDate, getPlanLabel, subscribeClientLicenses } from '../admin/services/licenseService';
 import {
   SupportTicket, createSupportTicket, sendTicketMessage,
@@ -101,6 +101,43 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // Alteração de Senha do Portal
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError(null);
+    setPasswordSuccess(false);
+
+    if (newPassword.length < 6) {
+      setPasswordError('A palavra-passe deve ter no mínimo 6 caracteres.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('As palavras-passe não coincidem.');
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      const userKey = session?.id || clientLicense.id;
+      await changeUserPassword(userKey, newPassword, session?.email || clientLicense.client_email, clientLicense.id);
+      setPasswordSuccess(true);
+      setNewPassword('');
+      setConfirmPassword('');
+      showToast('Palavra-passe do portal alterada com sucesso!');
+    } catch (e: any) {
+      setPasswordError(e?.message || 'Erro ao processar alteração.');
+    } finally {
+      setChangingPassword(false);
+    }
   };
 
   const [selectedLicenseId, setSelectedLicenseId] = useState<string | null>(null);
@@ -278,11 +315,11 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
     setSelectedTicket((prev) =>
       prev
         ? {
-            ...prev,
-            messages: [...prev.messages, optMsg],
-            messagesCount: prev.messages.length + 1,
-            status: 'open',
-          }
+          ...prev,
+          messages: [...prev.messages, optMsg],
+          messagesCount: prev.messages.length + 1,
+          status: 'open',
+        }
         : null
     );
 
@@ -389,7 +426,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 sm:p-6 selection:bg-rose-600 selection:text-white">
         <div className="max-w-lg w-full surface-card bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl space-y-6 text-center animate-fadeIn">
-          
+
           <div className="w-14 h-14 bg-rose-950/60 border border-rose-800/50 rounded-2xl flex items-center justify-center mx-auto text-rose-400 shadow-lg shadow-rose-950/50">
             <Ban className="w-7 h-7 text-rose-500" strokeWidth={2} />
           </div>
@@ -448,7 +485,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
 
   return (
     <div className="flex h-screen h-[100dvh] overflow-hidden bg-slate-50 font-sans selection:bg-slate-900 selection:text-white">
-      
+
       {/* Toast Notification Flutuante */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl border border-slate-700 text-xs font-display font-semibold flex items-center gap-2.5 animate-fadeIn">
@@ -601,11 +638,10 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                         <button
                           key={lic.id}
                           onClick={() => setSelectedLicenseId(lic.id)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap border ${
-                            isSel
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap border ${isSel
                               ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
                               : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                          }`}
+                            }`}
                         >
                           Posto {idx + 1} ({getPlanLabel(lic.plan_type)})
                         </button>
@@ -1075,9 +1111,8 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                           <div className="flex items-center gap-2">
                             <span className="font-mono-num font-semibold text-slate-900">{inv.invoice_number || inv.id}</span>
                             <span className="font-medium text-slate-700 font-display">— {inv.plan_label || 'Subscrição Kivora Soft'}</span>
-                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
-                              inv.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' : 'bg-amber-50 text-amber-700 border-amber-200/80'
-                            }`}>
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${inv.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' : 'bg-amber-50 text-amber-700 border-amber-200/80'
+                              }`}>
                               {inv.status === 'paid' ? 'Pago & Liquidado' : 'Pendente'}
                             </span>
                           </div>
@@ -1132,9 +1167,8 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                         <div>
                           <div className="flex items-center gap-2">
                             <p className="font-semibold font-display text-slate-900">{getPlanLabel(lic.plan_type)} — Kivora Soft Desktop</p>
-                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
-                              lic.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' : 'bg-rose-50 text-rose-700 border-rose-200/80'
-                            }`}>
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${lic.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' : 'bg-rose-50 text-rose-700 border-rose-200/80'
+                              }`}>
                               {lic.status === 'active' ? 'Pago & Ativo' : 'Suspenso'}
                             </span>
                           </div>
@@ -1241,7 +1275,7 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                
+
                 {/* Form Novo Ticket + Lista de Chamados */}
                 <div className="lg:col-span-5 space-y-4">
                   {/* Form Novo Chamado */}
@@ -1333,21 +1367,19 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                             <div
                               key={t.id}
                               onClick={() => setSelectedTicket(t)}
-                              className={`p-3 rounded-xl border transition-all cursor-pointer ${
-                                isSel
+                              className={`p-3 rounded-xl border transition-all cursor-pointer ${isSel
                                   ? 'bg-slate-100 border-slate-300 shadow-xs'
                                   : 'bg-slate-50/60 border-slate-200/70 hover:bg-slate-100/70'
-                              }`}
+                                }`}
                             >
                               <div className="flex items-center justify-between gap-1 mb-1">
                                 <span className="font-mono-num text-[10px] font-semibold text-slate-900 bg-white px-1.5 py-0.5 rounded border border-slate-200/80">
                                   {t.ticket_number}
                                 </span>
-                                <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border ${
-                                  t.status === 'resolved' ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80' :
-                                  t.status === 'in_progress' ? 'bg-slate-100 text-slate-800 border-slate-200/80' :
-                                  'bg-amber-50 text-amber-800 border-amber-200/80'
-                                }`}>
+                                <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border ${t.status === 'resolved' ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80' :
+                                    t.status === 'in_progress' ? 'bg-slate-100 text-slate-800 border-slate-200/80' :
+                                      'bg-amber-50 text-amber-800 border-amber-200/80'
+                                  }`}>
                                   {t.status === 'resolved' ? 'Resolvido' : t.status === 'in_progress' ? 'Em Atendimento' : 'Aberto'}
                                 </span>
                               </div>
@@ -1386,11 +1418,10 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                             <span>Entrar em Vídeo</span>
                           </button>
 
-                          <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${
-                            selectedTicket.status === 'resolved' ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80' :
-                            selectedTicket.status === 'in_progress' ? 'bg-slate-100 text-slate-800 border-slate-200/80' :
-                            'bg-amber-50 text-amber-800 border-amber-200/80'
-                          }`}>
+                          <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${selectedTicket.status === 'resolved' ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80' :
+                              selectedTicket.status === 'in_progress' ? 'bg-slate-100 text-slate-800 border-slate-200/80' :
+                                'bg-amber-50 text-amber-800 border-amber-200/80'
+                            }`}>
                             {selectedTicket.status === 'resolved' ? 'Resolvido' : selectedTicket.status === 'in_progress' ? 'Em Atendimento' : 'Aberto'}
                           </span>
                         </div>
@@ -1405,11 +1436,10 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                               <span className="text-[10px] font-semibold text-slate-400 mb-1 px-1 font-display">
                                 {msg.sender_name} ({isClient ? 'Você' : msg.sender_role === 'partner' ? 'Parceiro' : 'Equipa Kivora'})
                               </span>
-                              <div className={`p-3.5 rounded-2xl text-xs max-w-sm sm:max-w-md ${
-                                isClient
+                              <div className={`p-3.5 rounded-2xl text-xs max-w-sm sm:max-w-md ${isClient
                                   ? 'bg-slate-950 text-white rounded-br-xs shadow-xs'
                                   : 'bg-white text-slate-900 border border-slate-200/80 rounded-bl-xs shadow-xs'
-                              }`}>
+                                }`}>
                                 <p className="whitespace-pre-wrap font-sans leading-relaxed">{msg.text}</p>
                                 <span className={`text-[9px] font-mono-num mt-1 block text-right ${isClient ? 'text-slate-400' : 'text-slate-400'}`}>
                                   {new Date(msg.timestamp).toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit' })}
@@ -1477,6 +1507,67 @@ export const ClientPortalApp: React.FC<ClientPortalAppProps> = ({ onLogout }) =>
                   <span className="text-slate-500 font-semibold uppercase text-[10px] tracking-wider font-display">Parceiro Emissor:</span>
                   <span className="font-mono-num font-semibold text-slate-800">{clientLicense.partner_id || 'Kivora Central'}</span>
                 </div>
+              </div>
+
+              {/* Formulário de Alteração de Palavra-passe do Cliente */}
+              <div className="pt-4 border-t border-slate-200/80 space-y-4">
+                <div>
+                  <h3 className="text-sm font-semibold font-display text-slate-900 flex items-center gap-1.5">
+                    <Lock className="w-4 h-4 text-slate-900" />
+                    <span>Segurança & Palavra-passe do Portal</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 font-sans mt-0.5">
+                    Defina uma nova palavra-passe para o acesso da sua empresa a este portal.
+                  </p>
+                </div>
+
+                <form onSubmit={handleChangePassword} className="space-y-3.5 text-xs max-w-md">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700 uppercase font-display text-[10px] tracking-wider">Nova Palavra-passe</label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="Mínimo 6 caracteres"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs font-sans text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700 uppercase font-display text-[10px] tracking-wider">Confirmar Nova Palavra-passe</label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="Repita a palavra-passe"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full bg-slate-50/70 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs font-sans text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 outline-none transition-all"
+                    />
+                  </div>
+
+                  {passwordError && (
+                    <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-sans">
+                      {passwordError}
+                    </div>
+                  )}
+
+                  {passwordSuccess && (
+                    <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-sans flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>Palavra-passe atualizada com sucesso!</span>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={changingPassword || !newPassword}
+                    className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-display font-semibold text-xs px-4 py-2.5 rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer active:scale-[0.98]"
+                  >
+                    {changingPassword ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                    <span>{changingPassword ? 'A Gravar...' : 'Atualizar Palavra-passe'}</span>
+                  </button>
+                </form>
               </div>
             </div>
           )}

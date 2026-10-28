@@ -195,6 +195,10 @@ export const getEmailBaseLayout = (title: string, contentHtml: string, footerNot
   </style>
 </head>
 <body>
+  <!-- PREHEADER (Preview limpo para clientes de e-mail / Anti-Spam) -->
+  <div style="display: none; max-height: 0px; overflow: hidden; mso-hide: all; font-size: 1px; line-height: 1px; color: #f1f5f9; opacity: 0;">
+    ${title} — KIVORA SOFT • Sistema de Gestão Empresarial Certificado pela AGT.
+  </div>
   <div class="wrapper">
     <table class="main-table" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
       <!-- HEADER -->

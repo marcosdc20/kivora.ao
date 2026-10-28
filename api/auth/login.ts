@@ -490,9 +490,24 @@ function parseFirestoreFields(fields: Record<string, any> = {}): Record<string, 
 }
 
 export default async function handler(req: any, res: any) {
-  // CORS
+  // CORS Seguro com reflexão dinâmica de origens autorizadas (Conforme W3C Fetch Spec)
+  const rawOrigin = (req.headers['origin'] || req.headers['referer'] || '').toLowerCase();
+  const isAllowedOrigin =
+    !rawOrigin ||
+    rawOrigin.includes('kivora.visualsoftware.dev') ||
+    rawOrigin.includes('visualsoftware.dev') ||
+    rawOrigin.includes('localhost') ||
+    rawOrigin.includes('127.0.0.1') ||
+    rawOrigin.startsWith('tauri://') ||
+    rawOrigin.startsWith('http://tauri.localhost');
+
+  const originHeader = isAllowedOrigin && req.headers['origin']
+    ? req.headers['origin']
+    : 'https://kivora.visualsoftware.dev';
+
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', originHeader);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
   res.setHeader(
     'Access-Control-Allow-Headers',

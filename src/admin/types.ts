@@ -11,7 +11,7 @@ export type TicketPrioridade = 'baixa' | 'media' | 'alta' | 'urgente';
 
 // ─── Tipos do Firebase Firestore ──────────────────────────────────────────
 export type PlanType = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'semiannual' | 'annual' | 'quadrennial' | 'lifetime';
-export type LicenseStatus = 'active' | 'expired' | 'revoked';
+export type LicenseStatus = 'active' | 'expired' | 'revoked' | 'suspended';
 
 export interface KivoraLicense {
   id: string;                    // Chave KVRA-XXXX-XXXX-XXXX

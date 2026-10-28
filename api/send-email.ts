@@ -39,8 +39,6 @@ interface ServerEmailConfig {
 }
 
 let cachedServerConfig: { config: ServerEmailConfig; expiresAt: number } | null = null;
-let cachedTransporter: any = null;
-let lastTransporterKey = '';
 
 function base64url(input: string | Buffer): string {
   return Buffer.from(input)
@@ -149,9 +147,28 @@ async function resolveServerEmailConfig(): Promise<ServerEmailConfig> {
 
 // Vercel Serverless Function: /api/send-email
 export default async function handler(req: any, res: any) {
-  // CORS headers
+  // Validação de Origem (Anti-CSRF / Anti-Open-Relay) e CORS Seguro conforme W3C
+  const rawOrigin = (req.headers['origin'] || req.headers['referer'] || '').toLowerCase();
+  const isAllowedOrigin =
+    !rawOrigin ||
+    rawOrigin.includes('kivora.visualsoftware.dev') ||
+    rawOrigin.includes('visualsoftware.dev') ||
+    rawOrigin.includes('localhost') ||
+    rawOrigin.includes('127.0.0.1') ||
+    rawOrigin.startsWith('tauri://') ||
+    rawOrigin.startsWith('http://tauri.localhost');
+
+  if (!isAllowedOrigin) {
+    return res.status(403).json({ error: 'Acesso negado: Origem não autorizada para envio de e-mails.' });
+  }
+
+  const originHeader = isAllowedOrigin && req.headers['origin']
+    ? req.headers['origin']
+    : 'https://kivora.visualsoftware.dev';
+
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', originHeader);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
@@ -217,9 +234,18 @@ export default async function handler(req: any, res: any) {
   const effectiveKey = (apiKey || smtpPass || serverConfig.apiKey || serverConfig.smtpPass || '').trim();
   const effectiveSenderEmail = (senderEmail || serverConfig.senderEmail || 'kivora.angola@gmail.com').trim();
   const effectiveSenderName = (senderName || serverConfig.senderName || 'KIVORA SOFT').trim();
-  const effectiveHost = smtpHost || serverConfig.smtpHost || 'smtp.gmail.com';
+  const effectiveHost = (smtpHost || serverConfig.smtpHost || 'smtp.gmail.com').trim();
   const effectivePort = Number(smtpPort || serverConfig.smtpPort || 465);
   const effectiveUser = (smtpUser || serverConfig.smtpUser || effectiveSenderEmail).trim();
+
+  // Proteção Anti-SSRF: Bloqueio estrito de IPs privados/locais e metadados de nuvem
+  const blockedHostRegex = /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|169\.254\.|0\.|::1|fd|fe80)/i;
+  if (blockedHostRegex.test(effectiveHost) || effectiveHost.includes(':') || effectiveHost.includes('/') || effectiveHost.includes('\\')) {
+    return res.status(400).json({ error: 'Servidor SMTP especificado não é permitido por razões de segurança.' });
+  }
+
+  // Sanitização de Assunto contra CRLF Injection
+  const cleanSubject = String(subject).replace(/[\r\n]+/g, ' ').trim();
 
   if (!effectiveKey && effectiveProvider !== 'smtp') {
     return res.status(500).json({ error: 'Credenciais de e-mail não configuradas no servidor Vercel. Configure SMTP_PASS e SMTP_USER nas variáveis de ambiente do projeto.' });
@@ -240,38 +266,35 @@ export default async function handler(req: any, res: any) {
     .trim() : '');
 
   try {
-    // ── PROVEDOR 1: GOOGLE GMAIL OFICIAL OU SMTP DIRETO COM POOLING DE CONEXÃO ──
+    // ── PROVEDOR 1: GOOGLE GMAIL OFICIAL OU SMTP DIRETO ──
     if (effectiveProvider === 'gmail' || effectiveProvider === 'smtp') {
       const isSecure = effectivePort === 465;
       const cleanPass = effectiveKey.replace(/\s+/g, '');
-      const transporterKey = `${effectiveHost}:${effectivePort}:${effectiveUser}:${cleanPass}`;
 
-      if (!cachedTransporter || lastTransporterKey !== transporterKey) {
-        cachedTransporter = nodemailer.createTransport({
-          pool: true,
-          maxConnections: 3,
-          maxMessages: 100,
-          rateLimit: 5,
-          host: effectiveHost,
-          port: effectivePort,
-          secure: isSecure,
-          auth: {
-            user: effectiveUser,
-            pass: cleanPass,
-          },
-          tls: {
-            rejectUnauthorized: false
-          }
-        });
-        lastTransporterKey = transporterKey;
-      }
+      // Em ambiente serverless (Vercel/Lambda), pool: false previne sockets mortos/congelados
+      const transporter = nodemailer.createTransport({
+        pool: false,
+        host: effectiveHost,
+        port: effectivePort,
+        secure: isSecure,
+        auth: {
+          user: effectiveUser,
+          pass: cleanPass,
+        },
+        tls: {
+          rejectUnauthorized: false
+        }
+      } as any);
 
       const isBulk = Boolean(body.isBulk || body.isNewsletter);
+      const senderDomain = effectiveUser.includes('@') ? effectiveUser.split('@')[1].toLowerCase().trim() : 'visualsoftware.dev';
+      const msgIdDomain = senderDomain === 'gmail.com' ? 'mail.gmail.com' : senderDomain;
+
       const cleanHeaders: Record<string, string> = {
-        'X-Mailer': 'KIVORA Soft Mail Engine 2.2',
         'X-Entity-Ref-ID': `kvra-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         'X-Auto-Response-Suppress': 'All',
-        'Auto-Submitted': 'auto-generated',
+        'Priority': 'normal',
+        'Importance': 'normal',
       };
 
       if (isBulk) {
@@ -284,14 +307,20 @@ export default async function handler(req: any, res: any) {
         const mailOptions: any = {
           from: typeof from === 'string' && from.includes('@') && from.includes(effectiveUser) ? from : `"${effectiveSenderName}" <${effectiveUser}>`,
           to: recipientEmail,
-          subject,
+          subject: cleanSubject,
           html,
           text: plainText,
           replyTo: (typeof body.replyTo === 'string' && body.replyTo.includes('@')) ? body.replyTo : 'kivora.angola@gmail.com',
+          messageId: `<${Date.now()}.${crypto.randomBytes(8).toString('hex')}@${msgIdDomain}>`,
+          date: new Date(),
+          envelope: {
+            from: effectiveUser,
+            to: recipientEmail,
+          },
           headers: cleanHeaders,
         };
 
-        return cachedTransporter.sendMail(mailOptions);
+        return transporter.sendMail(mailOptions);
       };
 
       if (recipients.length === 1) {

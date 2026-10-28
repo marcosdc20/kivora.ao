@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   CreditCard, Download, Search, Plus, CheckCircle2,
   X, Check, Clock, Loader2, FileText,
-  Users, TrendingDown, Wallet
+  Users, TrendingDown, Wallet, Printer
 } from 'lucide-react';
 import { AdminTopbar, StatCard } from './AdminComponents';
 import { db } from '../lib/firebase';
@@ -13,6 +13,8 @@ import {
 import { generateLicenseKey } from './services/licenseService';
 import { notify, confirmDialog } from '../services/notificationService';
 import { cleanFirestoreData } from '../lib/firestoreUtils';
+import { InvoicePrintModal } from '../components/InvoicePrintModal';
+import type { KivoraLicense } from './types';
 
 export interface SubscriptionInvoice {
   id: string;
@@ -38,6 +40,9 @@ export const AdminPagamentos: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'pending' | 'overdue'>('all');
   const [showModal, setShowModal] = useState(false);
+  const [selectedInvoiceForPrint, setSelectedInvoiceForPrint] = useState<KivoraLicense | null>(null);
+  const [selectedInvoiceNumber, setSelectedInvoiceNumber] = useState<string>('');
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
 
   // Parceiros / Dívidas
   const [partnerDebts, setPartnerDebts] = useState<PartnerDebtEntry[]>([]);
@@ -382,11 +387,10 @@ export const AdminPagamentos: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
           <button
             onClick={() => setActiveTab('clientes')}
-            className={`text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 font-display cursor-pointer ${
-              activeTab === 'clientes'
+            className={`text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 font-display cursor-pointer ${activeTab === 'clientes'
                 ? 'bg-slate-950 text-white shadow-sm'
                 : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
-            }`}
+              }`}
           >
             <CreditCard className="w-3.5 h-3.5 text-blue-500" />
             <span>Faturas Diretas a Clientes <span className="font-mono-num">({invoices.length})</span></span>
@@ -394,11 +398,10 @@ export const AdminPagamentos: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('parceiros')}
-            className={`text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 font-display cursor-pointer ${
-              activeTab === 'parceiros'
+            className={`text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 font-display cursor-pointer ${activeTab === 'parceiros'
                 ? 'bg-slate-950 text-white shadow-sm'
                 : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
-            }`}
+              }`}
           >
             <Users className="w-3.5 h-3.5 text-indigo-400" />
             <span>Dívidas & Cobranças a Parceiros <span className="font-mono-num">({partnerDebts.length})</span></span>
@@ -425,11 +428,10 @@ export const AdminPagamentos: React.FC = () => {
                   <button
                     key={f.id}
                     onClick={() => setStatusFilter(f.id as any)}
-                    className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all font-display cursor-pointer ${
-                      statusFilter === f.id
+                    className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all font-display cursor-pointer ${statusFilter === f.id
                         ? 'bg-slate-950 text-white border-slate-950 shadow-sm'
                         : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
-                    }`}
+                      }`}
                   >
                     {f.label}
                   </button>
@@ -452,88 +454,103 @@ export const AdminPagamentos: React.FC = () => {
             <div className="surface-card rounded-2xl overflow-hidden shadow-card">
               <div className="overflow-x-auto w-full">
                 <table className="w-full text-xs text-left min-w-[700px]">
-                <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/80 text-slate-400 uppercase font-black text-[10px] tracking-wider font-display">
-                    <th className="p-4">N.º Fatura</th>
-                    <th className="p-4">Empresa / NIF</th>
-                    <th className="p-4">Plano de Subscrição</th>
-                    <th className="p-4">Valor (Kz)</th>
-                    <th className="p-4">Método</th>
-                    <th className="p-4">Estado</th>
-                    <th className="p-4">Vencimento</th>
-                    <th className="p-4 text-right">Ações</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {loadingInvoices ? (
-                    <tr>
-                      <td colSpan={8} className="p-8 text-center text-slate-400">
-                        <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
-                        <span className="font-display">A sincronizar faturas com o Firebase...</span>
-                      </td>
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50/80 text-slate-400 uppercase font-black text-[10px] tracking-wider font-display">
+                      <th className="p-4">N.º Fatura</th>
+                      <th className="p-4">Empresa / NIF</th>
+                      <th className="p-4">Plano de Subscrição</th>
+                      <th className="p-4">Valor (Kz)</th>
+                      <th className="p-4">Método</th>
+                      <th className="p-4">Estado</th>
+                      <th className="p-4">Vencimento</th>
+                      <th className="p-4 text-right">Ações</th>
                     </tr>
-                  ) : filteredInvoices.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="p-8 text-center text-slate-400">
-                        <FileText className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                        <p className="font-bold text-slate-700 font-display">Nenhuma fatura encontrada</p>
-                        <p className="text-[11px] mt-1 text-slate-400">
-                          As faturas são geradas automaticamente com base nas licenças ativadas no Firebase.
-                        </p>
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredInvoices.map((inv) => (
-                      <tr key={inv.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="p-4 font-mono-num font-bold text-blue-600">
-                          {inv.invoice_number}
-                        </td>
-                        <td className="p-4">
-                          <p className="font-bold text-slate-900 font-display">{inv.company_name}</p>
-                          <p className="text-slate-400 text-[10px] font-mono-num">NIF: {inv.nif}</p>
-                        </td>
-                        <td className="p-4 text-slate-600 font-medium">{inv.plan_label}</td>
-                        <td className="p-4 font-mono-num font-black text-slate-900">{fmt(inv.amount_aoa)} Kz</td>
-                        <td className="p-4 text-slate-500 text-[11px] font-medium">
-                          {inv.payment_method || '—'}
-                        </td>
-                        <td className="p-4">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                            inv.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                            inv.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                            'bg-red-50 text-red-700 border border-red-200'
-                          }`}>
-                            {inv.status === 'paid' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
-                            {inv.status === 'paid' ? 'Liquidada' : inv.status === 'pending' ? 'Pendente' : 'Vencida'}
-                          </span>
-                        </td>
-                        <td className="p-4 text-slate-500 font-mono-num font-medium">{inv.due_date}</td>
-                        <td className="p-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {inv.status !== 'paid' && (
-                              <button
-                                onClick={() => handleMarkAsPaid(inv.id)}
-                                className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
-                                title="Confirmar Pagamento"
-                              >
-                                <Check className="w-3 h-3" />
-                                <span>Marcar Paga</span>
-                              </button>
-                            )}
-                            <button
-                              onClick={() => notify.info(`A transferir cópia da fatura ${inv.invoice_number}...`)}
-                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                              title="Descarregar PDF"
-                            >
-                              <Download className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {loadingInvoices ? (
+                      <tr>
+                        <td colSpan={8} className="p-8 text-center text-slate-400">
+                          <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
+                          <span className="font-display">A sincronizar faturas com o Firebase...</span>
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : filteredInvoices.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="p-8 text-center text-slate-400">
+                          <FileText className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                          <p className="font-bold text-slate-700 font-display">Nenhuma fatura encontrada</p>
+                          <p className="text-[11px] mt-1 text-slate-400">
+                            As faturas são geradas automaticamente com base nas licenças ativadas no Firebase.
+                          </p>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredInvoices.map((inv) => (
+                        <tr key={inv.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="p-4 font-mono-num font-bold text-blue-600">
+                            {inv.invoice_number}
+                          </td>
+                          <td className="p-4">
+                            <p className="font-bold text-slate-900 font-display">{inv.company_name}</p>
+                            <p className="text-slate-400 text-[10px] font-mono-num">NIF: {inv.nif}</p>
+                          </td>
+                          <td className="p-4 text-slate-600 font-medium">{inv.plan_label}</td>
+                          <td className="p-4 font-mono-num font-black text-slate-900">{fmt(inv.amount_aoa)} Kz</td>
+                          <td className="p-4 text-slate-500 text-[11px] font-medium">
+                            {inv.payment_method || '—'}
+                          </td>
+                          <td className="p-4">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${inv.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                                inv.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                                  'bg-red-50 text-red-700 border border-red-200'
+                              }`}>
+                              {inv.status === 'paid' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                              {inv.status === 'paid' ? 'Liquidada' : inv.status === 'pending' ? 'Pendente' : 'Vencida'}
+                            </span>
+                          </td>
+                          <td className="p-4 text-slate-500 font-mono-num font-medium">{inv.due_date}</td>
+                          <td className="p-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {inv.status !== 'paid' && (
+                                <button
+                                  onClick={() => handleMarkAsPaid(inv.id)}
+                                  className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
+                                  title="Confirmar Pagamento"
+                                >
+                                  <Check className="w-3 h-3" />
+                                  <span>Marcar Paga</span>
+                                </button>
+                              )}
+                              <button
+                                onClick={() => {
+                                  const lic: KivoraLicense = {
+                                    id: inv.id,
+                                    company_name: inv.company_name,
+                                    nif: inv.nif,
+                                    client_email: `${inv.nif}@kivora.visualsoftware.dev`,
+                                    plan_type: 'annual',
+                                    status: inv.status === 'paid' ? 'active' : 'suspended',
+                                    created_at: new Date(inv.issue_date).getTime() || Date.now(),
+                                    expires_at: new Date(inv.due_date).getTime() || (Date.now() + 365 * 86400000),
+                                    price_aoa: inv.amount_aoa,
+                                    hardware_id: null,
+                                  };
+                                  setSelectedInvoiceForPrint(lic);
+                                  setSelectedInvoiceNumber(inv.invoice_number);
+                                  setInvoiceModalOpen(true);
+                                }}
+                                className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                title="Visualizar & Imprimir Fatura / Recibo"
+                              >
+                                <Printer className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -552,11 +569,10 @@ export const AdminPagamentos: React.FC = () => {
                   <button
                     key={f.id}
                     onClick={() => setPartnerStatusFilter(f.id as any)}
-                    className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all font-display cursor-pointer ${
-                      partnerStatusFilter === f.id
+                    className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all font-display cursor-pointer ${partnerStatusFilter === f.id
                         ? 'bg-slate-950 text-white border-slate-950 shadow-sm'
                         : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
-                    }`}
+                      }`}
                   >
                     {f.label}
                   </button>
@@ -592,79 +608,78 @@ export const AdminPagamentos: React.FC = () => {
             <div className="surface-card rounded-2xl overflow-hidden shadow-card">
               <div className="overflow-x-auto w-full">
                 <table className="w-full text-xs text-left min-w-[700px]">
-                <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/80 text-slate-400 uppercase font-black text-[10px] tracking-wider font-display">
-                    <th className="p-4 w-10">
-                      <span className="sr-only">Seleção</span>
-                    </th>
-                    <th className="p-4">Chave Licença / Cliente</th>
-                    <th className="p-4">Parceiro Responsável</th>
-                    <th className="p-4">Plano</th>
-                    <th className="p-4">Custo Devido à Kivora</th>
-                    <th className="p-4">Preço ao Cliente</th>
-                    <th className="p-4">Estado</th>
-                    <th className="p-4">Data Emissão</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredPartnerDebts.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="p-8 text-center text-slate-400">
-                        <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                        <p className="font-bold text-slate-700 font-display">Nenhuma dívida de parceiro encontrada</p>
-                        <p className="text-[11px] mt-1 text-slate-400">
-                          Quando os parceiros emitem licenças no portal deles, as dívidas de atacado surgem aqui automaticamente.
-                        </p>
-                      </td>
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50/80 text-slate-400 uppercase font-black text-[10px] tracking-wider font-display">
+                      <th className="p-4 w-10">
+                        <span className="sr-only">Seleção</span>
+                      </th>
+                      <th className="p-4">Chave Licença / Cliente</th>
+                      <th className="p-4">Parceiro Responsável</th>
+                      <th className="p-4">Plano</th>
+                      <th className="p-4">Custo Devido à Kivora</th>
+                      <th className="p-4">Preço ao Cliente</th>
+                      <th className="p-4">Estado</th>
+                      <th className="p-4">Data Emissão</th>
                     </tr>
-                  ) : (
-                    filteredPartnerDebts.map((debt) => (
-                      <tr key={debt.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="p-4">
-                          <input
-                            type="checkbox"
-                            disabled={debt.paid}
-                            checked={selectedDebtIds.includes(debt.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) setSelectedDebtIds(prev => [...prev, debt.id]);
-                              else setSelectedDebtIds(prev => prev.filter(id => id !== debt.id));
-                            }}
-                            className="w-4 h-4 accent-emerald-600 cursor-pointer"
-                          />
-                        </td>
-                        <td className="p-4">
-                          <span className="font-mono-num font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
-                            {debt.license_id}
-                          </span>
-                          <p className="font-bold text-slate-900 mt-1 font-display">{debt.company_name}</p>
-                        </td>
-                        <td className="p-4">
-                          <p className="font-bold text-slate-900 font-display">{debt.partner_name || 'Parceiro'}</p>
-                          <span className="font-mono-num text-[10px] text-slate-500">{debt.partner_id}</span>
-                        </td>
-                        <td className="p-4 font-semibold text-slate-700">{debt.plan_type}</td>
-                        <td className="p-4 font-mono-num font-black text-slate-900">
-                          {fmt(debt.cost_aoa)} Kz
-                        </td>
-                        <td className="p-4 font-mono-num text-slate-600">
-                          {debt.client_price_aoa > 0 ? `${fmt(debt.client_price_aoa)} Kz` : '—'}
-                        </td>
-                        <td className="p-4">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                            debt.paid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
-                          }`}>
-                            {debt.paid && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
-                            {debt.paid ? 'Liquidado' : 'Dívida Pendente'}
-                          </span>
-                        </td>
-                        <td className="p-4 text-slate-500 font-mono-num font-medium">
-                          {new Date(debt.created_at).toLocaleDateString('pt-AO')}
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredPartnerDebts.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="p-8 text-center text-slate-400">
+                          <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                          <p className="font-bold text-slate-700 font-display">Nenhuma dívida de parceiro encontrada</p>
+                          <p className="text-[11px] mt-1 text-slate-400">
+                            Quando os parceiros emitem licenças no portal deles, as dívidas de atacado surgem aqui automaticamente.
+                          </p>
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      filteredPartnerDebts.map((debt) => (
+                        <tr key={debt.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="p-4">
+                            <input
+                              type="checkbox"
+                              disabled={debt.paid}
+                              checked={selectedDebtIds.includes(debt.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) setSelectedDebtIds(prev => [...prev, debt.id]);
+                                else setSelectedDebtIds(prev => prev.filter(id => id !== debt.id));
+                              }}
+                              className="w-4 h-4 accent-emerald-600 cursor-pointer"
+                            />
+                          </td>
+                          <td className="p-4">
+                            <span className="font-mono-num font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                              {debt.license_id}
+                            </span>
+                            <p className="font-bold text-slate-900 mt-1 font-display">{debt.company_name}</p>
+                          </td>
+                          <td className="p-4">
+                            <p className="font-bold text-slate-900 font-display">{debt.partner_name || 'Parceiro'}</p>
+                            <span className="font-mono-num text-[10px] text-slate-500">{debt.partner_id}</span>
+                          </td>
+                          <td className="p-4 font-semibold text-slate-700">{debt.plan_type}</td>
+                          <td className="p-4 font-mono-num font-black text-slate-900">
+                            {fmt(debt.cost_aoa)} Kz
+                          </td>
+                          <td className="p-4 font-mono-num text-slate-600">
+                            {debt.client_price_aoa > 0 ? `${fmt(debt.client_price_aoa)} Kz` : '—'}
+                          </td>
+                          <td className="p-4">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${debt.paid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
+                              }`}>
+                              {debt.paid && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                              {debt.paid ? 'Liquidado' : 'Dívida Pendente'}
+                            </span>
+                          </td>
+                          <td className="p-4 text-slate-500 font-mono-num font-medium">
+                            {new Date(debt.created_at).toLocaleDateString('pt-AO')}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -777,6 +792,18 @@ export const AdminPagamentos: React.FC = () => {
             </form>
           </div>
         </div>
+      )}
+      {/* Modal de Impressão de Fatura Oficial */}
+      {selectedInvoiceForPrint && (
+        <InvoicePrintModal
+          isOpen={invoiceModalOpen}
+          onClose={() => {
+            setInvoiceModalOpen(false);
+            setSelectedInvoiceForPrint(null);
+          }}
+          license={selectedInvoiceForPrint}
+          invoiceNumber={selectedInvoiceNumber}
+        />
       )}
     </div>
   );

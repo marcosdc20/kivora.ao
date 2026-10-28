@@ -220,7 +220,7 @@ service cloud.firestore {
       allow update: if isAdmin() || (
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'id', 'name', 'nif', 'email', 'phone', 'address',
-          'partner_id', 'status', 'createdAt', 'updatedAt', 'updated_at'
+          'partner_id', 'partner_code', 'status', 'createdAt', 'updatedAt', 'updated_at'
         ])
       );
       allow delete: if isAdmin();
